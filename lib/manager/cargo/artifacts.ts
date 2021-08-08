@@ -86,7 +86,7 @@ export async function updateArtifacts({
       const dep = updatedDeps[i];
       // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
       // at ${localPackageFileName} path
-      await cargoUpdate(packageFileName, dep.depName);
+      await cargoUpdate(packageFileName, dep.lookupName ?? dep.depName);
     }
     if (isLockFileMaintenance) {
       await cargoUpdate(packageFileName);

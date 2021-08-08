@@ -34,3 +34,17 @@ Here is another example, this time for handling `python` Docker images, which us
   ]
 }
 ```
+
+Here is another example, this time for handling Bitnami Docker images, which use build indicators as well as version suffixes for compatibility:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePrefixes": ["bitnami/"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$"
+    }
+  ]
+}
+```

@@ -72,6 +72,7 @@ describe('bundler.updateArtifacts()', () => {
       modified: [],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -91,6 +92,7 @@ describe('bundler.updateArtifacts()', () => {
       modified: ['Gemfile.lock'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -111,6 +113,7 @@ describe('bundler.updateArtifacts()', () => {
       modified: ['Gemfile.lock'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -144,6 +147,7 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -170,6 +174,7 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -202,6 +207,7 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -248,6 +254,7 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -288,6 +295,7 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -333,6 +341,7 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -378,6 +387,7 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -400,6 +410,7 @@ describe('bundler.updateArtifacts()', () => {
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',

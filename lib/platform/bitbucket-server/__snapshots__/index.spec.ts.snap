@@ -55,7 +55,22 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -147,7 +162,22 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -241,7 +271,22 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -379,7 +424,22 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -449,7 +509,22 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -517,7 +592,22 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -585,7 +675,23 @@ Array [
     "url": "https://stash.renovatebot.com/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"fromRef\\":{\\"id\\":\\"refs/heads/branch\\"},\\"toRef\\":{\\"id\\":\\"refs/heads/master\\"},\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"jcitizen\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "fromRef": Object {
+        "id": "refs/heads/branch",
+      },
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "jcitizen",
+          },
+        },
+      ],
+      "title": "title",
+      "toRef": Object {
+        "id": "refs/heads/master",
+      },
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -653,7 +759,23 @@ Array [
     "url": "https://stash.renovatebot.com/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"fromRef\\":{\\"id\\":\\"refs/heads/branch\\"},\\"toRef\\":{\\"id\\":\\"refs/heads/master\\"},\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"jcitizen\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "fromRef": Object {
+        "id": "refs/heads/branch",
+      },
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "jcitizen",
+          },
+        },
+      ],
+      "title": "title",
+      "toRef": Object {
+        "id": "refs/heads/master",
+      },
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -723,7 +845,11 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
   },
   Object {
-    "body": "{\\"text\\":\\"### topic\\\\n\\\\ncontent\\"}",
+    "body": Object {
+      "text": "### topic
+
+content",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -791,7 +917,9 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
   },
   Object {
-    "body": "{\\"text\\":\\"content\\"}",
+    "body": Object {
+      "text": "content",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -871,7 +999,13 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21",
   },
   Object {
-    "body": "{\\"text\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\",\\"version\\":1}",
+    "body": Object {
+      "text": "### some-subject
+
+some
+content",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -939,7 +1073,10 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
   },
   Object {
-    "body": "{\\"text\\":\\"some\\\\ncontent\\"}",
+    "body": Object {
+      "text": "some
+content",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3142,7 +3279,12 @@ Array [
     "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"SUCCESSFUL\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "SUCCESSFUL",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3222,7 +3364,12 @@ Array [
     "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"FAILED\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "FAILED",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3302,7 +3449,12 @@ Array [
     "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"FAILED\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "FAILED",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3382,7 +3534,12 @@ Array [
     "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"INPROGRESS\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "INPROGRESS",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3462,7 +3619,12 @@ Array [
     "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"SUCCESSFUL\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "SUCCESSFUL",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3571,7 +3733,18 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3651,7 +3824,18 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3690,7 +3874,12 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3758,7 +3947,18 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3826,7 +4026,18 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -3908,7 +4119,18 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4046,7 +4268,18 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4114,7 +4347,18 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4186,7 +4430,22 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4278,7 +4537,22 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4372,7 +4646,22 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4510,7 +4799,22 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4580,7 +4884,22 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4648,7 +4967,22 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+        Object {
+          "user": Object {
+            "name": "name",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4716,7 +5050,23 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"fromRef\\":{\\"id\\":\\"refs/heads/branch\\"},\\"toRef\\":{\\"id\\":\\"refs/heads/master\\"},\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"jcitizen\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "fromRef": Object {
+        "id": "refs/heads/branch",
+      },
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "jcitizen",
+          },
+        },
+      ],
+      "title": "title",
+      "toRef": Object {
+        "id": "refs/heads/master",
+      },
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4784,7 +5134,23 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"fromRef\\":{\\"id\\":\\"refs/heads/branch\\"},\\"toRef\\":{\\"id\\":\\"refs/heads/master\\"},\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"jcitizen\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "fromRef": Object {
+        "id": "refs/heads/branch",
+      },
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "jcitizen",
+          },
+        },
+      ],
+      "title": "title",
+      "toRef": Object {
+        "id": "refs/heads/master",
+      },
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4854,7 +5220,11 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
   },
   Object {
-    "body": "{\\"text\\":\\"### topic\\\\n\\\\ncontent\\"}",
+    "body": Object {
+      "text": "### topic
+
+content",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -4922,7 +5292,9 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
   },
   Object {
-    "body": "{\\"text\\":\\"content\\"}",
+    "body": Object {
+      "text": "content",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -5002,7 +5374,13 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21",
   },
   Object {
-    "body": "{\\"text\\":\\"### some-subject\\\\n\\\\nsome\\\\ncontent\\",\\"version\\":1}",
+    "body": Object {
+      "text": "### some-subject
+
+some
+content",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -5070,7 +5448,10 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
   },
   Object {
-    "body": "{\\"text\\":\\"some\\\\ncontent\\"}",
+    "body": Object {
+      "text": "some
+content",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7273,7 +7654,12 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"SUCCESSFUL\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "SUCCESSFUL",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7353,7 +7739,12 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"FAILED\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "FAILED",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7433,7 +7824,12 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"FAILED\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "FAILED",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7513,7 +7909,12 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"INPROGRESS\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "INPROGRESS",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7593,7 +7994,12 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
   },
   Object {
-    "body": "{\\"key\\":\\"context-2\\",\\"description\\":null,\\"url\\":\\"https://renovatebot.com\\",\\"state\\":\\"SUCCESSFUL\\"}",
+    "body": Object {
+      "description": null,
+      "key": "context-2",
+      "state": "SUCCESSFUL",
+      "url": "https://renovatebot.com",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7702,7 +8108,18 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7782,7 +8199,18 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7821,7 +8249,12 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7889,7 +8322,18 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -7957,7 +8401,18 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -8039,7 +8494,18 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -8177,7 +8643,18 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -8245,7 +8722,18 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "user": Object {
+            "name": "userName2",
+          },
+        },
+      ],
+      "title": "title",
+      "version": 1,
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",

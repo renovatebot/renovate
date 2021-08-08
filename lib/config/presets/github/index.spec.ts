@@ -30,6 +30,7 @@ describe(getName(), () => {
         'some-filename.json',
         githubApiHost
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

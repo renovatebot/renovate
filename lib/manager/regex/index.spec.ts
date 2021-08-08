@@ -104,6 +104,7 @@ describe(getName(), () => {
       'Dockerfile',
       config
     );
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
   });
   it('extracts and applies a registryUrlTemplate', async () => {
@@ -137,6 +138,7 @@ describe(getName(), () => {
       'Dockerfile',
       config
     );
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
     expect(logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-gradle' },

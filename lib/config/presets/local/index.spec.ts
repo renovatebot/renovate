@@ -65,6 +65,7 @@ describe(getName(), () => {
         },
       });
       expect(azure.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
 
@@ -77,6 +78,7 @@ describe(getName(), () => {
         },
       });
       expect(bitbucket.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
 
@@ -92,6 +94,7 @@ describe(getName(), () => {
       expect(
         bitbucketServer.getPresetFromEndpoint.mock.calls
       ).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
 
@@ -103,6 +106,7 @@ describe(getName(), () => {
         },
       });
       expect(gitea.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom gitea', async () => {
@@ -115,6 +119,7 @@ describe(getName(), () => {
         },
       });
       expect(gitea.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
 
@@ -126,6 +131,7 @@ describe(getName(), () => {
         },
       });
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom github', async () => {
@@ -138,6 +144,7 @@ describe(getName(), () => {
         },
       });
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
 
@@ -150,6 +157,7 @@ describe(getName(), () => {
         },
       });
       expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom gitlab', async () => {
@@ -162,6 +170,7 @@ describe(getName(), () => {
         },
       });
       expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(content).toMatchSnapshot();
     });
   });

@@ -21,6 +21,7 @@ describe(getName(), () => {
         },
       },
     });
+    // FIXME: explicit assert condition
     expect(errSerializer(err)).toMatchSnapshot();
   });
   it('handles missing fields', () => {
@@ -29,6 +30,7 @@ describe(getName(), () => {
       stack: 'foo',
       body: 'some body',
     });
+    // FIXME: explicit assert condition
     expect(errSerializer(err)).toMatchSnapshot();
   });
 
@@ -85,6 +87,7 @@ describe(getName(), () => {
       delete err.stack;
 
       // sanitize like Bunyan
+      // FIXME: explicit assert condition
       expect(sanitizeValue(err)).toMatchSnapshot();
     });
   });

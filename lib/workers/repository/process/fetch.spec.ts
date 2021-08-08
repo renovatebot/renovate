@@ -28,6 +28,7 @@ describe(getName(), () => {
         npm: [{ packageFile: 'package.json', deps: [] }],
       };
       await fetchUpdates(config, packageFiles);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
     it('handles ignored, skipped and disabled', async () => {

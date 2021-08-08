@@ -1,4 +1,5 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { cache } from '../../util/cache/package/decorator';
 import { HttpError } from '../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -18,6 +19,10 @@ export class AdoptiumJavaDatasource extends Datasource {
 
   caching = true;
 
+  @cache({
+    namespace: `datasource-${datasource}`,
+    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
+  })
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {

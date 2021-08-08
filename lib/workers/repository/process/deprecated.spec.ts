@@ -59,6 +59,7 @@ describe(getName(), () => {
       ];
       platform.getIssueList.mockResolvedValue(mockIssue);
       await raiseDeprecationWarnings(config, packageFiles);
+      // FIXME: explicit assert condition
       expect(platform.ensureIssue.mock.calls).toMatchSnapshot();
       expect(platform.getIssueList).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
