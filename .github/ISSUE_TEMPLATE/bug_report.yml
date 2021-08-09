@@ -41,7 +41,7 @@ body:
     id: renovate-version-if-selfhosting
     attributes:
       label: If you're self-hosting Renovate, tell us what version of Renovate you run.
-      placeholder: '25.56.1'
+      placeholder: ''
     validations:
       required: false
 
