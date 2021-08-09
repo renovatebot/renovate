@@ -11,9 +11,10 @@ export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 
-const http = new GithubHttp({ hostType: id });
+const http = new GithubHttp({}, id);
 
 const cacheNamespace = 'datasource-github-tags';
+
 function getCacheKey(registryUrl: string, repo: string, type: string): string {
   return `${registryUrl}:${repo}:${type}`;
 }

@@ -158,13 +158,10 @@ function constructAcceptString(input?: any): string {
 }
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
-  constructor({
-    hostType = PLATFORM_TYPE_GITHUB,
-    options,
-  }: {
-    hostType?: string;
-    options?: GithubHttpOptions;
-  }) {
+  constructor(
+    options?: GithubHttpOptions,
+    hostType: string = PLATFORM_TYPE_GITHUB
+  ) {
     super(hostType, options);
   }
 

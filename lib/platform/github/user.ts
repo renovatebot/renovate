@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import * as githubHttp from '../../util/http/github';
 
-const githubApi = new githubHttp.GithubHttp({});
+const githubApi = new githubHttp.GithubHttp();
 
 export interface UserDetails {
   username: string;

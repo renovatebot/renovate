@@ -63,7 +63,7 @@ import {
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
 
-const githubApi = new githubHttp.GithubHttp({});
+const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig = {} as any;
 

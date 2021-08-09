@@ -41,7 +41,7 @@ query(
 describe('util/http/github', () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
-    githubApi = new GithubHttp({});
+    githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
   });
@@ -65,9 +65,7 @@ describe('util/http/github', () => {
       expect(req.headers.authorization).toBe('token abc123');
     });
     it('supports different datasources', async () => {
-      const githubApiDatasource = new GithubHttp({
-        hostType: GITHUB_RELEASES_ID,
-      });
+      const githubApiDatasource = new GithubHttp({}, GITHUB_RELEASES_ID);
       hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
       hostRules.add({
         hostType: GITHUB_RELEASES_ID,
