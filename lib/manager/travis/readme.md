@@ -12,7 +12,8 @@ node_js:
 ```
 
 Due to this, major updates for Travis are disabled by default.
-If you enable them and use a version matrix, then you will likely need to manually fix any major update PRs raised by Renovate. You can enable them this way in config:
+If you enable major updates and use a version matrix, then you will likely need to manually fix any major update PRs raised by Renovate.
+You can major updates them this way in config:
 
 ```json
 {
