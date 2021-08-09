@@ -360,9 +360,6 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates node to t
 Object {
   "node": Object {
     "automerge": false,
-    "supportPolicy": Array [
-      "lts",
-    ],
   },
   "travis": Object {
     "enabled": true,
