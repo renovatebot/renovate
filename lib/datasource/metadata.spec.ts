@@ -26,6 +26,7 @@ describe(getName(), () => {
     const lookupName = 'django';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
 
@@ -46,6 +47,7 @@ describe(getName(), () => {
     const lookupName = 'mkdocs';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
 
@@ -66,6 +68,7 @@ describe(getName(), () => {
     const lookupName = 'django-filter';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
 
@@ -84,6 +87,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
   it('Should handle failed parsing of sourceUrls for GitLab', () => {
@@ -101,6 +105,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
   it('Should handle failed parsing of sourceUrls for other', () => {
@@ -118,6 +123,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
   it('Should handle non-url', () => {
@@ -135,6 +141,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
 

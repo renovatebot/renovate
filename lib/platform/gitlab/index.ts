@@ -31,6 +31,7 @@ import type {
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
@@ -606,10 +607,10 @@ export async function updatePr({
   await tryPrAutomerge(iid, platformOptions);
 }
 
-export async function mergePr(iid: number): Promise<boolean> {
+export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
   try {
     await gitlabApi.putJson(
-      `projects/${config.repository}/merge_requests/${iid}/merge`,
+      `projects/${config.repository}/merge_requests/${id}/merge`,
       {
         body: {
           should_remove_source_branch: true,

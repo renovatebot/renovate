@@ -11,11 +11,13 @@ describe(getName(), () => {
 
   describe('extractPackageFile()', () => {
     it('returns empty for invalid dependency file', async () => {
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile('nothing here', 'mix.exs')
       ).toMatchSnapshot();
     });
     it('extracts all dependencies', async () => {
+      // FIXME: explicit assert condition
       const res = await extractPackageFile(sample, 'mix.exs');
       expect(res).toMatchSnapshot();
     });

@@ -22,6 +22,11 @@ describe(getName(), () => {
       ).toBeNull();
     });
     it('returns null if repository was not provided', async () => {
+      // FIXME: should it call default rtegisty?
+      httpMock
+        .scope('https://charts.helm.sh')
+        .get('/stable/index.yaml')
+        .reply(404);
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,

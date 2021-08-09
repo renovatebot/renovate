@@ -17,11 +17,13 @@ describe(getName(), () => {
 
     it('extracts bin version line', () => {
       const res = extractPackageFile(propertiesFile1);
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
     });
 
     it('extracts all version line', () => {
       const res = extractPackageFile(propertiesFile2);
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
     });
 
@@ -38,6 +40,7 @@ describe(getName(), () => {
 
     it('handles whitespace', () => {
       const res = extractPackageFile(whitespacePropertiesFile);
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
     });
   });

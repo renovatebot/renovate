@@ -109,7 +109,11 @@ export async function checkAutoMerge(
     };
   }
   logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy}`);
-  const res = await platform.mergePr(pr.number, branchName, automergeStrategy);
+  const res = await platform.mergePr({
+    branchName,
+    id: pr.number,
+    strategy: automergeStrategy,
+  });
   if (res) {
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
     let branchRemoved = false;
