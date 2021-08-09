@@ -65,8 +65,7 @@ describe(getName(), () => {
         },
       });
       expect(azure.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
 
     it('forwards to bitbucket', async () => {
@@ -78,8 +77,7 @@ describe(getName(), () => {
         },
       });
       expect(bitbucket.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
 
     it('forwards to custom bitbucket-server', async () => {
@@ -94,8 +92,7 @@ describe(getName(), () => {
       expect(
         bitbucketServer.getPresetFromEndpoint.mock.calls
       ).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
 
     it('forwards to gitea', async () => {
@@ -106,8 +103,7 @@ describe(getName(), () => {
         },
       });
       expect(gitea.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
     it('forwards to custom gitea', async () => {
       const content = await local.getPreset({
@@ -119,8 +115,7 @@ describe(getName(), () => {
         },
       });
       expect(gitea.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
 
     it('forwards to github', async () => {
@@ -131,8 +126,7 @@ describe(getName(), () => {
         },
       });
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
     it('forwards to custom github', async () => {
       const content = await local.getPreset({
@@ -144,8 +138,7 @@ describe(getName(), () => {
         },
       });
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
 
     it('forwards to gitlab', async () => {
@@ -157,8 +150,7 @@ describe(getName(), () => {
         },
       });
       expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
     it('forwards to custom gitlab', async () => {
       const content = await local.getPreset({
@@ -170,8 +162,7 @@ describe(getName(), () => {
         },
       });
       expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(content).toMatchSnapshot();
+      expect(content).toEqual({ resolved: 'preset' });
     });
   });
 });
