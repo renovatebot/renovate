@@ -1,6 +1,5 @@
 import { RenovateConfig } from '../../../../config/types';
 import { CommitMessage } from '../../model/commit-message';
-import { CommitMessageBuilder } from '../../model/commit-message-builder';
 
 export class OnboardingCommitMessageFactory {
   private readonly config: RenovateConfig;
@@ -19,24 +18,21 @@ export class OnboardingCommitMessageFactory {
       semanticCommitScope,
       semanticCommitType,
     } = this.config;
-    const commitMessageBuilder = new CommitMessageBuilder();
+    const commitMessage = new CommitMessage();
 
     if (commitMessagePrefix) {
-      commitMessageBuilder.withCustomPrefix(commitMessagePrefix);
+      commitMessage.setCustomPrefix(commitMessagePrefix);
     } else if (this.areSemanticCommitsEnabled()) {
-      commitMessageBuilder.withSemanticPrefix(
-        semanticCommitType,
-        semanticCommitScope
-      );
+      commitMessage.setSemanticPrefix(semanticCommitType, semanticCommitScope);
     }
 
     if (onboardingCommitMessage) {
-      commitMessageBuilder.setMessage(onboardingCommitMessage);
+      commitMessage.setMessage(onboardingCommitMessage);
     } else {
-      commitMessageBuilder.setMessage(`add ${this.configFile}`);
+      commitMessage.setMessage(`add ${this.configFile}`);
     }
 
-    return commitMessageBuilder.build();
+    return commitMessage;
   }
 
   private areSemanticCommitsEnabled(): boolean {

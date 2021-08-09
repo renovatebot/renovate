@@ -1,13 +1,13 @@
 export class CommitMessage {
   public static readonly SEPARATOR: string = ':';
 
-  private readonly message: string;
+  private message: string;
 
-  private readonly prefix: string;
+  private prefix: string;
 
-  constructor(message: string, prefix = '') {
-    this.message = message.trim();
-    this.prefix = prefix.trim();
+  constructor(message = '', prefix = '') {
+    this.setMessage(message);
+    this.setCustomPrefix(prefix);
   }
 
   public static formatPrefix(prefix: string): string {
@@ -20,6 +20,26 @@ export class CommitMessage {
     }
 
     return `${prefix}${CommitMessage.SEPARATOR}`;
+  }
+
+  public setMessage(message: string): void {
+    this.message = message.trim();
+  }
+
+  public setCustomPrefix(prefix?: string): void {
+    if (prefix) {
+      this.prefix = prefix.trim();
+    }
+  }
+
+  public setSemanticPrefix(type?: string, scope?: string): void {
+    if (type) {
+      this.prefix = type.trim();
+
+      if (scope) {
+        this.prefix += `(${scope.trim()})`;
+      }
+    }
   }
 
   public toString(): string {

@@ -4,13 +4,13 @@ import { CommitMessage } from './commit-message';
 describe(getName(), () => {
   describe('CommitMessage', () => {
     const TEST_CASES: ReadonlyArray<
-      [message: string, prefix: string, result: string]
+      [message: string, prefix: string | undefined, result: string]
     > = [
+      ['test', undefined, 'Test'],
       ['test', '', 'Test'],
       ['  test  ', '  ', 'Test'],
       ['test', 'fix', 'fix: test'],
-      ['test', 'fix(test)', 'fix(test): test'],
-      ['test', 'feat(test):', 'feat(test): test'],
+      ['test', 'fix:', 'fix: test'],
     ];
 
     it('has colon character separator', () => {
@@ -25,5 +25,26 @@ describe(getName(), () => {
         expect(commitMessage.toString()).toEqual(result);
       }
     );
+
+    it('should handle empty semantic prefix', () => {
+      const message = new CommitMessage('test');
+      message.setSemanticPrefix();
+
+      expect(message.toString()).toBe('Test');
+    });
+
+    it('should format sematic prefix', () => {
+      const message = new CommitMessage('test');
+      message.setSemanticPrefix(' fix ');
+
+      expect(message.toString()).toBe('fix: test');
+    });
+
+    it('should format sematic prefix with scope', () => {
+      const message = new CommitMessage('test');
+      message.setSemanticPrefix(' fix ', ' scope ');
+
+      expect(message.toString()).toBe('fix(scope): test');
+    });
   });
 });
