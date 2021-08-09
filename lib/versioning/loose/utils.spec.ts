@@ -53,6 +53,7 @@ describe(getName(), () => {
 
     for (const key of schemeKeys) {
       it(`${key}`, () => {
+        // FIXME: explicit assert condition
         expect(api[key]()).toMatchSnapshot();
       });
     }

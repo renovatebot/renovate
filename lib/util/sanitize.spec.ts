@@ -17,6 +17,7 @@ describe(getName(), () => {
     const hashed = Buffer.from(`${username}:${password}`).toString('base64');
     add(hashed);
     add(password);
+    // FIXME: explicit assert condition
     expect(
       sanitize(
         `My token is ${token}, username is "${username}" and password is "${password}" (hashed: ${hashed})`

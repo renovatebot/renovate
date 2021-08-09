@@ -46,6 +46,7 @@ describe(getName(), () => {
           },
         ];
         await getLockedVersions(packageFiles);
+        // FIXME: explicit assert condition
         expect(packageFiles).toMatchSnapshot();
       }
     );
@@ -78,6 +79,7 @@ describe(getName(), () => {
           },
         ];
         await getLockedVersions(packageFiles);
+        // FIXME: explicit assert condition
         expect(packageFiles).toMatchSnapshot();
       }
     );
@@ -109,6 +111,7 @@ describe(getName(), () => {
         },
       ];
       await getLockedVersions(packageFiles);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
     it('ignores pnpm', async () => {
@@ -128,6 +131,7 @@ describe(getName(), () => {
         },
       ];
       await getLockedVersions(packageFiles);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
   });

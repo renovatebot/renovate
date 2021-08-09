@@ -38,6 +38,7 @@ describe(getName(), () => {
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
       const renovateConfig = await initRepo({});
+      // FIXME: explicit assert condition
       expect(renovateConfig).toMatchSnapshot();
     });
     it('warns on unsupported options', async () => {

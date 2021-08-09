@@ -5,6 +5,7 @@ const depsEdn = loadFixture('deps.edn');
 
 describe(getName(), () => {
   it('extractPackageFile', () => {
+    // FIXME: explicit assert condition
     expect(extractPackageFile(depsEdn)).toMatchSnapshot();
   });
 });

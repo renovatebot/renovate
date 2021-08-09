@@ -10,7 +10,7 @@ const config: InitialOptionsTsJest = {
   collectCoverageFrom: [
     'lib/**/*.{js,ts}',
     '!lib/**/*.{d,spec}.ts',
-    '!lib/**/{__fixtures__,__mocks__,__testutil__}/**/*.{js,ts}',
+    '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
     '!lib/**/types.ts',
   ],
   coverageReporters: ci
