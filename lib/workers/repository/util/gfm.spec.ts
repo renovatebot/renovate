@@ -8,7 +8,13 @@ const testLines = [
   '--qwe -- asd--',
 ];
 
-const negativeTestLines = ['qwe - - asd', '-qwe- -asd-'];
+const testLinesToNotBeChanged = [
+  'qwe - - asd',
+  '-qwe- -asd-',
+  'qwe\u2060asd',
+  'qwe\u2060-asd',
+  'qwe-\u2060asd',
+];
 
 describe(getName(), () => {
   describe('escapeGfmCommentText', () => {
@@ -19,7 +25,7 @@ describe(getName(), () => {
     });
 
     it('does not change normal lines', () => {
-      for (const line of negativeTestLines) {
+      for (const line of testLinesToNotBeChanged) {
         expect(escapeGfmCommentText(line)).toBe(line);
       }
     });
@@ -41,7 +47,7 @@ describe(getName(), () => {
     });
 
     it('does not change normal lines', () => {
-      for (const line of negativeTestLines) {
+      for (const line of testLinesToNotBeChanged) {
         expect(unescapeGfmCommentText(line)).toBe(line);
       }
     });
