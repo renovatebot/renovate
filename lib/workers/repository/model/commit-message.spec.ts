@@ -26,9 +26,16 @@ describe(getName(), () => {
       }
     );
 
-    it('should handle empty semantic prefix', () => {
+    it('should handle not defined semantic prefix', () => {
       const message = new CommitMessage('test');
       message.setSemanticPrefix();
+
+      expect(message.toString()).toBe('Test');
+    });
+
+    it('should handle empty semantic prefix', () => {
+      const message = new CommitMessage('test');
+      message.setSemanticPrefix('  ', '  ');
 
       expect(message.toString()).toBe('Test');
     });
