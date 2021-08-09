@@ -50,8 +50,7 @@ describe(getName(), () => {
       config.extends = [];
       const res = await presets.resolveConfigPresets(config);
       expect(config).toMatchObject(res);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ foo: 1 });
     });
     it('throws if invalid preset file', async () => {
       config.foo = 1;
@@ -63,10 +62,11 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toEqual(
+        "Cannot find preset's package (notfound)"
+      );
+      expect(e.validationMessage).toBeUndefined();
     });
     it('throws if invalid preset', async () => {
       config.foo = 1;
@@ -78,10 +78,11 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toEqual(
+        'Preset name not found within published preset config (wrongpreset:invalid-preset)'
+      );
+      expect(e.validationMessage).toBeUndefined();
     });
 
     it('throws if path + invalid syntax', async () => {
@@ -94,10 +95,11 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toEqual(
+        'Preset is invalid (github>user/repo//)'
+      );
+      expect(e.validationMessage).toBeUndefined();
     });
 
     it('throws if path + sub-preset', async () => {
@@ -110,10 +112,11 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toEqual(
+        'Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)'
+      );
+      expect(e.validationMessage).toBeUndefined();
     });
 
     it('throws noconfig', async () => {
@@ -126,10 +129,11 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toEqual(
+        'Preset package is missing a renovate-config entry (noconfig:base)'
+      );
+      expect(e.validationMessage).toBeUndefined();
     });
 
     it('throws throw', async () => {
@@ -142,10 +146,9 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toBeUndefined();
+      expect(e.validationMessage).toBeUndefined();
     });
 
     it('works with valid', async () => {
@@ -153,7 +156,11 @@ describe(getName(), () => {
       config.ignoreDeps = [];
       config.extends = [':pinVersions'];
       const res = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        foo: 1,
+        ignoreDeps: [],
+        rangeStrategy: 'pin',
+      });
       expect(res.rangeStrategy).toEqual('pin');
     });
     it('throws if valid and invalid', async () => {
@@ -166,16 +173,19 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toEqual(
+        'Preset name not found within published preset config (wrongpreset:invalid-preset)'
+      );
+      expect(e.validationMessage).toBeUndefined();
     });
     it('combines two package alls', async () => {
       config.extends = ['packages:eslint', 'packages:stylelint'];
       const res = await presets.resolveConfigPresets(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        matchPackageNames: ['@types/eslint', 'babel-eslint'],
+        matchPackagePrefixes: ['@typescript-eslint/', 'eslint', 'stylelint'],
+      });
     });
     it('resolves packageRule', async () => {
       config.packageRules = [
@@ -185,8 +195,15 @@ describe(getName(), () => {
         },
       ];
       const res = await presets.resolveConfigPresets(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        packageRules: [
+          {
+            groupName: 'eslint',
+            matchPackageNames: ['@types/eslint', 'babel-eslint'],
+            matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
+          },
+        ],
+      });
     });
     it('resolves eslint', async () => {
       config.extends = ['packages:eslint'];
@@ -226,8 +243,7 @@ describe(getName(), () => {
         'config:base',
       ]);
       expect(config).toMatchObject(res);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({});
     });
 
     it('resolves self-hosted presets without baseConfig', async () => {
@@ -253,8 +269,7 @@ describe(getName(), () => {
     it('replaces args in strings', () => {
       const str = '{{arg2}} foo {{arg0}}{{arg1}}';
       const res = presets.replaceArgs(str, argMappings);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual('c foo ab');
     });
     it('replaces args twice in same string', () => {
       const str = '{{arg2}}{{arg0}} foo {{arg0}}{{arg1}}';
@@ -272,170 +287,294 @@ describe(getName(), () => {
         },
       };
       const res = presets.replaceArgs(obj, argMappings);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bar: { aaa: { bbb: 'woo c' }, baz: 'b boo' },
+        foo: 'ha a',
+      });
     });
     it('replaces arrays', () => {
       const obj = {
-        foo: [
-          '{{arg0}}',
-          {
-            bar: '{{arg1}}',
-            baz: 5,
-          },
-        ],
+        foo: ['{{arg0}}', { bar: '{{arg1}}', baz: 5 }],
       };
       const res = presets.replaceArgs(obj, argMappings);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        foo: ['a', { bar: 'b', baz: 5 }],
+      });
     });
   });
   describe('parsePreset', () => {
     // default namespace
     it('returns default package name', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset(':base')).toMatchSnapshot();
+      expect(presets.parsePreset(':base')).toEqual({
+        packageName: 'default',
+        params: undefined,
+        presetName: 'base',
+        presetPath: undefined,
+        presetSource: 'internal',
+      });
     });
     it('parses github', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('github>some/repo')).toMatchSnapshot();
+      expect(presets.parsePreset('github>some/repo')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
     });
     it('parses github subfiles', () => {
-      // FIXME: explicit assert condition
-      expect(
-        presets.parsePreset('github>some/repo:somefile')
-      ).toMatchSnapshot();
+      expect(presets.parsePreset('github>some/repo:somefile')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'somefile',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
     });
     it('parses github subfiles with preset name', () => {
-      // FIXME: explicit assert condition
       expect(
         presets.parsePreset('github>some/repo:somefile/somepreset')
-      ).toMatchSnapshot();
+      ).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'somefile/somepreset',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
     });
     it('parses github subfiles with preset and sub-preset name', () => {
-      // FIXME: explicit assert condition
       expect(
         presets.parsePreset(
           'github>some/repo:somefile/somepreset/somesubpreset'
         )
-      ).toMatchSnapshot();
+      ).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'somefile/somepreset/somesubpreset',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
     });
     it('parses github subdirectories', () => {
-      // FIXME: explicit assert condition
       expect(
         presets.parsePreset('github>some/repo//somepath/somesubpath/somefile')
-      ).toMatchSnapshot();
+      ).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'somefile',
+        presetPath: 'somepath/somesubpath',
+        presetSource: 'github',
+      });
     });
     it('parses github toplevel file using subdirectory syntax', () => {
-      // FIXME: explicit assert condition
-      expect(
-        presets.parsePreset('github>some/repo//somefile')
-      ).toMatchSnapshot();
+      expect(presets.parsePreset('github>some/repo//somefile')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'somefile',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
     });
     it('parses gitlab', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('gitlab>some/repo')).toMatchSnapshot();
+      expect(presets.parsePreset('gitlab>some/repo')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'gitlab',
+      });
     });
     it('parses gitea', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('gitea>some/repo')).toMatchSnapshot();
+      expect(presets.parsePreset('gitea>some/repo')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'gitea',
+      });
     });
     it('parses local', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('local>some/repo')).toMatchSnapshot();
+      expect(presets.parsePreset('local>some/repo')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
     });
     it('parses local with subdirectory', () => {
-      // FIXME: explicit assert condition
       expect(
         presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
-      ).toMatchSnapshot();
+      ).toEqual({
+        packageName: 'some-group/some-repo',
+        params: undefined,
+        presetName: 'some-file',
+        presetPath: 'some-dir',
+        presetSource: 'local',
+      });
     });
     it('parses no prefix as local', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('some/repo')).toMatchSnapshot();
+      expect(presets.parsePreset('some/repo')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
     });
     it('returns default package name with params', () => {
-      // FIXME: explicit assert condition
-      expect(
-        presets.parsePreset(':group(packages/eslint, eslint)')
-      ).toMatchSnapshot();
+      expect(presets.parsePreset(':group(packages/eslint, eslint)')).toEqual({
+        packageName: 'default',
+        params: ['packages/eslint', 'eslint'],
+        presetName: 'group',
+        presetPath: undefined,
+        presetSource: 'internal',
+      });
     });
     // scoped namespace
     it('returns simple scope', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('@somescope')).toMatchSnapshot();
+      expect(presets.parsePreset('@somescope')).toEqual({
+        packageName: '@somescope/renovate-config',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns simple scope and params', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('@somescope(param1)')).toMatchSnapshot();
+      expect(presets.parsePreset('@somescope(param1)')).toEqual({
+        packageName: '@somescope/renovate-config',
+        params: ['param1'],
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns scope with packageName and default', () => {
-      // FIXME: explicit assert condition
-      expect(
-        presets.parsePreset('@somescope/somepackagename')
-      ).toMatchSnapshot();
+      expect(presets.parsePreset('@somescope/somepackagename')).toEqual({
+        packageName: '@somescope/somepackagename',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns scope with packageName and params and default', () => {
-      // FIXME: explicit assert condition
       expect(
         presets.parsePreset(
           '@somescope/somepackagename(param1, param2, param3)'
         )
-      ).toMatchSnapshot();
+      ).toEqual({
+        packageName: '@somescope/somepackagename',
+        params: ['param1', 'param2', 'param3'],
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns scope with presetName', () => {
-      // FIXME: explicit assert condition
-      expect(
-        presets.parsePreset('@somescope:somePresetName')
-      ).toMatchSnapshot();
+      expect(presets.parsePreset('@somescope:somePresetName')).toEqual({
+        packageName: '@somescope/renovate-config',
+        params: undefined,
+        presetName: 'somePresetName',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns scope with presetName and params', () => {
-      // FIXME: explicit assert condition
-      expect(
-        presets.parsePreset('@somescope:somePresetName(param1)')
-      ).toMatchSnapshot();
+      expect(presets.parsePreset('@somescope:somePresetName(param1)')).toEqual({
+        packageName: '@somescope/renovate-config',
+        params: ['param1'],
+        presetName: 'somePresetName',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns scope with packageName and presetName', () => {
-      // FIXME: explicit assert condition
       expect(
         presets.parsePreset('@somescope/somepackagename:somePresetName')
-      ).toMatchSnapshot();
+      ).toEqual({
+        packageName: '@somescope/somepackagename',
+        params: undefined,
+        presetName: 'somePresetName',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns scope with packageName and presetName and params', () => {
-      // FIXME: explicit assert condition
       expect(
         presets.parsePreset(
           '@somescope/somepackagename:somePresetName(param1, param2)'
         )
-      ).toMatchSnapshot();
+      ).toEqual({
+        packageName: '@somescope/somepackagename',
+        params: ['param1', 'param2'],
+        presetName: 'somePresetName',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     // non-scoped namespace
     it('returns non-scoped default', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('somepackage')).toMatchSnapshot();
+      expect(presets.parsePreset('somepackage')).toEqual({
+        packageName: 'renovate-config-somepackage',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns non-scoped package name', () => {
-      // FIXME: explicit assert condition
-      expect(presets.parsePreset('somepackage:webapp')).toMatchSnapshot();
+      expect(presets.parsePreset('somepackage:webapp')).toEqual({
+        packageName: 'renovate-config-somepackage',
+        params: undefined,
+        presetName: 'webapp',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
     it('returns non-scoped package name full', () => {
-      // FIXME: explicit assert condition
-      expect(
-        presets.parsePreset('renovate-config-somepackage:webapp')
-      ).toMatchSnapshot();
+      expect(presets.parsePreset('renovate-config-somepackage:webapp')).toEqual(
+        {
+          packageName: 'renovate-config-somepackage',
+          params: undefined,
+          presetName: 'webapp',
+          presetPath: undefined,
+          presetSource: 'npm',
+        }
+      );
     });
     it('returns non-scoped package name with params', () => {
-      // FIXME: explicit assert condition
-      expect(
-        presets.parsePreset('somepackage:webapp(param1)')
-      ).toMatchSnapshot();
+      expect(presets.parsePreset('somepackage:webapp(param1)')).toEqual({
+        packageName: 'renovate-config-somepackage',
+        params: ['param1'],
+        presetName: 'webapp',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
     });
   });
   describe('getPreset', () => {
     it('handles removed presets with a migration', async () => {
       const res = await presets.getPreset(':base', {});
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        extends: [
+          ':separateMajorReleases',
+          ':combinePatchMinorReleases',
+          ':ignoreUnstable',
+          ':prImmediately',
+          ':semanticPrefixFixDepsChoreOthers',
+          ':updateNotScheduled',
+          ':automergeDisabled',
+          ':ignoreModulesAndTests',
+          ':autodetectPinVersions',
+          ':prHourlyLimit2',
+          ':prConcurrentLimit20',
+          'group:monorepos',
+          'group:recommended',
+          'workarounds:all',
+        ],
+      });
     });
     it('handles removed presets with no migration', async () => {
       const res = await presets.getPreset('helpers:oddIsUnstable', {});
@@ -452,18 +591,36 @@ describe(getName(), () => {
         ':group(packages:eslint, eslint)',
         {}
       );
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        description: ['Group eslint packages into same branch/PR'],
+        packageRules: [
+          {
+            extends: ['packages:eslint'],
+            groupName: 'eslint',
+          },
+        ],
+      });
     });
     it('handles missing params', async () => {
       const res = await presets.getPreset(':group()', {});
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        description: ['Group {{arg1}} packages into same branch/PR'],
+        packageRules: [
+          {
+            extends: [],
+            groupName: '{{arg1}}',
+          },
+        ],
+      });
     });
     it('ignores irrelevant params', async () => {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        description: [
+          'Use version pinning (maintain a single version only and not semver ranges)',
+        ],
+        rangeStrategy: 'pin',
+      });
     });
     it('handles 404 packages', async () => {
       let e: Error;
@@ -473,7 +630,6 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
       expect(e.validationSource).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
@@ -486,10 +642,9 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toBeUndefined();
+      expect(e.validationMessage).toBeUndefined();
     });
     it('handles throw errors', async () => {
       let e: Error;
@@ -499,10 +654,9 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toBeUndefined();
+      expect(e.validationMessage).toBeUndefined();
     });
     it('handles preset not found', async () => {
       let e: Error;
@@ -512,10 +666,9 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e.validationSource).toMatchSnapshot();
-      expect(e.validationError).toMatchSnapshot();
-      expect(e.validationMessage).toMatchSnapshot();
+      expect(e.validationSource).toBeUndefined();
+      expect(e.validationError).toBeUndefined();
+      expect(e.validationMessage).toBeUndefined();
     });
   });
 });

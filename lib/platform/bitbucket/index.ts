@@ -536,11 +536,7 @@ export async function ensureIssue({
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
-      logger.debug(
-        `Issues are disabled, so could not create issue: ${
-          err.message as string
-        }`
-      );
+      logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
