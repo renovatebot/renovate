@@ -29,11 +29,11 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 }
 ```
 
-Or set `dependencyDashboardApproval` to `true`:
+Or set `dependencyDashboard` to `true`:
 
 ```
 {
-  "dependencyDashboardApproval": true
+  "dependencyDashboard": true
 }
 ```
 
