@@ -1,0 +1,8 @@
+This issue contains a list of Renovate updates and their statuses.
+
+## Pending Approval
+
+These branches will be created by Renovate only once you click their checkbox below.
+
+ - [ ] <!-- approve-branch=branch-⁠-name -->pr1
+

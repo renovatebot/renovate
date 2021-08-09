@@ -5,6 +5,7 @@ import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchConfig, BranchResult } from '../types';
+import { escapeGfmCommentText, unescapeGfmCommentText } from './util/gfm';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -19,7 +20,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
     const re = new RegExp(checkMatch);
     checked.forEach((check) => {
       const [, type, branchName] = re.exec(check);
-      dependencyDashboardChecks[branchName] = type;
+      dependencyDashboardChecks[unescapeGfmCommentText(branchName)] = type;
     });
   }
   const checkedRebaseAll = issueBody.includes(
@@ -55,7 +56,7 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
 
 function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
-  item += `<!-- ${type}-branch=${branch.branchName} -->`;
+  item += `<!-- ${type}-branch=${escapeGfmCommentText(branch.branchName)} -->`;
   if (branch.prNo) {
     item += `[${branch.prTitle}](../pull/${branch.prNo})`;
   } else {
@@ -329,7 +330,9 @@ export async function ensureDependencyDashboard(
         delete dependencyDashboardChecks[branchName];
       }
       for (const branchName of Object.keys(dependencyDashboardChecks)) {
-        const checkText = `- [ ] <!-- ${dependencyDashboardChecks[branchName]}-branch=${branchName} -->`;
+        const checkText = `- [ ] <!-- ${
+          dependencyDashboardChecks[branchName]
+        }-branch=${escapeGfmCommentText(branchName)} -->`;
         issueBody = issueBody.replace(
           checkText,
           checkText.replace('[ ]', '[x]')
