@@ -3,11 +3,11 @@ import { CommitMessage } from '../../model/commit-message';
 import { CommitMessageBuilder } from '../../model/commit-message-builder';
 
 export class OnboardingCommitMessageFactory {
-  private readonly config: Partial<RenovateConfig>;
+  private readonly config: RenovateConfig;
 
   private readonly configFile: string;
 
-  constructor(config: Partial<RenovateConfig>, configFile: string) {
+  constructor(config: RenovateConfig, configFile: string) {
     this.config = config;
     this.configFile = configFile;
   }
