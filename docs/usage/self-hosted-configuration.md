@@ -126,15 +126,15 @@ e.g.
 }
 ```
 
-## composerIgnorePlatformReqs
-
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
-
 ## composerIgnorePlatformReq
 
 Set the platform requirements you want to exclude when using Composer. Each item will be added to the composer command with `--ignore-platform-req`.
 
 Note that for this to have an effect, you will need to set the Renovate option `composerIgnorePlatformReqs` to `false`.
+
+## composerIgnorePlatformReqs
+
+Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
 
 ## customEnvVariables
 

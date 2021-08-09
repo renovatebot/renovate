@@ -360,8 +360,8 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          composerIgnorePlatformReqs: false,
           composerIgnorePlatformReq: ['ext-posix', 'ext-sodium'],
+          composerIgnorePlatformReqs: false,
         },
       })
     ).not.toBeNull();
