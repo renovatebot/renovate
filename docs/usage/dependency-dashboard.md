@@ -88,6 +88,10 @@ You can mix and match these options as well.
 
 #### Require approval for all updates
 
+We do not recommend that you require approval for _all_ updates.
+When you require prior approval, you need to check the dashboard issue regularly to check for important updates.
+You'll probably forgot to check often enough, out of sight is out of mind!
+
 Maybe you find Renovate too noisy, and want to opt-out of getting automatic updates whenever they're ready.
 
 In this case, you can tell Renovate to wait for your approval before making any pull requests.
@@ -113,6 +117,8 @@ To require manual approval for _all updates_, add the `:dependencyDashboard` and
 
 Major updates are likely to break tests and/or require manual work before they can be merged.
 So maybe you only want to get major updates when you approve them.
+
+Dependency Dashboard Approval is far superior to disabling major updates because at least you can fully see what's pending on the dashboard, instead of updates being totally invisible.
 
 If you want to require approval for major updates, set `dependencyDashboardApproval` to `true` within a `major` object:
 
