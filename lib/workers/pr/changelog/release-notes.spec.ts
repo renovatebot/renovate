@@ -228,6 +228,11 @@ describe(getName(), () => {
     it.each([[''], ['v'], ['other-']])(
       'gets null from repository without gitlab/github in domain %s',
       async (prefix) => {
+        // FIXME: Should not call `api.lol.lol` ?
+        httpMock
+          .scope('https://api.lol.lol')
+          .get('/repos/some/other-repository/releases?per_page=100')
+          .reply(404);
         const res = await getReleaseNotes(
           'some/other-repository',
           '1.0.1',
@@ -241,6 +246,7 @@ describe(getName(), () => {
   });
   describe('getReleaseNotesMd()', () => {
     it('handles not found', async () => {
+      httpMock.scope('https://api.github.com').get('/repos/chalk').reply(404);
       const res = await getReleaseNotesMd(
         'chalk',
         '2.0.0',

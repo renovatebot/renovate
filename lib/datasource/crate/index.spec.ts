@@ -97,6 +97,8 @@ describe(getName(), () => {
     });
 
     it('returns null for missing registry url', async () => {
+      // FIXME: should not call default registry?
+      httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(404, {});
       expect(
         await getPkgReleases({
           datasource,

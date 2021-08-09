@@ -1028,7 +1028,9 @@ describe(getName(), () => {
           .get('/api/v4/users?username=someuser')
           .reply(200, [{ id: 1 }])
           .get('/api/v4/users?username=someotheruser')
-          .reply(200, [{ id: 2 }]);
+          .reply(200, [{ id: 2 }])
+          .put('/api/v4/projects/undefined/merge_requests/42')
+          .reply(200);
 
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
         expect(scope.isDone()).toBeTrue();
