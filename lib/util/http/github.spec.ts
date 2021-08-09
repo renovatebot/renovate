@@ -160,6 +160,13 @@ describe(getName(), () => {
           'Response code 404 (Not Found)'
         );
       });
+      it('should throw 410', async () => {
+        await expect(
+          fail(410, { message: 'Issues are disabled for this repo' })
+        ).rejects.toThrow(
+          'Response code 410 (Issues are disabled for this repo)'
+        );
+      });
       it('should throw rate limit exceeded', async () => {
         await expect(
           fail(403, {
