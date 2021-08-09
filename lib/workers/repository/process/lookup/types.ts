@@ -13,6 +13,7 @@ export interface FilterConfig {
   ignoreDeprecated?: boolean;
   ignoreUnstable?: boolean;
   respectLatest?: boolean;
+  updatePinnedDependencies?: boolean;
   versioning: string;
 }
 

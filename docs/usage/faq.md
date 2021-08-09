@@ -41,21 +41,21 @@ If you're self hosting Renovate, use the latest release if possible.
 
 ## Renovate core features not supported on all platforms
 
-| Feature              | Platforms which lack feature                      | See Renovate issue(s) |
-| -------------------- | ------------------------------------------------- | --------------------- |
-| Dependency Dashboard | BitBucket, BitBucket Server, Azure                | #9592                 |
-| Hosted app           | GitLab, BitBucket, BitBucket Server, Azure, Gitea |                       |
+| Feature              | Platforms which lack feature                      | See Renovate issue(s)                                        |
+| -------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
+| Dependency Dashboard | BitBucket, BitBucket Server, Azure                | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| Hosted app           | GitLab, BitBucket, BitBucket Server, Azure, Gitea |                                                              |
 
 ## Major platform features not suported by Renovate
 
 Some major platform features are not supported at all by Renovate.
 
-| Feature name                            | Platform                               | See Renovate issue(s) |
-| --------------------------------------- | -------------------------------------- | --------------------- |
-| Jira issues                             | BitBucket                              | #3796                 |
-| Merge trains                            | GitLab                                 | #5573                 |
-| Cloning repo over SSH selfhosted        | None                                   | #5406                 |
-| Configurable merge strategy and message | None, BitBucket will get support first | #7184                 |
+| Feature name                            | Platform               | See Renovate issue(s)                                                                                                                                                                                                                                       |
+| --------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jira issues                             | BitBucket              | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                                                                                |
+| Merge trains                            | GitLab                 | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                                                                                |
+| Cloning repo over SSH selfhosted        | None                   | [#5406](https://github.com/renovatebot/renovate/issues/5406)                                                                                                                                                                                                |
+| Configurable merge strategy and message | Only BitBucket for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10868](https://github.com/renovatebot/renovate/issues/10868) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
 
 ## What if I need to .. ?
 
