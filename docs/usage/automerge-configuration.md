@@ -138,3 +138,26 @@ These approval helper apps are only available for GitHub.
 ### Codeowners
 
 Depending on the platform, having a `CODEOWNERS` file could block automerging, because it means a code owner must review the PR.
+
+### Overriding global automerge
+
+You might have setup a global configuration in a `.github` repository, that has a `renovate.json` file that turns on automerge for certain dependencies.
+It does not matter where you've put the global config, the important point in this example is that you're extending from a global config that's somewhere else.
+For this example we'll assume you put your config in a repository on GitHub, called `.github`.
+
+Repositories in the organization all extend from this global configuration, and so they "inherit" the automerge settings as well.
+
+To turn off automerge for all dependencies of a selected repository, you need to make a config that overrides all `packageRules` in the repository's `renovate.json` file, like this:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>org-name/.github:renovate-config"],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["*"],
+      "automerge": false
+    }
+  ]
+}
+```
