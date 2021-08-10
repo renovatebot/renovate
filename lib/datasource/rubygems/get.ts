@@ -52,9 +52,6 @@ export async function fetchDependencies(
   const response = await http.getBuffer(url, { headers });
 
   logger.debug({ response }, 'dependencies response');
-  if (!response || !response.body) {
-    return null;
-  }
 
   return new Marshal(response.body).parsed as MarshalledVersionInfo[];
 }
