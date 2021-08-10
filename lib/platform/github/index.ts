@@ -1,4 +1,4 @@
-import { URL } from 'url';
+import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import { DateTime } from 'luxon';
@@ -23,7 +23,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../util/url';
 import type {
   AggregatedVulnerabilities,
   BranchStatusConfig,
@@ -121,7 +121,7 @@ export async function initPlatform({
 
   // Generic github hostRule that per default all datasources using github api are enabled
   const genericGithubHostRule = {
-    matchHost: new URL(defaults.endpoint).hostname,
+    matchHost: parseUrl(defaults.endpoint).hostname,
     token,
   };
   hostRules.add(genericGithubHostRule);
@@ -201,7 +201,7 @@ export async function initRepo({
     hostType: PLATFORM_TYPE_GITHUB,
     url: defaults.endpoint,
   });
-  config.isGhe = new URL(defaults.endpoint).host !== 'api.github.com';
+  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
@@ -403,24 +403,24 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = new URL(defaults.endpoint);
+  const parsedEndpoint = URL.parse(defaults.endpoint);
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.password = config.forkToken;
+    parsedEndpoint.auth = config.forkToken;
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
-    parsedEndpoint.password = opts.token;
+    parsedEndpoint.auth = opts.token;
   }
   parsedEndpoint.host = parsedEndpoint.host.replace(
     'api.github.com',
     'github.com'
   );
   parsedEndpoint.pathname = config.repository + '.git';
-  const url = parsedEndpoint.toString();
+  const url = URL.format(parsedEndpoint);
   await git.initRepo({
     ...config,
     url,

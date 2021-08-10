@@ -79,15 +79,13 @@ describe('util/http/auth', () => {
 
       applyAuthorization(opts);
 
-      expect(opts).toMatchInlineSnapshot(`
-        Object {
-          "headers": Object {
-            "authorization": "token XXXX",
-          },
-          "hostType": "github",
-          "token": "XXXX",
-        }
-      `);
+      expect(opts).toEqual({
+        headers: {
+          authorization: 'token XXXX',
+        },
+        hostType: 'github',
+        token: 'XXXX',
+      });
     });
 
     it('github token for datasource using github api', () => {

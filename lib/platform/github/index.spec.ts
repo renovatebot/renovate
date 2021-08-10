@@ -130,6 +130,7 @@ describe('platform/github/index', () => {
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should add initialized platform with predefined generic host rule for github api', async () => {
       expect(
         await github.initPlatform({

@@ -2,17 +2,17 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import {
-  id as GITHUB_RELEASES_ID,
   cacheNamespace,
   getApiBaseUrl,
   getGithubRelease,
   getSourceUrlBase,
   http,
+  id,
 } from './common';
 import { findDigestAsset, mapDigestAssetToRelease } from './digest';
 import type { GithubRelease } from './types';
 
-export const id = GITHUB_RELEASES_ID;
+export { id };
 export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
