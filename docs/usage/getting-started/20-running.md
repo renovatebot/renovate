@@ -202,16 +202,6 @@ It's also OK to configure the same as a host rule instead, if you prefer that.
 
 **Note:** If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token as you will run in the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
-## Installing Renovate Into Repositories
+### Self-hosting Examples
 
-Renovate administrators can choose to either "autodiscover" installed repositories, or to configure a fixed list of repository names to operate on.
-
-If the adminstrator has configured a fixed list of repositories then the only way to "install" Renovate on an additional repository is for it to be manually added for the next run or restart.
-
-Otherwise, the process can vary:
-
-- Most commonly, you run Renovate as a dedicated "bot user" with `autodiscover=true`, meaning that it will run on every repository which it's been granted access to
-- If using a GitHub App (including WhiteSource Renovate on `github.com`) then you can install the app into an account or org and select either "All repositories", or "Select repositories" and pick them manually
-
-Once Renovate has been added to a repository, the first step it usually does is create an "onboarding" Pull Request.
-The goal of the onboarding Pull Request is to give a preview of what's to come and allow users to adjust the default config to their liking before fully activating the bot's activities.
+For more examples on running Renovate self-hosted, please view our [Self-hosted examples](../examples/self-hosting.md) page.
