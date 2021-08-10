@@ -64,17 +64,17 @@ body:
     validations:
       required: false
 
+  - type: markdown
+    attributes:
+      value: Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
+
   - type: dropdown
     id: minimal-reproduction-repository
     attributes:
       label: Have you created a minimal reproduction repository?
       options:
         - 'I have linked to a minimal reproduction repository in the bug description'
-        - "No reproduction, but I have linked to a public repo where it occurs"
-        - "No reproduction repository"
+        - 'No reproduction, but I have linked to a public repo where it occurs'
+        - 'No reproduction repository'
     validations:
       required: true
-
-  - type: markdown
-    attributes:
-      value: Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
