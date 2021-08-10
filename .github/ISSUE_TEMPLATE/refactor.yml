@@ -6,17 +6,10 @@ body:
     attributes:
       value: '# This form is for Renovate maintainers only.'
 
-  - type: markdown
-    attributes:
-      value: '## Please do not report any security concerns this way'
-
-  - type: markdown
-    attributes:
-      value: Email renovate-disclosure@whitesourcesoftware.com with any security concerns.
-
   - type: textarea
     id: describe-proposed-changes
     attributes:
       label: Describe the proposed change(s).
+      description: 'Do not report any security concerns here. Email renovate-disclosure@whitesourcesoftware.com instead.'
     validations:
       required: true
