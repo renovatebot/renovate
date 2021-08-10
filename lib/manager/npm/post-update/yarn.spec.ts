@@ -62,8 +62,8 @@ describe(getName(), () => {
       const res = await yarnHelper.generateLockFile(
         'some-dir',
         {
-          YARN_CACHE_FOLDER: 'yarn-cache-folder',
-          YARN_GLOBAL_FOLDER: 'yarn-global-folder',
+          YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
+          YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
         },
         config
       );
