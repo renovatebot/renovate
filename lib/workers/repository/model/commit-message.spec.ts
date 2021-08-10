@@ -20,7 +20,8 @@ describe(getName(), () => {
     it.each(TEST_CASES)(
       'given %p and %p as arguments, returns %p',
       (message, prefix, result) => {
-        const commitMessage = new CommitMessage(message, prefix);
+        const commitMessage = new CommitMessage(message);
+        commitMessage.setCustomPrefix(prefix);
 
         expect(commitMessage.toString()).toEqual(result);
       }

@@ -5,9 +5,8 @@ export class CommitMessage {
 
   private prefix: string;
 
-  constructor(message = '', prefix = '') {
+  constructor(message = '') {
     this.setMessage(message);
-    this.setCustomPrefix(prefix);
   }
 
   public static formatPrefix(prefix: string): string {
