@@ -105,6 +105,7 @@ describe(getName(), () => {
   });
   describe('getFileList()', () => {
     it('should return the correct files', async () => {
+      // FIXME: explicit assert condition
       expect(await git.getFileList()).toMatchSnapshot();
     });
     it('should exclude submodules', async () => {
@@ -117,6 +118,7 @@ describe(getName(), () => {
       });
       await git.syncGit();
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      // FIXME: explicit assert condition
       expect(await git.getFileList()).toMatchSnapshot();
       await repo.reset(['--hard', 'HEAD^']);
     });
@@ -202,6 +204,7 @@ describe(getName(), () => {
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes'
       );
+      // FIXME: explicit assert condition
       expect(branchFiles).toMatchSnapshot();
     });
   });
@@ -414,6 +417,7 @@ describe(getName(), () => {
 
   describe('getCommitMessages()', () => {
     it('returns commit messages', async () => {
+      // FIXME: explicit assert condition
       expect(await git.getCommitMessages()).toMatchSnapshot();
     });
   });
@@ -461,6 +465,7 @@ describe(getName(), () => {
 
       expect(git.branchExists('test')).toBeFalsy();
 
+      // FIXME: explicit assert condition
       expect(await git.getCommitMessages()).toMatchSnapshot();
 
       await git.checkoutBranch('develop');

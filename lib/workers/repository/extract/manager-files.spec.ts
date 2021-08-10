@@ -47,6 +47,7 @@ describe(getName(), () => {
         deps: [{}, { replaceString: 'abc' }],
       })) as never;
       const res = await getManagerPackageFiles(managerConfig);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns files with extractAllPackageFiles', async () => {
@@ -60,6 +61,7 @@ describe(getName(), () => {
         '{"dependencies":{"chalk":"2.0.0"}}'
       );
       const res = await getManagerPackageFiles(managerConfig);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

@@ -7,12 +7,14 @@ describe(getName(), () => {
       nottoken: 'b',
       prBody: 'foo',
     };
+    // FIXME: explicit assert condition
     expect(configSerializer(config)).toMatchSnapshot();
   });
   it('suppresses content', () => {
     const config = {
       content: {},
     };
+    // FIXME: explicit assert condition
     expect(configSerializer(config)).toMatchSnapshot();
   });
 });

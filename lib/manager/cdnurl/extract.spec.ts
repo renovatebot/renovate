@@ -5,6 +5,7 @@ const input = loadFixture(`sample.txt`);
 
 describe(getName(), () => {
   it('extractPackageFile', () => {
+    // FIXME: explicit assert condition
     expect(extractPackageFile(input)).toMatchSnapshot();
   });
 });

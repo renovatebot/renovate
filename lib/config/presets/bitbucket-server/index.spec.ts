@@ -32,7 +32,7 @@ describe(getName(), () => {
         'some-filename.json',
         bitbucketApiHost
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
