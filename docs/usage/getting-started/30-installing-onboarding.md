@@ -11,8 +11,31 @@ Otherwise, the process for adding new repositories to a Renovate installation ca
 - Most commonly, you run Renovate as a dedicated "bot user" with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
 - If using a GitHub App (including WhiteSource Renovate on `github.com`) then you can install the app into an account or org and select either "All repositories", or "Select repositories" and pick them manually
 
+### Hosted GitHub.com App
+
+Installing/enabling WhiteSource's Renovate GitHub App is simple.
+
+First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and click the Install button:
+
+![Github App Install button](assets/images/github-app-install.png)
+
+The only choice you need to make is whether to run Renovate on all repositories or on selected repositories:
+
+![Github App repositories](assets/images/github-app-choose-repos.png)
+
+Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
+That said, most people run Renovate on selected repositories.
+Unfortunately GitHub doesn't offer a "select all except X,Y,Z" option, so you must select each repository where you want Renovate to run.
+
+Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
+
 Note: if you are using the WhiteSource Renovate App then it has a custom behavior for forked repositories.
 If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
+
+### Hosted GitLab.com App
+
+Unfortunately WhiteSource's hotsed GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
+For more details on GitLab security for bots, please see the [GitLab Bot Security](../gitlab-bot-security.md) doc.
 
 ## Repository Onboarding
 
