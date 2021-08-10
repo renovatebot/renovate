@@ -20,12 +20,12 @@ const log = logger.logger as jest.Mocked<Logger>;
 describe(getName(), () => {
   let cacheDir: DirectoryResult;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     cacheDir = await dir({ unsafeCleanup: true });
     setAdminConfig({ cacheDir: cacheDir.path });
   });
 
-  afterEach(() => cacheDir.cleanup());
+  afterAll(() => cacheDir.cleanup());
 
   it('returns null if getBuilds returns null', async () => {
     httpMock
