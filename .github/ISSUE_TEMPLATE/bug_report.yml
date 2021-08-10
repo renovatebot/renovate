@@ -1,5 +1,5 @@
 name: Bug report
-description: You've found a bug with Renovate
+description: You've found a bug with Renovate.
 labels: ['type:bug', 'status:requirements', 'priority-5-triage']
 body:
   - type: dropdown
