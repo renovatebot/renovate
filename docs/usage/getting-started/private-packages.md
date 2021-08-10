@@ -1,4 +1,4 @@
-# Private module support
+# Private package support
 
 It's a very common requirement to be able to support private module/dependency lookups.
 This page describes Renovate's approach to authentication.
