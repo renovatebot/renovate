@@ -40,7 +40,7 @@ body:
     id: describe-bug
     attributes:
       label: Describe the bug
-      placeholder: 'Do not report any security concerns here. Email renovate-disclosure@whitesourcesoftware.com instead.'
+      description: 'Do not report any security concerns here. Email renovate-disclosure@whitesourcesoftware.com instead.'
     validations:
       required: true
 
