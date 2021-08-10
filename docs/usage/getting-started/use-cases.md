@@ -4,7 +4,7 @@ This page describes some common use cases for Renovate, for those who are new an
 
 ## Development Dependency Updates
 
-The original use case, and still the most popular, is for developers to automate updating of their development dependencies.
+The original use case, and still the most popular one, is for developers to automate updating of their development dependencies.
 
 ### Updating of Package Files
 
@@ -111,7 +111,7 @@ Renovate allows users to define time ranges during which to create updates using
 Renovate's "Dependency Dashboard" capability is supported on platforms which support dynamic Markdown checkboxes (GitHub, GitLab, and Gitea).
 When enabled, an issue titled "Dependency Dashboard" is created which lists all updates which are pending, in progress, or were previously closed ignored.
 
-Importantly, it also enables the concept of "Dependency Dashboard Approval", meaning that configured PRs won't be raised automatically and will instead only be created once the corresponding checkbox is clicked in the dashboard.
+Importantly, it also enables the concept of "Dependency Dashboard Approval", meaning that configured PRs won't be raised automatically and will instead only be created once the corresponding checkbox is clicked on the dashboard.
 This can be an improvement in two ways:
 
 - By not raising PRs automatically, it can allow users to request them on-demand at times when they are ready to take action on them, and
