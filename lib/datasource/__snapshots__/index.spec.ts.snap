@@ -8,7 +8,7 @@ Object {
       "version": "1.0.0",
     },
   ],
-  "sourceUrl": Any<String>,
+  "sourceUrl": "https://github.com/react-native-community/react-native-releases",
 }
 `;
 

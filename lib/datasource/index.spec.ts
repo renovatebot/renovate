@@ -145,7 +145,9 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'node',
     });
-    expect(res).toMatchSnapshot({ sourceUrl: expect.any(String) });
+    expect(res).toMatchSnapshot({
+      sourceUrl: expect.any(String),
+    });
   });
   it('ignores and warns for registryUrls', async () => {
     await datasource.getPkgReleases({
