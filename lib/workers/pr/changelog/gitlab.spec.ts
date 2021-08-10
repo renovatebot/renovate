@@ -32,6 +32,11 @@ const upgrade: BranchUpgradeConfig = {
 const matchHost = 'https://gitlab.com/';
 
 describe(getName(), () => {
+  afterEach(() => {
+    // FIXME: add missing http mocks
+    httpMock.clear(false);
+  });
+
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       hostRules.clear();
