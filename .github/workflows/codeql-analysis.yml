@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
-  # The branches below must be a subset of the branches above
-  branches: [main]
+    # The branches below must be a subset of the branches above
+    branches: [main]
   schedule:
     - cron: '0 13 * * 1'
 
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   CodeQL-Build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repository
