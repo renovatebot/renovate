@@ -1,4 +1,4 @@
-import * as Marshal from '@qnighy/marshal';
+import Marshal from 'marshal';
 import urlJoin from 'url-join';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
@@ -56,7 +56,7 @@ export async function fetchDependencies(
     return null;
   }
 
-  return Marshal.parse(response.body) as MarshalledVersionInfo[];
+  return new Marshal(response.body).parsed as MarshalledVersionInfo[];
 }
 
 async function getDependencyFromV1Dependencies(
