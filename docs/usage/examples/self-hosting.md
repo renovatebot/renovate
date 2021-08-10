@@ -182,6 +182,20 @@ workflows:
                   - main
 ```
 
+#### Renovate config file validation when using CircleCI
+
+How to validate your config as part of your workflow:
+
+```yml
+version: '2.1'
+orbs:
+  renovate: daniel-shuy/renovate@2.1
+workflows:
+  lint:
+    jobs:
+      - renovate/validate-config
+```
+
 ### GitLab CI/CD pipeline
 
 For GitLab pipelines we recommend you use the [renovate-runner project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
