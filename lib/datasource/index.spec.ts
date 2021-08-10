@@ -116,10 +116,10 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'react-native',
     });
-    // FIXME: explicit assert condition
-    expect(res).toMatchSnapshot();
-    expect(res.changelogUrl).toBeDefined();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res).toMatchSnapshot({
+      changelogUrl:
+        'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
+    });
   });
   it('applies extractVersion', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -146,9 +146,9 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'node',
     });
-    // FIXME: explicit assert condition
-    expect(res).toMatchSnapshot();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res).toMatchSnapshot({
+      sourceUrl: 'https://github.com/nodejs/node',
+    });
   });
   it('ignores and warns for registryUrls', async () => {
     await datasource.getPkgReleases({
@@ -165,8 +165,7 @@ describe(getName(), () => {
       depName: 'something',
       registryUrls: ['https://docker.com', 'https://docker.io'],
     });
-    // FIXME: explicit assert condition
-    expect(res).toMatchSnapshot();
+    expect(res).toBeNull();
   });
   it('hunts registries and returns success', async () => {
     packagistDatasource.getReleases.mockResolvedValueOnce(null);
@@ -231,9 +230,18 @@ describe(getName(), () => {
       depName: 'something',
       registryUrls: ['https://reg1.com', 'https://reg2.io'],
     });
-    // FIXME: explicit assert condition
-    expect(res).toMatchSnapshot();
-    expect(res.releases).toHaveLength(2);
+    expect(res).toEqual({
+      releases: [
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.0.0',
+        },
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.1.0',
+        },
+      ],
+    });
   });
   it('merges registries and aborts on ExternalHostError', async () => {
     mavenDatasource.getReleases.mockImplementationOnce(() => {
