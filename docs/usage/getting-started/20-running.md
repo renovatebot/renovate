@@ -14,18 +14,20 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 - You provide infrastructure for it to run on,
 - You provision its global config,
 - You ensure it's running regularly
+- You ensure Renovate bot itself is updated
 
 ### Available distributions
 
-#### npm Package (CLI)
+#### npm package (CLI)
 
 Renovate's Open Source CLI is built and distributed as the npm package `renovate`.
 You can run this directly in any Node.js environment - even via `npx` - and it will process all the repositories it is configured with, before exiting.
-If you need to support any non-npm lock files like Bundler, Go Modules or Poetry then you'll need to make sure they are pre-installed in the same environment alongside Renovate.
+When you install Renovate from npm it naturally does not come bundled with any third party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
+Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third party tools are pre-installed in the same environment alongside Renovate before you run it.
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
-#### Docker Image
+#### Docker image
 
 The `renovate` npm package is also distributed in pre-built Node.js images on Docker Hub (`renovate/renovate`).
 
@@ -86,7 +88,7 @@ In general we recommend to run Renovate hourly if possible.
 
 WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-lived containers so do not need any additional cron-like concept as it is built-in.
 
-### Global Config
+### Global config
 
 Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js` or `config.json`), environment variables, or CLI parameters.
 
