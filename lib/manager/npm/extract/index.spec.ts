@@ -38,6 +38,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('ignores vendorised package.json', async () => {
@@ -79,6 +80,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns an array of dependencies with resolution comments', async () => {
@@ -88,6 +90,7 @@ describe(getName(), () => {
         defaultConfig
       );
       expect(res?.deps).toHaveLength(13);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds a lock file', async () => {
@@ -102,6 +105,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds and filters .npmrc', async () => {
@@ -159,6 +163,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds "npmClient":"npm" in lerna.json', async () => {
@@ -173,6 +178,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds "npmClient":"yarn" in lerna.json', async () => {
@@ -187,6 +193,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds simple yarn workspaces', async () => {
@@ -201,6 +208,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
@@ -215,6 +223,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds complex yarn workspaces', async () => {
@@ -229,6 +238,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts engines', async () => {
@@ -259,6 +269,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts volta', async () => {
@@ -271,6 +282,7 @@ describe(getName(), () => {
           node: '8.9.2',
           yarn: '1.12.3',
           npm: '5.9.0',
+          pnpm: '6.11.2',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -279,6 +291,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
 
@@ -299,6 +312,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts non-npmjs', async () => {
@@ -326,6 +340,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts npm package alias', async () => {
@@ -348,6 +363,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
 

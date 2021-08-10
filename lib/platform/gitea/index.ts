@@ -25,6 +25,7 @@ import type {
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   Platform,
   PlatformParams,
   PlatformResult,
@@ -563,12 +564,12 @@ const platform: Platform = {
     });
   },
 
-  async mergePr(number: number, branchName: string): Promise<boolean> {
+  async mergePr({ id }: MergePRConfig): Promise<boolean> {
     try {
-      await helper.mergePR(config.repository, number, config.mergeMethod);
+      await helper.mergePR(config.repository, id, config.mergeMethod);
       return true;
     } catch (err) {
-      logger.warn({ err, number }, 'Merging of PR failed');
+      logger.warn({ err, id }, 'Merging of PR failed');
       return false;
     }
   },

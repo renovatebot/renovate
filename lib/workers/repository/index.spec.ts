@@ -23,6 +23,7 @@ describe(getName(), () => {
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
       const res = await renovateRepository(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

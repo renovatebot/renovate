@@ -37,7 +37,17 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"reviewers\\":[{\\"username\\":\\"someuser\\"},{\\"username\\":\\"someotheruser\\"}]}",
+    "body": Object {
+      "reviewers": Array [
+        Object {
+          "username": "someuser",
+        },
+        Object {
+          "username": "someotheruser",
+        },
+      ],
+      "title": "title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -78,7 +88,26 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/default-reviewers",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"source\\":{\\"branch\\":{\\"name\\":\\"branch\\"}},\\"destination\\":{\\"branch\\":{\\"name\\":\\"master\\"}},\\"close_source_branch\\":true,\\"reviewers\\":[{\\"uuid\\":\\"{1234-5678}\\"}]}",
+    "body": Object {
+      "close_source_branch": true,
+      "description": "body",
+      "destination": Object {
+        "branch": Object {
+          "name": "master",
+        },
+      },
+      "reviewers": Array [
+        Object {
+          "uuid": "{1234-5678}",
+        },
+      ],
+      "source": Object {
+        "branch": Object {
+          "name": "branch",
+        },
+      },
+      "title": "title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -134,7 +163,13 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"content\\":{\\"raw\\":\\"body\\",\\"markup\\":\\"markdown\\"}}",
+    "body": Object {
+      "content": Object {
+        "markup": "markdown",
+        "raw": "body",
+      },
+      "title": "title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -175,7 +210,9 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   },
   Object {
-    "body": "{\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "state": "closed",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -216,7 +253,9 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   },
   Object {
-    "body": "{\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "state": "closed",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -230,7 +269,12 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues/26",
   },
   Object {
-    "body": "{\\"content\\":{\\"raw\\":\\"body\\",\\"markup\\":\\"markdown\\"}}",
+    "body": Object {
+      "content": Object {
+        "markup": "markdown",
+        "raw": "body",
+      },
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -271,7 +315,9 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   },
   Object {
-    "body": "{\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "state": "closed",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -285,7 +331,9 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/issues/25",
   },
   Object {
-    "body": "{\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "state": "closed",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -1254,7 +1302,7 @@ Array [
 
 exports[`platform/bitbucket/index massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket/index mergePr() posts Merge 1`] = `
+exports[`platform/bitbucket/index mergePr() posts Merge with auto 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1268,12 +1316,150 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
   },
   Object {
-    "body": "{\\"close_source_branch\\":true,\\"merge_strategy\\":\\"merge_commit\\",\\"message\\":\\"auto merged\\"}",
+    "body": Object {
+      "close_source_branch": true,
+      "message": "auto merged",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "52",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index mergePr() posts Merge with fast-forward 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": Object {
+      "close_source_branch": true,
+      "merge_strategy": "fast_forward",
+      "message": "auto merged",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
       "content-length": "84",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index mergePr() posts Merge with merge-commit 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": Object {
+      "close_source_branch": true,
+      "merge_strategy": "merge_commit",
+      "message": "auto merged",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "84",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index mergePr() posts Merge with optional merge strategy 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": Object {
+      "close_source_branch": true,
+      "message": "auto merged",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "52",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/merge",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index mergePr() posts Merge with squash 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "body": Object {
+      "close_source_branch": true,
+      "merge_strategy": "squash",
+      "message": "auto merged",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "78",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1309,7 +1495,13 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/branch",
   },
   Object {
-    "body": "{\\"name\\":\\"context\\",\\"state\\":\\"FAILED\\",\\"key\\":\\"context\\",\\"description\\":\\"description\\",\\"url\\":\\"targetUrl\\"}",
+    "body": Object {
+      "description": "description",
+      "key": "context",
+      "name": "context",
+      "state": "FAILED",
+      "url": "targetUrl",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -1372,7 +1564,9 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\"}",
+    "body": Object {
+      "title": "title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -1424,7 +1618,16 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"reviewers\\":[{\\"display_name\\":\\"Jane Smith\\",\\"uuid\\":\\"{90b6646d-1724-4a64-9fd9-539515fe94e9}\\"}]}",
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "display_name": "Jane Smith",
+          "uuid": "{90b6646d-1724-4a64-9fd9-539515fe94e9}",
+        },
+      ],
+      "title": "title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",

@@ -11,6 +11,7 @@ describe(getName(), () => {
         newValue: '6,8',
       };
       const res = updateDependency({ fileContent: content, upgrade });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('falls back to 2 spaces', () => {
@@ -22,6 +23,7 @@ describe(getName(), () => {
         fileContent: 'hello: world',
         upgrade,
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('uses double quotes', () => {
@@ -33,6 +35,7 @@ describe(getName(), () => {
         fileContent: 'node_js:\n  - "6"\n',
         upgrade,
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns null if error', () => {

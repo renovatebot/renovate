@@ -1,6 +1,5 @@
-import { exec as _exec } from 'child_process';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
@@ -22,7 +21,6 @@ jest.mock('../../../lib/datasource');
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const datasource = mocked(_datasource);
 
 const config: UpdateArtifactsConfig = {
@@ -54,10 +52,24 @@ describe('.updateArtifacts()', () => {
     fs.ensureCacheDir.mockResolvedValue(
       join(adminConfig.cacheDir, './others/composer')
     );
+
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.3.0' },
+        { version: '1.10.0' },
+        { version: '1.10.17' },
+        { version: '2.0.14' },
+        { version: '2.1.0' },
+      ],
+    });
   });
+
   afterEach(() => {
     setAdminConfig();
   });
+
   it('returns if no composer.lock found', async () => {
     expect(
       await composer.updateArtifacts({
@@ -68,10 +80,11 @@ describe('.updateArtifacts()', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if unchanged', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValue(repoStatus);
     setAdminConfig({ ...adminConfig, allowScripts: true });
     expect(
@@ -84,6 +97,7 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
       hostType: PLATFORM_TYPE_GITHUB,
@@ -112,9 +126,9 @@ describe('.updateArtifacts()', () => {
       username: 'some-other-username',
       password: 'some-other-password',
     });
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     const authConfig = {
       ...config,
       registryUrls: ['https://packagist.renovatebot.com'],
@@ -130,10 +144,11 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated composer.lock', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValue({
       ...repoStatus,
       modified: ['composer.lock'],
@@ -148,12 +163,13 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports vendor directory update', async () => {
     const foo = join('vendor/foo/Foo.php');
     const bar = join('vendor/bar/Bar.php');
     const baz = join('vendor/baz/Baz.php');
     fs.localPathExists.mockResolvedValueOnce(true);
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
@@ -161,10 +177,10 @@ describe('.updateArtifacts()', () => {
       not_added: [bar],
       deleted: [baz],
     });
-    fs.readLocalFile.mockResolvedValueOnce('New composer.lock' as any);
-    fs.readLocalFile.mockResolvedValueOnce('Foo' as any);
-    fs.readLocalFile.mockResolvedValueOnce('Bar' as any);
-    fs.getSiblingFileName.mockReturnValueOnce('vendor' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{  }');
+    fs.readLocalFile.mockResolvedValueOnce('Foo');
+    fs.readLocalFile.mockResolvedValueOnce('Bar');
+    fs.getSiblingFileName.mockReturnValueOnce('vendor');
     const res = await composer.updateArtifacts({
       packageFileName: 'composer.json',
       updatedDeps: [],
@@ -173,17 +189,18 @@ describe('.updateArtifacts()', () => {
     });
     expect(res).not.toBeNull();
     expect(res?.map(({ file }) => file)).toEqual([
-      { contents: 'New composer.lock', name: 'composer.lock' },
+      { contents: '{  }', name: 'composer.lock' },
       { contents: 'Foo', name: foo },
       { contents: 'Bar', name: bar },
       { contents: baz, name: '|delete|' },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('performs lockFileMaintenance', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{  }');
     git.getRepoStatus.mockResolvedValue({
       ...repoStatus,
       modified: ['composer.lock'],
@@ -201,19 +218,22 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'docker' });
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
 
     const execSnapshots = mockExecAll(exec);
 
-    fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{  }');
+
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '1.10.0' },
-        { version: '1.10.17' },
-        { version: '2.0.0' },
-        { version: '2.0.7' },
+        { version: '7.2.34' },
+        { version: '7.3' }, // composer versioning bug
+        { version: '7.3.29' },
+        { version: '7.4.22' },
+        { version: '8.0.6' },
       ],
     });
 
@@ -227,16 +247,18 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, constraints: { composer: '^1.10.0' } },
+        config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(3);
   });
+
   it('supports global mode', async () => {
     setAdminConfig({ ...adminConfig, binarySource: 'global' });
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
     git.getRepoStatus.mockResolvedValue({
       ...repoStatus,
       modified: ['composer.lock'],
@@ -251,11 +273,13 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -265,13 +289,15 @@ describe('.updateArtifacts()', () => {
       })
     ).toMatchSnapshot();
   });
+
   it('catches unmet requirements errors', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error(
         'fooYour requirements could not be resolved to an installable set of packages.bar'
       );
     });
+    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -281,8 +307,9 @@ describe('.updateArtifacts()', () => {
       })
     ).toMatchSnapshot();
   });
+
   it('throws for disk space', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error(
         'vendor/composer/07fe2366/sebastianbergmann-php-code-coverage-c896779/src/Report/Html/Renderer/Template/js/d3.min.js:  write error (disk full?).  Continue? (y/n/^C) '
@@ -297,10 +324,11 @@ describe('.updateArtifacts()', () => {
       })
     ).rejects.toThrow();
   });
+
   it('disables ignorePlatformReqs', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
     git.getRepoStatus.mockResolvedValue({
       ...repoStatus,
       modified: ['composer.lock'],

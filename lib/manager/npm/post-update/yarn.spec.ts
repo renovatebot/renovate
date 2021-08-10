@@ -211,6 +211,7 @@ describe(getName(), () => {
         }
         return new Promise<string>((resolve) => resolve(''));
       });
+      // FIXME: explicit assert condition
       expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
     });
 
@@ -223,6 +224,7 @@ describe(getName(), () => {
         }
         return new Promise<string>((resolve) => resolve(''));
       });
+      // FIXME: explicit assert condition
       expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
     });
   });

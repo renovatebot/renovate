@@ -187,6 +187,7 @@ describe('updateArtifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',

@@ -31,6 +31,7 @@ import type {
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
@@ -59,6 +60,7 @@ let config: {
   defaultBranch: string;
   cloneSubmodules: boolean;
   ignorePrAuthor: boolean;
+  squash: boolean;
 } = {} as any;
 
 const defaults = {
@@ -70,7 +72,6 @@ const defaults = {
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
-let authorId: number;
 let draftPrefix = DRAFT_PREFIX;
 
 export async function initPlatform({
@@ -96,7 +97,6 @@ export async function initPlatform({
       )
     ).body;
     gitAuthor = `${user.name} <${user.email}>`;
-    authorId = user.id;
     // version is 'x.y.z-edition', so not strictly semver; need to strip edition
     gitlabVersion = (
       await gitlabApi.getJson<{ version: string }>('version', { token })
@@ -212,6 +212,11 @@ export async function initRepo({
       throw new Error(TEMPORARY_ERROR);
     }
     config.mergeMethod = res.body.merge_method || 'merge';
+    if (res.body.squash_option) {
+      config.squash =
+        res.body.squash_option === 'always' ||
+        res.body.squash_option === 'default_on';
+    }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
@@ -398,10 +403,8 @@ async function fetchPrList(): Promise<Pr[]> {
     per_page: '100',
   } as any;
   // istanbul ignore if
-  if (config.ignorePrAuthor) {
-    // https://docs.gitlab.com/ee/api/merge_requests.html#list-merge-requests
-    // default: `scope=created_by_me`
-    searchParams.scope = 'all';
+  if (!config.ignorePrAuthor) {
+    searchParams.scope = 'created_by_me';
   }
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
@@ -440,12 +443,35 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
+async function ignoreApprovals(pr: number): Promise<void> {
+  try {
+    const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
+    const { body: rules } = await gitlabApi.getJson<{ name: string }[]>(url);
+    const ruleName = 'renovateIgnoreApprovals';
+    const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
+    if (!zeroApproversRule) {
+      await gitlabApi.postJson(url, {
+        body: {
+          name: ruleName,
+          approvals_required: 0,
+        },
+      });
+    }
+  } catch (err) {
+    logger.warn({ err }, 'GitLab: Error adding approval rule');
+  }
+}
+
 async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
   if (platformOptions?.gitLabAutomerge) {
     try {
+      if (platformOptions?.gitLabIgnoreApprovals) {
+        await ignoreApprovals(pr);
+      }
+
       const desiredStatus = 'can_be_merged';
       const retryTimes = 5;
 
@@ -502,6 +528,7 @@ export async function createPr({
         title,
         description,
         labels: is.array(labels) ? labels.join(',') : null,
+        squash: config.squash,
       },
     }
   );
@@ -580,10 +607,10 @@ export async function updatePr({
   await tryPrAutomerge(iid, platformOptions);
 }
 
-export async function mergePr(iid: number): Promise<boolean> {
+export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
   try {
     await gitlabApi.putJson(
-      `projects/${config.repository}/merge_requests/${iid}/merge`,
+      `projects/${config.repository}/merge_requests/${id}/merge`,
       {
         body: {
           should_remove_source_branch: true,
@@ -730,7 +757,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
     const query = getQueryString({
       per_page: '100',
-      author_id: `${authorId}`,
+      scope: 'created_by_me',
       state: 'opened',
     });
     const res = await gitlabApi.getJson<
@@ -782,7 +809,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    return getIssue(issue.iid);
+    return await getIssue(issue.iid);
   } catch (err) /* istanbul ignore next */ {
     logger.warn('Error finding issue');
     return null;

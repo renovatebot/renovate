@@ -63,6 +63,7 @@ describe(getName(), () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
+      // FIXME: explicit assert condition
       expect(
         git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();
@@ -86,6 +87,7 @@ describe(getName(), () => {
         renovateJsonPresent: true,
         warnings: [],
       });
+      // FIXME: explicit assert condition
       expect(
         git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();

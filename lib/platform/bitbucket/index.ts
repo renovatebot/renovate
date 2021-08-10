@@ -18,6 +18,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -29,7 +30,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody } from './utils';
+import { PrResponse, RepoInfoBody, mergeBodyTransformer } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -391,7 +392,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || /* istanbul ignore next */ 'http://bitbucket.org';
+  const url = targetUrl || /* istanbul ignore next */ 'https://bitbucket.org';
 
   const body = {
     name: context,
@@ -535,11 +536,7 @@ export async function ensureIssue({
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
-      logger.debug(
-        `Issues are disabled, so could not create issue: ${
-          err.message as string
-        }`
-      );
+      logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
@@ -746,21 +743,24 @@ export async function updatePr({
   }
 }
 
-export async function mergePr(
-  prNo: number,
-  branchName: string
-): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName})`);
+export async function mergePr({
+  branchName,
+  id: prNo,
+  strategy: mergeStrategy,
+}: MergePRConfig): Promise<boolean> {
+  logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
+
+  // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610
+  if (mergeStrategy === 'rebase') {
+    logger.warn('Bitbucket Cloud does not support a "rebase" strategy.');
+    return false;
+  }
 
   try {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/merge`,
       {
-        body: {
-          close_source_branch: true,
-          merge_strategy: 'merge_commit',
-          message: 'auto merged',
-        },
+        body: mergeBodyTransformer(mergeStrategy),
       }
     );
     logger.debug('Automerging succeeded');

@@ -153,6 +153,7 @@ describe(getName(), () => {
         },
       ];
       await detectMonorepos(packageFiles, false);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
   });
