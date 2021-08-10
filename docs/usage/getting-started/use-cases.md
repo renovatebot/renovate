@@ -80,13 +80,13 @@ Renovate is often used to achieve both the above best practices by detecting and
 
 An example from Renovate itself is the use of submodule updating to automate the process of updating Renovate's documentation:
 
-- Renovate's main repository [`renovatebot/renovate`](https://github.com/renovatebot/renovate) contains the majority of markdown documenmtation files
+- Renovate's main repository [`renovatebot/renovate`](https://github.com/renovatebot/renovate) contains the majority of Markdown documentation files
 - Renovate's documentation build repository [`renovatebot/renovatebot.github.io`](https://github.com/renovatebot/renovatebot.github.io) contains a submodule link to `renovatebot/renovate`
 - Submodule updates are performed automatically whenever detected
 - After the automatic update is merged, the documentation site is rebuilt and pushed live
 
 The above use case makes use of Renovate's "automerge" feature, which allows for fully automated updates without need for manual approval, merging, or even a PR at all if desired.
-Automerge is particularly useful for internal dependencies when it's best to use the appraoch of "if it passes tests then merge it".
+Automerge is particularly useful for internal dependencies when it's best to use the approach of "if it passes tests then merge it".
 
 ## Advanced Configuration Use
 
@@ -101,17 +101,17 @@ Renovate supports this capability using the `groupName` configuration as part of
 
 ### Scheduled Updates
 
-Some users prefer to limit which hours of the day or week when Renovate will raise updates.
+Some users prefer to limit which hours of the day or week during which Renovate will raise updates.
 This may be to reduce "noise" during working hours, but also to reduce the chance of CI contention at times when developers are more likely to be waiting on tests to finish.
 
 Renovate allows users to define time ranges during which to create updates using the `schedule` field.
 
 ### On-demand Updates
 
-Renovate's "Dependency Dashboard" capability is supported on platforms which support dynamic markdown checkboxes (GitHub, GitLab, and Gitea).
+Renovate's "Dependency Dashboard" capability is supported on platforms which support dynamic Markdown checkboxes (GitHub, GitLab, and Gitea).
 When enabled, an issue titled "Dependency Dashboard" is created which lists all updates which are pending, in progress, or were previously closed ignored.
 
-Importantly, it also enables the concept of "Dependency Dashboard Approval", meaning that configured PRs won't be raised automatically and will instead only be created once the corresponding checkbox is ticked in the dashboard.
+Importantly, it also enables the concept of "Dependency Dashboard Approval", meaning that configured PRs won't be raised automatically and will instead only be created once the corresponding checkbox is clicked in the dashboard.
 This can be an improvement in two ways:
 
 - By not raising PRs automatically, it can allow users to request them on-demand at times when they are ready to take action on them, and
@@ -125,7 +125,7 @@ It's pretty common that users will run Renovate on many repositories and want mo
 Renovate supports the concept of configuration "presets" to avoid users needing to duplicate configuration across all such repos.
 
 Configuration presets are JSON configuration files which are committed to repositories and then referenced from others.
-Renovate also includes over 100 presets built-in, including its default recommend `config:base` preset.
+Renovate also includes over 100 built-in presets, including the default recommended `config:base` preset.
 
 The typical workflow for a company is:
 
