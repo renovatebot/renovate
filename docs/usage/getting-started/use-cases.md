@@ -2,11 +2,11 @@
 
 This page describes some common use cases for Renovate, for those who are new and would like to get their heads around the capabilities.
 
-## Development Dependency Updates
+## Development dependency updates
 
-The original use case, and still the most popular one, is for developers to automate updating of their development dependencies.
+The original use case, and still the most popular one, is for developers to automate dependency updating in their software projects.
 
-### Updating of Package Files
+### Updating of package files
 
 The term "package file" is used to describe files which contain lists of dependencies, managed by a "package manager".
 Example package files include `package.json` (managed by npm or Yarn), `Gemfile` (managed by Bundler), or `go.mod` (managed by `go` modules).
@@ -51,7 +51,7 @@ The end result is that Renovate can keep dependencies in custom file formats up-
 
 Renovate is increasingly used for purposes which are traditionally described as DevOps instead of Developer.
 
-### DevOps / Infrastructure as Code Updates
+### DevOps / Infrastructure as Code updates
 
 Repositories today consist of more than just development dependencies, and commonly include DevOps-related files like CI/CD configs or "Infrastructure as Code" (IaC) files like Docker, Kubernetes or Terraform files.
 Renovate considers these all to be forms of "package managers" and "package files" and therefore detects and updates them accordingly.
@@ -67,7 +67,7 @@ A better example of Renovate's power is when updating Docker digests.
 While humans could be reasonably expected to check and update versions like `14.17.4`, looking up image digests and updating them manually is impractical to do at scale.
 Renovate can not only keep Docker digests updated, but it can even be configured to "pin" digests from being tag-based to being tag+digest based to get immutable builds.
 
-### Internal Package Updates
+### Internal package updates
 
 Companies typically have at least dozens of repositories, if not hundreds or thousands.
 In most cases, these repositories do not operate in isolation and may have upstream or downstream internal dependencies.
@@ -88,25 +88,25 @@ An example from Renovate itself is the use of submodule updating to automate the
 The above use case makes use of Renovate's "automerge" feature, which allows for fully automated updates without need for manual approval, merging, or even a PR at all if desired.
 Automerge is particularly useful for internal dependencies when it's best to use the approach of "if it passes tests then merge it".
 
-## Advanced Configuration Use
+## Advanced configuration
 
 The below capabilities are common across the above use cases.
 
-### Batched Updates
+### Batched updates
 
 Although Renovate defaults to separating each dependency update into its own PR, some users prefer to batch or "group" updates together.
 For example, group all patch updates into one PR or even perhaps all non-major updates together (patches and minor updates).
 
 Renovate supports this capability using the `groupName` configuration as part of `packageRules`.
 
-### Scheduled Updates
+### Scheduled updates
 
 Some users prefer to limit which hours of the day or week during which Renovate will raise updates.
 This may be to reduce "noise" during working hours, but also to reduce the chance of CI contention at times when developers are more likely to be waiting on tests to finish.
 
 Renovate allows users to define time ranges during which to create updates using the `schedule` field.
 
-### On-demand Updates
+### On-demand updates
 
 Renovate's "Dependency Dashboard" capability is supported on platforms which support dynamic Markdown checkboxes (GitHub, GitLab, and Gitea).
 When enabled, an issue titled "Dependency Dashboard" is created which lists all updates which are pending, in progress, or were previously closed ignored.
@@ -119,7 +119,7 @@ This can be an improvement in two ways:
 
 By having this dashboard concept it gives users both visibility and control over updates.
 
-### Configuration Presets
+### Configuration presets
 
 It's pretty common that users will run Renovate on many repositories and want mostly similar config on them all too.
 Renovate supports the concept of configuration "presets" to avoid users needing to duplicate configuration across all such repos.
