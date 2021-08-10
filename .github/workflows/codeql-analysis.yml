@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   CodeQL-Build:
-    runs-on: macos-latest
+    runs-on: linux-latest
 
     steps:
       - name: Checkout repository
