@@ -40,4 +40,5 @@ export enum SkipReason {
   Unsupported = 'unsupported',
   UnversionedReference = 'unversioned-reference',
   VersionPlaceholder = 'version-placeholder',
+  IsPinned = 'is-pinned',
 }

@@ -24,6 +24,7 @@ describe(getName(), () => {
     });
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile(requirements1, packageFile);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts registryUrls', async () => {
@@ -50,6 +51,7 @@ describe(getName(), () => {
     it('extracts dependencies with lock file', async () => {
       fs.readLocalFile.mockResolvedValue('some content');
       const res = await extractPackageFile(requirements1, packageFile);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

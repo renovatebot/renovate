@@ -15,6 +15,7 @@ describe(getName(), () => {
         '0.0.2',
         'patch'
       );
+      // FIXME: explicit assert condition
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
     });
@@ -32,6 +33,7 @@ describe(getName(), () => {
         '0.0.1',
         'minor'
       );
+      // FIXME: explicit assert condition
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
     });

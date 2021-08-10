@@ -167,6 +167,10 @@ describe(getName(), () => {
         .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
         .reply(500, {});
+      httpMock
+        .scope('https://firstparty.com/basepath')
+        .get('/api/v1/gems/rails.json')
+        .reply(500);
       expect(await getPkgReleases(params)).toBeNull();
     });
   });

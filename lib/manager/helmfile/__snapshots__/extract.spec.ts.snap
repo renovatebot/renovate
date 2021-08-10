@@ -22,6 +22,10 @@ Object {
         "https://prometheus-community.github.io/helm-charts",
       ],
     },
+    Object {
+      "depName": "invalid",
+      "skipReason": "invalid-name",
+    },
   ],
 }
 `;

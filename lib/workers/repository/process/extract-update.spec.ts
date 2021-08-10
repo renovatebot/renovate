@@ -32,6 +32,7 @@ describe(getName(), () => {
       git.checkoutBranch.mockResolvedValueOnce('abc123');
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       await expect(update(config, res.branches)).resolves.not.toThrow();
     });
@@ -44,6 +45,7 @@ describe(getName(), () => {
       git.checkoutBranch.mockResolvedValueOnce('abc123');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
     it('uses repository cache', async () => {

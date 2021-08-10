@@ -7,6 +7,8 @@ export interface Config {
 
 export interface DigestConfig extends Config {
   registryUrl?: string;
+  currentValue?: string;
+  currentDigest?: string;
 }
 
 export interface ReleasesConfigBase {

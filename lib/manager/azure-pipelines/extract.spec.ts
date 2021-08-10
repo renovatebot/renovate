@@ -27,6 +27,7 @@ describe(getName(), () => {
 
   describe('extractRepository()', () => {
     it('should extract repository information', () => {
+      // FIXME: explicit assert condition
       expect(
         extractRepository({
           type: 'github',
@@ -69,6 +70,7 @@ describe(getName(), () => {
 
   describe('extractContainer()', () => {
     it('should extract container information', () => {
+      // FIXME: explicit assert condition
       expect(
         extractContainer({
           image: 'ubuntu:16.04',
