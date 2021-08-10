@@ -116,6 +116,7 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'react-native',
     });
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
     expect(res.changelogUrl).toBeDefined();
     expect(res.sourceUrl).toBeDefined();
@@ -145,6 +146,7 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'node',
     });
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
   });
@@ -163,6 +165,7 @@ describe(getName(), () => {
       depName: 'something',
       registryUrls: ['https://docker.com', 'https://docker.io'],
     });
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
   });
   it('hunts registries and returns success', async () => {
@@ -228,6 +231,7 @@ describe(getName(), () => {
       depName: 'something',
       registryUrls: ['https://reg1.com', 'https://reg2.io'],
     });
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
     expect(res.releases).toHaveLength(2);
   });

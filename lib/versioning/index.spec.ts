@@ -12,6 +12,7 @@ const supportedSchemes = getOptions().find(
 
 describe('allVersioning.get(versioning)', () => {
   it('has api', () => {
+    // FIXME: explicit assert condition
     expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
   });
   it('validates', () => {

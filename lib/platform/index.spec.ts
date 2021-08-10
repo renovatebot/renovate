@@ -51,6 +51,7 @@ describe(getName(), () => {
       username: 'abc',
       password: '123',
     };
+    // FIXME: explicit assert condition
     expect(await platform.initPlatform(config)).toMatchSnapshot();
   });
   it('initializes no author', async () => {
@@ -59,17 +60,20 @@ describe(getName(), () => {
       username: 'abc',
       password: '123',
     };
+    // FIXME: explicit assert condition
     expect(await platform.initPlatform(config)).toMatchSnapshot();
   });
   it('returns null if empty email given', () => {
     expect(platform.parseGitAuthor(undefined)).toBeNull();
   });
   it('parses bot email', () => {
+    // FIXME: explicit assert condition
     expect(
       platform.parseGitAuthor('some[bot]@users.noreply.github.com')
     ).toMatchSnapshot();
   });
   it('parses bot name and email', () => {
+    // FIXME: explicit assert condition
     expect(
       platform.parseGitAuthor(
         '"some[bot]" <some[bot]@users.noreply.github.com>'
@@ -77,6 +81,7 @@ describe(getName(), () => {
     ).toMatchSnapshot();
   });
   it('escapes names', () => {
+    // FIXME: explicit assert condition
     expect(
       platform.parseGitAuthor('name [what] <name@what.com>').name
     ).toMatchSnapshot();

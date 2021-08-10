@@ -118,6 +118,6 @@ describe(getName(), () => {
       .get('/workingpreset')
       .reply(200, presetPackage);
     const res = await npm.getPreset({ packageName: 'workingpreset' });
-    expect(res).toMatchSnapshot();
+    expect(res).toEqual({ rangeStrategy: 'auto' });
   });
 });

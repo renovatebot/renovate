@@ -73,15 +73,18 @@ describe(getName(), () => {
     });
     it('dedupes registries', async () => {
       const res = await extractPackageFile(pyproject8toml, filename);
+      // FIXME: explicit assert condition
       expect(res.registryUrls).toMatchSnapshot();
     });
     it('extracts mixed versioning types', async () => {
       const res = await extractPackageFile(pyproject9toml, filename);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('resolves lockedVersions from the lockfile', async () => {
       fs.readLocalFile.mockResolvedValue(pyproject11tomlLock);
       const res = await extractPackageFile(pyproject11toml, filename);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips git dependencies', async () => {

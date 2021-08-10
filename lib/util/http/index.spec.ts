@@ -20,6 +20,7 @@ describe(getName(), () => {
   });
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
+    // FIXME: explicit assert condition
     expect(await http.get('http://renovate.com/test')).toMatchSnapshot();
     expect(httpMock.allUsed()).toBe(true);
   });
@@ -54,10 +55,12 @@ describe(getName(), () => {
   });
   it('getJson', async () => {
     httpMock.scope(baseUrl).get('/').reply(200, '{ "test": true }');
+    // FIXME: explicit assert condition
     expect(await http.getJson('http://renovate.com')).toMatchSnapshot();
   });
   it('postJson', async () => {
     httpMock.scope(baseUrl).post('/').reply(200, {});
+    // FIXME: explicit assert condition
     expect(
       await http.postJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
@@ -65,6 +68,7 @@ describe(getName(), () => {
   });
   it('putJson', async () => {
     httpMock.scope(baseUrl).put('/').reply(200, {});
+    // FIXME: explicit assert condition
     expect(
       await http.putJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
@@ -72,6 +76,7 @@ describe(getName(), () => {
   });
   it('patchJson', async () => {
     httpMock.scope(baseUrl).patch('/').reply(200, {});
+    // FIXME: explicit assert condition
     expect(
       await http.patchJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
@@ -79,6 +84,7 @@ describe(getName(), () => {
   });
   it('deleteJson', async () => {
     httpMock.scope(baseUrl).delete('/').reply(200, {});
+    // FIXME: explicit assert condition
     expect(
       await http.deleteJson('http://renovate.com', { body: {}, baseUrl })
     ).toMatchSnapshot();
@@ -86,6 +92,7 @@ describe(getName(), () => {
   });
   it('headJson', async () => {
     httpMock.scope(baseUrl).head('/').reply(200, {});
+    // FIXME: explicit assert condition
     expect(
       await http.headJson('http://renovate.com', { baseUrl })
     ).toMatchSnapshot();
@@ -127,6 +134,7 @@ describe(getName(), () => {
         .reply(500)
         .head('/')
         .reply(200, undefined, { 'x-some-header': 'abc' });
+      // FIXME: explicit assert condition
       expect(await http.head('http://renovate.com')).toMatchSnapshot();
       expect(httpMock.allUsed()).toBe(true);
     } finally {
