@@ -30,7 +30,7 @@ describe(getName(), () => {
         'some-filename.json',
         githubApiHost
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

@@ -2324,6 +2324,11 @@ However there are cases where updates might be desirable - e.g. if you have conf
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
 
+## updatePinnedDependencies
+
+By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
+You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
 ## versioning
 
 Usually, each language or package manager has a specific type of "versioning":

@@ -20,6 +20,7 @@ describe(getName(), () => {
       setAdminConfig();
     });
     it('returns empty for invalid csproj', async () => {
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile('nothing here', 'bogus', config)
       ).toMatchSnapshot();
@@ -49,6 +50,7 @@ describe(getName(), () => {
     it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';
       const contents = loadFixture(packageFile);
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
@@ -57,7 +59,7 @@ describe(getName(), () => {
       const packageFile =
         'with-lower-case-config-file/with-lower-case-config-file.csproj';
       const contents = loadFixture(packageFile);
-
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
@@ -66,7 +68,7 @@ describe(getName(), () => {
       const packageFile =
         'with-pascal-case-config-file/with-pascal-case-config-file.csproj';
       const contents = loadFixture(packageFile);
-
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
@@ -75,7 +77,7 @@ describe(getName(), () => {
       const packageFile =
         'with-malformed-config-file/with-malformed-config-file.csproj';
       const contents = loadFixture(packageFile);
-
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
@@ -84,7 +86,7 @@ describe(getName(), () => {
       const packageFile =
         'without-package-sources/without-package-sources.csproj';
       const contents = loadFixture(packageFile);
-
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
@@ -93,7 +95,7 @@ describe(getName(), () => {
       const packageFile =
         'with-local-feed-in-config-file/with-local-feed-in-config-file.csproj';
       const contents = loadFixture(packageFile);
-
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
@@ -103,6 +105,7 @@ describe(getName(), () => {
       const contents = loadFixture(packageFile);
       const otherPackageFile = 'multiple-package-files/two/two.csproj';
       const otherContents = loadFixture(otherPackageFile);
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
@@ -124,12 +127,14 @@ describe(getName(), () => {
   }
 }`;
       it('works', async () => {
+        // FIXME: explicit assert condition
         expect(
           await extractPackageFile(contents, packageFile, config)
         ).toMatchSnapshot();
       });
 
       it('with-config', async () => {
+        // FIXME: explicit assert condition
         expect(
           await extractPackageFile(
             contents,

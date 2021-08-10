@@ -184,6 +184,7 @@ describe('.updateArtifacts()', () => {
       throw new Error('not found');
     });
     const updatedDeps = [{ depName: 'dep1' }];
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
