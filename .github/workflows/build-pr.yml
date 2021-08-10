@@ -55,7 +55,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Unit tests
-        run: yarn jest --maxWorkers=2 --ci
+        run: yarn jest --maxWorkers=2 --ci --bail
 
       - name: Codecov
         uses: codecov/codecov-action@51d810878be5422784e86451c0e7c14e5860ec47 # renovate: tag=v2.0.2
