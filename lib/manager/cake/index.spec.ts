@@ -5,6 +5,7 @@ const content = loadFixture('build.cake');
 
 describe(getName(), () => {
   it('extracts', () => {
+    // FIXME: explicit assert condition
     expect(extractPackageFile(content)).toMatchSnapshot();
   });
 });

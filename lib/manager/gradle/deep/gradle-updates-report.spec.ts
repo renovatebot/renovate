@@ -11,7 +11,7 @@ import {
 import { extraEnv } from './utils';
 import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from '.';
 
-const fixtures = 'lib/manager/gradle/__fixtures__';
+const fixtures = 'lib/manager/gradle/deep/__fixtures__';
 
 describe(getName(), () => {
   for (const gradleVersion of [5, 6]) {
@@ -37,6 +37,7 @@ describe(getName(), () => {
             cwd: workingDir.path,
             extraEnv,
           });
+          // FIXME: explicit assert condition
           expect(
             fs.readJSONSync(
               `${workingDir.path}/${GRADLE_DEPENDENCY_REPORT_FILENAME}`

@@ -177,13 +177,26 @@ function simplifyGraphqlTree(tree: DocumentNode): GraphqlSnapshot {
   return result;
 }
 
-export function makeGraphqlSnapshot(requestBodyStr: string): GraphqlSnapshot {
-  const requestBody = JSON.parse(requestBodyStr);
-  const { query: queryStr, variables } = requestBody;
-  const queryRawTree = parse(queryStr, { noLocation: true });
-  const queryTree = simplifyGraphqlTree(queryRawTree);
-  if (variables) {
-    return { variables, ...queryTree };
+export interface GraphqlSnapshotInput {
+  query: string;
+  variables: Record<string, string>;
+}
+
+export function makeGraphqlSnapshot(
+  requestBody: GraphqlSnapshotInput
+): GraphqlSnapshot | null {
+  try {
+    const { query: queryStr, variables } = requestBody;
+    if (!queryStr) {
+      return null;
+    }
+    const queryRawTree = parse(queryStr, { noLocation: true });
+    const queryTree = simplifyGraphqlTree(queryRawTree);
+    if (variables) {
+      return { variables, ...queryTree };
+    }
+    return queryTree;
+  } catch (ex) {
+    return null;
   }
-  return queryTree;
 }

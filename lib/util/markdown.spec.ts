@@ -15,6 +15,7 @@ describe(getName(), () => {
 *   Mention: @wooorm
 `;
     it('works', async () => {
+      // FIXME: explicit assert condition
       expect(await linkify(md, { repository: 'some/repo' })).toMatchSnapshot();
     });
   });

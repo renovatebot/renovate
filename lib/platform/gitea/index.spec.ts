@@ -899,7 +899,12 @@ describe(getName(), () => {
     it('should return true when merging succeeds', async () => {
       await initFakeRepo();
 
-      expect(await gitea.mergePr(1, 'some-branch')).toEqual(true);
+      expect(
+        await gitea.mergePr({
+          branchName: 'some-branch',
+          id: 1,
+        })
+      ).toEqual(true);
       expect(helper.mergePR).toHaveBeenCalledTimes(1);
       expect(helper.mergePR).toHaveBeenCalledWith(
         mockRepo.full_name,
@@ -912,7 +917,12 @@ describe(getName(), () => {
       helper.mergePR.mockRejectedValueOnce(new Error());
       await initFakeRepo();
 
-      expect(await gitea.mergePr(1, 'some-branch')).toEqual(false);
+      expect(
+        await gitea.mergePr({
+          branchName: 'some-branch',
+          id: 1,
+        })
+      ).toEqual(false);
     });
   });
 

@@ -67,6 +67,7 @@ describe(getName(), () => {
           d: ['e', 'f'],
         },
       };
+      // FIXME: explicit assert condition
       expect(prettyStdout.getDetails(rec as any)).toMatchSnapshot();
     });
   });
@@ -87,6 +88,7 @@ describe(getName(), () => {
           d: ['e', 'f'],
         },
       };
+      // FIXME: explicit assert condition
       expect(prettyStdout.formatRecord(rec)).toMatchSnapshot();
     });
   });

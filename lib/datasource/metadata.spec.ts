@@ -2,7 +2,7 @@ import { getName } from '../../test/util';
 import * as datasourceMaven from './maven';
 import { addMetaData } from './metadata';
 import * as datasourceNpm from './npm';
-import * as datasourcePypi from './pypi';
+import { PypiDatasource } from './pypi';
 
 describe(getName(), () => {
   it('Should do nothing if dep is not specified', () => {
@@ -22,10 +22,11 @@ describe(getName(), () => {
       ],
     };
 
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'django';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
 
@@ -42,10 +43,11 @@ describe(getName(), () => {
       ],
     };
 
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'mkdocs';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
 
@@ -62,10 +64,11 @@ describe(getName(), () => {
         { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
       ],
     };
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'django-filter';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
 
@@ -84,6 +87,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
   it('Should handle failed parsing of sourceUrls for GitLab', () => {
@@ -101,6 +105,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
   it('Should handle failed parsing of sourceUrls for other', () => {
@@ -118,6 +123,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
   it('Should handle non-url', () => {
@@ -135,6 +141,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    // FIXME: explicit assert condition
     expect(dep).toMatchSnapshot();
   });
 

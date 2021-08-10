@@ -1,7 +1,7 @@
 import toml from '@iarna/toml';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import is from '@sindresorhus/is';
-import * as datasourcePypi from '../../datasource/pypi';
+import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { localPathExists } from '../../util/fs';
@@ -77,7 +77,7 @@ function extractFromSection(
       if (skipReason) {
         dep.skipReason = skipReason;
       } else {
-        dep.datasource = datasourcePypi.id;
+        dep.datasource = PypiDatasource.id;
       }
       if (nestedVersion) {
         dep.managerData.nestedVersion = nestedVersion;
