@@ -117,7 +117,8 @@ describe(getName(), () => {
       depName: 'react-native',
     });
     expect(res).toMatchSnapshot({
-      changelogUrl: expect.any(String),
+      changelogUrl:
+        'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
     });
   });
   it('applies extractVersion', async () => {
@@ -146,7 +147,7 @@ describe(getName(), () => {
       depName: 'node',
     });
     expect(res).toMatchSnapshot({
-      sourceUrl: expect.any(String),
+      sourceUrl: 'https://github.com/nodejs/node',
     });
   });
   it('ignores and warns for registryUrls', async () => {

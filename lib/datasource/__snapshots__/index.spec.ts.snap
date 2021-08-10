@@ -2,7 +2,7 @@
 
 exports[`datasource/index adds changelogUrl 1`] = `
 Object {
-  "changelogUrl": Any<String>,
+  "changelogUrl": "https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md",
   "releases": Array [
     Object {
       "version": "1.0.0",
@@ -19,6 +19,6 @@ Object {
       "version": "1.0.0",
     },
   ],
-  "sourceUrl": Any<String>,
+  "sourceUrl": "https://github.com/nodejs/node",
 }
 `;
