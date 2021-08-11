@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import remark from 'remark';
 import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../logger';
@@ -86,7 +85,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin<any> {
     }
   };
 
-  return () => transformer as any;
+  return () => transformer as Transformer;
 }
 
 export function massageMarkdownLinks(content: string): string {
