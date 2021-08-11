@@ -1,0 +1,77 @@
+name: Bug report
+description: You've found a bug with Renovate.
+labels: ['type:bug', 'status:requirements', 'priority-5-triage']
+body:
+  - type: dropdown
+    id: how-are-you-running-renovate
+    attributes:
+      label: How are you running Renovate?
+      options:
+        - 'WhiteSource Renovate hosted app on github.com'
+        - 'Self-hosted'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform-select
+    attributes:
+      label: Please select which platform you are using if self-hosting.
+      options:
+        - 'Azure DevOps (dev.azure.com)'
+        - 'Azure DevOps Server'
+        - 'Bitbucket Cloud (bitbucket.org)'
+        - 'Bitbucket Server'
+        - 'Gitea'
+        - 'github.com'
+        - 'GitHub Enterprise Server'
+        - 'gitlab.com'
+        - 'GitLab self-hosted'
+    validations:
+      required: false
+
+  - type: input
+    id: renovate-version-if-selfhosting
+    attributes:
+      label: If you're self-hosting Renovate, tell us what version of Renovate you run.
+    validations:
+      required: false
+
+  - type: textarea
+    id: describe-bug
+    attributes:
+      label: Describe the bug
+      description: 'Do not report any security concerns here. Email renovate-disclosure@whitesourcesoftware.com instead.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug-logs
+    attributes:
+      label: Relevant debug logs
+      description: |
+        Try not to raise a bug report unless you've looked at the logs first.
+        If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+        If you are using the Renovate App, log into https://app.renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+        Paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others do not have permissions to view them).
+      value: |
+        <details><summary>Logs</summary>
+
+        ```
+        Copy/paste any log here, between the starting and ending backticks
+        ```
+
+        </details>
+    validations:
+      required: false
+
+  - type: dropdown
+    id: minimal-reproduction-repository
+    attributes:
+      label: Have you created a minimal reproduction repository?
+      description: Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
+      options:
+        - 'I have linked to a minimal reproduction repository in the bug description'
+        - 'No reproduction, but I have linked to a public repo where it occurs'
+        - 'No reproduction repository'
+    validations:
+      required: true
