@@ -16,7 +16,7 @@ install_requires =
     docopt ~=0.4
     fs ~=2.1
 
-    requests ~=2.18
+    requests[security] ~=2.18
 
 setup_requires =
     six ~=1.4
