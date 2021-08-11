@@ -1,14 +1,11 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
-import { env, fs, getName } from '../../../test/util';
+import { env, fs, getName, hostRules } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
-import * as _hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
-
-const hostRules: any = _hostRules;
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');

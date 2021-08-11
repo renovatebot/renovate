@@ -1,11 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadJsonFixture } from '../../../test/util';
+import { getName, hostRules, loadJsonFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import * as _hostRules from '../../util/host-rules';
 import { HexDatasource } from '.';
-
-const hostRules: any = _hostRules;
 
 const certifiResponse = loadJsonFixture('certifi.json');
 const privatePackageResponse = loadJsonFixture('private_package.json');
