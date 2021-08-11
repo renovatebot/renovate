@@ -87,8 +87,15 @@ describe(getName(), () => {
       delete err.stack;
 
       // sanitize like Bunyan
-      // FIXME: explicit assert condition
-      expect(sanitizeValue(err)).toMatchSnapshot();
+      expect(sanitizeValue(err)).toMatchSnapshot({
+        name: 'HTTPError',
+        options: {
+          method: 'POST',
+          password: '***********',
+          url: 'https://:**redacted**@github.com/api',
+          username: '',
+        },
+      });
     });
   });
 });
