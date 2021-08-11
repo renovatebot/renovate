@@ -162,6 +162,45 @@ export async function getJsonFile(
   return JSON.parse(raw);
 }
 
+function getRepoUrl(
+  repository: string,
+  res: HttpResponse<RepoResponse>
+): string {
+  const opts = hostRules.find({
+    hostType: defaults.hostType,
+    url: defaults.endpoint,
+  });
+  if (
+    process.env.GITLAB_IGNORE_REPO_URL ||
+    (res.body.http_url_to_repo === null &&
+      (!opts.useSsh || res.body.ssh_url_to_repo === null))
+  ) {
+    logger.debug(
+      'no http_url_to_repo or ssh_url_to_repo (or useSsh is not true in hostRules) found. Falling back to old behaviour.'
+    );
+    const { protocol, host, pathname } = parseUrl(defaults.endpoint);
+    const newPathname = pathname.slice(0, pathname.indexOf('/api'));
+    const url = URL.format({
+      protocol: protocol.slice(0, -1) || 'https',
+      auth: 'oauth2:' + opts.token,
+      host,
+      pathname: newPathname + '/' + repository + '.git',
+    });
+    logger.debug({ url }, 'using URL based on configured endpoint');
+    return url;
+  }
+
+  if (opts.useSsh) {
+    logger.debug(`${repository} ssh URL = ${res.body.ssh_url_to_repo}`);
+    return res.body.ssh_url_to_repo;
+  }
+
+  logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
+  const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
+  repoUrl.auth = 'oauth2:' + opts.token;
+  return URL.format(repoUrl);
+}
+
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
@@ -220,31 +259,7 @@ export async function initRepo({
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
-    const opts = hostRules.find({
-      hostType: defaults.hostType,
-      url: defaults.endpoint,
-    });
-    let url: string;
-    if (
-      process.env.GITLAB_IGNORE_REPO_URL ||
-      res.body.http_url_to_repo === null
-    ) {
-      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
-      const { protocol, host, pathname } = parseUrl(defaults.endpoint);
-      const newPathname = pathname.slice(0, pathname.indexOf('/api'));
-      url = URL.format({
-        protocol: protocol.slice(0, -1) || 'https',
-        auth: 'oauth2:' + opts.token,
-        host,
-        pathname: newPathname + '/' + repository + '.git',
-      });
-      logger.debug({ url }, 'using URL based on configured endpoint');
-    } else {
-      logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
-      const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-      repoUrl.auth = 'oauth2:' + opts.token;
-      url = URL.format(repoUrl);
-    }
+    const url = getRepoUrl(repository, res);
     await git.initRepo({
       ...config,
       url,
