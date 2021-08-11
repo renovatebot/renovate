@@ -5,12 +5,13 @@ import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchConfig, BranchResult } from '../types';
-import { escapeGfmCommentText, unescapeGfmCommentText } from './util/gfm';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
   dependencyDashboardRebaseAllOpen: boolean;
 }
+
+const RE_MULTIPLE_DASH = /--+/g;
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
@@ -20,7 +21,8 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
     const re = new RegExp(checkMatch);
     checked.forEach((check) => {
       const [, type, branchName] = re.exec(check);
-      dependencyDashboardChecks[unescapeGfmCommentText(branchName)] = type;
+      const cleanedUpBranchName = branchName.replace(RE_MULTIPLE_DASH, '-'); // Backward compatibility with versions which didn't remove chained dashes
+      dependencyDashboardChecks[cleanedUpBranchName] = type;
     });
   }
   const checkedRebaseAll = issueBody.includes(
@@ -56,7 +58,7 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
 
 function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
-  item += `<!-- ${type}-branch=${escapeGfmCommentText(branch.branchName)} -->`;
+  item += `<!-- ${type}-branch=${branch.branchName} -->`;
   if (branch.prNo) {
     item += `[${branch.prTitle}](../pull/${branch.prNo})`;
   } else {
@@ -330,9 +332,7 @@ export async function ensureDependencyDashboard(
         delete dependencyDashboardChecks[branchName];
       }
       for (const branchName of Object.keys(dependencyDashboardChecks)) {
-        const checkText = `- [ ] <!-- ${
-          dependencyDashboardChecks[branchName]
-        }-branch=${escapeGfmCommentText(branchName)} -->`;
+        const checkText = `- [ ] <!-- ${dependencyDashboardChecks[branchName]}-branch=${branchName} -->`;
         issueBody = issueBody.replace(
           checkText,
           checkText.replace('[ ]', '[x]')

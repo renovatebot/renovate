@@ -7,6 +7,7 @@ import * as template from '../../../util/template';
 
 const MIN_HASH_LENGTH = 6;
 
+const RE_MULTIPLE_DASH = /--+/g;
 /**
  * Clean git branch name
  *
@@ -14,12 +15,14 @@ const MIN_HASH_LENGTH = 6;
  * - leading dot/leading dot after slash
  * - trailing dot
  * - whitespace
+ * - dashes after dash
  */
 function cleanBranchName(branchName: string): string {
   return cleanGitRef(branchName)
     .replace(/^\.|\.$/, '') // leading or trailing dot
     .replace(/\/\./g, '/') // leading dot after slash
-    .replace(/\s/g, ''); // whitespace
+    .replace(/\s/g, '') // whitespace
+    .replace(RE_MULTIPLE_DASH, '-'); // multiple dashes
 }
 
 /* eslint-disable no-param-reassign */

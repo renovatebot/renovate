@@ -64,14 +64,17 @@ describe(getName(), () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body:
-          loadFixture(
-            'master-issue_with_1_PR_double_dash_branch_name.txt'
-          ).replace('- [ ]', '- [x]') +
-          '\n\n - [x] <!-- rebase-all-open-prs -->',
+        body: loadFixture(
+          'dependency-dashboard_with_double_dash_branch_name.txt'
+        ),
       });
       await dependencyDashboard.readDashboardBody(conf);
-      expect(conf.dependencyDashboardChecks['branch--name']).toBe('approve');
+      expect(
+        conf.dependencyDashboardChecks['old-style-double-dash-branch-name']
+      ).toBe('approve'); // backward compatibility
+      expect(
+        conf.dependencyDashboardChecks['new-style-double-dash-branch-name']
+      ).toBe('approve');
     });
   });
 
@@ -301,35 +304,6 @@ describe(getName(), () => {
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         loadFixture('master-issue_with_2_PR_edited.txt')
-      );
-
-      // same with dry run
-      await dryRun(branches, platform, 0, 0);
-    });
-
-    it('to not create broken comments on branch names with double dash', async () => {
-      const branches: BranchConfig[] = [
-        {
-          ...mock<BranchConfig>(),
-          prTitle: 'pr1',
-          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
-          branchName: 'branch--name',
-        },
-      ];
-      config.dependencyDashboard = true;
-      await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
-      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
-      );
-
-      expect(platform.ensureIssue.mock.calls[0][0].body).not.toContain(
-        'branch--name'
-      );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        loadFixture('master-issue_with_1_PR_double_dash_branch_name.txt')
       );
 
       // same with dry run

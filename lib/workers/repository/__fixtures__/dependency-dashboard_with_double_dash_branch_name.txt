@@ -4,5 +4,7 @@ This issue contains a list of Renovate updates and their statuses.
 
 These branches will be created by Renovate only once you click their checkbox below.
 
- - [ ] <!-- approve-branch=branch-⁠-name -->pr1
+ - [x] <!-- approve-branch=old-style-double-dash-branch--name -->pr1
+ - [x] <!-- approve-branch=new-style-double-dash-branch-name -->pr2
 
+ - [x] <!-- rebase-all-open-prs -->
