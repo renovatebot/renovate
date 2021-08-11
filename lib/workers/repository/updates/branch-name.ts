@@ -15,14 +15,14 @@ const RE_MULTIPLE_DASH = /--+/g;
  * - leading dot/leading dot after slash
  * - trailing dot
  * - whitespace
- * - dashes after dash
+ * - chained dashes(breaks markdown comments) are replaced by single dash
  */
 function cleanBranchName(branchName: string): string {
   return cleanGitRef(branchName)
     .replace(/^\.|\.$/, '') // leading or trailing dot
     .replace(/\/\./g, '/') // leading dot after slash
     .replace(/\s/g, '') // whitespace
-    .replace(RE_MULTIPLE_DASH, '-'); // multiple dashes
+    .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
 /* eslint-disable no-param-reassign */
