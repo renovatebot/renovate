@@ -1,6 +1,8 @@
 import remark from 'remark';
 import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../logger';
+import { Content } from 'mdast';
+import { hasKey } from '../../util/object';
 
 interface UrlMatch {
   start: number;
@@ -15,36 +17,8 @@ function massageLink(input: string): string {
   return input.replace(/(?:to)?github\.com/i, 'togithub.com');
 }
 
-interface BaseNode {
-  position: {
-    start: {
-      offset: number;
-    };
-    end: {
-      offset: number;
-    };
-  };
-}
-
-interface MarkdownLinkNode extends BaseNode {
-  type: 'link';
-  url: string;
-}
-
-interface MarkdownTextNode extends BaseNode {
-  type: 'text';
-  value: string;
-}
-
-interface MarkdownUnknownNode extends BaseNode {
-  type: 'root' | 'paragraph' | 'heading'; // etc...
-  children?: MarkdownNode[];
-}
-
-type MarkdownNode = MarkdownLinkNode | MarkdownTextNode | MarkdownUnknownNode;
-
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin<any> {
-  const transformer = (tree: MarkdownNode): void => {
+  const transformer = (tree: Content): void => {
     const startOffset: number = tree.position.start.offset;
     const endOffset: number = tree.position.end.offset;
 
@@ -78,8 +52,8 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin<any> {
         text = text.slice(currentOffset);
         match = urlRegex.exec(text);
       }
-    } else if (tree.children) {
-      tree.children.forEach((child) => {
+    } else if (hasKey('children', tree)) {
+      tree.children.forEach((child: Content) => {
         transformer(child);
       });
     }
