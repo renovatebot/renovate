@@ -111,25 +111,36 @@ describe(getName(), () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     hostRules.find.mockReturnValueOnce({ token: 'valid_token' });
     hostRules.find.mockReturnValueOnce({});
-    // FIXME: explicit assert condition
-    expect(
-      await updateArtifacts({
-        packageFileName: 'mix.exs',
-        updatedDeps: [
-          {
-            depName: 'private_package',
-            lookupName: 'private_package:renovate_test',
-          },
-          {
-            depName: 'other_package',
-            lookupName: 'other_package:unauthorized_organization',
-          },
-        ],
-        newPackageFileContent: '{}',
-        config,
-      })
-    ).toMatchSnapshot();
+
+    const result = await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [
+        {
+          depName: 'private_package',
+          lookupName: 'private_package:renovate_test',
+        },
+        {
+          depName: 'other_package',
+          lookupName: 'other_package:unauthorized_organization',
+        },
+      ],
+      newPackageFileContent: '{}',
+      config,
+    });
+
+    expect(result).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
+
+    const [updateResult] = result;
+    expect(updateResult).toEqual({
+      file: { contents: 'New mix.lock', name: 'mix.lock' },
+    });
+
+    const [, packageUpdateCommand] = execSnapshots;
+    expect(packageUpdateCommand.cmd).toInclude(
+      'mix hex.organization auth renovate_test --key valid_token && ' +
+        'mix deps.update private_package other_package'
+    );
   });
 
   it('returns updated mix.lock in subdir', async () => {

@@ -135,18 +135,28 @@ describe(getName(), () => {
         .scope(baseUrl)
         .get('/repos/renovate_test/packages/private_package')
         .reply(200, privatePackageResponse);
+
       hostRules.find.mockReturnValueOnce({
         authType: 'Token-Only',
         token: 'valid_token',
       });
-      const res = await getPkgReleases({
+
+      const result = await getPkgReleases({
         datasource,
         depName: 'private_package:renovate_test',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+
+      expect(result).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+
+      expect(result).toEqual({
+        homepage: 'https://hex.pm/packages/renovate_test/private_package',
+        registryUrl: 'https://hex.pm/',
+        releases: [
+          { releaseTimestamp: '2021-08-04T15:26:26.500Z', version: '0.1.0' },
+          { releaseTimestamp: '2021-08-04T17:46:00.274Z', version: '0.1.1' },
+        ],
+      });
     });
   });
 });
