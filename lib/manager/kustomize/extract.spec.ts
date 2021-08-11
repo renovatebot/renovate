@@ -253,6 +253,7 @@ describe(getName(), () => {
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
     });
     it('extracts sha256 from newTag', () => {
+      // FIXME: explicit assert condition
       expect(extractPackageFile(sha)).toMatchSnapshot();
     });
     it('extracts digest, ignoring newTag', () => {

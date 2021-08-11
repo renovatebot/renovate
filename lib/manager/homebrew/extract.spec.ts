@@ -98,6 +98,7 @@ describe(getName(), () => {
           end
       `;
       const res = extractPackageFile(content);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url version', () => {
@@ -110,6 +111,7 @@ describe(getName(), () => {
           end
       `;
       const res = extractPackageFile(content);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url protocol', () => {
@@ -122,6 +124,7 @@ describe(getName(), () => {
           end
       `;
       const res = extractPackageFile(content);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips if invalid url', () => {
@@ -134,6 +137,7 @@ describe(getName(), () => {
           end
       `;
       const res = extractPackageFile(content);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips if there is no sha256 field', () => {

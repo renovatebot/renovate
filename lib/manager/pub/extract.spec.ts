@@ -16,6 +16,7 @@ describe(getName(), () => {
     });
     it('should return valid dependencies', () => {
       const res = extractPackageFile(packageFile, 'pubspec.yaml');
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

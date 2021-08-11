@@ -37,6 +37,7 @@ describe(getName(), () => {
           p.parent = p.parent.replace(/\\/g, '/');
         }
       }
+      // FIXME: explicit assert condition
       expect(packages).toMatchSnapshot();
     });
   });
@@ -102,6 +103,7 @@ describe(getName(), () => {
           expect(depUrls).toEqual(urls);
         });
       });
+      // FIXME: explicit assert condition
       expect(packages).toMatchSnapshot();
     });
 

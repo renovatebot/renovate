@@ -147,25 +147,24 @@ export async function generateLockFile(
     }
 
     // postUpdateOptions
-    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeFewer')) {
-      logger.debug('Performing yarn dedupe fewer');
-      commands.push('npx yarn-deduplicate --strategy fewer');
-      // Run yarn again in case any changes are necessary
-      commands.push(`yarn install ${cmdOptions}`.trim());
-    }
-    if (
-      (isYarn1 || isYarnDedupeAvailable) &&
-      config.postUpdateOptions?.includes('yarnDedupeHighest')
-    ) {
-      logger.debug('Performing yarn dedupe highest');
-      if (isYarn1) {
-        commands.push('npx yarn-deduplicate --strategy highest');
-        // Run yarn again in case any changes are necessary
-        commands.push(`yarn install ${cmdOptions}`.trim());
-      } else {
-        commands.push('yarn dedupe --strategy highest');
+    ['fewer', 'highest'].forEach((s) => {
+      if (
+        config.postUpdateOptions?.includes(
+          `yarnDedupe${s.charAt(0).toUpperCase()}${s.slice(1)}`
+        )
+      ) {
+        logger.debug(`Performing yarn dedupe ${s}`);
+        if (isYarn1) {
+          commands.push(`npx yarn-deduplicate --strategy ${s}`);
+          // Run yarn again in case any changes are necessary
+          commands.push(`yarn install ${cmdOptions}`.trim());
+        } else if (isYarnDedupeAvailable && s === 'highest') {
+          commands.push(`yarn dedupe --strategy ${s}`);
+        } else {
+          logger.debug(`yarn dedupe ${s} not available`);
+        }
       }
-    }
+    });
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(

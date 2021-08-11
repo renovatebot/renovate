@@ -19,6 +19,7 @@ describe(getName(), () => {
           git.isBranchModified.mockResolvedValue(modified);
         });
         it('has the correct contents', async () => {
+          // FIXME: explicit assert condition
           expect(await getControls(branchConfig)).toMatchSnapshot();
           expect(git.isBranchModified).toHaveBeenCalledTimes(1);
           expect(git.isBranchModified).toHaveBeenCalledWith(

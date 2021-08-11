@@ -70,6 +70,7 @@ describe('applyPackageRules()', () => {
         },
       ],
     };
+    // FIXME: explicit assert condition
     expect(applyPackageRules(config)).toMatchSnapshot();
   });
   it('applies both rules for a', () => {
@@ -710,6 +711,7 @@ describe('applyPackageRules()', () => {
     expect(res3.x).toBeDefined();
   });
   it('empty rules', () => {
+    // FIXME: explicit assert condition
     expect(
       applyPackageRules({ ...config1, packageRules: null })
     ).toMatchSnapshot();
