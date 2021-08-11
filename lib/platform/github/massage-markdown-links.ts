@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import remark from 'remark';
-import type { Plugin } from 'unified';
+import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../logger';
 
 interface UrlMatch {
@@ -16,14 +16,40 @@ function massageLink(input: string): string {
   return input.replace(/(?:to)?github\.com/i, 'togithub.com');
 }
 
+interface BaseNode {
+  position: {
+    start: {
+      offset: number;
+    };
+    end: {
+      offset: number;
+    };
+  };
+}
+
+interface MarkdownLinkNode extends BaseNode {
+  type: 'link';
+  url: string;
+}
+
+interface MarkdownTextNode extends BaseNode {
+  type: 'text';
+  value: string;
+}
+
+interface MarkdownUnknownNode extends BaseNode {
+  type: 'root' | 'paragraph' | 'heading'; // etc...
+  children?: MarkdownNode[];
+}
+
+type MarkdownNode = MarkdownLinkNode | MarkdownTextNode | MarkdownUnknownNode;
+
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin<any> {
-  const transformer = (tree: any): void => {
-    const type = tree.type;
-    const children = is.array<any>(tree.children) ? tree.children : [];
+  const transformer = (tree: MarkdownNode): void => {
     const startOffset: number = tree.position.start.offset;
     const endOffset: number = tree.position.end.offset;
 
-    if (type === 'link') {
+    if (tree.type === 'link') {
       const substr = input.slice(startOffset, endOffset);
       const url: string = tree.url;
       const offset: number = startOffset + substr.lastIndexOf(url);
@@ -34,7 +60,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin<any> {
           replaceTo: massageLink(url),
         });
       }
-    } else if (type === 'text') {
+    } else if (tree.type === 'text') {
       let text: string = tree.value;
       let match = urlRegex.exec(text);
       let currentOffset = 0;
@@ -53,14 +79,14 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin<any> {
         text = text.slice(currentOffset);
         match = urlRegex.exec(text);
       }
-    } else {
-      children.forEach((child) => {
+    } else if (tree.children) {
+      tree.children.forEach((child) => {
         transformer(child);
       });
     }
   };
 
-  return () => transformer;
+  return () => transformer as any;
 }
 
 export function massageMarkdownLinks(content: string): string {
