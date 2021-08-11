@@ -57,7 +57,7 @@ Repositories today consist of more than just development dependencies, and commo
 Renovate considers these all to be forms of "package managers" and "package files" and therefore detects and updates them accordingly.
 
 Docker-compatible images are one of the key building blocks of modern software and so are most commonly found, in both CI/CD pipeline configs as well as referenced in IaC files.
-Renovate will detect these then look up tags and digests from Docker registries to determine not only if a new tag exists but also if a new digest does too.
+Renovate will detect these IaC files and then query Docker registries to determine if newer tags or digests exists.
 
 An example of tag-based updating would be `node` images from Docker Hub.
 These are typically tagged using their version, like `14.17.4` but can also have more elaborate tags like `14.17.4-alpine3.11`.
