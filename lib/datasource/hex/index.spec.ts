@@ -126,6 +126,7 @@ describe(getName(), () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes a private repo with auth', async () => {
       httpMock
         .scope(baseUrl)
