@@ -84,19 +84,31 @@ describe(getName(), () => {
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null with wrong auth token', async () => {
-      httpMock.scope(baseUrl).get('/packages/certifi').reply(401);
+      httpMock
+        .scope(baseUrl, {
+          reqheaders: {
+            authorization: 'this_simple_token',
+          },
+        })
+        .get('/packages/certifi')
+        .reply(401);
+
       hostRules.find.mockReturnValueOnce({
         authType: 'Token-Only',
         token: 'this_simple_token',
       });
+
       const res = await getPkgReleases({
         datasource,
         depName: 'certifi',
       });
+
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)
@@ -129,7 +141,11 @@ describe(getName(), () => {
 
     it('processes a private repo with auth', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(baseUrl, {
+          reqheaders: {
+            authorization: 'valid_token',
+          },
+        })
         .get('/repos/renovate_test/packages/private_package')
         .reply(200, privatePackageResponse);
 
