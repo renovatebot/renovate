@@ -12,7 +12,26 @@ Object {
       "versioning": "docker",
     },
     Object {
-      "currentValue": 595005649444,
+      "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "currentValue": "11",
+      "datasource": "docker",
+      "depName": "postgres",
+      "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "versioning": "docker",
+    },
+    Object {
+      "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "currentValue": 11,
+      "depName": "postgres",
+      "skipReason": "invalid-value",
+    },
+    Object {
+      "currentValue": 2641143766,
+      "depName": "redis",
+      "skipReason": "invalid-value",
+    },
+    Object {
+      "currentValue": "b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "depName": "redis",
       "skipReason": "invalid-value",
     },

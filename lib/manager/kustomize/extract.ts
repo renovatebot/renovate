@@ -42,23 +42,37 @@ export function extractImage(image: Image): PackageDependency | null {
   if (!image?.name) {
     return null;
   }
-  const depName = image.newName ?? image.name;
+  const nameDep = splitImageParts(image.newName ?? image.name);
+  const { depName } = nameDep;
   if (image.digest) {
-    const replaceString = image.digest;
-    if (!is.string(replaceString)) {
+    if (!is.string(image.digest) || !image.digest.startsWith('sha256:')) {
       return {
         depName,
-        currentValue: replaceString,
+        currentValue: image.digest,
         skipReason: SkipReason.InvalidValue,
       };
     }
+
+    if (image.newTag) {
+      logger.warn(
+        { newTag: image.newTag, digest: image.digest },
+        'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`'
+      );
+      return {
+        depName,
+        currentValue: image.newTag,
+        currentDigest: image.digest,
+        skipReason: SkipReason.InvalidValue,
+      };
+    }
+
     return {
       datasource: datasourceDocker.id,
       versioning: dockerVersioning.id,
       depName,
-      currentValue: undefined,
+      currentValue: nameDep.currentValue,
       currentDigest: image.digest,
-      replaceString,
+      replaceString: image.digest,
     };
   }
 
