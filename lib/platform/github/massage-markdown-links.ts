@@ -17,7 +17,7 @@ function massageLink(input: string): string {
   return input.replace(/(?:to)?github\.com/i, 'togithub.com');
 }
 
-function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin<any> {
+function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
   const transformer = (tree: Content): void => {
     const startOffset: number = tree.position.start.offset;
     const endOffset: number = tree.position.end.offset;
