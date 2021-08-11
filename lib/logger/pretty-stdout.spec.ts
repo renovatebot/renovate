@@ -92,7 +92,7 @@ describe(getName(), () => {
       expect(prettyStdout.formatRecord(rec)).toEqual(
         [
           `TRACE: test message`,
-          `     "config": {"a": "b", "d": ["e", "f"]}`,
+          `       "config": {"a": "b", "d": ["e", "f"]}`,
           ``,
         ].join('\n')
       );
