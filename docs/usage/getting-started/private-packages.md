@@ -240,7 +240,7 @@ The end-result looks like this:
 }
 ```
 
-However be aware that if your `.npmrc` is too long to encrypt then the above command will fail.
+However be aware that if your `.npmrc` is too big to encrypt then the above command will fail.
 
 #### Automatically authenticate for npm package stored in private GitHub npm repository
 

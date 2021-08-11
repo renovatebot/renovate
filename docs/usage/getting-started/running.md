@@ -13,7 +13,7 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 
 - You provide infrastructure for it to run on,
 - You provision its global config,
-- You ensure it's running regularly
+- You ensure it's running regularly,
 - You ensure Renovate bot itself is updated
 
 ### Available distributions
@@ -29,7 +29,7 @@ The `renovate` npm package is compatible with all of Renovate's supported platfo
 
 #### Docker image
 
-The `renovate` npm package is also distributed in pre-built Node.js images on Docker Hub (`renovate/renovate`).
+The `renovate` npm package is also distributed via pre-built Node.js images on Docker Hub (`renovate/renovate`).
 
 The `slim` image contains only Node.js so works if either:
 
@@ -64,7 +64,7 @@ It is built similarly to the "full" Renovate image described above, but with the
 - It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
 - It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
 - It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
-- It's licensed using a EULA and not AGPL
+- It's licensed using a end-user license agreement (EULA) and not the Affero General Public License (AGPL)
 
 WSOP supports GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
 Documentation can be found in its public GitHub repository [`whitesource/renovate-on-prem`](https://github.com/whitesource/renovate-on-prem).
@@ -114,14 +114,14 @@ It is also recommended that you configure `config.gitAuthor` with the same ident
 
 #### GitHub (Enterprise Server)
 
-First, [create a personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" permissions).
+First, [create a personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" scope).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
 
 ##### Running as a GitHub App
 
-Instead of a bot account and a personal access token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
+Instead of a bot account with a Personal Access Token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
 
 When creating the GitHub App give it the following permissions:
 
@@ -158,7 +158,7 @@ Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 List of repositories to run on.
 Auto discovery does not work with a GitHub App.
-Alternatively as comma-seperated environment variable `RENOVATE_REPOSITORIES`.
+Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
 #### GitLab CE/EE
@@ -185,7 +185,7 @@ If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot co
 
 ### Azure DevOps
 
-First, [create a personal access token](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats) for the bot account.
+First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats) for the bot account.
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=azure` somewhere in config.
 
@@ -197,13 +197,13 @@ Don't forget to configure `platform=gitea` somewhere in config.
 
 ### GitHub.com token for release notes
 
-If you are running on any platform except github.com, it's important to also configure the environment variable `GITHUB_COM_TOKEN` containing a personal access token for github.com.
+If you are running on any platform except github.com, it's important to also configure the environment variable `GITHUB_COM_TOKEN` containing a Personal Access Token for github.com.
 This account can actually be _any_ account on GitHub, and needs only read-only access.
 It's used when fetching release notes for repositories in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
-**Note:** If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token as you will run in the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+**Note:** If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token as you will exceed the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
-### Self-hosting Examples
+### Self-hosting examples
 
-For more examples on running Renovate self-hosted, please view our [Self-hosted examples](../examples/self-hosting.md) page.
+For more examples on running Renovate self-hosted, please read our [Self-hosted examples](../examples/self-hosting.md) page.
