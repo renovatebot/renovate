@@ -119,7 +119,7 @@ The following details the most common/popular manager artifacts updating and how
 
 ### bundler
 
-`hostRules` with `hostType=bundler` are converted into environment variables which Bundler supports.
+`hostRules` with `hostType=rubygems` are converted into environment variables which Bundler supports.
 
 ### composer
 

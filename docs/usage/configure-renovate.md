@@ -63,3 +63,8 @@ Renovate will update your PR description each time it finds changes.
 ## Merge
 
 Once you're done checking and configuring in your Configure Renovate PR, it's time to merge it to enable the real Pull Requests to begin.
+
+## Re-do configuration from scratch
+
+You might want to re-do the Renovate configuration _after_ you merged the initial onboarding PR.
+Get a new onboarding PR, by following the steps described in [Reconfiguring Renovate](https://docs.renovatebot.com/reconfigure-renovate/).

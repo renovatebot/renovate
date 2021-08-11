@@ -100,6 +100,7 @@ describe(getName(), () => {
       );
     });
     it('should init', async () => {
+      httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
         await bitbucket.initPlatform({
           username: 'abc',
@@ -611,6 +612,10 @@ describe(getName(), () => {
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/undefined/pullrequests/3/comments?pagelen=100')
+        .reply(500);
       expect(
         await bitbucket.ensureComment({
           number: 3,
@@ -623,6 +628,10 @@ describe(getName(), () => {
 
   describe('ensureCommentRemoval()', () => {
     it('does not throw', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/undefined/pullrequests/3/comments?pagelen=100')
+        .reply(500);
       expect(
         await bitbucket.ensureCommentRemoval({ number: 3, topic: 'topic' })
       ).toMatchSnapshot();

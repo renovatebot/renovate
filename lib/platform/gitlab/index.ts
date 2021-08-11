@@ -809,7 +809,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    return getIssue(issue.iid);
+    return await getIssue(issue.iid);
   } catch (err) /* istanbul ignore next */ {
     logger.warn('Error finding issue');
     return null;
