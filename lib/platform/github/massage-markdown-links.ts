@@ -1,7 +1,7 @@
+import type { Content } from 'mdast';
 import remark from 'remark';
 import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../logger';
-import { Content } from 'mdast';
 import { hasKey } from '../../util/object';
 
 interface UrlMatch {
