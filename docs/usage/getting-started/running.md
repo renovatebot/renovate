@@ -114,7 +114,7 @@ It is also recommended that you configure `config.gitAuthor` with the same ident
 
 #### GitHub (Enterprise Server)
 
-First, [create a personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" scope).
+First, [create a Personal Access Token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" scope).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
