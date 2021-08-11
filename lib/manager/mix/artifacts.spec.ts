@@ -90,16 +90,39 @@ describe(getName(), () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    // FIXME: explicit assert condition
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('authenticates to private repositories', async () => {
+    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     hostRules.find.mockReturnValueOnce({ token: 'valid_token' });
+    hostRules.find.mockReturnValueOnce({});
     // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [
-          { depName: 'plug' },
           {
             depName: 'private_package',
             lookupName: 'private_package:renovate_test',
+          },
+          {
+            depName: 'other_package',
+            lookupName: 'other_package:unauthorized_organization',
           },
         ],
         newPackageFileContent: '{}',
