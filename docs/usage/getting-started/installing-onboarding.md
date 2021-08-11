@@ -115,7 +115,7 @@ There are two recommended approaches:
 If you want to make config edits directly, follow these steps:
 
 1. Create a new Git branch to work on
-1. Install the `renovate` package globally (`npm i -g renovate` or `yarn global add renovate`) to get the `renovate-config-validator` program
+1. Install or update the `renovate` package globally (`npm i -g renovate` or `yarn global add renovate`) to get the `renovate-config-validator` program
 1. Edit your Renovate configuration file
 1. Validate your config by running `renovate-config-validator`
 1. If the improved config passes the validation, merge the branch into your mainline branch
