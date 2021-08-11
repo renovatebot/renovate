@@ -2,6 +2,20 @@ import { getName } from '../../../test/util';
 import { massageMarkdownLinks } from './massage-markdown-links';
 
 describe(getName(), () => {
+  it('performs multiple replacements', () => {
+    const input = [
+      'Link [foo/bar#1](https://github.com/foo/bar/pull/1) points to https://github.com/foo/bar/pull/1.',
+      'URL https://github.com/foo/bar/pull/1 becomes [foo/bar#1](https://github.com/foo/bar/pull/1).',
+    ].join('\n');
+    const res = massageMarkdownLinks(input);
+    expect(res).toEqual(
+      [
+        'Link [foo/bar#1](https://togithub.com/foo/bar/pull/1) points to [https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1).',
+        'URL [https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1) becomes [foo/bar#1](https://togithub.com/foo/bar/pull/1).',
+      ].join('\n')
+    );
+  });
+
   test.each`
     input
     ${'github.com'}
