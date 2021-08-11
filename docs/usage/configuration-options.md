@@ -567,7 +567,7 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used to encrypt npm tokens.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
 
 ## excludeCommitPaths
 
@@ -1139,12 +1139,12 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 ## npmToken
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
 Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
 
 ## packageRules
 
