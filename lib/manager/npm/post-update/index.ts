@@ -434,6 +434,7 @@ export async function getAdditionalFiles(
       './others/yarn',
       'YARN_CACHE_FOLDER'
     ),
+    YARN_GLOBAL_FOLDER: await ensureCacheDir('./others/berry'),
     npm_config_store: await ensureCacheDir('./others/pnpm', 'npm_config_store'),
     NODE_ENV: 'dev',
   };

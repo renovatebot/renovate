@@ -49,7 +49,6 @@ import {
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
-import { massageMarkdownLinks } from './massage-markdown-links';
 import {
   BranchProtection,
   CombinedBranchStatus,
@@ -1570,7 +1569,7 @@ export function massageMarkdown(input: string): string {
   if (config.isGhe) {
     return smartTruncate(input, 60000);
   }
-  const massagedInput = massageMarkdownLinks(input)
+  const massagedInput = input
     // to be safe, replace all github.com links with renovatebot redirector
     .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
     .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
