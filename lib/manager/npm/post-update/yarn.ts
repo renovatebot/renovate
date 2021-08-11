@@ -78,7 +78,7 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    let commands: string[] = [];
+    const commands = [];
     let cmdOptions = '';
     if (config.skipInstalls !== false) {
       if (isYarn1) {
@@ -134,7 +134,7 @@ export async function generateLockFile(
     }
 
     // This command updates the lock file based on package.json
-    commands.push('yarn install');
+    commands.push(`yarn install ${cmdOptions}`.trim());
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
@@ -146,14 +146,14 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
-            .join(' ')}`
+            .join(' ')} ${cmdOptions}`.trim()
         );
       } else {
         // `yarn up` updates to the latest release, so the range should be specified
         commands.push(
           `yarn up ${lockUpdates
             .map((update) => `${update.depName}@${update.newValue}`)
-            .join(' ')}`
+            .join(' ')} ${cmdOptions}`.trim()
         );
       }
     }
@@ -169,18 +169,14 @@ export async function generateLockFile(
         if (isYarn1) {
           commands.push(`npx yarn-deduplicate --strategy ${s}`);
           // Run yarn again in case any changes are necessary
-          commands.push('yarn install');
+          commands.push(`yarn install ${cmdOptions}`.trim());
         } else if (isYarnDedupeAvailable && s === 'highest') {
-          commands.push(`yarn dedupe --strategy ${s}`);
+          commands.push(`yarn dedupe --strategy ${s} ${cmdOptions}`.trim());
         } else {
           logger.debug(`yarn dedupe ${s} not available`);
         }
       }
     });
-
-    commands = commands.map((c) =>
-      c.startsWith('yarn') ? `${c} ${cmdOptions}`.trim() : c
-    );
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
