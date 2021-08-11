@@ -252,12 +252,33 @@ describe(getName(), () => {
       expect(res.deps[1].currentValue).toEqual('1.19.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
     });
-    it('extracts sha256 from newTag', () => {
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(sha)).toMatchSnapshot();
+    const postgresDigest =
+      'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c';
+    it('extracts tag@digest from newTag', () => {
+      const res = extractPackageFile(sha);
+      expect(res.deps).toHaveLength(2);
+      for (const dep of res.deps) {
+        expect(dep.depName).toBe('postgres');
+      }
+      expect(res.deps[0].currentDigest).toEqual(postgresDigest);
+      expect(res.deps[0].currentValue).toEqual('11');
+      expect(res.deps[1].skipReason).toEqual(SkipReason.InvalidValue);
     });
     it('extracts digest, ignoring newTag', () => {
-      expect(extractPackageFile(digest)).toMatchSnapshot();
+      const res = extractPackageFile(digest);
+      expect(res.deps).toHaveLength(5);
+      for (const dep of res.deps) {
+        expect(dep.depName).toBe('postgres');
+      }
+      expect(res.deps[0].currentDigest).toEqual(postgresDigest);
+      expect(res.deps[0].currentValue).toBeUndefined();
+      expect(res.deps[1].currentDigest).toEqual(postgresDigest);
+      expect(res.deps[1].currentValue).toEqual('11');
+      expect(res.deps[2].skipReason).toEqual(
+        SkipReason.InvalidDependencySpecification
+      );
+      expect(res.deps[3].skipReason).toEqual(SkipReason.InvalidValue);
+      expect(res.deps[4].skipReason).toEqual(SkipReason.InvalidValue);
     });
   });
 });
