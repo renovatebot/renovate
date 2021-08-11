@@ -89,7 +89,10 @@ describe(getName(), () => {
     });
     it('returns null with wrong auth token', async () => {
       httpMock.scope(baseUrl).get('/packages/certifi').reply(401);
-      hostRules.find.mockReturnValueOnce({ token: 'this_simple_token' });
+      hostRules.find.mockReturnValueOnce({
+        authType: 'Token-Only',
+        token: 'this_simple_token',
+      });
       const res = await getPkgReleases({
         datasource,
         depName: 'certifi',
@@ -132,7 +135,10 @@ describe(getName(), () => {
         .scope(baseUrl)
         .get('/repos/renovate_test/packages/private_package')
         .reply(200, privatePackageResponse);
-      hostRules.find.mockReturnValueOnce({ token: 'valid_token' });
+      hostRules.find.mockReturnValueOnce({
+        authType: 'Token-Only',
+        token: 'valid_token',
+      });
       const res = await getPkgReleases({
         datasource,
         depName: 'private_package:renovate_test',

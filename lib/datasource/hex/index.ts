@@ -1,6 +1,5 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
-import * as hostRules from '../../util/host-rules';
 import type { HttpResponse } from '../../util/http';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
@@ -38,12 +37,10 @@ export class HexDatasource extends Datasource {
       ? `repos/${organizationName}/`
       : '';
     const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
-    const { token } = hostRules.find({ url: hexUrl });
-    const httpOptions = token ? { headers: { authorization: token } } : {};
 
     let response: HttpResponse<HexRelease>;
     try {
-      response = await this.http.getJson<HexRelease>(hexUrl, httpOptions);
+      response = await this.http.getJson<HexRelease>(hexUrl);
     } catch (err) {
       this.handleGenericErrors(err);
     }
