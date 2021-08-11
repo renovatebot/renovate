@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
-import { id as datasource } from '.';
+import { GitlabReleasesDatasource } from '.';
 
 describe(getName(), () => {
   describe('getReleases', () => {
@@ -19,11 +19,11 @@ describe(getName(), () => {
     it('returns releases from custom registry', async () => {
       httpMock
         .scope('https://gitlab.company.com')
-        .get('/api/v4/projects/some%2Fdep2/releases?per_page=100')
+        .get('/api/v4/projects/some%2Fdep2/releases')
         .reply(200, body);
       const res = await getPkgReleases({
-        datasource,
-        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        datasource: GitlabReleasesDatasource.id,
+        registryUrls: ['https://gitlab.company.com'],
         depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
@@ -34,10 +34,10 @@ describe(getName(), () => {
     it('returns releases from default registry', async () => {
       httpMock
         .scope('https://gitlab.com')
-        .get('/api/v4/projects/some%2Fdep2/releases?per_page=100')
+        .get('/api/v4/projects/some%2Fdep2/releases')
         .reply(200, body);
       const res = await getPkgReleases({
-        datasource,
+        datasource: GitlabReleasesDatasource.id,
         depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();

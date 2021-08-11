@@ -2,20 +2,22 @@
 
 exports[`datasource/gitlab-releases/index getReleases returns releases from custom registry 1`] = `
 Object {
-  "registryUrl": "https://gitlab.company.com/api/v4/",
+  "registryUrl": "https://gitlab.company.com",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
+      "registryUrl": "https://gitlab.company.com",
       "releaseTimestamp": "2021-01-01T00:00:00.000Z",
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v1.1.0",
+      "registryUrl": "https://gitlab.company.com",
       "releaseTimestamp": "2021-03-01T00:00:00.000Z",
       "version": "v1.1.0",
     },
   ],
-  "sourceUrl": "https://gitlab.company.com/api/v4/some/dep2",
+  "sourceUrl": "https://gitlab.company.com/some/dep2",
 }
 `;
 
@@ -29,7 +31,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.company.com/api/v4/projects/some%2Fdep2/releases?per_page=100",
+    "url": "https://gitlab.company.com/api/v4/projects/some%2Fdep2/releases",
   },
 ]
 `;
@@ -40,11 +42,13 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
+      "registryUrl": "https://gitlab.com",
       "releaseTimestamp": "2021-01-01T00:00:00.000Z",
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v1.1.0",
+      "registryUrl": "https://gitlab.com",
       "releaseTimestamp": "2021-03-01T00:00:00.000Z",
       "version": "v1.1.0",
     },
@@ -63,7 +67,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Fdep2/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2Fdep2/releases",
   },
 ]
 `;

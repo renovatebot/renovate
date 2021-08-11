@@ -51,7 +51,7 @@ api.set('git-tags', gitTags);
 api.set('github-releases', githubReleases);
 api.set('github-tags', githubTags);
 api.set('gitlab-tags', gitlabTags);
-api.set('gitlab-releases', new GitlabReleasesDatasource());
+api.set(GitlabReleasesDatasource.id, new GitlabReleasesDatasource());
 api.set('go', go);
 api.set('gradle-version', new GradleVersionDatasource());
 api.set('helm', new HelmDatasource());

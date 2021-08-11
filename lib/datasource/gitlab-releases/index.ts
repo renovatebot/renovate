@@ -6,7 +6,7 @@ import type { GitlabRelease } from './types';
 export class GitlabReleasesDatasource extends Datasource {
   static readonly id = 'gitlab-releases';
 
-  static readonly defaultRegistryUrls = ['https://gitlab.com'];
+  readonly defaultRegistryUrls = ['https://gitlab.com'];
 
   static readonly registryStrategy = 'first';
 
@@ -31,7 +31,7 @@ export class GitlabReleasesDatasource extends Datasource {
     ).body;
 
     return {
-      sourceUrl: `${registryUrl}/${urlEncodedRepo}`,
+      sourceUrl: `${registryUrl}/${lookupName}`,
       releases: gitlabReleasesResponse.map(({ tag_name, released_at }) => {
         const release: Release = {
           registryUrl,
