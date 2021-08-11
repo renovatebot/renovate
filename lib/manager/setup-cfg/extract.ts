@@ -32,8 +32,8 @@ function parseDep(
   section: string,
   record: string
 ): PackageDependency | null {
-  const [, depName, currentValue] =
-    /\s+([-_a-zA-Z0-9]*)\s*(.*)/.exec(line) || [];
+  const [, depName, , currentValue] =
+    /\s+([-_a-zA-Z0-9]*)(\[.*\])?\s*(.*)/.exec(line) || [];
   if (
     section &&
     record &&
