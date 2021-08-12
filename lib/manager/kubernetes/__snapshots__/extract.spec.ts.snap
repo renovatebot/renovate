@@ -3,12 +3,11 @@
 exports[`manager/kubernetes/extract extractPackageFile() extracts image line in a YAML array 1`] = `
 Array [
   Object {
-    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "v2.1.0",
     "datasource": "docker",
     "depName": "quay.io/external_storage/local-volume-provisioner",
-    "lookupName": "quay.io/external_storage/local-volume-provisioner",
     "replaceString": "quay.io/external_storage/local-volume-provisioner:v2.1.0",
   },
 ]

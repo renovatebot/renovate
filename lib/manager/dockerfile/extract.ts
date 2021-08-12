@@ -68,10 +68,13 @@ export function getDep(
 
   // Don't display quay.io ports
   if (quayRegex.test(dep.depName)) {
-    dep.lookupName = dep.depName;
-    dep.depName = dep.depName.replace(quayRegex, 'quay.io');
-    dep.autoReplaceStringTemplate =
-      '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+    const depName = dep.depName.replace(quayRegex, 'quay.io');
+    if (depName !== dep.depName) {
+      dep.lookupName = dep.depName;
+      dep.depName = depName;
+      dep.autoReplaceStringTemplate =
+        '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+    }
   }
 
   return dep;
