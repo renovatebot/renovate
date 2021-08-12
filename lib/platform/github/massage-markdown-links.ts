@@ -34,23 +34,14 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         });
       }
     } else if (tree.type === 'text') {
-      let text: string = tree.value;
-      let match = urlRegex.exec(text);
-      let currentOffset = 0;
-      while (match) {
+      const globalUrlReg = new RegExp(urlRegex, 'g');
+      const urlMatches = [...tree.value.matchAll(globalUrlReg)];
+      for (const match of urlMatches) {
         const [url] = match;
-
-        currentOffset += match.index;
-        const start = startOffset + currentOffset;
-
-        currentOffset += url.length;
-        const end = startOffset + currentOffset;
-
+        const start = startOffset + match.index;
+        const end = start + url.length;
         const newUrl = massageLink(url);
         matches.push({ start, end, replaceTo: `[${url}](${newUrl})` });
-
-        text = text.slice(currentOffset);
-        match = urlRegex.exec(text);
       }
     } else if (hasKey('children', tree)) {
       tree.children.forEach((child: Content) => {
