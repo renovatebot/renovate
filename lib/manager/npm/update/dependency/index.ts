@@ -1,10 +1,11 @@
 import { dequal } from 'dequal';
+import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../logger';
 import { matchAt, replaceAt } from '../../../../util/string';
 import type { UpdateDependencyConfig } from '../../../types';
 
 function replaceAsString(
-  parsedContents: any,
+  parsedContents: PackageJson,
   fileContent: string,
   depType: string,
   depName: string,
@@ -79,7 +80,7 @@ export function updateDependency({
   }
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
-    const parsedContents = JSON.parse(fileContent);
+    const parsedContents: PackageJson = JSON.parse(fileContent);
     // Save the old version
     const oldVersion: string = parsedContents[depType][depName];
     if (oldVersion === newValue) {
