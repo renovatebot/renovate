@@ -59,7 +59,14 @@ describe(getName(), () => {
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
-      const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+      const res = await yarnHelper.generateLockFile(
+        'some-dir',
+        {
+          YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
+          YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
+        },
+        config
+      );
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
