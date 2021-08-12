@@ -123,7 +123,7 @@ You can set more than one PR target branch in the `baseBranches` array.
 
 ### Support private npm modules
 
-See the dedicated [Private npm module support](./private-modules.md) page.
+See the dedicated [Private npm module support](./getting-started/private-packages.md) page.
 
 ### Control Renovate's schedule
 
