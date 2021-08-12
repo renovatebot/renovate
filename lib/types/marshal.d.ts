@@ -13,5 +13,5 @@ declare module 'marshal' {
     public toJSON(): unknown;
   }
 
-  export default Marshal;
+  export = Marshal;
 }
