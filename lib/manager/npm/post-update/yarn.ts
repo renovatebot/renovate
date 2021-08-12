@@ -93,9 +93,11 @@ export async function generateLockFile(
     if (isYarn1) {
       cmdOptions +=
         '--ignore-engines --ignore-platform --network-timeout 100000';
+      extraEnv.YARN_CACHE_FOLDER = env.YARN_CACHE_FOLDER;
     } else {
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
+      extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
     }
     if (!getAdminConfig().allowScripts || config.ignoreScripts) {
       if (isYarn1) {
