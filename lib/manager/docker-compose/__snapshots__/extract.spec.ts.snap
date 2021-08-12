@@ -3,11 +3,12 @@
 exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 1 1`] = `
 Array [
   Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
+    "lookupName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
@@ -70,11 +71,12 @@ Array [
 exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 1`] = `
 Array [
   Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
+    "lookupName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
@@ -137,11 +139,12 @@ Array [
 exports[`manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 without set version key 1`] = `
 Array [
   Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
+    "lookupName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
