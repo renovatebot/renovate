@@ -172,11 +172,11 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     return this.request<string>(url, { ...options, method: 'head' });
   }
 
-  protected requestBuffer<T>(
+  protected requestBuffer(
     url: string | URL,
     httpOptions?: InternalHttpOptions
-  ): Promise<HttpResponse<T> | null> {
-    return this.request<T>(url, {
+  ): Promise<HttpResponse<Buffer> | null> {
+    return this.request<Buffer>(url, {
       ...httpOptions,
       responseType: 'buffer' as any,
     });
