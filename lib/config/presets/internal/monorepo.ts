@@ -49,6 +49,7 @@ const repoGroups = {
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
+  tsoa: 'https://github.com/lukeautry/tsoa',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   'vue-cli': 'https://github.com/vuejs/vue-cli',

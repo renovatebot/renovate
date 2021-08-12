@@ -39,6 +39,7 @@ export async function lookupUpdates(
     pinDigests,
     rollbackPrs,
     isVulnerabilityAlert,
+    updatePinnedDependencies,
   } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   // Use the datasource's default versioning if none is configured
@@ -59,6 +60,11 @@ export async function lookupUpdates(
   }
   const isValid = currentValue && versioning.isValid(currentValue);
   if (isValid) {
+    if (!updatePinnedDependencies && versioning.isSingleVersion(currentValue)) {
+      res.skipReason = SkipReason.IsPinned;
+      return res;
+    }
+
     const dependency = clone(await getPkgReleases(config));
     if (!dependency) {
       // If dependency lookup fails then warn and return
@@ -82,6 +88,7 @@ export async function lookupUpdates(
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
     res.dependencyUrl = dependency?.dependencyUrl;
+
     const latestVersion = dependency.tags?.latest;
     // Filter out any results from datasource that don't comply with our versioning
     let allVersions = dependency.releases.filter((release) =>

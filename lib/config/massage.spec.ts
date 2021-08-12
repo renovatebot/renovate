@@ -7,8 +7,7 @@ describe(getName(), () => {
     it('returns empty', () => {
       const config: RenovateConfig = {};
       const res = massage.massageConfig(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({});
     });
     it('massages strings to array', () => {
       const config: RenovateConfig = {
@@ -21,8 +20,9 @@ describe(getName(), () => {
       const config: RenovateConfig = {
         npmToken: 'some-token',
       };
-      // FIXME: explicit assert condition
-      expect(massage.massageConfig(config)).toMatchSnapshot();
+      expect(massage.massageConfig(config)).toEqual({
+        npmrc: '//registry.npmjs.org/:_authToken=some-token\n',
+      });
     });
     it('massages packageRules matchUpdateTypes', () => {
       const config: RenovateConfig = {

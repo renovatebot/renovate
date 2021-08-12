@@ -46,10 +46,14 @@ export function clear(throwOnPending = true): void {
   const pending = nock.pendingMocks();
   nock.abortPendingRequests();
   nock.cleanAll();
+  const missing = missingLog;
   requestLog = [];
   missingLog = [];
   if (!isDone && throwOnPending) {
     throw new Error(`Pending mocks!\n * ${pending.join('\n * ')}`);
+  }
+  if (missing.length && throwOnPending) {
+    throw new Error(`Missing mocks!\n * ${missing.join('\n * ')}`);
   }
 }
 
