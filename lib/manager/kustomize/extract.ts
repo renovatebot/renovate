@@ -96,6 +96,15 @@ export function extractImage(image: Image): PackageDependency | null {
     return dep;
   }
 
+  if (image.newName) {
+    Object.assign(nameDep, {
+      datasource: datasourceDocker.id,
+      versioning: dockerVersioning.id,
+      replaceString: image.newName,
+    });
+    return nameDep;
+  }
+
   return null;
 }
 

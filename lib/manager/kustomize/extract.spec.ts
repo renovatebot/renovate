@@ -19,7 +19,8 @@ const kustomizeWithLocal = loadFixture('kustomizeWithLocal.yaml');
 const nonKustomize = loadFixture('service.yaml');
 const gitImages = loadFixture('gitImages.yaml');
 const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
-const sha = loadFixture('sha.yaml');
+const newTag = loadFixture('newTag.yaml');
+const newName = loadFixture('newName.yaml');
 const digest = loadFixture('digest.yaml');
 
 describe(getName(), () => {
@@ -254,17 +255,21 @@ describe(getName(), () => {
     });
     const postgresDigest =
       'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c';
-    it('extracts tag@digest from newTag', () => {
-      const res = extractPackageFile(sha);
-      expect(res.deps).toHaveLength(2);
+    it('extracts from newTag', () => {
+      const res = extractPackageFile(newTag);
+      expect(res.deps).toHaveLength(3);
       for (const dep of res.deps) {
         expect(dep.depName).toBe('postgres');
       }
-      expect(res.deps[0].currentDigest).toEqual(postgresDigest);
+      expect(res.deps[0].currentDigest).toBeUndefined();
       expect(res.deps[0].currentValue).toEqual('11');
-      expect(res.deps[1].skipReason).toEqual(SkipReason.InvalidValue);
+      expect(res.deps[0].replaceString).toEqual('11');
+      expect(res.deps[1].currentDigest).toEqual(postgresDigest);
+      expect(res.deps[1].currentValue).toEqual('11');
+      expect(res.deps[1].replaceString).toEqual(`11@${postgresDigest}`);
+      expect(res.deps[2].skipReason).toEqual(SkipReason.InvalidValue);
     });
-    it('extracts digest, ignoring newTag', () => {
+    it('extracts from digest', () => {
       const res = extractPackageFile(digest);
       expect(res.deps).toHaveLength(5);
       for (const dep of res.deps) {
@@ -272,13 +277,35 @@ describe(getName(), () => {
       }
       expect(res.deps[0].currentDigest).toEqual(postgresDigest);
       expect(res.deps[0].currentValue).toBeUndefined();
+      expect(res.deps[0].replaceString).toEqual(postgresDigest);
       expect(res.deps[1].currentDigest).toEqual(postgresDigest);
       expect(res.deps[1].currentValue).toEqual('11');
+      expect(res.deps[1].replaceString).toEqual(postgresDigest);
       expect(res.deps[2].skipReason).toEqual(
         SkipReason.InvalidDependencySpecification
       );
       expect(res.deps[3].skipReason).toEqual(SkipReason.InvalidValue);
       expect(res.deps[4].skipReason).toEqual(SkipReason.InvalidValue);
+    });
+    it('extracts newName', () => {
+      const res = extractPackageFile(newName);
+      expect(res.deps).toHaveLength(3);
+      for (const dep of res.deps) {
+        expect(dep.depName).toBe('awesome/postgres');
+      }
+      expect(res.deps[0].currentDigest).toEqual(postgresDigest);
+      expect(res.deps[0].currentValue).toEqual('11');
+      expect(res.deps[0].replaceString).toEqual(
+        `awesome/postgres:11@${postgresDigest}`
+      );
+      expect(res.deps[1].currentDigest).toBeUndefined();
+      expect(res.deps[1].currentValue).toEqual('11');
+      expect(res.deps[1].replaceString).toEqual('awesome/postgres:11');
+      expect(res.deps[2].currentDigest).toEqual(postgresDigest);
+      expect(res.deps[2].currentValue).toBeUndefined();
+      expect(res.deps[2].replaceString).toEqual(
+        `awesome/postgres@${postgresDigest}`
+      );
     });
   });
 });
