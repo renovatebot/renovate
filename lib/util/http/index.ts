@@ -10,7 +10,12 @@ import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import type { GotOptions, OutgoingHttpHeaders, RequestStats } from './types';
+import type {
+  GotJSONOptions,
+  GotOptions,
+  OutgoingHttpHeaders,
+  RequestStats,
+} from './types';
 
 // TODO: refactor code to remove this (#9651)
 import './legacy';
@@ -31,7 +36,7 @@ export interface HttpPostOptions extends HttpOptions {
 
 export interface InternalHttpOptions extends HttpOptions {
   json?: Record<string, unknown>;
-  responseType?: 'json';
+  responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
@@ -69,6 +74,11 @@ function applyDefaultHeaders(options: Options): void {
   };
 }
 
+// Note on types:
+// options.requestType can be either 'json' or 'buffer', but `T` should be
+// `Buffer` in the latter case.
+// We don't declare overload signatures because it's immediately wrapped by
+// `request`.
 async function gotRoutine<T>(
   url: string,
   options: GotOptions,
@@ -76,7 +86,9 @@ async function gotRoutine<T>(
 ): Promise<Response<T>> {
   logger.trace({ url, options }, 'got request');
 
-  const resp = await got<T>(url, options);
+  // Cheat the TS compiler using `as` to pick a specific overload.
+  // Otherwise it doesn't typecheck.
+  const resp = await got<T>(url, options as GotJSONOptions);
   const duration = resp.timings.phases.total || 0;
 
   const httpRequests = memCache.get('http-requests') || [];
@@ -178,7 +190,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   ): Promise<HttpResponse<Buffer> | null> {
     return this.request<Buffer>(url, {
       ...httpOptions,
-      responseType: 'buffer' as any,
+      responseType: 'buffer',
     });
   }
 
