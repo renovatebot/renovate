@@ -80,6 +80,15 @@ describe(getName(), () => {
       expect(res).toMatchSnapshot();
       expect(res[0].depName).toEqual('registry2.something.info:5005/node');
     });
+    it('handles quay hosts with port', () => {
+      const res = extractPackageFile('FROM quay.io:1234/node\n').deps;
+      expect(res[0]).toMatchSnapshot({
+        depName: 'quay.io/node',
+        lookupName: 'quay.io:1234/node',
+        autoReplaceStringTemplate:
+          '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+      });
+    });
     it('handles namespaced images', () => {
       const res = extractPackageFile('FROM mynamespace/node:8\n').deps;
       // FIXME: explicit assert condition
