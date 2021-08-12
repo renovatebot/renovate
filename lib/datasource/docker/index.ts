@@ -100,10 +100,12 @@ async function getTags(
       return cachedResult;
     }
 
-    const isQuay = registryHost === 'https://quay.io';
+    const isQuay = /^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i.test(
+      registryHost
+    );
     let tags: string[] | null;
     if (isQuay) {
-      tags = await getTagsQuayRegistry(dockerRepository);
+      tags = await getTagsQuayRegistry(registryHost, dockerRepository);
     } else {
       tags = await getDockerApiTags(registryHost, dockerRepository);
     }
