@@ -200,7 +200,7 @@ function getRepoUrl(
     return url;
   }
 
-  logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
+  logger.debug({ url: res.body.http_url_to_repo }, `using http URL`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
   repoUrl.auth = 'oauth2:' + opts.token;
   return URL.format(repoUrl);
