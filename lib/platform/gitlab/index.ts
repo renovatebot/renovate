@@ -170,7 +170,7 @@ function getRepoUrl(
   const { gitUrl } = getAdminConfig();
 
   if (gitUrl === 'ssh') {
-    logger.debug(`${repository} ssh URL = ${res.body.ssh_url_to_repo}`);
+    logger.debug({url: res.body.ssh_url_to_repo}, `using ssh URL`);
     return res.body.ssh_url_to_repo;
   }
 
