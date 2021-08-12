@@ -38,6 +38,7 @@ describe(getName(), () => {
         fileContent: input,
         upgrade,
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('replaces a npm package alias', () => {
@@ -58,6 +59,7 @@ describe(getName(), () => {
         fileContent: input,
         upgrade,
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('replaces a github short hash', () => {
@@ -77,6 +79,7 @@ describe(getName(), () => {
         fileContent: input,
         upgrade,
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('replaces a github fully specified version', () => {

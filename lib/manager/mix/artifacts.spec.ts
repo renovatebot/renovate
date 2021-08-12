@@ -86,6 +86,7 @@ describe(getName(), () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -118,6 +119,7 @@ describe(getName(), () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -134,6 +136,7 @@ describe(getName(), () => {
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',

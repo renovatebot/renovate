@@ -23,14 +23,17 @@ describe(getName(), () => {
     });
     it('extracts github tags', () => {
       const res = extractPackageFile(workspace2File);
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
     });
     it('handle comments and strings', () => {
       const res = extractPackageFile(workspace3File);
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
     });
     it('extracts dependencies from *.bzl files', () => {
       const res = extractPackageFile(fileWithBzlExtension);
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
     });
 
@@ -46,6 +49,7 @@ describe(getName(), () => {
           tag="v1.0.0-alpha31.cli-migrations"
         )`
       );
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
     });
 
