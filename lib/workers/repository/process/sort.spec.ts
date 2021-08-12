@@ -24,6 +24,7 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
+      // FIXME: explicit assert condition
       expect(branches).toMatchSnapshot();
     });
     it('sorts based on prPriority', () => {
@@ -50,6 +51,7 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
+      // FIXME: explicit assert condition
       expect(branches).toMatchSnapshot();
     });
     it('sorts based on isVulnerabilityAlert', () => {
@@ -77,6 +79,7 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
+      // FIXME: explicit assert condition
       expect(branches).toMatchSnapshot();
     });
   });

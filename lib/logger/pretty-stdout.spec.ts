@@ -67,7 +67,9 @@ describe(getName(), () => {
           d: ['e', 'f'],
         },
       };
-      expect(prettyStdout.getDetails(rec as any)).toMatchSnapshot();
+      expect(prettyStdout.getDetails(rec as any)).toEqual(
+        `       "config": {"a": "b", "d": ["e", "f"]}\n`
+      );
     });
   });
   describe('formatRecord(rec)', () => {
@@ -87,7 +89,13 @@ describe(getName(), () => {
           d: ['e', 'f'],
         },
       };
-      expect(prettyStdout.formatRecord(rec)).toMatchSnapshot();
+      expect(prettyStdout.formatRecord(rec)).toEqual(
+        [
+          `TRACE: test message`,
+          `       "config": {"a": "b", "d": ["e", "f"]}`,
+          ``,
+        ].join('\n')
+      );
     });
   });
 });

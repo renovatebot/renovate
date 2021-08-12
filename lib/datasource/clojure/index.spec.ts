@@ -233,6 +233,11 @@ describe(getName(), () => {
     const pom = loadFixture('pom.scm-prefix.xml', upath.join('..', 'maven'));
     mockGenericPackage({ pom });
 
+    httpMock
+      .scope('https://repo.maven.apache.org')
+      .get('/maven2/org/example/package/maven-metadata.xml')
+      .reply(200, '###');
+
     const { sourceUrl } = await get();
 
     expect(sourceUrl).toEqual('https://github.com/example/test');

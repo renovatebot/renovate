@@ -162,6 +162,14 @@ describe(getName(), () => {
           'minor'
         )
       ).toBe('neutral');
+
+      // FIXME: no cache hit
+      httpMock
+        .scope('https://badges.renovateapi.com')
+        .get(
+          `/packages/${datasource}/${depName}-new/${newVersion}/confidence.api/${currentVersion}`
+        )
+        .reply(403);
       // memory cache
       expect(
         await getMergeConfidenceLevel(

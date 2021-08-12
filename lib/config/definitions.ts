@@ -1899,7 +1899,13 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'gitLabAutomerge',
-    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging PRs.`,
+    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging MRs.`,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'gitLabIgnoreApprovals',
+    description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
     default: false,
   },
@@ -2030,6 +2036,13 @@ const options: RenovateOptions[] = [
     default: ['commit', 'push'],
     stage: 'global',
     admin: true,
+  },
+  {
+    name: 'updatePinnedDependencies',
+    description:
+      'Whether to update pinned (single version) dependencies or not.',
+    type: 'boolean',
+    default: true,
   },
   {
     name: 'gitLfsInclude',

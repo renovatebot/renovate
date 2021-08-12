@@ -124,6 +124,7 @@ export function getPlatformPrOptions(
       config.automerge &&
       config.automergeType === 'pr' &&
       config.gitLabAutomerge,
+    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
   };
 }
 

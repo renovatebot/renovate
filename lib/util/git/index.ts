@@ -861,6 +861,15 @@ export async function commitFiles({
       error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
       throw error;
     }
+    if (err.message.includes('can only push your own commits')) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = branchName;
+      error.validationError = 'Bitbucket committer error';
+      error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: "${String(
+        err.message
+      )}"`;
+      throw error;
+    }
     if (err.message.includes('remote: error: cannot lock ref')) {
       logger.error({ err }, 'Error committing files.');
       return null;

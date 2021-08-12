@@ -35,6 +35,7 @@ describe(getName(), () => {
       ]);
       const result = await getPythonAlias();
       expect(pythonVersions).toContain(result);
+      // FIXME: explicit assert condition
       expect(result).toMatchSnapshot();
       expect(await getPythonAlias()).toEqual(result);
       expect(execSnapshots).toMatchSnapshot();

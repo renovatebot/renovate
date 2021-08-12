@@ -27,9 +27,7 @@ export class TerraformProviderHash {
       // a sha256sum displayed as lowercase hex string to root hash
       const fileBuffer = await fs.readFile(file);
       hash.update(fileBuffer);
-      hash.end();
-      const data = hash.read();
-      rootHash.update(data.toString('hex'));
+      rootHash.update(hash.digest('hex'));
 
       // add double space, the filename and a new line char
       rootHash.update('  ');
@@ -38,10 +36,7 @@ export class TerraformProviderHash {
       rootHash.update('\n');
     }
 
-    rootHash.end();
-    const rootData = rootHash.read();
-    const result: string = rootData.toString('base64');
-    return result;
+    return rootHash.digest('base64');
   }
 
   static async hashOfZipContent(

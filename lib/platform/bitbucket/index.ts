@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
-import type { MergeStrategy } from '../../config/types';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -19,6 +18,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -536,11 +536,7 @@ export async function ensureIssue({
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
-      logger.debug(
-        `Issues are disabled, so could not create issue: ${
-          err.message as string
-        }`
-      );
+      logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
@@ -747,11 +743,11 @@ export async function updatePr({
   }
 }
 
-export async function mergePr(
-  prNo: number,
-  branchName: string,
-  mergeStrategy: MergeStrategy
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: prNo,
+  strategy: mergeStrategy,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
 
   // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610

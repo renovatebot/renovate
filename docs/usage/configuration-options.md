@@ -705,6 +705,13 @@ If you enabled `automerge` in the Renovate config, you can speed up the automerg
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
+## gitLabIgnoreApprovals
+
+Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
+This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`.
+Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
+
 ## gitLfsExclude
 
 See also the `allowGitLfs` and `gitNoVerify` options.
@@ -2328,6 +2335,11 @@ However there are cases where updates might be desirable - e.g. if you have conf
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
+
+## updatePinnedDependencies
+
+By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
+You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
 
 ## versioning
 

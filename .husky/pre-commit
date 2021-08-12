@@ -2,3 +2,19 @@
 . "$(dirname "$0")/_/husky.sh"
 
 yarn pretty-quick --staged
+
+BRANCH_NAME=$(git branch --show-current)
+
+if [ "$BRANCH_NAME" = "main" ]; then
+  echo
+  echo "Aborting commit."
+  echo "You're committing to the main branch, usually this is not what you want to do."
+  echo "Did you forget to make a new feature branch to put your work on?"
+  echo
+  echo "Use git checkout -b <new_branch> to create a new feature branch."
+  echo
+  echo "If you're sure you want to commit to the main branch, run git commit with the --no-verify flag."
+  echo
+
+  exit 1
+fi

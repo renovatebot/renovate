@@ -67,6 +67,7 @@ describe(getName(), () => {
         },
       ]);
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(jsonContent);
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();

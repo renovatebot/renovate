@@ -124,5 +124,10 @@ Array [
     "replaceString": "v0.0.4",
     "versioning": "docker",
   },
+  Object {
+    "currentValue": 2.5,
+    "depName": "nginx",
+    "skipReason": "invalid-value",
+  },
 ]
 `;
