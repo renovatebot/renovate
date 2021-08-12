@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
-import { env, fs, getName } from '../../../test/util';
+import { env, fs, getName, hostRules } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
@@ -10,6 +10,7 @@ import { updateArtifacts } from '.';
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
+jest.mock('../../util/host-rules');
 
 const adminConfig: RepoAdminConfig = {
   // `join` fixes Windows CI
@@ -96,6 +97,47 @@ describe(getName(), () => {
       })
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('authenticates to private repositories', async () => {
+    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
+    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    hostRules.find.mockReturnValueOnce({ token: 'valid_token' });
+    hostRules.find.mockReturnValueOnce({});
+
+    const result = await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [
+        {
+          depName: 'private_package',
+          lookupName: 'private_package:renovate_test',
+        },
+        {
+          depName: 'other_package',
+          lookupName: 'other_package:unauthorized_organization',
+        },
+      ],
+      newPackageFileContent: '{}',
+      config,
+    });
+
+    expect(result).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+
+    const [updateResult] = result;
+    expect(updateResult).toEqual({
+      file: { contents: 'New mix.lock', name: 'mix.lock' },
+    });
+
+    const [, packageUpdateCommand] = execSnapshots;
+    expect(packageUpdateCommand.cmd).toInclude(
+      'mix hex.organization auth renovate_test --key valid_token && ' +
+        'mix deps.update private_package other_package'
+    );
   });
 
   it('returns updated mix.lock in subdir', async () => {
