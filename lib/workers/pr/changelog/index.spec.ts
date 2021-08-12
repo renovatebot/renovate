@@ -147,6 +147,8 @@ describe(getName(), () => {
           depType: 'engines',
         })
       ).toMatchSnapshot();
+      // FIXME: missing mocks
+      httpMock.clear(false);
     });
     it('handles no sourceUrl', async () => {
       expect(
