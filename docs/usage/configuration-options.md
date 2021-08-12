@@ -906,6 +906,22 @@ An example for npm basic auth with token:
 
 This will generate the following header: `authorization: Basic <some-token>`.
 
+To use a bare token in the authorization header (required by e.g. Hex) - use the `authType` "Token-Only":
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://hex.pm/api/repos/private_repo/",
+      "token": "<some-token>",
+      "authType": "Token-Only"
+    }
+  ]
+}
+```
+
+This will generate the header `authorization: <some-token>`.
+
 ### concurrentRequestLimit
 
 Usually the default setting is fine, but you can use `concurrentRequestLimit` to limit the number of concurrent outstanding requests.
