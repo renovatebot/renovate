@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import pAll from 'p-all';
 import { lt } from 'semver';
+import { getAdminConfig } from '../../config/admin';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -166,18 +167,27 @@ function getRepoUrl(
   repository: string,
   res: HttpResponse<RepoResponse>
 ): string {
+  const { gitUrl } = getAdminConfig();
+
+  if (gitUrl === 'ssh') {
+    logger.debug(`${repository} ssh URL = ${res.body.ssh_url_to_repo}`);
+    return res.body.ssh_url_to_repo;
+  }
+
   const opts = hostRules.find({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
+
   if (
+    gitUrl === 'endpoint' ||
     process.env.GITLAB_IGNORE_REPO_URL ||
-    (res.body.http_url_to_repo === null &&
-      (!opts.useSsh || res.body.ssh_url_to_repo === null))
+    res.body.http_url_to_repo === null
   ) {
-    logger.debug(
-      'no http_url_to_repo or ssh_url_to_repo (or useSsh is not true in hostRules) found. Falling back to old behaviour.'
-    );
+    if (res.body.http_url_to_repo === null) {
+      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
+    }
+
     const { protocol, host, pathname } = parseUrl(defaults.endpoint);
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
@@ -188,11 +198,6 @@ function getRepoUrl(
     });
     logger.debug({ url }, 'using URL based on configured endpoint');
     return url;
-  }
-
-  if (opts.useSsh) {
-    logger.debug(`${repository} ssh URL = ${res.body.ssh_url_to_repo}`);
-    return res.body.ssh_url_to_repo;
   }
 
   logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);

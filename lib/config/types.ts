@@ -102,6 +102,7 @@ export interface RepoAdminConfig {
   privateKey?: string | Buffer;
   localDir?: string;
   cacheDir?: string;
+  gitUrl?: 'default' | 'ssh' | 'endpoint';
 }
 
 export interface LegacyAdminConfig {
