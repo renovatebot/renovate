@@ -34,7 +34,7 @@ export async function fetch(
 }
 
 export async function fetchDependencies(
-  dependencies: string[],
+  dependency: string,
   registry: string
 ): Promise<MarshalledVersionInfo[]> {
   const headers = getHeaders();
@@ -44,11 +44,11 @@ export async function fetchDependencies(
     DEPENDENCIES_PATH,
     '?' +
       getQueryString({
-        gems: dependencies.join(','),
+        gems: dependency,
       })
   );
 
-  logger.trace({ dependencies }, `RubyGems lookup request: ${String(url)}`);
+  logger.trace({ dependency }, `RubyGems lookup request: ${String(url)}`);
   const response = await http.getBuffer(url, { headers });
 
   logger.debug({ response }, 'dependencies response');
@@ -63,7 +63,7 @@ async function getDependencyFromV1Dependencies(
   logger.debug({ dependency }, 'falling back to dependencies endpoint');
   let depInfo: MarshalledVersionInfo[] | null = null;
   try {
-    depInfo = await fetchDependencies([dependency], registry);
+    depInfo = await fetchDependencies(dependency, registry);
   } catch (err) {
     // Ignore error because this endpoint is just a fallback
     logger.debug({ registry, err }, 'dependencies endpoint returns error');
