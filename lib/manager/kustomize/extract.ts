@@ -22,7 +22,8 @@ export function extractBase(base: string): PackageDependency | null {
     return null;
   }
 
-  if (match.groups.path.startsWith('github.com')) {
+  const { path } = match.groups;
+  if (path.startsWith('github.com:') || path.startsWith('github.com/')) {
     return {
       currentValue: match.groups.currentValue,
       datasource: datasourceGitHubTags.id,
@@ -32,7 +33,7 @@ export function extractBase(base: string): PackageDependency | null {
 
   return {
     datasource: datasourceGitTags.id,
-    depName: match.groups.path.replace('.git', ''),
+    depName: path.replace('.git', ''),
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,
   };
