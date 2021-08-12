@@ -14,16 +14,51 @@ This package will manage two parts of the `kustomization.yaml` file:
 
 - Needs to have `kind: Kustomization` defined
 - Currently this hasn't been tested using HTTPS to fetch the repos
-- The image tags are limited to the following formats:
+- Order of image tags does not matter:
 
-```
+```yaml
 - name: image/name
   newTag: v0.0.1
-```
-
-or
-
-```
+# or
 - newTag: v0.0.1
   name: image/name
+```
+
+- Digests can be pinned in `newTag` or `digest`:
+
+```yaml
+- name: image/name
+  newTag: v0.0.1@sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
+# without a version, digests are tracked as :latest
+- name: image/name
+  digest: sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
+```
+
+- The image's repository can be changed with `newName`:
+
+```yaml
+- name: image/name
+  newName: custom-image/name:v0.0.1
+- name: image/name
+  newName: custom-image/name:v0.0.1@sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
+- name: image/name
+  newName: custom-image/name@sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
+- name: image/name
+  newName: custom-image/name
+  newTag: v0.0.1@sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
+- name: image/name
+  newName: custom-image/name
+  digest: sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
+```
+
+- Images with values ignored by kustomize will be skipped to avoid ambiguity:
+
+```yaml
+# bad: skipped because newTag: is ignored when digest: is set
+- name: image/name
+  newTag: v0.0.1
+  digest: sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
+# good:
+- name: image/name
+  newTag: v0.0.1@sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
 ```
