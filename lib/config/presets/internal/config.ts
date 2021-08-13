@@ -4,13 +4,7 @@ export const presets: Record<string, Preset> = {
   base: {
     description: 'Default base configuration for all languages',
     extends: [
-      ':separateMajorReleases',
-      ':combinePatchMinorReleases',
-      ':ignoreUnstable',
-      ':prImmediately',
       ':semanticPrefixFixDepsChoreOthers',
-      ':updateNotScheduled',
-      ':automergeDisabled',
       ':ignoreModulesAndTests',
       ':autodetectPinVersions',
       ':prHourlyLimit2',
