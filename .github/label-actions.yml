@@ -22,13 +22,6 @@
 
     The Renovate team
 
-'reproduction:provided':
-  comment: >
-    Thank you for providing a reproduction! :tada: :rocket:
-
-
-    The Renovate team will take a look at the reproduction repository.
-
 'logs:problem':
   comment: >
     Hi there,
