@@ -174,6 +174,7 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  'aws-java-sdk-v2': '^software.amazon.awssdk:',
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
 };
