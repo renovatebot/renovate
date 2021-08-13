@@ -18,8 +18,6 @@ export async function fetch(
   dependency: string,
   registry: string
 ): Promise<MarshalledVersionInfo[]> {
-  const headers = getHeaders();
-
   const url = urlJoin(
     registry,
     DEPENDENCIES_PATH,
@@ -30,7 +28,7 @@ export async function fetch(
   );
 
   logger.trace({ dependency }, `RubyGems lookup request: ${String(url)}`);
-  const response = await http.getBuffer(url, { headers });
+  const response = await http.getBuffer(url);
 
   return new Marshal(response.body).parsed as MarshalledVersionInfo[];
 }
