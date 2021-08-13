@@ -7,7 +7,7 @@ import { logger } from '../../../logger';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { formatCommitMessagePrefix } from '../util/commit-message';
+import { CommitMessage } from '../model/commit-message';
 
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
@@ -158,7 +158,7 @@ export function generateBranchConfig(
           upgrade
         )})`;
       }
-      upgrade.commitMessagePrefix = formatCommitMessagePrefix(semanticPrefix);
+      upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix);
       upgrade.toLowerCase =
         // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
         upgrade.semanticCommitType.match(/[A-Z]/) === null &&
