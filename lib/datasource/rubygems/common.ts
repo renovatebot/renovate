@@ -7,6 +7,8 @@ import { getQueryString } from '../../util/url';
 export const id = 'rubygems';
 export const http = new Http(id);
 
+export const knownFallbackHosts = ['rubygems.pkg.github.com', 'gitlab.com'];
+
 export async function fetchJson<T>(
   dependency: string,
   registry: string,
