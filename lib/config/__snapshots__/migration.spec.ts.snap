@@ -1,5 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/migration it migrates gradle-lite 1`] = `
+Object {
+  "gradle": Object {
+    "enabled": true,
+    "fileMatch": Array [
+      "foo",
+    ],
+  },
+  "packageRules": Array [
+    Object {
+      "matchManagers": Array [
+        "gradle",
+      ],
+      "separateMinorPatch": true,
+    },
+  ],
+}
+`;
+
 exports[`config/migration it migrates nested packageRules 1`] = `
 Object {
   "packageRules": Array [
