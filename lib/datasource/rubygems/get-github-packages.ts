@@ -12,8 +12,6 @@ const http = new Http(id);
 
 const DEPENDENCIES_PATH = '/api/v1/dependencies';
 
-const getHeaders = (): OutgoingHttpHeaders => ({ hostType: id });
-
 export async function fetch(
   dependency: string,
   registry: string
