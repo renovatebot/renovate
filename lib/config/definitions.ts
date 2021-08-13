@@ -1646,15 +1646,6 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'supportPolicy',
-    description:
-      'Dependency support policy, e.g. used for LTS vs non-LTS etc (Node only).',
-    type: 'array',
-    subType: 'string',
-    stage: 'package',
-    allowString: true,
-  },
-  {
     name: 'node',
     description: 'Configuration object for Node version renovation.',
     stage: 'package',

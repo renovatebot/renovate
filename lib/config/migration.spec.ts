@@ -12,7 +12,7 @@ import type {
 const defaultConfig = getConfig();
 
 interface TestRenovateConfig extends RenovateConfig {
-  node?: RenovateSharedConfig & { supportPolicy?: unknown };
+  node?: RenovateSharedConfig;
 }
 
 describe(getName(), () => {
@@ -356,7 +356,6 @@ describe(getName(), () => {
       const config: TestRenovateConfig = {
         node: {
           enabled: true,
-          supportPolicy: ['lts'],
           automerge: 'none' as never,
         },
       };
@@ -372,9 +371,6 @@ describe(getName(), () => {
       expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
         true
       );
-      expect(
-        (migratedConfig.node as TestRenovateConfig).supportPolicy
-      ).toBeDefined();
     });
     it('migrates packageFiles', () => {
       const config: TestRenovateConfig = {
