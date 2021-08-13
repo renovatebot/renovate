@@ -1,18 +1,14 @@
-import Marshal from 'marshal';
 import urlJoin from 'url-join';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
-import { getQueryString } from '../../util/url';
 import type { ReleaseResult } from '../types';
 import { id } from './common';
-import type { MarshalledVersionInfo } from './types';
 
 const http = new Http(id);
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
-const DEPENDENCIES_PATH = '/api/v1/dependencies';
 
 const getHeaders = (): OutgoingHttpHeaders => ({ hostType: id });
 
@@ -33,82 +29,12 @@ export async function fetch(
   return response.body;
 }
 
-export async function fetchDependencies(
-  dependency: string,
-  registry: string
-): Promise<MarshalledVersionInfo[]> {
-  const headers = getHeaders();
-
-  const url = urlJoin(
-    registry,
-    DEPENDENCIES_PATH,
-    '?' +
-      getQueryString({
-        gems: dependency,
-      })
-  );
-
-  logger.trace({ dependency }, `RubyGems lookup request: ${String(url)}`);
-  const response = await http.getBuffer(url, { headers });
-
-  logger.debug({ response }, 'dependencies response');
-
-  return new Marshal(response.body).parsed as MarshalledVersionInfo[];
-}
-
-async function getDependencyFromV1Dependencies(
-  dependency: string,
-  registry: string
-): Promise<ReleaseResult | null> {
-  logger.debug({ dependency }, 'falling back to dependencies endpoint');
-  let depInfo: MarshalledVersionInfo[] | null = null;
-  try {
-    depInfo = await fetchDependencies(dependency, registry);
-  } catch (err) {
-    // Ignore error because this endpoint is just a fallback
-    logger.debug({ registry, err }, 'dependencies endpoint returns error');
-  }
-  if (!depInfo) {
-    return null;
-  }
-  const releases = depInfo.map(
-    ({ number: version, platform: rubyPlatform }) => ({
-      version,
-      rubyPlatform,
-    })
-  );
-  return {
-    releases,
-    homepage: null,
-    sourceUrl: null,
-    changelogUrl: null,
-  };
-}
-
 export async function getDependency(
   dependency: string,
   registry: string
 ): Promise<ReleaseResult | null> {
   logger.debug({ dependency }, 'RubyGems lookup for dependency');
-  let info = null;
-  try {
-    info = await fetch(dependency, registry, INFO_PATH);
-  } catch (err) {
-    if (err.statusCode === 400 || err.statusCode === 404) {
-      logger.debug(
-        { registry },
-        'info endpoint returns error - falling back to dependencies endpoint'
-      );
-      const result = await getDependencyFromV1Dependencies(
-        dependency,
-        registry
-      );
-      if (result) {
-        return result;
-      }
-    }
-    throw err;
-  }
+  const info = await fetch(dependency, registry, INFO_PATH);
 
   if (!info) {
     logger.debug({ dependency }, 'RubyGems package not found.');

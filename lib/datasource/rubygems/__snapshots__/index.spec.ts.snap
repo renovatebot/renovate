@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/rubygems/index getReleases falls back to dependencies when info request fails 1`] = `
+exports[`datasource/rubygems/index getReleases returns a dep for GitHub Packages package hit 1`] = `
 Object {
-  "registryUrl": "https://thirdparty.com",
+  "registryUrl": "https://rubygems.pkg.github.com/example",
   "releases": Array [
     Object {
       "rubyPlatform": "ruby",
