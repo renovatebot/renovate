@@ -1,9 +1,9 @@
-import { Stats } from 'fs';
+import type { Stats } from 'fs';
 import os from 'os';
 import { chmod } from 'fs-extra';
 import upath from 'upath';
-import { getAdminConfig } from '../../config/admin';
-import type { ExtractConfig } from '../types';
+import { getAdminConfig } from '../../../config/admin';
+import type { ExtractConfig } from '../../types';
 
 export const extraEnv = {
   GRADLE_OPTS:
