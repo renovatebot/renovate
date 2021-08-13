@@ -57,25 +57,6 @@ describe(getName(), () => {
       // FIXME: explicit assert condition
       expect(conf).toMatchSnapshot();
     });
-
-    it('reads dashboard body with double dash in branch name', async () => {
-      const conf: RenovateConfig = {};
-      conf.prCreation = 'approval';
-      platform.findIssue.mockResolvedValueOnce({
-        title: '',
-        number: 1,
-        body: loadFixture(
-          'dependency-dashboard_with_double_dash_branch_name.txt'
-        ),
-      });
-      await dependencyDashboard.readDashboardBody(conf);
-      expect(
-        conf.dependencyDashboardChecks['old-style-double-dash-branch-name']
-      ).toBe('approve'); // backward compatibility
-      expect(
-        conf.dependencyDashboardChecks['new-style-double-dash-branch-name']
-      ).toBe('approve');
-    });
   });
 
   describe('ensureDependencyDashboard()', () => {

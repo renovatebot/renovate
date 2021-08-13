@@ -11,8 +11,6 @@ interface DependencyDashboard {
   dependencyDashboardRebaseAllOpen: boolean;
 }
 
-const RE_MULTIPLE_DASH = /--+/g;
-
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
   const checked = issueBody.match(new RegExp(checkMatch, 'g'));
@@ -21,8 +19,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
     const re = new RegExp(checkMatch);
     checked.forEach((check) => {
       const [, type, branchName] = re.exec(check);
-      const cleanedUpBranchName = branchName.replace(RE_MULTIPLE_DASH, '-'); // Backward compatibility with versions which didn't remove chained dashes
-      dependencyDashboardChecks[cleanedUpBranchName] = type;
+      dependencyDashboardChecks[branchName] = type;
     });
   }
   const checkedRebaseAll = issueBody.includes(
