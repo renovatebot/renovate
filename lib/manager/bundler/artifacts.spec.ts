@@ -53,10 +53,7 @@ describe('bundler.updateArtifacts()', () => {
     docker.resetPrefetchedImages();
 
     setAdminConfig(adminConfig);
-
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      join(adminConfig.cacheDir, './others/gem')
-    );
+    fs.ensureCacheDir.mockResolvedValue('/tmp/cache/others/gem');
   });
   afterEach(() => {
     setAdminConfig();
