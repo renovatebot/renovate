@@ -3,19 +3,19 @@ import type { Stats } from 'fs';
 import os from 'os';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/exec-util';
+import { extractAllPackageFiles, updateDependency } from '..';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import {
   addReplacingSerializer,
   getName,
   loadFixture,
   mocked,
-} from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import * as docker from '../../util/exec/docker';
-import * as _env from '../../util/exec/env';
-import type { ExtractConfig } from '../types';
-import { extractAllPackageFiles, updateDependency } from '.';
+} from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
+import type { RepoAdminConfig } from '../../../config/types';
+import * as docker from '../../../util/exec/docker';
+import * as _env from '../../../util/exec/env';
+import type { ExtractConfig } from '../../types';
 
 jest.mock('child_process');
 const exec: jest.Mock<typeof _exec> = _exec as never;
@@ -23,7 +23,7 @@ const exec: jest.Mock<typeof _exec> = _exec as never;
 jest.mock('fs-extra');
 const fs = mocked(_fs);
 
-jest.mock('../../util/exec/env');
+jest.mock('../../../util/exec/env');
 const env = mocked(_env);
 
 const adminConfig: RepoAdminConfig = {
@@ -41,6 +41,7 @@ const gradleOutput = {
 };
 
 const config: ExtractConfig = {
+  deepExtract: true,
   gradle: {
     timeout: 60,
   },
@@ -260,6 +261,7 @@ describe(getName(), () => {
       const buildGradleContent = loadFixture(`build.gradle.example1`);
       // prettier-ignore
       const upgrade = {
+        deepExtract: true,
         depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8',
       };
       const buildGradleContentUpdated = updateDependency({
@@ -284,6 +286,7 @@ describe(getName(), () => {
         }
         `;
       const upgrade = {
+        deepExtract: true,
         depGroup: 'com.github.ben-manes.versions',
         name: 'com.github.ben-manes.versions.gradle.plugin',
         version: '0.20.0',
@@ -317,6 +320,7 @@ describe(getName(), () => {
         }
         `;
       const upgrade = {
+        deepExtract: true,
         depGroup: 'com.github.ben-manes.versions',
         name: 'com.github.ben-manes.versions.gradle.plugin',
         version: '0.20.0',
@@ -347,6 +351,7 @@ describe(getName(), () => {
       const buildGradleContent = loadFixture(`build.gradle.example1`);
 
       const upgrade = {
+        deepExtract: true,
         depGroup: 'org.apache.openjpa',
         name: 'openjpa',
         version: '3.1.1',
