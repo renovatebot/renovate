@@ -7,19 +7,17 @@ description: Learn all about Renovate's Dependency Dashboard
 
 Renovate has a Dependency Dashboard that shows a overview of the state of your repositories' dependencies.
 
-When you turn on the Dependency Dashboard, Renovate will create a new issue on the repository.
+When the Dependency Dashboard is enabled, Renovate will create a new issue in the repository.
 This issue contains a "dashboard" where you can get a overview of the status of all updates.
 
-Having the Dependency Dashboard enabled also allows you to opt-in to different behavior for certain or even all updates with the "Dependency Dashboard Approval" workflow.
+Having the Dependency Dashboard also enables the concept of an "approval" workflow for new upgrades, either for selected dependencies (recommended) or even for all.
 
 ## Supported platforms
 
-The Dependency Dashboard requires that the host platforms supports the concept of issues.
+The Dependency Dashboard requires that the host platforms supports the concept of issues with dynamic Markdown checkboxes.
 Read [our FAQ, Renovate core features not supported on all platforms](https://docs.renovatebot.com/faq/#renovate-core-features-not-supported-on-all-platforms) to see if your platform can use the Dependency Dashboard feature.
 
 ## How to enable the dashboard
-
-<!-- TODO: It might be nice to change our config presets, so we have one to `:enableDependencyDashboard` and one to `:disableDependencyDashboard`. -->
 
 To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your `extends` array in the Renovate configuration file:
 
@@ -37,41 +35,25 @@ Or set `dependencyDashboard` to `true`:
 }
 ```
 
-<!--
-TODO: discuss whether we need to change things.
-
-https://docs.renovatebot.com/configuration-options/#dependencydashboardapproval
-says to set `dependencyDashboardApproval` to `true`, but we also have the `:dependencyDashboard`, which is not mentioned in the link.
-
--->
-
 ## How to disable the dashboard
 
-<!-- TODO: It might be nice to change our config presets, so we have one to `:enableDependencyDashboard` and one to `:disableDependencyDashboard`. -->
-
-To disable the Dependency Dashboard, set `dependencyDashboard` to `false`.
+To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
 
 ```json
 {
-  "extends": ["config:base"],
-  "dependencyDashboard": false
+  "extends": ["config:base", ":disableDependencyDashboard"]
 }
-```
 
-## Usecases
+## Use cases
 
-This section explains some common usecases where having the Dependency Dashboard can help.
+This section explains some common use cases where having the Dependency Dashboard can help.
 
 ### Visibility into rejected/deferred updates
 
 Renovate's Dependency Dashboard shows a overview of all updates that are still "to do".
 
-If you close a update PR from Renovate, the Dashboard will list this update.
+If you close an update PR from Renovate without merging, the Dashboard will list this update in the Closed/Ignored section.
 If you later change your mind about the update, you can get a new PR by clicking the corresponding checkbox on the dashboard.
-
-### Show errored out updates
-
-<!-- TODO: Not sure if showing errored updates/branches require the dashboard? Do we open a new issue to warn about a branch error? -->
 
 ### Dependency Dashboard Approval workflow
 
@@ -90,24 +72,21 @@ You can mix and match these options as well.
 
 We do not recommend that you require approval for _all_ updates.
 When you require prior approval, you need to check the dashboard issue regularly to check for important updates.
-You'll probably forgot to check often enough, out of sight is out of mind!
+You'll probably forgot to check often enough, and out of sight means out of mind!
 
 Maybe you find Renovate too noisy, and want to opt-out of getting automatic updates whenever they're ready.
 
 In this case, you can tell Renovate to wait for your approval before making any pull requests.
 This means that you have full control over when you get updates.
 
-<!-- TODO: question: do you still get security updates when you tell Renovate to wait for approval for all updates? -->
+However, vulnerability remediation PRs will still get created immediately without requiring approval.
 
-Make sure you explictly enable the Dependency Dashboard this way have visibility into all pending updates.
-
-To require manual approval for _all updates_, add the `:dependencyDashboard` and the `:dependencyDashboardApproval` presets to the `extends` array in your Renovate configuration file:
+To require manual approval for _all updates_, add the `:dependencyDashboardApproval` presets to the `extends` array in your Renovate configuration file:
 
 ```json
 {
   "extends": [
     "config:base",
-    ":dependencyDashboard",
     ":dependencyDashboardApproval"
   ]
 }
@@ -115,8 +94,8 @@ To require manual approval for _all updates_, add the `:dependencyDashboard` and
 
 #### Require approval for major updates
 
-Major updates are likely to break tests and/or require manual work before they can be merged.
-So maybe you only want to get major updates when you approve them.
+Major updates often contain breaking changes which require manual changes in your code before they can be merged.
+So maybe you only want to get major updates when you have sufficient time to check them carefully.
 
 Dependency Dashboard Approval is far superior to disabling major updates because at least you can fully see what's pending on the dashboard, instead of updates being totally invisible.
 
@@ -144,7 +123,7 @@ If you want to approve specific packages, set `dependencyDashboardApproval` to `
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^@package-name"],
+      "matchPackagePatterns": ["^@somescope"],
       "dependencyDashboardApproval": true
     }
   ]
