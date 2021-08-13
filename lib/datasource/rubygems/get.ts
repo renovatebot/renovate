@@ -1,33 +1,64 @@
-import urlJoin from 'url-join';
 import { logger } from '../../logger';
+import { HttpError } from '../../util/http/types';
 import type { Release, ReleaseResult } from '../types';
-import { http } from './common';
-import type { JsonGemVersions, JsonGemsInfo } from './types';
+import { fetchBuffer, fetchJson } from './common';
+import type {
+  JsonGemVersions,
+  JsonGemsInfo,
+  MarshalledVersionInfo,
+} from './types';
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
+const DEPENDENCIES_PATH = '/api/v1/dependencies';
 
-export async function fetch<T>(
+export async function getDependencyFallback(
   dependency: string,
-  registry: string,
-  path: string
-): Promise<T> {
-  const url = urlJoin(registry, path, `${dependency}.json`);
-
-  logger.trace({ dependency }, `RubyGems lookup request: ${String(url)}`);
-  const response = (await http.getJson<T>(url)) || {
-    body: undefined,
+  registry: string
+): Promise<ReleaseResult | null> {
+  logger.debug(
+    { dependency, api: DEPENDENCIES_PATH },
+    'RubyGems lookup for dependency'
+  );
+  const info = await fetchBuffer<MarshalledVersionInfo[]>(
+    dependency,
+    registry,
+    DEPENDENCIES_PATH
+  );
+  if (!info || info.length === 0) {
+    return null;
+  }
+  const releases = info.map(({ number: version, platform: rubyPlatform }) => ({
+    version,
+    rubyPlatform,
+  }));
+  return {
+    releases,
+    homepage: null,
+    sourceUrl: null,
+    changelogUrl: null,
   };
-
-  return response.body;
 }
 
 export async function getDependency(
   dependency: string,
   registry: string
 ): Promise<ReleaseResult | null> {
-  logger.debug({ dependency }, 'RubyGems lookup for dependency');
-  const info = await fetch<JsonGemsInfo>(dependency, registry, INFO_PATH);
+  logger.debug(
+    { dependency, api: INFO_PATH },
+    'RubyGems lookup for dependency'
+  );
+  let info: JsonGemsInfo;
+
+  try {
+    info = await fetchJson(dependency, registry, INFO_PATH);
+  } catch (error) {
+    // fallback to deps api on 404
+    if (error instanceof HttpError && error.response?.statusCode === 404) {
+      return await getDependencyFallback(dependency, registry);
+    }
+    throw error;
+  }
 
   if (!info) {
     logger.debug({ dependency }, 'RubyGems package not found.');
@@ -45,7 +76,7 @@ export async function getDependency(
   let versions: JsonGemVersions[] = [];
   let releases: Release[] = [];
   try {
-    versions = await fetch(dependency, registry, VERSIONS_PATH);
+    versions = await fetchJson(dependency, registry, VERSIONS_PATH);
   } catch (err) {
     if (err.statusCode === 400 || err.statusCode === 404) {
       logger.debug(

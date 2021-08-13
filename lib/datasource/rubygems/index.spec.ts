@@ -182,6 +182,18 @@ describe(getName(), () => {
       expect(await getPkgReleases(params)).toBeNull();
     });
 
+    it('falls back to dependencies api', async () => {
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(404, railsInfo)
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(200, railsDependencies);
+
+      const res = await getPkgReleases(params);
+      expect(res?.releases).toHaveLength(339);
+    });
+
     it('returns null for GitHub Packages package miss', async () => {
       const newparams = { ...params };
       newparams.registryUrls = ['https://rubygems.pkg.github.com/example'];

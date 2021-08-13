@@ -1,7 +1,6 @@
 import { parseUrl } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { getDependency } from './get';
-import { getGitHubPackagesDependency } from './get-github-packages';
+import { getDependency, getDependencyFallback } from './get';
 import { getRubygemsOrgDependency } from './get-rubygems-org';
 
 export function getReleases({
@@ -12,7 +11,7 @@ export function getReleases({
     return getRubygemsOrgDependency(lookupName);
   }
   if (parseUrl(registryUrl)?.hostname === 'rubygems.pkg.github.com') {
-    return getGitHubPackagesDependency(lookupName, registryUrl);
+    return getDependencyFallback(lookupName, registryUrl);
   }
   return getDependency(lookupName, registryUrl);
 }
