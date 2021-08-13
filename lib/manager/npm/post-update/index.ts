@@ -420,17 +420,16 @@ export async function getAdditionalFiles(
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
 
-  const env = {
-    ...getChildProcessEnv(),
-    NPM_CONFIG_CACHE: await ensureCacheDir('./others/npm', 'NPM_CONFIG_CACHE'),
-    YARN_CACHE_FOLDER: await ensureCacheDir(
-      './others/yarn',
-      'YARN_CACHE_FOLDER'
-    ),
-    YARN_GLOBAL_FOLDER: await ensureCacheDir('./others/berry'),
-    npm_config_store: await ensureCacheDir('./others/pnpm', 'npm_config_store'),
-    NODE_ENV: 'dev',
-  };
+  const env = getChildProcessEnv([
+    'NPM_CONFIG_CACHE',
+    'YARN_CACHE_FOLDER',
+    'npm_config_store',
+  ]);
+  env.NPM_CONFIG_CACHE = await ensureCacheDir('npm');
+  env.YARN_CACHE_FOLDER = await ensureCacheDir('yarn');
+  env.YARN_GLOBAL_FOLDER = await ensureCacheDir('berry');
+  env.npm_config_store = await ensureCacheDir('pnpm');
+  env.NODE_ENV = 'dev';
 
   let token = '';
   try {

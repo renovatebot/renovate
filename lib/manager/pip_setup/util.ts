@@ -15,8 +15,7 @@ export async function getExtractFile(): Promise<string> {
     return extractPy;
   }
 
-  const cacheDir = await ensureCacheDir('./others/pip_setup');
-  extractPy = join(cacheDir, EXTRACT);
+  extractPy = join(await ensureCacheDir('pip_setup'), EXTRACT);
   await outputFile(extractPy, dataFiles.get('data/extract.py'));
 
   return extractPy;
