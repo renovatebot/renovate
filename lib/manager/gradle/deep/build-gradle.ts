@@ -1,5 +1,9 @@
-import { regEx } from '../../util/regex';
-import { BuildDependency, GradleDependency, UpdateFunction } from './types';
+import { regEx } from '../../../util/regex';
+import type {
+  BuildDependency,
+  GradleDependency,
+  UpdateFunction,
+} from './types';
 
 /**
  * Functions adapted/ported from https://github.com/patrikerdes/gradle-use-latest-versions-plugin
