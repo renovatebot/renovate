@@ -39,17 +39,6 @@ The Renovate team will only create bugfixes for an older version if the hosted a
 If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
 If you're self hosting Renovate, use the latest release if possible.
 
-## Supported ways of using Renovate
-
-Renovate is intended to be used as an app.
-We do not support using Renovate as a library.
-
-Supported ways to use Renovate:
-
-- via the CLI program
-- via the official hosted app
-- via selfhosting the Renovate app
-
 ## Renovate core features not supported on all platforms
 
 | Feature              | Platforms which lack feature                      | See Renovate issue(s)                                        |
