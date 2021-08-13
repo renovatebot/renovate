@@ -1,7 +1,7 @@
-This manager is intended to keep Travis config files (`.travis.yml`) up-to-date.
-Currently it manages only the `node_js` section of files only.
+This manager is intended to keep Travis config files (`.travis.yml`) up-to-date, this file controls the CI build environment.
+Currently Renovate can only update the `node_js` section of this file.
 
-An important limitation is that Renovate does not currently "understand" Travis's node matrix concept, so it will try to update all found node versions to the latest LTS, e.g.
+An important limitation is that Renovate does not currently "understand" [Travis's Build Matrix concept](https://docs.travis-ci.com/user/build-matrix/#matrix-expansion), so it will try to update all found Node.js versions to the latest LTS, e.g.
 
 ```diff
 node_js:
