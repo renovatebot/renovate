@@ -40,6 +40,7 @@ function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
 
 function createDependency(
   matchResult: RegExpMatchArray,
+  combinedGroups: { [p: string]: string },
   config: CustomExtractConfig,
   dep?: PackageDependency
 ): PackageDependency {
@@ -67,7 +68,11 @@ function createDependency(
     const fieldTemplate = `${field}Template`;
     if (config[fieldTemplate]) {
       try {
-        const compiled = template.compile(config[fieldTemplate], groups, false);
+        const compiled = template.compile(
+          config[fieldTemplate],
+          combinedGroups ?? groups,
+          false
+        );
         updateDependency(field, compiled);
       } catch (err) {
         logger.warn(
@@ -108,7 +113,24 @@ function handleAny(
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
-    .map((matchResult) => createDependency(matchResult, config));
+    .map((matchResult) => createDependency(matchResult, null, config));
+}
+
+function mergeGroups(
+  mergedGroup: { [p: string]: string },
+  secondGroup: { [p: string]: string }
+): { [p: string]: string } {
+  const resultGroup = {};
+  Object.keys(mergedGroup).forEach(
+    // eslint-disable-next-line no-return-assign
+    (key) => (resultGroup[key] = mergedGroup[key])
+  );
+  Object.keys(secondGroup).forEach((key) => {
+    if (secondGroup[key] && secondGroup[key] !== '') {
+      resultGroup[key] = secondGroup[key];
+    }
+  });
+  return resultGroup;
 }
 
 function handleCombination(
@@ -116,10 +138,22 @@ function handleCombination(
   packageFile: string,
   config: CustomExtractConfig
 ): PackageDependency[] {
-  const dep = handleAny(content, packageFile, config).reduce(
-    (mergedDep, currentDep) => mergeDependency([mergedDep, currentDep]),
-    {}
-  ); // merge fields of dependencies
+  const matches = config.matchStrings
+    .map((matchString) => regEx(matchString, 'g'))
+    .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array
+
+  const combinedGroup = matches
+    .map((match) => match.groups)
+    .reduce((mergedGroup, currentGroup) =>
+      mergeGroups(mergedGroup, currentGroup)
+    );
+
+  const dep = matches
+    .map((match) => createDependency(match, combinedGroup, config))
+    .reduce(
+      (mergedDep, currentDep) => mergeDependency([mergedDep, currentDep]),
+      {}
+    ); // merge fields of dependencies
   return [dep];
 }
 
@@ -139,7 +173,7 @@ function handleRecursive(
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     // if we have a depName and a currentValue with have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
-      return createDependency(match, config);
+      return createDependency(match, null, config);
     }
     return handleRecursive(match[0], packageFile, config, index + 1);
   });
