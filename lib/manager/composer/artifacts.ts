@@ -138,20 +138,14 @@ export async function updateArtifacts({
           'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
         ).trim() + ' --with-dependencies';
     }
-    if (
-      !config.composerIgnorePlatformReqs &&
-      config.composerIgnorePlatformReq?.length > 0
-    ) {
-      logger.warn(
-        'composerIgnorePlatformReq has been set, while composerIgnorePlatformReqs is not set to false. The composerIgnorePlatformReq will have no effect.'
-      );
-    }
     if (config.composerIgnorePlatformReqs) {
-      args += ' --ignore-platform-reqs';
-    } else {
-      config.composerIgnorePlatformReq?.forEach((req) => {
-        args += ' --ignore-platform-req ' + req;
-      });
+      if (config.composerIgnorePlatformReqs.length === 0) {
+        args += ' --ignore-platform-reqs';
+      } else {
+        config.composerIgnorePlatformReqs.forEach((req) => {
+          args += ' --ignore-platform-req ' + req;
+        });
+      }
     }
     args += ' --no-ansi --no-interaction';
     if (!getAdminConfig().allowScripts || config.ignoreScripts) {

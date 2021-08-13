@@ -24,7 +24,7 @@ jest.mock('../../util/git');
 const datasource = mocked(_datasource);
 
 const config: UpdateArtifactsConfig = {
-  composerIgnorePlatformReqs: true,
+  composerIgnorePlatformReqs: [],
   ignoreScripts: false,
 };
 
@@ -338,7 +338,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          composerIgnorePlatformReqs: false,
+          composerIgnorePlatformReqs: null,
         },
       })
     ).not.toBeNull();
@@ -360,30 +360,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          composerIgnorePlatformReq: ['ext-posix', 'ext-sodium'],
-          composerIgnorePlatformReqs: false,
-        },
-      })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
-  });
-
-  it('only adds ignorePlatformReqs when ignorePlatformReq has also been set', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockResolvedValueOnce('{ }');
-    git.getRepoStatus.mockResolvedValue({
-      ...repoStatus,
-      modified: ['composer.lock'],
-    });
-    expect(
-      await composer.updateArtifacts({
-        packageFileName: 'composer.json',
-        updatedDeps: [],
-        newPackageFileContent: '{}',
-        config: {
-          ...config,
-          composerIgnorePlatformReq: ['ext-posix', 'ext-sodium'],
+          composerIgnorePlatformReqs: ['ext-posix', 'ext-sodium'],
         },
       })
     ).not.toBeNull();
