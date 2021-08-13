@@ -1,28 +1,21 @@
 import urlJoin from 'url-join';
 import { logger } from '../../logger';
-import { Http } from '../../util/http';
-import type { OutgoingHttpHeaders } from '../../util/http/types';
-import type { ReleaseResult } from '../types';
-import { id } from './common';
-
-const http = new Http(id);
+import type { Release, ReleaseResult } from '../types';
+import { http } from './common';
+import type { JsonGemVersions, JsonGemsInfo } from './types';
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
 
-const getHeaders = (): OutgoingHttpHeaders => ({ hostType: id });
-
-export async function fetch(
+export async function fetch<T>(
   dependency: string,
   registry: string,
   path: string
-): Promise<any> {
-  const headers = getHeaders();
-
+): Promise<T> {
   const url = urlJoin(registry, path, `${dependency}.json`);
 
   logger.trace({ dependency }, `RubyGems lookup request: ${String(url)}`);
-  const response = (await http.getJson(url, { headers })) || {
+  const response = (await http.getJson<T>(url)) || {
     body: undefined,
   };
 
@@ -34,7 +27,7 @@ export async function getDependency(
   registry: string
 ): Promise<ReleaseResult | null> {
   logger.debug({ dependency }, 'RubyGems lookup for dependency');
-  const info = await fetch(dependency, registry, INFO_PATH);
+  const info = await fetch<JsonGemsInfo>(dependency, registry, INFO_PATH);
 
   if (!info) {
     logger.debug({ dependency }, 'RubyGems package not found.');
@@ -49,8 +42,8 @@ export async function getDependency(
     return null;
   }
 
-  let versions = [];
-  let releases = [];
+  let versions: JsonGemVersions[] = [];
+  let releases: Release[] = [];
   try {
     versions = await fetch(dependency, registry, VERSIONS_PATH);
   } catch (err) {
@@ -64,13 +57,15 @@ export async function getDependency(
     }
   }
 
+  // FIXME: invalid properties for `Release`
+
   if (versions.length === 0 && info.version) {
     logger.warn('falling back to the version from the info endpoint');
     releases = [
       {
         version: info.version,
         rubyPlatform: info.platform,
-      },
+      } as Release,
     ];
   } else {
     releases = versions.map(

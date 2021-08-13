@@ -1,14 +1,10 @@
 import Marshal from 'marshal';
 import urlJoin from 'url-join';
 import { logger } from '../../logger';
-import { Http } from '../../util/http';
-import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { getQueryString } from '../../util/url';
 import type { ReleaseResult } from '../types';
-import { id } from './common';
+import { http } from './common';
 import type { MarshalledVersionInfo } from './types';
-
-const http = new Http(id);
 
 const DEPENDENCIES_PATH = '/api/v1/dependencies';
 
