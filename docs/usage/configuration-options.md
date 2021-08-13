@@ -2302,12 +2302,6 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 <!-- markdownlint-enable MD001 -->
 
-## supportPolicy
-
-Language support is limited to those listed below:
-
-- **Node.js** - [Read our Node.js documentation](https://docs.renovatebot.com/node#configuring-support-policy)
-
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
