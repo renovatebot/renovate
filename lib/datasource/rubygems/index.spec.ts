@@ -66,7 +66,6 @@ describe(getName(), () => {
         .get('/api/v1/dependencies?gems=rails')
         .reply(404, null);
       expect(await getPkgReleases(params)).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for rubygems.org package miss', async () => {
@@ -183,7 +182,6 @@ describe(getName(), () => {
       const res = await getPkgReleases(params);
       expect(res.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('falls back to info when version request fails', async () => {
       httpMock
