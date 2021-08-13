@@ -51,6 +51,9 @@ module.exports = {
         memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
       },
     ],
+
+    // mdast is a types only package `@types/mdast`
+    'import/no-unresolved': ['error', { ignore: ['^mdast$'] }],
     'import/order': [
       'error',
       {
