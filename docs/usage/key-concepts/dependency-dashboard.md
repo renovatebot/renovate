@@ -43,6 +43,7 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 {
   "extends": ["config:base", ":disableDependencyDashboard"]
 }
+```
 
 ## Use cases
 
@@ -85,10 +86,7 @@ To require manual approval for _all updates_, add the `:dependencyDashboardAppro
 
 ```json
 {
-  "extends": [
-    "config:base",
-    ":dependencyDashboardApproval"
-  ]
+  "extends": ["config:base", ":dependencyDashboardApproval"]
 }
 ```
 
