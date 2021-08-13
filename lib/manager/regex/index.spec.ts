@@ -220,6 +220,7 @@ describe(getName(), () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
   });
+
   it('extracts with combination strategy and templates', async () => {
     const config: CustomExtractConfig = {
       matchStringsStrategy: 'combination',
@@ -238,6 +239,7 @@ describe(getName(), () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
   });
+
   it('extracts with recursive strategy and single match', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
