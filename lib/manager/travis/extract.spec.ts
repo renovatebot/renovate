@@ -12,7 +12,7 @@ describe(getName(), () => {
     it('returns results', () => {
       const res = extractPackageFile('node_js:\n  - 6\n  - 8\n');
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res.deps).toHaveLength(2);
     });
     it('should handle invalid YAML', () => {
       const res = extractPackageFile(invalidYAML);
