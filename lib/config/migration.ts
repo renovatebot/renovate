@@ -517,6 +517,12 @@ export function migrateConfig(
         }
       } else if (key === 'binarySource' && val === 'auto') {
         migratedConfig.binarySource = 'global';
+      } else if (key === 'composerIgnorePlatformReqs') {
+        if (val === true) {
+          migratedConfig.composerIgnorePlatformReqs = [];
+        } else if (val === false) {
+          migratedConfig.composerIgnorePlatformReqs = null;
+        }
       }
       const migratedTemplates = {
         fromVersion: 'currentVersion',
