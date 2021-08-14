@@ -117,19 +117,24 @@ function handleAny(
 }
 
 function mergeGroups(
-  mergedGroup: { [p: string]: string },
-  secondGroup: { [p: string]: string }
-): { [p: string]: string } {
+  mergedGroup: Record<string, string>,
+  secondGroup: Record<string, string>
+): Record<string, string> {
   const resultGroup = {};
-  Object.keys(mergedGroup).forEach(
-    // eslint-disable-next-line no-return-assign
-    (key) => (resultGroup[key] = mergedGroup[key])
-  );
-  Object.keys(secondGroup).forEach((key) => {
-    if (secondGroup[key] && secondGroup[key] !== '') {
-      resultGroup[key] = secondGroup[key];
-    }
-  });
+
+  Object.keys(mergedGroup)
+    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
+    .forEach(
+      // eslint-disable-next-line no-return-assign
+      (key) => (resultGroup[key] = mergedGroup[key])
+    );
+  Object.keys(secondGroup)
+    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
+    .forEach((key) => {
+      if (secondGroup[key] && secondGroup[key] !== '') {
+        resultGroup[key] = secondGroup[key];
+      }
+    });
   return resultGroup;
 }
 
