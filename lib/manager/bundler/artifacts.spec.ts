@@ -190,19 +190,7 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchInlineSnapshot(
-        [updatedGemfileLock],
-        `
-        Array [
-          Object {
-            "file": Object {
-              "contents": "Updated Gemfile.lock",
-              "name": "Gemfile.lock",
-            },
-          },
-        ]
-      `
-      );
+      ).toMatchSnapshot([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid constraints options', async () => {
