@@ -166,6 +166,7 @@ const repoGroups = {
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
+  vstest: 'https://github.com/microsoft/vstest',
 };
 
 const patternGroups = {
