@@ -40,7 +40,7 @@ function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
 
 function createDependency(
   matchResult: RegExpMatchArray,
-  combinedGroups: { [p: string]: string },
+  combinedGroups: Record<string, string>,
   config: CustomExtractConfig,
   dep?: PackageDependency
 ): PackageDependency {
