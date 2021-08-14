@@ -124,7 +124,7 @@ export async function updateArtifacts(
     ];
 
     const bundlerHostRules = findAllAuthenticatable({
-      hostType: 'bundler',
+      hostType: 'rubygems',
     });
 
     const bundlerHostRulesVariables = bundlerHostRules.reduce(

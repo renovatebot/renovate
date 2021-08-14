@@ -33,6 +33,10 @@ describe(getName(), () => {
     });
 
     it('supports custom registries', async () => {
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/packages.json')
+        .reply(404);
       config = {
         registryUrls: ['https://composer.renovatebot.com'],
       };
@@ -44,6 +48,7 @@ describe(getName(), () => {
       });
       expect(res).toBeNull();
     });
+
     it('supports plain packages', async () => {
       const packagesOnly = {
         packages: {

@@ -35,14 +35,12 @@ function getChildEnv({
   env: forcedEnv = {},
 }: ExecOptions): ExtraEnv<string> {
   const { customEnvVariables: globalConfigEnv } = getAdminConfig();
-
   const inheritedKeys = Object.entries(extraEnv).reduce(
     (acc, [key, val]) =>
       val === null || val === undefined ? acc : [...acc, key],
     []
   );
   const parentEnv = getChildProcessEnv(inheritedKeys);
-
   const childEnv = Object.entries({
     ...extraEnv,
     ...parentEnv,
@@ -55,7 +53,6 @@ function getChildEnv({
         : { ...acc, [key]: val.toString() },
     {}
   );
-
   return childEnv;
 }
 
@@ -94,7 +91,6 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   rawExecOptions.timeout = rawExecOptions.timeout || 15 * 60 * 1000;
   // Set default max buffer size to 10MB
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
-
   return rawExecOptions;
 }
 

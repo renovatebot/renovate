@@ -17,11 +17,13 @@ describe(getName(), () => {
     });
     it('extracts orbs too', () => {
       const res = extractPackageFile(file2);
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
       // expect(res.deps).toHaveLength(4);
     });
     it('extracts image without leading dash', () => {
       const res = extractPackageFile(file3);
+      // FIXME: explicit assert condition
       expect(res.deps).toMatchSnapshot();
     });
   });

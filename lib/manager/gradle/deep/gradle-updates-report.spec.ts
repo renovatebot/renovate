@@ -37,6 +37,7 @@ describe(getName(), () => {
             cwd: workingDir.path,
             extraEnv,
           });
+          // FIXME: explicit assert condition
           expect(
             fs.readJSONSync(
               `${workingDir.path}/${GRADLE_DEPENDENCY_REPORT_FILENAME}`

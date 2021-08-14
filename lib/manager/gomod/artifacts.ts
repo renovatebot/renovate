@@ -134,7 +134,7 @@ export async function updateArtifacts({
       },
       cacheTmpdir: {
         env: 'GOPATH',
-        path: 'gomod',
+        path: 'go',
       },
     };
 

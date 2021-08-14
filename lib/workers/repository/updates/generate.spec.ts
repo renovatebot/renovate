@@ -38,6 +38,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileUpdate', () => {
@@ -54,6 +55,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('does not group same upgrades', () => {
@@ -385,6 +387,7 @@ describe(getName(), () => {
         }),
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res.prTitle).toMatchSnapshot();
     });
     it('handles @types specially', () => {
@@ -426,6 +429,7 @@ describe(getName(), () => {
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
+      // FIXME: explicit assert condition
       expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles @types specially (reversed)', () => {
@@ -460,6 +464,7 @@ describe(getName(), () => {
           group: {},
         },
       ];
+      // FIXME: explicit assert condition
       expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles upgrades', () => {
@@ -508,6 +513,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res.prTitle).toMatchSnapshot();
     });
     it('sorts upgrades, without position first', () => {

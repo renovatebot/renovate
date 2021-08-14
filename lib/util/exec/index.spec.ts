@@ -802,6 +802,7 @@ describe(getName(), () => {
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
+    // FIXME: explicit assert condition
     expect(actualCmd).toMatchSnapshot();
   });
 

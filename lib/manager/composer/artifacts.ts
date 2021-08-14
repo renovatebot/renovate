@@ -27,7 +27,8 @@ import type { AuthJson } from './types';
 import {
   composerVersioningId,
   extractContraints,
-  getConstraint,
+  getComposerConstraint,
+  getPhpConstraint,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -104,14 +105,19 @@ export async function updateArtifacts({
       await deleteLocalFile(lockFileName);
     }
 
+    const preCommands: string[] = [
+      `install-tool composer ${await getComposerConstraint(constraints)}`,
+    ];
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_AUTH: getAuthJson(),
       },
       docker: {
-        image: 'composer',
-        tagConstraint: getConstraint(constraints),
+        preCommands,
+        image: 'php',
+        tagConstraint: getPhpConstraint(constraints),
         tagScheme: composerVersioningId,
       },
       cacheTmpdir: {

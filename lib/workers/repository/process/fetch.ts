@@ -3,7 +3,6 @@ import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
-import { getPackageUpdates } from '../../../manager';
 import type { PackageDependency, PackageFile } from '../../../manager/types';
 import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
@@ -37,11 +36,6 @@ async function fetchDepUpdates(
       dep = {
         ...dep,
         ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
-      };
-    } else {
-      dep = {
-        ...dep,
-        ...(await getPackageUpdates(packageFileConfig.manager, depConfig)),
       };
     }
     dep.updates = dep.updates || [];

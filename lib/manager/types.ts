@@ -50,17 +50,6 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   newMajor?: number;
 }
 
-export interface PackageUpdateConfig {
-  currentValue?: string;
-  rangeStrategy?: RangeStrategy;
-  supportPolicy?: string[];
-}
-
-export interface PackageUpdateResult {
-  sourceUrl?: string;
-  updates: LookupUpdate[];
-}
-
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
@@ -252,8 +241,6 @@ export interface ManagerApi {
     packageFile?: string,
     config?: ExtractConfig
   ): Result<PackageFile | null>;
-
-  getPackageUpdates?(config: PackageUpdateConfig): Result<PackageUpdateResult>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

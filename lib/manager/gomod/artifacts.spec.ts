@@ -245,6 +245,7 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('This update totally doesnt work');
     });
+    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -266,6 +267,7 @@ describe('.updateArtifacts()', () => {
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New main.go' as any)
       .mockResolvedValueOnce('New go.mod' as any);
+    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -291,6 +293,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New go.mod' as any);
+    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -317,6 +320,7 @@ describe('.updateArtifacts()', () => {
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New main.go' as any)
       .mockResolvedValueOnce('New go.mod' as any);
+    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -346,6 +350,7 @@ describe('.updateArtifacts()', () => {
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New main.go' as any)
       .mockResolvedValueOnce('New go.mod' as any);
+    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -374,6 +379,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New go.mod' as any);
+    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',

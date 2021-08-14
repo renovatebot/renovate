@@ -26,6 +26,7 @@ describe(getName(), () => {
         password: 'pass123',
       });
       const res = processHostRules();
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns mixed rules content', () => {
@@ -47,6 +48,7 @@ describe(getName(), () => {
         password: 'pass123',
       });
       const res = processHostRules();
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

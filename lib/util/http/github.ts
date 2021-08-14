@@ -122,6 +122,12 @@ function handleGotError(
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
+  if (
+    err.statusCode === 410 &&
+    err.body?.message === 'Issues are disabled for this repo'
+  ) {
+    throw err;
+  }
   if (err.statusCode === 404) {
     logger.debug({ url: path }, 'GitHub 404');
   } else {

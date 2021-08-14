@@ -61,7 +61,12 @@ describe('logger', () => {
     logger.error({ some: 'meta' }, 'message');
     logger.warn('a warning with a p4$$w0rd');
     logger.info('ignored');
-    expect(getProblems()).toMatchSnapshot();
+    expect(getProblems()).toMatchSnapshot([
+      { msg: 'some meta' },
+      { some: 'meta', password: '***********' },
+      { some: 'meta', msg: 'message' },
+      { msg: 'a warning with a **redacted**' },
+    ]);
     clearProblems();
     expect(getProblems()).toHaveLength(0);
   });

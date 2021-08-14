@@ -1655,15 +1655,6 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'supportPolicy',
-    description:
-      'Dependency support policy, e.g. used for LTS vs non-LTS etc (Node only).',
-    type: 'array',
-    subType: 'string',
-    stage: 'package',
-    allowString: true,
-  },
-  {
     name: 'node',
     description: 'Configuration object for Node version renovation.',
     stage: 'package',
@@ -1828,7 +1819,7 @@ const options: RenovateOptions[] = [
   {
     name: 'authType',
     description:
-      'Authentication type for http header. e.g. "Bearer" or "Basic".',
+      'Authentication type for http header. e.g. "Bearer" or "Basic". Use "Token-Only" to use only the token without an authorization type.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -1903,7 +1894,13 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'gitLabAutomerge',
-    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging PRs.`,
+    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging MRs.`,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'gitLabIgnoreApprovals',
+    description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
     default: false,
   },
@@ -2034,6 +2031,13 @@ const options: RenovateOptions[] = [
     default: ['commit', 'push'],
     stage: 'global',
     admin: true,
+  },
+  {
+    name: 'updatePinnedDependencies',
+    description:
+      'Whether to update pinned (single version) dependencies or not.',
+    type: 'boolean',
+    default: true,
   },
 ];
 

@@ -79,6 +79,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Chart.lock' as any);
     const updatedDeps = [{ depName: 'dep1' }];
+    // FIXME: explicit assert condition
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -94,6 +95,7 @@ describe('.updateArtifacts()', () => {
     git.getFile.mockResolvedValueOnce('Old Chart.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Chart.lock' as any);
+    // FIXME: explicit assert condition
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -111,6 +113,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Chart.lock' as any);
     const updatedDeps = [{ depName: 'dep1' }];
+    // FIXME: explicit assert condition
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -127,6 +130,7 @@ describe('.updateArtifacts()', () => {
       throw new Error('not found');
     });
     const updatedDeps = [{ depName: 'dep1' }];
+    // FIXME: explicit assert condition
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',

@@ -50,6 +50,17 @@ describe('.updateArtifacts()', () => {
     hostRules.clear();
     setAdminConfig(adminConfig);
     fs.ensureCacheDir.mockResolvedValue('/tmp/renovate/cache/others/composer');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.3.0' },
+        { version: '1.10.0' },
+        { version: '1.10.17' },
+        { version: '2.0.14' },
+        { version: '2.1.0' },
+      ],
+    });
   });
 
   afterEach(() => {
@@ -212,12 +223,14 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
 
     fs.readLocalFile.mockResolvedValueOnce('{  }');
+
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '1.10.0' },
-        { version: '1.10.17' },
-        { version: '2.0.0' },
-        { version: '2.0.7' },
+        { version: '7.2.34' },
+        { version: '7.3' }, // composer versioning bug
+        { version: '7.3.29' },
+        { version: '7.4.22' },
+        { version: '8.0.6' },
       ],
     });
 
@@ -231,10 +244,11 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, constraints: { composer: '^1.10.0' } },
+        config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(3);
   });
 
   it('supports global mode', async () => {
@@ -262,6 +276,7 @@ describe('.updateArtifacts()', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -279,6 +294,7 @@ describe('.updateArtifacts()', () => {
         'fooYour requirements could not be resolved to an installable set of packages.bar'
       );
     });
+    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',

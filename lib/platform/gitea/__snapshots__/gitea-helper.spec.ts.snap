@@ -3,7 +3,7 @@
 exports[`platform/gitea/gitea-helper addReviewers should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint 1`] = `
 Array [
   Object {
-    "body": "{}",
+    "body": Object {},
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -21,7 +21,9 @@ Array [
 exports[`platform/gitea/gitea-helper closeIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "state": "closed",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -39,7 +41,9 @@ Array [
 exports[`platform/gitea/gitea-helper closePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"state\\":\\"closed\\"}",
+    "body": Object {
+      "state": "closed",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -57,7 +61,9 @@ Array [
 exports[`platform/gitea/gitea-helper createComment should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"body\\":\\"some-comment\\"}",
+    "body": Object {
+      "body": "some-comment",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -75,7 +81,12 @@ Array [
 exports[`platform/gitea/gitea-helper createCommitStatus should call /api/v1/repos/[repo]/statuses/[commit] endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"state\\":\\"success\\",\\"context\\":\\"some-context\\",\\"description\\":\\"some-description\\",\\"target_url\\":\\"https://gitea.renovatebot.com/commit-status\\"}",
+    "body": Object {
+      "context": "some-context",
+      "description": "some-description",
+      "state": "success",
+      "target_url": "https://gitea.renovatebot.com/commit-status",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -93,7 +104,14 @@ Array [
 exports[`platform/gitea/gitea-helper createIssue should call /api/v1/repos/[repo]/issues endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"state\\":\\"open\\",\\"title\\":\\"Some Issue\\",\\"body\\":\\"just some issue\\",\\"assignees\\":[\\"admin\\"]}",
+    "body": Object {
+      "assignees": Array [
+        "admin",
+      ],
+      "body": "just some issue",
+      "state": "open",
+      "title": "Some Issue",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -111,7 +129,19 @@ Array [
 exports[`platform/gitea/gitea-helper createPR should call /api/v1/repos/[repo]/pulls endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"state\\":\\"open\\",\\"title\\":\\"Some PR\\",\\"body\\":\\"Lorem ipsum dolor sit amet\\",\\"base\\":\\"master\\",\\"head\\":\\"pull-req-13\\",\\"assignees\\":[\\"admin\\"],\\"labels\\":[100]}",
+    "body": Object {
+      "assignees": Array [
+        "admin",
+      ],
+      "base": "master",
+      "body": "Lorem ipsum dolor sit amet",
+      "head": "pull-req-13",
+      "labels": Array [
+        100,
+      ],
+      "state": "open",
+      "title": "Some PR",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -594,7 +624,9 @@ Array [
 exports[`platform/gitea/gitea-helper mergePR should call /api/v1/repos/[repo]/pulls/[pull]/merge endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"Do\\":\\"rebase\\"}",
+    "body": Object {
+      "Do": "rebase",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -732,7 +764,9 @@ Array [
 exports[`platform/gitea/gitea-helper updateComment should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"body\\":\\"new-body\\"}",
+    "body": Object {
+      "body": "new-body",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -750,7 +784,14 @@ Array [
 exports[`platform/gitea/gitea-helper updateIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"state\\":\\"closed\\",\\"title\\":\\"new-title\\",\\"body\\":\\"new-body\\",\\"assignees\\":[\\"renovate\\"]}",
+    "body": Object {
+      "assignees": Array [
+        "renovate",
+      ],
+      "body": "new-body",
+      "state": "closed",
+      "title": "new-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -768,7 +809,12 @@ Array [
 exports[`platform/gitea/gitea-helper updateIssueLabels should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"labels\\":[1,3]}",
+    "body": Object {
+      "labels": Array [
+        1,
+        3,
+      ],
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
@@ -786,7 +832,17 @@ Array [
 exports[`platform/gitea/gitea-helper updatePR should call /api/v1/repos/[repo]/pulls/[pull] endpoint 1`] = `
 Array [
   Object {
-    "body": "{\\"state\\":\\"closed\\",\\"title\\":\\"new-title\\",\\"body\\":\\"new-body\\",\\"assignees\\":[\\"renovate\\"],\\"labels\\":[200]}",
+    "body": Object {
+      "assignees": Array [
+        "renovate",
+      ],
+      "body": "new-body",
+      "labels": Array [
+        200,
+      ],
+      "state": "closed",
+      "title": "new-title",
+    },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",

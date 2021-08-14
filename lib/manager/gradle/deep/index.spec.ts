@@ -108,6 +108,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -117,6 +118,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle.kts',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -157,6 +159,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -166,6 +169,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -176,6 +180,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -185,6 +190,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -208,6 +214,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'baz/qux/build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -218,6 +225,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -228,6 +236,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
@@ -239,6 +248,7 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
+      // FIXME: explicit assert condition
       expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });

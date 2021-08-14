@@ -133,6 +133,7 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',

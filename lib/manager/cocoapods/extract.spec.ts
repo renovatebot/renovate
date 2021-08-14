@@ -16,11 +16,14 @@ describe(getName(), () => {
       setAdminConfig(adminConfig);
       const simpleResult = (await extractPackageFile(simplePodfile, 'Podfile'))
         .deps;
+      // FIXME: explicit assert condition
       expect(simpleResult).toMatchSnapshot();
 
+      // TODO: split test
       const complexResult = (
         await extractPackageFile(complexPodfile, 'Podfile')
       ).deps;
+      // FIXME: explicit assert condition
       expect(complexResult).toMatchSnapshot();
     });
   });

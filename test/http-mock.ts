@@ -46,10 +46,14 @@ export function clear(throwOnPending = true): void {
   const pending = nock.pendingMocks();
   nock.abortPendingRequests();
   nock.cleanAll();
+  const missing = missingLog;
   requestLog = [];
   missingLog = [];
   if (!isDone && throwOnPending) {
     throw new Error(`Pending mocks!\n * ${pending.join('\n * ')}`);
+  }
+  if (missing.length && throwOnPending) {
+    throw new Error(`Missing mocks!\n * ${missing.join('\n * ')}`);
   }
 }
 
@@ -58,13 +62,19 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
     const { headers, method } = req;
     const url = req.options?.href;
     const result: RequestLogItem = { headers, method, url };
-    const body = req.requestBodyBuffers?.[0]?.toString();
+    const requestBody = req.requestBodyBuffers?.[0]?.toString();
 
-    if (body) {
+    if (requestBody && headers['content-type'] === 'application/json') {
       try {
-        result.graphql = makeGraphqlSnapshot(body);
-      } catch (ex) {
-        result.body = body;
+        const body = JSON.parse(requestBody);
+        const graphql = makeGraphqlSnapshot(body);
+        if (graphql) {
+          result.graphql = graphql;
+        } else {
+          result.body = body;
+        }
+      } catch (e) {
+        result.body = requestBody;
       }
     }
     requestLog.push(result);

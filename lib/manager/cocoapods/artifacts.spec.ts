@@ -132,6 +132,7 @@ describe('.updateArtifacts()', () => {
       modified: ['Podfile.lock'],
     } as StatusResult);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -153,6 +154,7 @@ describe('.updateArtifacts()', () => {
       modified: ['Podfile.lock', 'Pods/Manifest.lock'],
       deleted: ['Pods/Deleted'],
     } as StatusResult);
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -169,6 +171,7 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -184,6 +187,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
     fs.outputFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -213,6 +217,7 @@ describe('.updateArtifacts()', () => {
       newPackageFileContent: '',
       config,
     });
+    // FIXME: explicit assert condition
     expect(execSnapshots).toMatchSnapshot();
   });
   it('falls back to the `latest` Docker image tag', async () => {
@@ -237,6 +242,7 @@ describe('.updateArtifacts()', () => {
       newPackageFileContent: '',
       config,
     });
+    // FIXME: explicit assert condition
     expect(execSnapshots).toMatchSnapshot();
   });
 });
