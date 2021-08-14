@@ -28,7 +28,6 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns releases from default registry', async () => {
@@ -42,7 +41,19 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('return null if not found', async () => {
+      httpMock
+        .scope('https://gitlab.com')
+        .get('/api/v4/projects/some%2Fdep2/releases')
+        .reply(404);
+      expect(
+        await getPkgReleases({
+          datasource: GitlabReleasesDatasource.id,
+          depName: 'some/dep2',
+        })
+      ).toBeNull();
     });
   });
 });
