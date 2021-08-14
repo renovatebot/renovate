@@ -581,7 +581,7 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used to encrypt npm tokens.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
 
 ## excludeCommitPaths
 
@@ -713,9 +713,20 @@ Example:
 }
 ```
 
+## gitLabIgnoreApprovals
+
+Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
+This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`.
+Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
+
 ## golang
 
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
+
+For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://golang.org/ref/mod#module-proxy)).
+
+But when you use the `direct` or `off` keywords Renovate will fallback to its own fetching strategy (i.e. directly from GitHub, etc).
 
 ## group
 
@@ -906,6 +917,22 @@ An example for npm basic auth with token:
 ```
 
 This will generate the following header: `authorization: Basic <some-token>`.
+
+To use a bare token in the authorization header (required by e.g. Hex) - use the `authType` "Token-Only":
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://hex.pm/api/repos/private_repo/",
+      "token": "<some-token>",
+      "authType": "Token-Only"
+    }
+  ]
+}
+```
+
+This will generate the header `authorization: <some-token>`.
 
 ### concurrentRequestLimit
 
@@ -1140,12 +1167,12 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 ## npmToken
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
 Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
 
 ## packageRules
 
@@ -2273,12 +2300,6 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 <!-- markdownlint-enable MD001 -->
 
-## supportPolicy
-
-Language support is limited to those listed below:
-
-- **Node.js** - [Read our Node.js documentation](https://docs.renovatebot.com/node#configuring-support-policy)
-
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
@@ -2324,6 +2345,11 @@ However there are cases where updates might be desirable - e.g. if you have conf
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
+
+## updatePinnedDependencies
+
+By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
+You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
 
 ## versioning
 

@@ -77,6 +77,7 @@ export type PlatformPrOptions = {
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   usePlatformAutomerge?: boolean;
+  gitLabIgnoreApprovals?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -115,6 +116,11 @@ export interface FindPRConfig {
   state?: PrState.Open | PrState.Closed | PrState.NotOpen | PrState.All;
   refreshCache?: boolean;
 }
+export interface MergePRConfig {
+  branchName?: string;
+  id: number;
+  strategy?: MergeStrategy;
+}
 export interface EnsureCommentConfig {
   number: number;
   topic: string;
@@ -152,11 +158,7 @@ export interface Platform {
   ): Promise<EnsureIssueResult | null>;
   massageMarkdown(prBody: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
-  mergePr(
-    number: number,
-    branchName: string,
-    mergeStrategy?: MergeStrategy
-  ): Promise<boolean>;
+  mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr>;

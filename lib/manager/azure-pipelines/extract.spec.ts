@@ -33,7 +33,10 @@ describe(getName(), () => {
           name: 'user/repo',
           ref: 'refs/tags/v1.0.0',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        depName: 'user/repo',
+        lookupName: 'https://github.com/user/repo.git',
+      });
     });
 
     it('should return null when repository type is not github', () => {
@@ -69,11 +72,16 @@ describe(getName(), () => {
 
   describe('extractContainer()', () => {
     it('should extract container information', () => {
+      // FIXME: explicit assert condition
       expect(
         extractContainer({
           image: 'ubuntu:16.04',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        depName: 'ubuntu',
+        currentValue: '16.04',
+        datasource: 'docker',
+      });
     });
     it('should return null if image field is missing', () => {
       expect(extractContainer({ image: null })).toBeNull();

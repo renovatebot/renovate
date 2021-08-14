@@ -1598,13 +1598,21 @@ describe(getName(), () => {
             )
             .reply(200);
 
-          expect(await bitbucket.mergePr(5, 'branch')).toBe(true);
+          expect(
+            await bitbucket.mergePr({
+              branchName: 'branch',
+              id: 5,
+            })
+          ).toBe(true);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('throws not-found 1', async () => {
           await initRepo();
-          const res = bitbucket.mergePr(null as any, 'branch');
+          const res = bitbucket.mergePr({
+            branchName: 'branch',
+            id: null as any,
+          });
           await expect(res).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1617,9 +1625,12 @@ describe(getName(), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.mergePr(4, 'branch')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.mergePr({
+              branchName: 'branch',
+              id: 4,
+            })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1639,9 +1650,12 @@ describe(getName(), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.mergePr({
+              branchName: 'branch',
+              id: 5,
+            })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1661,7 +1675,12 @@ describe(getName(), () => {
             )
             .reply(409);
 
-          expect(await bitbucket.mergePr(5, 'branch')).toBeFalsy();
+          expect(
+            await bitbucket.mergePr({
+              branchName: 'branch',
+              id: 5,
+            })
+          ).toBeFalsy();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1681,7 +1700,12 @@ describe(getName(), () => {
             )
             .reply(405);
 
-          await expect(bitbucket.mergePr(5, 'branch')).resolves.toBe(false);
+          await expect(
+            bitbucket.mergePr({
+              branchName: 'branch',
+              id: 5,
+            })
+          ).resolves.toBe(false);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

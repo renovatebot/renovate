@@ -1080,7 +1080,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(updatePullRequestMock).toHaveBeenCalledWith(
         {
@@ -1118,7 +1121,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
       expect(res).toBe(false);
     });
 
@@ -1138,8 +1144,14 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      await azure.mergePr(1234, 'test-branch-1');
-      await azure.mergePr(5678, 'test-branch-2');
+      await azure.mergePr({
+        branchName: 'test-branch-1',
+        id: 1234,
+      });
+      await azure.mergePr({
+        branchName: 'test-branch-2',
+        id: 5678,
+      });
 
       expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
     });
@@ -1167,7 +1179,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
       expect(res).toBe(true);
@@ -1197,7 +1212,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(
         expectedNumRetries + 1

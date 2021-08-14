@@ -21,6 +21,7 @@ describe(getName(), () => {
         },
       },
     });
+    // FIXME: explicit assert condition
     expect(errSerializer(err)).toMatchSnapshot();
   });
   it('handles missing fields', () => {
@@ -29,6 +30,7 @@ describe(getName(), () => {
       stack: 'foo',
       body: 'some body',
     });
+    // FIXME: explicit assert condition
     expect(errSerializer(err)).toMatchSnapshot();
   });
 
@@ -85,7 +87,15 @@ describe(getName(), () => {
       delete err.stack;
 
       // sanitize like Bunyan
-      expect(sanitizeValue(err)).toMatchSnapshot();
+      expect(sanitizeValue(err)).toMatchSnapshot({
+        name: 'HTTPError',
+        options: {
+          method: 'POST',
+          password: '***********',
+          url: 'https://:**redacted**@github.com/api',
+          username: '',
+        },
+      });
     });
   });
 });

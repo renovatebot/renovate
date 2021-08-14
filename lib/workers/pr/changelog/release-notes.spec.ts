@@ -76,6 +76,7 @@ describe(getName(), () => {
         project: { github: 'https://github.com/nodeca/js-yaml' },
         versions: [{ version: '3.10.0', compare: { url: '' } }],
       };
+      // FIXME: explicit assert condition
       expect(await addReleaseNotes(input as never)).toMatchSnapshot();
     });
     it('returns ChangeLogResult without release notes', async () => {
@@ -84,6 +85,7 @@ describe(getName(), () => {
         project: { gitlab: 'https://gitlab.com/gitlab-org/gitter/webapp/' },
         versions: [{ version: '20.26.0', compare: { url: '' } }],
       };
+      // FIXME: explicit assert condition
       expect(await addReleaseNotes(input as never)).toMatchSnapshot();
     });
   });
@@ -108,6 +110,7 @@ describe(getName(), () => {
         'https://api.github.com/',
         'some/yet-other-repository'
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -128,6 +131,7 @@ describe(getName(), () => {
         'https://gitlab.com/api/v4/',
         'some/yet-other-repository'
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -149,6 +153,7 @@ describe(getName(), () => {
         'https://my.custom.domain/api/v4/',
         'some/yet-other-repository'
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -189,6 +194,7 @@ describe(getName(), () => {
           'https://github.com/',
           'https://api.github.com/'
         );
+        // FIXME: explicit assert condition
         expect(res).toMatchSnapshot();
         expect(httpMock.getTrace()).toMatchSnapshot();
       }
@@ -214,6 +220,7 @@ describe(getName(), () => {
           'https://gitlab.com/',
           'https://api.gitlab.com/'
         );
+        // FIXME: explicit assert condition
         expect(res).toMatchSnapshot();
         expect(httpMock.getTrace()).toMatchSnapshot();
       }
@@ -221,6 +228,11 @@ describe(getName(), () => {
     it.each([[''], ['v'], ['other-']])(
       'gets null from repository without gitlab/github in domain %s',
       async (prefix) => {
+        // FIXME: Should not call `api.lol.lol` ?
+        httpMock
+          .scope('https://api.lol.lol')
+          .get('/repos/some/other-repository/releases?per_page=100')
+          .reply(404);
         const res = await getReleaseNotes(
           'some/other-repository',
           '1.0.1',
@@ -234,6 +246,7 @@ describe(getName(), () => {
   });
   describe('getReleaseNotesMd()', () => {
     it('handles not found', async () => {
+      httpMock.scope('https://api.github.com').get('/repos/chalk').reply(404);
       const res = await getReleaseNotesMd(
         'chalk',
         '2.0.0',
@@ -320,6 +333,7 @@ describe(getName(), () => {
         'https://github.com/',
         'https://api.github.com/'
       );
+      // FIXME: explicit assert condition
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -341,6 +355,7 @@ describe(getName(), () => {
         'https://api.gitlab.com/'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
@@ -362,6 +377,7 @@ describe(getName(), () => {
         'https://my.custom.domain/'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
@@ -383,6 +399,7 @@ describe(getName(), () => {
         'https://api.github.com/'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
@@ -410,6 +427,7 @@ describe(getName(), () => {
         sourceDirectory
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
@@ -431,6 +449,7 @@ describe(getName(), () => {
         'https://api.github.com/'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
@@ -456,6 +475,7 @@ describe(getName(), () => {
         );
         versionOneNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
+        // FIXME: explicit assert condition
         expect(res).not.toBeNull();
         expect(res).toMatchSnapshot();
       });
@@ -478,6 +498,7 @@ describe(getName(), () => {
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
+        // FIXME: explicit assert condition
         expect(res).not.toBeNull();
         expect(res).toMatchSnapshot();
       });
@@ -500,6 +521,7 @@ describe(getName(), () => {
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
+        // FIXME: explicit assert condition
         expect(res).not.toBeNull();
         expect(res).toMatchSnapshot();
       });
@@ -528,6 +550,7 @@ describe(getName(), () => {
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
+        // FIXME: explicit assert condition
         expect(res).not.toBeNull();
         expect(res).toMatchSnapshot();
       });

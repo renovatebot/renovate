@@ -435,6 +435,7 @@ describe('semverRuby', () => {
     });
 
     it('does not error', () => {
+      // FIXME: explicit assert condition
       expect(
         semverRuby.getNewValue({
           currentValue: '>= 3.2, < 5.0',

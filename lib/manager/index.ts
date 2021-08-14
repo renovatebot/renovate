@@ -17,8 +17,6 @@ import type {
   ExtractConfig,
   ManagerApi,
   PackageFile,
-  PackageUpdateConfig,
-  PackageUpdateResult,
   RangeConfig,
   Result,
 } from './types';
@@ -67,17 +65,6 @@ export async function extractAllPackageFiles(
     return res;
   }
   return null;
-}
-
-export function getPackageUpdates(
-  manager: string,
-  config: PackageUpdateConfig
-): Result<PackageUpdateResult> | null {
-  if (!managers.has(manager)) {
-    return null;
-  }
-  const m = managers.get(manager);
-  return m.getPackageUpdates ? m.getPackageUpdates(config) : null;
 }
 
 export function extractPackageFile(

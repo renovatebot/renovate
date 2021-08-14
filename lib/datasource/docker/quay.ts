@@ -1,9 +1,9 @@
 import { http } from './common';
 
 export async function getTagsQuayRegistry(
+  registry: string,
   repository: string
 ): Promise<string[]> {
-  const registry = 'https://quay.io';
   let tags: string[] = [];
   const limit = 100;
 

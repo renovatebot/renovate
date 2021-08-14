@@ -60,3 +60,5 @@ releases:
   needs:
     - manifests
   version: 13.7.2
+
+- name: invalid

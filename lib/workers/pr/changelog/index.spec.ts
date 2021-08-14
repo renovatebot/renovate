@@ -94,6 +94,7 @@ describe(getName(), () => {
         .get('/repos/chalk/chalk/releases?per_page=100')
         .times(4)
         .reply(500);
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -116,6 +117,7 @@ describe(getName(), () => {
         .persist()
         .get(/.*/)
         .reply(200, []);
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -133,16 +135,20 @@ describe(getName(), () => {
         ...upgrade,
         depName: '@renovate/no',
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports node engines', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           depType: 'engines',
         })
       ).toMatchSnapshot();
+      // FIXME: missing mocks
+      httpMock.clear(false);
     });
     it('handles no sourceUrl', async () => {
       expect(
@@ -191,6 +197,7 @@ describe(getName(), () => {
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -211,6 +218,7 @@ describe(getName(), () => {
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -232,6 +240,7 @@ describe(getName(), () => {
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,

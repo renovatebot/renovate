@@ -396,7 +396,14 @@ Object {
     },
     Object {
       "currentValue": "5.9.0",
+      "datasource": "npm",
       "depName": "npm",
+      "depType": "volta",
+      "prettyDepType": "volta",
+    },
+    Object {
+      "currentValue": "6.11.2",
+      "depName": "pnpm",
       "depType": "volta",
       "prettyDepType": "volta",
       "skipReason": "unknown-volta",

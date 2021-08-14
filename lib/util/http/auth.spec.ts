@@ -110,32 +110,55 @@ describe(getName(), () => {
         }
       `);
     });
-  });
 
-  it(`npm basic token`, () => {
-    const opts: GotOptions = {
-      headers: {},
-      token: 'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
-      hostType: 'npm',
-      context: {
-        authType: 'Basic',
-      },
-    };
-
-    applyAuthorization(opts);
-
-    expect(opts).toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
-          "authType": "Basic",
+    it(`npm basic token`, () => {
+      const opts: GotOptions = {
+        headers: {},
+        token:
+          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+        hostType: 'npm',
+        context: {
+          authType: 'Basic',
         },
-        "headers": Object {
-          "authorization": "Basic a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toEqual({
+        context: {
+          authType: 'Basic',
         },
-        "hostType": "npm",
-        "token": "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
-      }
-    `);
+        headers: {
+          authorization:
+            'Basic a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+        },
+        hostType: 'npm',
+        token:
+          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+      });
+    });
+
+    it(`bare token`, () => {
+      const opts: GotOptions = {
+        headers: {},
+        token: '01234567890123456789',
+        context: {
+          authType: 'Token-Only',
+        },
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toEqual({
+        context: {
+          authType: 'Token-Only',
+        },
+        headers: {
+          authorization: '01234567890123456789',
+        },
+        token: '01234567890123456789',
+      });
+    });
   });
 
   describe('removeAuthorization', () => {

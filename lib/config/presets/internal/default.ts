@@ -523,6 +523,10 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Renovate Dependency Dashboard creation',
     dependencyDashboard: true,
   },
+  disableDependencyDashboard: {
+    description: 'Disable Renovate Dependency Dashboard creation',
+    dependencyDashboard: false,
+  },
   dependencyDashboardApproval: {
     description: 'Enable Renovate Dependency Dashboard approval workflow',
     dependencyDashboardApproval: true,

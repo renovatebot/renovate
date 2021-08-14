@@ -32,6 +32,7 @@ const removedOptions = [
   'groupPrBody',
   'statusCheckVerify',
   'lazyGrouping',
+  'supportPolicy',
 ];
 
 // Returns a migrated config
