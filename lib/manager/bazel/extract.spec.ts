@@ -23,18 +23,29 @@ describe(getName(), () => {
     });
     it('extracts github tags', () => {
       const res = extractPackageFile(workspace2File);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toMatchSnapshot([
+        { lookupName: 'lmirosevic/GBDeviceInfo' },
+        { lookupName: 'nelhage/rules_boost' },
+        { lookupName: 'lmirosevic/GBDeviceInfo' },
+        { lookupName: 'nelhage/rules_boost' },
+      ]);
     });
     it('handle comments and strings', () => {
       const res = extractPackageFile(workspace3File);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toMatchSnapshot([{ lookupName: 'nelhage/rules_boost' }]);
     });
     it('extracts dependencies from *.bzl files', () => {
       const res = extractPackageFile(fileWithBzlExtension);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toMatchSnapshot([
+        {
+          currentDigest: '0356bef3fbbabec5f0e196ecfacdeb6db62d48c0',
+          lookupName: 'google/subpar',
+        },
+        {
+          currentValue: '0.6.0',
+          lookupName: 'bazelbuild/bazel-skylib',
+        },
+      ]);
     });
 
     it('extracts dependencies for container_pull deptype', () => {
@@ -49,8 +60,16 @@ describe(getName(), () => {
           tag="v1.0.0-alpha31.cli-migrations"
         )`
       );
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toMatchSnapshot([
+        {
+          currentDigest:
+            'sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548',
+          currentValue: 'v1.0.0-alpha31.cli-migrations',
+          depType: 'container_pull',
+          lookupName: 'hasura/graphql-engine',
+          registryUrls: ['index.docker.io'],
+        },
+      ]);
     });
 
     it('check remote option in go_repository', () => {

@@ -166,6 +166,7 @@ const repoGroups = {
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
+  vstest: 'https://github.com/microsoft/vstest',
 };
 
 const patternGroups = {
@@ -174,6 +175,7 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  'aws-java-sdk-v2': '^software.amazon.awssdk:',
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
 };
