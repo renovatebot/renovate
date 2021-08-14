@@ -36,7 +36,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker constraints options 2`] = `
+exports[`bundler.updateArtifacts() Docker constraints options 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",

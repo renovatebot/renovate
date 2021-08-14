@@ -190,7 +190,7 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot([updatedGemfileLock]);
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid constraints options', async () => {
