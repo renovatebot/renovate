@@ -1,5 +1,5 @@
 import { getName, loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/admin';
 import { extractPackageFile } from './extract';
 
 const requirements1 = loadFixture('requirements1.txt');
@@ -13,11 +13,11 @@ const requirements7 = loadFixture('requirements7.txt');
 describe(getName(), () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    setAdminConfig();
+    setGlobalConfig();
   });
   afterEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    setAdminConfig();
+    setGlobalConfig();
   });
   describe('extractPackageFile()', () => {
     let config;
@@ -123,7 +123,7 @@ describe(getName(), () => {
     });
     it('should replace env vars in high trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
-      setAdminConfig({ exposeAllEnv: true });
+      setGlobalConfig({ exposeAllEnv: true });
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',

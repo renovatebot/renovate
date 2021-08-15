@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/admin';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -99,7 +99,7 @@ export async function generateLockFile(
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
       extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
     }
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
       } else {
@@ -118,7 +118,7 @@ export async function generateLockFile(
       },
     };
     // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
+    if (getGlobalConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }

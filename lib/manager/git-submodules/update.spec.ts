@@ -2,8 +2,8 @@ import _simpleGit from 'simple-git';
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/admin';
+import type { RepoGlobalConfig } from '../../config/types';
 import type { Upgrade } from '../types';
 import updateDependency from './update';
 
@@ -13,16 +13,16 @@ const simpleGit: any = _simpleGit;
 describe(getName(), () => {
   describe('updateDependency', () => {
     let upgrade: Upgrade;
-    let adminConfig: RepoAdminConfig;
+    let adminConfig: RepoGlobalConfig;
     beforeAll(async () => {
       upgrade = { depName: 'renovate' };
 
       const tmpDir = await dir();
       adminConfig = { localDir: join(tmpDir.path) };
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
     });
     afterAll(() => {
-      setAdminConfig();
+      setGlobalConfig();
     });
     it('returns null on error', async () => {
       simpleGit.mockReturnValue({

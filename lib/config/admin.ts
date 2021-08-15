@@ -1,9 +1,9 @@
-import type { RenovateConfig, RepoAdminConfig } from './types';
+import type { RenovateConfig, RepoGlobalConfig } from './types';
 
-let adminConfig: RepoAdminConfig = {};
+let repoGlobalConfig: RepoGlobalConfig = {};
 
 // TODO: once admin config work is complete, add a test to make sure this list includes all options with admin=true (#9603)
-const repoAdminOptions = [
+const repoGlobalOptions = [
   'allowCustomCrateRegistries',
   'allowPostUpgradeCommandTemplating',
   'allowScripts',
@@ -21,18 +21,18 @@ const repoAdminOptions = [
   'cacheDir',
 ];
 
-export function setAdminConfig(
-  config: RenovateConfig | RepoAdminConfig = {}
+export function setGlobalConfig(
+  config: RenovateConfig | RepoGlobalConfig = {}
 ): RenovateConfig {
-  adminConfig = {};
+  repoGlobalConfig = {};
   const result = { ...config };
-  for (const option of repoAdminOptions) {
-    adminConfig[option] = config[option];
+  for (const option of repoGlobalOptions) {
+    repoGlobalConfig[option] = config[option];
     delete result[option]; // eslint-disable-line no-param-reassign
   }
   return result;
 }
 
-export function getAdminConfig(): RepoAdminConfig {
-  return adminConfig;
+export function getGlobalConfig(): RepoGlobalConfig {
+  return repoGlobalConfig;
 }

@@ -12,8 +12,8 @@ import {
   git,
   partial,
 } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/admin';
+import type { RepoGlobalConfig } from '../../config/types';
 import { resetPrefetchedImages } from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git';
 import type { UpdateArtifactsConfig } from '../types';
@@ -27,7 +27,7 @@ jest.mock('../../util/exec/env');
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const fixtures = resolve(__dirname, './__fixtures__');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: resolve(fixtures, './testFiles'),
 };
 
@@ -54,14 +54,14 @@ describe(getName(), () => {
       LC_ALL: 'en_US',
     });
 
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
   });
 
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
 
   it('replaces existing value', async () => {
@@ -100,7 +100,7 @@ describe(getName(), () => {
   });
 
   it('gradlew not found', async () => {
-    setAdminConfig({ ...adminConfig, localDir: 'some-dir' });
+    setGlobalConfig({ ...adminConfig, localDir: 'some-dir' });
     const res = await dcUpdate.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],

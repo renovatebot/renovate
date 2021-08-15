@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { fs, getName, loadFixture, mocked } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/admin';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { TerraformProviderHash } from './hash';
@@ -32,7 +32,7 @@ describe(getName(), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
   });
 
   afterEach(() => {

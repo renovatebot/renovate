@@ -5,7 +5,7 @@ import {
   getName,
   platform,
 } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/admin';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';
@@ -22,7 +22,7 @@ beforeEach(() => {
 describe(getName(), () => {
   describe('raiseConfigWarningIssue()', () => {
     beforeEach(() => {
-      setAdminConfig();
+      setGlobalConfig();
     });
     it('creates issues', async () => {
       const error = new Error(CONFIG_VALIDATION);
@@ -37,7 +37,7 @@ describe(getName(), () => {
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
-      setAdminConfig({ dryRun: true });
+      setGlobalConfig({ dryRun: true });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
@@ -62,7 +62,7 @@ describe(getName(), () => {
         number: 1,
         state: PrState.Open,
       });
-      setAdminConfig({ dryRun: true });
+      setGlobalConfig({ dryRun: true });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });

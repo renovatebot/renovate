@@ -3,13 +3,13 @@ import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { add } from '../util/sanitize';
-import { getAdminConfig } from './admin';
+import { getGlobalConfig } from './admin';
 import type { RenovateConfig } from './types';
 
 export function decryptConfig(config: RenovateConfig): RenovateConfig {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
-  const { privateKey } = getAdminConfig();
+  const { privateKey } = getGlobalConfig();
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');
