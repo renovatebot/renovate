@@ -2,7 +2,7 @@ import type { RenovateConfig, RepoGlobalConfig } from './types';
 
 let repoGlobalConfig: RepoGlobalConfig = {};
 
-// TODO: once admin config work is complete, add a test to make sure this list includes all options with admin=true (#9603)
+// TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
 const repoGlobalOptions = [
   'allowCustomCrateRegistries',
   'allowPostUpgradeCommandTemplating',
