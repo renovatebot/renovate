@@ -1,10 +1,10 @@
-import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { getManagers } from '../manager';
-import { getPlatformList } from '../platform';
-import { getVersioningList } from '../versioning';
-import * as dockerVersioning from '../versioning/docker';
-import * as pep440Versioning from '../versioning/pep440';
-import type { RenovateOptions } from './types';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { getManagers } from '../../manager';
+import { getPlatformList } from '../../platform';
+import { getVersioningList } from '../../versioning';
+import * as dockerVersioning from '../../versioning/docker';
+import * as pep440Versioning from '../../versioning/pep440';
+import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
