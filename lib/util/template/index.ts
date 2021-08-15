@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as handlebars from 'handlebars';
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { clone } from '../clone';
 

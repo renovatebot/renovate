@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { getName, mocked } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import * as _env from '../../../util/exec/env';
 import * as _lernaHelper from './lerna';
 

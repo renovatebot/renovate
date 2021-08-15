@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
-import { getGlobalConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';

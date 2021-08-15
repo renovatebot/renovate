@@ -3,7 +3,7 @@ import util from 'util';
 import is from '@sindresorhus/is';
 import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 
 export * from './proxies';

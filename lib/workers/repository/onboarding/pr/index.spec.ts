@@ -6,7 +6,7 @@ import {
   partial,
   platform,
 } from '../../../../../test/util';
-import { setGlobalConfig } from '../../../../config/admin';
+import { setGlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../manager/types';
 import { Pr } from '../../../../platform';

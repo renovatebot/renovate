@@ -3,7 +3,7 @@ import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
 import { getName, git, partial } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/deep/__testutil__/gradle';

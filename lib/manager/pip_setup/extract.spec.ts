@@ -1,6 +1,6 @@
 import { envMock, exec, mockExecSequence } from '../../../test/exec-util';
 import { env, getName } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import {
   getPythonAlias,
   parsePythonVersion,

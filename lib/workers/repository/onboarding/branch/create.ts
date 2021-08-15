@@ -1,5 +1,5 @@
-import { getGlobalConfig } from '../../../../config/admin';
 import { configFileNames } from '../../../../config/app-strings';
+import { getGlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';

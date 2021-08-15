@@ -2,7 +2,7 @@ import type { Stats } from 'fs';
 import os from 'os';
 import { chmod } from 'fs-extra';
 import upath from 'upath';
-import { getGlobalConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import type { ExtractConfig } from '../../types';
 
 export const extraEnv = {

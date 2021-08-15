@@ -1,6 +1,6 @@
 import { getName, git, mocked } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/admin';
 import { getConfig } from '../../../config/defaults';
+import { setGlobalConfig } from '../../../config/global';
 import * as _lockFiles from '../../../manager/npm/post-update';
 import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _npm from '../../../manager/npm/post-update/npm';

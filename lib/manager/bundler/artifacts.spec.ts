@@ -2,7 +2,7 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, git, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';

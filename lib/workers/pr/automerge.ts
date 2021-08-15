@@ -1,4 +1,4 @@
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';

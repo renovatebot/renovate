@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { commitFiles } from '../../util/git';

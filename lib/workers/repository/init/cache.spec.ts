@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig, getName } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import { initializeCaches } from './cache';
 
 describe(getName(), () => {

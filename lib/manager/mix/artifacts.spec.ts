@@ -1,7 +1,7 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, getName, hostRules } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';

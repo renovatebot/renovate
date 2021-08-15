@@ -1,7 +1,7 @@
 import type { Stats } from 'fs';
 import { stat } from 'fs-extra';
 import upath from 'upath';
-import { getGlobalConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as datasourceMaven from '../../../datasource/maven';
 import { logger } from '../../../logger';

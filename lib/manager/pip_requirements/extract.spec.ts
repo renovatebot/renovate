@@ -1,5 +1,5 @@
 import { getName, loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import { extractPackageFile } from './extract';
 
 const requirements1 = loadFixture('requirements1.txt');

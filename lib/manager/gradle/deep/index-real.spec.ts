@@ -1,7 +1,7 @@
 import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { getName } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../../types';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';

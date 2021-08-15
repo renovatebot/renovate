@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { getName, partial } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import * as hostRules from '../../util/host-rules';
 import type { PackageFile } from '../types';
 import extractPackageFile from './extract';

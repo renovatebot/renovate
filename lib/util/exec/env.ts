@@ -1,4 +1,4 @@
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 
 const basicEnvVars = [
   'HTTP_PROXY',

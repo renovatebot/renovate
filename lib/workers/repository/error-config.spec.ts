@@ -5,7 +5,7 @@ import {
   getName,
   platform,
 } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';

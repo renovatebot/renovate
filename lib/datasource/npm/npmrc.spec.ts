@@ -1,5 +1,5 @@
 import { getName, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import * as _sanitize from '../../util/sanitize';
 import { getNpmrc, setNpmrc } from './npmrc';
 
