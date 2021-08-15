@@ -282,7 +282,7 @@ Or if you wish to avoid forward slashes in branch names then you could use `reno
 e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `additionalBranchPrefix`, like `"additionalBranchPrefix": "{{parentDir}}-"`.
 
 Note that this setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
-If you wish to change that too, you need to also configure the field `onboardingBranch` in your admin bot config.
+If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
 
 ## branchTopic
 
@@ -1615,7 +1615,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
-Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (an admin-only configuration option) in order to be executed.
+Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
 
 e.g.

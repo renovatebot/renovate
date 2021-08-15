@@ -2,28 +2,18 @@
 
 ## Configuration Methods
 
-Renovate's bot admin settings can be configured via any of these methods:
+Renovate global config can be defined via any of these methods:
 
 - Configuration file
 - Environment variables
 - CLI parameters
-- Configuration file in target repository at one of the following paths:
-  - `renovate.json`
-  - `renovate.json5`
-  - `.github/renovate.json`
-  - `.github/renovate.json5`
-  - `.gitlab/renovate.json`
-  - `.gitlab/renovate.json5`
-  - `.renovaterc.json`
-  - `.renovaterc`
-  - `renovate` field of `package.json` in target repository
 
 The above are listed in **_reverse order_** of preference. e.g. CLI values will override environment values if they conflict.
 
 ### Default Configuration
 
 The default configuration values can be found in [lib/config/options/index.ts](../../lib/config/options/index.ts).
-Options which have `"admin": true` are reserved only for bot admin configuration and cannot be configured within repository config files.
+Options which have `"globalOnly": true` are reserved only for bot global configuration and cannot be configured within repository config files.
 
 ### Configuration File
 
