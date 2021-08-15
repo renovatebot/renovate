@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { getOptions } from '../lib/config/definitions';
+import { getOptions } from '../lib/config/options';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -71,7 +71,7 @@ describe('docs', () => {
     expect(headers3).toEqual(expectedOptions3);
   });
 
-  // Checking relatedOptions field in definitions
+  // Checking relatedOptions field in options
   const relatedOptionsMatrix = options
     .filter((option) => option.relatedOptions)
     .map((option) => option.relatedOptions)
@@ -89,13 +89,13 @@ describe('docs', () => {
       if (received.includes(argument)) {
         return {
           message: (): string =>
-            `Option "${argument}" should be within definitions`,
+            `Option "${argument}" should be within options`,
           pass: true,
         };
       }
       return {
         message: (): string =>
-          `Option "${argument}" doesn't exist within definitions`,
+          `Option "${argument}" doesn't exist within options`,
         pass: false,
       };
     },

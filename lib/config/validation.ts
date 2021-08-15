@@ -3,8 +3,8 @@ import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import { getOptions } from './definitions';
 import { migrateConfig } from './migration';
+import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
