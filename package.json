@@ -242,7 +242,7 @@
     "eslint": "7.32.0",
     "eslint-config-airbnb-typescript": "12.3.1",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-import": "2.23.4",
+    "eslint-plugin-import": "2.24.0",
     "eslint-plugin-jest": "24.4.0",
     "eslint-plugin-promise": "5.1.0",
     "glob": "7.1.7",
