@@ -181,7 +181,7 @@ describe(getName(), () => {
       return { dirFromEnv, dirFromConfig };
     }
 
-    it('prefers environment variables over admin config', async () => {
+    it('prefers environment variables over global config', async () => {
       await withDir(
         async (tmpDir) => {
           const { dirFromEnv } = setupMock(tmpDir.path);
