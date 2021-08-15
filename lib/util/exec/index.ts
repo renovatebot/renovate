@@ -18,16 +18,13 @@ import { getChildProcessEnv } from './env';
 
 type ExtraEnv<T = unknown> = Record<string, T>;
 
-export interface CacheDirOption {
-  path: string;
-  env: string;
-}
+export type CacheOptions = Record<string, string>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
   cwdFile?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
-  cacheTmpdir?: Opt<CacheDirOption>;
+  cache?: Opt<CacheOptions>;
 }
 
 function getChildEnv({
@@ -77,7 +74,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   delete execOptions.extraEnv;
   delete execOptions.docker;
   delete execOptions.cwdFile;
-  delete execOptions.cacheTmpdir;
+  delete execOptions.cache;
 
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
@@ -108,7 +105,7 @@ async function prepareRawExec(
   cmd: string | string[],
   opts: ExecOptions = {}
 ): Promise<RawExecArguments> {
-  const { cacheTmpdir, docker } = opts;
+  const { cache = {}, docker } = opts;
   const { customEnvVariables, dockerCache } = getAdminConfig();
 
   const rawOptions = getRawExecOptions(opts);
@@ -126,29 +123,36 @@ async function prepareRawExec(
     const cwd = getCwd();
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
-    if (cacheTmpdir && dockerCache && dockerCache !== 'none') {
-      const mountTarget = `/tmp`;
-      if (dockerCache === 'volume') {
-        const tmpCacheName = `${tmpCacheNs}_${tmpCacheId}`;
-        const mountedCachePath = join(mountTarget, cacheTmpdir.path);
-        const mountPair: VolumesPair = [tmpCacheName, mountTarget];
+    const preCommands: string[] = [];
+    for (const [cacheEnv, cachePath] of Object.entries(cache)) {
+      if (cache && dockerCache && dockerCache !== 'none') {
+        const mountTarget = `/tmp`;
+        if (dockerCache === 'volume') {
+          const tmpCacheName = `${tmpCacheNs}_${tmpCacheId}`;
+          const mountedCachePath = join(mountTarget, cachePath);
+          const mountPair: VolumesPair = [tmpCacheName, mountTarget];
 
-        dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
-        rawOptions.env[cacheTmpdir.env] = mountedCachePath;
-        dockerOptions.preCommands = [
-          `mkdir -p ${mountedCachePath}`,
-          ...(dockerOptions.preCommands || []),
-        ];
-      } else if (dockerCache === 'mount') {
-        const tmpCacheSubdir = join(tmpCacheNs, tmpCacheId);
-        const mountSource = await ensureCacheDir(tmpCacheSubdir);
-        const mountPair: VolumesPair = [mountSource, mountTarget];
-        dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
-        const targetCachePath = join(mountTarget, cacheTmpdir.path);
-        rawOptions.env[cacheTmpdir.env] = targetCachePath;
+          dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
+          rawOptions.env[cacheEnv] = mountedCachePath;
+          preCommands.push(`mkdir -p ${mountedCachePath}`);
+        } else if (dockerCache === 'folder') {
+          const tmpCacheSubdir = join(tmpCacheNs, tmpCacheId);
+          const mountSource = await ensureCacheDir(tmpCacheSubdir);
+          const mountPair: VolumesPair = [mountSource, mountTarget];
+          dockerOptions.volumes = [...(dockerOptions.volumes || []), mountPair];
+          const targetCachePath = join(mountTarget, cachePath);
+          rawOptions.env[cacheEnv] = targetCachePath;
+        }
+
+        dockerOptions.envVars.push(cacheEnv);
       }
+    }
 
-      dockerOptions.envVars.push(cacheTmpdir.env);
+    if (preCommands.length) {
+      dockerOptions.preCommands = [
+        ...preCommands,
+        ...(dockerOptions.preCommands || []),
+      ];
     }
 
     const dockerCommand = await generateDockerCommand(
@@ -156,11 +160,13 @@ async function prepareRawExec(
       dockerOptions
     );
     rawCommands = [dockerCommand];
-  } else if (cacheTmpdir) {
-    const mountSource = join(tmpCacheNs, tmpCacheId);
-    const sourceCachePath = join(mountSource, cacheTmpdir.path);
-    const cacheLocalPath = await ensureCacheDir(sourceCachePath);
-    rawOptions.env[cacheTmpdir.env] = cacheLocalPath;
+  } else if (cache) {
+    for (const [cacheEnv, cachePath] of Object.entries(cache)) {
+      const mountSource = join(tmpCacheNs, tmpCacheId);
+      const sourceCachePath = join(mountSource, cachePath);
+      const cacheLocalPath = await ensureCacheDir(sourceCachePath);
+      rawOptions.env[cacheEnv] = cacheLocalPath;
+    }
   }
 
   return { rawCommands, rawOptions };

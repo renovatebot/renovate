@@ -99,10 +99,7 @@ export async function updateArtifacts({
           `pip install --user ${quote(`pipenv${pipenvConstraint}`)}`,
         ],
       },
-      cacheTmpdir: {
-        env: 'PIPENV_CACHE_DIR',
-        path: 'pipenv',
-      },
+      cache: { PIPENV_CACHE_DIR: 'pipenv' },
     };
     logger.debug({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);

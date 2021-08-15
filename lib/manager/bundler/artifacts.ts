@@ -182,10 +182,7 @@ export async function updateArtifacts(
         tagConstraint: await getRubyConstraint(updateArtifact),
         preCommands,
       },
-      cacheTmpdir: {
-        path: 'bundler',
-        env: 'GEM_HOME',
-      },
+      cache: { GEM_HOME: 'bundler' },
     };
     await exec(cmd, execOptions);
 

@@ -282,10 +282,9 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'dockerCache',
-    description:
-      'Change this to enable per-repository cache being mounted as a Docker volume or temporary directory (will be cleaned up after each run).',
+    description: 'Control caching mechanism for executed binaries.',
     type: 'string',
-    allowedValues: ['volume', 'mount', 'none'],
+    allowedValues: ['volume', 'folder', 'none'],
     admin: true,
     default: 'none',
   },

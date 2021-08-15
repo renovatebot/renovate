@@ -69,7 +69,7 @@ export async function purgeCachedTmpDirs(): Promise<void> {
     if (dockerCache === 'volume') {
       logger.trace(`Deleting Docker cache volume: ${cacheNs}_*`);
       await volumePrune({ renovate: cacheNs });
-    } else if (dockerCache === 'mount') {
+    } else if (dockerCache === 'folder') {
       await purgeCacheRoot();
     }
   } else {
@@ -94,7 +94,7 @@ export async function ensureCachedTmpDir(): Promise<void> {
       const cacheName = `${cacheNs}_${cacheId}`;
       logger.trace(`Creating Docker cache volume: ${cacheName}`);
       await volumeCreate(cacheName, { renovate: cacheNs });
-    } else if (dockerCache === 'mount') {
+    } else if (dockerCache === 'folder') {
       await ensureCacheRoot();
     }
   } else {

@@ -93,11 +93,11 @@ export interface RepoAdminConfig {
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global';
   customEnvVariables?: Record<string, string>;
-  dockerCache?: 'volume' | 'mount' | 'none';
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
+  dockerCache?: 'volume' | 'folder' | 'none';
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string | Buffer;

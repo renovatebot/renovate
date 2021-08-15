@@ -83,7 +83,7 @@ describe(getName(), () => {
       setAdminConfig({
         binarySource: 'docker',
         cacheDir: '/foo/bar',
-        dockerCache: 'mount',
+        dockerCache: 'folder',
       });
       await purgeCachedTmpDirs();
 
@@ -98,7 +98,7 @@ describe(getName(), () => {
       setAdminConfig({
         binarySource: 'global',
         cacheDir: '/foo/bar',
-        dockerCache: 'mount',
+        dockerCache: 'folder',
       });
       await purgeCachedTmpDirs();
 
@@ -113,7 +113,7 @@ describe(getName(), () => {
       setAdminConfig({
         binarySource: 'docker',
         cacheDir: '/foo/bar',
-        dockerCache: 'mount',
+        dockerCache: 'folder',
         dockerChildPrefix: 'custom_prefix_',
       });
       await purgeCachedTmpDirs();
@@ -147,7 +147,7 @@ describe(getName(), () => {
       setAdminConfig({
         binarySource: 'docker',
         cacheDir: '/foo/bar',
-        dockerCache: 'mount',
+        dockerCache: 'folder',
       });
       await purgeCachedTmpDirs();
 
@@ -221,7 +221,7 @@ describe(getName(), () => {
       setAdminConfig({
         binarySource: 'docker',
         cacheDir: '/foo/bar',
-        dockerCache: 'mount',
+        dockerCache: 'folder',
       });
 
       await ensureCachedTmpDir();
@@ -237,7 +237,7 @@ describe(getName(), () => {
       setAdminConfig({
         binarySource: 'global',
         cacheDir: '/foo/bar',
-        dockerCache: 'mount',
+        dockerCache: 'folder',
       });
       await ensureCachedTmpDir();
 

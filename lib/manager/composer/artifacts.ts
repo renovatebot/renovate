@@ -120,10 +120,7 @@ export async function updateArtifacts({
         tagConstraint: getPhpConstraint(constraints),
         tagScheme: composerVersioningId,
       },
-      cacheTmpdir: {
-        path: 'composer',
-        env: 'COMPOSER_CACHE_DIR',
-      },
+      cache: { COMPOSER_CACHE_DIR: 'composer' },
     };
     const cmd = 'composer';
     let args: string;

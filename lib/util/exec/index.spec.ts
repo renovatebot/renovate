@@ -666,12 +666,12 @@ describe(getName(), () => {
         inOpts: {
           docker,
           cwd,
-          cacheTmpdir: { path: './foo/bar', env: 'FOO_BAR' },
+          cache: { FOO: 'foo', BAR: 'bar' },
         },
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_tmpdir_cache_${cacheId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/foo/bar && ${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "renovate_tmpdir_cache_${cacheId}":"/tmp" -e FOO -e BAR ${defaultCwd} ${fullImage} bash -l -c "mkdir -p /tmp/foo && mkdir -p /tmp/bar && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -679,10 +679,7 @@ describe(getName(), () => {
           {
             cwd,
             encoding,
-            env: {
-              ...envMock.basic,
-              FOO_BAR: '/tmp/foo/bar',
-            },
+            env: { ...envMock.basic, FOO: '/tmp/foo', BAR: '/tmp/bar' },
             timeout: 900000,
             maxBuffer: 10485760,
           },
@@ -699,12 +696,12 @@ describe(getName(), () => {
         inOpts: {
           docker,
           cwd,
-          cacheTmpdir: { path: './foo/bar', env: 'FOO_BAR' },
+          cache: { FOO: 'foo', BAR: 'bar' },
         },
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${cacheDir}renovate_tmpdir_cache/${cacheId}":"/tmp" -e FOO_BAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${cacheDir}renovate_tmpdir_cache/${cacheId}":"/tmp" -e FOO -e BAR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -712,15 +709,12 @@ describe(getName(), () => {
           {
             cwd,
             encoding,
-            env: {
-              ...envMock.basic,
-              FOO_BAR: '/tmp/foo/bar',
-            },
+            env: { ...envMock.basic, FOO: '/tmp/foo', BAR: '/tmp/bar' },
             timeout: 900000,
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { binarySource: 'docker', dockerCache: 'mount' },
+        adminConfig: { binarySource: 'docker', dockerCache: 'folder' },
       },
     ],
 
@@ -730,7 +724,7 @@ describe(getName(), () => {
         processEnv,
         inCmd,
         inOpts: {
-          cacheTmpdir: { path: './foo/bar', env: 'FOO_BAR' },
+          cache: { FOO_BAR: './foo/bar' },
         },
         outCmd,
         outOpts: [
