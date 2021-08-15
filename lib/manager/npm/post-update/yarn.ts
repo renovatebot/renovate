@@ -50,7 +50,7 @@ export function getOptimizeCommand(
 
 export async function generateLockFile(
   cwd: string,
-  config: PostUpdateConfig = {},
+  config: PostUpdateConfig,
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   const lockFileName = join(cwd, 'yarn.lock');
