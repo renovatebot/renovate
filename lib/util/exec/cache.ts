@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { chmod, ensureCacheDir, exists, readdir, remove, stat } from '../fs';
 import { getCachedTmpDirId, resetCachedTmpDirId } from './cache-id';
@@ -8,9 +8,9 @@ import { volumeCreate, volumePrune } from './docker/volume';
 export * from './cache-id';
 
 export function getCachedTmpDirNs(): string {
-  const { dockerChildPrefix } = getAdminConfig();
+  const { dockerChildPrefix } = getGlobalConfig();
   const rawPrefix = dockerChildPrefix || 'renovate';
-  const prefix = rawPrefix.replace(/\//g, '_').replace(/_+$/, '');
+  const prefix: string = rawPrefix.replace(/\//g, '_').replace(/_+$/, '');
   const suffix = 'tmpdir_cache';
   return `${prefix}_${suffix}`;
 }
@@ -36,7 +36,7 @@ async function fixFilePermissionsBeforeDelete(entry: string): Promise<void> {
 }
 
 async function purgeCacheRoot(): Promise<void> {
-  const { cacheDir } = getAdminConfig();
+  const { cacheDir } = getGlobalConfig();
   const cacheNs = getCachedTmpDirNs();
   const cacheRoot = join(cacheDir, cacheNs);
   if (await exists(cacheRoot)) {
@@ -52,7 +52,7 @@ async function purgeCacheRoot(): Promise<void> {
 
 export async function purgeCachedTmpDirs(): Promise<void> {
   resetCachedTmpDirId();
-  const { binarySource, dockerCache } = getAdminConfig();
+  const { binarySource, dockerCache } = getGlobalConfig();
   if (binarySource === 'docker') {
     const cacheNs = getCachedTmpDirNs();
     if (dockerCache === 'volume') {
@@ -75,7 +75,7 @@ async function ensureCacheRoot(): Promise<void> {
 }
 
 export async function ensureCachedTmpDir(): Promise<void> {
-  const { binarySource, dockerCache } = getAdminConfig();
+  const { binarySource, dockerCache } = getGlobalConfig();
   const cacheNs = getCachedTmpDirNs();
   const cacheId = getCachedTmpDirId();
   if (binarySource === 'docker') {

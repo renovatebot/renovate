@@ -2,8 +2,8 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
@@ -31,7 +31,7 @@ const getRandomString: jest.Mock<typeof _getRandomString> =
   _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
@@ -49,12 +49,12 @@ describe('updateArtifacts', () => {
       Promise.resolve(`/cache/dir/${dirName}`)
     );
     getRandomString.mockReturnValue('not-so-random' as any);
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
 
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
 
   it('aborts if no lock file found', async () => {
@@ -150,7 +150,7 @@ describe('updateArtifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -166,7 +166,7 @@ describe('updateArtifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'global' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);

@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { getName, mocked } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import * as _execCacheId from '../../../util/exec/cache-id';
 import * as _env from '../../../util/exec/env';
 import * as _lernaHelper from './lerna';
@@ -34,7 +34,7 @@ describe(getName(), () => {
       jest.resetAllMocks();
       jest.resetModules();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
-      setAdminConfig({ cacheDir: '/tmp/cache' });
+      setGlobalConfig({ cacheDir: '/tmp/cache' });
       execCacheId.getCachedTmpDirId.mockReturnValue('12345');
     });
     it('returns if no lernaClient', async () => {
@@ -95,7 +95,7 @@ describe(getName(), () => {
     });
     it('allows scripts for trust level high', async () => {
       const execSnapshots = mockExecAll(exec);
-      setAdminConfig({ allowScripts: true, cacheDir: '/tmp/cache' });
+      setGlobalConfig({ allowScripts: true, cacheDir: '/tmp/cache' });
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',

@@ -11,8 +11,8 @@ import {
   loadFixture,
   mocked,
 } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
-import type { RepoAdminConfig } from '../../../config/types';
+import { setGlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import * as _env from '../../../util/exec/env';
 import type { ExtractConfig } from '../../types';
@@ -26,7 +26,7 @@ const fs = mocked(_fs);
 jest.mock('../../../util/exec/env');
 const env = mocked(_env);
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: join('/foo/bar'),
 };
 
@@ -88,11 +88,11 @@ describe(getName(), () => {
   }
 
   beforeAll(() => {
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
   });
 
   afterAll(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
 
   beforeEach(() => {
@@ -220,7 +220,7 @@ describe(getName(), () => {
     });
 
     it('should use docker if required', async () => {
-      setAdminConfig(dockerAdminConfig);
+      setGlobalConfig(dockerAdminConfig);
       const execSnapshots = setupMocks({ wrapperFilename: null });
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
@@ -231,7 +231,7 @@ describe(getName(), () => {
     });
 
     it('should use docker even if gradlew is available', async () => {
-      setAdminConfig(dockerAdminConfig);
+      setGlobalConfig(dockerAdminConfig);
       const execSnapshots = setupMocks();
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
@@ -242,7 +242,7 @@ describe(getName(), () => {
     });
 
     it('should use docker even if gradlew.bat is available on Windows', async () => {
-      setAdminConfig(dockerAdminConfig);
+      setGlobalConfig(dockerAdminConfig);
       jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
       const execSnapshots = setupMocks({ wrapperFilename: 'gradlew.bat' });
       const dependencies = await extractAllPackageFiles(config, [

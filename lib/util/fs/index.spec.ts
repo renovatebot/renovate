@@ -1,7 +1,7 @@
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import {
   ensureCacheDir,
   ensureLocalDir,
@@ -17,7 +17,7 @@ import {
 describe(getName(), () => {
   describe('readLocalFile', () => {
     beforeEach(() => {
-      setAdminConfig({ localDir: '' });
+      setGlobalConfig({ localDir: '' });
     });
 
     it('reads buffer', async () => {
@@ -55,7 +55,7 @@ describe(getName(), () => {
     it('returns path for file', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
 
@@ -109,7 +109,7 @@ describe(getName(), () => {
     it('returns dir content', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
           await writeLocalFile('test/Cargo.toml', '');
@@ -137,7 +137,7 @@ describe(getName(), () => {
     it('return empty array for non existing directory', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
           await expect(readLocalDirectory('somedir')).rejects.toThrow();
@@ -160,7 +160,7 @@ describe(getName(), () => {
     it('creates cache directory according to admin config', async () => {
       await withDir(
         async ({ path }) => {
-          setAdminConfig({ cacheDir: join(path) });
+          setGlobalConfig({ cacheDir: join(path) });
           const dir1 = await ensureCacheDir('deeply/nested');
           const dir2 = await ensureCacheDir('./deeply/nested');
           const dir3 = await ensureCacheDir('/deeply/nested');

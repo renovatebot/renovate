@@ -1,7 +1,7 @@
 import _cryptoRandomString from 'crypto-random-string';
 import { exec, mockExecAll } from '../../../test/exec-util';
-import { fs, getName, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { fs, getName } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
 import { ensureCachedTmpDir, purgeCachedTmpDirs } from './cache';
 import { getCachedTmpDirId, resetCachedTmpDirId } from './cache-id';
 
@@ -55,7 +55,7 @@ describe(getName(), () => {
     it('removes volume cache', async () => {
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'docker',
         dockerCache: 'volume',
       });
@@ -71,7 +71,7 @@ describe(getName(), () => {
     it('removes volumes from custom namespaces', async () => {
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'docker',
         dockerCache: 'volume',
         dockerChildPrefix: 'custom_prefix_',
@@ -89,7 +89,7 @@ describe(getName(), () => {
       fs.exists.mockResolvedValue(true);
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'docker',
         cacheDir: '/foo/bar',
         dockerCache: 'folder',
@@ -104,7 +104,7 @@ describe(getName(), () => {
       fs.exists.mockResolvedValue(true);
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'global',
         cacheDir: '/foo/bar',
         dockerCache: 'folder',
@@ -119,7 +119,7 @@ describe(getName(), () => {
       fs.exists.mockResolvedValue(true);
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'docker',
         cacheDir: '/foo/bar',
         dockerCache: 'folder',
@@ -153,7 +153,7 @@ describe(getName(), () => {
 
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'docker',
         cacheDir: '/foo/bar',
         dockerCache: 'folder',
@@ -196,7 +196,7 @@ describe(getName(), () => {
     it('creates new volume', async () => {
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'docker',
         dockerCache: 'volume',
       });
@@ -212,7 +212,7 @@ describe(getName(), () => {
     it('creates volumes within custom namespace', async () => {
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'docker',
         dockerCache: 'volume',
         dockerChildPrefix: 'custom_prefix_',
@@ -231,7 +231,7 @@ describe(getName(), () => {
       const execSnapshots = mockExecAll(exec);
       fs.ensureCacheDir.mockResolvedValueOnce(`/foo/bar/${expected}` as never);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'docker',
         cacheDir: '/foo/bar',
         dockerCache: 'folder',
@@ -247,7 +247,7 @@ describe(getName(), () => {
       const expected = `renovate_tmpdir_cache/${tmpVolumeId}`;
       const execSnapshots = mockExecAll(exec);
 
-      setAdminConfig({
+      setGlobalConfig({
         binarySource: 'global',
         cacheDir: '/foo/bar',
         dockerCache: 'folder',

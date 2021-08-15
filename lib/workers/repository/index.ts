@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { getAdminConfig, setAdminConfig } from '../../config/admin';
+import { getGlobalConfig, setGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
 import { ensureCachedTmpDir, purgeCachedTmpDirs } from '../../util/exec/cache';
@@ -31,8 +31,7 @@ export async function renovateRepository(
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = setAdminConfig(repoConfig);
-
+  let config = setGlobalConfig(repoConfig);
   await removeDanglingContainers();
   await purgeCachedTmpDirs();
   await ensureCachedTmpDir();
@@ -42,7 +41,7 @@ export async function renovateRepository(
   logger.trace({ config });
   let repoResult: ProcessResult;
   queue.clear();
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   try {
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);

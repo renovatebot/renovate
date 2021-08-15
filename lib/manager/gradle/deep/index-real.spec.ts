@@ -1,8 +1,8 @@
 import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { getName } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
-import type { RepoAdminConfig } from '../../../config/types';
+import { setGlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../../types';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import * as manager from '.';
@@ -21,13 +21,13 @@ describe(getName(), () => {
     let workingDir: DirectoryResult;
     let testRunConfig: ExtractConfig;
     let successFile: string;
-    let adminConfig: RepoAdminConfig;
+    let adminConfig: RepoGlobalConfig;
 
     beforeEach(async () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });
       successFile = '';
       adminConfig = { localDir: workingDir.path };
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
       testRunConfig = { ...baseConfig };
       await fsExtra.copy(`${fixtures}/minimal-project`, workingDir.path);
       await fsExtra.copy(`${fixtures}/gradle-wrappers/6`, workingDir.path);
@@ -48,7 +48,7 @@ allprojects {
     });
 
     afterEach(() => {
-      setAdminConfig();
+      setGlobalConfig();
     });
 
     it('executes an executable gradle wrapper', async () => {

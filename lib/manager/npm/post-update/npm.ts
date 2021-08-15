@@ -1,7 +1,7 @@
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -52,13 +52,13 @@ export async function generateLockFile(
       cmdOptions += '--package-lock-only --no-audit';
     }
 
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
       cmdOptions += ' --ignore-scripts';
     }
 
     let extraEnv: ExecOptions['extraEnv'] = {};
     // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
+    if (getGlobalConfig().exposeAllEnv) {
       const { NPM_AUTH, NPM_EMAIL } = getChildProcessEnv();
       extraEnv = { ...extraEnv, NPM_AUTH, NPM_EMAIL };
     }
@@ -78,6 +78,7 @@ export async function generateLockFile(
         npm_config_store: 'pnpm',
       },
     };
+
     if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
       // This command updates the lock file based on package.json
       commands.push(`npm install ${cmdOptions}`.trim());

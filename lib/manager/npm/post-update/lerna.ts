@@ -1,6 +1,6 @@
 import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
@@ -67,7 +67,7 @@ export async function generateLockFiles(
       return { error: false };
     }
     let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
-    if (getAdminConfig().allowScripts && config.ignoreScripts !== false) {
+    if (getGlobalConfig().allowScripts && config.ignoreScripts !== false) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
@@ -76,7 +76,7 @@ export async function generateLockFiles(
 
     let extraEnv: ExecOptions['extraEnv'] = {};
     // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
+    if (getGlobalConfig().exposeAllEnv) {
       const { NPM_AUTH, NPM_EMAIL } = getChildProcessEnv();
       extraEnv = { ...extraEnv, NPM_AUTH, NPM_EMAIL };
     }

@@ -3,7 +3,7 @@ import util from 'util';
 import is from '@sindresorhus/is';
 import * as fs from 'fs-extra';
 import { isAbsolute, join, parse } from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 
 export * from './proxies';
@@ -31,7 +31,7 @@ export async function readLocalFile(
   fileName: string,
   encoding?: string
 ): Promise<string | Buffer> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   const localFileName = join(localDir, fileName);
   try {
     const fileContent = await fs.readFile(localFileName, encoding);
@@ -46,13 +46,13 @@ export async function writeLocalFile(
   fileName: string,
   fileContent: string
 ): Promise<void> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   const localFileName = join(localDir, fileName);
   await fs.outputFile(localFileName, fileContent);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   if (localDir) {
     const localFileName = join(localDir, fileName);
     await fs.remove(localFileName);
@@ -64,7 +64,7 @@ export async function renameLocalFile(
   fromFile: string,
   toFile: string
 ): Promise<void> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   await fs.move(join(localDir, fromFile), join(localDir, toFile));
 }
 
@@ -77,13 +77,13 @@ export async function ensureDir(dirName: string): Promise<void> {
 
 // istanbul ignore next
 export async function ensureLocalDir(dirName: string): Promise<void> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   const localDirName = join(localDir, dirName);
   await fs.ensureDir(localDirName);
 }
 
 export async function ensureCacheDir(name: string): Promise<string> {
-  const cacheDirName = join(getAdminConfig().cacheDir, name);
+  const cacheDirName = join(getGlobalConfig().cacheDir, name);
   await fs.ensureDir(cacheDirName);
   return cacheDirName;
 }
@@ -94,12 +94,12 @@ export async function ensureCacheDir(name: string): Promise<string> {
  * without risk of that information leaking to other repositories/users.
  */
 export function privateCacheDir(): string {
-  const { cacheDir } = getAdminConfig();
+  const { cacheDir } = getGlobalConfig();
   return join(cacheDir, '__renovate-private-cache');
 }
 
 export function localPathExists(pathName: string): Promise<boolean> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   // Works for both files as well as directories
   return fs
     .stat(join(localDir, pathName))
@@ -140,7 +140,7 @@ export async function findLocalSiblingOrParent(
  * Get files by name from directory
  */
 export async function readLocalDirectory(path: string): Promise<string[]> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   const localPath = join(localDir, path);
   const fileList = await fs.readdir(localPath);
   return fileList;

@@ -3,7 +3,7 @@ import upath from 'upath';
 
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import * as _execCacheId from '../../../util/exec/cache-id';
 import * as _env from '../../../util/exec/env';
 import * as _fs from '../../../util/fs/proxies';
@@ -25,7 +25,7 @@ describe('generateLockFile', () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setAdminConfig({ cacheDir: '/tmp/cache' });
+    setGlobalConfig({ cacheDir: '/tmp/cache' });
     execCacheId.getCachedTmpDirId.mockReturnValue('12345');
   });
   it('generates lock files', async () => {

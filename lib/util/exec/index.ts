@@ -1,6 +1,6 @@
 import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ensureCacheDir } from '../fs';
@@ -31,7 +31,8 @@ function getChildEnv({
   extraEnv = {},
   env: forcedEnv = {},
 }: ExecOptions): ExtraEnv<string> {
-  const { customEnvVariables: globalConfigEnv } = getAdminConfig();
+  const { customEnvVariables: globalConfigEnv } = getGlobalConfig();
+
   const inheritedKeys = Object.entries(extraEnv).reduce(
     (acc, [key, val]) =>
       val === null || val === undefined ? acc : [...acc, key],
@@ -64,7 +65,7 @@ function dockerEnvVars(
 }
 
 function getCwd({ cwd, cwdFile }: ExecOptions = {}): string {
-  const { localDir: defaultCwd } = getAdminConfig();
+  const { localDir: defaultCwd } = getGlobalConfig();
   const paramCwd = cwdFile ? join(defaultCwd, dirname(cwdFile)) : cwd;
   return paramCwd || defaultCwd;
 }
@@ -92,7 +93,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
 }
 
 function isDocker({ docker }: ExecOptions): boolean {
-  const { binarySource } = getAdminConfig();
+  const { binarySource } = getGlobalConfig();
   return binarySource === 'docker' && !!docker;
 }
 
@@ -106,7 +107,7 @@ async function prepareRawExec(
   opts: ExecOptions = {}
 ): Promise<RawExecArguments> {
   const { cache = {}, docker } = opts;
-  const { customEnvVariables, dockerCache } = getAdminConfig();
+  const { customEnvVariables, dockerCache } = getGlobalConfig();
 
   const rawOptions = getRawExecOptions(opts);
 
@@ -177,7 +178,7 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const { dockerChildPrefix } = getAdminConfig();
+  const { dockerChildPrefix } = getGlobalConfig();
 
   const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
 

@@ -1,10 +1,10 @@
-import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { getManagers } from '../manager';
-import { getPlatformList } from '../platform';
-import { getVersioningList } from '../versioning';
-import * as dockerVersioning from '../versioning/docker';
-import * as pep440Versioning from '../versioning/pep440';
-import type { RenovateOptions } from './types';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { getManagers } from '../../manager';
+import { getPlatformList } from '../../platform';
+import { getVersioningList } from '../../versioning';
+import * as dockerVersioning from '../../versioning/docker';
+import * as pep440Versioning from '../../versioning/pep440';
+import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
@@ -12,7 +12,7 @@ const options: RenovateOptions[] = [
     description: 'If true allow templating for post-upgrade commands.',
     type: 'boolean',
     default: false,
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'allowedPostUpgradeCommands',
@@ -21,7 +21,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'postUpgradeTasks',
@@ -70,7 +70,7 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding branch name.',
     type: 'string',
     default: 'renovate/configure',
-    admin: true,
+    globalOnly: true,
     cli: false,
   },
   {
@@ -79,7 +79,7 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding commit message.',
     type: 'string',
     default: null,
-    admin: true,
+    globalOnly: true,
     cli: false,
   },
   {
@@ -88,7 +88,7 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding config file name.',
     type: 'string',
     default: 'renovate.json',
-    admin: true,
+    globalOnly: true,
     cli: false,
   },
   {
@@ -97,14 +97,14 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding PR title.',
     type: 'string',
     default: 'Configure Renovate',
-    admin: true,
+    globalOnly: true,
     cli: false,
   },
   {
     name: 'productLinks',
     description: 'Links which are embedded within PRs, issues, etc.',
     type: 'object',
-    admin: true,
+    globalOnly: true,
     mergeable: true,
     default: {
       documentation: 'https://docs.renovatebot.com/',
@@ -120,7 +120,7 @@ const options: RenovateOptions[] = [
     name: 'secrets',
     description: 'Object containing secret name/value pairs',
     type: 'object',
-    admin: true,
+    globalOnly: true,
     mergeable: true,
     default: {},
     additionalProperties: {
@@ -152,7 +152,7 @@ const options: RenovateOptions[] = [
     description:
       'Define presets here which have been removed or renamed and should be migrated automatically.',
     type: 'object',
-    admin: true,
+    globalOnly: true,
     default: {},
     additionalProperties: {
       type: 'string',
@@ -188,7 +188,7 @@ const options: RenovateOptions[] = [
   {
     name: 'repositoryCache',
     description: 'Option to do repository extract caching.',
-    admin: true,
+    globalOnly: true,
     type: 'string',
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
@@ -199,7 +199,7 @@ const options: RenovateOptions[] = [
     description:
       'Any configuration defined within this object will force override existing settings.',
     stage: 'package',
-    admin: true,
+    globalOnly: true,
     type: 'object',
     cli: false,
     env: false,
@@ -223,7 +223,7 @@ const options: RenovateOptions[] = [
     description:
       'If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs.',
     type: 'boolean',
-    admin: true,
+    globalOnly: true,
     default: false,
   },
   {
@@ -231,14 +231,14 @@ const options: RenovateOptions[] = [
     description:
       'If enabled, log the full resolved config for each repo, including resolved presets.',
     type: 'boolean',
-    admin: true,
+    globalOnly: true,
     default: false,
   },
   {
     name: 'binarySource',
     description:
       'Controls whether third party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
-    admin: true,
+    globalOnly: true,
     type: 'string',
     allowedValues: ['global', 'docker'],
     default: 'global',
@@ -261,14 +261,14 @@ const options: RenovateOptions[] = [
     name: 'cacheDir',
     description:
       'The directory for Renovate for storing caches. If left empty, Renovate will create a subdirectory within `baseDir` to use.',
-    admin: true,
+    globalOnly: true,
     type: 'string',
   },
   {
     name: 'customEnvVariables',
     description:
       'Custom environment variables for child processes and sidecar Docker containers.',
-    admin: true,
+    globalOnly: true,
     type: 'object',
     default: {},
   },
@@ -277,7 +277,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value in order to add a prefix to the Renovate Docker sidecar container names and labels.',
     type: 'string',
-    admin: true,
+    globalOnly: true,
     default: 'renovate_',
   },
   {
@@ -285,7 +285,7 @@ const options: RenovateOptions[] = [
     description: 'Control caching mechanism for executed binaries.',
     type: 'string',
     allowedValues: ['volume', 'folder', 'none'],
-    admin: true,
+    globalOnly: true,
     default: 'none',
   },
   {
@@ -294,13 +294,13 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default Renovate Docker sidecar image name prefix.',
     type: 'string',
     default: 'docker.io/renovate',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'dockerUser',
     description:
       'Specify UID and GID for Docker-based binaries when binarySource=docker is used.',
-    admin: true,
+    globalOnly: true,
     type: 'string',
   },
   {
@@ -309,7 +309,7 @@ const options: RenovateOptions[] = [
       'Enable / disable use of --ignore-platform-reqs in the Composer package manager.',
     type: 'boolean',
     default: true,
-    admin: true,
+    globalOnly: true,
   },
   // Log options
   {
@@ -328,7 +328,7 @@ const options: RenovateOptions[] = [
   {
     name: 'logContext',
     description: 'Add a global or per-repo log context to each log entry.',
-    admin: true,
+    globalOnly: true,
     type: 'string',
     default: null,
   },
@@ -338,7 +338,7 @@ const options: RenovateOptions[] = [
     description: 'Require a Configuration PR first.',
     stage: 'repository',
     type: 'boolean',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'onboardingConfig',
@@ -346,7 +346,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'object',
     default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
-    admin: true,
+    globalOnly: true,
     mergeable: true,
   },
   {
@@ -364,7 +364,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: false,
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'forkToken',
@@ -373,7 +373,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'string',
     default: '',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'requireConfig',
@@ -382,7 +382,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: true,
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'optimizeForDisabled',
@@ -391,7 +391,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     default: false,
-    admin: true,
+    globalOnly: true,
   },
   // Dependency Dashboard
   {
@@ -458,14 +458,14 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'string',
     replaceLineReturns: true,
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'privateKeyPath',
     description: 'Path to the Server-side private key.',
     stage: 'repository',
     type: 'string',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'encrypted',
@@ -505,14 +505,14 @@ const options: RenovateOptions[] = [
     description:
       'If set to true, repository data will preserved between runs instead of deleted.',
     type: 'boolean',
-    admin: true,
+    globalOnly: true,
     default: false,
   },
   {
     name: 'exposeAllEnv',
     description:
       'Configure this to true to allow passing of all env variables to package managers.',
-    admin: true,
+    globalOnly: true,
     type: 'boolean',
     default: false,
   },
@@ -520,7 +520,7 @@ const options: RenovateOptions[] = [
     name: 'allowScripts',
     description:
       'Configure this to true if repositories are allowed to run install scripts.',
-    admin: true,
+    globalOnly: true,
     type: 'boolean',
     default: false,
   },
@@ -528,7 +528,7 @@ const options: RenovateOptions[] = [
     name: 'allowCustomCrateRegistries',
     description:
       'Configure this to true if custom crate registries are allowed.',
-    admin: true,
+    globalOnly: true,
     type: 'boolean',
     default: false,
   },
@@ -545,13 +545,13 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: getPlatformList(),
     default: PLATFORM_TYPE_GITHUB,
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'endpoint',
     description: 'Custom endpoint to use.',
     type: 'string',
-    admin: true,
+    globalOnly: true,
     default: null,
   },
   {
@@ -559,14 +559,14 @@ const options: RenovateOptions[] = [
     description: 'Repository Auth Token.',
     stage: 'repository',
     type: 'string',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'username',
     description: 'Username for authentication. Currently Bitbucket only.',
     stage: 'repository',
     type: 'string',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'password',
@@ -574,7 +574,7 @@ const options: RenovateOptions[] = [
       'Password for authentication. Currently Bitbucket only (AppPassword).',
     stage: 'repository',
     type: 'string',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'npmrc',
@@ -599,7 +599,7 @@ const options: RenovateOptions[] = [
       'Skip installing modules/dependencies if lock file updating is possible alone.',
     type: 'boolean',
     default: null,
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'autodiscover',
@@ -642,14 +642,14 @@ const options: RenovateOptions[] = [
     name: 'gitAuthor',
     description: 'Author to use for Git commits. Must conform to RFC5322.',
     type: 'string',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'gitPrivateKey',
     description: 'PGP key to use for signing Git commits.',
     type: 'string',
     cli: false,
-    admin: true,
+    globalOnly: true,
     stage: 'global',
   },
   {
@@ -2029,7 +2029,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['commit', 'push'],
     default: ['commit', 'push'],
     stage: 'global',
-    admin: true,
+    globalOnly: true,
   },
   {
     name: 'updatePinnedDependencies',

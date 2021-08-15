@@ -1,6 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { RenovateConfig, getConfig, getName, mocked } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
 import * as _execCacheId from '../../util/exec/cache-id';
 import * as _process from './process';
 import { ExtractResult } from './process/extract-update';
@@ -20,8 +21,9 @@ describe(getName(), () => {
   describe('renovateRepository()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
-      config = { ...getConfig(), localDir: '', cacheDir: '' };
       execCacheId.getCachedTmpDirId.mockReturnValue('1234');
+      setGlobalConfig({ localDir: '' });
+      config = { ...getConfig(), localDir: '', cacheDir: '' };
     });
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());

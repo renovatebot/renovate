@@ -1,7 +1,7 @@
 import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { setAdminConfig } from './admin';
 import { getConfig } from './defaults';
+import { setGlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
   MigratedConfig,
@@ -707,7 +707,7 @@ describe(getName(), () => {
     });
   });
   it('it migrates presets', () => {
-    setAdminConfig({
+    setGlobalConfig({
       migratePresets: {
         '@org': 'local>org/renovate-config',
         '@org2/foo': '',
