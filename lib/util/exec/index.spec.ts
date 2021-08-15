@@ -3,17 +3,20 @@ import {
   exec as _cpExec,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
-import { getName } from '../../../test/util';
+import { getName, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { resetCachedTmpDirId } from './cache';
+import * as _execCacheId from './cache-id';
 import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
 import { ExecOptions, exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 jest.mock('child_process');
+jest.mock('./cache-id');
+
+const execCacheId = mocked(_execCacheId);
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -42,7 +45,7 @@ describe(getName(), () => {
     jest.resetModules();
     processEnvOrig = process.env;
     setAdminConfig();
-    resetCachedTmpDirId(cacheId);
+    execCacheId.getCachedTmpDirId.mockReturnValue(cacheId);
   });
 
   afterEach(() => {

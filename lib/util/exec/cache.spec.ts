@@ -1,39 +1,44 @@
+import _cryptoRandomString from 'crypto-random-string';
 import { exec, mockExecAll } from '../../../test/exec-util';
-import { fs, getName } from '../../../test/util';
+import { fs, getName, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
-import {
-  ensureCachedTmpDir,
-  getCachedTmpDirId,
-  purgeCachedTmpDirs,
-  resetCachedTmpDirId,
-} from './cache';
+import { ensureCachedTmpDir, purgeCachedTmpDirs } from './cache';
+import { getCachedTmpDirId, resetCachedTmpDirId } from './cache-id';
 
 jest.mock('child_process');
-
+jest.mock('crypto-random-string');
 jest.mock('../../util/fs');
+
+const cryptoRandomString: jest.Mock<typeof _cryptoRandomString> =
+  _cryptoRandomString as any;
 
 describe(getName(), () => {
   const tmpVolumeId = '0123456789abcdef';
 
   beforeEach(() => {
     jest.resetAllMocks();
-    resetCachedTmpDirId(tmpVolumeId);
+    resetCachedTmpDirId();
   });
 
   describe('getCachedTmpDirId', () => {
     it('returns new volume after reset', () => {
-      resetCachedTmpDirId();
+      cryptoRandomString.mockReturnValueOnce('foo' as never);
       const res1 = getCachedTmpDirId();
+
       resetCachedTmpDirId();
+      cryptoRandomString.mockReturnValueOnce('bar' as never);
       const res2 = getCachedTmpDirId();
+
       expect(res1).not.toEqual(res2);
     });
 
     it('preserves same volume name until reset', () => {
-      resetCachedTmpDirId('foo');
+      cryptoRandomString.mockReturnValueOnce('foo' as never);
       const res1 = getCachedTmpDirId();
       const res2 = getCachedTmpDirId();
-      resetCachedTmpDirId('bar');
+
+      resetCachedTmpDirId();
+      cryptoRandomString.mockReturnValueOnce('bar' as never);
       const res3 = getCachedTmpDirId();
 
       expect(res1).toBe('foo');
@@ -43,6 +48,10 @@ describe(getName(), () => {
   });
 
   describe('purgeCachedTmpDirs', () => {
+    beforeEach(() => {
+      cryptoRandomString.mockReturnValue(tmpVolumeId as never);
+    });
+
     it('removes volume cache', async () => {
       const execSnapshots = mockExecAll(exec);
 
@@ -180,6 +189,10 @@ describe(getName(), () => {
   });
 
   describe('ensureCachedTmpDir', () => {
+    beforeEach(() => {
+      cryptoRandomString.mockReturnValue(tmpVolumeId as never);
+    });
+
     it('creates new volume', async () => {
       const execSnapshots = mockExecAll(exec);
 

@@ -6,7 +6,7 @@ import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
-import { resetCachedTmpDirId } from '../../util/exec/cache';
+import * as _cacheId from '../../util/exec/cache-id';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
 import type { UpdateArtifactsConfig } from '../types';
@@ -14,6 +14,7 @@ import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../util/exec/cache-id');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../platform');
@@ -23,6 +24,7 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const datasource = mocked(_datasource);
+const cacheId = mocked(_cacheId);
 
 delete process.env.CP_HOME_DIR;
 
@@ -50,7 +52,7 @@ describe('.updateArtifacts()', () => {
         { version: '1.2.5' },
       ],
     });
-    resetCachedTmpDirId('1234');
+    cacheId.getCachedTmpDirId.mockReturnValue('1234');
   });
   afterEach(() => {
     setAdminConfig();

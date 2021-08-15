@@ -1,22 +1,11 @@
-import cryptoRandomString from 'crypto-random-string';
 import { join } from 'upath';
 import { getAdminConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import { chmod, ensureCacheDir, exists, readdir, remove, stat } from '../fs';
+import { getCachedTmpDirId, resetCachedTmpDirId } from './cache-id';
 import { volumeCreate, volumePrune } from './docker/volume';
 
-let cachedTmpDirId: string = null;
-
-export function getCachedTmpDirId(): string {
-  if (!cachedTmpDirId) {
-    cachedTmpDirId = cryptoRandomString({ length: 16 });
-  }
-  return cachedTmpDirId;
-}
-
-export function resetCachedTmpDirId(cacheId: string = null): void {
-  cachedTmpDirId = cacheId;
-}
+export * from './cache-id';
 
 export function getCachedTmpDirNs(): string {
   const { dockerChildPrefix } = getAdminConfig();

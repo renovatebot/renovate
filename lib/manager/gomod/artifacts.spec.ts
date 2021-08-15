@@ -5,7 +5,7 @@ import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
-import { resetCachedTmpDirId } from '../../util/exec/cache';
+import * as _execCacheId from '../../util/exec/cache-id';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -19,11 +19,13 @@ jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../util/host-rules');
 jest.mock('../../util/http');
+jest.mock('../../util/exec/cache-id');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const hostRules = mocked(_hostRules);
+const execCacheId = mocked(_execCacheId);
 
 const gomod1 = `module github.com/renovate-tests/gomod1
 
@@ -64,7 +66,7 @@ describe('.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     setAdminConfig(adminConfig);
     docker.resetPrefetchedImages();
-    resetCachedTmpDirId('1234');
+    execCacheId.getCachedTmpDirId.mockReturnValue('1234');
   });
   afterEach(() => {
     setAdminConfig();
