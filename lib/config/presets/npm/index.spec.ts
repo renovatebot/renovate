@@ -1,6 +1,6 @@
 import * as httpMock from '../../../../test/http-mock';
 import { getName } from '../../../../test/util';
-import { setGlobalConfig } from '../../admin';
+import { setGlobalConfig } from '../../global';
 import * as npm from '.';
 
 jest.mock('registry-auth-token');

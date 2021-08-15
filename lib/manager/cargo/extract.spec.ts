@@ -1,7 +1,7 @@
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { getName, loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { writeLocalFile } from '../../util/fs';
 import type { ExtractConfig } from '../types';

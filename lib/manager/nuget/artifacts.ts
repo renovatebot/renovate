@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { id, parseRegistryUrl } from '../../datasource/nuget';
 import { logger } from '../../logger';

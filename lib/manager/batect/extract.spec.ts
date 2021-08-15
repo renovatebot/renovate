@@ -1,5 +1,5 @@
 import { getName } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';

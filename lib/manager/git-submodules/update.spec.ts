@@ -2,7 +2,7 @@ import _simpleGit from 'simple-git';
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { getName } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { Upgrade } from '../types';
 import updateDependency from './update';

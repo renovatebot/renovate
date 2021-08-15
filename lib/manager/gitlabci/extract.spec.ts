@@ -1,5 +1,5 @@
 import { getName, logger } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';

@@ -5,7 +5,7 @@ import {
   git,
   platform,
 } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as cleanup from './prune';
 

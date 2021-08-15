@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { fs, getName, loadFixture, mocked } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { TerraformProviderHash } from './hash';

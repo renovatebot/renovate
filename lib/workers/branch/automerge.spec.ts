@@ -1,5 +1,5 @@
 import { defaultConfig, getName, git, platform } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { BranchStatus } from '../../types';
 import { tryBranchAutomerge } from './automerge';

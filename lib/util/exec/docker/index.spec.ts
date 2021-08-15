@@ -4,7 +4,7 @@ import {
   mockExecSequence,
 } from '../../../../test/exec-util';
 import { getName } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
