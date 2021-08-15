@@ -1,4 +1,4 @@
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';

@@ -1,4 +1,4 @@
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import { getChildProcessEnv } from './env';
 
 describe('getChildProcess environment when trustlevel set to low', () => {

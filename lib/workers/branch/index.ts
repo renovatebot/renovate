@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,

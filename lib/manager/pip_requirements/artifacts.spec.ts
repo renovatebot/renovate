@@ -1,5 +1,5 @@
 import _fs from 'fs-extra';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 

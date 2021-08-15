@@ -5,7 +5,7 @@ import {
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
 import { getName } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { RawExecOptions, VolumeOption } from './common';

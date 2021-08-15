@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { getGlobalConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { addMeta, logger } from '../../logger';
 import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';

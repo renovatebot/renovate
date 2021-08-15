@@ -6,7 +6,7 @@ import {
   mockExecSequence,
 } from '../../../test/exec-util';
 import { env, getName, loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as fs from '../../util/fs';
 import type { ExtractConfig } from '../types';

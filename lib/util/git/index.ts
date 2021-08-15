@@ -9,8 +9,8 @@ import Git, {
   TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
-import { getGlobalConfig } from '../../config/admin';
 import { configFileNames } from '../../config/app-strings';
+import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,

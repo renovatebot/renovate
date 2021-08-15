@@ -6,7 +6,7 @@ import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { getName, loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as memCache from '../../util/cache/memory';
 import { RegistryFlavor, RegistryInfo } from './types';

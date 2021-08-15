@@ -2,7 +2,7 @@ import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
 import { getName, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import * as _env from '../exec/env';
 import {
   ensureCacheDir,

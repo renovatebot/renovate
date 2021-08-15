@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import { join } from 'upath';
-import { getGlobalConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import type {
   RenovateConfig,
   RepositoryCacheConfig,

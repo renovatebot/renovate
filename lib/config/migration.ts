@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
-import { getGlobalConfig } from './admin';
+import { getGlobalConfig } from './global';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {

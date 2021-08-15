@@ -1,6 +1,6 @@
 import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
-import { getGlobalConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
