@@ -2,16 +2,19 @@ import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { getName, mocked } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
+import * as _execCacheId from '../../../util/exec/cache-id';
 import * as _env from '../../../util/exec/env';
 import * as _lernaHelper from './lerna';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../manager/npm/post-update/node-version');
+jest.mock('../../../util/exec/cache-id');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const lernaHelper = mocked(_lernaHelper);
+const execCacheId = mocked(_execCacheId);
 
 function lernaPkgFile(lernaClient: string) {
   return {
@@ -31,16 +34,17 @@ describe(getName(), () => {
       jest.resetAllMocks();
       jest.resetModules();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
+      setAdminConfig({ cacheDir: '/tmp/cache' });
+      execCacheId.getCachedTmpDirId.mockReturnValue('12345');
     });
     it('returns if no lernaClient', async () => {
-      const res = await lernaHelper.generateLockFiles({}, 'some-dir', {}, {});
+      const res = await lernaHelper.generateLockFiles({}, 'some-dir', {});
       expect(res.error).toBe(false);
     });
     it('returns if invalid lernaClient', async () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('foo'),
         'some-dir',
-        {},
         {}
       );
       expect(res.error).toBe(false);
@@ -51,7 +55,6 @@ describe(getName(), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        {},
         {},
         skipInstalls
       );
@@ -65,7 +68,6 @@ describe(getName(), () => {
         lernaPkgFile('npm'),
         'some-dir',
         {},
-        {},
         skipInstalls
       );
       expect(res.error).toBe(false);
@@ -76,8 +78,7 @@ describe(getName(), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
-        { constraints: { yarn: '^1.10.0' } },
-        {}
+        { constraints: { yarn: '^1.10.0' } }
       );
       expect(execSnapshots).toMatchSnapshot();
       expect(res.error).toBe(false);
@@ -87,7 +88,6 @@ describe(getName(), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFileWithoutLernaDep('npm'),
         'some-dir',
-        {},
         {}
       );
       expect(res.error).toBe(false);
@@ -95,12 +95,11 @@ describe(getName(), () => {
     });
     it('allows scripts for trust level high', async () => {
       const execSnapshots = mockExecAll(exec);
-      setAdminConfig({ allowScripts: true });
+      setAdminConfig({ allowScripts: true, cacheDir: '/tmp/cache' });
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        { constraints: { npm: '^6.0.0' } },
-        {}
+        { constraints: { npm: '^6.0.0' } }
       );
       expect(res.error).toBe(false);
       expect(execSnapshots).toMatchSnapshot();

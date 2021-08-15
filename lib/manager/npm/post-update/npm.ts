@@ -8,6 +8,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -15,7 +16,6 @@ import type { GenerateLockFileResult } from './types';
 
 export async function generateLockFile(
   cwd: string,
-  env: NodeJS.ProcessEnv,
   filename: string,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
@@ -56,26 +56,28 @@ export async function generateLockFile(
       cmdOptions += ' --ignore-scripts';
     }
 
+    let extraEnv: ExecOptions['extraEnv'] = {};
+    // istanbul ignore if
+    if (getAdminConfig().exposeAllEnv) {
+      const { NPM_AUTH, NPM_EMAIL } = getChildProcessEnv();
+      extraEnv = { ...extraEnv, NPM_AUTH, NPM_EMAIL };
+    }
+
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      extraEnv,
       docker: {
         image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
       },
+      cache: {
+        NPM_CONFIG_CACHE: 'npm',
+        npm_config_store: 'pnpm',
+      },
     };
-    // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
-      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
-      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
-    }
-
     if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
       // This command updates the lock file based on package.json
       commands.push(`npm install ${cmdOptions}`.trim());

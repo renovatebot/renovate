@@ -4,6 +4,7 @@ import { getAdminConfig } from '../../../config/admin';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -27,7 +28,6 @@ export async function generateLockFiles(
   lernaPackageFile: Partial<PackageFile>,
   cwd: string,
   config: PostUpdateConfig,
-  env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
   const lernaClient = lernaPackageFile.lernaClient;
@@ -73,25 +73,30 @@ export async function generateLockFiles(
     }
     lernaCommand += cmdOptions;
     const allowUnstable = true; // lerna will pick the default installed npm@6 unless we use node@>=15
+
+    let extraEnv: ExecOptions['extraEnv'] = {};
+    // istanbul ignore if
+    if (getAdminConfig().exposeAllEnv) {
+      const { NPM_AUTH, NPM_EMAIL } = getChildProcessEnv();
+      extraEnv = { ...extraEnv, NPM_AUTH, NPM_EMAIL };
+    }
+
     const tagConstraint = await getNodeConstraint(config, allowUnstable);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      extraEnv,
       docker: {
         image: 'node',
         tagScheme: 'npm',
         tagConstraint,
         preCommands,
       },
+      cache: {
+        NPM_CONFIG_CACHE: 'npm',
+        npm_config_store: 'pnpm',
+      },
     };
-    // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
-      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
-      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
-    }
+
     const lernaVersion = getLernaVersion(lernaPackageFile);
     logger.debug('Using lerna version ' + lernaVersion);
     preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);

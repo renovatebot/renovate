@@ -11,6 +11,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import { readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -49,7 +50,6 @@ export function getOptimizeCommand(
 
 export async function generateLockFile(
   cwd: string,
-  env: NodeJS.ProcessEnv,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
@@ -71,9 +71,12 @@ export async function generateLockFile(
 
     const preCommands = [installYarn];
 
+    const cache: Record<string, string> = {
+      NPM_CONFIG_CACHE: 'npm',
+      npm_config_store: 'pnpm',
+    };
+
     const extraEnv: ExecOptions['extraEnv'] = {
-      NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-      npm_config_store: env.npm_config_store,
       CI: 'true',
     };
 
@@ -93,11 +96,11 @@ export async function generateLockFile(
     if (isYarn1) {
       cmdOptions +=
         '--ignore-engines --ignore-platform --network-timeout 100000';
-      extraEnv.YARN_CACHE_FOLDER = env.YARN_CACHE_FOLDER;
+      cache.YARN_CACHE_FOLDER = 'yarn';
     } else {
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
-      extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
+      cache.YARN_GLOBAL_FOLDER = 'berry';
     }
     if (!getAdminConfig().allowScripts || config.ignoreScripts) {
       if (isYarn1) {
@@ -107,6 +110,14 @@ export async function generateLockFile(
       }
     }
     const tagConstraint = await getNodeConstraint(config);
+
+    // istanbul ignore if
+    if (getAdminConfig().exposeAllEnv) {
+      const env = getChildProcessEnv();
+      extraEnv.NPM_AUTH = env.NPM_AUTH;
+      extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+    }
+
     const execOptions: ExecOptions = {
       cwd,
       extraEnv,
@@ -116,12 +127,8 @@ export async function generateLockFile(
         tagConstraint,
         preCommands,
       },
+      cache,
     };
-    // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
-      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
-      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
-    }
 
     // This command updates the lock file based on package.json
     commands.push(`yarn install ${cmdOptions}`.trim());

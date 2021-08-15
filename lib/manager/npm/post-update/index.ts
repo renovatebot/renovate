@@ -420,15 +420,6 @@ export async function getAdditionalFiles(
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
 
-  const env = {
-    ...getChildProcessEnv(),
-    NPM_CONFIG_CACHE: await ensureCacheDir('others/npm'),
-    YARN_CACHE_FOLDER: await ensureCacheDir('others/yarn'),
-    YARN_GLOBAL_FOLDER: await ensureCacheDir('others/berry'),
-    npm_config_store: await ensureCacheDir('others/pnpm'),
-    NODE_ENV: 'dev',
-  };
-
   let token = '';
   try {
     ({ token } = hostRules.find({
@@ -456,7 +447,6 @@ export async function getAdditionalFiles(
     );
     const res = await npm.generateLockFile(
       fullLockFileDir,
-      env,
       fileName,
       config,
       upgrades
@@ -541,7 +531,6 @@ export async function getAdditionalFiles(
     );
     const res = await yarn.generateLockFile(
       upath.join(localDir, lockFileDir),
-      env,
       config,
       upgrades
     );
@@ -610,7 +599,6 @@ export async function getAdditionalFiles(
     );
     const res = await pnpm.generateLockFile(
       upath.join(localDir, lockFileDir),
-      env,
       config,
       upgrades
     );
@@ -689,7 +677,6 @@ export async function getAdditionalFiles(
       lernaPackageFile,
       fullLearnaFileDir,
       config,
-      env,
       skipInstalls
     );
     // istanbul ignore else

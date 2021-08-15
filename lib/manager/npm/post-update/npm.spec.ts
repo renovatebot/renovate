@@ -3,11 +3,14 @@ import upath from 'upath';
 
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
+import { setAdminConfig } from '../../../config/admin';
+import * as _execCacheId from '../../../util/exec/cache-id';
 import * as _env from '../../../util/exec/env';
 import * as _fs from '../../../util/fs/proxies';
 import * as npmHelper from './npm';
 
 jest.mock('child_process');
+jest.mock('../../../util/exec/cache-id');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs/proxies');
 jest.mock('./node-version');
@@ -15,12 +18,15 @@ jest.mock('./node-version');
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const fs = mocked(_fs);
+const execCacheId = mocked(_execCacheId);
 
 describe('generateLockFile', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    setAdminConfig({ cacheDir: '/tmp/cache' });
+    execCacheId.getCachedTmpDirId.mockReturnValue('12345');
   });
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -32,7 +38,6 @@ describe('generateLockFile', () => {
     ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { skipInstalls, postUpdateOptions },
       updates
@@ -51,7 +56,6 @@ describe('generateLockFile', () => {
     ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { skipInstalls },
       updates
@@ -69,7 +73,6 @@ describe('generateLockFile', () => {
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
@@ -98,7 +101,6 @@ describe('generateLockFile', () => {
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
@@ -122,7 +124,6 @@ describe('generateLockFile', () => {
     const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { skipInstalls, binarySource }
     );
@@ -137,7 +138,6 @@ describe('generateLockFile', () => {
     const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { binarySource },
       [{ isRemediation: true }]
@@ -154,7 +154,6 @@ describe('generateLockFile', () => {
     }) as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json'
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -167,7 +166,6 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json'
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -179,7 +177,6 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { binarySource: 'docker', constraints: { npm: '^6.0.0' } }
     );
@@ -192,7 +189,6 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       {},
       [{ isLockFileMaintenance: true }]

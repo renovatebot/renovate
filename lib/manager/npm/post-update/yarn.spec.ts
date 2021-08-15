@@ -5,10 +5,12 @@ import {
   mockExecAll,
 } from '../../../../test/exec-util';
 import { fs, getName, mocked } from '../../../../test/util';
+import * as _execCacheId from '../../../util/exec/cache-id';
 import * as _env from '../../../util/exec/env';
 import * as _yarnHelper from './yarn';
 
 jest.mock('child_process');
+jest.mock('../../../util/exec/cache-id');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('./node-version');
@@ -16,6 +18,7 @@ jest.mock('./node-version');
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const yarnHelper = mocked(_yarnHelper);
+const execCacheId = mocked(_execCacheId);
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -31,6 +34,10 @@ describe(getName(), () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    fs.ensureCacheDir.mockImplementation(
+      (x) => `/tmp/renovate/cache/${x}` as never
+    );
+    execCacheId.getCachedTmpDirId.mockReturnValue('12345');
   });
   it.each([
     ['1.22.0', '^1.10.0', 2],
@@ -59,14 +66,7 @@ describe(getName(), () => {
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
-      const res = await yarnHelper.generateLockFile(
-        'some-dir',
-        {
-          YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
-          YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
-        },
-        config
-      );
+      const res = await yarnHelper.generateLockFile('some-dir', config);
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
@@ -93,7 +93,7 @@ describe(getName(), () => {
           yarn: yarnVersion === '1.22.0' ? '^1.10.0' : '>= 2.0.0',
         },
       };
-      const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      const res = await yarnHelper.generateLockFile('some-dir', config, [
         {
           depName: 'some-dep',
           newValue: '^1.0.0',
@@ -116,7 +116,7 @@ describe(getName(), () => {
           'yarn-offline-mirror ./npm-packages-offline-cache'
         )
         .mockResolvedValueOnce('package-lock-contents');
-      const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
+      const res = await yarnHelper.generateLockFile('some-dir', {}, [
         {
           depName: 'some-dep',
           isLockfileUpdate: true,
@@ -151,7 +151,7 @@ describe(getName(), () => {
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
-      const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      const res = await yarnHelper.generateLockFile('some-dir', config, [
         { isLockFileMaintenance: true },
       ]);
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
