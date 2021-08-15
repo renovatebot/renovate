@@ -310,11 +310,11 @@ export const presets: Record<string, Preset> = {
   },
   automergeRequireAllStatusChecks: {
     description: 'Require all status checks to pass before any automerging',
-    requiredStatusChecks: [],
+    ignoreTests: false,
   },
   skipStatusChecks: {
     description: 'Skip status checks and automerge right away',
-    requiredStatusChecks: null,
+    ignoreTests: true,
   },
   maintainLockFilesDisabled: {
     description:

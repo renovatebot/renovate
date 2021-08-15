@@ -186,7 +186,7 @@ export interface Platform {
   refreshPr?(number: number): Promise<void>;
   getBranchStatus(
     branchName: string,
-    requiredStatusChecks?: string[] | null
+    ignoreTests?: boolean
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;

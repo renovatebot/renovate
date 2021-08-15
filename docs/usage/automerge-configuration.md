@@ -117,7 +117,7 @@ If you see "Automerge: Disabled by config" then it means you need a config chang
 ### Absence of tests
 
 By default, Renovate will not automerge until it sees passing status checks / check runs for the branch.
-If you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
+If you have no tests but still want Renovate to automerge, you need to add `"ignoreTests": true` to your configuration.
 However, we strongly recommend you have tests in any project where you are regularly updating dependencies.
 
 ### Committer restrictions

@@ -201,7 +201,7 @@ In that case Renovate first creates a branch and associated Pull Request, and th
 If by the next run the PR is already behind the base branch it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
 If Renovate is scheduled for hourly runs on the repository but commits are made every 15 minutes to the main branch, then an automerge like this will keep getting deferred with every rebase.
 
-Note: if you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
+Note: if you have no tests but still want Renovate to automerge, you need to add `"ignoreTests": true` to your configuration.
 
 If you prefer that Renovate more silently automerge _without_ Pull Requests at all, you can configure `"automergeType": "branch"`. In this case Renovate will:
 
@@ -1093,6 +1093,14 @@ It would take the entire `"config:base"` preset - which contains a lot of sub-pr
 ## ignoreScripts
 
 Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
+
+## ignoreTests
+
+Currently Renovate's default behavior is to only automerge if every status check has succeeded.
+
+Setting this option to `true` means that Renovate will ignore _all_ status checks.
+You can set this if you don't have any status checks but still want Renovate to automerge PRs.
+Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
 
 ## ignoreUnstable
 
@@ -2131,17 +2139,6 @@ In case there is a need to configure them manually, it can be done using this `r
 ```
 
 The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
-
-## requiredStatusChecks
-
-Currently Renovate's default behavior is to only automerge if every status check has succeeded.
-
-Setting this option to `null` means that Renovate will ignore _all_ status checks.
-You can set this if you don't have any status checks but still want Renovate to automerge PRs.
-Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
-
-In future, this might be configurable to allow certain status checks to be ignored/required.
-See [issue 1853 at the Renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
 
 ## respectLatest
 

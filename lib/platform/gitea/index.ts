@@ -354,15 +354,10 @@ const platform: Platform = {
 
   async getBranchStatus(
     branchName: string,
-    requiredStatusChecks?: string[] | null
+    ignoreTests = false
   ): Promise<BranchStatus> {
-    if (!requiredStatusChecks) {
+    if (ignoreTests) {
       return BranchStatus.green;
-    }
-
-    if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-      logger.warn({ requiredStatusChecks }, 'Unsupported requiredStatusChecks');
-      return BranchStatus.red;
     }
 
     let ccs: helper.CombinedCommitStatus;

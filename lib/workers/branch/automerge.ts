@@ -27,7 +27,7 @@ export async function tryBranchAutomerge(
   }
   const branchStatus = await platform.getBranchStatus(
     config.branchName,
-    config.requiredStatusChecks
+    config.ignoreTests
   );
   if (branchStatus === BranchStatus.green) {
     logger.debug(`Automerging branch`);

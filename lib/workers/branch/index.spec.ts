@@ -410,7 +410,7 @@ describe('workers/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({
         ...config,
-        requiredStatusChecks: null,
+        ignoreTests: true,
       });
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -535,7 +535,7 @@ describe('workers/branch/index', () => {
       expect(
         await branchWorker.processBranch({
           ...config,
-          requiredStatusChecks: null,
+          ignoreTests: true,
           prCreation: 'not-pending',
         })
       ).toMatchSnapshot();

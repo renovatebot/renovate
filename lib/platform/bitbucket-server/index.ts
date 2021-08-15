@@ -399,14 +399,13 @@ async function getStatus(
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks?: string[] | null
+  ignoreTests = false
 ): Promise<BranchStatus> {
   logger.debug(
-    `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
+    `getBranchStatus(${branchName}, ignoreTests=${Boolean(ignoreTests)})`
   );
 
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
+  if (ignoreTests) {
     logger.debug('Status checks disabled = returning "success"');
     return BranchStatus.green;
   }

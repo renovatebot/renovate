@@ -807,18 +807,12 @@ async function getStatus(
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks: any[] | undefined
+  ignoreTests = false
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
+  if (ignoreTests) {
     logger.debug('Status checks disabled = returning "success"');
     return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
   }
   let commitStatus: CombinedBranchStatus;
   try {

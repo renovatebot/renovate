@@ -26,11 +26,11 @@ export async function checkAutoMerge(
 ): Promise<AutomergePrResult> {
   logger.trace({ config }, 'checkAutoMerge');
   const {
-    branchName,
-    automergeType,
-    automergeStrategy,
     automergeComment,
-    requiredStatusChecks,
+    automergeStrategy,
+    automergeType,
+    branchName,
+    ignoreTests,
     rebaseRequested,
   } = config;
   // Return if PR not ready for automerge
@@ -41,7 +41,7 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: PrAutomergeBlockReason.Conflicted,
     };
   }
-  if (requiredStatusChecks && pr.canMerge !== true) {
+  if (!ignoreTests && pr.canMerge !== true) {
     logger.debug(
       { canMergeReason: pr.canMergeReason },
       'PR is not ready for merge'
@@ -51,10 +51,7 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: PrAutomergeBlockReason.PlatformNotReady,
     };
   }
-  const branchStatus = await platform.getBranchStatus(
-    branchName,
-    requiredStatusChecks
-  );
+  const branchStatus = await platform.getBranchStatus(branchName, ignoreTests);
   if (branchStatus !== BranchStatus.green) {
     logger.debug(
       `PR is not ready for merge (branch status is ${branchStatus})`

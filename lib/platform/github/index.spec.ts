@@ -690,26 +690,15 @@ describe('platform/github/index', () => {
     });
   });
   describe('getBranchStatus()', () => {
-    it('returns success if requiredStatusChecks null', async () => {
+    it('returns success if ignoreTests true', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
 
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', null);
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toEqual(BranchStatus.green);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('return failed if unsupported requiredStatusChecks', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-
-      await github.initRepo({
-        repository: 'some/repo',
-      } as any);
-      const res = await github.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should pass through success', async () => {
@@ -726,7 +715,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -744,7 +733,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -761,7 +750,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -795,7 +784,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -835,7 +824,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -868,7 +857,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

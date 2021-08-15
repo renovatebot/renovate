@@ -474,16 +474,11 @@ describe('platform/azure/index', () => {
       expect(res).toBeNull();
     });
   });
-  describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
-    it('return success if requiredStatusChecks null', async () => {
+  describe('getBranchStatus(branchName, ignoreTests)', () => {
+    it('return success if ignoreTests true', async () => {
       await initRepo('some/repo');
-      const res = await azure.getBranchStatus('somebranch', null);
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toEqual(BranchStatus.green);
-    });
-    it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some/repo');
-      const res = await azure.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BranchStatus.red);
     });
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -494,7 +489,7 @@ describe('platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
     it('should pass through failed', async () => {
@@ -506,7 +501,7 @@ describe('platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
     });
     it('should pass through pending', async () => {
@@ -518,7 +513,7 @@ describe('platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
     it('should fall back to yellow if no statuses returned', async () => {
@@ -530,7 +525,7 @@ describe('platform/azure/index', () => {
             getStatuses: jest.fn(() => []),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
   });

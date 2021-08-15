@@ -28,7 +28,7 @@ export async function getPrConfigDescription(
   if (config.automerge) {
     const branchStatus = await platform.getBranchStatus(
       config.branchName,
-      config.requiredStatusChecks
+      config.ignoreTests
     );
     // istanbul ignore if
     if (branchStatus === BranchStatus.red) {

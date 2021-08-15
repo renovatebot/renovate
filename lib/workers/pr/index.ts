@@ -169,7 +169,7 @@ export async function ensurePr(
     if (!branchStatus) {
       branchStatus = await platform.getBranchStatus(
         branchName,
-        config.requiredStatusChecks
+        config.ignoreTests
       );
       logger.debug({ branchStatus, branchName }, 'getBranchStatus() result');
     }
