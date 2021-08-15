@@ -62,14 +62,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`terraform.updateArtifacts(${packageFileName})`);
 
-  // TODO remove experimental flag, if functionality is confirmed
-  if (!process.env.RENOVATE_X_TERRAFORM_LOCK_FILE) {
-    logger.debug(
-      `terraform.updateArtifacts: skipping updates. Experimental feature not activated`
-    );
-    return null;
-  }
-
   const lockFilePath = findLockFile(packageFileName);
   try {
     const lockFileContent = await readLockFile(lockFilePath);
