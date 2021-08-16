@@ -5,6 +5,7 @@ import pAll from 'p-all';
 import { lt } from 'semver';
 import { getAdminConfig } from '../../config/admin';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -170,7 +171,10 @@ function getRepoUrl(
   const { gitUrl } = getAdminConfig();
 
   if (gitUrl === 'ssh') {
-    logger.debug({url: res.body.ssh_url_to_repo}, `using ssh URL`);
+    if (!res.body.ssh_url_to_repo) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+    }
+    logger.debug({ url: res.body.ssh_url_to_repo }, `using ssh URL`);
     return res.body.ssh_url_to_repo;
   }
 
@@ -186,6 +190,11 @@ function getRepoUrl(
   ) {
     if (res.body.http_url_to_repo === null) {
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
+    }
+    if (process.env.GITLAB_IGNORE_REPO_URL) {
+      logger.warn(
+        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.'
+      );
     }
 
     const { protocol, host, pathname } = parseUrl(defaults.endpoint);
