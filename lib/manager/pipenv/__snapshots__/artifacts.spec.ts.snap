@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches errors 1`] = `
+exports[`manager/pipenv/artifacts catches errors 1`] = `
 Array [
   Object {
     "artifactError": Object {
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() handles no constraint 1`] = `
+exports[`manager/pipenv/artifacts handles no constraint 1`] = `
 Array [
   Object {
     "cmd": "pipenv lock",
@@ -35,7 +35,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
+exports[`manager/pipenv/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
     "cmd": "pipenv lock",
@@ -59,7 +59,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated Pipenv.lock when doing lockfile maintenance 1`] = `
+exports[`manager/pipenv/artifacts returns updated Pipenv.lock when doing lockfile maintenance 1`] = `
 Array [
   Object {
     "cmd": "pipenv lock",
@@ -83,7 +83,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated Pipfile.lock 1`] = `
+exports[`manager/pipenv/artifacts returns updated Pipfile.lock 1`] = `
 Array [
   Object {
     "cmd": "pipenv lock",
@@ -107,7 +107,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode 1`] = `
+exports[`manager/pipenv/artifacts supports docker mode 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/python:latest",
@@ -143,7 +143,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() uses pipenv version from Pipfile 1`] = `
+exports[`manager/pipenv/artifacts uses pipenv version from Pipfile 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/python",
@@ -179,7 +179,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() uses pipenv version from Pipfile dev packages 1`] = `
+exports[`manager/pipenv/artifacts uses pipenv version from Pipfile dev packages 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/python",
@@ -215,7 +215,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() uses pipenv version from config 1`] = `
+exports[`manager/pipenv/artifacts uses pipenv version from config 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/python",

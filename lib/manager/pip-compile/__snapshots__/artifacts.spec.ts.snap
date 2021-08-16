@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches errors 1`] = `
+exports[`manager/pip-compile/artifacts catches errors 1`] = `
 Array [
   Object {
     "artifactError": Object {
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
+exports[`manager/pip-compile/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
     "cmd": "pip-compile",
@@ -34,7 +34,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated requirements.txt 1`] = `
+exports[`manager/pip-compile/artifacts returns updated requirements.txt 1`] = `
 Array [
   Object {
     "cmd": "pip-compile",
@@ -57,7 +57,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated requirements.txt when doing lockfile maintenance 1`] = `
+exports[`manager/pip-compile/artifacts returns updated requirements.txt when doing lockfile maintenance 1`] = `
 Array [
   Object {
     "cmd": "pip-compile",
@@ -80,7 +80,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode 1`] = `
+exports[`manager/pip-compile/artifacts supports docker mode 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/python",
@@ -115,7 +115,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() uses pipenv version from config 1`] = `
+exports[`manager/pip-compile/artifacts uses pipenv version from config 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/python",

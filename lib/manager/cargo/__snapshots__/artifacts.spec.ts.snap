@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches errors 1`] = `
+exports[`manager/cargo/artifacts catches errors 1`] = `
 Array [
   Object {
     "artifactError": Object {
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
+exports[`manager/cargo/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
     "cmd": "cargo update --manifest-path Cargo.toml --package dep1",
@@ -34,7 +34,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated Cargo.lock 1`] = `
+exports[`manager/cargo/artifacts returns updated Cargo.lock 1`] = `
 Array [
   Object {
     "cmd": "cargo update --manifest-path Cargo.toml --package dep1",
@@ -57,7 +57,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated Cargo.lock for lockfile maintenance 1`] = `
+exports[`manager/cargo/artifacts returns updated Cargo.lock for lockfile maintenance 1`] = `
 Array [
   Object {
     "cmd": "cargo update --manifest-path Cargo.toml",
@@ -80,7 +80,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated Cargo.lock with docker 1`] = `
+exports[`manager/cargo/artifacts returns updated Cargo.lock with docker 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/rust",
@@ -115,7 +115,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated workspace Cargo.lock 1`] = `
+exports[`manager/cargo/artifacts returns updated workspace Cargo.lock 1`] = `
 Array [
   Object {
     "cmd": "cargo update --manifest-path crates/one/Cargo.toml --package dep1",
@@ -138,7 +138,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() updates Cargo.lock based on the lookupName, when given 1`] = `
+exports[`manager/cargo/artifacts updates Cargo.lock based on the lookupName, when given 1`] = `
 Array [
   Object {
     "cmd": "cargo update --manifest-path Cargo.toml --package dep1",
