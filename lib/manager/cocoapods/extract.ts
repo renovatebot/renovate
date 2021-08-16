@@ -73,7 +73,8 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 
   return {
     datasource: datasourceGitTags.id,
-    depName: git,
+    depName,
+    lookupName: git,
     currentValue: tag,
   };
 }
