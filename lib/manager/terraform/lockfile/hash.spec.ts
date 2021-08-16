@@ -7,7 +7,7 @@ import {
   loadFixture,
   logger,
 } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/admin';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { Logger } from '../../../logger/types';
 import { TerraformProviderHash } from './hash';
@@ -22,7 +22,7 @@ describe(getName(), () => {
 
   beforeEach(async () => {
     cacheDir = await dir({ unsafeCleanup: true });
-    setAdminConfig({ cacheDir: cacheDir.path });
+    setGlobalConfig({ cacheDir: cacheDir.path });
   });
 
   afterEach(() => cacheDir.cleanup());

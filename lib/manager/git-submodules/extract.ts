@@ -1,7 +1,7 @@
 import URL from 'url';
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/admin';
 import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
@@ -88,7 +88,7 @@ export default async function extractPackageFile(
   fileName: string,
   config: ManagerConfig
 ): Promise<PackageFile | null> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   const git = Git(localDir);
   const gitModulesPath = upath.join(localDir, fileName);
 

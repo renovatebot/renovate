@@ -1,5 +1,5 @@
 import { getName, logger, mocked } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/admin';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
@@ -24,10 +24,10 @@ const secrets = mocked(_secrets);
 
 describe(getName(), () => {
   beforeEach(() => {
-    setAdminConfig({ localDir: '', cacheDir: '' });
+    setGlobalConfig({ localDir: '', cacheDir: '' });
   });
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
 
   describe('initRepo', () => {

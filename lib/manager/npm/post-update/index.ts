@@ -3,7 +3,7 @@ import { parseSyml } from '@yarnpkg/parsers';
 import deepmerge from 'deepmerge';
 import { dump, load } from 'js-yaml';
 import upath from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/admin';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
@@ -139,7 +139,7 @@ export async function writeExistingFiles(
     { packageFiles: npmFiles.map((n) => n.packageFile) },
     'Writing package.json files'
   );
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   for (const packageFile of npmFiles) {
     const basedir = upath.join(
       localDir,
@@ -218,7 +218,7 @@ export async function writeUpdatedPackageFiles(
     logger.debug('No files found');
     return;
   }
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   for (const packageFile of config.updatedPackageFiles) {
     if (packageFile.name.endsWith('package-lock.json')) {
       logger.debug(`Writing package-lock file: ${packageFile.name}`);
@@ -439,7 +439,7 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
     const fullLockFileDir = upath.join(localDir, lockFileDir);

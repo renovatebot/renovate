@@ -1,8 +1,8 @@
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { getName, loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/admin';
+import type { RepoGlobalConfig } from '../../config/types';
 import { writeLocalFile } from '../../util/fs';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
@@ -18,7 +18,7 @@ const cargo6toml = loadFixture('Cargo.6.toml');
 describe(getName(), () => {
   describe('extractPackageFile()', () => {
     let config: ExtractConfig;
-    let adminConfig: RepoAdminConfig;
+    let adminConfig: RepoGlobalConfig;
 
     beforeEach(async () => {
       config = {};
@@ -28,10 +28,10 @@ describe(getName(), () => {
         cacheDir: join(tmpDir.path, 'cache'),
       };
 
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
     });
     afterEach(() => {
-      setAdminConfig();
+      setGlobalConfig();
     });
     it('returns null for invalid toml', async () => {
       expect(

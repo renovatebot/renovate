@@ -1,7 +1,7 @@
 import type { Stats } from 'fs';
 import { stat } from 'fs-extra';
 import upath from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/admin';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as datasourceMaven from '../../../datasource/maven';
 import { logger } from '../../../logger';
@@ -91,7 +91,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   let rootBuildGradle: string | undefined;
   let gradlew: Stats | null;
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
     const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));

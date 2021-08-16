@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
-import { getAdminConfig } from './admin';
+import { getGlobalConfig } from './admin';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
@@ -56,7 +56,7 @@ export function migrateConfig(
       'optionalDependencies',
       'peerDependencies',
     ];
-    const { migratePresets } = getAdminConfig();
+    const { migratePresets } = getGlobalConfig();
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
         delete migratedConfig[key];

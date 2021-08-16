@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import ini from 'ini';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/admin';
 import { logger } from '../../logger';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
@@ -60,7 +60,7 @@ export function setNpmrc(input?: string): void {
     npmrcRaw = input;
     logger.debug('Setting npmrc');
     npmrc = ini.parse(input.replace(/\\n/g, '\n'));
-    const { exposeAllEnv } = getAdminConfig();
+    const { exposeAllEnv } = getGlobalConfig();
     for (const [key, val] of Object.entries(npmrc)) {
       if (!exposeAllEnv) {
         sanitize(key, val);

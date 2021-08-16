@@ -1,7 +1,7 @@
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/admin';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
@@ -44,13 +44,13 @@ export async function generateLockFile(
       },
     };
     // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
+    if (getGlobalConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
     cmd = 'pnpm';
     let args = 'install --recursive --lockfile-only';
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
     }

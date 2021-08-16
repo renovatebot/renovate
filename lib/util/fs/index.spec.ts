@@ -2,7 +2,7 @@ import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
 import { getName, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/admin';
 import * as _env from '../exec/env';
 import {
   ensureCacheDir,
@@ -22,7 +22,7 @@ const env = mocked(_env);
 describe(getName(), () => {
   describe('readLocalFile', () => {
     beforeEach(() => {
-      setAdminConfig({ localDir: '' });
+      setGlobalConfig({ localDir: '' });
     });
 
     it('reads buffer', async () => {
@@ -60,7 +60,7 @@ describe(getName(), () => {
     it('returns path for file', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
 
@@ -114,7 +114,7 @@ describe(getName(), () => {
     it('returns dir content', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
           await writeLocalFile('test/Cargo.toml', '');
@@ -142,7 +142,7 @@ describe(getName(), () => {
     it('return empty array for non existing directory', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
           await expect(readLocalDirectory('somedir')).rejects.toThrow();
@@ -174,7 +174,7 @@ describe(getName(), () => {
         ...envMock.basic,
       });
 
-      setAdminConfig({
+      setGlobalConfig({
         cacheDir: join(dirFromConfig),
       });
 
