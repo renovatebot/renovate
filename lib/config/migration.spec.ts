@@ -700,6 +700,7 @@ describe(getName(), () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
   });
+
   it('it migrates composerIgnorePlatformReqs values', () => {
     let config: TestRenovateConfig;
     let res: MigratedConfig;
