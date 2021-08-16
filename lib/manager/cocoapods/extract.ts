@@ -1,4 +1,6 @@
+import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import * as datasourcePod from '../../datasource/pod';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -47,13 +49,21 @@ export function parseLine(line: string): ParsedLine {
 
 export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
-  if (git?.startsWith('https://github.com/')) {
-    const githubMatch =
-      /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/.exec(git);
-    const { account, repo } = githubMatch?.groups || {};
+
+  const platformMatch =
+    /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/.exec(
+      git
+    );
+
+  if (platformMatch) {
+    const { account, repo, platform } = platformMatch?.groups || {};
     if (account && repo) {
+      const datasource =
+        platform === 'github'
+          ? datasourceGithubTags.id
+          : datasourceGitlabTags.id;
       return {
-        datasource: datasourceGithubTags.id,
+        datasource,
         depName,
         lookupName: `${account}/${repo.replace(/\.git$/, '')}`,
         currentValue: tag,
@@ -61,7 +71,11 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
     }
   }
 
-  return null;
+  return {
+    datasource: datasourceGitTags.id,
+    depName: git,
+    currentValue: tag,
+  };
 }
 
 export async function extractPackageFile(
