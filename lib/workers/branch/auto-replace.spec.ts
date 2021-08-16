@@ -1,4 +1,4 @@
-import { defaultConfig, getName, loadFixture } from '../../../test/util';
+import { defaultConfig, loadFixture } from '../../../test/util';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
 import type { BranchUpgradeConfig } from '../types';
@@ -8,7 +8,7 @@ const sampleHtml = loadFixture('sample.html', `../../manager/html`);
 
 jest.mock('../../util/fs');
 
-describe(getName(), () => {
+describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;

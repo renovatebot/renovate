@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { updateDependency } from './update';
 
-describe(getName(), () => {
+describe('manager/gradle-lite/update', () => {
   it('replaces', () => {
     expect(
       updateDependency({

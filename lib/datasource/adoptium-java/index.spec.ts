@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { datasource, defaultRegistryUrl, pageSize } from './common';
 
@@ -17,7 +17,7 @@ function* range(start: number, end: number): Generator<number, number, number> {
   yield* range(start + 1, end);
 }
 
-describe(getName(), () => {
+describe('datasource/adoptium-java/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
       httpMock

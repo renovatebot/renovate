@@ -2,7 +2,6 @@ import {
   RenovateConfig,
   fs,
   getConfig,
-  getName,
   git,
   mocked,
   platform,
@@ -33,7 +32,7 @@ beforeEach(() => {
 jest.mock('../../../config/migration');
 jest.mock('../../../config/migrate-validate');
 
-describe(getName(), () => {
+describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
       await initialize({});

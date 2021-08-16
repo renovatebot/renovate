@@ -32,7 +32,7 @@ const adminConfig: RepoAdminConfig = {
   cacheDir: join('/tmp/cache'),
 };
 
-describe('.updateArtifacts()', () => {
+describe('manager/cocoapods/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);

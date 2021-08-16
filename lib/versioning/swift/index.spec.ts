@@ -11,7 +11,7 @@ const {
   matches,
 } = swift;
 
-describe('isValid(input)', () => {
+describe('versioning/swift/index', () => {
   it('supports isVersion', () => {
     expect(isVersion('from: "1.2.3"')).toBe(false);
     expect(isVersion('1.2.3')).toBe(true);
@@ -86,8 +86,7 @@ describe('isValid(input)', () => {
     expect(matches('1.2.4', '..."1.2.3"')).toBe(false);
     expect(matches('v1.2.4', '..."1.2.3"')).toBe(false);
   });
-});
-describe('getNewValue()', () => {
+
   it('supports range update', () => {
     [
       ['1.2.3', 'auto', '1.2.3', '1.2.4', '1.2.3'],

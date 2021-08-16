@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
-import { env, fs, getName, hostRules } from '../../../test/util';
+import { env, fs, hostRules } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
@@ -19,7 +19,7 @@ const adminConfig: RepoAdminConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-describe(getName(), () => {
+describe('manager/mix/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

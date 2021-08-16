@@ -18,7 +18,7 @@ declare global {
 
 const options = getOptions();
 
-describe('docs', () => {
+describe('website-docs', () => {
   const doc = fs.readFileSync('docs/usage/configuration-options.md', 'utf8');
   const selfHostDoc = fs.readFileSync(
     'docs/usage/self-hosted-configuration.md',

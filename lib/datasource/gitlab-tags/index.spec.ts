@@ -1,9 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { id as datasource } from '.';
 
-describe(getName(), () => {
+describe('datasource/gitlab-tags/index', () => {
   describe('getReleases', () => {
     it('returns tags from custom registry', async () => {
       const body = [

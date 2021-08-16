@@ -1,11 +1,11 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const file1 = loadFixture('config.yml');
 const file2 = loadFixture('config2.yml');
 const file3 = loadFixture('config3.yml');
 
-describe(getName(), () => {
+describe('manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

@@ -1,6 +1,6 @@
 import { api as semver } from '.';
 
-describe('semver.matches()', () => {
+describe('versioning/cargo/index', () => {
   it('handles comma', () => {
     expect(semver.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
     expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
@@ -8,9 +8,8 @@ describe('semver.matches()', () => {
     expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
     expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
   });
-});
-describe('semver.getSatisfyingVersion()', () => {
-  it('handles comma', () => {
+
+  it('getSatisfyingVersion', () => {
     expect(
       semver.getSatisfyingVersion(
         ['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
@@ -24,8 +23,7 @@ describe('semver.getSatisfyingVersion()', () => {
       )
     ).toBe('5.0.3');
   });
-});
-describe('semver.isValid()', () => {
+
   it('simple constraints are valid', () => {
     expect(semver.isValid('1')).toBeTruthy();
     expect(semver.isValid('1.2')).toBeTruthy();
@@ -34,25 +32,22 @@ describe('semver.isValid()', () => {
     expect(semver.isValid('~1.2.3')).toBeTruthy();
     expect(semver.isValid('1.2.*')).toBeTruthy();
   });
-  it('handles comma', () => {
+  it('isValid', () => {
     expect(semver.isValid('< 3.0, >= 1.0.0 <= 2.0.0')).toBeTruthy();
     expect(semver.isValid('< 3.0, >= 1.0.0 <= 2.0.0, = 5.1.2')).toBeTruthy();
   });
-});
-describe('semver.isVersion()', () => {
-  it('handles comma', () => {
+
+  it('isVersion', () => {
     expect(semver.isVersion('1.2.3')).toBeTruthy();
     expect(semver.isValid('1.2')).toBeTruthy();
   });
-});
-describe('semver.isLessThanRange()', () => {
-  it('handles comma', () => {
+
+  it('isLessThanRange', () => {
     expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 <= 2.0.0')).toBe(true);
     expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBe(false);
   });
-});
-describe('semver.minSatisfyingVersion()', () => {
-  it('handles comma', () => {
+
+  it('minSatisfyingVersion', () => {
     expect(
       semver.minSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0'],
@@ -81,8 +76,7 @@ describe('semver.minSatisfyingVersion()', () => {
       )
     ).toBeNull();
   });
-});
-describe('semver.isSingleVersion()', () => {
+
   it('returns false if naked version', () => {
     expect(semver.isSingleVersion('1.2.3')).toBeFalsy();
     expect(semver.isSingleVersion('1.2.3-alpha.1')).toBeFalsy();
@@ -101,8 +95,7 @@ describe('semver.isSingleVersion()', () => {
     expect(semver.isSingleVersion('1.*')).toBeFalsy();
     expect(semver.isSingleVersion('1.2.*')).toBeFalsy();
   });
-});
-describe('semver.getNewValue()', () => {
+
   it('returns if empty or *', () => {
     expect(
       semver.getNewValue({

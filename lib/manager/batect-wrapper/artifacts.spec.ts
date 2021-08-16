@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
@@ -25,7 +24,7 @@ function artifactForPath(
   };
 }
 
-describe(getName(), () => {
+describe('manager/batect-wrapper/artifacts', () => {
   beforeEach(() => {
     httpMock
       .scope('https://github.com')

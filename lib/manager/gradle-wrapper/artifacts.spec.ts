@@ -8,7 +8,6 @@ import {
   addReplacingSerializer,
   env,
   fs,
-  getName,
   git,
   partial,
 } from '../../../test/util';
@@ -44,7 +43,7 @@ function readString(...paths: string[]): Promise<string> {
   return readFile(resolve(fixtures, ...paths), 'utf8');
 }
 
-describe(getName(), () => {
+describe('manager/gradle-wrapper/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 

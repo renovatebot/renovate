@@ -5,7 +5,7 @@ import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as memCache from '../../util/cache/memory';
@@ -60,7 +60,7 @@ function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
   return { mockClone };
 }
 
-describe(getName(), () => {
+describe('datasource/crate/index', () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
       expect(getIndexSuffix('a')).toStrictEqual(['1', 'a']);

@@ -5,7 +5,7 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../test/exec-util';
-import { env, getName, loadFixture } from '../../../test/util';
+import { env, loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import * as fs from '../../util/fs';
@@ -39,7 +39,7 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
     cmd: snapshot.cmd.replace(/^.*extract\.py"\s+/, '<extract.py> '),
   }));
 
-describe(getName(), () => {
+describe('manager/pip_setup/index', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

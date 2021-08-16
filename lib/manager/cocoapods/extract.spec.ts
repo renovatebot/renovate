@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import { extractPackageFile } from '.';
@@ -8,7 +8,7 @@ const complexPodfile = loadFixture('Podfile.complex');
 
 const adminConfig: RepoAdminConfig = { localDir: '' };
 
-describe(getName(), () => {
+describe('manager/cocoapods/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts from simple file', async () => {
       setAdminConfig(adminConfig);

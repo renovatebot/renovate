@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture, loadJsonFixture } from '../../../test/util';
+import { loadFixture, loadJsonFixture } from '../../../test/util';
 import * as rubyVersioning from '../../versioning/ruby';
 import { resetCache } from './get-rubygems-org';
 import * as rubygems from '.';
@@ -9,7 +9,7 @@ const rubygemsOrgVersions = loadFixture('rubygems-org.txt');
 const railsInfo = loadJsonFixture('rails/info.json');
 const railsVersions = loadJsonFixture('rails/versions.json');
 
-describe(getName(), () => {
+describe('datasource/rubygems/index', () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 

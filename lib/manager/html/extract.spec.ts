@@ -1,10 +1,10 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
 const sample = loadFixture(`sample.html`);
 const nothing = loadFixture(`nothing.html`);
 
-describe(getName(), () => {
+describe('manager/html/extract', () => {
   it('extractPackageFile', () => {
     // FIXME: explicit assert condition
     expect(extractPackageFile(sample)).toMatchSnapshot();

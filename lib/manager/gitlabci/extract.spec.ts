@@ -1,4 +1,4 @@
-import { getName, logger } from '../../../test/util';
+import { logger } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
@@ -8,7 +8,7 @@ const config: ExtractConfig = {};
 
 const adminConfig: RepoAdminConfig = { localDir: '' };
 
-describe(getName(), () => {
+describe('manager/gitlabci/extract', () => {
   beforeEach(() => {
     setAdminConfig(adminConfig);
   });

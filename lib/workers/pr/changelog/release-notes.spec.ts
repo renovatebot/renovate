@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
-import { getName, loadFixture, mocked } from '../../../../test/util';
+import { loadFixture, mocked } from '../../../../test/util';
 import { clone } from '../../../util/clone';
 import * as _hostRules from '../../../util/host-rules';
 import {
@@ -37,7 +37,7 @@ const gitlabTreeResponse = [
   { path: 'README.md', type: 'blob' },
 ];
 
-describe(getName(), () => {
+describe('workers/pr/changelog/release-notes', () => {
   beforeEach(() => {
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);

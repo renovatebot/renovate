@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import { getFixturePath, getName, logger } from '../../../../test/util';
+import { getFixturePath, logger } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
 import * as fs from '../../../util/fs';
 import {
@@ -8,7 +8,7 @@ import {
   findPnpmWorkspace,
 } from './pnpm';
 
-describe(getName(), () => {
+describe('manager/npm/extract/pnpm', () => {
   beforeAll(() => {
     setAdminConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
   });

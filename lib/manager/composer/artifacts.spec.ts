@@ -41,7 +41,7 @@ const repoStatus = partial<StatusResult>({
   deleted: [],
 });
 
-describe('.updateArtifacts()', () => {
+describe('manager/composer/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

@@ -1,9 +1,9 @@
-import { fs, getName } from '../../../test/util';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-describe(getName(), () => {
+describe('manager/helmv3/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

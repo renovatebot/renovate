@@ -1,6 +1,6 @@
 import pep440 from '.';
 
-describe('pep440.isValid(input)', () => {
+describe('versioning/pep440/index', () => {
   it('should support a version without equals', () => {
     expect(pep440.isValid('0.750')).toBeTruthy();
     expect(pep440.isValid('1.2.3')).toBeTruthy();
@@ -27,28 +27,20 @@ describe('pep440.isValid(input)', () => {
       pep440.isValid('https://github.com/renovatebot/renovate.git')
     ).toBeFalsy();
   });
-});
 
-describe('pep440.isStable(version)', () => {
   it('returns correct value', () => {
     expect(pep440.isStable('1.2.3')).toBeTruthy();
     expect(pep440.isStable('1.2.3rc0')).toBeFalsy();
   });
   it('returns false when version invalid', () => {
     expect(pep440.isStable('not_version')).toBeFalsy();
+    expect(pep440.equals('1.0.0', '1.0..foo')).toBeFalsy();
   });
-});
 
-describe('pep440.equals(version1, version2)', () => {
   it('returns correct true', () => {
     expect(pep440.equals('1.0', '1.0.0')).toBeTruthy();
   });
-  it('returns false when version invalid', () => {
-    expect(pep440.equals('1.0.0', '1.0..foo')).toBeFalsy();
-  });
-});
 
-describe('pep440.isSingleVersion()', () => {
   it('returns true if naked version', () => {
     expect(pep440.isSingleVersion('1.2.3')).toBeTruthy();
     expect(pep440.isSingleVersion('1.2.3rc0')).toBeTruthy();
@@ -61,38 +53,28 @@ describe('pep440.isSingleVersion()', () => {
   it('returns false when not version', () => {
     expect(pep440.isSingleVersion('==1.*')).toBeFalsy();
   });
-});
 
-const versions = [
-  '0.9.4',
-  '1.0.0',
-  '1.1.5',
-  '1.2.1',
-  '1.2.2',
-  '1.2.3',
-  '1.3.4',
-  '2.0.3',
-];
+  const versions = [
+    '0.9.4',
+    '1.0.0',
+    '1.1.5',
+    '1.2.1',
+    '1.2.2',
+    '1.2.3',
+    '1.3.4',
+    '2.0.3',
+  ];
 
-describe('pep440.getSatisfyingVersion(versions, range)', () => {
-  it('returns correct value', () => {
+  it('getSatisfyingVersion', () => {
     expect(pep440.getSatisfyingVersion(versions, '~=1.2.1')).toBe('1.2.3');
-  });
-  it('returns null when none found', () => {
     expect(pep440.getSatisfyingVersion(versions, '~=2.1')).toBeNull();
   });
-});
 
-describe('pep440.minSatisfyingVersion(versions, range)', () => {
-  it('returns correct value', () => {
+  it('minSatisfyingVersion', () => {
     expect(pep440.minSatisfyingVersion(versions, '~=1.2.1')).toBe('1.2.1');
-  });
-  it('returns null when none found', () => {
     expect(pep440.minSatisfyingVersion(versions, '~=2.1')).toBeNull();
   });
-});
 
-describe('pep440.getNewValue()', () => {
   const { getNewValue } = pep440;
 
   // cases: [currentValue, expectedBump]
@@ -177,9 +159,7 @@ describe('pep440.getNewValue()', () => {
     });
     expect(invalid).toEqual('==1.2.3');
   });
-});
 
-describe('pep.isLessThanRange()', () => {
   test.each([
     ['>= 1.0.0, < 2.0.0', '0.9.9.9', true],
     ['>= 1.0.0, < 2.0.0', '1.0.0a0', true],

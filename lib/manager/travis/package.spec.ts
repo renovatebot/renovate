@@ -1,4 +1,3 @@
-import { getName } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import { getPackageUpdates } from './package';
@@ -8,7 +7,7 @@ const getPkgReleases: any = _getPkgReleases;
 
 jest.mock('../../datasource');
 
-describe(getName(), () => {
+describe('manager/travis/package', () => {
   describe('getPackageUpdates', () => {
     let config: any;
     const RealDate = Date;

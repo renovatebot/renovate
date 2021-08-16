@@ -1,6 +1,6 @@
 import semver from '.';
 
-describe('semver.isValid(input)', () => {
+describe('versioning/semver/index', () => {
   it('should return null for irregular versions', () => {
     expect(semver.isValid('17.04.0')).toBeFalsy();
   });
@@ -25,8 +25,7 @@ describe('semver.isValid(input)', () => {
       semver.isValid('https://github.com/renovatebot/renovate.git')
     ).toBeFalsy();
   });
-});
-describe('semver.isSingleVersion()', () => {
+
   it('returns true if naked version', () => {
     expect(semver.isSingleVersion('1.2.3')).toBeTruthy();
     expect(semver.isSingleVersion('1.2.3-alpha.1')).toBeTruthy();
@@ -38,8 +37,7 @@ describe('semver.isSingleVersion()', () => {
   it('returns false when not version', () => {
     expect(semver.isSingleVersion('1.x')).toBeFalsy();
   });
-});
-describe('semver.getNewValue()', () => {
+
   it('uses newVersion', () => {
     expect(
       semver.getNewValue({

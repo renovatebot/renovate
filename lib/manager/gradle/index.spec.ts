@@ -6,7 +6,6 @@ import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import {
   addReplacingSerializer,
-  getName,
   loadFixture,
   mocked,
 } from '../../../test/util';
@@ -55,7 +54,7 @@ dependency "baz:baz:\${bazVersion}"
 addReplacingSerializer('gradlew.bat', '<gradlew>');
 addReplacingSerializer('./gradlew', '<gradlew>');
 
-describe(getName(), () => {
+describe('manager/gradle/index', () => {
   const updatesReport = loadFixture('updatesReport.json');
 
   function setupMocks({

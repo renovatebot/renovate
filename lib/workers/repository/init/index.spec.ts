@@ -1,4 +1,4 @@
-import { getName, logger, mocked } from '../../../../test/util';
+import { logger, mocked } from '../../../../test/util';
 import { setAdminConfig } from '../../../config/admin';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
@@ -22,7 +22,7 @@ const merge = mocked(_merge);
 const onboarding = mocked(_onboarding);
 const secrets = mocked(_secrets);
 
-describe(getName(), () => {
+describe('workers/repository/init/index', () => {
   beforeEach(() => {
     setAdminConfig({ localDir: '', cacheDir: '' });
   });

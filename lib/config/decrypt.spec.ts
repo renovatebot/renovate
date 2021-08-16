@@ -1,11 +1,11 @@
-import { getName, loadFixture } from '../../test/util';
+import { loadFixture } from '../../test/util';
 import { setAdminConfig } from './admin';
 import { decryptConfig } from './decrypt';
 import type { RenovateConfig } from './types';
 
 const privateKey = loadFixture('private.pem', '.');
 
-describe(getName(), () => {
+describe('config/decrypt', () => {
   describe('decryptConfig()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

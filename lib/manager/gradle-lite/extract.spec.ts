@@ -1,4 +1,4 @@
-import { fs, getName } from '../../../test/util';
+import { fs } from '../../../test/util';
 import { extractAllPackageFiles } from '.';
 
 jest.mock('../../util/fs');
@@ -12,7 +12,7 @@ function mockFs(files: Record<string, string>): void {
   });
 }
 
-describe(getName(), () => {
+describe('manager/gradle-lite/extract', () => {
   beforeAll(() => {});
   afterAll(() => {
     jest.resetAllMocks();

@@ -1,4 +1,3 @@
-import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { setAdminConfig } from './admin';
 import { getConfig } from './defaults';
@@ -15,7 +14,7 @@ interface TestRenovateConfig extends RenovateConfig {
   node?: RenovateSharedConfig & { supportPolicy?: unknown };
 }
 
-describe(getName(), () => {
+describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
       const config: TestRenovateConfig = {

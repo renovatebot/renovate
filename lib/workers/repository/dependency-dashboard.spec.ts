@@ -3,7 +3,6 @@ import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   getConfig,
-  getName,
   loadFixture,
   logger,
   platform,
@@ -41,7 +40,7 @@ async function dryRun(
   expect(platform.ensureIssue).toHaveBeenCalledTimes(ensureIssueCalls);
 }
 
-describe(getName(), () => {
+describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
     it('reads dashboard body', async () => {
       const conf: RenovateConfig = {};

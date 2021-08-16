@@ -1,13 +1,12 @@
 import { api as semver } from '.';
 
-describe('semver.matches()', () => {
-  it('handles tilde greater than', () => {
+describe('versioning/hashicorp/index', () => {
+  it('matches', () => {
     expect(semver.matches('4.2.0', '~> 4.0')).toBe(true);
     expect(semver.matches('4.2.0', '~> 4.0.0')).toBe(false);
   });
-});
-describe('semver.getSatisfyingVersion()', () => {
-  it('handles tilde greater than', () => {
+
+  it('getSatisfyingVersion', () => {
     expect(
       semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
@@ -21,20 +20,17 @@ describe('semver.getSatisfyingVersion()', () => {
       )
     ).toBe('4.0.0');
   });
-});
-describe('semver.isValid()', () => {
-  it('handles comma', () => {
+
+  it('isValid', () => {
     expect(semver.isValid('>= 1.0.0, <= 2.0.0')).toBeTruthy();
   });
-});
-describe('semver.isLessThanRange()', () => {
-  it('handles comma', () => {
+
+  it('isLessThanRange', () => {
     expect(semver.isLessThanRange('0.9.0', '>= 1.0.0, <= 2.0.0')).toBe(true);
     expect(semver.isLessThanRange('1.9.0', '>= 1.0.0, <= 2.0.0')).toBe(false);
   });
-});
-describe('semver.minSatisfyingVersion()', () => {
-  it('handles tilde greater than', () => {
+
+  it('minSatisfyingVersion', () => {
     expect(
       semver.minSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -48,9 +44,8 @@ describe('semver.minSatisfyingVersion()', () => {
       )
     ).toBeNull();
   });
-});
-describe('semver.getNewValue()', () => {
-  it('handles tilde greater than', () => {
+
+  it('getNewValue', () => {
     expect(
       semver.getNewValue({
         currentValue: '~> 1.2',

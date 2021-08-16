@@ -1,7 +1,7 @@
 import * as _AWS from '@aws-sdk/client-ecr';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, mocked, partial } from '../../../test/util';
+import { mocked, partial } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import { id } from './common';
@@ -42,7 +42,7 @@ function mockEcrAuthReject(msg: string) {
   );
 }
 
-describe(getName(), () => {
+describe('datasource/docker/index', () => {
   beforeEach(() => {
     hostRules.find.mockReturnValue({
       username: 'some-username',

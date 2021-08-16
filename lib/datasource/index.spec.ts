@@ -1,4 +1,4 @@
-import { getName, logger, mocked } from '../../test/util';
+import { logger, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -25,7 +25,7 @@ const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe(getName(), () => {
+describe('datasource/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });

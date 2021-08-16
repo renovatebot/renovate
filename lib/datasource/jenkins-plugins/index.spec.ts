@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadJsonFixture } from '../../../test/util';
+import { loadJsonFixture } from '../../../test/util';
 import * as versioning from '../../versioning/docker';
 import { resetCache } from './get';
 import * as jenkins from '.';
@@ -8,7 +8,7 @@ import * as jenkins from '.';
 const jenkinsPluginsVersions = loadJsonFixture('plugin-versions.json');
 const jenkinsPluginsInfo = loadJsonFixture('update-center.actual.json');
 
-describe(getName(), () => {
+describe('datasource/jenkins-plugins/index', () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 

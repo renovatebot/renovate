@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
-import { getName, partial } from '../../../test/util';
+import { partial } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import * as hostRules from '../../util/host-rules';
 import type { PackageFile } from '../types';
@@ -10,7 +10,7 @@ jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 const Git: typeof _simpleGit = jest.requireActual('simple-git');
 
-describe(getName(), () => {
+describe('manager/git-submodules/extract', () => {
   // flaky ci tests
   jest.setTimeout(10 * 1000);
 

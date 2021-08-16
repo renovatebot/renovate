@@ -1,4 +1,3 @@
-import { getName } from '../../test/util';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../constants/platforms';
 import { loadModules } from '../util/modules';
@@ -7,7 +6,7 @@ import * as platform from '.';
 
 jest.unmock('.');
 
-describe(getName(), () => {
+describe('platform/index', () => {
   beforeEach(() => {
     jest.resetModules();
   });

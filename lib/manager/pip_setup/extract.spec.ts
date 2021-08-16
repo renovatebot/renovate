@@ -1,5 +1,5 @@
 import { envMock, exec, mockExecSequence } from '../../../test/exec-util';
-import { env, getName } from '../../../test/util';
+import { env } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import {
   getPythonAlias,
@@ -11,7 +11,7 @@ import {
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 
-describe(getName(), () => {
+describe('manager/pip_setup/extract', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

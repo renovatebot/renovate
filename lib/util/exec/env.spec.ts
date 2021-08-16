@@ -1,7 +1,7 @@
 import { setAdminConfig } from '../../config/admin';
 import { getChildProcessEnv } from './env';
 
-describe('getChildProcess environment when trustlevel set to low', () => {
+describe('util/exec/env', () => {
   const envVars = [
     'HTTP_PROXY',
     'HTTPS_PROXY',

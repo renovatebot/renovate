@@ -1,9 +1,4 @@
-import {
-  RenovateConfig,
-  getConfig,
-  getName,
-  mocked,
-} from '../../../../test/util';
+import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import * as datasourceMaven from '../../../datasource/maven';
 import * as datasourceNpm from '../../../datasource/npm';
 import * as _npm from '../../../manager/npm';
@@ -16,7 +11,7 @@ const lookupUpdates = mocked(lookup).lookupUpdates;
 
 jest.mock('./lookup');
 
-describe(getName(), () => {
+describe('workers/repository/process/fetch', () => {
   describe('fetchUpdates()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

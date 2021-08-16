@@ -41,7 +41,7 @@ const updatedGemfileLock = {
   },
 };
 
-describe('bundler.updateArtifacts()', () => {
+describe('manager/bundler/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

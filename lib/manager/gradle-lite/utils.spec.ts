@@ -1,4 +1,3 @@
-import { getName } from '../../../test/util';
 import { TokenType } from './common';
 import {
   getVars,
@@ -10,7 +9,7 @@ import {
   versionLikeSubstring,
 } from './utils';
 
-describe(getName(), () => {
+describe('manager/gradle-lite/utils', () => {
   it('versionLikeSubstring', () => {
     [
       '1.2.3',

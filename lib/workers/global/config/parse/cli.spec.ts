@@ -1,10 +1,9 @@
-import { getName } from '../../../../../test/util';
 import type { RenovateOptions } from '../../../../config/types';
 import * as datasourceDocker from '../../../../datasource/docker';
 import getArgv from './__fixtures__/argv';
 import * as cli from './cli';
 
-describe(getName(), () => {
+describe('workers/global/config/parse/cli', () => {
   let argv: string[];
   beforeEach(() => {
     argv = getArgv();

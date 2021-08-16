@@ -1,7 +1,6 @@
 import _simpleGit from 'simple-git';
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
-import { getName } from '../../../test/util';
 import { setAdminConfig } from '../../config/admin';
 import type { RepoAdminConfig } from '../../config/types';
 import type { Upgrade } from '../types';
@@ -10,7 +9,7 @@ import updateDependency from './update';
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
-describe(getName(), () => {
+describe('manager/git-submodules/update', () => {
   describe('updateDependency', () => {
     let upgrade: Upgrade;
     let adminConfig: RepoAdminConfig;

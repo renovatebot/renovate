@@ -1,12 +1,12 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
 const indexYaml = loadFixture('index.yaml');
 
-describe(getName(), () => {
+describe('datasource/helm/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
