@@ -30,6 +30,7 @@ export interface RepoResult {
 export interface RepoParams {
   repository: string;
   endpoint?: string;
+  gitUrl?: 'default' | 'ssh' | 'endpoint';
   forkMode?: string;
   forkToken?: string;
   includeForks?: boolean;

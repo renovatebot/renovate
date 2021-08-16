@@ -2037,6 +2037,16 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
   },
+  {
+    name: 'gitUrl',
+    description:
+      'Overrides the default resolution for git remote, e.g. to switch GitLab from HTTPS to SSH-based. Currently GitLab only. Can be one of `default`, `endpoint` or `ssh`',
+    type: 'string',
+    allowedValues: ['default', 'ssh', 'endpoint'],
+    default: 'default',
+    stage: 'repository',
+    admin: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

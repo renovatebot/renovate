@@ -19,7 +19,6 @@ const repoAdminOptions = [
   'privateKey',
   'localDir',
   'cacheDir',
-  'gitUrl',
 ];
 
 export function setAdminConfig(

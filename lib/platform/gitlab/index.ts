@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import pAll from 'p-all';
 import { lt } from 'semver';
-import { getAdminConfig } from '../../config/admin';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -166,10 +165,9 @@ export async function getJsonFile(
 
 function getRepoUrl(
   repository: string,
+  gitUrl: 'default' | 'ssh' | 'endpoint' | undefined,
   res: HttpResponse<RepoResponse>
 ): string {
-  const { gitUrl } = getAdminConfig();
-
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
@@ -220,6 +218,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  gitUrl,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -273,7 +272,7 @@ export async function initRepo({
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
-    const url = getRepoUrl(repository, res);
+    const url = getRepoUrl(repository, gitUrl, res);
     await git.initRepo({
       ...config,
       url,
