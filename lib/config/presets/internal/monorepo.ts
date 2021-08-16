@@ -151,6 +151,7 @@ const repoGroups = {
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
+  'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   sentry: 'https://github.com/getsentry/sentry-javascript',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
