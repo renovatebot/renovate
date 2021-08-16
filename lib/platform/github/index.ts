@@ -34,6 +34,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformResult,
   Pr,
   RepoParams,
@@ -48,6 +49,7 @@ import {
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
+import { massageMarkdownLinks } from './massage-markdown-links';
 import {
   BranchProtection,
   CombinedBranchStatus,
@@ -1146,11 +1148,7 @@ export async function ensureIssue({
     return 'created';
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
-      logger.debug(
-        `Issues are disabled, so could not create issue: ${
-          (err as Error).message
-        }`
-      );
+      logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
@@ -1476,10 +1474,10 @@ export async function updatePr({
   }
 }
 
-export async function mergePr(
-  prNo: number,
-  branchName: string
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: prNo,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
   if (config.prReviewsRequired) {
@@ -1572,7 +1570,7 @@ export function massageMarkdown(input: string): string {
   if (config.isGhe) {
     return smartTruncate(input, 60000);
   }
-  const massagedInput = input
+  const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with renovatebot redirector
     .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
     .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')

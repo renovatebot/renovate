@@ -346,6 +346,19 @@ Array [
 ]
 `;
 
+exports[`manager/dockerfile/extract extractPackageFile() handles quay hosts with port 1`] = `
+Object {
+  "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+  "currentDigest": undefined,
+  "currentValue": undefined,
+  "datasource": "docker",
+  "depName": "quay.io/node",
+  "depType": "final",
+  "lookupName": "quay.io:1234/node",
+  "replaceString": "quay.io:1234/node",
+}
+`;
+
 exports[`manager/dockerfile/extract extractPackageFile() handles tag 1`] = `
 Array [
   Object {

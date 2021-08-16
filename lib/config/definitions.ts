@@ -1818,7 +1818,7 @@ const options: RenovateOptions[] = [
   {
     name: 'authType',
     description:
-      'Authentication type for http header. e.g. "Bearer" or "Basic".',
+      'Authentication type for http header. e.g. "Bearer" or "Basic". Use "Token-Only" to use only the token without an authorization type.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -2030,6 +2030,13 @@ const options: RenovateOptions[] = [
     default: ['commit', 'push'],
     stage: 'global',
     admin: true,
+  },
+  {
+    name: 'updatePinnedDependencies',
+    description:
+      'Whether to update pinned (single version) dependencies or not.',
+    type: 'boolean',
+    default: true,
   },
 ];
 

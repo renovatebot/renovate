@@ -54,6 +54,7 @@ describe(getName(), () => {
           '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
+      // FIXME: explicit assert condition
       expect(conf).toMatchSnapshot();
     });
   });

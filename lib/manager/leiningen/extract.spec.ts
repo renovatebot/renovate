@@ -53,6 +53,7 @@ describe(getName(), () => {
     ]);
   });
   it('extractPackageFile', () => {
+    // FIXME: explicit assert condition
     expect(extractPackageFile(leinProjectClj)).toMatchSnapshot();
   });
   it('extractVariables', () => {

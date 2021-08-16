@@ -34,6 +34,13 @@ const adminConfig: RepoAdminConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
+const updatedGemfileLock = {
+  file: {
+    contents: 'Updated Gemfile.lock',
+    name: 'Gemfile.lock',
+  },
+};
+
 describe('bundler.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -79,7 +86,7 @@ describe('bundler.updateArtifacts()', () => {
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
-    ).toMatchSnapshot();
+    ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works for default binarySource', async () => {
@@ -98,7 +105,7 @@ describe('bundler.updateArtifacts()', () => {
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([updatedGemfileLock]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
@@ -118,7 +125,7 @@ describe('bundler.updateArtifacts()', () => {
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([updatedGemfileLock]);
     expect(execSnapshots).toMatchSnapshot();
   });
   describe('Docker', () => {
@@ -151,7 +158,7 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
     it('constraints options', async () => {
@@ -183,7 +190,7 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid constraints options', async () => {
@@ -215,7 +222,7 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -255,7 +262,7 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -300,7 +307,7 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -345,7 +352,7 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -385,7 +392,7 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
   });
@@ -410,7 +417,13 @@ describe('bundler.updateArtifacts()', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([
+      {
+        artifactError: {
+          lockFile: 'Gemfile.lock',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lockFileMaintenance', async () => {

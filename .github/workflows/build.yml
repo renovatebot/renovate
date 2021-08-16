@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - v24
+      - v25
 
   workflow_dispatch:
     inputs:
@@ -57,7 +57,7 @@ jobs:
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
         if: env.NODE_VERSION == '14'
-        uses: actions/setup-java@d9126d7df2f1b080b603441eaf5810ced3614e78 # renovate: tag=v2.1.0
+        uses: actions/setup-java@4b1b3d4a82f726de9ba1945f8c6967b67caf5dcd # renovate: tag=v2.2.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
