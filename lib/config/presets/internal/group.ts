@@ -583,6 +583,17 @@ const staticGroups = {
       },
     ],
   },
+  reactAdmin: {
+    description: 'Group react-admin packages together',
+    packageRules: [
+      {
+        matchPackageNames: ['react-admin'],
+        matchPackagePatterns: ['^ra-'],
+        groupName: 'react-admin packages',
+        groupSlug: 'react-admin',
+      },
+    ],
+  },
 };
 
 const config: any = { ...staticGroups };
