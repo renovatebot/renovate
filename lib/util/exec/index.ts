@@ -58,7 +58,7 @@ function dockerEnvVars(
   );
 }
 
-function getCwd({ cwd, cwdFile }: ExecOptions = {}): string {
+function getCwd({ cwd, cwdFile }: ExecOptions): string {
   const { localDir: defaultCwd } = getAdminConfig();
   const paramCwd = cwdFile ? join(defaultCwd, dirname(cwdFile)) : cwd;
   return paramCwd || defaultCwd;
@@ -111,7 +111,7 @@ async function prepareRawExec(
     const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
     const childEnv = getChildEnv(opts);
     const envVars = dockerEnvVars(extraEnv, childEnv);
-    const cwd = getCwd();
+    const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
 
     const dockerCommand = await generateDockerCommand(

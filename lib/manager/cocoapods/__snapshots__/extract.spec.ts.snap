@@ -377,6 +377,10 @@ Array [
     "skipReason": "git-dependency",
   },
   Object {
+    "currentValue": "3.2.1",
+    "datasource": "git-tags",
+    "depName": "g",
+    "lookupName": "g.git",
     "managerData": Object {
       "lineNumber": 9,
     },
@@ -385,9 +389,54 @@ Array [
     "currentValue": "0.0.1",
     "datasource": "github-tags",
     "depName": "h",
-    "lookupName": "foo/bar",
+    "lookupName": "foo/foo",
     "managerData": Object {
       "lineNumber": 10,
+    },
+  },
+  Object {
+    "currentValue": "0.0.1",
+    "datasource": "github-tags",
+    "depName": "i",
+    "lookupName": "foo/foo",
+    "managerData": Object {
+      "lineNumber": 11,
+    },
+  },
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "gitlab-tags",
+    "depName": "j",
+    "lookupName": "bar/bar",
+    "managerData": Object {
+      "lineNumber": 12,
+    },
+  },
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "gitlab-tags",
+    "depName": "k",
+    "lookupName": "bar/bar",
+    "managerData": Object {
+      "lineNumber": 13,
+    },
+  },
+  Object {
+    "currentValue": "1.0.0",
+    "datasource": "git-tags",
+    "depName": "l",
+    "lookupName": "https://example.com/baz/baz.git",
+    "managerData": Object {
+      "lineNumber": 14,
+    },
+  },
+  Object {
+    "currentValue": "1.0.0",
+    "datasource": "git-tags",
+    "depName": "m",
+    "lookupName": "git@example.com:baz/baz.git",
+    "managerData": Object {
+      "lineNumber": 15,
     },
   },
 ]
