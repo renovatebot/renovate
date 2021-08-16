@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/admin';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
@@ -105,7 +105,7 @@ export async function extractPackageFile(
         logger.debug('Stripping package-lock setting from .npmrc');
         npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
       }
-      if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
+      if (npmrc.includes('=${') && !getGlobalConfig().exposeAllEnv) {
         logger.debug(
           { npmrcFileName },
           'Stripping .npmrc file of lines with variables'

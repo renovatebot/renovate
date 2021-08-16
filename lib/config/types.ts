@@ -86,7 +86,7 @@ export interface GlobalOnlyConfig {
 
 // Config options used within the repository worker, but not user configurable
 // The below should contain config options where admin=true
-export interface RepoAdminConfig {
+export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
