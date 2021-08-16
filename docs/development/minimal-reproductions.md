@@ -1,13 +1,13 @@
 # About minimal reproductions
 
-You may be asked to provide a "minimal reproduction" repository to help the Renovate team debug bug reports.
+You may be asked to provide a "minimal reproduction" repository to help the Renovate team debug bug reports or implement a feature.
 
 This document explains why we need a minimal reproduction, why using large repositories to debug is undesirable, and how you can create a good minimal reproduction.
 
 ## What is a minimal reproduction?
 
 The basic idea of a minimal reproduction is to use the least amount of both code and config to trigger missing or wrong behavior.
-Having a minimal reproduction makes it easier for the developers to see where the bug is, and to verify that the new code fixes the bug.
+Having a minimal reproduction makes it easier for the developers to see where the bug or missing feature is, and to verify that the new code satisfies requirements.
 
 ### Why not use the production repository to debug?
 
@@ -27,12 +27,16 @@ Reducing the config to a minimum to reproduce the bug helps discover exactly whi
 A debuggable reproduction repository is usually needed, and it makes the most sense for the issue reporter to create it.
 We prefer that you use GitHub to host your reproduction, but if it requires GitLab or Bitbucket to be reproduced then creating a public repository on those instead is fine.
 
-### Making a reproduction repository is too much work for me
+### "Making a reproduction repository is too much work for me"
 
-Although we'd love to get down to zero reported bugs remaining, there's usually a queue and we need to prioritize.
-If a bug is not important enough for you to spend your time reproducing, that's a strong indicator to the Renovate team that it should be treated as a lower priority than those bugs which do have a reproduction repository.
+Although we'd love to get down to zero reported bugs or feature requests remaining, there's a queue and we need to prioritize.
+If a bug or feature is not important enough for you to spend your time creating a simple repository for, that's a strong indicator to the Renovate team that it should be treated as a lower priority than those issues which do have a reproduction repository.
 
-Therefore you are free to raise bug reports without a reproduction repository but be prepared for it to not be fixed until someone else with the same bug reproduces it, and for it to be closed unfixed if nobody else is able to do that.
+Therefore you are free to raise bug reports or feature requests without a reproduction repository but be prepared for it to not be fixed until someone else with the same problem reproduces it, and for it to be closed unfixed if nobody else is able to do that.
+
+### "I already described what you need in the issue itself"
+
+If it's so simple then it shouldn't take you much time to commit it to a repo.
 
 ## How to create a good minimal reproduction
 
