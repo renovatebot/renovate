@@ -8,4 +8,3 @@ description: Learn how to schedule when Renovate bot runs
 This document describes how Renovate bot's scheduling works.
 
 ## Placeholder section
-
