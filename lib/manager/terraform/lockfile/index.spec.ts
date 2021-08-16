@@ -35,14 +35,8 @@ describe(getName(), () => {
     setGlobalConfig(adminConfig);
   });
 
-  afterEach(() => {
-    delete process.env.RENOVATE_X_TERRAFORM_LOCK_FILE;
-  });
-
   it('returns null if no .terraform.lock.hcl found', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     expect(
       await updateArtifacts({
@@ -56,8 +50,6 @@ describe(getName(), () => {
 
   it('returns null if .terraform.lock.hcl is empty', async () => {
     fs.readLocalFile.mockResolvedValueOnce('empty' as any);
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     expect(
       await updateArtifacts({
@@ -84,8 +76,6 @@ describe(getName(), () => {
       newValue: '3.36.0',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
@@ -117,8 +107,6 @@ describe(getName(), () => {
       newValue: '~> 2.50',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
@@ -157,8 +145,6 @@ describe(getName(), () => {
       ...config,
     };
 
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
-
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: [{ depName: 'random', lookupName: 'hashicorp/random' }],
@@ -189,8 +175,6 @@ describe(getName(), () => {
       newValue: '~> 3.0',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'test/main.tf',
@@ -264,8 +248,6 @@ describe(getName(), () => {
       ...config,
     };
 
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
-
     const result = await updateArtifacts({
       packageFileName: '',
       updatedDeps: [],
@@ -338,8 +320,6 @@ describe(getName(), () => {
       updateType: 'lockFileMaintenance',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: '',
@@ -461,8 +441,6 @@ describe(getName(), () => {
       updateType: 'lockFileMaintenance',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: '',
