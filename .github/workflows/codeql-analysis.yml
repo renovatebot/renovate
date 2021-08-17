@@ -23,6 +23,8 @@ jobs:
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@b0e70410b40f1a9af3bba1cecd95b4b57896af26 # renovate: tag=v1.0.12
+        with:
+          config-file: ./.github/codeql/codeql-config.yml
 
         # Override language selection by uncommenting this and choosing your languages
         # with:
