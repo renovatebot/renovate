@@ -1,6 +1,6 @@
 import { envMock, exec, mockExecSequence } from '../../../test/exec-util';
 import { env, getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import {
   getPythonAlias,
   parsePythonVersion,
@@ -18,7 +18,7 @@ describe(getName(), () => {
     resetModule();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setAdminConfig({ localDir: '/tmp/foo/bar' });
+    setGlobalConfig({ localDir: '/tmp/foo/bar' });
   });
   describe('parsePythonVersion', () => {
     it('returns major and minor version numbers', () => {

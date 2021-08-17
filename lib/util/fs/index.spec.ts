@@ -2,7 +2,7 @@ import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
 import { getName, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import * as _env from '../exec/env';
 import {
   ensureCacheDir,
@@ -22,7 +22,7 @@ const env = mocked(_env);
 describe(getName(), () => {
   describe('readLocalFile', () => {
     beforeEach(() => {
-      setAdminConfig({ localDir: '' });
+      setGlobalConfig({ localDir: '' });
     });
 
     it('reads buffer', async () => {
@@ -60,7 +60,7 @@ describe(getName(), () => {
     it('returns path for file', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
 
@@ -114,7 +114,7 @@ describe(getName(), () => {
     it('returns dir content', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
           await writeLocalFile('test/Cargo.toml', '');
@@ -142,7 +142,7 @@ describe(getName(), () => {
     it('return empty array for non existing directory', async () => {
       await withDir(
         async (localDir) => {
-          setAdminConfig({
+          setGlobalConfig({
             localDir: localDir.path,
           });
           await expect(readLocalDirectory('somedir')).rejects.toThrow();
@@ -166,64 +166,28 @@ describe(getName(), () => {
       dirFromEnv: string;
       dirFromConfig: string;
     } {
-      const dirFromEnv = join(root, join('/foo'));
+      const dirFromEnv = join(root, join('/bar/others/bundler'));
       const dirFromConfig = join(root, join('/bar'));
 
       jest.resetAllMocks();
       env.getChildProcessEnv.mockReturnValueOnce({
         ...envMock.basic,
-        CUSTOM_CACHE_DIR: dirFromEnv,
       });
 
-      setAdminConfig({
+      setGlobalConfig({
         cacheDir: join(dirFromConfig),
       });
 
       return { dirFromEnv, dirFromConfig };
     }
 
-    it('prefers environment variables over admin config', async () => {
+    it('prefers environment variables over global config', async () => {
       await withDir(
         async (tmpDir) => {
-          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
-          const res = await ensureCacheDir(
-            './deeply/nested',
-            'CUSTOM_CACHE_DIR'
-          );
+          const { dirFromEnv } = setupMock(tmpDir.path);
+          const res = await ensureCacheDir('bundler');
           expect(res).toEqual(dirFromEnv);
           expect(await exists(dirFromEnv)).toBeTrue();
-          expect(await exists(dirFromConfig)).toBeFalse();
-        },
-        { unsafeCleanup: true }
-      );
-    });
-
-    it('is optional to pass environment variable', async () => {
-      await withDir(
-        async (tmpDir) => {
-          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
-          const expected = join(`${dirFromConfig}/deeply/nested`);
-          const res = await ensureCacheDir('./deeply/nested');
-          expect(res).toEqual(expected);
-          expect(await exists(expected)).toBeTrue();
-          expect(await exists(dirFromEnv)).toBeFalse();
-        },
-        { unsafeCleanup: true }
-      );
-    });
-
-    it('falls back to admin config', async () => {
-      await withDir(
-        async (tmpDir) => {
-          const { dirFromEnv, dirFromConfig } = setupMock(tmpDir.path);
-          const expected = join(`${dirFromConfig}/deeply/nested`);
-          const res = await ensureCacheDir(
-            './deeply/nested',
-            'NO_SUCH_VARIABLE'
-          );
-          expect(res).toEqual(expected);
-          expect(await exists(expected)).toBeTrue();
-          expect(await exists(dirFromEnv)).toBeFalse();
         },
         { unsafeCleanup: true }
       );

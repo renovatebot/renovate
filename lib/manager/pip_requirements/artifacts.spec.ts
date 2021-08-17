@@ -1,5 +1,5 @@
 import _fs from 'fs-extra';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
@@ -19,7 +19,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    setAdminConfig({ localDir: '' });
+    setGlobalConfig({ localDir: '' });
   });
   it('returns null if no updatedDeps were provided', async () => {
     expect(
