@@ -1,6 +1,6 @@
 import Git from 'simple-git';
 import upath from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import type { UpdateDependencyConfig } from '../types';
 
@@ -8,7 +8,7 @@ export default async function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   const git = Git(localDir);
   const submoduleGit = Git(upath.join(localDir, upgrade.depName));
 
