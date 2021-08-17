@@ -3,7 +3,7 @@ import { cache } from '../../util/cache/package/decorator';
 import { HttpError } from '../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, pageSize } from './common';
+import { datasource, defaultRegistryUrl, pageSize } from './common';
 import type { AdoptiumJavaResponse } from './types';
 
 export class AdoptiumJavaDatasource extends Datasource {
@@ -15,7 +15,7 @@ export class AdoptiumJavaDatasource extends Datasource {
 
   customRegistrySupport = false;
 
-  defaultRegistryUrls = ['https://api.adoptium.net/'];
+  defaultRegistryUrls = [defaultRegistryUrl];
 
   caching = true;
 
@@ -27,7 +27,7 @@ export class AdoptiumJavaDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let page = 0;
-    const url = `${registryUrl}v3/release_versions?page_size=${pageSize}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`;
+    const url = `${registryUrl}v3/info/release_versions?page_size=${pageSize}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium`;
 
     const result: ReleaseResult = {
       homepage: 'https://adoptium.net',
