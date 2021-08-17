@@ -138,7 +138,7 @@ export async function updateArtifacts({
         args += ' --ignore-platform-reqs';
       } else {
         config.composerIgnorePlatformReqs.forEach((req) => {
-          args += ' --ignore-platform-req ' + req;
+          args += ' --ignore-platform-req ' + quote(req);
         });
       }
     }
