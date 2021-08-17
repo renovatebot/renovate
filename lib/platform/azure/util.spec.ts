@@ -138,7 +138,7 @@ describe(getName(), () => {
     });
     it('should configure personal access token', () => {
       const res = getStorageExtraCloneOpts({
-        token: '1234567890123456789012345678901234567890123456789012',
+        token: '123456789012345678901234567890123456789012345678test',
       });
       expect(res).toMatchSnapshot();
     });

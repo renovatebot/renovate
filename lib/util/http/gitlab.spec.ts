@@ -7,7 +7,7 @@ import { GitlabHttp, setBaseUrl } from './gitlab';
 
 hostRules.add({
   hostType: PLATFORM_TYPE_GITLAB,
-  token: 'abc123',
+  token: '123test',
 });
 
 const gitlabApiHost = 'https://gitlab.com';

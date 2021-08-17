@@ -32,7 +32,7 @@ describe(getName(), () => {
       defaultArgv = defaultArgv.concat([
         '--token=abc',
         '--pr-footer=custom',
-        '--log-context=abc123',
+        '--log-context=123test',
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
@@ -41,7 +41,7 @@ describe(getName(), () => {
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
         ['prFooter', 'custom'],
-        ['logContext', 'abc123'],
+        ['logContext', '123test'],
       ]);
     });
 

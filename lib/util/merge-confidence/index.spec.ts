@@ -96,7 +96,7 @@ describe(getName(), () => {
     });
 
     it('returns valid confidence level', async () => {
-      hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
+      hostRules.add({ hostType: 'merge-confidence', token: '123test' });
       const datasource = 'npm';
       const depName = 'renovate';
       const currentVersion = '24.3.0';
@@ -119,7 +119,7 @@ describe(getName(), () => {
     });
 
     it('returns neutral if invalid confidence level', async () => {
-      hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
+      hostRules.add({ hostType: 'merge-confidence', token: '123test' });
       const datasource = 'npm';
       const depName = 'renovate';
       const currentVersion = '25.0.0';
@@ -142,7 +142,7 @@ describe(getName(), () => {
     });
 
     it('returns neutral if exception from API', async () => {
-      hostRules.add({ hostType: 'merge-confidence', token: 'abc123' });
+      hostRules.add({ hostType: 'merge-confidence', token: '123test' });
       const datasource = 'npm';
       const depName = 'renovate';
       const currentVersion = '25.0.0';

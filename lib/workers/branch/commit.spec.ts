@@ -20,7 +20,7 @@ describe(getName(), () => {
         updatedArtifacts: [],
       });
       jest.resetAllMocks();
-      git.commitFiles.mockResolvedValueOnce('abc123');
+      git.commitFiles.mockResolvedValueOnce('123test');
       setGlobalConfig();
     });
     it('handles empty files', async () => {

@@ -271,11 +271,11 @@ describe(getName(), () => {
     hostRules.add({
       hostType: 'npm',
       matchHost: 'npm.mycustomregistry.com',
-      token: 'abcde',
+      token: 'test_token',
     });
     httpMock
       .scope('https://npm.mycustomregistry.com', {
-        reqheaders: { authorization: 'Bearer abcde' },
+        reqheaders: { authorization: 'Bearer test_token' },
       })
       .get('/foobar')
       .reply(200, npmResponse);
@@ -290,13 +290,13 @@ describe(getName(), () => {
       hostType: 'npm',
       matchHost:
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/',
-      token: 'abcde',
+      token: 'test_token',
     });
     httpMock
       .scope(
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry',
         {
-          reqheaders: { authorization: 'Bearer abcde' },
+          reqheaders: { authorization: 'Bearer test_token' },
         }
       )
       .get('/foobar')

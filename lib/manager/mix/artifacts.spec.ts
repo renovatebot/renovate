@@ -106,7 +106,7 @@ describe(getName(), () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    hostRules.find.mockReturnValueOnce({ token: 'valid_token' });
+    hostRules.find.mockReturnValueOnce({ token: 'valid_test_token' });
     hostRules.find.mockReturnValueOnce({});
 
     const result = await updateArtifacts({
@@ -135,7 +135,7 @@ describe(getName(), () => {
 
     const [, packageUpdateCommand] = execSnapshots;
     expect(packageUpdateCommand.cmd).toInclude(
-      'mix hex.organization auth renovate_test --key valid_token && ' +
+      'mix hex.organization auth renovate_test --key valid_test_token && ' +
         'mix deps.update private_package other_package'
     );
   });

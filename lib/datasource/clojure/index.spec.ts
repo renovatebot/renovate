@@ -83,7 +83,7 @@ describe(getName(), () => {
     hostRules.add({
       hostType: ClojureDatasource.id,
       matchHost: 'custom.registry.renovatebot.com',
-      token: 'abc123',
+      token: '123test',
     });
     jest.resetAllMocks();
   });

@@ -17,7 +17,7 @@ describe(getName(), () => {
       },
       options: {
         headers: {
-          authorization: 'Bearer abc',
+          authorization: 'Bearer test_token',
         },
       },
     });

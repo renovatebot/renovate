@@ -79,7 +79,7 @@ describe(getName(), () => {
     hostRules.add({
       hostType: datasource,
       matchHost: 'custom.registry.renovatebot.com',
-      token: 'abc123',
+      token: '123test',
     });
     jest.resetAllMocks();
   });

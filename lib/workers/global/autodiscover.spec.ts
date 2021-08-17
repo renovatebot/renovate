@@ -20,7 +20,7 @@ describe(getName(), () => {
     config = {};
     await platform.initPlatform({
       platform: PLATFORM_TYPE_GITHUB,
-      token: 'abc123',
+      token: '123test',
       endpoint: 'endpoint',
     });
   });

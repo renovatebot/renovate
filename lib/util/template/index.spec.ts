@@ -13,10 +13,10 @@ describe(getName(), () => {
   it('filters out disallowed fields', () => {
     const userTemplate =
       '{{#if isFoo}}foo{{/if}}{{platform}} token = "{{token}}"';
-    const input = { isFoo: true, platform: 'github', token: 'abc123 ' };
+    const input = { isFoo: true, platform: 'github', token: '123test ' };
     const output = template.compile(userTemplate, input);
     expect(output).toMatchSnapshot();
     expect(output).toContain('github');
-    expect(output).not.toContain('abc123');
+    expect(output).not.toContain('123test');
   });
 });

@@ -21,7 +21,7 @@ describe(getName(), () => {
     it('should set personal access token and endpoint', () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_AZURE,
-        token: '1234567890123456789012345678901234567890123456789012',
+        token: '123test',
         matchHost: 'https://dev.azure.com/renovate1',
       });
       azure.setEndpoint('https://dev.azure.com/renovate1');
@@ -37,7 +37,7 @@ describe(getName(), () => {
     it('should set bearer token and endpoint', () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_AZURE,
-        token: 'token',
+        token: 'test_token',
         matchHost: 'https://dev.azure.com/renovate2',
       });
       azure.setEndpoint('https://dev.azure.com/renovate2');

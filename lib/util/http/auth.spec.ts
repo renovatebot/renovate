@@ -73,7 +73,7 @@ describe(getName(), () => {
       const opts: GotOptions = {
         headers: {},
         // Personal Access Token is exactly 20 characters long
-        token: '01234567890123456789',
+        token: '0123456789012345test',
         hostType: PLATFORM_TYPE_GITLAB,
       };
 
@@ -82,10 +82,10 @@ describe(getName(), () => {
       expect(opts).toMatchInlineSnapshot(`
         Object {
           "headers": Object {
-            "Private-token": "01234567890123456789",
+            "Private-token": "0123456789012345test",
           },
           "hostType": "gitlab",
-          "token": "01234567890123456789",
+          "token": "0123456789012345test",
         }
       `);
     });
@@ -94,7 +94,7 @@ describe(getName(), () => {
       const opts: GotOptions = {
         headers: {},
         token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
         hostType: PLATFORM_TYPE_GITLAB,
       };
 
@@ -103,10 +103,10 @@ describe(getName(), () => {
       expect(opts).toMatchInlineSnapshot(`
         Object {
           "headers": Object {
-            "authorization": "Bearer a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
+            "authorization": "Bearer a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test",
           },
           "hostType": "gitlab",
-          "token": "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
+          "token": "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test",
         }
       `);
     });
@@ -115,7 +115,7 @@ describe(getName(), () => {
       const opts: GotOptions = {
         headers: {},
         token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
         hostType: 'npm',
         context: {
           authType: 'Basic',
@@ -130,18 +130,18 @@ describe(getName(), () => {
         },
         headers: {
           authorization:
-            'Basic a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+            'Basic a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
         },
         hostType: 'npm',
         token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
       });
     });
 
     it(`bare token`, () => {
       const opts: GotOptions = {
         headers: {},
-        token: '01234567890123456789',
+        token: '0123456789012345test',
         context: {
           authType: 'Token-Only',
         },
@@ -154,9 +154,9 @@ describe(getName(), () => {
           authType: 'Token-Only',
         },
         headers: {
-          authorization: '01234567890123456789',
+          authorization: '0123456789012345test',
         },
-        token: '01234567890123456789',
+        token: '0123456789012345test',
       });
     });
   });
@@ -182,7 +182,7 @@ describe(getName(), () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
         headers: {
-          authorization: 'auth',
+          authorization: 'Bearer auth',
         },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
@@ -203,7 +203,7 @@ describe(getName(), () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
         headers: {
-          authorization: 'auth',
+          authorization: 'Bearer auth',
         },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
@@ -225,7 +225,7 @@ describe(getName(), () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
         headers: {
-          authorization: 'auth',
+          authorization: 'Bearer auth',
         },
         hostname: 'store123.blob.core.windows.net',
         href: 'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
@@ -244,7 +244,7 @@ describe(getName(), () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
         headers: {
-          authorization: 'auth',
+          authorization: 'Bearer auth',
         },
         hostname: 'renovate.com',
         href: 'https://renovate.com',
@@ -256,7 +256,7 @@ describe(getName(), () => {
       expect(opts).toEqual({
         password: 'auth',
         headers: {
-          authorization: 'auth',
+          authorization: 'Bearer auth',
         },
         hostname: 'renovate.com',
         href: 'https://renovate.com',

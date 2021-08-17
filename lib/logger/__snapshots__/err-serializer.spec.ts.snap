@@ -7,7 +7,7 @@ Object {
   "message": "some message",
   "options": Object {
     "headers": Object {
-      "authorization": "Bearer abc",
+      "authorization": "Bearer test_token",
     },
   },
   "response": Object {

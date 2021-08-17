@@ -88,7 +88,7 @@ describe(getName(), () => {
         upgrades: [{ depName: 'some-dep-name' }],
       } as BranchConfig;
       schedule.isScheduledNow.mockReturnValue(true);
-      commit.commitFilesToBranch.mockResolvedValue('abc123');
+      commit.commitFilesToBranch.mockResolvedValue('123test');
 
       platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
@@ -303,8 +303,8 @@ describe(getName(), () => {
     it('continues branch if branch edited and but PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValueOnce('abc123');
-      platform.findPr.mockResolvedValueOnce({ sha: 'abc123' } as any);
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
       const res = await branchWorker.processBranch(config);
       // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
@@ -312,7 +312,7 @@ describe(getName(), () => {
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValueOnce('abc123');
+      git.getBranchCommit.mockReturnValueOnce('123test');
       platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
       const res = await branchWorker.processBranch(config);
       // FIXME: explicit assert condition
