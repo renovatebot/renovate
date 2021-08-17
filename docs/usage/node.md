@@ -17,45 +17,6 @@ Renovate can manage the Node.js version in the following files:
 - The [`.nvmrc`](https://github.com/creationix/nvm#nvmrc) file for the [Node Version Manager](https://github.com/creationix/nvm)
 - The [`node_js`](https://docs.travis-ci.com/user/languages/javascript-with-nodejs/#Specifying-Node.js-versions) field in [`.travis.yml`](https://docs.travis-ci.com/user/customizing-the-build/)
 
-## How It Works
-
-Node.js renovation in `package.json > engines` and in `.nvmrc` is enabled by default, if your existing version is pinned.
-
-To enable `.travis.yml` renovation, you must:
-
-1. Enable Travis renovation explicitly by setting the following Renovate configuration: `"travis": { "enabled": true }`
-1. Optionally, configure a support policy (As documented below)
-
-When Renovate processes your project's repository it will look for the files listed above and submit a single pull request that upgrades all Node.js versions simultaneously.
-
-## Configuring Support Policy
-
-Renovate supports a [`supportPolicy`](./configuration-options.md#supportpolicy) option that can be passed the following values and associated versions (current as of June 2021):
-
-**Default:** `lts`
-
-| supportPolicy | versions   | description                                              |
-| ------------- | ---------- | -------------------------------------------------------- |
-| all           | 12, 14, 16 | All releases that have not passed their end date         |
-| lts           | 12, 14     | All releases classified as LTS, including in maintenance |
-| active        | 14, 16     | All releases not in maintenance                          |
-| lts_active    | 14         | All releases both LTS and active                         |
-| lts_latest    | 14         | The latest LTS release                                   |
-| current       | 16         | The latest release from "all"                            |
-
-The version numbers associated with each support policy will be updated as new versions of Node.js are released, moved to LTS or maintenance, etc.
-
-For example, to instruct Renovate to upgrade your project to the latest [Long-term Support](https://github.com/nodejs/Release#release-plan) release, you can use the following configuration:
-
-```json
-"supportPolicy": ["lts_latest"]
-```
-
-We recommend that you define this support policy inside the `node` configuration object.
-This way, it is applied to all Node.js-related files.
-
-For additional language support see the [`supportPolicy` documentation](./configuration-options.md#supportpolicy).
-
 ## Configuring which version of npm Renovate uses
 
 When `binarySource=docker`, such as in the hosted WhiteSource Renovate App, Renovate will choose and install an `npm` version dynamically.

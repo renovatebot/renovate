@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { addMeta, logger } from '../../logger';
 import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
@@ -23,7 +23,7 @@ export async function postUpgradeCommandsExecutor(
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const artifactErrors = [...(config.artifactErrors || [])];
   const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
-    getAdminConfig();
+    getGlobalConfig();
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -62,7 +62,7 @@ export async function postUpgradeCommandsExecutor(
 
             logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
-              cwd: getAdminConfig().localDir,
+              cwd: getGlobalConfig().localDir,
             });
 
             logger.debug(
@@ -149,7 +149,7 @@ export async function postUpgradeCommandsExecutor(
 export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
-  const { allowedPostUpgradeCommands } = getAdminConfig();
+  const { allowedPostUpgradeCommands } = getGlobalConfig();
 
   const hasChangedFiles =
     config.updatedPackageFiles?.length > 0 ||
