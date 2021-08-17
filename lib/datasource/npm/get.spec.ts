@@ -153,14 +153,14 @@ describe(getName(), () => {
     const npmrc = ``;
     hostRules.add({
       matchHost: 'https://registry.npmjs.org',
-      token: 'test-token',
+      token: 'abc',
       authType: 'Basic',
     });
 
     httpMock
       .scope('https://registry.npmjs.org', {
         reqheaders: {
-          authorization: 'Basic test-token',
+          authorization: 'Basic abc',
         },
       })
       .get('/renovate')

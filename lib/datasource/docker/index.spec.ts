@@ -271,7 +271,7 @@ describe(getName(), () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'test-token' }],
+        authorizationData: [{ authorizationToken: 'test' }],
       });
 
       const res = await getDigest(
@@ -283,7 +283,7 @@ describe(getName(), () => {
       );
       const trace = httpMock.getTrace();
       expect(res).toBe('some-digest');
-      expect(trace[1].headers.authorization).toBe('Basic test-token');
+      expect(trace[1].headers.authorization).toBe('Basic test');
       expect(trace).toMatchSnapshot();
     });
     it('continues without token if ECR authentication could not be extracted', async () => {
@@ -359,7 +359,7 @@ describe(getName(), () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-other-dep:pull'
         )
-        .reply(200, { access_token: 'some-test-token' });
+        .reply(200, { access_token: 'test' });
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-other-dep' },
         '8.0.0-alpine'
@@ -522,7 +522,7 @@ describe(getName(), () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/node:pull'
         )
-        .reply(200, { token: 'some-test-token ' });
+        .reply(200, { token: 'test' });
       const res = await getPkgReleases({
         datasource: id,
         depName: 'node',
@@ -550,7 +550,7 @@ describe(getName(), () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/node:pull'
         )
-        .reply(200, { token: 'some-test-token ' });
+        .reply(200, { token: 'test' });
       const res = await getPkgReleases({
         datasource: id,
         depName: 'docker.io/node',
