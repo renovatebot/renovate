@@ -357,6 +357,19 @@ Usually left empty except for internal use (multiple base branches, and vulnerab
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
 
+## composerIgnorePlatformReqs
+
+By default, Renovate will run Composer with `--ignore-platform-reqs` as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
+However, this also means that all platform constraints (including PHP version) will be ignored by default, which can result in updated dependencies that are not compatible with your platform.
+
+To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
+Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
+
+If an empty array is configured, Renovate uses its default behaviour.
+
+Set to `null` to fully omit `--ignore-platform-reqs/--ignore-platform-req` during Composer invocation.
+This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
