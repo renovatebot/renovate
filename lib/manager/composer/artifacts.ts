@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -81,11 +81,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const cacheDir = await ensureCacheDir(
-    './others/composer',
-    'COMPOSER_CACHE_DIR'
-  );
-
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
@@ -118,7 +113,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
-        COMPOSER_CACHE_DIR: cacheDir,
+        COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
       },
       docker: {
@@ -148,7 +143,7 @@ export async function updateArtifacts({
       }
     }
     args += ' --no-ansi --no-interaction';
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
       args += ' --no-scripts --no-autoloader --no-plugins';
     }
     logger.debug({ cmd, args }, 'composer command');

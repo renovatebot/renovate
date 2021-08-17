@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { id, parseRegistryUrl } from '../../datasource/nuget';
 import { logger } from '../../logger';
@@ -29,7 +29,7 @@ async function addSourceCmds(
   config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   const registries =
     (await getConfiguredRegistries(packageFileName, localDir)) ||
     getDefaultRegistries();
@@ -64,10 +64,9 @@ async function runDotnetRestore(
     },
   };
 
-  const nugetConfigDir = await ensureCacheDir(
-    `./others/nuget/${getRandomString()}`
-  );
-  const nugetConfigFile = join(nugetConfigDir, 'nuget.config');
+  const nugetCacheDir = await ensureCacheDir('nuget');
+  const nugetConfigDir = join(nugetCacheDir, `${getRandomString()}`);
+  const nugetConfigFile = join(nugetConfigDir, `nuget.config`);
   await outputFile(
     nugetConfigFile,
     `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`

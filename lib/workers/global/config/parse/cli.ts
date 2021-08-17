@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { version } from '../../../../../package.json';
-import { getOptions } from '../../../../config/definitions';
+import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
 
 export function getCliName(option: Partial<RenovateOptions>): string {

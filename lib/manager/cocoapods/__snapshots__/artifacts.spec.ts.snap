@@ -1,18 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches write error 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "Podfile.lock",
-      "stderr": "not found",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() catches write error 2`] = `Array []`;
-
 exports[`.updateArtifacts() dynamically selects Docker image tag 1`] = `
 Array [
   Object {
@@ -118,17 +105,6 @@ Array [
 exports[`.updateArtifacts() returns null if updatedDeps is empty 1`] = `Array []`;
 
 exports[`.updateArtifacts() returns pod exec error 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "Podfile.lock",
-      "stderr": "exec exception",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() returns pod exec error 2`] = `
 Array [
   Object {
     "cmd": "pod install",

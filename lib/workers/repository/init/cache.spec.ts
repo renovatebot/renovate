@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig, getName } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import { initializeCaches } from './cache';
 
 describe(getName(), () => {
@@ -7,7 +7,7 @@ describe(getName(), () => {
     let config: RenovateConfig;
     beforeEach(() => {
       config = { ...getConfig() };
-      setAdminConfig({ cacheDir: '' });
+      setGlobalConfig({ cacheDir: '' });
     });
     it('initializes', async () => {
       expect(await initializeCaches(config)).toBeUndefined();
