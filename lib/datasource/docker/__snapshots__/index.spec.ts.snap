@@ -299,7 +299,7 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic test_token",
+      "authorization": "Basic test-token",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -310,7 +310,7 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic test_token",
+      "authorization": "Basic test-token",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },

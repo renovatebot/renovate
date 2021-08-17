@@ -271,7 +271,7 @@ describe(getName(), () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'test_token' }],
+        authorizationData: [{ authorizationToken: 'test-token' }],
       });
 
       const res = await getDigest(
@@ -283,7 +283,7 @@ describe(getName(), () => {
       );
       const trace = httpMock.getTrace();
       expect(res).toBe('some-digest');
-      expect(trace[1].headers.authorization).toBe('Basic test_token');
+      expect(trace[1].headers.authorization).toBe('Basic test-token');
       expect(trace).toMatchSnapshot();
     });
     it('continues without token if ECR authentication could not be extracted', async () => {

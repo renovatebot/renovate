@@ -114,8 +114,7 @@ describe(getName(), () => {
     it(`npm basic token`, () => {
       const opts: GotOptions = {
         headers: {},
-        token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
+        token: 'test',
         hostType: 'npm',
         context: {
           authType: 'Basic',
@@ -129,19 +128,17 @@ describe(getName(), () => {
           authType: 'Basic',
         },
         headers: {
-          authorization:
-            'Basic a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
+          authorization: 'Basic test',
         },
         hostType: 'npm',
-        token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
+        token: 'test',
       });
     });
 
     it(`bare token`, () => {
       const opts: GotOptions = {
         headers: {},
-        token: '0123456789012345test',
+        token: 'test',
         context: {
           authType: 'Token-Only',
         },
@@ -154,9 +151,9 @@ describe(getName(), () => {
           authType: 'Token-Only',
         },
         headers: {
-          authorization: '0123456789012345test',
+          authorization: 'test',
         },
-        token: '0123456789012345test',
+        token: 'test',
       });
     });
   });
@@ -182,7 +179,7 @@ describe(getName(), () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
         headers: {
-          authorization: 'Bearer auth',
+          authorization: 'auth',
         },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
@@ -203,7 +200,7 @@ describe(getName(), () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
         headers: {
-          authorization: 'Bearer auth',
+          authorization: 'auth',
         },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
@@ -225,7 +222,7 @@ describe(getName(), () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
         headers: {
-          authorization: 'Bearer auth',
+          authorization: 'auth',
         },
         hostname: 'store123.blob.core.windows.net',
         href: 'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
@@ -244,7 +241,7 @@ describe(getName(), () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
         headers: {
-          authorization: 'Bearer auth',
+          authorization: 'auth',
         },
         hostname: 'renovate.com',
         href: 'https://renovate.com',
@@ -256,7 +253,7 @@ describe(getName(), () => {
       expect(opts).toEqual({
         password: 'auth',
         headers: {
-          authorization: 'Bearer auth',
+          authorization: 'auth',
         },
         hostname: 'renovate.com',
         href: 'https://renovate.com',

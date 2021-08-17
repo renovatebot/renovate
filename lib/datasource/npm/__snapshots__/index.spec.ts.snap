@@ -586,7 +586,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer test_token",
+      "authorization": "Bearer test-token",
       "host": "npm.mycustomregistry.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -625,7 +625,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer test_token",
+      "authorization": "Bearer test-token",
       "host": "npm.mycustomregistry.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },

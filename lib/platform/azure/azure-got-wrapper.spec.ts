@@ -37,7 +37,7 @@ describe(getName(), () => {
     it('should set bearer token and endpoint', () => {
       hostRules.add({
         hostType: PLATFORM_TYPE_AZURE,
-        token: 'test_token',
+        token: 'test-token',
         matchHost: 'https://dev.azure.com/renovate2',
       });
       azure.setEndpoint('https://dev.azure.com/renovate2');

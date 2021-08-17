@@ -89,7 +89,7 @@ describe(getName(), () => {
       httpMock
         .scope(baseUrl, {
           reqheaders: {
-            authorization: 'this_test_token',
+            authorization: 'test-token',
           },
         })
         .get('/packages/certifi')
@@ -97,7 +97,7 @@ describe(getName(), () => {
 
       hostRules.find.mockReturnValueOnce({
         authType: 'Token-Only',
-        token: 'this_test_token',
+        token: 'test-token',
       });
 
       const res = await getPkgReleases({
@@ -143,7 +143,7 @@ describe(getName(), () => {
       httpMock
         .scope(baseUrl, {
           reqheaders: {
-            authorization: 'valid_test_token',
+            authorization: 'valid-test-token',
           },
         })
         .get('/repos/renovate_test/packages/private_package')
@@ -151,7 +151,7 @@ describe(getName(), () => {
 
       hostRules.find.mockReturnValueOnce({
         authType: 'Token-Only',
-        token: 'valid_test_token',
+        token: 'valid-test-token',
       });
 
       const result = await getPkgReleases({
