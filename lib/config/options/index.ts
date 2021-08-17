@@ -302,7 +302,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
-    globalOnly: true,
   },
   // Log options
   {
