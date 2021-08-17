@@ -1,6 +1,6 @@
 import { stat } from 'fs-extra';
 import { resolve } from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -11,7 +11,7 @@ import {
   extraEnv,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from '../gradle/utils';
+} from '../gradle/deep/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const http = new Http('gradle-wrapper');
@@ -55,7 +55,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const { localDir: projectDir } = getAdminConfig();
+    const { localDir: projectDir } = getGlobalConfig();
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
     const gradlew = gradleWrapperFileName(config);
     const gradlewPath = resolve(projectDir, `./${gradlew}`);

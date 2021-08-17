@@ -1,4 +1,4 @@
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
@@ -35,7 +35,7 @@ export async function shouldReuseExistingBranch(
     if (pr.labels?.includes(config.rebaseLabel)) {
       logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
       // istanbul ignore if
-      if (getAdminConfig().dryRun) {
+      if (getGlobalConfig().dryRun) {
         logger.info(
           `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
         );

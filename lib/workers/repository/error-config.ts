@@ -1,4 +1,4 @@
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
@@ -22,7 +22,7 @@ export async function raiseConfigWarningIssue(
     logger.debug('Updating onboarding PR with config error notice');
     body = `## Action Required: Fix Renovate Configuration\n\n${body}`;
     body += `\n\nOnce you have resolved this problem (in this onboarding branch), Renovate will return to providing you with a preview of your repository's configuration.`;
-    if (getAdminConfig().dryRun) {
+    if (getGlobalConfig().dryRun) {
       logger.info(`DRY-RUN: Would update PR #${pr.number}`);
     } else {
       try {
@@ -35,7 +35,7 @@ export async function raiseConfigWarningIssue(
         logger.warn({ err }, 'Error updating onboarding PR');
       }
     }
-  } else if (getAdminConfig().dryRun) {
+  } else if (getGlobalConfig().dryRun) {
     logger.info('DRY-RUN: Would ensure config error issue');
   } else {
     const once = false;
