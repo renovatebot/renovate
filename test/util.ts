@@ -75,12 +75,6 @@ function getCallerFileName(): string | null {
   return result;
 }
 
-export function getName(): string {
-  const file = getCallerFileName();
-  const [, name] = /lib\/(.*?)\.spec\.ts$/.exec(file.replace(/\\/g, '/'));
-  return name;
-}
-
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   const callerDir = upath.dirname(getCallerFileName());
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
