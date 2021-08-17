@@ -128,9 +128,16 @@ e.g.
 
 ## composerIgnorePlatformReqs
 
-Set the platform requirements you want to exclude when using Composer. Each item will be added to the composer command with `--ignore-platform-req`. When set to an empty array, `--ignore-platform-reqs` will be added to the Composer command.
+By default, Renovate will run Composer with `--ignore-platform-reqs` as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
+However, this also means that all platform constraints (including PHP version) will be ignored by default, which can result in updated dependencies that are not compatible with your platform.
 
-Set to `null` to prevent usage of `--ignore-platform-reqs` and `--ignore-platform-req` in the Composer package manager.
+To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
+Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
+
+If an empty array is configured, Renovate uses its default behaviour.
+
+Set to `null` to fully omit `--ignore-platform-reqs/--ignore-platform-req` during Composer invocation.
+This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed.
 
 ## customEnvVariables
 
