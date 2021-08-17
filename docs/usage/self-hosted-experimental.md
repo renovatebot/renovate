@@ -14,7 +14,7 @@ We do not follow Semantic Versioning for any experimental variables.
 These variables may be removed or have their behavior changed in **any** version.
 We will try to keep breakage to a minimum, but make no guarantees that a experimental variable will keep working.
 
-## GITLAB_IGNORE_REPO_URL
+## GITLAB_IGNORE_REPO_URL (deprecated, use global `gitUrl` option)
 
 If set to any value, Renovate will ignore the Project's `http_url_to_repo` value and instead construct the Git URL manually.
 
