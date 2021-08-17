@@ -31,6 +31,7 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
+  GitUrlOption,
   Issue,
   MergePRConfig,
   PlatformParams,
@@ -165,7 +166,7 @@ export async function getJsonFile(
 
 function getRepoUrl(
   repository: string,
-  gitUrl: 'default' | 'ssh' | 'endpoint' | undefined,
+  gitUrl: GitUrlOption | undefined,
   res: HttpResponse<RepoResponse>
 ): string {
   if (gitUrl === 'ssh') {

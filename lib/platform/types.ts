@@ -27,10 +27,12 @@ export interface RepoResult {
   isFork: boolean;
 }
 
+export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
+
 export interface RepoParams {
   repository: string;
   endpoint?: string;
-  gitUrl?: 'default' | 'ssh' | 'endpoint';
+  gitUrl?: GitUrlOption;
   forkMode?: string;
   forkToken?: string;
   includeForks?: boolean;

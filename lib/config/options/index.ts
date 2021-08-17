@@ -2038,7 +2038,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
-    admin: true,
+    globalOnly: true,
   },
 ];
 
