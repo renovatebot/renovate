@@ -1469,7 +1469,7 @@
   dependencies:
     "@octokit/openapi-types" "^9.5.0"
 
-"@renovate/eslint-plugin@https://github.com/renovatebot/eslint-plugin#main":
+"@renovate/eslint-plugin@https://github.com/renovatebot/eslint-plugin#v0.0.1":
   version "0.0.1"
   resolved "https://github.com/renovatebot/eslint-plugin#1ebc0b11bd7170ccd6e36c2c836dd710ccc0fb5e"
 
