@@ -150,6 +150,7 @@ const repoGroups = {
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
+  'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   sentry: 'https://github.com/getsentry/sentry-javascript',
   springfox: 'https://github.com/springfox/springfox',
   sanity: 'https://github.com/sanity-io/sanity',
@@ -166,6 +167,7 @@ const repoGroups = {
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
+  vstest: 'https://github.com/microsoft/vstest',
 };
 
 const patternGroups = {
@@ -174,6 +176,7 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  'aws-java-sdk-v2': '^software.amazon.awssdk:',
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
 };
