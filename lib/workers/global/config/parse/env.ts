@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 
-import { getOptions } from '../../../../config/definitions';
+import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
 import { PLATFORM_TYPE_GITHUB } from '../../../../constants/platforms';
 import { getDatasourceList } from '../../../../datasource';
