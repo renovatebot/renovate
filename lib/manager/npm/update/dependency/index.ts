@@ -13,12 +13,7 @@ function replaceAsString(
   newValue: string
 ): string | null {
   // Update the file = this is what we want
-  // eslint-disable-next-line no-param-reassign
-  if (depName === oldVersion) {
-    delete Object.assign(parsedContents[depType], {
-      [newValue]: parsedContents[depType][oldVersion],
-    })[oldVersion];
-  } else if (depType === 'resolutions') {
+  if (depType === 'resolutions') {
     // eslint-disable-next-line no-param-reassign
     parsedContents.resolutions[depName] = newValue;
   } else {
