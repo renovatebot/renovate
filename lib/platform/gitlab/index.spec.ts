@@ -285,6 +285,22 @@ describe(getName(), () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should use ssh_url_to_repo if gitUrl is set to ssh', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `https://gitlab.com/some%2Frepo%2Fproject.git`,
+          ssh_url_to_repo: `ssh://git@gitlab.com/some%2Frepo%2Fproject.git`,
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo/project',
+        gitUrl: 'ssh',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(git.initRepo.mock.calls).toMatchSnapshot();
+    });
 
     it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
       process.env.GITLAB_IGNORE_REPO_URL = 'true';

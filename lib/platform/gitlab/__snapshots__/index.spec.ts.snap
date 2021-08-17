@@ -2653,6 +2653,39 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab/index initRepo should use ssh_url_to_repo if gitUrl is set to ssh 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo%2Fproject",
+  },
+]
+`;
+
+exports[`platform/gitlab/index initRepo should use ssh_url_to_repo if gitUrl is set to ssh 2`] = `
+Array [
+  Array [
+    Object {
+      "cloneSubmodules": undefined,
+      "defaultBranch": "master",
+      "gitAuthorEmail": undefined,
+      "gitAuthorName": undefined,
+      "ignorePrAuthor": undefined,
+      "mergeMethod": "merge",
+      "repository": "some%2Frepo%2Fproject",
+      "url": "ssh://git@gitlab.com/some%2Frepo%2Fproject.git",
+    },
+  ],
+]
+`;
+
 exports[`platform/gitlab/index initRepo should fall back respecting when GITLAB_IGNORE_REPO_URL is set 1`] = `
 Array [
   Array [
