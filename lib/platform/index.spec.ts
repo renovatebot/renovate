@@ -1,3 +1,4 @@
+import * as httpMock from '../../test/http-mock';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../constants/platforms';
 import { loadModules } from '../util/modules';
@@ -44,24 +45,32 @@ describe('platform/index', () => {
     await expect(platform.initPlatform(config)).rejects.toThrow();
   });
   it('initializes', async () => {
+    httpMock
+      .scope('https://api.bitbucket.org')
+      .get('/2.0/user')
+      .basicAuth({ user: 'abc', pass: '123' })
+      .reply(200, { uuid: 123 });
     const config = {
       platform: PLATFORM_TYPE_BITBUCKET,
       gitAuthor: 'user@domain.com',
       username: 'abc',
       password: '123',
     };
-    // FIXME: explicit assert condition
-    expect(await platform.initPlatform(config)).toMatchSnapshot();
-  });
-  it('initializes no author', async () => {
-    const config = {
+    expect(await platform.initPlatform(config)).toEqual({
+      endpoint: 'https://api.bitbucket.org/',
+      gitAuthor: 'user@domain.com',
+      hostRules: [
+        {
+          hostType: 'bitbucket',
+          matchHost: 'api.bitbucket.org',
+          password: '123',
+          username: 'abc',
+        },
+      ],
       platform: PLATFORM_TYPE_BITBUCKET,
-      username: 'abc',
-      password: '123',
-    };
-    // FIXME: explicit assert condition
-    expect(await platform.initPlatform(config)).toMatchSnapshot();
+    });
   });
+
   it('returns null if empty email given', () => {
     expect(platform.parseGitAuthor(undefined)).toBeNull();
   });

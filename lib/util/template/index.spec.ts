@@ -1,4 +1,4 @@
-import { getOptions } from '../../config/definitions';
+import { getOptions } from '../../config/options';
 import * as template from '.';
 
 describe('util/template/index', () => {

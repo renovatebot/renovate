@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { partial } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import * as hostRules from '../../util/host-rules';
 import type { PackageFile } from '../types';
 import extractPackageFile from './extract';
@@ -44,7 +44,7 @@ describe('manager/git-submodules/extract', () => {
   });
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
-      setAdminConfig({ localDir: `${__dirname}/__fixtures__` });
+      setGlobalConfig({ localDir: `${__dirname}/__fixtures__` });
       hostRules.add({ matchHost: 'github.com', token: 'abc123' });
       let res: PackageFile;
       expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();

@@ -90,26 +90,6 @@ describe('manager/index', () => {
     });
   });
 
-  describe('getPackageUpdates', () => {
-    it('returns null', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-      });
-      expect(manager.getPackageUpdates('unknown', null)).toBeNull();
-      expect(manager.getPackageUpdates('dummy', null)).toBeNull();
-    });
-    it('returns non-null', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        getPackageUpdates: () => Promise.resolve({ updates: [] }),
-      });
-      expect(manager.getPackageUpdates('dummy', {} as any)).not.toBeNull();
-    });
-    afterEach(() => {
-      manager.getManagers().delete('dummy');
-    });
-  });
-
   describe('getRangeStrategy', () => {
     it('returns null', () => {
       manager.getManagers().set('dummy', {

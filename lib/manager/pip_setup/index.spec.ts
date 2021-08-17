@@ -6,8 +6,8 @@ import {
   mockExecSequence,
 } from '../../../test/exec-util';
 import { env, loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as fs from '../../util/fs';
 import type { ExtractConfig } from '../types';
 import * as extract from './extract';
@@ -17,7 +17,7 @@ const packageFile = 'setup.py';
 const content = loadFixture(packageFile);
 const jsonContent = loadFixture('setup.py.json');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: '/tmp/github/some/repo',
   cacheDir: '/tmp/renovate/cache',
 };
@@ -46,7 +46,7 @@ describe('manager/pip_setup/index', () => {
       jest.resetModules();
       extract.resetModule();
 
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py
@@ -54,7 +54,7 @@ describe('manager/pip_setup/index', () => {
     });
 
     afterEach(() => {
-      setAdminConfig();
+      setGlobalConfig();
     });
 
     it('returns found deps', async () => {
@@ -76,7 +76,7 @@ describe('manager/pip_setup/index', () => {
     });
 
     it('returns found deps (docker)', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
       const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
 
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(jsonContent);

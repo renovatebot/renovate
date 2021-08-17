@@ -3,8 +3,8 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { UpdateArtifactsConfig } from '../types';
@@ -20,7 +20,7 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
 };
 
@@ -32,11 +32,11 @@ describe('manager/helmv3/artifacts', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
   it('returns null if no Chart.lock found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
@@ -108,7 +108,7 @@ describe('manager/helmv3/artifacts', () => {
   });
 
   it('returns updated Chart.lock with docker', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     git.getFile.mockResolvedValueOnce('Old Chart.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Chart.lock' as any);

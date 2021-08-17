@@ -1,17 +1,17 @@
 import { loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import { extractPackageFile } from '.';
 
 const simplePodfile = loadFixture('Podfile.simple');
 const complexPodfile = loadFixture('Podfile.complex');
 
-const adminConfig: RepoAdminConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig = { localDir: '' };
 
 describe('manager/cocoapods/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts from simple file', async () => {
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
       const { deps } = await extractPackageFile(simplePodfile, 'Podfile');
       expect(deps).toMatchSnapshot([
         { depName: 'a' },
@@ -40,7 +40,7 @@ describe('manager/cocoapods/extract', () => {
     });
 
     it('extracts from complex file', async () => {
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
       const { deps } = await extractPackageFile(complexPodfile, 'Podfile');
       expect(deps).toMatchSnapshot([
         { depName: 'IQKeyboardManager', currentValue: '~> 6.5.0' },

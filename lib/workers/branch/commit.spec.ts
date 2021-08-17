@@ -1,5 +1,5 @@
 import { defaultConfig, git, partial } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import type { BranchConfig } from '../types';
 import { commitFilesToBranch } from './commit';
 
@@ -21,7 +21,7 @@ describe('workers/branch/commit', () => {
       });
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('abc123');
-      setAdminConfig();
+      setGlobalConfig();
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
@@ -37,7 +37,7 @@ describe('workers/branch/commit', () => {
       expect(git.commitFiles.mock.calls).toMatchSnapshot();
     });
     it('dry runs', async () => {
-      setAdminConfig({ dryRun: true });
+      setGlobalConfig({ dryRun: true });
       config.updatedPackageFiles.push({
         name: 'package.json',
         contents: 'some contents',

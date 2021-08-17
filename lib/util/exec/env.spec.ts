@@ -1,4 +1,4 @@
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import { getChildProcessEnv } from './env';
 
 describe('util/exec/env', () => {
@@ -54,7 +54,7 @@ describe('util/exec/env', () => {
 
   describe('getChildProcessEnv when trustlevel set to high', () => {
     it('returns process.env if trustlevel set to high', () => {
-      setAdminConfig({ exposeAllEnv: true });
+      setGlobalConfig({ exposeAllEnv: true });
       expect(getChildProcessEnv()).toMatchObject(process.env);
     });
   });

@@ -1,6 +1,6 @@
 import { loadFixture } from '../../test/util';
-import { setAdminConfig } from './admin';
 import { decryptConfig } from './decrypt';
+import { setGlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 
 const privateKey = loadFixture('private.pem', '.');
@@ -10,7 +10,7 @@ describe('config/decrypt', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       config = {};
-      setAdminConfig();
+      setGlobalConfig();
     });
     it('returns empty with no privateKey', () => {
       delete config.encrypted;
@@ -25,17 +25,17 @@ describe('config/decrypt', () => {
     });
     it('handles invalid encrypted type', () => {
       config.encrypted = 1;
-      setAdminConfig({ privateKey });
+      setGlobalConfig({ privateKey });
       const res = decryptConfig(config);
       expect(res.encrypted).not.toBeDefined();
     });
     it('handles invalid encrypted value', () => {
       config.encrypted = { a: 1 };
-      setAdminConfig({ privateKey });
+      setGlobalConfig({ privateKey });
       expect(() => decryptConfig(config)).toThrow(Error('config-validation'));
     });
     it('replaces npm token placeholder in npmrc', () => {
-      setAdminConfig({ privateKey });
+      setGlobalConfig({ privateKey });
       config.npmrc =
         '//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n'; // eslint-disable-line no-template-curly-in-string
       config.encrypted = {
@@ -50,7 +50,7 @@ describe('config/decrypt', () => {
       );
     });
     it('appends npm token in npmrc', () => {
-      setAdminConfig({ privateKey });
+      setGlobalConfig({ privateKey });
       config.npmrc = 'foo=bar\n'; // eslint-disable-line no-template-curly-in-string
       config.encrypted = {
         npmToken:
@@ -62,7 +62,7 @@ describe('config/decrypt', () => {
       expect(res.npmrc).toMatchSnapshot();
     });
     it('decrypts nested', () => {
-      setAdminConfig({ privateKey });
+      setGlobalConfig({ privateKey });
       config.packageFiles = [
         {
           packageFile: 'package.json',

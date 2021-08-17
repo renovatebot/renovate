@@ -1,3 +1,4 @@
+import * as httpMock from '../../test/http-mock';
 import { logger, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
@@ -151,6 +152,11 @@ describe('datasource/index', () => {
     });
   });
   it('ignores and warns for registryUrls', async () => {
+    httpMock
+      .scope('https://galaxy.ansible.com')
+      .get('/api/v1/roles/')
+      .query({ owner__username: 'some', name: 'dep' })
+      .reply(200, {});
     await datasource.getPkgReleases({
       datasource: GalaxyDatasource.id,
       depName: 'some.dep',

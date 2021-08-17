@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { RenovateConfig, getConfig, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import * as _process from './process';
 import { ExtractResult } from './process/extract-update';
 import { renovateRepository } from '.';
@@ -18,7 +18,7 @@ describe('workers/repository/index', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       config = getConfig();
-      setAdminConfig({ localDir: '' });
+      setGlobalConfig({ localDir: '' });
     });
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());

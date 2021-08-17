@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { fs, loadFixture, mocked } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { TerraformProviderHash } from './hash';
@@ -32,17 +32,11 @@ describe('manager/terraform/lockfile/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    setAdminConfig(adminConfig);
-  });
-
-  afterEach(() => {
-    delete process.env.RENOVATE_X_TERRAFORM_LOCK_FILE;
+    setGlobalConfig(adminConfig);
   });
 
   it('returns null if no .terraform.lock.hcl found', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     expect(
       await updateArtifacts({
@@ -56,8 +50,6 @@ describe('manager/terraform/lockfile/index', () => {
 
   it('returns null if .terraform.lock.hcl is empty', async () => {
     fs.readLocalFile.mockResolvedValueOnce('empty' as any);
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     expect(
       await updateArtifacts({
@@ -84,8 +76,6 @@ describe('manager/terraform/lockfile/index', () => {
       newValue: '3.36.0',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
@@ -117,8 +107,6 @@ describe('manager/terraform/lockfile/index', () => {
       newValue: '~> 2.50',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
@@ -157,8 +145,6 @@ describe('manager/terraform/lockfile/index', () => {
       ...config,
     };
 
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
-
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: [{ depName: 'random', lookupName: 'hashicorp/random' }],
@@ -189,8 +175,6 @@ describe('manager/terraform/lockfile/index', () => {
       newValue: '~> 3.0',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: 'test/main.tf',
@@ -264,8 +248,6 @@ describe('manager/terraform/lockfile/index', () => {
       ...config,
     };
 
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
-
     const result = await updateArtifacts({
       packageFileName: '',
       updatedDeps: [],
@@ -338,8 +320,6 @@ describe('manager/terraform/lockfile/index', () => {
       updateType: 'lockFileMaintenance',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: '',
@@ -461,8 +441,6 @@ describe('manager/terraform/lockfile/index', () => {
       updateType: 'lockFileMaintenance',
       ...config,
     };
-
-    process.env.RENOVATE_X_TERRAFORM_LOCK_FILE = 'test';
 
     const result = await updateArtifacts({
       packageFileName: '',

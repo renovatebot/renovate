@@ -1,23 +1,23 @@
 import * as upath from 'upath';
 import { loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
 
 const config: ExtractConfig = {};
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('lib/manager/nuget/__fixtures__'),
 };
 
 describe('manager/nuget/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
     });
     afterEach(() => {
-      setAdminConfig();
+      setGlobalConfig();
     });
     it('returns empty for invalid csproj', async () => {
       // FIXME: explicit assert condition

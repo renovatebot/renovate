@@ -559,13 +559,8 @@ describe('config/presets/index', () => {
       const res = await presets.getPreset(':base', {});
       expect(res).toEqual({
         extends: [
-          ':separateMajorReleases',
-          ':combinePatchMinorReleases',
-          ':ignoreUnstable',
-          ':prImmediately',
+          ':dependencyDashboard',
           ':semanticPrefixFixDepsChoreOthers',
-          ':updateNotScheduled',
-          ':automergeDisabled',
           ':ignoreModulesAndTests',
           ':autodetectPinVersions',
           ':prHourlyLimit2',

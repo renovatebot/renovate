@@ -17,14 +17,38 @@ describe('manager/circleci/extract', () => {
     });
     it('extracts orbs too', () => {
       const res = extractPackageFile(file2);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
-      // expect(res.deps).toHaveLength(4);
+      expect(res.deps).toMatchSnapshot([
+        {
+          depName: 'release-workflows',
+          currentValue: '4.1.0',
+          datasource: 'orb',
+          depType: 'orb',
+        },
+        {
+          depName: 'no-version',
+          currentValue: undefined,
+          datasource: 'orb',
+          depType: 'orb',
+        },
+        {
+          depName: 'volatile',
+          currentValue: 'volatile',
+          datasource: 'orb',
+          depType: 'orb',
+        },
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+      ]);
     });
     it('extracts image without leading dash', () => {
       const res = extractPackageFile(file3);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toMatchSnapshot([
+        { currentValue: '14.8.0', depName: 'cimg/node' },
+      ]);
     });
   });
 });

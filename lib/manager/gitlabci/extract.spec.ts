@@ -1,20 +1,20 @@
 import { logger } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
 const config: ExtractConfig = {};
 
-const adminConfig: RepoAdminConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig = { localDir: '' };
 
 describe('manager/gitlabci/extract', () => {
   beforeEach(() => {
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
   });
 
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
 
   describe('extractAllPackageFiles()', () => {

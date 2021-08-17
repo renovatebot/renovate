@@ -1,6 +1,6 @@
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { setAdminConfig } from './admin';
 import { getConfig } from './defaults';
+import { setGlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
   MigratedConfig,
@@ -11,7 +11,7 @@ import type {
 const defaultConfig = getConfig();
 
 interface TestRenovateConfig extends RenovateConfig {
-  node?: RenovateSharedConfig & { supportPolicy?: unknown };
+  node?: RenovateSharedConfig;
 }
 
 describe('config/migration', () => {
@@ -355,7 +355,6 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         node: {
           enabled: true,
-          supportPolicy: ['lts'],
           automerge: 'none' as never,
         },
       };
@@ -371,9 +370,6 @@ describe('config/migration', () => {
       expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
         true
       );
-      expect(
-        (migratedConfig.node as TestRenovateConfig).supportPolicy
-      ).toBeDefined();
     });
     it('migrates packageFiles', () => {
       const config: TestRenovateConfig = {
@@ -710,7 +706,7 @@ describe('config/migration', () => {
     });
   });
   it('it migrates presets', () => {
-    setAdminConfig({
+    setGlobalConfig({
       migratePresets: {
         '@org': 'local>org/renovate-config',
         '@org2/foo': '',
@@ -725,5 +721,28 @@ describe('config/migration', () => {
     );
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
+  });
+  it('it migrates gradle-lite', () => {
+    const config: RenovateConfig = {
+      gradle: {
+        enabled: false,
+      },
+      'gradle-lite': {
+        enabled: true,
+        fileMatch: ['foo'],
+      },
+      packageRules: [
+        {
+          matchManagers: ['gradle-lite'],
+          separateMinorPatch: true,
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchSnapshot();
   });
 });
