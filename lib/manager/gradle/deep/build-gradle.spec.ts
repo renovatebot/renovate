@@ -1,11 +1,10 @@
-import { getName } from '../../../../test/util';
 import {
   collectVersionVariables,
   init,
   updateGradleVersion,
 } from './build-gradle';
 
-describe(getName(), () => {
+describe('manager/gradle/deep/build-gradle', () => {
   beforeEach(() => {
     init();
   });

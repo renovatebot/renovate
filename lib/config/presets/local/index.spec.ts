@@ -1,4 +1,4 @@
-import { getName, mocked } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import * as _azure from '../azure';
 import * as _bitbucket from '../bitbucket';
 import * as _bitbucketServer from '../bitbucket-server';
@@ -21,7 +21,7 @@ const gitea = mocked(_gitea);
 const github = mocked(_github);
 const gitlab = mocked(_gitlab);
 
-describe(getName(), () => {
+describe('config/presets/local/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     const preset = { resolved: 'preset' };

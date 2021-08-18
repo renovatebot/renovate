@@ -1,80 +1,78 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`manager/deps-edn/extract extractPackageFile 1`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "0.1.2",
-      "datasource": "clojure",
-      "depName": "persistent-sorted-set:persistent-sorted-set",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "1.9.0",
-      "datasource": "clojure",
-      "depName": "org.clojure:clojure",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "1.10.0",
-      "datasource": "clojure",
-      "depName": "org.clojure:clojure",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "1.10.520",
-      "datasource": "clojure",
-      "depName": "org.clojure:clojurescript",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "0.2.11",
-      "datasource": "clojure",
-      "depName": "org.clojure:tools.namespace",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "1.10.520",
-      "datasource": "clojure",
-      "depName": "org.clojure:clojurescript",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "0.0-389",
-      "datasource": "clojure",
-      "depName": "lambdaisland:kaocha",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "0.0-21",
-      "datasource": "clojure",
-      "depName": "lambdaisland:kaocha-cljs",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "0.21.1",
-      "datasource": "clojure",
-      "depName": "cider:cider-nrepl",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "0.6.0",
-      "datasource": "clojure",
-      "depName": "nrepl:nrepl",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "0.2.11",
-      "datasource": "clojure",
-      "depName": "org.clojure:tools.namespace",
-      "registryUrls": Array [],
-    },
-    Object {
-      "currentValue": "0.9.5703",
-      "datasource": "clojure",
-      "depName": "com.datomic:datomic-free",
-      "registryUrls": Array [],
-    },
-  ],
-}
+Array [
+  Object {
+    "currentValue": "0.1.2",
+    "datasource": "clojure",
+    "depName": "persistent-sorted-set:persistent-sorted-set",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "1.9.0",
+    "datasource": "clojure",
+    "depName": "org.clojure:clojure",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "1.10.0",
+    "datasource": "clojure",
+    "depName": "org.clojure:clojure",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "1.10.520",
+    "datasource": "clojure",
+    "depName": "org.clojure:clojurescript",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "0.2.11",
+    "datasource": "clojure",
+    "depName": "org.clojure:tools.namespace",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "1.10.520",
+    "datasource": "clojure",
+    "depName": "org.clojure:clojurescript",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "0.0-389",
+    "datasource": "clojure",
+    "depName": "lambdaisland:kaocha",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "0.0-21",
+    "datasource": "clojure",
+    "depName": "lambdaisland:kaocha-cljs",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "0.21.1",
+    "datasource": "clojure",
+    "depName": "cider:cider-nrepl",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "0.6.0",
+    "datasource": "clojure",
+    "depName": "nrepl:nrepl",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "0.2.11",
+    "datasource": "clojure",
+    "depName": "org.clojure:tools.namespace",
+    "registryUrls": Array [],
+  },
+  Object {
+    "currentValue": "0.9.5703",
+    "datasource": "clojure",
+    "depName": "com.datomic:datomic-free",
+    "registryUrls": Array [],
+  },
+]
 `;

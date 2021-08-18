@@ -10,7 +10,7 @@ const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning'
 ).allowedValues;
 
-describe('allVersioning.get(versioning)', () => {
+describe('versioning/index', () => {
   it('has api', () => {
     // FIXME: explicit assert condition
     expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();

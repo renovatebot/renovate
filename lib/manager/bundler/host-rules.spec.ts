@@ -1,4 +1,3 @@
-import { getName } from '../../../test/util';
 import { HostRule } from '../../types';
 import { add, clear } from '../../util/host-rules';
 
@@ -7,7 +6,7 @@ import {
   getAuthenticationHeaderValue,
 } from './host-rules';
 
-describe(getName(), () => {
+describe('manager/bundler/host-rules', () => {
   beforeEach(() => {
     clear();
   });

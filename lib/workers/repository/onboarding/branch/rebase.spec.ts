@@ -1,14 +1,9 @@
-import {
-  RenovateConfig,
-  defaultConfig,
-  getName,
-  git,
-} from '../../../../../test/util';
+import { RenovateConfig, defaultConfig, git } from '../../../../../test/util';
 import { rebaseOnboardingBranch } from './rebase';
 
 jest.mock('../../../../util/git');
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/branch/rebase', () => {
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
