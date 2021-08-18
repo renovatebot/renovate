@@ -89,16 +89,3 @@ To restrict `aws-sdk` to weekly updates, you could add this package rule:
 
 The "schedule" propery must always be defined in an array, even if you only set a single schedule.
 Multiple entries in the array means "or".
-
-## TODOs
-
-### Words to search for to edit docs
-
-timezone, schedule, @breejs/later, minutes, hours, days
-
-### Pages to edit locally
-
-- [ ] [FAQ, control renovate's schedule](https://docs.renovatebot.com/faq/#control-renovates-schedule)
-- [ ] [deep dive dependency pinning, scheduling section](https://docs.renovatebot.com/dependency-pinning/#scheduling)
-- [ ] [configuration options, check things related to time, schedule, @breejs/later, minutes, hours, days](https://docs.renovatebot.com/configuration-options/)
-- [ ] [deep dive, noise reduction via scheduling](https://docs.renovatebot.com/noise-reduction/#scheduling-renovate)
