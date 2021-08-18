@@ -575,6 +575,37 @@ describe('config/presets/index', () => {
       const res = await presets.getPreset('helpers:oddIsUnstable', {});
       expect(res).toEqual({});
     });
+    it('handles renamed monorepos', async () => {
+      const res = await presets.getPreset('monorepo:opentelemetry', {});
+      expect(res).toMatchInlineSnapshot(`
+Object {
+  "description": Array [
+    "opentelemetry-js monorepo",
+  ],
+  "matchSourceUrlPrefixes": Array [
+    "https://github.com/open-telemetry/opentelemetry-js",
+  ],
+}
+`);
+    });
+    it('handles renamed monorepo groups', async () => {
+      const res = await presets.getPreset('group:opentelemetryMonorepo', {});
+      expect(res).toMatchInlineSnapshot(`
+Object {
+  "packageRules": Array [
+    Object {
+      "description": Array [
+        "Group packages from opentelemetry-js monorepo together",
+      ],
+      "extends": Array [
+        "monorepo:opentelemetry-js",
+      ],
+      "groupName": "opentelemetry-js monorepo",
+    },
+  ],
+}
+`);
+    });
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
