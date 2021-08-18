@@ -86,5 +86,18 @@ export async function shouldReuseExistingBranch(
     logger.debug(`Branch is not mergeable but can't be rebased`);
   }
   logger.debug(`Branch does not need rebasing`);
+
+  // When postUpdateOptions are defined, some lockfiles might be changed after processing packages
+  // This shouldn't be a problem but if the PR is already created and the package.json didn't change
+  // the second pass will only commit the files changed by postUpdateOptions (#10050)
+  // To avoid this we don't reuse branches is postUpdateOptions are present
+  // We are saved from the double push by a check at commit time that won't push identical contents
+  if (config.postUpdateOptions?.length > 0) {
+    return {
+      reuseExistingBranch: false,
+      isModified: false,
+    };
+  }
+
   return { reuseExistingBranch: true, isModified: false };
 }
