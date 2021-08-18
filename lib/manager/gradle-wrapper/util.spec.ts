@@ -1,8 +1,7 @@
-import { getName } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import { extractGradleVersion, getJavaContraint } from './utils';
 
-describe(getName(), () => {
+describe('manager/gradle-wrapper/util', () => {
   describe('getJavaContraint()', () => {
     it('return null for global mode', () => {
       expect(getJavaContraint(undefined)).toBeNull();
