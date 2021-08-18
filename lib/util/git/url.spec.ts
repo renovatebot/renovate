@@ -1,9 +1,9 @@
-import { getName, hostRules } from '../../../test/util';
+import { hostRules } from '../../../test/util';
 import { getHttpUrl, getRemoteUrlWithToken } from './url';
 
 jest.mock('../host-rules');
 
-describe(getName(), () => {
+describe('util/git/url', () => {
   describe('getHttpUrl()', () => {
     it('returns https url for git url', () => {
       expect(getHttpUrl('git://foo.bar/')).toBe('https://foo.bar/');

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const upath = require('upath');
-const { getOptions } = require('../lib/config/definitions');
+const { getOptions } = require('../lib/config/options');
 
 const schema = {
   title: 'JSON schema for Renovate config files (https://renovatebot.com/)',

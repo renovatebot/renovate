@@ -1,4 +1,3 @@
-import { getName } from '../../test/util';
 import {
   ensurePathPrefix,
   parseUrl,
@@ -7,7 +6,7 @@ import {
   validateUrl,
 } from './url';
 
-describe(getName(), () => {
+describe('util/url', () => {
   test.each([
     ['http://foo.io', '', 'http://foo.io'],
     ['http://foo.io/', '', 'http://foo.io'],

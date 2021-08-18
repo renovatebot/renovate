@@ -1,4 +1,4 @@
-import { fs, getName, loadFixture } from '../../../test/util';
+import { fs, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -17,7 +17,7 @@ const pyproject9toml = loadFixture('pyproject.9.toml');
 const pyproject11toml = loadFixture('pyproject.11.toml');
 const pyproject11tomlLock = loadFixture('pyproject.11.toml.lock');
 
-describe(getName(), () => {
+describe('manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
     const OLD_ENV = process.env;

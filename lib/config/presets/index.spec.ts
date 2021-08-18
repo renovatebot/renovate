@@ -1,4 +1,4 @@
-import { getName, loadJsonFixture, mocked } from '../../../test/util';
+import { loadJsonFixture, mocked } from '../../../test/util';
 import type { RenovateConfig } from '../types';
 import * as _local from './local';
 import * as _npm from './npm';
@@ -39,7 +39,7 @@ npm.getPreset = jest.fn(({ packageName, presetName }) => {
   return null;
 });
 
-describe(getName(), () => {
+describe('config/presets/index', () => {
   describe('resolvePreset', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -559,13 +559,8 @@ describe(getName(), () => {
       const res = await presets.getPreset(':base', {});
       expect(res).toEqual({
         extends: [
-          ':separateMajorReleases',
-          ':combinePatchMinorReleases',
-          ':ignoreUnstable',
-          ':prImmediately',
+          ':dependencyDashboard',
           ':semanticPrefixFixDepsChoreOthers',
-          ':updateNotScheduled',
-          ':automergeDisabled',
           ':ignoreModulesAndTests',
           ':autodetectPinVersions',
           ':prHourlyLimit2',

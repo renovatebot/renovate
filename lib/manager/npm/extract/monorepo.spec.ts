@@ -1,9 +1,8 @@
-import { getName } from '../../../../test/util';
 import { detectMonorepos } from './monorepo';
 
 jest.mock('./pnpm');
 
-describe(getName(), () => {
+describe('manager/npm/extract/monorepo', () => {
   describe('.extractPackageFile()', () => {
     it('uses lerna package settings', async () => {
       const packageFiles = [

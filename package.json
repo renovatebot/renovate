@@ -122,7 +122,7 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ecr": "3.18.0",
+    "@aws-sdk/client-ecr": "3.25.0",
     "@breejs/later": "4.0.2",
     "@iarna/toml": "2.2.5",
     "@renovate/pep440": "1.0.0",
@@ -202,6 +202,7 @@
     "@jest/reporters": "27.0.6",
     "@jest/test-result": "27.0.6",
     "@ls-lint/ls-lint": "1.10.0",
+    "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.3",
     "@semantic-release/exec": "5.0.0",
     "@types/bunyan": "1.8.7",
     "@types/cacache": "15.0.1",
@@ -234,8 +235,8 @@
     "@types/traverse": "0.6.32",
     "@types/url-join": "4.0.1",
     "@types/xmldoc": "1.1.6",
-    "@typescript-eslint/eslint-plugin": "4.29.0",
-    "@typescript-eslint/parser": "4.29.0",
+    "@typescript-eslint/eslint-plugin": "4.29.1",
+    "@typescript-eslint/parser": "4.29.1",
     "conventional-changelog-conventionalcommits": "4.6.0",
     "cross-env": "7.0.3",
     "emojibase-data": "6.2.0",

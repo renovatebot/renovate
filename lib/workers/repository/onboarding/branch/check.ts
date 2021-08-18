@@ -52,7 +52,7 @@ const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
-  // Repo is onboarded if admin is bypassing onboarding and does not require a
+  // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
   if (config.requireConfig === false && config.onboarding === false) {
     // Return early and avoid checking for config files

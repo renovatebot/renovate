@@ -1,11 +1,11 @@
 /* eslint-disable no-template-curly-in-string */
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackage } from './extract';
 
 const minimumContent = loadFixture(`minimum.pom.xml`);
 const simpleContent = loadFixture(`simple.pom.xml`);
 
-describe(getName(), () => {
+describe('manager/maven/extract', () => {
   describe('extractDependencies', () => {
     it('returns null for invalid XML', () => {
       expect(extractPackage(undefined)).toBeNull();
