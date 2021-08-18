@@ -98,6 +98,6 @@ timezone, schedule, @breejs/later, minutes, hours, days
 
 ### Pages to edit locally
 
-- [ ] https://docs.renovatebot.com/faq/#control-renovates-schedule
-- [ ] https://docs.renovatebot.com/dependency-pinning/#scheduling
-- [ ] https://docs.renovatebot.com/configuration-options/
+- [ ] [FAQ, control renovate's schedule](https://docs.renovatebot.com/faq/#control-renovates-schedule)
+- [ ] [deep dive dependency pinning, scheduling section](https://docs.renovatebot.com/dependency-pinning/#scheduling)
+- [ ] [configuration options, check things related to time, schedule, @breejs/later, minutes, hours, days](https://docs.renovatebot.com/configuration-options/)
