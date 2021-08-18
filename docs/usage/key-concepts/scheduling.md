@@ -77,24 +77,26 @@ The scheduling feature can be very useful for "noisy" packages that are updated 
 To restrict `aws-sdk` to weekly updates, you could add this package rule:
 
 ```json
+{
   "packageRules": [
     {
       "matchPackageNames": ["aws-sdk"],
       "schedule": ["after 9pm on sunday"]
     }
   ]
+}
 ```
 
 The "schedule" propery must always be defined in an array, even if you only set a single schedule.
 Multiple entries in the array means "or".
 
-## TODO:
+## TODOs
 
-### Words to search for to edit docs:
+### Words to search for to edit docs
 
 timezone, schedule, @breejs/later, minutes, hours, days
 
-### Pages to edit locally:
+### Pages to edit locally
 
 - [ ] https://docs.renovatebot.com/faq/#control-renovates-schedule
 - [ ] https://docs.renovatebot.com/dependency-pinning/#scheduling
