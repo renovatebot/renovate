@@ -62,9 +62,13 @@ describe('manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          { currentValue: '0.9.0', depName: 'redis' },
+          { currentValue: '0.8.1', depName: 'postgresql' },
+        ],
+      });
     });
     it('parses simple requirements.yaml but skips if necessary fields missing', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
@@ -132,9 +136,12 @@ describe('manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          { depName: 'redis' },
+          { depName: 'postgresql', skipReason: 'local-dependency' },
+        ],
+      });
     });
     it('returns null if no dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`

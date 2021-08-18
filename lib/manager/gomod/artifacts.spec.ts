@@ -243,7 +243,6 @@ describe('manager/gomod/artifacts', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('This update totally doesnt work');
     });
-    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -251,7 +250,14 @@ describe('manager/gomod/artifacts', () => {
         newPackageFileContent: gomod1,
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'go.sum',
+          stderr: 'This update totally doesnt work',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with gomodUpdateImportPaths', async () => {
@@ -265,7 +271,6 @@ describe('manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New main.go' as any)
       .mockResolvedValueOnce('New go.mod' as any);
-    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -278,7 +283,11 @@ describe('manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
@@ -291,7 +300,6 @@ describe('manager/gomod/artifacts', () => {
     fs.readFile
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New go.mod' as any);
-    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -304,7 +312,10 @@ describe('manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with specific tool version from constraint', async () => {
@@ -318,7 +329,6 @@ describe('manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New main.go' as any)
       .mockResolvedValueOnce('New go.mod' as any);
-    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -334,7 +344,11 @@ describe('manager/gomod/artifacts', () => {
           },
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with latest tool version on invalid version constraint', async () => {
@@ -348,7 +362,6 @@ describe('manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New main.go' as any)
       .mockResolvedValueOnce('New go.mod' as any);
-    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -364,7 +377,11 @@ describe('manager/gomod/artifacts', () => {
           },
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('skips updating import paths for gopkg.in dependencies', async () => {
@@ -377,7 +394,6 @@ describe('manager/gomod/artifacts', () => {
     fs.readFile
       .mockResolvedValueOnce('New go.sum' as any)
       .mockResolvedValueOnce('New go.mod' as any);
-    // FIXME: explicit assert condition
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -390,7 +406,10 @@ describe('manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
 });

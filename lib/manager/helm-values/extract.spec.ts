@@ -28,8 +28,14 @@ describe('manager/helm-values/extract', () => {
     });
     it('extracts from values.yaml correctly with same structure as "helm create"', () => {
       const result = extractPackageFile(helmDefaultChartInitValues);
-      // FIXME: explicit assert condition
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          {
+            currentValue: '1.16.1',
+            depName: 'nginx',
+          },
+        ],
+      });
     });
     it('extracts from complex values file correctly"', () => {
       const result = extractPackageFile(helmMultiAndNestedImageValues);

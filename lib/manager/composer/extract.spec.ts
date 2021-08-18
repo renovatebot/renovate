@@ -24,8 +24,8 @@ describe('manager/composer/extract', () => {
     });
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile(requirements1, packageFile);
-      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
+      expect(res.deps).toHaveLength(32);
     });
     it('extracts registryUrls', async () => {
       const res = await extractPackageFile(requirements2, packageFile);
@@ -51,8 +51,8 @@ describe('manager/composer/extract', () => {
     it('extracts dependencies with lock file', async () => {
       fs.readLocalFile.mockResolvedValue('some content');
       const res = await extractPackageFile(requirements1, packageFile);
-      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
+      expect(res.deps).toHaveLength(32);
     });
   });
 });

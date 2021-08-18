@@ -3,7 +3,6 @@ import updateArtifacts from './artifacts';
 describe('manager/git-submodules/artifact', () => {
   describe('updateArtifacts()', () => {
     it('returns empty content', () => {
-      // FIXME: explicit assert condition
       expect(
         updateArtifacts({
           packageFileName: '',
@@ -11,10 +10,9 @@ describe('manager/git-submodules/artifact', () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([{ file: { contents: '', name: '' } }]);
     });
     it('returns two modules', () => {
-      // FIXME: explicit assert condition
       expect(
         updateArtifacts({
           packageFileName: '',
@@ -22,7 +20,10 @@ describe('manager/git-submodules/artifact', () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([
+        { file: { name: 'renovate' } },
+        { file: { name: 'renovate-pro' } },
+      ]);
     });
   });
 });
