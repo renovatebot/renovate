@@ -29,7 +29,7 @@ const renamedMonorepos: Record<string, string> = {
   'arcus security': 'arcus.security',
   'arcus messaging': 'arcus.messaging',
   'arcus observability': 'arcus.observability',
-  'arcus webap': 'arcus.webap',
+  'arcus webapi': 'arcus.webapi',
   'arcus background-jobs': 'arcus.background-jobs',
   'aspnet AspNetWebStack': 'aspnet aspnetwebstack',
   'aspnet Extensions': 'aspnet extensions',
