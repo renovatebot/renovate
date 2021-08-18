@@ -361,6 +361,52 @@ describe('datasource/maven/index', () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
+  it('skips missing snapshot releases', async () => {
+    mockGenericPackage({
+      meta: loadFixture('metadata-snapshot.xml'),
+      latest: '1.0.0',
+      jars: { '1.0.0': 200 },
+    });
+
+    httpMock
+      .scope(baseUrl)
+      .get('/org/example/package/1.0.1-SNAPSHOT/maven-metadata.xml')
+      .reply(404, '');
+    httpMock
+      .scope(baseUrl)
+      .head('/org/example/package/1.0.1-SNAPSHOT/package-1.0.1-SNAPSHOT.pom')
+      .reply(404, '');
+
+    const { releases } = await get('org.example:package', baseUrl);
+
+    expect(releases).toMatchObject([{ version: '1.0.0' }]);
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('skips invalid snapshot releases', async () => {
+    mockGenericPackage({
+      meta: loadFixture('metadata-snapshot.xml'),
+      latest: '1.0.0',
+      jars: { '1.0.0': 200 },
+      snapshots: [
+        {
+          version: '1.0.1-SNAPSHOT',
+          meta: loadFixture('metadata-snapshot-version-invalid.xml'),
+        },
+      ],
+    });
+
+    httpMock
+      .scope(baseUrl)
+      .head('/org/example/package/1.0.1-SNAPSHOT/package-1.0.1-SNAPSHOT.pom')
+      .reply(404, '');
+
+    const { releases } = await get('org.example:package', baseUrl);
+
+    expect(releases).toMatchObject([{ version: '1.0.0' }]);
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
   describe('fetching parent info', () => {
     const parentPackage = {
       dep: 'org.example:parent',
