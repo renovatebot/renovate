@@ -118,8 +118,6 @@ With this approach, updates will be essentially "silent" - causing no notificati
 
 ### Scheduling
 
-TODO Discuss what to do with the scheduling section in the deep dive about pinning javascript deps.
-
 Although it can feel satisfying to receive updates "immediately" when they're available, the reality is that you usually don't _need_ updates so frequently.
 And worse still, npm package versions that are less than 24 hours [can be unpublished](https://blog.npmjs.org/post/141905368000/changes-to-npms-unpublish-policy), which would really break your build if you've pinned to a version that no longer exists.
 
@@ -127,6 +125,9 @@ So to reduce the interruptions of automated dependency updates, consider putting
 
 - Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
 - Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
+
+To learn all about controlling Renovate schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
+TODO confirm that link is correct!
 
 ### Grouping related packages
 
