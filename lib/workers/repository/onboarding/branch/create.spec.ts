@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import { commitFiles } from '../../../../util/git';
 import { CommitMessage } from '../../model/commit-message';
 import { createOnboardingBranch } from './create';
@@ -25,7 +25,7 @@ const buildExpectedCommitFilesArgument = (
   message,
 });
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/branch/create', () => {
   let config: RenovateConfig;
   beforeEach(() => {
     jest.clearAllMocks();

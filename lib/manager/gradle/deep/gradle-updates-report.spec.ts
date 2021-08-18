@@ -1,7 +1,6 @@
 import * as fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as upath from 'upath';
-import { getName } from '../../../../test/util';
 import { exec } from '../../../util/exec';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import {
@@ -13,7 +12,7 @@ import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from '.';
 
 const fixtures = 'lib/manager/gradle/deep/__fixtures__';
 
-describe(getName(), () => {
+describe('manager/gradle/deep/gradle-updates-report', () => {
   for (const gradleVersion of [5, 6]) {
     ifSystemSupportsGradle(gradleVersion).describe(
       'createRenovateGradlePlugin',

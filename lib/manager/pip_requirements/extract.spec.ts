@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import { extractPackageFile } from './extract';
 
@@ -10,7 +10,7 @@ const requirements5 = loadFixture('requirements5.txt');
 const requirements6 = loadFixture('requirements6.txt');
 const requirements7 = loadFixture('requirements7.txt');
 
-describe(getName(), () => {
+describe('manager/pip_requirements/extract', () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
     setGlobalConfig();

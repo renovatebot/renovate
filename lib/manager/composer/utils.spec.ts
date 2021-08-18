@@ -1,4 +1,4 @@
-import { getName, mocked } from '../../../test/util';
+import { mocked } from '../../../test/util';
 import * as _datasource from '../../datasource';
 import { extractContraints, getComposerConstraint } from './utils';
 
@@ -6,7 +6,7 @@ jest.mock('../../../lib/datasource');
 
 const datasource = mocked(_datasource);
 
-describe(getName(), () => {
+describe('manager/composer/utils', () => {
   describe('getComposerConstraint', () => {
     beforeEach(() => {
       datasource.getPkgReleases.mockResolvedValueOnce({

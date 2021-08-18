@@ -39,7 +39,7 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-describe('updateArtifacts', () => {
+describe('manager/nuget/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

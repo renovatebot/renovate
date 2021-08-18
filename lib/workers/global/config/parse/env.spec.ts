@@ -1,4 +1,3 @@
-import { getName } from '../../../../../test/util';
 import type { RenovateOptions } from '../../../../config/types';
 import {
   PLATFORM_TYPE_BITBUCKET,
@@ -6,7 +5,7 @@ import {
 } from '../../../../constants/platforms';
 import * as env from './env';
 
-describe(getName(), () => {
+describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
       expect(env.getConfig({})).toEqual({ hostRules: [] });

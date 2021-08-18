@@ -32,7 +32,7 @@ const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
-describe('.updateArtifacts()', () => {
+describe('manager/pip-compile/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({

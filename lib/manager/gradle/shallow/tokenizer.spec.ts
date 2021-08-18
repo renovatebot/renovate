@@ -1,4 +1,3 @@
-import { getName } from '../../../../test/util';
 import { TokenType } from './common';
 import { extractRawTokens, tokenize } from './tokenizer';
 
@@ -6,7 +5,7 @@ function tokenTypes(input): string[] {
   return extractRawTokens(input).map((token) => token.type);
 }
 
-describe(getName(), () => {
+describe('manager/gradle/shallow/tokenizer', () => {
   it('extractTokens', () => {
     const samples = {
       ' ': [TokenType.Space],

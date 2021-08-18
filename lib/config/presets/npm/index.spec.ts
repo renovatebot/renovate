@@ -1,12 +1,11 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName } from '../../../../test/util';
 import { setGlobalConfig } from '../../global';
 import * as npm from '.';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-describe(getName(), () => {
+describe('config/presets/npm/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     setGlobalConfig();

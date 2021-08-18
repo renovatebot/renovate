@@ -1,6 +1,6 @@
 import nuget from '.';
 
-describe('nuget.', () => {
+describe('versioning/nuget/index', () => {
   describe('isVersion and isValid', () => {
     [
       '9.0.3',

@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { smartTruncate } from './pr-body';
 
 const prBody = loadFixture('pr-body.txt');
 
-describe(getName(), () => {
+describe('platform/utils/pr-body', () => {
   describe('.smartTruncate', () => {
     it('truncates to 1000', () => {
       const body = smartTruncate(prBody, 1000);
