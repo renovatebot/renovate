@@ -118,6 +118,8 @@ With this approach, updates will be essentially "silent" - causing no notificati
 
 ### Scheduling
 
+TODO Discuss what to do with the scheduling section in the deep dive about pinning javascript deps.
+
 Although it can feel satisfying to receive updates "immediately" when they're available, the reality is that you usually don't _need_ updates so frequently.
 And worse still, npm package versions that are less than 24 hours [can be unpublished](https://blog.npmjs.org/post/141905368000/changes-to-npms-unpublish-policy), which would really break your build if you've pinned to a version that no longer exists.
 
