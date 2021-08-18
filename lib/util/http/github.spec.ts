@@ -64,18 +64,19 @@ describe('util/http/github', () => {
       );
       expect(req.headers.authorization).toBe('token abc123');
     });
+
     it('supports different datasources', async () => {
-      const githubApiDatasource = new GithubHttp({}, GITHUB_RELEASES_ID);
-      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
+      const githubApiDatasource = new GithubHttp(GITHUB_RELEASES_ID);
+      hostRules.add({ hostType: 'github', token: 'abc' });
       hostRules.add({
         hostType: GITHUB_RELEASES_ID,
-        token: 'x-access-token:def456',
+        token: 'def',
       });
       httpMock.scope(githubApiHost).get('/some-url').reply(200);
       await githubApiDatasource.get('/some-url');
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.headers.authorization).toBe('token def456');
+      expect(req.headers.authorization).toBe('token def');
     });
 
     it('paginates', async () => {

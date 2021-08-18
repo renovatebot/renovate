@@ -109,32 +109,34 @@ describe('util/host-rules', () => {
           .token
       ).toBeUndefined();
     });
+
     it('matches on specific path', () => {
       // Initialized platform holst rule
       add({
         hostType: PLATFORM_TYPE_GITHUB,
         matchHost: 'https://api.github.com',
-        token: 'defaultToken',
+        token: 'abc',
       });
       // Initialized generic host rule for github platform
       add({
         hostType: PLATFORM_TYPE_GITHUB,
         matchHost: 'https://api.github.com',
-        token: 'defaultToken',
+        token: 'abc',
       });
       // specific host rule for using other token in different org
       add({
         hostType: PLATFORM_TYPE_GITHUB,
         matchHost: 'https://api.github.com/repos/org-b/',
-        token: 'overwrittenToken',
-      } as any);
+        token: 'def',
+      });
       expect(
         find({
           hostType: PLATFORM_TYPE_GITHUB,
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
         }).token
-      ).toEqual('overwrittenToken');
+      ).toEqual('def');
     });
+
     it('matches for several hostTypes when no hostType rule is configured', () => {
       add({
         matchHost: 'https://api.github.com',
@@ -153,24 +155,26 @@ describe('util/host-rules', () => {
         }).token
       ).toEqual('abc');
     });
+
     it('matches if hostType is configured and host rule is filtered with datasource', () => {
       add({
         hostType: PLATFORM_TYPE_GITHUB,
         matchHost: 'https://api.github.com',
-        token: 'defaultToken',
+        token: 'abc',
       });
       add({
         hostType: 'github-tags',
         matchHost: 'https://api.github.com/repos/org-b/',
-        token: 'overwrittenToken',
-      } as any);
+        token: 'def',
+      });
       expect(
         find({
           hostType: 'github-tags',
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
         }).token
-      ).toEqual('overwrittenToken');
+      ).toEqual('def');
     });
+
     it('matches on hostName', () => {
       add({
         hostName: 'nuget.local',
