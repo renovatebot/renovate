@@ -39,8 +39,9 @@ You can customize when Renovate runs, by using the `timezone` and `schedule` con
 
 At a high level you need to follow these steps:
 
-1. Recommended: tell Renovate what `timezone` you want to use
-1. Optional: limit when Renovate bot itself runs (we have preset schedules you can use)
+1. Tell Renovate what `timezone` you want to use
+1. Learn about the scheduling syntax
+1. Optional: limit when Renovate bot itself can run, via custom config or _schedule preset_
 1. Optional: create packageRules with a custom `schedule` for specific packages
 
 ### Setting your timezone
@@ -59,9 +60,9 @@ You can set a specific time zone in your local config file like this:
 
 Read our docs on the [timezone](https://docs.renovatebot.com/configuration-options/#timezone) configuration option.
 
-## Scheduling syntax
+### Scheduling syntax
 
-With the timezone set, you can define days of week or hours of the day in which Renovate is allowed to make changes.
+After you've set your local timezone, you can define days of week or hours of the day in which Renovate is allowed to make changes.
 
 Examples of the kind of schedules you can create include:
 
@@ -107,6 +108,7 @@ Or you could tell Renovate to run outside of common office hours like this:
 #### Schedule presets
 
 Renovate has preset schedules that you might want to use, go to [Schedule Presets](https://docs.renovatebot.com/presets-schedule/) to see them.
+
 These preset schedules only affect when Renovate bot itself runs, and do not affect any specific dependencies/packages.
 
 ### Schedule when to update specific dependencies
