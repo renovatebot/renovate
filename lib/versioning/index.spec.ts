@@ -1,4 +1,4 @@
-import { getOptions } from '../config/definitions';
+import { getOptions } from '../config/options';
 import { loadModules } from '../util/modules';
 import { isVersioningApiConstructor } from './common';
 import { GenericVersion, GenericVersioningApi } from './loose/generic';

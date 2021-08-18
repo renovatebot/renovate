@@ -3,8 +3,8 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -27,7 +27,7 @@ delete process.env.CP_HOME_DIR;
 
 const config: UpdateArtifactsConfig = {};
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
 };
@@ -37,7 +37,7 @@ describe('.updateArtifacts()', () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
 
     datasource.getPkgReleases.mockResolvedValue({
       releases: [
@@ -51,7 +51,7 @@ describe('.updateArtifacts()', () => {
     });
   });
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
   it('returns null if no Podfile.lock found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -79,7 +79,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null for invalid local directory', async () => {
     const execSnapshots = mockExecAll(exec);
-    setAdminConfig({
+    setGlobalConfig({
       localDir: '',
     });
 
@@ -124,13 +124,12 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Podfile', async () => {
     const execSnapshots = mockExecAll(exec);
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Old Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
     } as StatusResult);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -138,12 +137,12 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([{ file: { contents: 'New Podfile' } }]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Podfile and Pods files', async () => {
     const execSnapshots = mockExecAll(exec);
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Old Manifest.lock' as any);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     fs.readFile.mockResolvedValueOnce('Pods manifest' as any);
@@ -152,7 +151,6 @@ describe('.updateArtifacts()', () => {
       modified: ['Podfile.lock', 'Pods/Manifest.lock'],
       deleted: ['Pods/Deleted'],
     } as StatusResult);
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -160,7 +158,12 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([
+      { file: { name: 'Podfile.lock' } },
+      { file: { name: 'Pods/Manifest.lock' } },
+      { file: { name: 'Pods/New' } },
+      { file: { name: '|delete|' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches write error', async () => {
@@ -169,7 +172,6 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -177,15 +179,16 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '',
         config,
       })
-    ).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'Podfile.lock', stderr: 'not found' } },
+    ]);
+    expect(execSnapshots).toBeEmpty();
   });
   it('returns pod exec error', async () => {
     const execSnapshots = mockExecAll(exec, new Error('exec exception'));
     fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
     fs.outputFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -193,13 +196,15 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'Podfile.lock', stderr: 'exec exception' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('dynamically selects Docker image tag', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
 
@@ -215,13 +220,16 @@ describe('.updateArtifacts()', () => {
       newPackageFileContent: '',
       config,
     });
-    // FIXME: explicit assert condition
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot([
+      { cmd: 'docker pull renovate/cocoapods:1.2.4' },
+      {},
+      {},
+    ]);
   });
   it('falls back to the `latest` Docker image tag', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -240,7 +248,10 @@ describe('.updateArtifacts()', () => {
       newPackageFileContent: '',
       config,
     });
-    // FIXME: explicit assert condition
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot([
+      { cmd: 'docker pull renovate/cocoapods:latest' },
+      {},
+      {},
+    ]);
   });
 });
