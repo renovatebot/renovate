@@ -13,13 +13,8 @@ function replaceAsString(
   newValue: string
 ): string | null {
   // Update the file = this is what we want
-  if (depType === 'resolutions') {
-    // eslint-disable-next-line no-param-reassign
-    parsedContents.resolutions[depName] = newValue;
-  } else {
-    // eslint-disable-next-line no-param-reassign
-    parsedContents[depType][depName] = newValue;
-  }
+  // eslint-disable-next-line no-param-reassign
+  parsedContents[depType][depName] = newValue;
   // Look for the old version number
   const searchString = `"${oldVersion}"`;
   const newString = `"${newValue}"`;
@@ -44,8 +39,7 @@ function replaceAsString(
       }
     }
   }
-  // istanbul ignore next: not possible to get here
-  return null;
+  throw new Error();
 }
 
 export function updateDependency({
