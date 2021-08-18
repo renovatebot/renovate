@@ -16,7 +16,7 @@ const railsVersions = loadJsonFixture('rails/versions.json');
 const railsDependencies = loadBinaryFixture('dependencies-rails.dat');
 const emptyMarshalArray = Buffer.from([4, 8, 91, 0]);
 
-describe(getName(), () => {
+describe('datasource/rubygems/index', () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 

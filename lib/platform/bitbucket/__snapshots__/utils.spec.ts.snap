@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`accumulateValues() paginates 1`] = `
+exports[`platform/bitbucket/utils paginates 1`] = `
 Array [
   Object {
     "headers": Object {

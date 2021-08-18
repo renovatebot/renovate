@@ -1,11 +1,11 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const yamlFile1 = loadFixture('docker-compose.1.yml');
 const yamlFile3 = loadFixture('docker-compose.3.yml');
 const yamlFile3NoVersion = loadFixture('docker-compose.3-no-version.yml');
 
-describe(getName(), () => {
+describe('manager/docker-compose/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('')).toBeNull();

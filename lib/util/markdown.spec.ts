@@ -1,7 +1,6 @@
-import { getName } from '../../test/util';
 import { linkify } from './markdown';
 
-describe(getName(), () => {
+describe('util/markdown', () => {
   describe('.linkify', () => {
     const md = `Some references:
 

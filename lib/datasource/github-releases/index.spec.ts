@@ -1,6 +1,5 @@
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { GitHubReleaseMocker } from './test';
 import { id as datasource } from '.';
@@ -24,7 +23,7 @@ const responseBody = [
   },
 ];
 
-describe(getName(), () => {
+describe('datasource/github-releases/index', () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({

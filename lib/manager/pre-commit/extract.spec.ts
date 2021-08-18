@@ -1,4 +1,4 @@
-import { getName, loadFixture, mocked } from '../../../test/util';
+import { loadFixture, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { extractPackageFile } from './extract';
 
@@ -19,7 +19,7 @@ const enterpriseGitPrecommitConfig = loadFixture(
   'enterprise.pre-commit-config.yaml'
 );
 
-describe(getName(), () => {
+describe('manager/pre-commit/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

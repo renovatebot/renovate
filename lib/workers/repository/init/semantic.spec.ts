@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, getName, git } from '../../../../test/util';
+import { RenovateConfig, getConfig, git } from '../../../../test/util';
 import { initialize } from '../../../util/cache/repository';
 import { detectSemanticCommits } from './semantic';
 
@@ -12,7 +12,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe(getName(), () => {
+describe('workers/repository/init/semantic', () => {
   describe('detectSemanticCommits()', () => {
     beforeEach(async () => {
       await initialize({});

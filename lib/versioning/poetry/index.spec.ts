@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { api as versionig } from '.';
 
-describe(getName(), () => {
+describe('versioning/poetry/index', () => {
   describe('equals', () => {
     it.each([
       ['1', '1'],

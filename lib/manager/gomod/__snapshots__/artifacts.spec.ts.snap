@@ -1,21 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "go.sum",
-      "stderr": "This update totally doesnt work",
-    },
-  },
-]
-`;
+exports[`manager/gomod/artifacts catches errors 1`] = `Array []`;
 
-exports[`.updateArtifacts() catches errors 2`] = `Array []`;
+exports[`manager/gomod/artifacts returns if no go.sum found 1`] = `Array []`;
 
-exports[`.updateArtifacts() returns if no go.sum found 1`] = `Array []`;
-
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
+exports[`manager/gomod/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -45,7 +34,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated go.sum 1`] = `
+exports[`manager/gomod/artifacts returns updated go.sum 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -75,24 +64,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() skips updating import paths for gopkg.in dependencies 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() skips updating import paths for gopkg.in dependencies 2`] = `
+exports[`manager/gomod/artifacts skips updating import paths for gopkg.in dependencies 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -172,24 +144,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() skips updating import paths with gomodUpdateImportPaths on v0 to v1 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() skips updating import paths with gomodUpdateImportPaths on v0 to v1 2`] = `
+exports[`manager/gomod/artifacts skips updating import paths with gomodUpdateImportPaths on v0 to v1 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -269,7 +224,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode with credentials 1`] = `
+exports[`manager/gomod/artifacts supports docker mode with credentials 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/go:latest",
@@ -311,7 +266,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode with goModTidy 1`] = `
+exports[`manager/gomod/artifacts supports docker mode with goModTidy 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/go:latest",
@@ -353,7 +308,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode without credentials 1`] = `
+exports[`manager/gomod/artifacts supports docker mode without credentials 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/go:latest",
@@ -395,7 +350,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports global mode 1`] = `
+exports[`manager/gomod/artifacts supports global mode 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -425,7 +380,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports vendor directory update 1`] = `
+exports[`manager/gomod/artifacts supports vendor directory update 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -555,30 +510,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() updates import paths with gomodUpdateImportPaths 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New main.go",
-      "name": "main.go",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() updates import paths with gomodUpdateImportPaths 2`] = `
+exports[`manager/gomod/artifacts updates import paths with gomodUpdateImportPaths 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -708,30 +640,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() updates import paths with latest tool version on invalid version constraint 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New main.go",
-      "name": "main.go",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() updates import paths with latest tool version on invalid version constraint 2`] = `
+exports[`manager/gomod/artifacts updates import paths with latest tool version on invalid version constraint 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -861,30 +770,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() updates import paths with specific tool version from constraint 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New main.go",
-      "name": "main.go",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() updates import paths with specific tool version from constraint 2`] = `
+exports[`manager/gomod/artifacts updates import paths with specific tool version from constraint 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
