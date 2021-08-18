@@ -13,10 +13,20 @@ import { setGlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { ExtractConfig } from '../../types';
+import {
+  getPkgReleases as _getPkgReleases,
+  ReleaseResult,
+} from '../../../datasource';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
+jest.mock('../../../datasource');
+
+const getPkgReleases: jest.MockInstance<
+  ReturnType<typeof _getPkgReleases>,
+  jest.ArgsType<typeof _getPkgReleases>
+> = _getPkgReleases as never;
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/foo/bar'),
@@ -47,6 +57,14 @@ dependency "baz:baz:\${bazVersion}"
 
 addReplacingSerializer('gradlew.bat', '<gradlew>');
 addReplacingSerializer('./gradlew', '<gradlew>');
+
+const javaReleases: ReleaseResult = {
+  releases: [
+    { version: '8.0.302' },
+    { version: '11.0.12' },
+    { version: '16.0.2' },
+  ],
+};
 
 describe('manager/gradle/deep/index', () => {
   const updatesReport = loadFixture('updatesReport.json');
@@ -270,6 +288,7 @@ describe('manager/gradle/deep/index', () => {
     it('should use docker if required', async () => {
       setGlobalConfig(dockerAdminConfig);
       const execSnapshots = setupMocks({ wrapperFilename: null });
+      getPkgReleases.mockResolvedValueOnce(javaReleases);
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -287,6 +306,7 @@ describe('manager/gradle/deep/index', () => {
     it('should use docker even if gradlew is available', async () => {
       setGlobalConfig(dockerAdminConfig);
       const execSnapshots = setupMocks();
+      getPkgReleases.mockResolvedValueOnce(javaReleases);
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -305,6 +325,7 @@ describe('manager/gradle/deep/index', () => {
       setGlobalConfig(dockerAdminConfig);
       jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
       const execSnapshots = setupMocks({ wrapperFilename: 'gradlew.bat' });
+      getPkgReleases.mockResolvedValueOnce(javaReleases);
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);

@@ -9,6 +9,7 @@ import { ExecOptions, exec } from '../../../util/exec';
 import { readLocalFile, stat } from '../../../util/fs';
 import {
   extraEnv,
+  getJavaVersioning,
   gradleWrapperFileName,
   prepareGradleCommand,
 } from '../../gradle-wrapper/utils';
@@ -72,6 +73,7 @@ export async function executeGradle(
       image: 'java',
       tagConstraint:
         config.constraints?.java ?? (await getConstraint(gradleRoot)),
+      tagScheme: getJavaVersioning(),
     },
     extraEnv,
   };

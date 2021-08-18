@@ -4,9 +4,8 @@ import upath from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import { chmod } from '../../util/fs';
 import { regEx } from '../../util/regex';
-import { get as getVersioning } from '../../versioning';
-
-const gradleVersioning = getVersioning('gradle');
+import gradleVersioning from '../../versioning/gradle';
+import { id as npmVersioning } from '../../versioning/npm';
 
 export const extraEnv = {
   GRADLE_OPTS:
@@ -66,6 +65,10 @@ export function getJavaContraint(gradleVersion: string): string | null {
     return '^8.0.0';
   }
   return '^11.0.0';
+}
+
+export function getJavaVersioning(): string {
+  return npmVersioning;
 }
 
 // https://regex101.com/r/1GaQ2X/1

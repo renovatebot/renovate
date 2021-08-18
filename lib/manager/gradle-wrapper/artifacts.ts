@@ -10,6 +10,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
   getJavaContraint,
+  getJavaVersioning,
   gradleWrapperFileName,
   prepareGradleCommand,
 } from './utils';
@@ -90,6 +91,7 @@ export async function updateArtifacts({
         image: 'java',
         tagConstraint:
           config.constraints?.java ?? getJavaContraint(config.currentValue),
+        tagScheme: getJavaVersioning(),
       },
       extraEnv,
     };
