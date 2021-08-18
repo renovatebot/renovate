@@ -1,6 +1,5 @@
 import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import { getName } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../../types';
@@ -15,7 +14,7 @@ const baseConfig = {
   },
 };
 
-describe(getName(), () => {
+describe('manager/gradle/deep/index-real', () => {
   ifSystemSupportsGradle(6).describe('executeGradle integration', () => {
     const SUCCESS_FILE_NAME = 'success.indicator';
     let workingDir: DirectoryResult;

@@ -1,7 +1,7 @@
 import semver from '../semver';
 import docker from '.';
 
-describe('docker.', () => {
+describe('versioning/docker/index', () => {
   describe('isValid(version)', () => {
     it('should support all versions length', () => {
       expect(docker.isValid(null)).toBeNull();

@@ -1,10 +1,10 @@
-import { fs, getName } from '../../../test/util';
+import { fs } from '../../../test/util';
 import { SkipReason } from '../../types';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-describe(getName(), () => {
+describe('manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

@@ -1,11 +1,5 @@
 import * as _fs from 'fs-extra';
-import {
-  defaultConfig,
-  getName,
-  git,
-  mocked,
-  platform,
-} from '../../../test/util';
+import { defaultConfig, git, mocked, platform } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import {
@@ -68,7 +62,7 @@ const limits = mocked(_limits);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
-describe(getName(), () => {
+describe('workers/branch/index', () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],

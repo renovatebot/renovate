@@ -1,9 +1,9 @@
-import { fs, getName, loadFixture } from '../../../../test/util';
+import { fs, loadFixture } from '../../../../test/util';
 import { getNpmLock } from './npm';
 
 jest.mock('../../../util/fs');
 
-describe(getName(), () => {
+describe('manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {
     it('returns empty if failed to parse', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');

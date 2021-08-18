@@ -1,4 +1,4 @@
-import { getName, git, mocked } from '../../../../test/util';
+import { git, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { setGlobalConfig } from '../../../config/global';
 import * as _lockFiles from '../../../manager/npm/post-update';
@@ -28,7 +28,7 @@ hostRules.find = jest.fn((_) => ({
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
-describe(getName(), () => {
+describe('workers/branch/lock-files/index', () => {
   describe('writeUpdatedPackageFiles', () => {
     beforeEach(() => {
       setGlobalConfig({

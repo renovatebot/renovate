@@ -3,7 +3,6 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../../test/exec-util';
-import { getName } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
@@ -24,7 +23,7 @@ const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
   _getPkgReleases as any;
 jest.mock('../../../datasource');
 
-describe(getName(), () => {
+describe('util/exec/docker/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });

@@ -1,4 +1,4 @@
-import { fs, getName, loadFixture } from '../../../test/util';
+import { fs, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -10,7 +10,7 @@ const requirements4 = loadFixture('composer4.json');
 const requirements5 = loadFixture('composer5.json');
 const requirements5Lock = loadFixture('composer5.lock');
 
-describe(getName(), () => {
+describe('manager/composer/extract', () => {
   describe('extractPackageFile()', () => {
     let packageFile;
     beforeEach(() => {

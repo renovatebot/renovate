@@ -1,11 +1,11 @@
-import { getName, loadJsonFixture } from '../../../../../test/util';
+import { loadJsonFixture } from '../../../../../test/util';
 import { getLockedDependencies } from './get-locked';
 
 jest.mock('../../../../util/fs');
 
 const packageLockJson = loadJsonFixture('package-lock.json');
 
-describe(getName(), () => {
+describe('manager/npm/update/locked-dependency/get-locked', () => {
   describe('getLockedDependencies()', () => {
     it('handles error', () => {
       expect(getLockedDependencies(null as any, 'some-dep', '1.0.0')).toEqual(
