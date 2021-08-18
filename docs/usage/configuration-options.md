@@ -364,11 +364,13 @@ However, this also means that all platform constraints (including PHP version) w
 
 To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
+The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
 
 If an empty array is configured, Renovate uses its default behaviour.
 
-Set to `null` to fully omit `--ignore-platform-reqs/--ignore-platform-req` during Composer invocation.
-This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed.
+Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-platform-req` during Composer invocation.
+This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
+The Composer output should inform you about the reasons the update failed.
 
 ## configWarningReuseIssue
 
