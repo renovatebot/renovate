@@ -53,6 +53,7 @@ const repoGroups = {
   tsoa: 'https://github.com/lukeautry/tsoa',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
+  'wordpress gutenberg': 'https://github.com/WordPress/gutenberg',
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   accounts: 'https://github.com/accounts-js/accounts',
   angularjs: 'https://github.com/angular/angular.js',
