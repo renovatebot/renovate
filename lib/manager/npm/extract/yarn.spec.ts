@@ -1,9 +1,9 @@
-import { fs, getName, loadFixture } from '../../../../test/util';
+import { fs, loadFixture } from '../../../../test/util';
 import { getYarnLock } from './yarn';
 
 jest.mock('../../../util/fs');
 
-describe(getName(), () => {
+describe('manager/npm/extract/yarn', () => {
   describe('.getYarnLock()', () => {
     it('returns empty if exception parsing', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');

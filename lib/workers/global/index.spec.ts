@@ -1,5 +1,5 @@
 import { ERROR, WARN } from 'bunyan';
-import { getName, logger } from '../../../test/util';
+import { logger } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
@@ -19,7 +19,7 @@ const configParser: jest.Mocked<typeof _configParser> = _configParser as never;
 const platform: jest.Mocked<typeof _platform> = _platform as never;
 const limits = _limits;
 
-describe(getName(), () => {
+describe('workers/global/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     logger.getProblems.mockImplementationOnce(() => []);

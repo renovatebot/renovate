@@ -54,7 +54,7 @@ const goEnv = {
   CGO_ENABLED: '1',
 };
 
-describe('.updateArtifacts()', () => {
+describe('manager/gomod/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

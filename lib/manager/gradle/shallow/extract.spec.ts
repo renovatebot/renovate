@@ -1,5 +1,5 @@
 import { extractAllPackageFiles } from '..';
-import { fs, getName } from '../../../../test/util';
+import { fs } from '../../../../test/util';
 
 jest.mock('../../../util/fs');
 
@@ -12,7 +12,7 @@ function mockFs(files: Record<string, string>): void {
   });
 }
 
-describe(getName(), () => {
+describe('manager/gradle/shallow/extract', () => {
   beforeAll(() => {});
   afterAll(() => {
     jest.resetAllMocks();

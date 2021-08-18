@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as memCache from '../../util/cache/memory';
 import {
   encodeCase,
@@ -9,7 +9,7 @@ import {
   versionInfo,
 } from './goproxy';
 
-describe(getName(), () => {
+describe('datasource/go/goproxy', () => {
   beforeEach(() => {
     memCache.init();
   });

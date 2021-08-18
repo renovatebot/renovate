@@ -1,4 +1,4 @@
-import { fs, getName, loadFixture } from '../../../test/util';
+import { fs, loadFixture } from '../../../test/util';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
@@ -14,7 +14,7 @@ function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
 }
 
-describe(getName(), () => {
+describe('manager/maven/index', () => {
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);

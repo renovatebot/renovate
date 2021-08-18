@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
 const multidocYaml = loadFixture('multidoc.yaml');
 
-describe(getName(), () => {
+describe('manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

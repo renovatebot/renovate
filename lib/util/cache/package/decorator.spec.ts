@@ -1,6 +1,5 @@
 import os from 'os';
 import { mock } from 'jest-mock-extended';
-import { getName } from '../../../../test/util';
 import type { GetReleasesConfig } from '../../../datasource';
 import * as memCache from '../memory';
 import { cache } from './decorator';
@@ -8,7 +7,7 @@ import * as packageCache from '.';
 
 jest.mock('./file');
 
-describe(getName(), () => {
+describe('util/cache/package/decorator', () => {
   const spy = jest.fn(() => Promise.resolve());
 
   beforeAll(() => {

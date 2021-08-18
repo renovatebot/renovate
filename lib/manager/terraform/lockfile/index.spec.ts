@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { fs, getName, loadFixture, mocked } from '../../../../test/util';
+import { fs, loadFixture, mocked } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
@@ -28,7 +28,7 @@ const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
   typeof getPkgReleases
 >;
 
-describe(getName(), () => {
+describe('manager/terraform/lockfile/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

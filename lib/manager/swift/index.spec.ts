@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const pkgContent = loadFixture(`SamplePackage.swift`);
 
-describe(getName(), () => {
+describe('manager/swift/index', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty content', () => {
       expect(extractPackageFile(null)).toBeNull();

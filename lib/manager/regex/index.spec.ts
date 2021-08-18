@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { logger } from '../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
@@ -8,7 +8,7 @@ const ansibleYamlContent = loadFixture(`ansible.yml`);
 const exampleJsonContent = loadFixture(`example.json`);
 const exampleGitlabCiYml = loadFixture(`gitlab-ci.yml`);
 
-describe(getName(), () => {
+describe('manager/regex/index', () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
       pinDigests: false,

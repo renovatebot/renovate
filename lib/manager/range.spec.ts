@@ -1,7 +1,7 @@
 import type { RangeConfig } from './types';
 import { getRangeStrategy } from '.';
 
-describe('getRangeStrategy', () => {
+describe('manager/range', () => {
   it('returns same if not auto', () => {
     const config: RangeConfig = {
       manager: 'npm',

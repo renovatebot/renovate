@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const sbt = loadFixture(`sample.sbt`);
@@ -9,7 +9,7 @@ const sbtPrivateVariableDependencyFile = loadFixture(
   `private-variable-dependency-file.scala`
 );
 
-describe(getName(), () => {
+describe('manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile(null)).toBeNull();

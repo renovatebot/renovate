@@ -1,8 +1,7 @@
 import { fromCodepointToUnicode, fromHexcodeToCodepoint } from 'emojibase';
-import { getName } from '../../test/util';
 import { emojify, setEmojiConfig, stripEmojis, unemojify } from './emoji';
 
-describe(getName(), () => {
+describe('util/emoji', () => {
   beforeEach(() => {
     setEmojiConfig({ unicodeEmoji: true });
   });
