@@ -193,8 +193,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchSourceUrlPrefixes.length) {
+    const lowerCaseSourceUrl = sourceUrl.toLowerCase();
     const isMatch = matchSourceUrlPrefixes.some((prefix) =>
-      sourceUrl?.toLowerCase().startsWith(prefix.toLowerCase())
+      lowerCaseSourceUrl?.startsWith(prefix.toLowerCase())
     );
     if (!isMatch) {
       return false;
