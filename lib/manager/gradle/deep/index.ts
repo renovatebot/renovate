@@ -1,5 +1,4 @@
 import type { Stats } from 'fs';
-import { stat } from 'fs-extra';
 import upath from 'upath';
 import { getGlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -7,7 +6,12 @@ import * as datasourceMaven from '../../../datasource/maven';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, stat } from '../../../util/fs';
+import {
+  extraEnv,
+  gradleWrapperFileName,
+  prepareGradleCommand,
+} from '../../gradle-wrapper/utils';
 import type {
   ExtractConfig,
   PackageFile,
@@ -24,7 +28,7 @@ import {
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
 import type { GradleDependency } from './types';
-import { extraEnv, gradleWrapperFileName, prepareGradleCommand } from './utils';
+import { getConstraint } from './utils';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -46,16 +50,17 @@ async function prepareGradleCommandFallback(
 export async function executeGradle(
   config: ExtractConfig,
   cwd: string,
-  gradlew: Stats | null
+  gradlew: Stats | null,
+  gradleRoot = '.'
 ): Promise<void> {
   let stdout: string;
   let stderr: string;
-  let timeout;
+  let timeout: number;
   if (config.gradle?.timeout) {
     timeout = config.gradle.timeout * 1000;
   }
   const cmd = await prepareGradleCommandFallback(
-    gradleWrapperFileName(config),
+    gradleWrapperFileName(),
     cwd,
     gradlew,
     GRADLE_DEPENDENCY_REPORT_OPTIONS
@@ -64,7 +69,9 @@ export async function executeGradle(
     timeout,
     cwd,
     docker: {
-      image: 'gradle',
+      image: 'java',
+      tagConstraint:
+        config.constraints?.java ?? (await getConstraint(gradleRoot)),
     },
     extraEnv,
   };
@@ -94,7 +101,7 @@ export async function extractAllPackageFiles(
   const { localDir } = getGlobalConfig();
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
-    const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
+    const gradlewPath = upath.join(dirname, gradleWrapperFileName());
     gradlew = await stat(upath.join(localDir, gradlewPath)).catch(() => null);
 
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
@@ -114,14 +121,15 @@ export async function extractAllPackageFiles(
   }
   logger.debug('Extracting dependencies from all gradle files');
 
-  const cwd = upath.join(localDir, upath.dirname(rootBuildGradle));
+  const gradleRoot = upath.dirname(rootBuildGradle);
+  const cwd = upath.join(localDir, gradleRoot);
 
-  await createRenovateGradlePlugin(cwd);
-  await executeGradle(config, cwd, gradlew);
+  await createRenovateGradlePlugin(gradleRoot);
+  await executeGradle(config, cwd, gradlew, gradleRoot);
 
   init();
 
-  const dependencies = await extractDependenciesFromUpdatesReport(cwd);
+  const dependencies = await extractDependenciesFromUpdatesReport(gradleRoot);
   if (dependencies.length === 0) {
     return [];
   }

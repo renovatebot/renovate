@@ -1,44 +1,25 @@
-import type { Stats } from 'fs';
-import os from 'os';
-import { chmod } from 'fs-extra';
-import upath from 'upath';
+import { join } from 'upath';
 import { getGlobalConfig } from '../../../config/global';
-import type { ExtractConfig } from '../../types';
+import { readLocalFile } from '../../../util/fs';
+import {
+  extractGradleVersion,
+  getJavaContraint,
+} from '../../gradle-wrapper/utils';
 
-export const extraEnv = {
-  GRADLE_OPTS:
-    '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
-};
-
-export function gradleWrapperFileName(config: ExtractConfig): string {
-  if (
-    os.platform() === 'win32' &&
-    getGlobalConfig()?.binarySource !== 'docker'
-  ) {
-    return 'gradlew.bat';
+export async function getConstraint(
+  gradleRoot: string
+): Promise<string | null> {
+  if (getGlobalConfig()?.binarySource !== 'docker') {
+    // ignore
+    return null;
   }
-  return './gradlew';
-}
 
-export async function prepareGradleCommand(
-  gradlewName: string,
-  cwd: string,
-  gradlew: Stats | null,
-  args: string | null
-): Promise<string> {
-  /* eslint-disable no-bitwise */
-  // istanbul ignore if
-  if (gradlew?.isFile() === true) {
-    // if the file is not executable by others
-    if ((gradlew.mode & 0o1) === 0) {
-      // add the execution permission to the owner, group and others
-      await chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
-    }
-    if (args === null) {
-      return gradlewName;
-    }
-    return `${gradlewName} ${args}`;
-  }
-  /* eslint-enable no-bitwise */
-  return null;
+  const fileContent = await readLocalFile(
+    join(gradleRoot, 'gradle/wrapper/gradle-wrapper.properties'),
+    'utf8'
+  );
+
+  const version = extractGradleVersion(fileContent);
+
+  return getJavaContraint(version);
 }

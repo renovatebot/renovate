@@ -1,30 +1,23 @@
-import { exec as _exec } from 'child_process';
 import type { Stats } from 'fs';
 import os from 'os';
-import _fs from 'fs-extra';
 import { join } from 'upath';
 import { extractAllPackageFiles, updateDependency } from '..';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import {
   addReplacingSerializer,
+  env,
+  fs,
   getName,
   loadFixture,
-  mocked,
 } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import * as _env from '../../../util/exec/env';
 import type { ExtractConfig } from '../../types';
 
 jest.mock('child_process');
-const exec: jest.Mock<typeof _exec> = _exec as never;
-
-jest.mock('fs-extra');
-const fs = mocked(_fs);
-
 jest.mock('../../../util/exec/env');
-const env = mocked(_env);
+jest.mock('../../../util/fs');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/foo/bar'),
@@ -68,7 +61,7 @@ describe(getName(), () => {
     packageFilename = 'build.gradle',
     output = gradleOutput,
   } = {}) {
-    fs.stat.mockImplementationOnce((dirname) => {
+    fs.stat.mockImplementationOnce((_dirname) => {
       if (wrapperFilename) {
         return Promise.resolve({
           isFile: () => true,
@@ -76,14 +69,28 @@ describe(getName(), () => {
       }
       return Promise.reject();
     });
-    fs.writeFile.mockImplementationOnce((_filename, _content) => {});
-    fs.exists.mockImplementationOnce((_filename) => Promise.resolve(!!report));
-    fs.readFile.mockImplementationOnce((filename) =>
-      report ? Promise.resolve(report as never) : Promise.reject()
-    );
-    fs.readFile.mockImplementationOnce((filename) =>
-      Promise.resolve(buildGradle as never)
-    );
+    fs.writeLocalFile.mockImplementation((f, _content) => {
+      if (f?.endsWith(pluginFilename)) {
+        return Promise.resolve();
+      }
+      return Promise.reject();
+    });
+    fs.localPathExists.mockImplementation((f) => {
+      if (f?.endsWith(reportFilename)) {
+        return Promise.resolve(!!report);
+      }
+      return Promise.resolve(false);
+    });
+    fs.readLocalFile.mockImplementation((f) => {
+      if (f?.endsWith(reportFilename)) {
+        return report ? Promise.resolve(report) : Promise.reject();
+      }
+      if (f?.endsWith(packageFilename)) {
+        return Promise.resolve(buildGradle);
+      }
+      return Promise.resolve('');
+    });
+
     return mockExecAll(exec, output);
   }
 
@@ -108,18 +115,30 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return gradle.kts dependencies', async () => {
-      const execSnapshots = setupMocks();
+      const execSnapshots = setupMocks({ packageFilename: 'build.gradle.kts' });
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle.kts',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle.kts',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -159,8 +178,14 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(3);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -169,8 +194,14 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -180,8 +211,14 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -190,8 +227,14 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -214,8 +257,14 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'baz/qux/build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'baz/qux/build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -225,8 +274,14 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -236,8 +291,14 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -248,8 +309,14 @@ describe(getName(), () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
   });

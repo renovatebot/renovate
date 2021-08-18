@@ -8,7 +8,7 @@ import type { RepoGlobalConfig } from '../../config/types';
 import type { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/deep/__testutil__/gradle';
 import type { UpdateArtifactsConfig } from '../types';
-import * as dcUpdate from '.';
+import * as gradleWrapper from '.';
 
 jest.mock('../../util/git');
 
@@ -60,7 +60,7 @@ describe(getName(), () => {
         ],
       } as StatusResult);
 
-      const res = await dcUpdate.updateArtifacts({
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
@@ -100,7 +100,7 @@ describe(getName(), () => {
         })
       );
 
-      const result = await dcUpdate.updateArtifacts({
+      const result = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: ``,
@@ -118,7 +118,7 @@ describe(getName(), () => {
         modified: [],
       } as StatusResult);
 
-      const res = await dcUpdate.updateArtifacts({
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
@@ -142,7 +142,7 @@ describe(getName(), () => {
         throw new Error('failed');
       });
 
-      const res = await dcUpdate.updateArtifacts({
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
@@ -169,7 +169,7 @@ describe(getName(), () => {
       };
 
       setGlobalConfig(wrongCmdConfig);
-      const res = await dcUpdate.updateArtifacts({
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
@@ -192,7 +192,7 @@ describe(getName(), () => {
 
     it('gradlew not found', async () => {
       setGlobalConfig({ localDir: 'some-dir' });
-      const res = await dcUpdate.updateArtifacts({
+      const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: undefined,
@@ -219,7 +219,7 @@ describe(getName(), () => {
 
       const newContent = await readString(`./gradle-wrapper-sum.properties`);
 
-      const result = await dcUpdate.updateArtifacts({
+      const result = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: newContent.replace(
@@ -263,7 +263,7 @@ describe(getName(), () => {
         .get('/distributions/gradle-6.3-bin.zip.sha256')
         .reply(404);
 
-      const result = await dcUpdate.updateArtifacts({
+      const result = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
