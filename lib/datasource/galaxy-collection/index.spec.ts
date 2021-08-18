@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { GalaxyCollectionDatasource } from '.';
 
@@ -22,7 +22,7 @@ const baseUrl = 'https://galaxy.ansible.com';
 
 const datasource = GalaxyCollectionDatasource.id;
 
-describe(getName(), () => {
+describe('datasource/galaxy-collection/index', () => {
   describe('getReleases', () => {
     it('returns null for 404 result', async () => {
       httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(404);

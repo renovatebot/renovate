@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-describe(getName(), () => {
+describe('manager/ruby-version/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns a result', () => {
       const res = extractPackageFile('8.4.0\n');

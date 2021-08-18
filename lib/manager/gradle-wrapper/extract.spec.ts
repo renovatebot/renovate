@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const propertiesFile1 = loadFixture('gradle-wrapper-1.properties');
@@ -9,7 +9,7 @@ const whitespacePropertiesFile = loadFixture(
   'gradle-wrapper-whitespace.properties'
 );
 
-describe(getName(), () => {
+describe('manager/gradle-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

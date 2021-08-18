@@ -7,7 +7,6 @@ import {
   addReplacingSerializer,
   env,
   fs,
-  getName,
   loadFixture,
 } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
@@ -49,7 +48,7 @@ dependency "baz:baz:\${bazVersion}"
 addReplacingSerializer('gradlew.bat', '<gradlew>');
 addReplacingSerializer('./gradlew', '<gradlew>');
 
-describe(getName(), () => {
+describe('manager/gradle/deep/index', () => {
   const updatesReport = loadFixture('updatesReport.json');
 
   function setupMocks({

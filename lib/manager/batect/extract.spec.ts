@@ -1,4 +1,3 @@
-import { getName } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { id as gitTagDatasource } from '../../datasource/git-tags';
@@ -33,7 +32,7 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: ExtractConfig = {};
 
-describe(getName(), () => {
+describe('manager/batect/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       setGlobalConfig(adminConfig);

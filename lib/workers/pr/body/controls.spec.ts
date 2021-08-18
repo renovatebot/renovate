@@ -1,11 +1,11 @@
 import { mock } from 'jest-mock-extended';
-import { getName, git } from '../../../../test/util';
+import { git } from '../../../../test/util';
 import { BranchConfig } from '../../types';
 import { getControls } from './controls';
 
 jest.mock('../../../util/git');
 
-describe(getName(), () => {
+describe('workers/pr/body/controls', () => {
   describe('getControls', () => {
     let branchConfig: BranchConfig;
     beforeEach(() => {

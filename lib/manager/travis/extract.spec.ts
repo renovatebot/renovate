@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const invalidYAML = loadFixture('invalid.yml');
 
-describe(getName(), () => {
+describe('manager/travis/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

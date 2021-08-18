@@ -26,7 +26,7 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-describe('.updateArtifacts()', () => {
+describe('manager/helmv3/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

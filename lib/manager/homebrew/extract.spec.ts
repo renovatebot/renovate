@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const aalib = loadFixture('aalib.rb');
@@ -7,7 +7,7 @@ const acmetool = loadFixture('acmetool.rb');
 const aide = loadFixture('aide.rb');
 const ibazel = loadFixture('ibazel.rb');
 
-describe(getName(), () => {
+describe('manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
       const res = extractPackageFile(aalib);

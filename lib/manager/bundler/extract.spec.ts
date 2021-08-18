@@ -1,4 +1,4 @@
-import { fs, getName, loadFixture } from '../../../test/util';
+import { fs, loadFixture } from '../../../test/util';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from './extract';
 
@@ -31,7 +31,7 @@ function validateGems(raw, parsed) {
   expect(gemfileGemCount).toEqual(parsedGemCount);
 }
 
-describe(getName(), () => {
+describe('manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();

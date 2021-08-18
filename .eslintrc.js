@@ -3,6 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
+  plugins: ['@renovate'],
   extends: [
     'airbnb-typescript/base',
     'plugin:import/errors',
@@ -105,6 +106,7 @@ module.exports = {
 
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
+    '@renovate/jest-root-describe': 2,
   },
   settings: {
     'import/parsers': {

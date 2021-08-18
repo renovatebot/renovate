@@ -1,7 +1,6 @@
 import { updateDependency } from '..';
-import { getName } from '../../../../test/util';
 
-describe(getName(), () => {
+describe('manager/gradle/shallow/update', () => {
   it('replaces', () => {
     expect(
       updateDependency({
