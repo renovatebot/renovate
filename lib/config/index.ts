@@ -1,6 +1,6 @@
 import { logger } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
-import * as definitions from './definitions';
+import * as options from './options';
 import type {
   AllConfig,
   ManagerConfig,
@@ -41,7 +41,7 @@ export function filterConfig(
   const outputConfig: RenovateConfig = { ...inputConfig };
   const stages = ['global', 'repository', 'package', 'branch', 'pr'];
   const targetIndex = stages.indexOf(targetStage);
-  for (const option of definitions.getOptions()) {
+  for (const option of options.getOptions()) {
     const optionIndex = stages.indexOf(option.stage);
     if (optionIndex !== -1 && optionIndex < targetIndex) {
       delete outputConfig[option.name];

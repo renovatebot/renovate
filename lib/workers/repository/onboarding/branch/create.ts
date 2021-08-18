@@ -1,5 +1,5 @@
-import { getAdminConfig } from '../../../../config/admin';
 import { configFileNames } from '../../../../config/app-strings';
+import { getGlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';
@@ -26,7 +26,7 @@ export async function createOnboardingBranch(
   const commitMessage = commitMessageFactory.create();
 
   // istanbul ignore if
-  if (getAdminConfig().dryRun) {
+  if (getGlobalConfig().dryRun) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }

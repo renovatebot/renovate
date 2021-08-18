@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const invalidYamlFile = loadFixture('invalid.yaml');
@@ -9,7 +9,7 @@ const pluginsYamlFile = loadFixture('plugins.yaml');
 const pluginsEmptyTextFile = loadFixture('empty.txt');
 const pluginsEmptyYamlFile = loadFixture('empty.yaml');
 
-describe(getName(), () => {
+describe('manager/jenkins/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns empty list for an empty text file', () => {
       const res = extractPackageFile(pluginsEmptyTextFile, 'path/file.txt');

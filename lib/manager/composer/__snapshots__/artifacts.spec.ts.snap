@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches errors 1`] = `
+exports[`manager/composer/artifacts catches errors 1`] = `
 Array [
   Object {
     "artifactError": Object {
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() catches unmet requirements errors 1`] = `
+exports[`manager/composer/artifacts catches unmet requirements errors 1`] = `
 Array [
   Object {
     "artifactError": Object {
@@ -22,7 +22,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() disables ignorePlatformReqs 1`] = `
+exports[`manager/composer/artifacts disables ignorePlatformReqs 1`] = `
 Array [
   Object {
     "cmd": "composer update --with-dependencies --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
@@ -46,7 +46,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() performs lockFileMaintenance 1`] = `
+exports[`manager/composer/artifacts performs lockFileMaintenance 1`] = `
 Array [
   Object {
     "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
@@ -70,7 +70,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
+exports[`manager/composer/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
     "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction",
@@ -94,7 +94,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated composer.lock 1`] = `
+exports[`manager/composer/artifacts returns updated composer.lock 1`] = `
 Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
@@ -118,7 +118,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode 1`] = `
+exports[`manager/composer/artifacts supports docker mode 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/php:7.3",
@@ -154,7 +154,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports global mode 1`] = `
+exports[`manager/composer/artifacts supports global mode 1`] = `
 Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
@@ -178,7 +178,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports vendor directory update 1`] = `
+exports[`manager/composer/artifacts supports vendor directory update 1`] = `
 Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
@@ -202,7 +202,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() uses hostRules to set COMPOSER_AUTH 1`] = `
+exports[`manager/composer/artifacts uses hostRules to set COMPOSER_AUTH 1`] = `
 Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",

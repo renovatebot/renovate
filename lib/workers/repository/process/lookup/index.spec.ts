@@ -1,7 +1,6 @@
 import * as httpMock from '../../../../../test/http-mock';
 import {
   getConfig,
-  getName,
   loadJsonFixture,
   mocked,
   partial,
@@ -49,7 +48,7 @@ Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
 
 let config: LookupUpdateConfig;
 
-describe(getName(), () => {
+describe('workers/repository/process/lookup/index', () => {
   beforeEach(() => {
     // TODO: fix types
     config = partial<LookupUpdateConfig>(getConfig());

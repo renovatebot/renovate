@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getPrList } from './pr-list';
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getPrList()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

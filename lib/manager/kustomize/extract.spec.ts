@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
@@ -21,7 +21,7 @@ const gitImages = loadFixture('gitImages.yaml');
 const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
 const sha = loadFixture('sha.yaml');
 
-describe(getName(), () => {
+describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
     expect(file).not.toBeNull();

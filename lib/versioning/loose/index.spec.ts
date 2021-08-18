@@ -1,6 +1,6 @@
 import loose from '.';
 
-describe('loose.', () => {
+describe('versioning/loose/index', () => {
   describe('isVersion', () => {
     ['1.1', '1.3.RC2', '2.1-rc2'].forEach((version) => {
       it(version, () => {

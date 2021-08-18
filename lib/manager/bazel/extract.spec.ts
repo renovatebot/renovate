@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const workspaceFile = loadFixture('WORKSPACE1');
@@ -6,7 +6,7 @@ const workspace2File = loadFixture('WORKSPACE2');
 const workspace3File = loadFixture('WORKSPACE3');
 const fileWithBzlExtension = loadFixture('repositories.bzl');
 
-describe(getName(), () => {
+describe('manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n');

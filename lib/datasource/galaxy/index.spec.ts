@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { GalaxyDatasource } from '.';
 
 const res1 = loadFixture('timezone');
@@ -8,7 +8,7 @@ const empty = loadFixture('empty');
 
 const baseUrl = 'https://galaxy.ansible.com/';
 
-describe(getName(), () => {
+describe('datasource/galaxy/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock

@@ -2,11 +2,11 @@ import { readFile, readFileSync } from 'fs-extra';
 import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
-import { getName, git, partial } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { git, partial } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import type { StatusResult } from '../../util/git';
-import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
+import { ifSystemSupportsGradle } from '../gradle/deep/__testutil__/gradle';
 import type { UpdateArtifactsConfig } from '../types';
 import * as dcUpdate from '.';
 
@@ -14,7 +14,7 @@ jest.mock('../../util/git');
 
 const fixtures = resolve(__dirname, './__fixtures__');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: resolve(fixtures, './testFiles'),
 };
 
@@ -36,18 +36,18 @@ function compareFile(file: string, path: string) {
   );
 }
 
-describe(getName(), () => {
+describe('manager/gradle-wrapper/artifacts-real', () => {
   ifSystemSupportsGradle(6).describe('real tests', () => {
     jest.setTimeout(60 * 1000);
 
     beforeEach(() => {
       jest.resetAllMocks();
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
     });
 
     afterEach(async () => {
       await Git(fixtures).checkout(['HEAD', '--', '.']);
-      setAdminConfig();
+      setGlobalConfig();
     });
 
     it('replaces existing value', async () => {
@@ -168,7 +168,7 @@ describe(getName(), () => {
         localDir: resolve(fixtures, './wrongCmd'),
       };
 
-      setAdminConfig(wrongCmdConfig);
+      setGlobalConfig(wrongCmdConfig);
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
@@ -191,7 +191,7 @@ describe(getName(), () => {
     });
 
     it('gradlew not found', async () => {
-      setAdminConfig({ localDir: 'some-dir' });
+      setGlobalConfig({ localDir: 'some-dir' });
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],

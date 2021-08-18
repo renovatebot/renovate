@@ -17,7 +17,7 @@ const fs = mocked(_fs);
 const pnpmHelper = mocked(_pnpmHelper);
 delete process.env.NPM_CONFIG_CACHE;
 
-describe('generateLockFile', () => {
+describe('manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
   beforeEach(() => {
     config = { cacheDir: 'some-cache-dir', constraints: { pnpm: '^2.0.0' } };

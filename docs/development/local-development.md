@@ -191,7 +191,7 @@ The example command will delete any existing `debug.log` and then save Renovate'
 We want stay backwards-compatible as much as possible, as well as make the code configurable.
 So most new functionality should be controllable via configuration options.
 
-Create your new configuration option in the `lib/config/definitions.ts` file.
+Create your new configuration option in the `lib/config/options/index.ts` file.
 Also create documentation for the option in the `website/docs/configuration-options.md` file.
 
 ## Debugging

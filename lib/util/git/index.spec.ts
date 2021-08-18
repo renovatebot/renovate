@@ -2,12 +2,11 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import * as git from '.';
 import { GitNoVerifyOption, setNoVerify } from '.';
 
-describe(getName(), () => {
+describe('util/git/index', () => {
   jest.setTimeout(15000);
 
   const masterCommitDate = new Date();
@@ -71,7 +70,7 @@ describe(getName(), () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setAdminConfig({ localDir: tmpDir.path });
+    setGlobalConfig({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
       gitAuthorName: 'Jest',
