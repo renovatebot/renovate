@@ -81,9 +81,19 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.0.0',
+            skipReason: 'unsupported-chart-type',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
+        ],
+      });
     });
 
     it('skip local charts', () => {
@@ -179,9 +189,15 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          { skipReason: 'local-chart' },
+          { depName: 'rabbitmq', currentValue: '7.4.3' },
+          { depName: 'kube-prometheus-stack', currentValue: '13.7.2' },
+          { depName: 'invalid', skipReason: 'invalid-name' },
+        ],
+      });
     });
   });
 });
