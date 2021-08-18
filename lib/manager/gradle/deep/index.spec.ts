@@ -11,12 +11,12 @@ import {
 } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import {
+  ReleaseResult,
+  getPkgReleases as _getPkgReleases,
+} from '../../../datasource';
 import * as docker from '../../../util/exec/docker';
 import type { ExtractConfig } from '../../types';
-import {
-  getPkgReleases as _getPkgReleases,
-  ReleaseResult,
-} from '../../../datasource';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
