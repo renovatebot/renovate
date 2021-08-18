@@ -254,6 +254,31 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts with combination strategy and templates 1`] = `
+Object {
+  "datasourceTemplate": "helm",
+  "depNameTemplate": "helm_repo/{{{ depName }}}",
+  "deps": Array [
+    Object {
+      "currentValue": "0.19.2",
+      "datasource": "helm",
+      "depName": "helm_repo/descheduler",
+      "registryUrls": Array [
+        "https://kubernetes-sigs.github.io/",
+      ],
+      "replaceString": "CHART_VERSION: 0.19.2
+",
+    },
+  ],
+  "matchStrings": Array [
+    "CHART_REPOSITORY_URL: \\"(?<registryUrl>.*)\\\\/(?<depName>[a-z]+)\\\\/\\"",
+    "CHART_VERSION: (?<currentValue>.*?)
+",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
 exports[`manager/regex/index extracts with recursive strategy and fail because of not sufficient regexes 1`] = `null`;
 
 exports[`manager/regex/index extracts with recursive strategy and fail because there is no match 1`] = `null`;
