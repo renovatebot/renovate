@@ -9,6 +9,12 @@ import { id as datasource } from '.';
 const baseUrl = 'https://repo.maven.apache.org/maven2';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';
 
+interface SnapshotOpts {
+  version: string;
+  concreteVersions?: string[];
+  meta?: string;
+}
+
 interface MockOpts {
   dep?: string;
   base?: string;
@@ -16,6 +22,7 @@ interface MockOpts {
   pom?: string | null;
   latest?: string;
   jars?: Record<string, number> | null;
+  snapshots?: SnapshotOpts[] | null;
 }
 
 function mockGenericPackage(opts: MockOpts = {}) {
@@ -62,6 +69,31 @@ function mockGenericPackage(opts: MockOpts = {}) {
       scope
         .head(`/${packagePath}/${version}/${artifact}-${version}.pom`)
         .reply(status, '', { 'Last-Modified': timestamp });
+    });
+  }
+
+  if (opts.snapshots !== undefined) {
+    opts.snapshots.forEach((snapshot) => {
+      if (snapshot.meta) {
+        scope
+          .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
+          .reply(200, snapshot.meta);
+      }
+
+      if (snapshot.concreteVersions) {
+        snapshot.concreteVersions.forEach((concreteVersion) => {
+          const [major, minor, patch] = snapshot.version
+            .split('.')
+            .map((x) => parseInt(x, 10))
+            .map((x) => (x < 10 ? `0${x}` : `${x}`));
+          const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
+          scope
+            .head(
+              `/${packagePath}/${snapshot.version}/${artifact}-${concreteVersion}.pom`
+            )
+            .reply(200, '', { 'Last-Modified': timestamp });
+        });
+      }
     });
   }
 }
@@ -303,6 +335,29 @@ describe('datasource/maven/index', () => {
     const res = await get('org.example:package', frontendUrl);
 
     expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('includes snapshot releases', async () => {
+    mockGenericPackage({
+      meta: loadFixture('metadata-snapshot.xml'),
+      latest: '1.0.0',
+      jars: { '1.0.0': 200 },
+      snapshots: [
+        {
+          version: '1.0.1-SNAPSHOT',
+          concreteVersions: ['1.0.1-20200101.123456-5'],
+          meta: loadFixture('metadata-snapshot-version.xml'),
+        },
+      ],
+    });
+
+    const { releases } = await get('org.example:package', baseUrl);
+
+    expect(releases).toMatchObject([
+      { version: '1.0.0' },
+      { version: '1.0.1-SNAPSHOT' },
+    ]);
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 

@@ -95,6 +95,66 @@ function isValidArtifactsInfo(
   return versions.every((v) => info[v] !== undefined);
 }
 
+function isSnapshotVersion(version: string): boolean {
+  if (version.endsWith('-SNAPSHOT')) {
+    return true;
+  }
+  return false;
+}
+
+function extractSnapshotVersion(metadata: XmlDocument): string {
+  const version = metadata
+    .descendantWithPath('version')
+    ?.val?.replace('-SNAPSHOT', '');
+
+  const snapshot = metadata.descendantWithPath('versioning.snapshot');
+  const timestamp = snapshot?.childNamed('timestamp')?.val;
+  const build = snapshot?.childNamed('buildNumber')?.val;
+
+  if (!version || !timestamp || !build) {
+    return null;
+  }
+  return `${version}-${timestamp}-${build}`;
+}
+
+async function getSnapshotFullVersion(
+  version: string,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string | null> {
+  const metadataUrl = getMavenUrl(
+    dependency,
+    repoUrl,
+    `${version}/maven-metadata.xml`
+  );
+
+  const { xml: mavenMetadata } = await downloadMavenXml(metadataUrl);
+  if (!mavenMetadata) {
+    return null;
+  }
+
+  return extractSnapshotVersion(mavenMetadata);
+}
+
+async function createUrlForDependencyPom(
+  version: string,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<string> {
+  if (isSnapshotVersion(version)) {
+    const fullVersion = await getSnapshotFullVersion(
+      version,
+      dependency,
+      repoUrl
+    );
+    if (fullVersion !== null) {
+      return `${version}/${dependency.name}-${fullVersion}.pom`;
+    }
+  }
+
+  return `${version}/${dependency.name}-${version}.pom`;
+}
+
 async function filterMissingArtifacts(
   dependency: MavenDependency,
   repoUrl: string,
@@ -106,15 +166,17 @@ async function filterMissingArtifacts(
     await packageCache.get<ArtifactsInfo>(cacheNamespace, cacheKey);
 
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
-    const queue = versions
-      .map((version): [string, url.URL | null] => {
+    const versionUrls = versions.map(
+      async (version): Promise<[string, url.URL | null]> => {
         const artifactUrl = getMavenUrl(
           dependency,
           repoUrl,
-          `${version}/${dependency.name}-${version}.pom`
+          await createUrlForDependencyPom(version, dependency, repoUrl)
         );
         return [version, artifactUrl];
-      })
+      }
+    );
+    const queue = (await Promise.all(versionUrls))
       .filter(([_, artifactUrl]) => Boolean(artifactUrl))
       .map(
         ([version, artifactUrl]) =>
