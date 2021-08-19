@@ -59,9 +59,12 @@ describe('manager/helmv3/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          { depName: 'redis', currentValue: '0.9.0' },
+          { depName: 'postgresql', currentValue: '0.8.1' },
+        ],
+      });
     });
     it('resolves aliased registry urls', async () => {
       const content = `
@@ -124,9 +127,12 @@ describe('manager/helmv3/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      // FIXME: explicit assert condition
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          { depName: 'redis' },
+          { depName: 'postgresql', skipReason: 'local-dependency' },
+        ],
+      });
     });
     it('returns null if no dependencies key', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`
