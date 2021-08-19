@@ -29,7 +29,7 @@ import {
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
 import type { GradleDependency } from './types';
-import { getConstraint } from './utils';
+import { getDockerConstraint, getDockerPreCommands } from './utils';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -72,8 +72,9 @@ export async function executeGradle(
     docker: {
       image: 'java',
       tagConstraint:
-        config.constraints?.java ?? (await getConstraint(gradleRoot)),
+        config.constraints?.java ?? (await getDockerConstraint(gradleRoot)),
       tagScheme: getJavaVersioning(),
+      preCommands: await getDockerPreCommands(gradleRoot),
     },
     extraEnv,
   };

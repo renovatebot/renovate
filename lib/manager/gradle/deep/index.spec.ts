@@ -55,6 +55,10 @@ dependency "bar:bar:This.Is.Valid.Version.Good.Luck"
 dependency "baz:baz:\${bazVersion}"
 `;
 
+const graddleWrapperPropertiesData = loadFixture(
+  '/gradle-wrappers/6/gradle/wrapper/gradle-wrapper.properties'
+);
+
 addReplacingSerializer('gradlew.bat', '<gradlew>');
 addReplacingSerializer('./gradlew', '<gradlew>');
 
@@ -70,8 +74,8 @@ describe('manager/gradle/deep/index', () => {
   const updatesReport = loadFixture('updatesReport.json');
 
   function setupMocks({
-    baseDir = '/foo/bar',
     wrapperFilename = `gradlew`,
+    wrapperPropertiesFilename = 'gradle/wrapper/gradle-wrapper.properties',
     pluginFilename = 'renovate-plugin.gradle',
     report = updatesReport,
     reportFilename = 'gradle-renovate-report.json',
@@ -96,6 +100,9 @@ describe('manager/gradle/deep/index', () => {
       if (f?.endsWith(reportFilename)) {
         return Promise.resolve(!!report);
       }
+      if (f?.endsWith(wrapperPropertiesFilename)) {
+        return Promise.resolve(true);
+      }
       return Promise.resolve(false);
     });
     fs.readLocalFile.mockImplementation((f) => {
@@ -104,6 +111,9 @@ describe('manager/gradle/deep/index', () => {
       }
       if (f?.endsWith(packageFilename)) {
         return Promise.resolve(buildGradle);
+      }
+      if (f?.endsWith(wrapperPropertiesFilename)) {
+        return Promise.resolve(graddleWrapperPropertiesData);
       }
       return Promise.resolve('');
     });
@@ -240,7 +250,10 @@ describe('manager/gradle/deep/index', () => {
     });
 
     it('should execute gradle if gradlew is not available', async () => {
-      const execSnapshots = setupMocks({ wrapperFilename: null });
+      const execSnapshots = setupMocks({
+        wrapperFilename: null,
+        wrapperPropertiesFilename: null,
+      });
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -256,7 +269,11 @@ describe('manager/gradle/deep/index', () => {
     });
 
     it('should return null and gradle should not be executed if no root build.gradle', async () => {
-      const execSnapshots = setupMocks({ wrapperFilename: null, report: null });
+      const execSnapshots = setupMocks({
+        wrapperFilename: null,
+        report: null,
+        wrapperPropertiesFilename: null,
+      });
       const packageFiles = ['foo/build.gradle'];
       expect(await extractAllPackageFiles(config, packageFiles)).toBeNull();
       expect(execSnapshots).toBeEmpty();
@@ -264,8 +281,9 @@ describe('manager/gradle/deep/index', () => {
 
     it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
       const execSnapshots = setupMocks({
-        baseDir: '/foo/bar/',
         wrapperFilename: 'baz/qux/gradlew',
+        wrapperPropertiesFilename:
+          'baz/qux/gradle/wrapper/gradle-wrapper.properties',
         packageFilename: 'baz/qux/build.gradle',
         reportFilename: 'baz/qux/gradle-renovate-report.json',
         pluginFilename: 'baz/qux/renovate-plugin.gradle',
@@ -287,7 +305,10 @@ describe('manager/gradle/deep/index', () => {
 
     it('should use docker if required', async () => {
       setGlobalConfig(dockerAdminConfig);
-      const execSnapshots = setupMocks({ wrapperFilename: null });
+      const execSnapshots = setupMocks({
+        wrapperFilename: null,
+        wrapperPropertiesFilename: null,
+      });
       getPkgReleases.mockResolvedValueOnce(javaReleases);
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
@@ -300,6 +321,7 @@ describe('manager/gradle/deep/index', () => {
           packageFile: 'build.gradle',
         },
       ]);
+      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -318,6 +340,7 @@ describe('manager/gradle/deep/index', () => {
           packageFile: 'build.gradle',
         },
       ]);
+      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -337,6 +360,7 @@ describe('manager/gradle/deep/index', () => {
           packageFile: 'build.gradle',
         },
       ]);
+      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
   });

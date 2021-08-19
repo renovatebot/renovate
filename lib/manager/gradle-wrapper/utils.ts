@@ -61,7 +61,8 @@ export function getJavaContraint(gradleVersion: string): string | null {
   if (major >= 7) {
     return '^16.0.0';
   }
-  if (major < 5) {
+  // first public gradle version was 2.0
+  if (major > 0 && major < 5) {
     return '^8.0.0';
   }
   return '^11.0.0';

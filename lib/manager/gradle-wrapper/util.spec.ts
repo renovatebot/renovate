@@ -7,9 +7,9 @@ describe('manager/gradle-wrapper/util', () => {
       expect(getJavaContraint(undefined)).toBeNull();
     });
 
-    it('return ^8.0.0 for docker mode and undefined gradle', () => {
+    it('return ^11.0.0 for docker mode and undefined gradle', () => {
       setGlobalConfig({ binarySource: 'docker' });
-      expect(getJavaContraint(undefined)).toEqual('^8.0.0');
+      expect(getJavaContraint(undefined)).toEqual('^11.0.0');
     });
 
     it('return ^8.0.0 for docker gradle < 5', () => {

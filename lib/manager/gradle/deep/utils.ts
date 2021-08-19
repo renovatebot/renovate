@@ -1,12 +1,14 @@
 import { join } from 'upath';
 import { getGlobalConfig } from '../../../config/global';
-import { readLocalFile } from '../../../util/fs';
+import { localPathExists, readLocalFile } from '../../../util/fs';
 import {
   extractGradleVersion,
   getJavaContraint,
 } from '../../gradle-wrapper/utils';
 
-export async function getConstraint(
+const GradleWrapperProperties = 'gradle/wrapper/gradle-wrapper.properties';
+
+export async function getDockerConstraint(
   gradleRoot: string
 ): Promise<string | null> {
   if (getGlobalConfig()?.binarySource !== 'docker') {
@@ -15,11 +17,26 @@ export async function getConstraint(
   }
 
   const fileContent = await readLocalFile(
-    join(gradleRoot, 'gradle/wrapper/gradle-wrapper.properties'),
+    join(gradleRoot, GradleWrapperProperties),
     'utf8'
   );
 
   const version = extractGradleVersion(fileContent);
 
   return getJavaContraint(version);
+}
+
+export async function getDockerPreCommands(
+  gradleRoot: string
+): Promise<string[]> {
+  if (getGlobalConfig()?.binarySource !== 'docker') {
+    // ignore
+    return null;
+  }
+
+  if (await localPathExists(join(gradleRoot, GradleWrapperProperties))) {
+    return null;
+  }
+
+  return ['install-tool gradle latest'];
 }
