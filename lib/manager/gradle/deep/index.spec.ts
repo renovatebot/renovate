@@ -1,29 +1,32 @@
-import { exec as _exec } from 'child_process';
 import type { Stats } from 'fs';
 import os from 'os';
-import _fs from 'fs-extra';
 import { join } from 'upath';
 import { extractAllPackageFiles, updateDependency } from '..';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { envMock, exec, mockExecAll } from '../../../../test/exec-util';
 import {
   addReplacingSerializer,
+  env,
+  fs,
   loadFixture,
-  mocked,
 } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import {
+  ReleaseResult,
+  getPkgReleases as _getPkgReleases,
+} from '../../../datasource';
 import * as docker from '../../../util/exec/docker';
-import * as _env from '../../../util/exec/env';
 import type { ExtractConfig } from '../../types';
 
 jest.mock('child_process');
-const exec: jest.Mock<typeof _exec> = _exec as never;
-
-jest.mock('fs-extra');
-const fs = mocked(_fs);
-
 jest.mock('../../../util/exec/env');
-const env = mocked(_env);
+jest.mock('../../../util/fs');
+jest.mock('../../../datasource');
+
+const getPkgReleases: jest.MockInstance<
+  ReturnType<typeof _getPkgReleases>,
+  jest.ArgsType<typeof _getPkgReleases>
+> = _getPkgReleases as never;
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/foo/bar'),
@@ -52,22 +55,34 @@ dependency "bar:bar:This.Is.Valid.Version.Good.Luck"
 dependency "baz:baz:\${bazVersion}"
 `;
 
+const graddleWrapperPropertiesData = loadFixture(
+  '/gradle-wrappers/6/gradle/wrapper/gradle-wrapper.properties'
+);
+
 addReplacingSerializer('gradlew.bat', '<gradlew>');
 addReplacingSerializer('./gradlew', '<gradlew>');
+
+const javaReleases: ReleaseResult = {
+  releases: [
+    { version: '8.0.302' },
+    { version: '11.0.12' },
+    { version: '16.0.2' },
+  ],
+};
 
 describe('manager/gradle/deep/index', () => {
   const updatesReport = loadFixture('updatesReport.json');
 
   function setupMocks({
-    baseDir = '/foo/bar',
     wrapperFilename = `gradlew`,
+    wrapperPropertiesFilename = 'gradle/wrapper/gradle-wrapper.properties',
     pluginFilename = 'renovate-plugin.gradle',
     report = updatesReport,
     reportFilename = 'gradle-renovate-report.json',
     packageFilename = 'build.gradle',
     output = gradleOutput,
   } = {}) {
-    fs.stat.mockImplementationOnce((dirname) => {
+    fs.stat.mockImplementationOnce((_dirname) => {
       if (wrapperFilename) {
         return Promise.resolve({
           isFile: () => true,
@@ -75,14 +90,34 @@ describe('manager/gradle/deep/index', () => {
       }
       return Promise.reject();
     });
-    fs.writeFile.mockImplementationOnce((_filename, _content) => {});
-    fs.exists.mockImplementationOnce((_filename) => Promise.resolve(!!report));
-    fs.readFile.mockImplementationOnce((filename) =>
-      report ? Promise.resolve(report as never) : Promise.reject()
-    );
-    fs.readFile.mockImplementationOnce((filename) =>
-      Promise.resolve(buildGradle as never)
-    );
+    fs.writeLocalFile.mockImplementation((f, _content) => {
+      if (f?.endsWith(pluginFilename)) {
+        return Promise.resolve();
+      }
+      return Promise.reject();
+    });
+    fs.localPathExists.mockImplementation((f) => {
+      if (f?.endsWith(reportFilename)) {
+        return Promise.resolve(!!report);
+      }
+      if (f?.endsWith(wrapperPropertiesFilename)) {
+        return Promise.resolve(true);
+      }
+      return Promise.resolve(false);
+    });
+    fs.readLocalFile.mockImplementation((f) => {
+      if (f?.endsWith(reportFilename)) {
+        return report ? Promise.resolve(report) : Promise.reject();
+      }
+      if (f?.endsWith(packageFilename)) {
+        return Promise.resolve(buildGradle);
+      }
+      if (f?.endsWith(wrapperPropertiesFilename)) {
+        return Promise.resolve(graddleWrapperPropertiesData);
+      }
+      return Promise.resolve('');
+    });
+
     return mockExecAll(exec, output);
   }
 
@@ -107,18 +142,30 @@ describe('manager/gradle/deep/index', () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return gradle.kts dependencies', async () => {
-      const execSnapshots = setupMocks();
+      const execSnapshots = setupMocks({ packageFilename: 'build.gradle.kts' });
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle.kts',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle.kts',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -158,8 +205,14 @@ describe('manager/gradle/deep/index', () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(3);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -168,8 +221,14 @@ describe('manager/gradle/deep/index', () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -179,23 +238,42 @@ describe('manager/gradle/deep/index', () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should execute gradle if gradlew is not available', async () => {
-      const execSnapshots = setupMocks({ wrapperFilename: null });
+      const execSnapshots = setupMocks({
+        wrapperFilename: null,
+        wrapperPropertiesFilename: null,
+      });
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should return null and gradle should not be executed if no root build.gradle', async () => {
-      const execSnapshots = setupMocks({ wrapperFilename: null, report: null });
+      const execSnapshots = setupMocks({
+        wrapperFilename: null,
+        report: null,
+        wrapperPropertiesFilename: null,
+      });
       const packageFiles = ['foo/build.gradle'];
       expect(await extractAllPackageFiles(config, packageFiles)).toBeNull();
       expect(execSnapshots).toBeEmpty();
@@ -203,8 +281,9 @@ describe('manager/gradle/deep/index', () => {
 
     it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
       const execSnapshots = setupMocks({
-        baseDir: '/foo/bar/',
         wrapperFilename: 'baz/qux/gradlew',
+        wrapperPropertiesFilename:
+          'baz/qux/gradle/wrapper/gradle-wrapper.properties',
         packageFilename: 'baz/qux/build.gradle',
         reportFilename: 'baz/qux/gradle-renovate-report.json',
         pluginFilename: 'baz/qux/renovate-plugin.gradle',
@@ -213,30 +292,55 @@ describe('manager/gradle/deep/index', () => {
       const dependencies = await extractAllPackageFiles(config, [
         'baz/qux/build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'baz/qux/build.gradle',
+        },
+      ]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should use docker if required', async () => {
       setGlobalConfig(dockerAdminConfig);
-      const execSnapshots = setupMocks({ wrapperFilename: null });
+      const execSnapshots = setupMocks({
+        wrapperFilename: null,
+        wrapperPropertiesFilename: null,
+      });
+      getPkgReleases.mockResolvedValueOnce(javaReleases);
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
+      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('should use docker even if gradlew is available', async () => {
       setGlobalConfig(dockerAdminConfig);
       const execSnapshots = setupMocks();
+      getPkgReleases.mockResolvedValueOnce(javaReleases);
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
+      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -244,11 +348,19 @@ describe('manager/gradle/deep/index', () => {
       setGlobalConfig(dockerAdminConfig);
       jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
       const execSnapshots = setupMocks({ wrapperFilename: 'gradlew.bat' });
+      getPkgReleases.mockResolvedValueOnce(javaReleases);
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      // FIXME: explicit assert condition
-      expect(dependencies).toMatchSnapshot();
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0]?.deps).toHaveLength(8);
+      expect(dependencies).toMatchSnapshot([
+        {
+          datasource: 'maven',
+          packageFile: 'build.gradle',
+        },
+      ]);
+      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
   });

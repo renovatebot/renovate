@@ -14,9 +14,8 @@ describe('manager/helmv3/update', () => {
         '0.0.2',
         'patch'
       );
-      // FIXME: explicit assert condition
-      expect(bumpedContent).toMatchSnapshot();
-      expect(bumpedContent).not.toEqual(content);
+      const expected = content.replace('0.0.2', '0.0.3');
+      expect(bumpedContent).toEqual(expected);
     });
     it('no ops', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
@@ -32,9 +31,8 @@ describe('manager/helmv3/update', () => {
         '0.0.1',
         'minor'
       );
-      // FIXME: explicit assert condition
-      expect(bumpedContent).toMatchSnapshot();
-      expect(bumpedContent).not.toEqual(content);
+      const expected = content.replace('0.0.2', '0.1.0');
+      expect(bumpedContent).toEqual(expected);
     });
     it('returns content if bumping errors', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
