@@ -53,6 +53,7 @@ describe('workers/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(false);
     });
+
     it('returns true if unmergeable and cannot rebase', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
