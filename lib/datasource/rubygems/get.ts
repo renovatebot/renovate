@@ -88,7 +88,7 @@ export async function getDependency(
     }
   }
 
-  // FIXME: invalid properties for `Release`
+  // TODO: invalid properties for `Release` see #11312
 
   if (versions.length === 0 && info.version) {
     logger.warn('falling back to the version from the info endpoint');
