@@ -73,7 +73,7 @@ describe('util/http/auth', () => {
     it('github token', () => {
       const opts: GotOptions = {
         headers: {},
-        token: 'XXXX',
+        token: 'XXX',
         hostType: PLATFORM_TYPE_GITHUB,
       };
 
@@ -81,10 +81,10 @@ describe('util/http/auth', () => {
 
       expect(opts).toEqual({
         headers: {
-          authorization: 'token XXXX',
+          authorization: 'token XXX',
         },
         hostType: 'github',
-        token: 'XXXX',
+        token: 'XXX',
       });
     });
 
