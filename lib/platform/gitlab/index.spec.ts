@@ -284,6 +284,7 @@ describe('platform/gitlab/index', () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should use ssh_url_to_repo if gitUrl is set to ssh', async () => {
       httpMock
         .scope(gitlabApiHost)
