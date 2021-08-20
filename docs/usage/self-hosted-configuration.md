@@ -28,7 +28,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option).
+The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
 
 ```json
 {
@@ -237,6 +237,17 @@ Before the first commit in a repository, Renovate will:
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
+
+## gitUrl
+
+Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
+Currently works for GitLab only.
+
+Possible values:
+
+- `default`: use HTTPS URLs provided by the platform for Git
+- `ssh`: use SSH URLs provided by the platform for Git
+- `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
 ## logContext
 

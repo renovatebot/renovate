@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../../test/http-mock';
-import { getName, loadFixture } from '../../../../../test/util';
+import { loadFixture } from '../../../../../test/util';
 import { clone } from '../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 import { updateLockedDependency } from '.';
@@ -13,7 +13,7 @@ const serveStaticJson = JSON.parse(loadFixture('serve-static.json'));
 const sendJson = JSON.parse(loadFixture('send.json'));
 const typeIsJson = JSON.parse(loadFixture('type-is.json'));
 
-describe(getName(), () => {
+describe('manager/npm/update/locked-dependency/index', () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
     beforeEach(() => {

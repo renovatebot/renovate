@@ -67,13 +67,11 @@ export async function updateArtifacts({
   );
   const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
 
-  const cacheDir = await ensureCacheDir('./others/cocoapods', 'CP_HOME_DIR');
-
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
-      CP_HOME_DIR: cacheDir,
+      CP_HOME_DIR: await ensureCacheDir('cocoapods'),
     },
     docker: {
       image: 'cocoapods',

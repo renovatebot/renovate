@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../../test/util';
+import { loadFixture } from '../../../../test/util';
 import { extractLocks } from './util';
 
 const validLockfile = loadFixture('validLockfile.hcl');
 
-describe(getName(), () => {
+describe('manager/terraform/lockfile/util', () => {
   describe('extractLocks()', () => {
     it('returns null for empty', () => {
       const result = extractLocks('nothing here');

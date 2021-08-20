@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import * as hostRules from '../host-rules';
@@ -13,7 +12,7 @@ hostRules.add({
 const gitlabApiHost = 'https://gitlab.com';
 const selfHostedUrl = 'http://mycompany.com/gitlab';
 
-describe(getName(), () => {
+describe('util/http/gitlab', () => {
   let gitlabApi: GitlabHttp;
 
   beforeEach(() => {

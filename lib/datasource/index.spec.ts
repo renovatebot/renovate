@@ -1,4 +1,5 @@
-import { getName, logger, mocked } from '../../test/util';
+import * as httpMock from '../../test/http-mock';
+import { logger, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -25,7 +26,7 @@ const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe(getName(), () => {
+describe('datasource/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -151,6 +152,11 @@ describe(getName(), () => {
     });
   });
   it('ignores and warns for registryUrls', async () => {
+    httpMock
+      .scope('https://galaxy.ansible.com')
+      .get('/api/v1/roles/')
+      .query({ owner__username: 'some', name: 'dep' })
+      .reply(200, {});
     await datasource.getPkgReleases({
       datasource: GalaxyDatasource.id,
       depName: 'some.dep',

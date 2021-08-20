@@ -1,10 +1,10 @@
 import * as httpMock from '../../../../../test/http-mock';
-import { getName, loadJsonFixture } from '../../../../../test/util';
+import { loadJsonFixture } from '../../../../../test/util';
 import { findFirstParentVersion } from './parent-version';
 
 const expressJson = loadJsonFixture('express.json');
 
-describe(getName(), () => {
+describe('manager/npm/update/locked-dependency/parent-version', () => {
   describe('getLockedDependencies()', () => {
     it('finds indirect dependency', async () => {
       httpMock

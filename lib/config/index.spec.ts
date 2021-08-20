@@ -1,4 +1,3 @@
-import { getName } from '../../test/util';
 import { getConfig } from './defaults';
 
 jest.mock('../datasource/npm');
@@ -10,7 +9,7 @@ try {
 
 const defaultConfig = getConfig();
 
-describe(getName(), () => {
+describe('config/index', () => {
   describe('mergeChildConfig(parentConfig, childConfig)', () => {
     it('merges', async () => {
       const parentConfig = { ...defaultConfig };

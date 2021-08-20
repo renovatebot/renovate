@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { GenericVersion, GenericVersioningApi } from './generic';
 
-describe(getName(), () => {
+describe('versioning/loose/utils', () => {
   const optionalFunctions = [
     'isLessThanRange',
     'valueToVersion',

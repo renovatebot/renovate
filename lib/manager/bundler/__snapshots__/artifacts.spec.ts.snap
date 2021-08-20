@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`bundler.updateArtifacts() Docker .ruby-version 1`] = `
+exports[`manager/bundler/artifacts Docker .ruby-version 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -36,7 +36,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker constraints options 1`] = `
+exports[`manager/bundler/artifacts Docker constraints options 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",
@@ -72,7 +72,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler < 2 1`] = `
+exports[`manager/bundler/artifacts Docker injects bundler host configuration as command with bundler < 2 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -108,7 +108,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler == latest 1`] = `
+exports[`manager/bundler/artifacts Docker injects bundler host configuration as command with bundler == latest 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -144,7 +144,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration as command with bundler >= 2 1`] = `
+exports[`manager/bundler/artifacts Docker injects bundler host configuration as command with bundler >= 2 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -180,7 +180,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker injects bundler host configuration environment variables 1`] = `
+exports[`manager/bundler/artifacts Docker injects bundler host configuration environment variables 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
@@ -217,7 +217,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker invalid constraints options 1`] = `
+exports[`manager/bundler/artifacts Docker invalid constraints options 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",
@@ -253,7 +253,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() performs lockFileMaintenance 1`] = `
+exports[`manager/bundler/artifacts performs lockFileMaintenance 1`] = `
 Array [
   Object {
     "cmd": "bundle lock",
@@ -277,7 +277,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() returns error when failing in lockFileMaintenance true 1`] = `
+exports[`manager/bundler/artifacts returns error when failing in lockFileMaintenance true 1`] = `
 Array [
   Object {
     "artifactError": Object {
@@ -289,7 +289,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() returns error when failing in lockFileMaintenance true 2`] = `
+exports[`manager/bundler/artifacts returns error when failing in lockFileMaintenance true 2`] = `
 Array [
   Object {
     "cmd": "bundle lock",
@@ -313,7 +313,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() returns null if Gemfile.lock was not changed 1`] = `
+exports[`manager/bundler/artifacts returns null if Gemfile.lock was not changed 1`] = `
 Array [
   Object {
     "cmd": "bundle lock --update foo bar",
@@ -337,7 +337,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() works explicit global binarySource 1`] = `
+exports[`manager/bundler/artifacts works explicit global binarySource 1`] = `
 Array [
   Object {
     "cmd": "bundle lock --update foo bar",
@@ -361,7 +361,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() works for default binarySource 1`] = `
+exports[`manager/bundler/artifacts works for default binarySource 1`] = `
 Array [
   Object {
     "cmd": "bundle lock --update foo bar",

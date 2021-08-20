@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { id as githubReleaseDatasource } from '../../datasource/github-releases';
 import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
@@ -7,7 +7,7 @@ import { extractPackageFile } from './extract';
 const validWrapperContent = loadFixture('valid-wrapper');
 const malformedWrapperContent = loadFixture('malformed-wrapper');
 
-describe(getName(), () => {
+describe('manager/batect-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty wrapper file', () => {
       expect(extractPackageFile('')).toBeNull();

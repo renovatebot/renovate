@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
@@ -23,7 +23,7 @@ const newTag = loadFixture('newTag.yaml');
 const newName = loadFixture('newName.yaml');
 const digest = loadFixture('digest.yaml');
 
-describe(getName(), () => {
+describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
     expect(file).not.toBeNull();
@@ -256,18 +256,23 @@ describe(getName(), () => {
     const postgresDigest =
       'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c';
     it('extracts from newTag', () => {
-      const res = extractPackageFile(newTag);
-      expect(res.deps).toHaveLength(3);
-      for (const dep of res.deps) {
-        expect(dep.depName).toBe('postgres');
-      }
-      expect(res.deps[0].currentDigest).toBeUndefined();
-      expect(res.deps[0].currentValue).toEqual('11');
-      expect(res.deps[0].replaceString).toEqual('11');
-      expect(res.deps[1].currentDigest).toEqual(postgresDigest);
-      expect(res.deps[1].currentValue).toEqual('11');
-      expect(res.deps[1].replaceString).toEqual(`11@${postgresDigest}`);
-      expect(res.deps[2].skipReason).toEqual(SkipReason.InvalidValue);
+      expect(extractPackageFile(newTag)).toMatchSnapshot({
+        deps: [
+          {
+            currentDigest: undefined,
+            currentValue: '11',
+            replaceString: '11',
+          },
+          {
+            currentDigest: postgresDigest,
+            currentValue: '11',
+            replaceString: `11@${postgresDigest}`,
+          },
+          {
+            skipReason: SkipReason.InvalidValue,
+          },
+        ],
+      });
     });
     it('extracts from digest', () => {
       const res = extractPackageFile(digest);

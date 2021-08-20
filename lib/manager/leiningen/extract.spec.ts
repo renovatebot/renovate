@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { ClojureDatasource } from '../../datasource/clojure';
 import {
   extractFromVectors,
@@ -9,7 +9,7 @@ import {
 
 const leinProjectClj = loadFixture(`project.clj`);
 
-describe(getName(), () => {
+describe('manager/leiningen/extract', () => {
   it('trimAtKey', () => {
     expect(trimAtKey('foo', 'bar')).toBeNull();
     expect(trimAtKey(':dependencies    ', 'dependencies')).toBeNull();

@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { isStable, isValid, api as nodever } from '.';
 
-describe('semver.getNewValue()', () => {
+describe('versioning/node/index', () => {
   let dtLocal: any;
   beforeEach(() => {
     dtLocal = DateTime.local;
