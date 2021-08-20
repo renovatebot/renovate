@@ -240,11 +240,12 @@ This reduces the chance of unintended consequences with global Git configs on sh
 
 ## gitUrl
 
-Override the default resolution for git remote, e.g. to switch GitLab from HTTPS to SSH-based. Currently works for GitLab only.
+Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
+Currently works for GitLab only.
 
 Possible values:
 
-- `default`: use HTTP URLs provided by the platform for Git
+- `default`: use HTTPS URLs provided by the platform for Git
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
