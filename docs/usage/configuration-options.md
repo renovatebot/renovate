@@ -402,7 +402,7 @@ This option applies only to the `gradle` manager.
 
 ## dependencyDashboard
 
-Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default via our `config:base` preset.
+Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:base` preset.
 
 To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
 
