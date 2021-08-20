@@ -402,6 +402,16 @@ This option applies only to the `gradle` manager.
 
 ## dependencyDashboard
 
+Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default via our `config:base` preset.
+
+To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
+
+```json
+{
+  "extends": ["config:base", ":disableDependencyDashboard"]
+}
+```
+
 Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
 This issue contains a list of all PRs pending, open, closed (unmerged) or in error.
 The goal of this issue is to give visibility into all updates that Renovate is managing.
