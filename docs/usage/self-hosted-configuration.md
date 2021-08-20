@@ -238,6 +238,16 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+## gitUrl
+
+Override the default resolution for git remote, e.g. to switch GitLab from HTTPS to SSH-based. Currently works for GitLab only.
+
+Possible values:
+
+- `default`: use HTTP URLs provided by the platform for Git
+- `ssh`: use SSH URLs provided by the platform for Git
+- `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
