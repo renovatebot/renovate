@@ -275,42 +275,53 @@ describe('manager/kustomize/extract', () => {
       });
     });
     it('extracts from digest', () => {
-      const res = extractPackageFile(digest);
-      expect(res.deps).toHaveLength(5);
-      for (const dep of res.deps) {
-        expect(dep.depName).toBe('postgres');
-      }
-      expect(res.deps[0].currentDigest).toEqual(postgresDigest);
-      expect(res.deps[0].currentValue).toBeUndefined();
-      expect(res.deps[0].replaceString).toEqual(postgresDigest);
-      expect(res.deps[1].currentDigest).toEqual(postgresDigest);
-      expect(res.deps[1].currentValue).toEqual('11');
-      expect(res.deps[1].replaceString).toEqual(postgresDigest);
-      expect(res.deps[2].skipReason).toEqual(
-        SkipReason.InvalidDependencySpecification
-      );
-      expect(res.deps[3].skipReason).toEqual(SkipReason.InvalidValue);
-      expect(res.deps[4].skipReason).toEqual(SkipReason.InvalidValue);
+      expect(extractPackageFile(digest)).toMatchSnapshot({
+        deps: [
+          {
+            currentDigest: postgresDigest,
+            currentValue: undefined,
+            replaceString: postgresDigest,
+          },
+          {
+            currentDigest: postgresDigest,
+            currentValue: '11',
+            replaceString: postgresDigest,
+          },
+          {
+            skipReason: SkipReason.InvalidDependencySpecification,
+          },
+          {
+            skipReason: SkipReason.InvalidValue,
+          },
+          {
+            skipReason: SkipReason.InvalidValue,
+          },
+        ],
+      });
     });
     it('extracts newName', () => {
-      const res = extractPackageFile(newName);
-      expect(res.deps).toHaveLength(3);
-      for (const dep of res.deps) {
-        expect(dep.depName).toBe('awesome/postgres');
-      }
-      expect(res.deps[0].currentDigest).toEqual(postgresDigest);
-      expect(res.deps[0].currentValue).toEqual('11');
-      expect(res.deps[0].replaceString).toEqual(
-        `awesome/postgres:11@${postgresDigest}`
-      );
-      expect(res.deps[1].currentDigest).toBeUndefined();
-      expect(res.deps[1].currentValue).toEqual('11');
-      expect(res.deps[1].replaceString).toEqual('awesome/postgres:11');
-      expect(res.deps[2].currentDigest).toEqual(postgresDigest);
-      expect(res.deps[2].currentValue).toBeUndefined();
-      expect(res.deps[2].replaceString).toEqual(
-        `awesome/postgres@${postgresDigest}`
-      );
+      expect(extractPackageFile(newName)).toMatchSnapshot({
+        deps: [
+          {
+            depName: 'awesome/postgres',
+            currentDigest: postgresDigest,
+            currentValue: '11',
+            replaceString: `awesome/postgres:11@${postgresDigest}`,
+          },
+          {
+            depName: 'awesome/postgres',
+            currentDigest: undefined,
+            currentValue: '11',
+            replaceString: 'awesome/postgres:11',
+          },
+          {
+            depName: 'awesome/postgres',
+            currentDigest: postgresDigest,
+            currentValue: undefined,
+            replaceString: `awesome/postgres@${postgresDigest}`,
+          },
+        ],
+      });
     });
   });
 });
