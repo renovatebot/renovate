@@ -29,6 +29,9 @@ function parseDepName(depType: string, key: string): string {
   return depName;
 }
 
+const RE_REPOSITORY_GITHUB_SSH_FORMAT =
+  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/;
+
 export async function extractPackageFile(
   content: string,
   fileName: string,
@@ -257,17 +260,28 @@ export async function extractPackageFile(
       return dep;
     }
     const [depNamePart, depRefPart] = hashSplit;
-    const githubOwnerRepo = depNamePart
-      .replace(/^github:/, '')
-      .replace(/^git\+/, '')
-      .replace(/^https:\/\/github\.com\//, '')
-      .replace(/\.git$/, '');
-    const githubRepoSplit = githubOwnerRepo.split('/');
-    if (githubRepoSplit.length !== 2) {
-      dep.skipReason = SkipReason.UnknownVersion;
-      return dep;
+
+    let githubOwnerRepo: string;
+    let githubOwner: string;
+    let githubRepo: string;
+    const matchUrlSshFormat = RE_REPOSITORY_GITHUB_SSH_FORMAT.exec(depNamePart);
+    if (matchUrlSshFormat === null) {
+      githubOwnerRepo = depNamePart
+        .replace(/^github:/, '')
+        .replace(/^git\+/, '')
+        .replace(/^https:\/\/github\.com\//, '')
+        .replace(/\.git$/, '');
+      const githubRepoSplit = githubOwnerRepo.split('/');
+      if (githubRepoSplit.length !== 2) {
+        dep.skipReason = SkipReason.UnknownVersion;
+        return dep;
+      }
+      [githubOwner, githubRepo] = githubRepoSplit;
+    } else {
+      githubOwner = matchUrlSshFormat[1];
+      githubRepo = matchUrlSshFormat[2];
+      githubOwnerRepo = `${githubOwner}/${githubRepo}`;
     }
-    const [githubOwner, githubRepo] = githubRepoSplit;
     const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/;
     if (
       !githubValidRegex.test(githubOwner) ||
