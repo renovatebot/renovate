@@ -1,4 +1,3 @@
-import { getName } from '../../../../test/util';
 import { getLockedVersions } from './locked-versions';
 
 /** @type any */
@@ -9,7 +8,7 @@ const yarn = require('./yarn');
 jest.mock('./npm');
 jest.mock('./yarn');
 
-describe(getName(), () => {
+describe('manager/npm/extract/locked-versions', () => {
   describe('.getLockedVersions()', () => {
     it.each([
       ['1.22.0', undefined],

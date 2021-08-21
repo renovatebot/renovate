@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../../test/util';
+import { loadFixture } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
@@ -18,7 +18,7 @@ const workspacesSimpleContent = loadFixture(
 const vendorisedContent = loadFixture('is-object.json', '..');
 const invalidNameContent = loadFixture('invalid-name.json', '..');
 
-describe(getName(), () => {
+describe('manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
       fs.readLocalFile = jest.fn(() => null);

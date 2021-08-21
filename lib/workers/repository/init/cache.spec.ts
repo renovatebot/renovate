@@ -1,13 +1,13 @@
-import { RenovateConfig, getConfig, getName } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { RenovateConfig, getConfig } from '../../../../test/util';
+import { setGlobalConfig } from '../../../config/global';
 import { initializeCaches } from './cache';
 
-describe(getName(), () => {
+describe('workers/repository/init/cache', () => {
   describe('initializeCaches()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       config = { ...getConfig() };
-      setAdminConfig({ cacheDir: '' });
+      setGlobalConfig({ cacheDir: '' });
     });
     it('initializes', async () => {
       expect(await initializeCaches(config)).toBeUndefined();

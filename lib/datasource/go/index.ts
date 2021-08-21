@@ -2,20 +2,21 @@ import URL from 'url';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
-import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { http } from './common';
+import * as goproxy from './goproxy';
 import type { DataSource } from './types';
 
-export const id = 'go';
+export { id } from './common';
+
 export const customRegistrySupport = false;
 
-const http = new Http(id);
-const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
+const gitlabRegExp = /^(https:\/\/[^/]*gitlab\.[^/]*)\/(.*)$/;
 const bitbucket = new BitBucketTagsDatasource();
 
 async function getDatasource(goModule: string): Promise<DataSource | null> {
@@ -142,9 +143,19 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  *  - Call the respective getReleases in github/gitlab to retrieve the tags
  *  - Filter module tags according to the module path
  */
-export async function getReleases({
-  lookupName,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { lookupName } = config;
+
+  let res: ReleaseResult = null;
+
+  logger.trace(`goproxy.getReleases(${lookupName})`);
+  res = await goproxy.getReleases(config);
+  if (res) {
+    return res;
+  }
+
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
 
@@ -155,8 +166,6 @@ export async function getReleases({
     );
     return null;
   }
-
-  let res: ReleaseResult;
 
   switch (source.datasource) {
     case github.id: {

@@ -1,4 +1,4 @@
-import { getConfig, getName, mocked } from '../../../../../test/util';
+import { getConfig, mocked } from '../../../../../test/util';
 import type { Release } from '../../../../datasource';
 import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';
@@ -36,7 +36,7 @@ const releases: Release[] = [
   },
 ];
 
-describe(getName(), () => {
+describe('workers/repository/process/lookup/filter-checks', () => {
   let sortedReleases: Release[];
   beforeEach(() => {
     config = getConfig();

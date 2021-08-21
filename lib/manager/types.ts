@@ -18,14 +18,15 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig {
+  constraints?: Record<string, string>;
   registryUrls?: string[];
   endpoint?: string;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
-  yarnrc?: string;
   skipInstalls?: boolean;
   updateInternalDeps?: boolean;
+  deepExtract?: boolean;
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
@@ -48,17 +49,6 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
-}
-
-export interface PackageUpdateConfig {
-  currentValue?: string;
-  rangeStrategy?: RangeStrategy;
-  supportPolicy?: string[];
-}
-
-export interface PackageUpdateResult {
-  sourceUrl?: string;
-  updates: LookupUpdate[];
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -97,7 +87,6 @@ export interface PackageFile<T = Record<string, any>>
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
-  yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
@@ -193,6 +182,7 @@ export interface Upgrade<T = Record<string, any>>
   isLockFileMaintenance?: boolean;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
+  deepExtract?: boolean;
 }
 
 export interface ArtifactError {
@@ -252,8 +242,6 @@ export interface ManagerApi {
     packageFile?: string,
     config?: ExtractConfig
   ): Result<PackageFile | null>;
-
-  getPackageUpdates?(config: PackageUpdateConfig): Result<PackageUpdateResult>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

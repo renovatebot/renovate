@@ -16,7 +16,7 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const fs = mocked(_fs);
 
-describe('generateLockFile', () => {
+describe('manager/npm/post-update/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

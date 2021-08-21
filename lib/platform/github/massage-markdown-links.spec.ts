@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { massageMarkdownLinks } from './massage-markdown-links';
 
-describe(getName(), () => {
+describe('platform/github/massage-markdown-links', () => {
   it('performs multiple replacements', () => {
     const input = [
       'Link [foo/bar#1](https://github.com/foo/bar/pull/1) points to https://github.com/foo/bar/pull/1.',

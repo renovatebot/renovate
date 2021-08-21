@@ -3,8 +3,7 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../../test/exec-util';
-import { getName } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { setGlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
@@ -24,7 +23,7 @@ const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
   _getPkgReleases as any;
 jest.mock('../../../datasource');
 
-describe(getName(), () => {
+describe('util/exec/docker/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -132,12 +131,12 @@ describe(getName(), () => {
 
   describe('removeDanglingContainers', () => {
     beforeEach(() => {
-      setAdminConfig({ binarySource: 'docker' });
+      setGlobalConfig({ binarySource: 'docker' });
     });
 
     it('short-circuits in non-Docker environment', async () => {
       const execSnapshots = mockExecAll(exec);
-      setAdminConfig({ binarySource: 'global' });
+      setGlobalConfig({ binarySource: 'global' });
       await removeDanglingContainers();
       expect(execSnapshots).toBeEmpty();
     });
@@ -222,7 +221,7 @@ describe(getName(), () => {
       `bash -l -c "foo && bar && baz"`;
 
     beforeEach(() => {
-      setAdminConfig({ dockerUser: 'some-user' });
+      setGlobalConfig({ dockerUser: 'some-user' });
     });
 
     it('returns executable command', async () => {

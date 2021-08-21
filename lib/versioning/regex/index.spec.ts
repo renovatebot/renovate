@@ -1,7 +1,7 @@
 import { VersioningApi, get } from '..';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
-describe('regex', () => {
+describe('versioning/regex/index', () => {
   const regex: VersioningApi = get(
     'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(?:-(?<compatibility>.*))?$'
   );

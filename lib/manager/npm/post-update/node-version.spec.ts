@@ -4,7 +4,7 @@ import { getNodeConstraint } from './node-version';
 
 jest.mock('../../../util/fs');
 
-describe('getNodeConstraint', () => {
+describe('manager/npm/post-update/node-version', () => {
   const config = {
     packageFile: 'package.json',
     constraints: { node: '^12.16.0' },

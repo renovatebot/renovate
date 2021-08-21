@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -94,8 +94,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
-  const goPath = await ensureCacheDir('./others/go', 'GOPATH');
-
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
@@ -121,19 +119,18 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
-        GOPATH: goPath,
+        GOPATH: await ensureCacheDir('go'),
         GOPROXY: process.env.GOPROXY,
         GOPRIVATE: process.env.GOPRIVATE,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
-        CGO_ENABLED: getAdminConfig().binarySource === 'docker' ? '0' : null,
+        CGO_ENABLED: getGlobalConfig().binarySource === 'docker' ? '0' : null,
       },
       docker: {
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
-        volumes: [goPath],
         preCommands: getPreCommands(),
       },
     };

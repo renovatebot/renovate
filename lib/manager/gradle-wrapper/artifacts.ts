@@ -1,18 +1,19 @@
-import { stat } from 'fs-extra';
 import { resolve } from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { readLocalFile, stat, writeLocalFile } from '../../util/fs';
 import { StatusResult, getRepoStatus } from '../../util/git';
 import { Http } from '../../util/http';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   extraEnv,
+  getJavaContraint,
+  getJavaVersioning,
   gradleWrapperFileName,
   prepareGradleCommand,
-} from '../gradle/utils';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+} from './utils';
 
 const http = new Http('gradle-wrapper');
 
@@ -55,9 +56,9 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const { localDir: projectDir } = getAdminConfig();
+    const { localDir: projectDir } = getGlobalConfig();
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-    const gradlew = gradleWrapperFileName(config);
+    const gradlew = gradleWrapperFileName();
     const gradlewPath = resolve(projectDir, `./${gradlew}`);
     let cmd = await prepareGradleCommand(
       gradlew,
@@ -87,7 +88,10 @@ export async function updateArtifacts({
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
-        image: 'gradle',
+        image: 'java',
+        tagConstraint:
+          config.constraints?.java ?? getJavaContraint(config.currentValue),
+        tagScheme: getJavaVersioning(),
       },
       extraEnv,
     };

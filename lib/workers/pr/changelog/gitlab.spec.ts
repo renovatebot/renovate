@@ -1,5 +1,4 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName } from '../../../../test/util';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
@@ -31,7 +30,7 @@ const upgrade: BranchUpgradeConfig = {
 
 const matchHost = 'https://gitlab.com/';
 
-describe(getName(), () => {
+describe('workers/pr/changelog/gitlab', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);

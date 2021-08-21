@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import { dump, load } from 'js-yaml';
 import upath from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
@@ -139,7 +139,7 @@ export async function writeExistingFiles(
     { packageFiles: npmFiles.map((n) => n.packageFile) },
     'Writing package.json files'
   );
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   for (const packageFile of npmFiles) {
     const basedir = upath.join(
       localDir,
@@ -152,20 +152,6 @@ export async function writeExistingFiles(
         await outputFile(npmrcFilename, `${npmrc}\n`);
       } catch (err) /* istanbul ignore next */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
-      }
-    }
-    if (packageFile.yarnrc) {
-      logger.debug(`Writing .yarnrc to ${basedir}`);
-      const yarnrcFilename = upath.join(basedir, '.yarnrc');
-      try {
-        await outputFile(
-          yarnrcFilename,
-          packageFile.yarnrc
-            .replace('--install.pure-lockfile true', '')
-            .replace('--install.frozen-lockfile true', '')
-        );
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
       }
     }
     const { npmLock } = packageFile;
@@ -232,7 +218,7 @@ export async function writeUpdatedPackageFiles(
     logger.debug('No files found');
     return;
   }
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   for (const packageFile of config.updatedPackageFiles) {
     if (packageFile.name.endsWith('package-lock.json')) {
       logger.debug(`Writing package-lock file: ${packageFile.name}`);
@@ -429,13 +415,10 @@ export async function getAdditionalFiles(
 
   const env = {
     ...getChildProcessEnv(),
-    NPM_CONFIG_CACHE: await ensureCacheDir('./others/npm', 'NPM_CONFIG_CACHE'),
-    YARN_CACHE_FOLDER: await ensureCacheDir(
-      './others/yarn',
-      'YARN_CACHE_FOLDER'
-    ),
-    YARN_GLOBAL_FOLDER: await ensureCacheDir('./others/berry'),
-    npm_config_store: await ensureCacheDir('./others/pnpm', 'npm_config_store'),
+    NPM_CONFIG_CACHE: await ensureCacheDir('npm'),
+    YARN_CACHE_FOLDER: await ensureCacheDir('yarn'),
+    YARN_GLOBAL_FOLDER: await ensureCacheDir('berry'),
+    npm_config_store: await ensureCacheDir('pnpm'),
     NODE_ENV: 'dev',
   };
 
@@ -449,7 +432,7 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
     const fullLockFileDir = upath.join(localDir, lockFileDir);

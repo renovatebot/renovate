@@ -1,10 +1,10 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const workflow1 = loadFixture('workflow_1.yml');
 const workflow2 = loadFixture('workflow_2.yml');
 
-describe(getName(), () => {
+describe('manager/github-actions/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
