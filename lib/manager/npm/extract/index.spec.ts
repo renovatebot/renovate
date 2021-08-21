@@ -317,6 +317,7 @@ describe(getName(), () => {
           l: 'github:owner/l.git#abcdef0',
           m: 'https://github.com/owner/m.git#v1.0.0',
           n: 'git+https://github.com/owner/n#v2.0.0',
+          o: 'git@github.com:owner/o.git#v2.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
