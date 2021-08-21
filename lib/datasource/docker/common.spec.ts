@@ -70,6 +70,17 @@ describe('datasource/docker/common', () => {
         }
       `);
     });
+
+    it('ignores "/" paths in registryUrls', () => {
+      const res = dockerCommon.getRegistryRepository(
+        'defaultbackend-amd64',
+        'https://k8s.gcr.io/'
+      );
+      expect(res).toEqual({
+        dockerRepository: 'defaultbackend-amd64',
+        registryHost: 'https://k8s.gcr.io',
+      });
+    });
   });
   describe('getAuthHeaders', () => {
     beforeEach(() => {

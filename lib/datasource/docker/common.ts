@@ -207,6 +207,18 @@ export function getRegistryRepository(
   if (!/^https?:\/\//.exec(registryHost)) {
     registryHost = `https://${registryHost}`;
   }
+
+  const parsedRegistryHost = new URL(registryHost);
+  if (
+    // path+search+hash consist just of "/"
+    registryHost.endsWith('/') &&
+    parsedRegistryHost.hash === '' &&
+    parsedRegistryHost.search === '' &&
+    parsedRegistryHost.pathname === '/'
+  ) {
+    registryHost = registryHost.substr(0, registryHost.length - 1);
+  }
+
   const opts = hostRules.find({ hostType: id, url: registryHost });
   if (opts?.insecureRegistry) {
     registryHost = registryHost.replace('https', 'http');
