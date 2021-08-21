@@ -8550,10 +8550,10 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@2.43.0:
-  version "2.43.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.43.0.tgz#fb75a80b85d2b0a40db82ade6d9a9ecc12acbb19"
-  integrity sha512-0RQa2KtHhSoukHVJvakxjvv6blEb6zqI9s81G9yT7LzekSgZLN6rIxyyDt45K4N+Dqnzwe/rWAz0miuGwNIpEQ==
+simple-git@2.44.0:
+  version "2.44.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.44.0.tgz#94eca4162b7e21707b5a1a40b22e6f29b007d3a8"
+  integrity sha512-wIjcAmymhzgdaM0Y/a+XxmNGlivvHQTPZDYXVmyHMShVDwdeVqu3+OOyDbYu0DnfVzqLs2EOxRTgMNbC3YquwQ==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
