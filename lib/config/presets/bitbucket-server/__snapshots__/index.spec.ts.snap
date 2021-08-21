@@ -1,12 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config/presets/bitbucket-server/index fetchJSONFile() returns JSON 1`] = `
-Object {
-  "from": "api",
-}
-`;
-
-exports[`config/presets/bitbucket-server/index fetchJSONFile() returns JSON 2`] = `
 Array [
   Object {
     "headers": Object {

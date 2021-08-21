@@ -2,8 +2,7 @@ import mockDate from 'mockdate';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as datasource, getNpmrc, resetCache, setNpmrc } from '.';
@@ -15,10 +14,10 @@ const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> =
   _registryAuthToken as never;
 let npmResponse: any;
 
-describe(getName(), () => {
+describe('datasource/npm/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    setAdminConfig();
+    setGlobalConfig();
     hostRules.clear();
     resetCache();
     setNpmrc();
@@ -358,7 +357,7 @@ describe(getName(), () => {
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
     process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
-    setAdminConfig({ exposeAllEnv: true });
+    setGlobalConfig({ exposeAllEnv: true });
     // eslint-disable-next-line no-template-curly-in-string
     const npmrc = 'registry=${REGISTRY}';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
@@ -367,7 +366,7 @@ describe(getName(), () => {
   });
 
   it('should throw error if necessary env var is not present', () => {
-    setAdminConfig({ exposeAllEnv: true });
+    setGlobalConfig({ exposeAllEnv: true });
     // eslint-disable-next-line no-template-curly-in-string
     expect(() => setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
       Error('env-replace')

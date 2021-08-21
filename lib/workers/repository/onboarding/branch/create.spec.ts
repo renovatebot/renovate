@@ -1,6 +1,6 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import { commitFiles } from '../../../../util/git';
-import { COMMIT_MESSAGE_PREFIX_SEPARATOR } from '../../util/commit-message';
+import { CommitMessage } from '../../model/commit-message';
 import { createOnboardingBranch } from './create';
 
 jest.mock('../../../../util/git');
@@ -25,7 +25,7 @@ const buildExpectedCommitFilesArgument = (
   message,
 });
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/branch/create', () => {
   let config: RenovateConfig;
   beforeEach(() => {
     jest.clearAllMocks();
@@ -54,7 +54,7 @@ describe(getName(), () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add renovate.json`
+            `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           )
         );
       });
@@ -67,7 +67,7 @@ describe(getName(), () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} ${message}`
+            `${prefix}${CommitMessage.SEPARATOR} ${message}`
           )
         );
       });
@@ -79,7 +79,7 @@ describe(getName(), () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add renovate.json`
+            `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           )
         );
       });
@@ -92,7 +92,7 @@ describe(getName(), () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} ${message}`
+            `${prefix}${CommitMessage.SEPARATOR} ${message}`
           )
         );
       });
@@ -105,7 +105,7 @@ describe(getName(), () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add renovate.json`
+            `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           )
         );
       });
@@ -116,7 +116,7 @@ describe(getName(), () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add renovate.json`
+            `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           )
         );
       });
@@ -127,7 +127,7 @@ describe(getName(), () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add ${config.onboardingConfigFileName}`,
+            `${prefix}${CommitMessage.SEPARATOR} add ${config.onboardingConfigFileName}`,
             config.onboardingConfigFileName
           )
         );
@@ -139,7 +139,7 @@ describe(getName(), () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add ${config.onboardingConfigFileName}`,
+            `${prefix}${CommitMessage.SEPARATOR} add ${config.onboardingConfigFileName}`,
             config.onboardingConfigFileName
           )
         );

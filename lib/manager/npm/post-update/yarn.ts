@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -93,11 +93,13 @@ export async function generateLockFile(
     if (isYarn1) {
       cmdOptions +=
         '--ignore-engines --ignore-platform --network-timeout 100000';
+      extraEnv.YARN_CACHE_FOLDER = env.YARN_CACHE_FOLDER;
     } else {
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
+      extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
     }
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
       } else {
@@ -116,7 +118,7 @@ export async function generateLockFile(
       },
     };
     // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
+    if (getGlobalConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
@@ -147,25 +149,24 @@ export async function generateLockFile(
     }
 
     // postUpdateOptions
-    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeFewer')) {
-      logger.debug('Performing yarn dedupe fewer');
-      commands.push('npx yarn-deduplicate --strategy fewer');
-      // Run yarn again in case any changes are necessary
-      commands.push(`yarn install ${cmdOptions}`.trim());
-    }
-    if (
-      (isYarn1 || isYarnDedupeAvailable) &&
-      config.postUpdateOptions?.includes('yarnDedupeHighest')
-    ) {
-      logger.debug('Performing yarn dedupe highest');
-      if (isYarn1) {
-        commands.push('npx yarn-deduplicate --strategy highest');
-        // Run yarn again in case any changes are necessary
-        commands.push(`yarn install ${cmdOptions}`.trim());
-      } else {
-        commands.push('yarn dedupe --strategy highest');
+    ['fewer', 'highest'].forEach((s) => {
+      if (
+        config.postUpdateOptions?.includes(
+          `yarnDedupe${s.charAt(0).toUpperCase()}${s.slice(1)}`
+        )
+      ) {
+        logger.debug(`Performing yarn dedupe ${s}`);
+        if (isYarn1) {
+          commands.push(`npx yarn-deduplicate --strategy ${s}`);
+          // Run yarn again in case any changes are necessary
+          commands.push(`yarn install ${cmdOptions}`.trim());
+        } else if (isYarnDedupeAvailable && s === 'highest') {
+          commands.push(`yarn dedupe --strategy ${s}`);
+        } else {
+          logger.debug(`yarn dedupe ${s} not available`);
+        }
       }
-    }
+    });
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(

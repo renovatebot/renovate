@@ -1,7 +1,7 @@
 import { VersioningApi, get } from '..';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
-describe('regex', () => {
+describe('versioning/regex/index', () => {
   const regex: VersioningApi = get(
     'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(?:-(?<compatibility>.*))?$'
   );
@@ -394,6 +394,35 @@ describe('regex', () => {
       expect(regex.matches('1.2.4a1-foo', '1.2.3-bar')).toBe(false);
       expect(regex.matches('1.2.4a1-foo', '1.2.3a1')).toBe(false);
       expect(regex.matches('1.2.4a1-foo', '1.2.3a1-bar')).toBe(false);
+    });
+  });
+
+  describe('Supported 4th number as build', () => {
+    it('supports Bitnami docker versioning', () => {
+      const re = get(
+        'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$'
+      );
+
+      expect(re.isValid('12.7.0-debian-10-r69')).toBe(true);
+      expect(re.isValid('12.7.0-debian-10-r100')).toBe(true);
+
+      expect(
+        re.isCompatible('12.7.0-debian-10-r69', '12.7.0-debian-10-r100')
+      ).toBe(true);
+
+      expect(
+        re.isGreaterThan('12.7.0-debian-10-r69', '12.7.0-debian-10-r100')
+      ).toBe(false);
+      expect(
+        re.isGreaterThan('12.7.0-debian-10-r169', '12.7.0-debian-10-r100')
+      ).toBe(true);
+
+      expect(re.matches('12.7.0-debian-9-r69', '12.7.0-debian-10-r69')).toBe(
+        true
+      );
+      expect(re.matches('12.7.0-debian-9-r69', '12.7.0-debian-10-r68')).toBe(
+        true
+      );
     });
   });
 });

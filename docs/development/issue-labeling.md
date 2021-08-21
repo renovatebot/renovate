@@ -109,6 +109,7 @@ Keep in mind that an issue can be both affecting a platform and a self hosted in
     <summary>Core labels</summary>
 
     core:automerge
+    core:changelogs
     core:dashboard
     core:onboarding
     core:schedule

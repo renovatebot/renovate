@@ -32,8 +32,11 @@ export class HexDatasource extends Datasource {
     // hexPackageName:organizationName
     // hexPackageName is used to pass it in hex dep url
     // organizationName is used for accessing to private deps
-    const hexPackageName = lookupName.split(':')[0];
-    const hexUrl = `${registryUrl}api/packages/${hexPackageName}`;
+    const [hexPackageName, organizationName] = lookupName.split(':');
+    const organizationUrlPrefix = organizationName
+      ? `repos/${organizationName}/`
+      : '';
+    const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
 
     let response: HttpResponse<HexRelease>;
     try {

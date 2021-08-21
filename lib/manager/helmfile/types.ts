@@ -1,5 +1,6 @@
 export interface Doc {
   releases?: {
+    name: string;
     chart: string;
     version: string;
   }[];

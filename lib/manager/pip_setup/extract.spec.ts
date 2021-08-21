@@ -1,6 +1,6 @@
 import { envMock, exec, mockExecSequence } from '../../../test/exec-util';
-import { env, getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { env } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
 import {
   getPythonAlias,
   parsePythonVersion,
@@ -11,14 +11,14 @@ import {
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 
-describe(getName(), () => {
+describe('manager/pip_setup/extract', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     resetModule();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setAdminConfig({ localDir: '/tmp/foo/bar' });
+    setGlobalConfig({ localDir: '/tmp/foo/bar' });
   });
   describe('parsePythonVersion', () => {
     it('returns major and minor version numbers', () => {
@@ -35,6 +35,7 @@ describe(getName(), () => {
       ]);
       const result = await getPythonAlias();
       expect(pythonVersions).toContain(result);
+      // FIXME: explicit assert condition
       expect(result).toMatchSnapshot();
       expect(await getPythonAlias()).toEqual(result);
       expect(execSnapshots).toMatchSnapshot();

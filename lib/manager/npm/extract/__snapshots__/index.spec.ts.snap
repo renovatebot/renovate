@@ -25,7 +25,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -148,7 +147,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -324,7 +322,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -373,7 +370,6 @@ Object {
   "skipInstalls": false,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -413,7 +409,14 @@ Object {
     },
     Object {
       "currentValue": "5.9.0",
+      "datasource": "npm",
       "depName": "npm",
+      "depType": "volta",
+      "prettyDepType": "volta",
+    },
+    Object {
+      "currentValue": "6.11.2",
+      "depName": "pnpm",
       "depType": "volta",
       "prettyDepType": "volta",
       "skipReason": "unknown-volta",
@@ -433,7 +436,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -487,7 +489,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -623,7 +624,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -759,7 +759,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -895,7 +894,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": "yarn.lock",
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -919,7 +917,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1055,7 +1052,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -1079,7 +1075,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1103,7 +1098,6 @@ Object {
   "yarnWorkspacesPackages": Array [
     "packages/*",
   ],
-  "yarnrc": undefined,
 }
 `;
 
@@ -1239,7 +1233,6 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
-  "yarnrc": undefined,
 }
 `;
 
@@ -1357,6 +1350,5 @@ Object {
   "skipInstalls": true,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": Array [],
-  "yarnrc": undefined,
 }
 `;

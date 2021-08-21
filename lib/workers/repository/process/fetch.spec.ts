@@ -1,22 +1,14 @@
-import {
-  RenovateConfig,
-  getConfig,
-  getName,
-  mocked,
-} from '../../../../test/util';
+import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import * as datasourceMaven from '../../../datasource/maven';
-import * as datasourceNpm from '../../../datasource/npm';
-import * as _npm from '../../../manager/npm';
-import type { ManagerApi, PackageFile } from '../../../manager/types';
+import type { PackageFile } from '../../../manager/types';
 import { fetchUpdates } from './fetch';
 import * as lookup from './lookup';
 
-const npm: ManagerApi = _npm;
 const lookupUpdates = mocked(lookup).lookupUpdates;
 
 jest.mock('./lookup');
 
-describe(getName(), () => {
+describe('workers/repository/process/fetch', () => {
   describe('fetchUpdates()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -28,6 +20,7 @@ describe(getName(), () => {
         npm: [{ packageFile: 'package.json', deps: [] }],
       };
       await fetchUpdates(config, packageFiles);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
     it('handles ignored, skipped and disabled', async () => {
@@ -66,28 +59,10 @@ describe(getName(), () => {
             deps: [{ datasource: datasourceMaven.id, depName: 'bbb' }],
           },
         ],
-        npm: [
-          {
-            packageFile: 'package.json',
-            packageJsonType: 'app',
-            deps: [
-              {
-                datasource: datasourceNpm.id,
-                depName: 'aaa',
-                depType: 'devDependencies',
-              },
-              { depName: 'bbb', depType: 'dependencies' },
-            ],
-          },
-        ],
       };
-      // TODO: fix types
-      npm.getPackageUpdates = jest.fn((_) => ['a', 'b'] as never);
       lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
-      expect(packageFiles.npm[0].deps[0].updates).toHaveLength(2);
     });
   });
 });

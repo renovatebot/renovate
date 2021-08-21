@@ -5,9 +5,9 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../test/exec-util';
-import { env, getName, loadFixture } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { env, loadFixture } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as fs from '../../util/fs';
 import type { ExtractConfig } from '../types';
 import * as extract from './extract';
@@ -17,7 +17,7 @@ const packageFile = 'setup.py';
 const content = loadFixture(packageFile);
 const jsonContent = loadFixture('setup.py.json');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: '/tmp/github/some/repo',
   cacheDir: '/tmp/renovate/cache',
 };
@@ -39,14 +39,14 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
     cmd: snapshot.cmd.replace(/^.*extract\.py"\s+/, '<extract.py> '),
   }));
 
-describe(getName(), () => {
+describe('manager/pip_setup/index', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       jest.resetModules();
       extract.resetModule();
 
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
       // do not copy extract.py
@@ -54,7 +54,7 @@ describe(getName(), () => {
     });
 
     afterEach(() => {
-      setAdminConfig();
+      setGlobalConfig();
     });
 
     it('returns found deps', async () => {
@@ -67,6 +67,7 @@ describe(getName(), () => {
         },
       ]);
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(jsonContent);
+      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
@@ -75,7 +76,7 @@ describe(getName(), () => {
     });
 
     it('returns found deps (docker)', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
       const execSnapshots = mockExecAll(exec, { stdout: '', stderr: '' });
 
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(jsonContent);

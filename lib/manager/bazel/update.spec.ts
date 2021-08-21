@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
@@ -16,7 +16,7 @@ git_repository(
 )
 */
 
-describe(getName(), () => {
+describe('manager/bazel/update', () => {
   describe('updateDependency', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -193,6 +193,12 @@ describe(getName(), () => {
         currentValue: '0.6.0',
         newValue: '0.8.0',
       };
+
+      httpMock
+        .scope('https://github.com')
+        .get('/bazelbuild/bazel-skyfoo/archive/0.8.0.tar.gz')
+        .reply(500);
+
       const res = await updateDependency({
         fileContent: content,
         upgrade,

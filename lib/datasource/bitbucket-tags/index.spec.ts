@@ -1,11 +1,10 @@
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { BitBucketTagsDatasource } from '.';
 
 const datasource = BitBucketTagsDatasource.id;
 
-describe(getName(), () => {
+describe('datasource/bitbucket-tags/index', () => {
   describe('getReleases', () => {
     it('returns tags from bitbucket cloud', async () => {
       const body = {

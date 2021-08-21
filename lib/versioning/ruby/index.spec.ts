@@ -1,7 +1,7 @@
 import type { RangeStrategy } from '../../types';
 import { api as semverRuby } from '.';
 
-describe('semverRuby', () => {
+describe('versioning/ruby/index', () => {
   describe('.equals', () => {
     it('returns true when versions are equal', () => {
       expect(semverRuby.equals('1.0.0', '1')).toBe(true);
@@ -435,6 +435,7 @@ describe('semverRuby', () => {
     });
 
     it('does not error', () => {
+      // FIXME: explicit assert condition
       expect(
         semverRuby.getNewValue({
           currentValue: '>= 3.2, < 5.0',

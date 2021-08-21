@@ -3,8 +3,8 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -36,7 +36,7 @@ require gopkg.in/russross/blackfriday.v1 v1.0.0
 replace github.com/pkg/errors => ../errors
 `;
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
@@ -54,18 +54,18 @@ const goEnv = {
   CGO_ENABLED: '1',
 };
 
-describe('.updateArtifacts()', () => {
+describe('manager/gomod/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -151,7 +151,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -170,7 +170,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'global' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -189,7 +189,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -211,7 +211,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with goModTidy', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -250,7 +250,14 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: gomod1,
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'go.sum',
+          stderr: 'This update totally doesnt work',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with gomodUpdateImportPaths', async () => {
@@ -276,7 +283,11 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
@@ -301,7 +312,10 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with specific tool version from constraint', async () => {
@@ -330,7 +344,11 @@ describe('.updateArtifacts()', () => {
           },
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with latest tool version on invalid version constraint', async () => {
@@ -359,7 +377,11 @@ describe('.updateArtifacts()', () => {
           },
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('skips updating import paths for gopkg.in dependencies', async () => {
@@ -384,7 +406,10 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
 });

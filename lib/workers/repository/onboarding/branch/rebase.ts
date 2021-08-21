@@ -1,5 +1,5 @@
-import { getAdminConfig } from '../../../../config/admin';
 import { configFileNames } from '../../../../config/app-strings';
+import { getGlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import {
@@ -8,29 +8,13 @@ import {
   isBranchModified,
   isBranchStale,
 } from '../../../../util/git';
+import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = (config: RenovateConfig): string =>
   configFileNames.includes(config.onboardingConfigFileName)
     ? config.onboardingConfigFileName
     : configFileNames[0];
-
-function getCommitMessage(config: RenovateConfig): string {
-  const configFile = defaultConfigFile(config);
-  let commitMessage: string;
-  // istanbul ignore if
-  if (config.semanticCommits === 'enabled') {
-    commitMessage = config.semanticCommitType;
-    if (config.semanticCommitScope) {
-      commitMessage += `(${config.semanticCommitScope})`;
-    }
-    commitMessage += ': ';
-    commitMessage += 'add ' + configFile;
-  } else {
-    commitMessage = 'Add ' + configFile;
-  }
-  return commitMessage;
-}
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig
@@ -52,10 +36,14 @@ export async function rebaseOnboardingBranch(
   }
   logger.debug('Rebasing onboarding branch');
   // istanbul ignore next
-  const commitMessage = getCommitMessage(config);
+  const commitMessageFactory = new OnboardingCommitMessageFactory(
+    config,
+    configFile
+  );
+  const commitMessage = commitMessageFactory.create();
 
   // istanbul ignore if
-  if (getAdminConfig().dryRun) {
+  if (getGlobalConfig().dryRun) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }
@@ -67,6 +55,6 @@ export async function rebaseOnboardingBranch(
         contents,
       },
     ],
-    message: commitMessage,
+    message: commitMessage.toString(),
   });
 }

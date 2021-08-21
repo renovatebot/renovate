@@ -5,7 +5,6 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -13,7 +12,7 @@ import * as _hostRules from '../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
 
-describe(getName(), () => {
+describe('platform/azure/index', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
@@ -1080,7 +1079,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(updatePullRequestMock).toHaveBeenCalledWith(
         {
@@ -1118,7 +1120,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
       expect(res).toBe(false);
     });
 
@@ -1138,8 +1143,14 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      await azure.mergePr(1234, 'test-branch-1');
-      await azure.mergePr(5678, 'test-branch-2');
+      await azure.mergePr({
+        branchName: 'test-branch-1',
+        id: 1234,
+      });
+      await azure.mergePr({
+        branchName: 'test-branch-2',
+        id: 5678,
+      });
 
       expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
     });
@@ -1167,7 +1178,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
       expect(res).toBe(true);
@@ -1197,7 +1211,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(
         expectedNumRetries + 1

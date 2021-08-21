@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -38,7 +37,7 @@ query(
 }
 `;
 
-describe(getName(), () => {
+describe('util/http/github', () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
     githubApi = new GithubHttp();
@@ -158,6 +157,13 @@ describe(getName(), () => {
       it('should throw Not found', async () => {
         await expect(fail(404)).rejects.toThrow(
           'Response code 404 (Not Found)'
+        );
+      });
+      it('should throw 410', async () => {
+        await expect(
+          fail(410, { message: 'Issues are disabled for this repo' })
+        ).rejects.toThrow(
+          'Response code 410 (Issues are disabled for this repo)'
         );
       });
       it('should throw rate limit exceeded', async () => {

@@ -1,4 +1,4 @@
-import { getOptions } from '../config/definitions';
+import { getOptions } from '../config/options';
 import { loadModules } from '../util/modules';
 import { isVersioningApiConstructor } from './common';
 import { GenericVersion, GenericVersioningApi } from './loose/generic';
@@ -10,8 +10,9 @@ const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning'
 ).allowedValues;
 
-describe('allVersioning.get(versioning)', () => {
+describe('versioning/index', () => {
   it('has api', () => {
+    // FIXME: explicit assert condition
     expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
   });
   it('validates', () => {

@@ -4,7 +4,7 @@ import {
   envMock,
   mockExecAll,
 } from '../../../../test/exec-util';
-import { fs, getName, mocked } from '../../../../test/util';
+import { fs, mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _yarnHelper from './yarn';
 
@@ -26,7 +26,7 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
 
-describe(getName(), () => {
+describe('manager/npm/post-update/yarn', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -59,7 +59,14 @@ describe(getName(), () => {
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
-      const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+      const res = await yarnHelper.generateLockFile(
+        'some-dir',
+        {
+          YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
+          YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
+        },
+        config
+      );
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
@@ -179,6 +186,7 @@ describe(getName(), () => {
         }
         return new Promise<string>((resolve) => resolve(''));
       });
+      // FIXME: explicit assert condition
       expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
     });
     it('returns no offline mirror and unquoted yarn path', async () => {
@@ -190,6 +198,7 @@ describe(getName(), () => {
         }
         return new Promise<string>((resolve) => resolve(''));
       });
+      // FIXME: explicit assert condition
       expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
     });
   });

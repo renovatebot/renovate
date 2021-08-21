@@ -1,6 +1,5 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as rubyVersioning from '../../versioning/ruby';
 import * as pod from '.';
@@ -15,13 +14,18 @@ const config = {
 const githubApiHost = 'https://api.github.com';
 const cocoapodsHost = 'https://cdn.cocoapods.org';
 
-describe(getName(), () => {
+describe('datasource/pod/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
     it('returns null for invalid inputs', async () => {
+      // FIXME: why get request?
+      httpMock
+        .scope(cocoapodsHost)
+        .get('/all_pods_versions_3_8_5.txt')
+        .reply(404);
       expect(
         await getPkgReleases({
           datasource: pod.id,
@@ -31,6 +35,11 @@ describe(getName(), () => {
       ).toBeNull();
     });
     it('returns null for empty result', async () => {
+      // FIXME: why get request?
+      httpMock
+        .scope(cocoapodsHost)
+        .get('/all_pods_versions_a_c_b.txt')
+        .reply(404);
       expect(await getPkgReleases(config)).toBeNull();
     });
     it('returns null for 404', async () => {

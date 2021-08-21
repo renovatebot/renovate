@@ -3,6 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
+  plugins: ['@renovate'],
   extends: [
     'airbnb-typescript/base',
     'plugin:import/errors',
@@ -51,6 +52,9 @@ module.exports = {
         memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
       },
     ],
+
+    // mdast is a types only package `@types/mdast`
+    'import/no-unresolved': ['error', { ignore: ['^mdast$'] }],
     'import/order': [
       'error',
       {
@@ -102,6 +106,7 @@ module.exports = {
 
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
+    '@renovate/jest-root-describe': 2,
   },
   settings: {
     'import/parsers': {

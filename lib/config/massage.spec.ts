@@ -1,13 +1,12 @@
-import { getName } from '../../test/util';
 import * as massage from './massage';
 import type { RenovateConfig } from './types';
 
-describe(getName(), () => {
+describe('config/massage', () => {
   describe('massageConfig', () => {
     it('returns empty', () => {
       const config: RenovateConfig = {};
       const res = massage.massageConfig(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({});
     });
     it('massages strings to array', () => {
       const config: RenovateConfig = {
@@ -20,7 +19,9 @@ describe(getName(), () => {
       const config: RenovateConfig = {
         npmToken: 'some-token',
       };
-      expect(massage.massageConfig(config)).toMatchSnapshot();
+      expect(massage.massageConfig(config)).toEqual({
+        npmrc: '//registry.npmjs.org/:_authToken=some-token\n',
+      });
     });
     it('massages packageRules matchUpdateTypes', () => {
       const config: RenovateConfig = {

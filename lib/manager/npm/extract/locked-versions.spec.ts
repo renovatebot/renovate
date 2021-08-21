@@ -1,4 +1,3 @@
-import { getName } from '../../../../test/util';
 import { getLockedVersions } from './locked-versions';
 
 /** @type any */
@@ -9,7 +8,7 @@ const yarn = require('./yarn');
 jest.mock('./npm');
 jest.mock('./yarn');
 
-describe(getName(), () => {
+describe('manager/npm/extract/locked-versions', () => {
   describe('.getLockedVersions()', () => {
     it.each([['1.22.0'], ['2.1.0'], ['2.2.0']])(
       'uses yarn.lock with yarn v%s',
@@ -46,6 +45,7 @@ describe(getName(), () => {
           },
         ];
         await getLockedVersions(packageFiles);
+        // FIXME: explicit assert condition
         expect(packageFiles).toMatchSnapshot();
       }
     );
@@ -78,6 +78,7 @@ describe(getName(), () => {
           },
         ];
         await getLockedVersions(packageFiles);
+        // FIXME: explicit assert condition
         expect(packageFiles).toMatchSnapshot();
       }
     );
@@ -109,6 +110,7 @@ describe(getName(), () => {
         },
       ];
       await getLockedVersions(packageFiles);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
     it('ignores pnpm', async () => {
@@ -128,6 +130,7 @@ describe(getName(), () => {
         },
       ];
       await getLockedVersions(packageFiles);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
   });

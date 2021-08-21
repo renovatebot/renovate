@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { GenericVersion, GenericVersioningApi } from './generic';
 
-describe(getName(), () => {
+describe('versioning/loose/utils', () => {
   const optionalFunctions = [
     'isLessThanRange',
     'valueToVersion',
@@ -53,6 +52,7 @@ describe(getName(), () => {
 
     for (const key of schemeKeys) {
       it(`${key}`, () => {
+        // FIXME: explicit assert condition
         expect(api[key]()).toMatchSnapshot();
       });
     }

@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName, mocked } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as github from '.';
@@ -11,7 +11,7 @@ const hostRules = mocked(_hostRules);
 const githubApiHost = github.Endpoint;
 const basePath = '/repos/some/repo/contents';
 
-describe(getName(), () => {
+describe('config/presets/github/index', () => {
   beforeEach(() => {
     hostRules.find.mockReturnValue({ token: 'abc' });
   });
@@ -30,7 +30,7 @@ describe(getName(), () => {
         'some-filename.json',
         githubApiHost
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

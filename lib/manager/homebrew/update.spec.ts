@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { updateDependency } from './update';
 
 const aide = loadFixture('aide.rb');
@@ -8,7 +8,7 @@ const ibazel = loadFixture('ibazel.rb');
 
 const baseUrl = 'https://github.com';
 
-describe(getName(), () => {
+describe('manager/homebrew/update', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

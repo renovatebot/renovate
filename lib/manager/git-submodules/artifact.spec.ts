@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import updateArtifacts from './artifacts';
 
-describe(getName(), () => {
+describe('manager/git-submodules/artifact', () => {
   describe('updateArtifacts()', () => {
     it('returns empty content', () => {
       expect(
@@ -11,7 +10,7 @@ describe(getName(), () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([{ file: { contents: '', name: '' } }]);
     });
     it('returns two modules', () => {
       expect(
@@ -21,7 +20,10 @@ describe(getName(), () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([
+        { file: { name: 'renovate' } },
+        { file: { name: 'renovate-pro' } },
+      ]);
     });
   });
 });

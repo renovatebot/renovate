@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture, mocked } from '../../../test/util';
+import { loadFixture, mocked } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -11,7 +11,7 @@ import type { Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(), () => {
+describe('platform/github/index', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -2040,7 +2040,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle merge error', async () => {
@@ -2056,7 +2061,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(false);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -2104,7 +2114,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should try squash after rebase', async () => {
@@ -2120,7 +2135,10 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      await github.mergePr(pr.number, '');
+      await github.mergePr({
+        branchName: '',
+        id: pr.number,
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should try merge after squash', async () => {
@@ -2140,7 +2158,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should give up', async () => {
@@ -2162,7 +2185,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(false);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

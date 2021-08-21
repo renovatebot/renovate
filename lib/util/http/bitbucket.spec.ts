@@ -1,12 +1,11 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import * as hostRules from '../host-rules';
 import { BitbucketHttp, setBaseUrl } from './bitbucket';
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe(getName(), () => {
+describe('util/http/bitbucket', () => {
   let api: BitbucketHttp;
   beforeEach(() => {
     api = new BitbucketHttp();
@@ -47,6 +46,7 @@ describe(getName(), () => {
   it('returns cached', async () => {
     httpMock.scope(baseUrl).get('/projects/foo').reply(200, {});
     const { body } = await api.getJson('projects/foo');
+    // FIXME: explicit assert condition
     expect(body).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });

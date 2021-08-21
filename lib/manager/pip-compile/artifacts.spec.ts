@@ -3,8 +3,8 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -22,7 +22,7 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
@@ -32,7 +32,7 @@ const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
-describe('.updateArtifacts()', () => {
+describe('manager/pip-compile/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
@@ -40,7 +40,7 @@ describe('.updateArtifacts()', () => {
       LANG: 'en_US.UTF-8',
       LC_ALL: 'en_US',
     });
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
 
@@ -89,7 +89,7 @@ describe('.updateArtifacts()', () => {
   });
 
   it('supports docker mode', async () => {
-    setAdminConfig(dockerAdminConfig);
+    setGlobalConfig(dockerAdminConfig);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
@@ -111,6 +111,7 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await pipCompile.updateArtifacts({
         packageFileName: 'requirements.in',
@@ -140,7 +141,7 @@ describe('.updateArtifacts()', () => {
   });
 
   it('uses pipenv version from config', async () => {
-    setAdminConfig(dockerAdminConfig);
+    setGlobalConfig(dockerAdminConfig);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],

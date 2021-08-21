@@ -1,6 +1,6 @@
 import yaml from 'js-yaml';
-import { getFixturePath, getName, logger } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { getFixturePath, logger } from '../../../../test/util';
+import { setGlobalConfig } from '../../../config/global';
 import * as fs from '../../../util/fs';
 import {
   detectPnpmWorkspaces,
@@ -8,9 +8,9 @@ import {
   findPnpmWorkspace,
 } from './pnpm';
 
-describe(getName(), () => {
+describe('manager/npm/extract/pnpm', () => {
   beforeAll(() => {
-    setAdminConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
+    setGlobalConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
   });
 
   describe('.extractPnpmFilters()', () => {
@@ -24,7 +24,7 @@ describe(getName(), () => {
         '..'
       );
       const res = await extractPnpmFilters(workSpaceFilePath);
-
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         {
@@ -40,7 +40,7 @@ describe(getName(), () => {
       });
 
       const res = await extractPnpmFilters('pnpm-workspace.yml');
-
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -58,6 +58,7 @@ describe(getName(), () => {
 
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({ packageFile }),
@@ -70,6 +71,7 @@ describe(getName(), () => {
 
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -136,6 +138,7 @@ describe(getName(), () => {
       ];
 
       await detectPnpmWorkspaces(packageFiles);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
 
@@ -158,6 +161,7 @@ describe(getName(), () => {
       ];
 
       await detectPnpmWorkspaces(packageFiles);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
       expect(
         packageFiles.find(

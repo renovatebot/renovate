@@ -1,13 +1,13 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { datasource, defaultRegistryUrl, pageSize } from './common';
 
 const res1 = loadFixture('page.json');
 
 function getPath(page: number): string {
-  return `/v3/release_versions?page_size=${pageSize}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
+  return `/v3/info/release_versions?page_size=${pageSize}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
 }
 function* range(start: number, end: number): Generator<number, number, number> {
   yield start;
@@ -17,7 +17,7 @@ function* range(start: number, end: number): Generator<number, number, number> {
   yield* range(start + 1, end);
 }
 
-describe(getName(), () => {
+describe('datasource/adoptium-java/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
       httpMock
@@ -30,7 +30,6 @@ describe(getName(), () => {
           depName: 'adoptium-java',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for 404', async () => {
@@ -41,7 +40,6 @@ describe(getName(), () => {
           depName: 'adoptium-java',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -55,7 +53,6 @@ describe(getName(), () => {
           depName: 'adoptium-java',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws for 5xx', async () => {
@@ -66,7 +63,6 @@ describe(getName(), () => {
           depName: 'adoptium-java',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('processes real data', async () => {
@@ -77,7 +73,6 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('pages', async () => {
@@ -95,7 +90,6 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(50);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

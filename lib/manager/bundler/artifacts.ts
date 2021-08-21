@@ -125,7 +125,7 @@ export async function updateArtifacts(
     ];
 
     const bundlerHostRules = findAllAuthenticatable({
-      hostType: 'bundler',
+      hostType: 'rubygems',
     });
 
     const bundlerHostRulesVariables = bundlerHostRules.reduce(
@@ -172,13 +172,11 @@ export async function updateArtifacts(
       );
     }
 
-    const cacheDir = await ensureCacheDir('./others/gem', 'GEM_HOME');
-
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,
-        GEM_HOME: cacheDir,
+        GEM_HOME: await ensureCacheDir('bundler'),
       },
       docker: {
         image: 'ruby',

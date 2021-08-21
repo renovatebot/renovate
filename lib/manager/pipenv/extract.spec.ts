@@ -1,4 +1,4 @@
-import { fs as fsutil, getName, loadFixture } from '../../../test/util';
+import { fs as fsutil, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -9,7 +9,7 @@ const pipfile3 = loadFixture('Pipfile3');
 const pipfile4 = loadFixture('Pipfile4');
 const pipfile5 = loadFixture('Pipfile5');
 
-describe(getName(), () => {
+describe('manager/pipenv/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('[packages]\r\n', 'Pipfile')).toBeNull();
@@ -67,6 +67,7 @@ describe(getName(), () => {
     });
     it('extracts example pipfile', async () => {
       const res = await extractPackageFile(pipfile4, 'Pipfile');
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('supports custom index', async () => {

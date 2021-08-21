@@ -1,9 +1,8 @@
-import { getName } from '../../test/util';
 import { PLATFORM_TYPE_AZURE } from '../constants/platforms';
 import * as datasourceNuget from '../datasource/nuget';
 import { add, clear, find, findAll, hosts } from './host-rules';
 
-describe(getName(), () => {
+describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
   });
@@ -41,6 +40,7 @@ describe(getName(), () => {
         username: 'user1',
         password: 'pass1',
       } as any);
+      // FIXME: explicit assert condition
       expect(find({ url: 'https://some.endpoint/v3/' })).toMatchSnapshot();
     });
   });
@@ -59,6 +59,7 @@ describe(getName(), () => {
         password: 'p4$$w0rd',
         token: undefined,
       } as any);
+      // FIXME: explicit assert condition
       expect(find({ hostType: datasourceNuget.id })).toMatchSnapshot();
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://nuget.org' })
@@ -83,6 +84,7 @@ describe(getName(), () => {
         hostType: datasourceNuget.id,
         token: 'abc',
       });
+      // FIXME: explicit assert condition
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
@@ -109,6 +111,7 @@ describe(getName(), () => {
         hostName: 'nuget.local',
         token: 'abc',
       } as any);
+      // FIXME: explicit assert condition
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
@@ -153,6 +156,7 @@ describe(getName(), () => {
         matchHost: 'https://nuget.local/api',
         token: 'abc',
       } as any);
+      // FIXME: explicit assert condition
       expect(
         find({
           hostType: datasourceNuget.id,

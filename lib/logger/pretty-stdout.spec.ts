@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { getName } from '../../test/util';
 import * as prettyStdout from './pretty-stdout';
 import type { BunyanRecord } from './types';
 
@@ -10,7 +9,7 @@ jest.mock('chalk', () =>
   )
 );
 
-describe(getName(), () => {
+describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {
     it('returns empty string if null rec', () => {
       expect(prettyStdout.getMeta(null as any)).toEqual('');
@@ -67,7 +66,9 @@ describe(getName(), () => {
           d: ['e', 'f'],
         },
       };
-      expect(prettyStdout.getDetails(rec as any)).toMatchSnapshot();
+      expect(prettyStdout.getDetails(rec as any)).toEqual(
+        `       "config": {"a": "b", "d": ["e", "f"]}\n`
+      );
     });
   });
   describe('formatRecord(rec)', () => {
@@ -87,7 +88,13 @@ describe(getName(), () => {
           d: ['e', 'f'],
         },
       };
-      expect(prettyStdout.formatRecord(rec)).toMatchSnapshot();
+      expect(prettyStdout.formatRecord(rec)).toEqual(
+        [
+          `TRACE: test message`,
+          `       "config": {"a": "b", "d": ["e", "f"]}`,
+          ``,
+        ].join('\n')
+      );
     });
   });
 });

@@ -1,9 +1,9 @@
-import { fs, getName } from '../../../test/util';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-describe(getName(), () => {
+describe('manager/helmv3/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -59,8 +59,12 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          { depName: 'redis', currentValue: '0.9.0' },
+          { depName: 'postgresql', currentValue: '0.8.1' },
+        ],
+      });
     });
     it('resolves aliased registry urls', async () => {
       const content = `
@@ -123,8 +127,12 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          { depName: 'redis' },
+          { depName: 'postgresql', skipReason: 'local-dependency' },
+        ],
+      });
     });
     it('returns null if no dependencies key', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`

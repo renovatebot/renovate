@@ -1,8 +1,8 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
-import { env, fs, getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { env, fs, hostRules } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
@@ -10,25 +10,26 @@ import { updateArtifacts } from '.';
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
+jest.mock('../../util/host-rules');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
 };
 
 const config: UpdateArtifactsConfig = {};
 
-describe(getName(), () => {
+describe('manager/mix/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
   });
 
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
 
   it('returns null if no mix.lock found', async () => {
@@ -81,11 +82,12 @@ describe(getName(), () => {
 
   it('returns updated mix.lock', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -97,8 +99,49 @@ describe(getName(), () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('authenticates to private repositories', async () => {
+    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    hostRules.find.mockReturnValueOnce({ token: 'valid_token' });
+    hostRules.find.mockReturnValueOnce({});
+
+    const result = await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [
+        {
+          depName: 'private_package',
+          lookupName: 'private_package:renovate_test',
+        },
+        {
+          depName: 'other_package',
+          lookupName: 'other_package:unauthorized_organization',
+        },
+      ],
+      newPackageFileContent: '{}',
+      config,
+    });
+
+    expect(result).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+
+    const [updateResult] = result;
+    expect(updateResult).toEqual({
+      file: { contents: 'New mix.lock', name: 'mix.lock' },
+    });
+
+    const [, packageUpdateCommand] = execSnapshots;
+    expect(packageUpdateCommand.cmd).toInclude(
+      'mix hex.organization auth renovate_test --key valid_token && ' +
+        'mix deps.update private_package other_package'
+    );
+  });
+
   it('returns updated mix.lock in subdir', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
     mockExecAll(exec);
     expect(
@@ -118,6 +161,7 @@ describe(getName(), () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -134,6 +178,7 @@ describe(getName(), () => {
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });
+    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',

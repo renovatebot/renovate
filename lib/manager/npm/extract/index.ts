@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
-import { getAdminConfig } from '../../../config/admin';
+import { getGlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
@@ -108,7 +108,7 @@ export async function extractPackageFile(
         logger.debug('Stripping package-lock setting from .npmrc');
         npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
       }
-      if (npmrc.includes('=${') && !getAdminConfig().exposeAllEnv) {
+      if (npmrc.includes('=${') && !getGlobalConfig().exposeAllEnv) {
         logger.debug(
           { npmrcFileName },
           'Stripping .npmrc file of lines with variables'
@@ -120,12 +120,6 @@ export async function extractPackageFile(
       }
     }
   }
-  const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
-  let yarnrc;
-  if (!is.string(config.yarnrc)) {
-    yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
-  }
-
   let lernaJsonFile: string;
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
@@ -216,6 +210,8 @@ export async function extractPackageFile(
       } else if (depName === 'yarn') {
         dep.datasource = npmId;
         dep.commitMessageTopic = 'Yarn';
+      } else if (depName === 'npm') {
+        dep.datasource = npmId;
       } else {
         dep.skipReason = SkipReason.UnknownVolta;
       }
@@ -378,7 +374,6 @@ export async function extractPackageFile(
     packageFileVersion,
     packageJsonType,
     npmrc,
-    yarnrc,
     ...lockFiles,
     managerData: {
       lernaJsonFile,

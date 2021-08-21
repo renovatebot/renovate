@@ -3,7 +3,6 @@ import {
   RenovateConfig,
   fs,
   getConfig,
-  getName,
   git,
   mocked,
   platform,
@@ -30,7 +29,7 @@ jest.mock('./config');
 
 const cache = mocked(_cache);
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -63,6 +62,7 @@ describe(getName(), () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
+      // FIXME: explicit assert condition
       expect(
         git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();
@@ -86,6 +86,7 @@ describe(getName(), () => {
         renovateJsonPresent: true,
         warnings: [],
       });
+      // FIXME: explicit assert condition
       expect(
         git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();

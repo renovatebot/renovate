@@ -1,5 +1,4 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName } from '../../../../test/util';
 import { setPlatformApi } from '../../../platform';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as bitbucket from '.';
@@ -9,7 +8,7 @@ jest.unmock('../../../platform');
 const baseUrl = 'https://api.bitbucket.org';
 const basePath = '/2.0/repositories/some/repo/src/HEAD';
 
-describe(getName(), () => {
+describe('config/presets/bitbucket/index', () => {
   beforeAll(() => {
     setPlatformApi('bitbucket');
   });
