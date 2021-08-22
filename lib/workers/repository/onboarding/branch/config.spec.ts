@@ -18,7 +18,7 @@ describe('workers/repository/onboarding/branch/config', () => {
   describe('getOnboardingConfigContents', () => {
     it('returns the JSON stringified onboarding config', async () => {
       mockedPresets.getPreset.mockResolvedValueOnce({ enabled: true });
-      const contents = await getOnboardingConfigContents(config);
+      const contents = await getOnboardingConfigContents(config, '');
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
       expect(contents).toEqual(
         '{\n' +
