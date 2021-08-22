@@ -52,4 +52,4 @@ As an example, say you want Renovate to use the latest patch version of the `1.1
 ```
 
 We do not support patch level versions for the minimum `go` version.
-This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a contraint.
+This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a constraint.
