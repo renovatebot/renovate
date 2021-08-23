@@ -10,9 +10,9 @@ export class DartDatasource extends Datasource {
     super(DartDatasource.id);
   }
 
-  readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  readonly defaultRegistryUrls = ['https://pub.dartlang.org/'];
+  override readonly defaultRegistryUrls = ['https://pub.dartlang.org/'];
 
   async getReleases({
     lookupName,

@@ -12,11 +12,13 @@ export class GradleVersionDatasource extends Datasource {
     super(GradleVersionDatasource.id);
   }
 
-  readonly defaultRegistryUrls = ['https://services.gradle.org/versions/all'];
+  override readonly defaultRegistryUrls = [
+    'https://services.gradle.org/versions/all',
+  ];
 
-  readonly defaultVersioning = gradleVersioning.id;
+  override readonly defaultVersioning = gradleVersioning.id;
 
-  readonly registryStrategy = 'merge';
+  override readonly registryStrategy = 'merge';
 
   private static readonly buildTimeRegex = regEx(
     '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'

@@ -92,31 +92,37 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     };
   }
 
-  isCompatible(version: string, range: string): boolean {
+  override isCompatible(version: string, range: string): boolean {
     return (
       this._parse(version).compatibility === this._parse(range).compatibility
     );
   }
 
-  isLessThanRange(version: string, range: string): boolean {
+  override isLessThanRange(version: string, range: string): boolean {
     return ltr(asSemver(this._parse(version)), asSemver(this._parse(range)));
   }
 
-  getSatisfyingVersion(versions: string[], range: string): string | null {
+  override getSatisfyingVersion(
+    versions: string[],
+    range: string
+  ): string | null {
     return maxSatisfying(
       versions.map((v) => asSemver(this._parse(v))),
       asSemver(this._parse(range))
     );
   }
 
-  minSatisfyingVersion(versions: string[], range: string): string | null {
+  override minSatisfyingVersion(
+    versions: string[],
+    range: string
+  ): string | null {
     return minSatisfying(
       versions.map((v) => asSemver(this._parse(v))),
       asSemver(this._parse(range))
     );
   }
 
-  matches(version: string, range: string): boolean {
+  override matches(version: string, range: string): boolean {
     return satisfies(
       asSemver(this._parse(version)),
       asSemver(this._parse(range))
