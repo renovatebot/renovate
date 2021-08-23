@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 import { fs, loadFixture } from '../../../test/util';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';
@@ -37,8 +38,62 @@ describe('manager/maven/index', () => {
           p.parent = p.parent.replace(/\\/g, '/');
         }
       }
-      // FIXME: explicit assert condition
-      expect(packages).toMatchSnapshot();
+      expect(packages).toMatchSnapshot([
+        {
+          deps: [
+            { depName: 'org.example:parent', currentValue: '42' },
+            { depName: 'org.example:foo', currentValue: '0.0.1' },
+            { depName: 'org.example:bar', currentValue: '1.0.0' },
+            {
+              depName: 'org.apache.maven.plugins:maven-release-plugin',
+              currentValue: '2.4.2',
+            },
+            {
+              depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
+              currentValue: '1.8.1',
+            },
+            {
+              depName: 'org.example:${artifact-id-placeholder}',
+              skipReason: 'name-placeholder',
+            },
+            {
+              depName: '${group-id-placeholder}:baz',
+              skipReason: 'name-placeholder',
+            },
+            {
+              depName: 'org.example:quux',
+              currentValue: '1.2.3.4',
+              groupName: 'quuxVersion',
+            },
+            {
+              depName: 'org.example:quux-test',
+              currentValue: '1.2.3.4',
+              groupName: 'quuxVersion',
+            },
+            {
+              depName: 'org.example:quuz',
+              currentValue: '1.2.3',
+              depType: 'test',
+            },
+            {
+              depName: 'org.example:quuuz',
+              currentValue: "it's not a version",
+            },
+            { depName: 'org.example:hard-range', currentValue: '[1.0.0]' },
+            {
+              depName: 'org.example:profile-artifact',
+              currentValue: '${profile-placeholder}',
+              skipReason: 'version-placeholder',
+            },
+            {
+              depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
+              currentValue: '2.17',
+            },
+          ],
+          packageFile: 'random.pom.xml',
+          parent: '../pom.xml',
+        },
+      ]);
     });
   });
 
@@ -103,7 +158,6 @@ describe('manager/maven/index', () => {
           expect(depUrls).toEqual(urls);
         });
       });
-      // FIXME: explicit assert condition
       expect(packages).toMatchSnapshot();
     });
 

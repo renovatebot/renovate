@@ -7,16 +7,12 @@ The following environment variables are "experimental" because:
 - They can be removed at any time
 - They are variables for Renovate's internal use to validate they work as intended
 
-Experimental variables which are commonly used and for which there is no external solution in sight can be converted to a official configuration option by the Renovate bot developers.
+Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate bot developers.
 
 Use these experimental variables at your own risk.
 We do not follow Semantic Versioning for any experimental variables.
 These variables may be removed or have their behavior changed in **any** version.
-We will try to keep breakage to a minimum, but make no guarantees that a experimental variable will keep working.
-
-## GITLAB_IGNORE_REPO_URL
-
-If set to any value, Renovate will ignore the Project's `http_url_to_repo` value and instead construct the Git URL manually.
+We will try to keep breakage to a minimum, but make no guarantees that an experimental variable will keep working.
 
 ## RENOVATE_CACHE_NPM_MINUTES
 
@@ -25,7 +21,7 @@ If set to any integer, Renovate will use this integer instead of the default npm
 ## RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK
 
 If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
-Skiping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
+Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
 
 ## RENOVATE_PAGINATE_ALL
 
