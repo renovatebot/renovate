@@ -10,7 +10,7 @@ If you are using a self-hosted GitLab instance, please note the following requir
 
 **Usage Example**
 
-A real-world example for this specific datasource would be maintaining packages versions in a config file.
+A real-world example for this specific datasource would be maintaining package versions in a config file.
 This can be achieved by configuring a generic regex manager in `renovate.json` for files named `versions.ini`:
 
 ```json
