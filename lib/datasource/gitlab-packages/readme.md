@@ -1,6 +1,6 @@
 [GitLab Packages API](https://docs.gitlab.com/ee/api/packages.html) supports looking up package versions from [all types of packages registry supported by GitLab](https://docs.gitlab.com/ee/user/packages/package_registry/index.html) and can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
 
-To specify which specific repository should be queried when looking up a package, the `registryUrl` has to be set like this: `https://gitlab.com/user/project`.
+To specify which specific repository should be queried when looking up a package, the `registryUrl` has to be set following this format: `https://gitlab.com/user/project`.
 As an example, `https://gitlab.com/gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list` would look for packages in the generic packages repository of the `gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list` project.
 
 If you are using a self-hosted GitLab instance, please note the following requirements:
