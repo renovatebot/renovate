@@ -4,8 +4,7 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { getGlobalConfig } from './global';
-import type { Migration } from './migrations/migration';
-import { RequiredStatusChecksMigration } from './migrations/required-status-checks-migration';
+import { applyMigrations } from './migrations';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
@@ -59,12 +58,7 @@ export function migrateConfig(
       'peerDependencies',
     ];
     const { migratePresets } = getGlobalConfig();
-    const migrations: Migration[] = [
-      new RequiredStatusChecksMigration(config, migratedConfig),
-    ];
-    migrations.forEach((migration) => {
-      migration.migrate();
-    });
+    applyMigrations(config, migratedConfig);
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
         delete migratedConfig[key];

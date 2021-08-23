@@ -10,7 +10,7 @@ export abstract class Migration {
     this.migratedConfig = migratedConfig;
   }
 
-  abstract migrate(): RenovateConfig;
+  abstract migrate(): void;
 
   protected delete(property: string): void {
     delete this.migratedConfig[property];
