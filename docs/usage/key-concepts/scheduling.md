@@ -8,7 +8,7 @@ This document describes Renovate bot's scheduling.
 ## Default behavior
 
 By default Renovate bot runs as often as its administrator has configured it to (e.g. hourly, daily, etc).
-When Renovate runs, the default behavior is to open PRs for any dependencies that need updating right away.
+The exact frequency which Renovate can process individual repositories depends on the combination of how often it runs, how many repositories are installed, and whether there's a lot of work to be done in each (e.g. if a commonly used dependency has recently received a new update, which triggers a lot of PRs to be created).
 
 By default, Renovate schedules use the UTC timezone.
 You can override the default timezone by setting your own `timezone` config option.
@@ -19,6 +19,8 @@ When we talk about scheduling Renovate, there are 2 senses in which you can sche
 
 - A global sense: when the bot is allowed to do work at all
 - A specific sense: when Renovate is allowed to look for updates to a specific dependency
+
+While as an end user you may think of scheduling in terms of when you allow it to raise updates, it's important to remember that such updates can only occur if the bot gets the opportunity to run within the schedule window you provide.
 
 Because Renovate defaults to "always on" and "open PRs right away" it can be overwhelming your repository with notifications of new PRs.
 To reduce overwhelm, we provide scheduling tools.
@@ -75,8 +77,9 @@ on friday and saturday
 ```
 
 **Warning:** Renovate does not support scheduled minutes or "at an exact time" granularity.
+Granularity must be at least one hour.
 
-Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text.
+Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text, so Renovate is limited to that library's syntax support.
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text) for more details.
 The _@breejs/later_ library also handles the concepts of "days", time_before", and "time_after".
 

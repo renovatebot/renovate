@@ -127,7 +127,6 @@ So to reduce the interruptions of automated dependency updates, consider putting
 - Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
 
 To learn all about controlling Renovate schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
-TODO confirm that link is correct!
 
 ### Grouping related packages
 

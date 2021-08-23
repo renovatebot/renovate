@@ -47,7 +47,6 @@ You will also have less flexibility about what to do when one or more in the gro
 ## Scheduling Renovate
 
 For a high level overview of scheduling when Renovate bot runs, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
-TODO: confirm link will be correct once live.
 
 On its own, the Renovate CLI tool runs once and then exits.
 Hence, it only runs as often as its administrator sets it to (e.g. via `cron`).
