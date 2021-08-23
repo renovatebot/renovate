@@ -13,11 +13,11 @@ export class AdoptiumJavaDatasource extends Datasource {
     super(datasource);
   }
 
-  customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  defaultRegistryUrls = [defaultRegistryUrl];
+  override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  caching = true;
+  override readonly caching = true;
 
   @cache({
     namespace: `datasource-${datasource}`,
