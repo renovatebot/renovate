@@ -147,12 +147,17 @@ function handleCombination(
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array
 
+  if (!matches.length) {
+    return [];
+  }
+
   const combinedGroup = matches
     .map((match) => match.groups)
     .reduce((mergedGroup, currentGroup) =>
       mergeGroups(mergedGroup, currentGroup)
     );
 
+  // TODO: this seems to be buggy behavior, needs to be checked
   const dep = matches
     .map((match) => createDependency(match, combinedGroup, config))
     .reduce(
