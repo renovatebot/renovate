@@ -98,7 +98,6 @@ describe(getName(), () => {
           depName: 'mypkg',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
