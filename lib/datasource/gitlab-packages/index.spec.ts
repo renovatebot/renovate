@@ -80,7 +80,6 @@ describe(getName(), () => {
           depName: 'mypkg',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws for 5xx', async () => {
