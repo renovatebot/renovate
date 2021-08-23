@@ -8,7 +8,7 @@ This document describes Renovate's scheduling.
 ## Default behavior
 
 By default Renovate bot runs as often as its administrator has configured it to (e.g. hourly, daily, etc).
-The exact frequency which Renovate can process individual repositories depends on the combination of how often it runs, how many repositories are installed, and whether there's a lot of work to be done in each (e.g. if a commonly used dependency has recently received a new update, which triggers a lot of PRs to be created).
+The exact frequency at which Renovate can process individual repositories depends on the combination of how often it runs, how many repositories are installed, and whether there's a lot of work to be done in each (e.g. if a commonly used dependency has recently received a new update, which triggers a lot of PRs to be created).
 
 By default, Renovate schedules use the UTC timezone.
 You can override the default timezone by setting your own `timezone` config option.
@@ -64,7 +64,7 @@ Read our docs on the [timezone](https://docs.renovatebot.com/configuration-optio
 
 ### Scheduling syntax
 
-After you've set your local timezone, you can define days of week or hours of the day in which Renovate is allowed to make changes.
+After you've set your local timezone, you can define days of the week or hours of the day in which Renovate is allowed to make changes.
 
 Examples of the kind of schedules you can create include:
 
