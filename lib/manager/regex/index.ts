@@ -157,7 +157,7 @@ function handleCombination(
       mergeGroups(mergedGroup, currentGroup)
     );
 
-  // TODO: this seems to be buggy behavior, needs to be checked
+  // TODO: this seems to be buggy behavior, needs to be checked #11387
   const dep = matches
     .map((match) => createDependency(match, combinedGroup, config))
     .reduce(
