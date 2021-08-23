@@ -52,7 +52,7 @@ async function queryPackagesViaResolver(
 
   // Retrieve list of packages by looking up Repology project
   const packages = await queryPackages(
-    `${registryUrl}tools/project-by?${query}`
+    `${registryUrl}/tools/project-by?${query}`
   );
 
   return packages;
@@ -65,7 +65,7 @@ async function queryPackagesViaAPI(
   // Directly query the package via the API. This will only work if `packageName` has the
   // same name as the repology project
   const packages = await queryPackages(
-    `${registryUrl}api/v1/project/${packageName}`
+    `${registryUrl}/api/v1/project/${packageName}`
   );
 
   return packages;
@@ -170,7 +170,7 @@ async function getCachedPackage(
   pkgName: string
 ): Promise<RepologyPackage[]> {
   // Fetch previous result from cache if available
-  const cacheKey = `${registryUrl}${repoName}/${pkgName}`;
+  const cacheKey = `${registryUrl}/${repoName}/${pkgName}`;
   const cachedResult = await packageCache.get<RepologyPackage[]>(
     cacheNamespace,
     cacheKey

@@ -599,6 +599,32 @@ describe('datasource/docker/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('strips trailing slash from registry', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(200, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:my/node:pull  "',
+        })
+        .get('/my/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {})
+        .get('/')
+        .reply(200)
+        .get('/my/node/manifests/1.0.0')
+        .reply(200);
+      httpMock
+        .scope(authUrl)
+        .get('/token?service=registry.docker.io&scope=repository:my/node:pull')
+        .reply(200, { token: 'some-token ' });
+      const res = await getPkgReleases({
+        datasource: id,
+        depName: 'my/node',
+        registryUrls: ['https://index.docker.io/'],
+      });
+      expect(res?.releases).toHaveLength(1);
+    });
+
     it('returns null if no auth', async () => {
       hostRules.find.mockReturnValue({});
       httpMock
