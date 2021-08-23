@@ -1,6 +1,6 @@
 ---
 title: Renovate scheduling
-description: Learn how to schedule when Renovate bot runs
+description: Learn how to schedule when Renovate runs
 ---
 
 This document describes Renovate's scheduling.
