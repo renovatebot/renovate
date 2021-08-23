@@ -433,7 +433,7 @@ This feature allows you to use Renovate's Dependency Dashboard to force approval
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
 You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
 
-Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explictly.
+Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explicitly.
 
 You can configure Renovate to wait for approval for:
 
