@@ -6,7 +6,7 @@ As an example, `https://gitlab.com/gitlab-org/ci-cd/package-stage/feature-testin
 If you are using a self-hosted GitLab instance, please note the following requirements:
 
 - If you are on the `Free` edition, this datasource requires at least GitLab 13.3
-- If you are on the `Premium` or the `Ultimate` edition, this datasource requires at least GitLab 11.8, but GitLab 12.9 or more is recommended if you have a lot of packages with different name on the same project.
+- If you are on the `Premium` or the `Ultimate` edition, this datasource requires at least GitLab 11.8, but GitLab 12.9 or more is recommended if you have a lot of packages with different name on the same project
 
 **Usage Example**
 
