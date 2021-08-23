@@ -37,6 +37,17 @@ Array [
 exports[`manager/helmv3/artifacts returns updated Chart.lock 1`] = `
 Array [
   Object {
+    "file": Object {
+      "contents": "New Chart.lock",
+      "name": "Chart.lock",
+    },
+  },
+]
+`;
+
+exports[`manager/helmv3/artifacts returns updated Chart.lock 2`] = `
+Array [
+  Object {
     "cmd": "helm dependency update ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
@@ -60,6 +71,17 @@ Array [
 exports[`manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 1`] = `
 Array [
   Object {
+    "file": Object {
+      "contents": "New Chart.lock",
+      "name": "Chart.lock",
+    },
+  },
+]
+`;
+
+exports[`manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 2`] = `
+Array [
+  Object {
     "cmd": "helm dependency update ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
@@ -81,6 +103,17 @@ Array [
 `;
 
 exports[`manager/helmv3/artifacts returns updated Chart.lock with docker 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New Chart.lock",
+      "name": "Chart.lock",
+    },
+  },
+]
+`;
+
+exports[`manager/helmv3/artifacts returns updated Chart.lock with docker 2`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/helm",

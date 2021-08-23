@@ -4,7 +4,7 @@
 
 Renovate administrators can configure Renovate to either "autodiscover" installed repositories, or configure a fixed list of repository names to operate on.
 
-If the adminstrator has configured a fixed list of repositories then the only way to "install" Renovate on an additional repository is for it to be manually added for the next run or restart.
+If the administrator has configured a fixed list of repositories then the only way to "install" Renovate on an additional repository is for it to be manually added for the next run or restart.
 
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
@@ -81,7 +81,7 @@ The configuration in your `package.json` will apply to the whole project (this i
 ### Customised defaults
 
 Renovate provides a `renovate.json` file, with default settings that will work for most cases.
-Sometimes Renovate detects that a override to these defaults is needed, and will add this override automatically, such as:
+Sometimes Renovate detects that an override to these defaults is needed, and will add this override automatically, such as:
 
 - Automatically enabling Angular-style semantic commits if your repository uses them
 - Determining whether to use dependency range pinning depending on the detected project type (app vs library)
