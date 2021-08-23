@@ -129,7 +129,6 @@ See the dedicated [Private npm module support](./getting-started/private-package
 
 To learn all about controlling Renovate schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
 
-
 ### Disable Renovate for certain dependency types
 
 Define a `packageRules` entry which has the dependency type(s) in `matchDepTypes` and `"enabled": false`.
