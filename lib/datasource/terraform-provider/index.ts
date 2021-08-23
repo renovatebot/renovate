@@ -16,7 +16,7 @@ import type {
 } from './types';
 
 export class TerraformProviderDatasource extends TerraformDatasource {
-  static readonly id = 'terraform-provider';
+  static override readonly id = 'terraform-provider';
 
   static readonly defaultRegistryUrls = [
     'https://registry.terraform.io',
@@ -29,12 +29,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     super(TerraformProviderDatasource.id);
   }
 
-  readonly defaultRegistryUrls =
+  override readonly defaultRegistryUrls =
     TerraformProviderDatasource.defaultRegistryUrls;
 
-  readonly defaultVersioning = hashicorpVersioning.id;
+  override readonly defaultVersioning = hashicorpVersioning.id;
 
-  readonly registryStrategy = 'hunt';
+  override readonly registryStrategy = 'hunt';
 
   @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}`,
