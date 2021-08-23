@@ -5,10 +5,10 @@ description: Learn all about Renovate's Dependency Dashboard
 
 # Introduction
 
-Renovate has a Dependency Dashboard that shows a overview of the state of your repositories' dependencies.
+Renovate has a Dependency Dashboard that shows an overview of the state of your repositories' dependencies.
 
 When the Dependency Dashboard is enabled, Renovate will create a new issue in the repository.
-This issue contains a "dashboard" where you can get a overview of the status of all updates.
+This issue contains a "dashboard" where you can get an overview of the status of all updates.
 
 Having the Dependency Dashboard also enables the concept of an "approval" workflow for new upgrades, either for selected dependencies (recommended) or even for all.
 
@@ -51,14 +51,14 @@ This section explains some common use cases where having the Dependency Dashboar
 
 ### Visibility into rejected/deferred updates
 
-Renovate's Dependency Dashboard shows a overview of all updates that are still "to do".
+Renovate's Dependency Dashboard shows an overview of all updates that are still "to do".
 
 If you close an update PR from Renovate without merging, the Dashboard will list this update in the Closed/Ignored section.
 If you later change your mind about the update, you can get a new PR by clicking the corresponding checkbox on the dashboard.
 
 ### Dependency Dashboard Approval workflow
 
-Sometimes you want Renovate to wait for your approval before creating a update PR.
+Sometimes you want Renovate to wait for your approval before creating an update PR.
 You can customize this "wait for approval" behavior however you like best.
 
 At a high level the options are:

@@ -2,12 +2,11 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { getName } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import * as git from '.';
 import { GitNoVerifyOption, setNoVerify } from '.';
 
-describe(getName(), () => {
+describe('util/git/index', () => {
   jest.setTimeout(15000);
 
   const masterCommitDate = new Date();

@@ -27,7 +27,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
 };
 
-describe('.updateArtifacts()', () => {
+describe('manager/cargo/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

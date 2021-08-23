@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName, mocked } from '../../../test/util';
+import { mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as dockerCommon from './common';
 
@@ -8,7 +8,7 @@ const hostRules = mocked(_hostRules);
 jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
 
-describe(getName(), () => {
+describe('datasource/docker/common', () => {
   beforeEach(() => {
     hostRules.find.mockReturnValue({
       username: 'some-username',

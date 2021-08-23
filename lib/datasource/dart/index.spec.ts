@@ -1,13 +1,13 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadJsonFixture } from '../../../test/util';
+import { loadJsonFixture } from '../../../test/util';
 import { DartDatasource } from '.';
 
 const body = loadJsonFixture('shared_preferences.json');
 
 const baseUrl = 'https://pub.dartlang.org/api/packages/';
 
-describe(getName(), () => {
+describe('datasource/dart/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/non_sense').reply(200, null);

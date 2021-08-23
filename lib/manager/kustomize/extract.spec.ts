@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
@@ -21,7 +21,7 @@ const gitImages = loadFixture('gitImages.yaml');
 const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
 const sha = loadFixture('sha.yaml');
 
-describe(getName(), () => {
+describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
     expect(file).not.toBeNull();
@@ -252,8 +252,15 @@ describe(getName(), () => {
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
     });
     it('extracts sha256 instead of tag', () => {
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(sha)).toMatchSnapshot();
+      expect(extractPackageFile(sha)).toMatchSnapshot({
+        deps: [
+          {
+            currentDigest:
+              'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c',
+            currentValue: undefined,
+          },
+        ],
+      });
     });
   });
 });

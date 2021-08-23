@@ -1,6 +1,6 @@
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { writeLocalFile } from '../../util/fs';
@@ -15,7 +15,7 @@ const cargo5toml = loadFixture('Cargo.5.toml');
 const cargo6configtoml = loadFixture('cargo.6.config.toml');
 const cargo6toml = loadFixture('Cargo.6.toml');
 
-describe(getName(), () => {
+describe('manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
     let config: ExtractConfig;
     let adminConfig: RepoGlobalConfig;

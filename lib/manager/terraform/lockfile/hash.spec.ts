@@ -1,12 +1,7 @@
 import { createReadStream } from 'fs';
 import { DirectoryResult, dir } from 'tmp-promise';
 import * as httpMock from '../../../../test/http-mock';
-import {
-  getFixturePath,
-  getName,
-  loadFixture,
-  logger,
-} from '../../../../test/util';
+import { getFixturePath, loadFixture, logger } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { Logger } from '../../../logger/types';
@@ -17,7 +12,7 @@ const releaseBackendAzurerm = loadFixture('releaseBackendAzurerm_2_56_0.json');
 
 const log = logger.logger as jest.Mocked<Logger>;
 
-describe(getName(), () => {
+describe('manager/terraform/lockfile/hash', () => {
   let cacheDir: DirectoryResult;
 
   beforeEach(async () => {

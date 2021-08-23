@@ -1,4 +1,4 @@
-import { defaultConfig, getName, platform } from '../../../test/util';
+import { defaultConfig, platform } from '../../../test/util';
 import { BranchStatus } from '../../types';
 import {
   ConfidenceConfig,
@@ -7,7 +7,7 @@ import {
   setStability,
 } from './status-checks';
 
-describe(getName(), () => {
+describe('workers/branch/status-checks', () => {
   describe('setStability', () => {
     let config: StabilityConfig;
     beforeEach(() => {

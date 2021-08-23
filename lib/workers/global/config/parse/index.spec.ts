@@ -1,5 +1,4 @@
 import upath from 'upath';
-import { getName } from '../../../../../test/util';
 import { readFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 
@@ -10,7 +9,7 @@ try {
   // file does not exist
 }
 
-describe(getName(), () => {
+describe('workers/global/config/parse/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];

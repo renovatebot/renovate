@@ -870,13 +870,13 @@ Array [
 exports[`manager/gradle/deep/index extractPackageFile should use docker even if gradlew is available 2`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/gradle",
+    "cmd": "docker pull renovate/java:11.0.12",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_gradle -aq",
+    "cmd": "docker ps --filter name=renovate_java -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -888,7 +888,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"/foo/bar\\":\\"/foo/bar\\" -e GRADLE_OPTS -w \\"/foo/bar\\" renovate/gradle bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_java --label=renovate_child -v \\"/foo/bar\\":\\"/foo/bar\\" -e GRADLE_OPTS -w \\"/foo/bar\\" renovate/java:11.0.12 bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "/foo/bar",
       "encoding": "utf-8",
@@ -1005,13 +1005,13 @@ Array [
 exports[`manager/gradle/deep/index extractPackageFile should use docker even if gradlew.bat is available on Windows 2`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/gradle",
+    "cmd": "docker pull renovate/java:11.0.12",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_gradle -aq",
+    "cmd": "docker ps --filter name=renovate_java -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -1023,7 +1023,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"/foo/bar\\":\\"/foo/bar\\" -e GRADLE_OPTS -w \\"/foo/bar\\" renovate/gradle bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_java --label=renovate_child -v \\"/foo/bar\\":\\"/foo/bar\\" -e GRADLE_OPTS -w \\"/foo/bar\\" renovate/java:11.0.12 bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "/foo/bar",
       "encoding": "utf-8",
@@ -1140,13 +1140,13 @@ Array [
 exports[`manager/gradle/deep/index extractPackageFile should use docker if required 2`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/gradle",
+    "cmd": "docker pull renovate/java:11.0.12",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_gradle -aq",
+    "cmd": "docker ps --filter name=renovate_java -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -1158,7 +1158,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"/foo/bar\\":\\"/foo/bar\\" -e GRADLE_OPTS -w \\"/foo/bar\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_java --label=renovate_child -v \\"/foo/bar\\":\\"/foo/bar\\" -e GRADLE_OPTS -w \\"/foo/bar\\" renovate/java:11.0.12 bash -l -c \\"install-tool gradle latest && gradle --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "/foo/bar",
       "encoding": "utf-8",

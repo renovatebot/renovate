@@ -41,7 +41,7 @@ const repoStatus = partial<StatusResult>({
   deleted: [],
 });
 
-describe('.updateArtifacts()', () => {
+describe('manager/composer/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -276,7 +276,6 @@ describe('.updateArtifacts()', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -284,17 +283,16 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([{ artifactError: { lockFile: 'composer.lock' } }]);
   });
 
   it('catches unmet requirements errors', async () => {
+    const stderr =
+      'fooYour requirements could not be resolved to an installable set of packages.bar';
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
-      throw new Error(
-        'fooYour requirements could not be resolved to an installable set of packages.bar'
-      );
+      throw new Error(stderr);
     });
-    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -302,7 +300,9 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([
+      { artifactError: { lockFile: 'composer.lock', stderr } },
+    ]);
   });
 
   it('throws for disk space', async () => {

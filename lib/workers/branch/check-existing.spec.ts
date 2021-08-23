@@ -1,9 +1,9 @@
-import { defaultConfig, getName, partial, platform } from '../../../test/util';
+import { defaultConfig, partial, platform } from '../../../test/util';
 import { PrState } from '../../types';
 import type { BranchConfig } from '../types';
 import { prAlreadyExisted } from './check-existing';
 
-describe(getName(), () => {
+describe('workers/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {
     let config: BranchConfig;
     beforeEach(() => {

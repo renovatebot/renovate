@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -10,7 +9,7 @@ import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
 
-describe(getName(), () => {
+describe('util/http/index', () => {
   let http: Http;
 
   beforeEach(() => {

@@ -149,6 +149,8 @@ You do not need to add it as a devDependency or add any other files to the prese
 It is also possible to host your preset config using just a regular GitLab repository and without needing to publish it to npmjs.
 In such cases Renovate will simply look for a `default.json` file in the default branch.
 
+For a private GitLab repository Renovate requires at least _Reporter_ level access.
+
 To host your preset config on GitLab:
 
 - Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
@@ -181,6 +183,8 @@ But you also probably want the preset to be private too, so how can the other re
 
 The answer is to host your preset using GitHub or GitLab - not npmjs - and make sure you have added the preset's repo to Renovate too.
 GitHub will then allow Renovate to access the preset repo whenever it is processing any other repos within the same account/org.
+
+For a private GitLab repository Renovate requires at least _Reporter_ level access.
 
 ## Contributing to presets
 

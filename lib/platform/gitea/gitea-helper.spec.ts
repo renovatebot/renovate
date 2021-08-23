@@ -1,10 +1,9 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
-describe(getName(), () => {
+describe('platform/gitea/gitea-helper', () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';

@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const aalib = loadFixture('aalib.rb');
@@ -7,7 +7,7 @@ const acmetool = loadFixture('acmetool.rb');
 const aide = loadFixture('aide.rb');
 const ibazel = loadFixture('ibazel.rb');
 
-describe(getName(), () => {
+describe('manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
     it('skips sourceforge dependency 1', () => {
       const res = extractPackageFile(aalib);
@@ -88,32 +88,6 @@ describe(getName(), () => {
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
-    it('skips if invalid url extension', () => {
-      const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.not_tar.not_gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
-      `;
-      const res = extractPackageFile(content);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
-    });
-    it('skips if invalid url version', () => {
-      const content = `
-          class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/vInvalid.version.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
-      `;
-      const res = extractPackageFile(content);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
-    });
     it('skips if invalid url protocol', () => {
       const content = `
           class Ibazel < Formula
@@ -124,8 +98,9 @@ describe(getName(), () => {
           end
       `;
       const res = extractPackageFile(content);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        deps: [{ depName: 'Ibazel', skipReason: 'unsupported-url' }],
+      });
     });
     it('skips if invalid url', () => {
       const content = `
@@ -137,8 +112,9 @@ describe(getName(), () => {
           end
       `;
       const res = extractPackageFile(content);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        deps: [{ depName: 'Ibazel', skipReason: 'unsupported-url' }],
+      });
     });
     it('skips if there is no sha256 field', () => {
       const content = `

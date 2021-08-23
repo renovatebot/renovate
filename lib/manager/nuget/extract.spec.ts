@@ -1,5 +1,5 @@
 import * as upath from 'upath';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig } from '../types';
@@ -11,7 +11,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('lib/manager/nuget/__fixtures__'),
 };
 
-describe(getName(), () => {
+describe('manager/nuget/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       setGlobalConfig(adminConfig);

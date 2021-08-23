@@ -1,7 +1,6 @@
-import { getName } from '../../../../test/util';
 import { matchesAnyPattern } from './utils';
 
-describe(getName(), () => {
+describe('manager/npm/extract/utils', () => {
   describe('.matchesAnyPattern()', () => {
     it('matches package in nested directory', () => {
       const packageFile = 'packages/group/a/package.json';
