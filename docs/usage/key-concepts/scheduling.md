@@ -64,7 +64,7 @@ Read our docs on the [timezone](https://docs.renovatebot.com/configuration-optio
 
 ### Scheduling syntax
 
-After you've set your local timezone, you can define days of the week or hours of the day in which Renovate is allowed to make changes.
+After you've set your local timezone, you can define "days of the week" or "hours of the day" in which Renovate is allowed to make changes.
 
 Examples of the kind of schedules you can create include:
 
