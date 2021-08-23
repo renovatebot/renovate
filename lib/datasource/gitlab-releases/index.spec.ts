@@ -1,9 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { GitlabReleasesDatasource } from '.';
 
-describe(getName(), () => {
+describe('datasource/gitlab-releases/index', () => {
   describe('getReleases', () => {
     const body = [
       {
