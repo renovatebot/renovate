@@ -131,7 +131,7 @@ Say you want to restrict `aws-sdk` to weekly updates, you would create this pack
 }
 ```
 
-The "schedule" propery must _always_ be defined in an array, even if you only set a single schedule.
+The "schedule" property must _always_ be defined in an array, even if you only set a single schedule.
 Multiple entries in the array means "or".
 
 Read the [schedule config option](https://docs.renovatebot.com/configuration-options/#schedule) documentation to earn more.
