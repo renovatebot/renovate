@@ -26,10 +26,10 @@ export async function checkAutoMerge(
 ): Promise<AutomergePrResult> {
   logger.trace({ config }, 'checkAutoMerge');
   const {
-    automergeComment,
-    automergeStrategy,
-    automergeType,
     branchName,
+    automergeType,
+    automergeStrategy,
+    automergeComment,
     ignoreTests,
     rebaseRequested,
   } = config;
