@@ -62,7 +62,6 @@ describe(getName(), () => {
           depName: 'mypkg',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for empty 200 OK', async () => {
