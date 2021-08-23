@@ -3,7 +3,7 @@ title: Renovate scheduling
 description: Learn how to schedule when Renovate bot runs
 ---
 
-This document describes Renovate bot's scheduling.
+This document describes Renovate's scheduling.
 
 ## Default behavior
 
