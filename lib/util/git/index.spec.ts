@@ -76,7 +76,7 @@ describe('util/git/index', () => {
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
     });
-    await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
@@ -159,7 +159,7 @@ describe('util/git/index', () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
     });
     it('should return false when author is ignored', async () => {
-      await git.setUserRepoConfig({
+      git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
       expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
@@ -494,7 +494,7 @@ describe('util/git/index', () => {
         url: base.path,
       });
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
 
       await git.initRepo({
@@ -504,7 +504,7 @@ describe('util/git/index', () => {
       await repo.checkout('renovate/test');
       await repo.commit('past message3', ['--amend']);
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
     });
 
