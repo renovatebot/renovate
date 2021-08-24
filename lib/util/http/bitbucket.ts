@@ -12,7 +12,7 @@ export class BitbucketHttp extends Http {
     super(PLATFORM_TYPE_BITBUCKET, options);
   }
 
-  protected request<T>(
+  protected override request<T>(
     url: string | URL,
     options?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {

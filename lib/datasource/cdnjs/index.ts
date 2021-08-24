@@ -10,11 +10,11 @@ export class CdnJsDatasource extends Datasource {
     super(CdnJsDatasource.id);
   }
 
-  customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  defaultRegistryUrls = ['https://api.cdnjs.com/'];
+  override readonly defaultRegistryUrls = ['https://api.cdnjs.com/'];
 
-  caching = true;
+  override readonly caching = true;
 
   // this.handleErrors will always throw
   // eslint-disable-next-line consistent-return
