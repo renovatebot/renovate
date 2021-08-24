@@ -8,15 +8,15 @@ import { TerraformDatasource } from './base';
 import type { RegistryRepository, TerraformRelease } from './types';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
-  static readonly id = 'terraform-module';
+  static override readonly id = 'terraform-module';
 
   constructor() {
     super(TerraformModuleDatasource.id);
   }
 
-  readonly defaultRegistryUrls = ['https://registry.terraform.io'];
+  override readonly defaultRegistryUrls = ['https://registry.terraform.io'];
 
-  readonly defaultVersioning = hashicorpVersioning.id;
+  override readonly defaultVersioning = hashicorpVersioning.id;
 
   /**
    * This function will fetch a package from the specified Terraform registry and return all semver versions.

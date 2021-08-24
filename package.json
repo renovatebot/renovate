@@ -130,7 +130,7 @@
     "@sindresorhus/is": "4.0.1",
     "@yarnpkg/core": "2.4.0",
     "@yarnpkg/parsers": "2.4.0",
-    "azure-devops-node-api": "10.2.2",
+    "azure-devops-node-api": "11.0.1",
     "bunyan": "1.8.15",
     "cacache": "15.2.0",
     "chalk": "4.1.2",

@@ -134,7 +134,13 @@ export async function updateArtifacts({
         ).trim() + ' --with-dependencies';
     }
     if (config.composerIgnorePlatformReqs) {
-      args += ' --ignore-platform-reqs';
+      if (config.composerIgnorePlatformReqs.length === 0) {
+        args += ' --ignore-platform-reqs';
+      } else {
+        config.composerIgnorePlatformReqs.forEach((req) => {
+          args += ' --ignore-platform-req ' + quote(req);
+        });
+      }
     }
     args += ' --no-ansi --no-interaction';
     if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
