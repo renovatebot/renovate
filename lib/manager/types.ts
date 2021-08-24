@@ -18,6 +18,7 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig {
+  constraints?: Record<string, string>;
   registryUrls?: string[];
   endpoint?: string;
   gradle?: { timeout?: number };
@@ -40,7 +41,7 @@ export interface CustomExtractConfig extends ExtractConfig {
 export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
-  composerIgnorePlatformReqs?: boolean;
+  composerIgnorePlatformReqs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;

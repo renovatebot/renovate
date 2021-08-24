@@ -240,6 +240,20 @@ describe('manager/regex/index', () => {
     expect(res.deps).toHaveLength(1);
   });
 
+  it('extracts with combination strategy and empty file', async () => {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
+      matchStrings: [
+        'CHART_REPOSITORY_URL: "(?<registryUrl>.*)\\/(?<depName>[a-z]+)\\/"',
+        'CHART_VERSION: (?<currentValue>.*?)\n',
+      ],
+      datasourceTemplate: 'helm',
+      depNameTemplate: 'helm_repo/{{{ depName }}}',
+    };
+    const res = await extractPackageFile('', '.gitlab-ci.yml', config);
+    expect(res).toBeNull();
+  });
+
   it('extracts with recursive strategy and single match', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [

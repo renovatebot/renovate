@@ -2,6 +2,7 @@
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/http-mock';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -113,6 +114,19 @@ describe('platform/gitlab/index', () => {
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it(`should reuse existing gitAuthor`, async () => {
+      httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
+        version: '13.3.6-ee',
+      });
+      expect(
+        await gitlab.initPlatform({
+          token: 'some-token',
+          endpoint: undefined,
+          gitAuthor: 'somebody',
+        })
+      ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
     });
   });
 
@@ -282,6 +296,40 @@ describe('platform/gitlab/index', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
       });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('should use ssh_url_to_repo if gitUrl is set to ssh', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `https://gitlab.com/some%2Frepo%2Fproject.git`,
+          ssh_url_to_repo: `ssh://git@gitlab.com/some%2Frepo%2Fproject.git`,
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo/project',
+        gitUrl: 'ssh',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(git.initRepo.mock.calls).toMatchSnapshot();
+    });
+
+    it('should throw if ssh_url_to_repo is not present but gitUrl is set to ssh', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `https://gitlab.com/some%2Frepo%2Fproject.git`,
+        });
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo/project',
+          gitUrl: 'ssh',
+        })
+      ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
