@@ -40,28 +40,6 @@ Array [
 ]
 `;
 
-exports[`manager/mix/artifacts catches exec errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "mix.lock",
-      "stderr": "exec-error",
-    },
-  },
-]
-`;
-
-exports[`manager/mix/artifacts catches write errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "mix.lock",
-      "stderr": "not found",
-    },
-  },
-]
-`;
-
 exports[`manager/mix/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
@@ -86,17 +64,6 @@ Array [
 `;
 
 exports[`manager/mix/artifacts returns updated mix.lock 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New mix.lock",
-      "name": "mix.lock",
-    },
-  },
-]
-`;
-
-exports[`manager/mix/artifacts returns updated mix.lock 2`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/elixir",
