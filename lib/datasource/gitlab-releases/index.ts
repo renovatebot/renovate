@@ -7,11 +7,11 @@ import type { GitlabRelease } from './types';
 export class GitlabReleasesDatasource extends Datasource {
   static readonly id = 'gitlab-releases';
 
-  readonly defaultRegistryUrls = ['https://gitlab.com'];
+  override readonly defaultRegistryUrls = ['https://gitlab.com'];
 
   static readonly registryStrategy = 'first';
 
-  http = new GitlabHttp();
+  override http = new GitlabHttp();
 
   constructor() {
     super(GitlabReleasesDatasource.id);
