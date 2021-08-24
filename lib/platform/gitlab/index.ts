@@ -79,6 +79,7 @@ let draftPrefix = DRAFT_PREFIX;
 export async function initPlatform({
   endpoint,
   token,
+  gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -89,16 +90,20 @@ export async function initPlatform({
   } else {
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
-  let gitAuthor: string;
+  const platformConfig: PlatformResult = {
+    endpoint: defaults.endpoint,
+  };
   let gitlabVersion: string;
   try {
-    const user = (
-      await gitlabApi.getJson<{ email: string; name: string; id: number }>(
-        `user`,
-        { token }
-      )
-    ).body;
-    gitAuthor = `${user.name} <${user.email}>`;
+    if (!gitAuthor) {
+      const user = (
+        await gitlabApi.getJson<{ email: string; name: string; id: number }>(
+          `user`,
+          { token }
+        )
+      ).body;
+      platformConfig.gitAuthor = `${user.name} <${user.email}>`;
+    }
     // version is 'x.y.z-edition', so not strictly semver; need to strip edition
     gitlabVersion = (
       await gitlabApi.getJson<{ version: string }>('version', { token })
@@ -115,10 +120,7 @@ export async function initPlatform({
   draftPrefix = lt(gitlabVersion, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-    gitAuthor,
-  };
+
   return platformConfig;
 }
 
