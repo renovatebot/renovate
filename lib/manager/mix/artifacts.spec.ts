@@ -87,7 +87,6 @@ describe('manager/mix/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -95,7 +94,7 @@ describe('manager/mix/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([{ file: { contents: 'New mix.lock', name: 'mix.lock' } }]);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -161,7 +160,6 @@ describe('manager/mix/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -169,7 +167,9 @@ describe('manager/mix/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'mix.lock', stderr: 'not found' } },
+    ]);
   });
 
   it('catches exec errors', async () => {
@@ -178,7 +178,6 @@ describe('manager/mix/artifacts', () => {
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -186,6 +185,8 @@ describe('manager/mix/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'mix.lock', stderr: 'exec-error' } },
+    ]);
   });
 });

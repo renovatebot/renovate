@@ -69,9 +69,3 @@ Object {
   ],
 }
 `;
-
-exports[`manager/mix/extract extractPackageFile() returns empty for invalid dependency file 1`] = `
-Object {
-  "deps": Array [],
-}
-`;
