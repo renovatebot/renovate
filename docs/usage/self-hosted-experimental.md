@@ -43,6 +43,6 @@ See <https://github.com/renovatebot/renovate/issues/8660> for background on why 
 ## RENOVATE_X_SERVER_VERSION
 
 If set, renovate will use that string as GitLab server version instead of checking via gitlab api.
-This can be usefull when using the GitlBal `CI_JOB_TOKEN` for running renovate.
+This can be usefull when using the GitLab `CI_JOB_TOKEN` for running renovate.
 
 See <https://docs.gitlab.com/ee/api/version.html>
