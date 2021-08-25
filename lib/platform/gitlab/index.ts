@@ -105,8 +105,8 @@ export async function initPlatform({
       platformConfig.gitAuthor = `${user.name} <${user.email}>`;
     }
     // istanbul ignore if: experimental feature
-    if (process.env.RENOVATE_X_SERVER_VERSION) {
-      gitlabVersion = process.env.RENOVATE_X_SERVER_VERSION;
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
     } else {
       const version = (
         await gitlabApi.getJson<{ version: string }>('version', { token })

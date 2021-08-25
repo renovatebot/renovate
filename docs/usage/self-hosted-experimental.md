@@ -40,7 +40,7 @@ If set to any string, Renovate will use this as the `user-agent` it sends with H
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See <https://github.com/renovatebot/renovate/issues/8660> for background on why this was created.
 
-## RENOVATE_X_SERVER_VERSION
+## RENOVATE_X_PLATFORM_VERSION
 
 If set, Renovate will use this string as GitLab server version instead of checking via the GitLab API.
 This can be useful when you use the GitLab `CI_JOB_TOKEN` to authenticate Renovate.
