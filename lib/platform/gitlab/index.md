@@ -7,7 +7,7 @@
 ## Server version dependend features
 
 We use the GitLab [version api](https://docs.gitlab.com/ee/api/version.html) to fetch the server version.
-This can be overridden by the experimental feature flag (`RENOVATE_X_SERVER_VERSION`)(https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_server_version).
+This can be overridden by the experimental feature flag [`RENOVATE_X_SERVER_VERSION`](https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_server_version).
 
 - Use `Draft:` MR prefix instead of `WIP:` prefix since `v13.2.0`
 - Do not truncate markdown body to 25K since `v13.4.0`
