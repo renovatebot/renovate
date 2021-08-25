@@ -65,7 +65,7 @@ describe('workers/repository/dependency-dashboard', () => {
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
