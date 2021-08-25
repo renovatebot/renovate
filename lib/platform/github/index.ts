@@ -35,6 +35,7 @@ import type {
   FindPRConfig,
   Issue,
   MergePRConfig,
+  PlatformParams,
   PlatformResult,
   Pr,
   RepoParams,
@@ -80,12 +81,7 @@ export async function initPlatform({
   token,
   username,
   gitAuthor,
-}: {
-  endpoint: string;
-  token: string;
-  username?: string;
-  gitAuthor?: string;
-}): Promise<PlatformResult> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }

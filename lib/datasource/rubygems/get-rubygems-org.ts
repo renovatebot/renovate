@@ -1,11 +1,8 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getElapsedMinutes } from '../../util/date';
-import { Http } from '../../util/http';
 import type { ReleaseResult } from '../types';
-import { id } from './common';
-
-const http = new Http(id);
+import { http } from './common';
 
 let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key

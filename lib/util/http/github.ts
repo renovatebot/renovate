@@ -165,7 +165,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     super(hostType, options);
   }
 
-  protected async request<T>(
+  protected override async request<T>(
     url: string | URL,
     options?: GithubInternalOptions & GithubHttpOptions,
     okToRetry = true

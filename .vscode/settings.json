@@ -12,5 +12,7 @@
     "Dockerfile.*": "dockerfile",
     ".releaserc": "json"
   },
-  "omnisharp.autoStart": false
+  "omnisharp.autoStart": false,
+  "jest.autoRun": "off",
+  "jest.jestCommandLine": "yarn jest"
 }
