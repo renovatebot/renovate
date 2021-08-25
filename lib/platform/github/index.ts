@@ -23,7 +23,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../util/url';
 import type {
   AggregatedVulnerabilities,
   BranchStatusConfig,
@@ -114,6 +114,13 @@ export async function initPlatform({
     gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
+
+  // Generic github hostRule that per default all datasources using github api are enabled
+  const genericGithubHostRule = {
+    matchHost: parseUrl(defaults.endpoint).hostname,
+    token,
+  };
+  hostRules.add(genericGithubHostRule);
   return platformConfig;
 }
 
