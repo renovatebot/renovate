@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { logger } from '../../dist/logger/index.js';
+import { logger } from '../../lib/logger';
 
 export const newFiles = new Set();
 
