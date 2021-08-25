@@ -104,7 +104,7 @@ export async function initPlatform({
       ).body;
       platformConfig.gitAuthor = `${user.name} <${user.email}>`;
     }
-    // istabul ignore if: experimental feature
+    // istanbul ignore if: experimental feature
     if (process.env.RENOVATE_X_SERVER_VERSION) {
       gitlabVersion = process.env.RENOVATE_X_SERVER_VERSION;
     } else {
