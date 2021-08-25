@@ -104,11 +104,18 @@ export async function initPlatform({
       ).body;
       platformConfig.gitAuthor = `${user.name} <${user.email}>`;
     }
-    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
-    gitlabVersion = (
-      await gitlabApi.getJson<{ version: string }>('version', { token })
-    ).body.version.split('-')[0];
+    // istabul ignore if: experimental feature
+    if (process.env.RENOVATE_X_SERVER_VERSION) {
+      gitlabVersion = process.env.RENOVATE_X_SERVER_VERSION;
+    } else {
+      const version = (
+        await gitlabApi.getJson<{ version: string }>('version', { token })
+      ).body;
+      gitlabVersion = version.version;
+    }
     logger.debug('GitLab version is: ' + gitlabVersion);
+    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
+    [gitlabVersion] = gitlabVersion.split('-');
     defaults.version = gitlabVersion;
   } catch (err) {
     logger.debug(
@@ -117,7 +124,7 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  draftPrefix = lt(gitlabVersion, '13.2.0')
+  draftPrefix = lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
 
