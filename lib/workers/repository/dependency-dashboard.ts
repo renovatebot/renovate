@@ -113,7 +113,7 @@ export async function ensureDependencyDashboard(
       )
     )
   ) {
-    if (getGlobalConfig().dryRun) {
+    if (getAdminConfig().dryRun) {
       logger.info(
         'DRY-RUN: Would close Dependency Dashboard ' +
           config.dependencyDashboardTitle
