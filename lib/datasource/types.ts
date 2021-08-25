@@ -1,3 +1,5 @@
+import type { ModuleApi } from '../types';
+
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -60,7 +62,7 @@ export interface ReleaseResult {
   registryUrl?: string;
 }
 
-export interface DatasourceApi {
+export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
@@ -87,4 +89,7 @@ export interface DatasourceApi {
    * false: caching is not performed, or performed within the datasource implementation
    */
   caching?: boolean;
+
+  /** optional urls to add do docs as references */
+  urls?: string[];
 }

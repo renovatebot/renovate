@@ -4,7 +4,7 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../config/types';
-import type { RangeStrategy, SkipReason } from '../types';
+import type { ModuleApi, RangeStrategy, SkipReason } from '../types';
 import type { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
@@ -221,7 +221,7 @@ export interface UpdateLockedConfig {
   newVersion?: string;
 }
 
-export interface ManagerApi {
+export interface ManagerApi extends ModuleApi {
   defaultConfig: Record<string, unknown>;
   language?: string;
   supportsLockFileMaintenance?: boolean;

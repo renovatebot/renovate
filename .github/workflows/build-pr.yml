@@ -97,7 +97,7 @@ jobs:
       - name: Lint
         run: |
           yarn ls-lint
-          yarn eslint
+          yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
           yarn prettier
           yarn markdown-lint
 
@@ -106,3 +106,15 @@ jobs:
 
       - name: Type check
         run: yarn type-check
+
+      - name: Build
+        run: yarn build
+
+      - name: Build docs
+        run: yarn build:docs
+
+      - name: Upload docs
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: docs
+          path: tmp/docs

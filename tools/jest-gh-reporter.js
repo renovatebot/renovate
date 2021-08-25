@@ -1,16 +1,22 @@
-import { relative } from 'path';
-import { error } from '@actions/core';
-import { issueCommand } from '@actions/core/lib/command';
-import { AggregatedResult, BaseReporter, Context } from '@jest/reporters';
-import { AssertionResult, TestResult } from '@jest/test-result';
-import stripAnsi from 'strip-ansi';
-import { getEnv } from './utils';
+const { error } = require('@actions/core');
+const { issueCommand } = require('@actions/core/lib/command');
+const { BaseReporter } = require('@jest/reporters');
+const stripAnsi = require('strip-ansi');
+const { relative } = require('upath');
 
 const ROOT = process.cwd();
 
-type Level = 'debug' | 'warning' | 'error';
+/**
+ * @param {string} key
+ */
+function getEnv(key) {
+  return process.env[key] ?? '';
+}
 
-function getCmd(test: AssertionResult): Level {
+/**
+ * @param {import('@jest/test-result').AssertionResult} test
+ */
+function getCmd(test) {
   switch (test.status) {
     case 'failed':
       return 'error';
@@ -22,14 +28,20 @@ function getCmd(test: AssertionResult): Level {
   }
 }
 
-function getPath(suite: TestResult): string {
+/**
+ * @param {import('@jest/reporters').TestResult} suite
+ */
+function getPath(suite) {
   return relative(ROOT, suite.testFilePath).replace(/\\/g, '/');
 }
 
 const ignoreStates = new Set(['passed', 'pending']);
 const lineRe = /\.spec\.ts:(?<line>\d+):(?<col>\d+)\)/;
 
-function getPos(msg: string): Record<string, string> {
+/**
+ * @param {string} msg
+ */
+function getPos(msg) {
   const pos = lineRe.exec(msg);
   if (!pos || !pos.groups) {
     return {};
@@ -45,11 +57,14 @@ function getPos(msg: string): Record<string, string> {
 }
 
 class GitHubReporter extends BaseReporter {
+  /**
+   * @override
+   * @param {Set<import('@jest/reporters').Context>} _contexts
+   * @param {import('@jest/reporters').AggregatedResult} testResult
+   * @returns
+   */
   // eslint-disable-next-line class-methods-use-this
-  override onRunComplete(
-    _contexts: Set<Context>,
-    testResult: AggregatedResult
-  ): void {
+  onRunComplete(_contexts, testResult) {
     try {
       if (getEnv('GITHUB_ACTIONS') !== 'true') {
         return;
@@ -70,9 +85,9 @@ class GitHubReporter extends BaseReporter {
         }
       }
     } catch (e) {
-      error(`Unexpected error: ${(e as Error).toString()}`);
+      error(`Unexpected error: ${e.toString()}`);
     }
   }
 }
 
-export = GitHubReporter;
+module.exports = GitHubReporter;

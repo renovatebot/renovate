@@ -1,3 +1,7 @@
+---
+title: Datasources
+---
+
 # Datasources
 
 Once Renovate's manager is done scanning files and extracting dependencies, it will assign a `datasource` to each extracted package file and/or dependency so that Renovate then knows how to search for new versions.

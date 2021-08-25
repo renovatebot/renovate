@@ -1,14 +1,11 @@
-import { relative } from 'path';
-import { error } from '@actions/core';
-import { issueCommand } from '@actions/core/lib/command';
-import { CLIEngine, Linter } from 'eslint';
-import stripAnsi from 'strip-ansi';
+const { error } = require('@actions/core');
+const { issueCommand } = require('@actions/core/lib/command');
+const stripAnsi = require('strip-ansi');
+const upath = require('upath');
 
 const ROOT = process.cwd();
 
-type Level = 'debug' | 'warning' | 'error';
-
-function getCmd(severity: Linter.Severity): Level {
+function getCmd(severity) {
   switch (severity) {
     case 2:
       return 'error';
@@ -19,11 +16,12 @@ function getCmd(severity: Linter.Severity): Level {
   }
 }
 
-function getPath(path: string): string {
-  return relative(ROOT, path).replace(/\\/g, '/');
+function getPath(path) {
+  return upath.relative(ROOT, path).replace(/\\/g, '/');
 }
 
-const formatter: CLIEngine.Formatter = (results) => {
+/** @type {import('eslint').CLIEngine.Formatter} */
+const formatter = (results) => {
   try {
     for (const { filePath, messages } of results) {
       const file = getPath(filePath);
@@ -38,9 +36,9 @@ const formatter: CLIEngine.Formatter = (results) => {
       }
     }
   } catch (e) {
-    error(`Unexpected error: ${(e as Error).toString()}`);
+    error(`Unexpected error: ${e.toString()}`);
   }
   return '';
 };
 
-export = formatter;
+module.exports = formatter;
