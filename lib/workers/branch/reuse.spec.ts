@@ -1,7 +1,7 @@
 import { git, platform } from '../../../test/util';
-import type { RenovateConfig } from '../../config/types';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';
+import type { BranchConfig } from '../types';
 import { shouldReuseExistingBranch } from './reuse';
 
 jest.mock('../../util/git');
@@ -13,12 +13,13 @@ describe('workers/branch/reuse', () => {
       state: PrState.Open,
       title: 'any',
     };
-    let config: RenovateConfig;
+    let config: BranchConfig;
     beforeEach(() => {
       config = {
         branchName: 'renovate/some-branch',
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
+        upgrades: [],
       };
       jest.resetAllMocks();
     });
@@ -34,6 +35,50 @@ describe('workers/branch/reuse', () => {
       expect(res.reuseExistingBranch).toBe(true);
     });
     it('returns true if does not need rebasing', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        ...pr,
+        isConflicted: false,
+      });
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(true);
+    });
+
+    it('returns false if does not need rebasing but has upgrades that need lockfile maintenance along with upgrades that do not', async () => {
+      config.upgrades = [
+        {
+          packageFile: 'package.json',
+          rangeStrategy: 'replace',
+          branchName: 'current',
+        },
+        {
+          packageFile: 'package.json',
+          rangeStrategy: 'update-lockfile',
+          branchName: 'current',
+        },
+      ];
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        ...pr,
+        isConflicted: false,
+      });
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(false);
+    });
+
+    it('returns true if does not need rebasing and lockfile update is on different packages', async () => {
+      config.upgrades = [
+        {
+          packageFile: 'package.json',
+          rangeStrategy: 'replace',
+          branchName: 'current',
+        },
+        {
+          packageFile: 'subpackage/package.json',
+          rangeStrategy: 'update-lockfile',
+          branchName: 'current',
+        },
+      ];
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
