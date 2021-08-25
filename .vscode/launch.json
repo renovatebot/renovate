@@ -6,7 +6,9 @@
       "request": "launch",
       "name": "debug",
       "program": "${workspaceFolder}/lib/renovate.ts",
-      "env": { "LOG_LEVEL": "debug" },
+      "env": {
+        "LOG_LEVEL": "debug"
+      },
       "console": "integratedTerminal",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
       "protocol": "inspector",
@@ -23,7 +25,10 @@
         "--runTestsByPath",
         "${relativeFile}"
       ],
-      "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
+      "env": {
+        "NODE_ENV": "test",
+        "LOG_LEVEL": "debug"
+      },
       "console": "integratedTerminal",
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
@@ -38,7 +43,10 @@
       "name": "Jest All",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "args": ["--runInBand", "--collectCoverage=false"],
-      "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
+      "env": {
+        "NODE_ENV": "test",
+        "LOG_LEVEL": "debug"
+      },
       "console": "integratedTerminal",
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
@@ -46,6 +54,17 @@
       "runtimeArgs": ["--preserve-symlinks"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "type": "node",
+      "name": "vscode-jest-tests",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "yarn",
+      "args": ["jest", "--runInBand", "--watchAll=false"]
     }
   ]
 }
