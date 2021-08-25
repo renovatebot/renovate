@@ -107,9 +107,6 @@ jobs:
       - name: Type check
         run: yarn type-check
 
-      - name: Build
-        run: yarn build
-
       - name: Build docs
         run: yarn build:docs
 
