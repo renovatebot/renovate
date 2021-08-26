@@ -14,7 +14,7 @@ This package will manage two parts of the `kustomization.yaml` file:
 
 - Needs to have `kind: Kustomization` defined
 - Currently this hasn't been tested using HTTPS to fetch the repos
-- Order of image tags does not matter:
+- The keys for the image tags can be in any order
 
 ```yaml
 - name: image/name

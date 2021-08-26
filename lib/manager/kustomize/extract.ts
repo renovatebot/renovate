@@ -88,21 +88,21 @@ export function extractImage(image: Image): PackageDependency | null {
     }
 
     const dep = splitImageParts(`${depName}:${newTag}`);
-    Object.assign(dep, {
+    return {
+      ...dep,
       datasource: datasourceDocker.id,
       versioning: dockerVersioning.id,
       replaceString: newTag,
-    });
-    return dep;
+    };
   }
 
   if (image.newName) {
-    Object.assign(nameDep, {
+    return {
+      ...nameDep,
       datasource: datasourceDocker.id,
       versioning: dockerVersioning.id,
       replaceString: image.newName,
-    });
-    return nameDep;
+    };
   }
 
   return null;
