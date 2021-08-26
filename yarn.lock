@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@actions/core@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@actions/core/-/core-1.4.0.tgz#cf2e6ee317e314b03886adfeb20e448d50d6e524"
-  integrity sha512-CGx2ilGq5i7zSLgiiGUtBCxhRRxibJYU6Fim0Q1Wg2aQL2LTnF27zbqZOrxfvFQ55eSBW0L8uVStgtKMpa0Qlg==
+"@actions/core@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@actions/core/-/core-1.5.0.tgz#885b864700001a1b9a6fba247833a036e75ad9d3"
+  integrity sha512-eDOLH1Nq9zh+PJlYLqEMkS/jLQxhksPNmUGNBHfa4G+tQmnIhzpctxmchETtVGyBOvXgOVVpYuE40+eS4cUnwQ==
 
 "@arcanis/slice-ansi@^1.0.2":
   version "1.0.2"
