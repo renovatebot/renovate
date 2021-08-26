@@ -130,6 +130,17 @@ describe('platform/github/index', () => {
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('should add initialized platform with predefined generic host rule for github api', async () => {
+      expect(
+        await github.initPlatform({
+          token: 'abc123',
+          username: 'renovate-bot',
+          gitAuthor: 'renovate@whitesourcesoftware.com',
+        } as any)
+      ).toMatchSnapshot();
+      expect(hostRules.add).toMatchSnapshot();
+    });
   });
 
   describe('getRepos', () => {

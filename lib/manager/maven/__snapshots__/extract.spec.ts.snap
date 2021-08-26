@@ -166,12 +166,3 @@ Object {
   "packageFile": null,
 }
 `;
-
-exports[`manager/maven/extract extractDependencies tries minimum manifests 1`] = `
-Object {
-  "datasource": "maven",
-  "deps": Array [],
-  "mavenProps": Object {},
-  "packageFile": null,
-}
-`;

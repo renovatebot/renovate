@@ -24,9 +24,9 @@ export class OrbDatasource extends Datasource {
     super(OrbDatasource.id);
   }
 
-  customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  defaultRegistryUrls = ['https://circleci.com/'];
+  override readonly defaultRegistryUrls = ['https://circleci.com/'];
 
   @cache({
     namespace: `datasource-${OrbDatasource.id}`,

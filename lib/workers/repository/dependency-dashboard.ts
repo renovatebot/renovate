@@ -113,6 +113,15 @@ export async function ensureDependencyDashboard(
       )
     )
   ) {
+    if (getGlobalConfig().dryRun) {
+      logger.info(
+        'DRY-RUN: Would close Dependency Dashboard ' +
+          config.dependencyDashboardTitle
+      );
+    } else {
+      logger.debug('Closing Dependency Dashboard');
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
+    }
     return;
   }
   // istanbul ignore if
