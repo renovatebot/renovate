@@ -21,10 +21,17 @@ process.on('unhandledRejection', (err) => {
 (async () => {
   try {
     const dist = 'tmp/docs';
+    let r: shell.ShellString;
+
     logger.info('generating docs');
 
+    r = shell.mkdir('-p', `${dist}/`);
+    if (r.code) {
+      return;
+    }
+
     logger.info('* static');
-    let r = shell.cp('-r', 'docs/usage/*', `${dist}/`);
+    r = shell.cp('-r', 'docs/usage/*', `${dist}/`);
     if (r.code) {
       return;
     }

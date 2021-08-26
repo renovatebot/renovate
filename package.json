@@ -9,7 +9,7 @@
   "scripts": {
     "build": "run-s clean generate:* compile:*",
     "build:docs": "run-s \"release:prepare {@}\"",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist tmp",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
     "config-validator": "node -r ts-node/register/transpile-only -- lib/config-validator.ts",
