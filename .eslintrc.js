@@ -136,12 +136,38 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.mjs'],
+      files: ['**/*.{js,mjs}'],
 
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/explicit-module-boundary-types': 0,
         '@typescript-eslint/restrict-template-expressions': 0,
+      },
+    },
+    {
+      files: ['tools/**/*.{ts,js,mjs}'],
+      env: {
+        node: true,
+      },
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          { devDependencies: true },
+        ],
+      },
+    },
+    {
+      files: ['tools/**/*.js'],
+      rules: {
+        // need commonjs
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+    {
+      files: ['*.mjs'],
+      rules: {
+        // esm always requires extensions
+        'import/extensions': 0,
       },
     },
   ],

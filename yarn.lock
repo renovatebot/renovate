@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@actions/core@1.5.0":
+"@actions/core@1.5.0", "@actions/core@^1.2.0", "@actions/core@^1.2.6":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@actions/core/-/core-1.5.0.tgz#885b864700001a1b9a6fba247833a036e75ad9d3"
   integrity sha512-eDOLH1Nq9zh+PJlYLqEMkS/jLQxhksPNmUGNBHfa4G+tQmnIhzpctxmchETtVGyBOvXgOVVpYuE40+eS4cUnwQ==
@@ -3937,6 +3937,13 @@ eslint-config-prettier@8.3.0:
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.3.0.tgz#f7471b20b6fe8a9a9254cc684454202886a2dd7a"
   integrity sha512-BgZuLUSeKzvlL/VUjx/Yb787VQ26RU3gGjA3iiFvdsp/2bMfVIWUVP7tjxtjS0e+HP409cPlPvNkQloz8C91ew==
 
+eslint-formatter-gha@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-formatter-gha/-/eslint-formatter-gha-1.2.0.tgz#ce52de9f9b17c65dc138482c0990fd2a158548be"
+  integrity sha512-teAorPqDzHzzYNCQCptdoYsnc+CZFXYcdB4v3dTi4Yqe8V64aShsbvtvPtYuJnKBoN6AwPzZ9P4D7R0hdQ5bcA==
+  dependencies:
+    "@actions/core" "^1.2.6"
+
 eslint-import-resolver-node@^0.3.6:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.6.tgz#4048b958395da89668252001dbd9eca6b83bacbd"
@@ -5618,6 +5625,13 @@ jest-get-type@^27.0.6:
   version "27.0.6"
   resolved "https://registry.yarnpkg.com/jest-get-type/-/jest-get-type-27.0.6.tgz#0eb5c7f755854279ce9b68a9f1a4122f69047cfe"
   integrity sha512-XTkK5exIeUbbveehcSR8w0bhH+c0yloW/Wpl+9vZrjzztCPWrxhHwkIFpZzCt71oRBsgxmuUfxEqOYoZI2macg==
+
+jest-github-actions-reporter@1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/jest-github-actions-reporter/-/jest-github-actions-reporter-1.0.3.tgz#6aa2b3a6599352e1043bbe42628a7f73a1ce48c2"
+  integrity sha512-IwLAKLSWLN8ZVfcfEEv6rfeWb78wKDeOhvOmH9KKXayKsKLSCwceopBcB+KUtwxfB5wYnT8Y9s2eZ+WdhA5yng==
+  dependencies:
+    "@actions/core" "^1.2.0"
 
 jest-haste-map@^27.0.6:
   version "27.0.6"
