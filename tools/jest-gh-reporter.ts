@@ -46,7 +46,10 @@ function getPos(msg: string): Record<string, string> {
 
 class GitHubReporter extends BaseReporter {
   // eslint-disable-next-line class-methods-use-this
-  onRunComplete(_contexts: Set<Context>, testResult: AggregatedResult): void {
+  override onRunComplete(
+    _contexts: Set<Context>,
+    testResult: AggregatedResult
+  ): void {
     try {
       if (getEnv('GITHUB_ACTIONS') !== 'true') {
         return;

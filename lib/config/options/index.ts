@@ -298,10 +298,10 @@ const options: RenovateOptions[] = [
   {
     name: 'composerIgnorePlatformReqs',
     description:
-      'Enable / disable use of --ignore-platform-reqs in the Composer package manager.',
-    type: 'boolean',
-    default: true,
-    globalOnly: true,
+      'Configure use of `--ignore-platform-reqs`/`--ignore-platform-req` for the Composer package manager.',
+    type: 'array',
+    subType: 'string',
+    default: [],
   },
   // Log options
   {
@@ -419,7 +419,7 @@ const options: RenovateOptions[] = [
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
     default:
-      'This issue contains a list of Renovate updates and their statuses.',
+      'This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)',
   },
   {
     name: 'dependencyDashboardFooter',
@@ -2029,6 +2029,16 @@ const options: RenovateOptions[] = [
       'Whether to update pinned (single version) dependencies or not.',
     type: 'boolean',
     default: true,
+  },
+  {
+    name: 'gitUrl',
+    description:
+      'Overrides the default resolution for git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
+    type: 'string',
+    allowedValues: ['default', 'ssh', 'endpoint'],
+    default: 'default',
+    stage: 'repository',
+    globalOnly: true,
   },
 ];
 

@@ -252,8 +252,15 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
     });
     it('extracts sha256 instead of tag', () => {
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(sha)).toMatchSnapshot();
+      expect(extractPackageFile(sha)).toMatchSnapshot({
+        deps: [
+          {
+            currentDigest:
+              'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c',
+            currentValue: undefined,
+          },
+        ],
+      });
     });
   });
 });
