@@ -186,13 +186,6 @@ describe('platform/bitbucket/index', () => {
   });
 
   describe('getBranchStatus()', () => {
-    it('getBranchStatus 1', async () => {
-      await initRepoMock();
-      expect(await bitbucket.getBranchStatus('master', true)).toBe(
-        BranchStatus.green
-      );
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
     it('getBranchStatus 3', async () => {
       const scope = await initRepoMock();
       scope

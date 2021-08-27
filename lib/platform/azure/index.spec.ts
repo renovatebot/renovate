@@ -475,11 +475,6 @@ describe('platform/azure/index', () => {
     });
   });
   describe('getBranchStatus(branchName, ignoreTests)', () => {
-    it('return success if ignoreTests true', async () => {
-      await initRepo('some/repo');
-      const res = await azure.getBranchStatus('somebranch', true);
-      expect(res).toEqual(BranchStatus.green);
-    });
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(

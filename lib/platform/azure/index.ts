@@ -333,13 +333,9 @@ export async function getBranchStatusCheck(
 }
 
 export async function getBranchStatus(
-  branchName: string,
-  ignoreTests = false
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (ignoreTests) {
-    return BranchStatus.green;
-  }
   const statuses = await getStatusCheck(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {

@@ -372,13 +372,9 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  ignoreTests = false
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (ignoreTests) {
-    return BranchStatus.green;
-  }
 
   if (!git.branchExists(branchName)) {
     throw new Error(REPOSITORY_CHANGED);

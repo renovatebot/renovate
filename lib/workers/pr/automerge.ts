@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { deleteBranch, isBranchModified } from '../../util/git';
+import { getBranchStatus } from '../branch/status-checks';
 import { BranchConfig } from '../types';
 
 export enum PrAutomergeBlockReason {
@@ -51,7 +52,10 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: PrAutomergeBlockReason.PlatformNotReady,
     };
   }
-  const branchStatus = await platform.getBranchStatus(branchName, ignoreTests);
+  const branchStatus = await getBranchStatus(
+    config.branchName,
+    config.ignoreTests
+  );
   if (branchStatus !== BranchStatus.green) {
     logger.debug(
       `PR is not ready for merge (branch status is ${branchStatus})`

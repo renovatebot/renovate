@@ -352,14 +352,7 @@ const platform: Platform = {
     }
   },
 
-  async getBranchStatus(
-    branchName: string,
-    ignoreTests = false
-  ): Promise<BranchStatus> {
-    if (ignoreTests) {
-      return BranchStatus.green;
-    }
-
+  async getBranchStatus(branchName: string): Promise<BranchStatus> {
     let ccs: helper.CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);

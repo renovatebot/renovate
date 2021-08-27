@@ -697,8 +697,6 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', true);
-      expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should pass through success', async () => {

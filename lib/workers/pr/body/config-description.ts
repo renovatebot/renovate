@@ -1,6 +1,6 @@
-import { platform } from '../../../platform';
 import { BranchStatus } from '../../../types';
 import { emojify } from '../../../util/emoji';
+import { getBranchStatus } from '../../branch/status-checks';
 import type { BranchConfig } from '../../types';
 
 export async function getPrConfigDescription(
@@ -26,7 +26,7 @@ export async function getPrConfigDescription(
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
   if (config.automerge) {
-    const branchStatus = await platform.getBranchStatus(
+    const branchStatus = await getBranchStatus(
       config.branchName,
       config.ignoreTests
     );

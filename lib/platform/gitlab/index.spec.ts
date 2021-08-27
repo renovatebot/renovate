@@ -528,10 +528,6 @@ describe('platform/gitlab/index', () => {
     });
   });
   describe('getBranchStatus(branchName, ignoreTests)', () => {
-    it('returns success if ignoreTests true', async () => {
-      const res = await gitlab.getBranchStatus('somebranch', true);
-      expect(res).toEqual(BranchStatus.green);
-    });
     it('returns pending if no results', async () => {
       const scope = await initRepo();
       scope

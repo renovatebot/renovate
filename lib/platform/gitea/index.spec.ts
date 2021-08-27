@@ -405,12 +405,6 @@ describe('platform/gitea/index', () => {
       return gitea.getBranchStatus('some-branch');
     };
 
-    it('should return success if ignoreTests true', async () => {
-      expect(await gitea.getBranchStatus('some-branch', true)).toEqual(
-        BranchStatus.green
-      );
-    });
-
     it('should return yellow for unknown result', async () => {
       expect(await getBranchStatus('unknown')).toEqual(BranchStatus.yellow);
     });

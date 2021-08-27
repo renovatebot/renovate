@@ -1758,10 +1758,6 @@ Followed by some information.
             BranchStatus.green
           );
 
-          expect(await bitbucket.getBranchStatus('somebranch', true)).toEqual(
-            BranchStatus.green
-          );
-
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
