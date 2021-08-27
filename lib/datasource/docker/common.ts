@@ -87,12 +87,20 @@ export async function getAuthHeaders(
       url: apiCheckUrl,
     });
     if (ecrRegex.test(registryHost)) {
+      logger.trace(
+        { registryHost, dockerRepository },
+        `Using ecr auth for Docker registry`
+      );
       const [, region] = ecrRegex.exec(registryHost);
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
       }
     } else if (opts.username && opts.password) {
+      logger.trace(
+        { registryHost, dockerRepository },
+        `Using basic auth for Docker registry`
+      );
       const auth = Buffer.from(`${opts.username}:${opts.password}`).toString(
         'base64'
       );
@@ -100,25 +108,26 @@ export async function getAuthHeaders(
     } else if (opts.token) {
       const authType = opts.authType ?? 'Bearer';
       logger.trace(
-        `Using ${authType} token for Docker registry ${registryHost}`
+        { registryHost, dockerRepository },
+        `Using ${authType} token for Docker registry`
       );
       opts.headers = { authorization: `${authType} ${opts.token}` };
-      return opts.headers;
     }
     delete opts.username;
     delete opts.password;
     delete opts.token;
 
-    if (authenticateHeader.scheme.toUpperCase() === 'BASIC') {
-      logger.trace(`Using Basic auth for docker registry ${registryHost}`);
-      await http.get(apiCheckUrl, opts);
-      return opts.headers;
-    }
+    // TODO: This seems totally wrong to me
+    // if (authenticateHeader.scheme.toUpperCase() === 'BASIC') {
+    //   logger.trace(`Using Basic auth for docker registry ${registryHost}`);
+    //   await http.get(apiCheckUrl, opts);
+    //   return opts.headers;
+    // }
 
-    // prettier-ignore
-    const authUrl = `${String(authenticateHeader.parms.realm)}?service=${String(authenticateHeader.parms.service)}&scope=repository:${dockerRepository}:pull`;
+    const authUrl = `${authenticateHeader.parms.realm}?service=${authenticateHeader.parms.service}&scope=repository:${dockerRepository}:pull`;
     logger.trace(
-      `Obtaining docker registry token for ${dockerRepository} using url ${authUrl}`
+      { registryHost, dockerRepository, authUrl },
+      `Obtaining docker registry token`
     );
     opts.noAuth = true;
     const authResponse = (
