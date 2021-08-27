@@ -10,3 +10,25 @@ Array [
   },
 ]
 `;
+
+exports[`manager/gradle-wrapper/extract extractPackageFile() extracts version for property file with prerelease version in distributionUrl 1`] = `
+Array [
+  Object {
+    "currentValue": "7.0-milestone-1",
+    "datasource": "gradle-version",
+    "depName": "gradle",
+    "versioning": "gradle",
+  },
+]
+`;
+
+exports[`manager/gradle-wrapper/extract extractPackageFile() extracts version line for property file with prerelease version in distributionUrl 1`] = `
+Array [
+  Object {
+    "currentValue": "7.0-milestone-1",
+    "datasource": "gradle-version",
+    "depName": "gradle",
+    "versioning": "gradle",
+  },
+]
+`;
