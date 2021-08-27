@@ -17,6 +17,7 @@ import {
   getVars,
   isGradleFile,
   isPropsFile,
+  isTOMLFile,
   reorderFiles,
   toAbsolutePath,
 } from './utils';
@@ -64,6 +65,8 @@ export async function extractAllPackageFiles(
         const { vars, deps } = parseProps(content, packageFile);
         updateVars(vars);
         extractedDeps.push(...deps);
+      } else if (isTOMLFile(packageFile)) {
+        // Implement TOML file parsing and extraction
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
