@@ -102,7 +102,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
         })
@@ -127,7 +127,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
         })
@@ -190,7 +190,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .get('/')
@@ -212,7 +212,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .get('/')
@@ -228,7 +228,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(amazonUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .get('/')
@@ -262,7 +262,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(amazonUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .get('/')
@@ -290,7 +290,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(amazonUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .get('/')
@@ -312,7 +312,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(amazonUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .get('/')
@@ -348,7 +348,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
         })
@@ -507,7 +507,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
         })
@@ -535,7 +535,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
         })
@@ -563,7 +563,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope('https://k8s.gcr.io/v2/')
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://k8s.gcr.io/v2/token",service="k8s.gcr.io"',
         })
@@ -604,7 +604,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, undefined, {
+        .reply(401, undefined, {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .get('/')
@@ -771,9 +771,7 @@ describe('datasource/docker/index', () => {
       const trace = httpMock.getTrace();
       expect(res).toMatchSnapshot();
       expect(trace).toMatchSnapshot();
-      expect(trace[1].headers.authorization).toBe(
-        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
-      );
+      expect(trace[1].headers.authorization).toBeUndefined();
       expect(trace[trace.length - 1].headers.authorization).toBeUndefined();
     });
   });

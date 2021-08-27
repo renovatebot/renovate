@@ -1,4 +1,5 @@
 import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
+import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import wwwAuthenticate from 'www-authenticate';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -7,7 +8,7 @@ import { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
-import { Http, HttpResponse } from '../../util/http';
+import { Http, HttpOptions, HttpResponse } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 import {
   ensureTrailingSlash,
@@ -59,17 +60,32 @@ export async function getAuthHeaders(
     const apiCheckUrl = `${registryHost}/v2/`;
     const apiCheckResponse = await http.get(apiCheckUrl, {
       throwHttpErrors: false,
+      noAuth: true,
     });
-    if (apiCheckResponse.headers['www-authenticate'] === undefined) {
+
+    if (apiCheckResponse.statusCode === 200) {
+      logger.debug({ registryHost }, 'No registry auth required');
       return {};
     }
+    if (
+      apiCheckResponse.statusCode !== 401 ||
+      !is.nonEmptyString(apiCheckResponse.headers['www-authenticate'])
+    ) {
+      logger.warn(
+        { registryHost, res: apiCheckResponse },
+        'Invalid registry response'
+      );
+      return null;
+    }
+
     const authenticateHeader = new wwwAuthenticate.parsers.WWW_Authenticate(
       apiCheckResponse.headers['www-authenticate']
     );
 
-    const opts: HostRule & {
-      headers?: Record<string, string>;
-    } = hostRules.find({ hostType: id, url: apiCheckUrl });
+    const opts: HostRule & HttpOptions = hostRules.find({
+      hostType: id,
+      url: apiCheckUrl,
+    });
     if (ecrRegex.test(registryHost)) {
       const [, region] = ecrRegex.exec(registryHost);
       const auth = await getECRAuthToken(region, opts);
@@ -104,6 +120,7 @@ export async function getAuthHeaders(
     logger.trace(
       `Obtaining docker registry token for ${dockerRepository} using url ${authUrl}`
     );
+    opts.noAuth = true;
     const authResponse = (
       await http.getJson<{ token?: string; access_token?: string }>(
         authUrl,
@@ -253,6 +270,7 @@ export async function getManifestResponse(
     const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
     const manifestResponse = await http.get(url, {
       headers,
+      noAuth: true,
     });
     return manifestResponse;
   } catch (err) /* istanbul ignore next */ {
@@ -399,6 +417,7 @@ export async function getLabels(
     const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
     const configResponse = await http.get(url, {
       headers,
+      noAuth: true,
     });
     labels = JSON.parse(configResponse.body).config.Labels;
 

@@ -20,6 +20,7 @@ export type GotExtraOptions = {
   hostType?: string;
   enabled?: boolean;
   useCache?: boolean;
+  noAuth?: boolean;
   context?: GotContextOptions;
 };
 

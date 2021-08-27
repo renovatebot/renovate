@@ -5,7 +5,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -52,7 +51,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -63,7 +61,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -78,7 +75,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -115,7 +111,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -186,7 +181,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -211,7 +205,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -222,7 +215,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -237,7 +229,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -248,7 +239,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -263,7 +253,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -274,7 +263,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -289,7 +277,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -325,7 +312,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -361,7 +347,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -372,7 +357,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -387,7 +371,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -424,7 +407,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -480,7 +462,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -536,7 +517,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "k8s.gcr.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -599,7 +579,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -610,7 +589,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -620,7 +598,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -631,7 +608,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -653,7 +629,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -664,7 +639,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -674,7 +648,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -685,7 +658,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -723,7 +695,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -734,7 +705,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -749,7 +719,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -760,7 +729,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -802,7 +770,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -813,7 +780,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -823,7 +789,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -834,7 +799,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -844,7 +808,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -854,7 +817,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -877,7 +839,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -888,7 +849,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -898,7 +858,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -909,7 +868,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -919,7 +877,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -930,7 +887,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -940,7 +896,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -950,7 +905,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -972,7 +926,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -983,7 +936,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -993,7 +945,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1004,7 +955,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1014,7 +964,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1024,7 +973,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1048,7 +996,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1059,7 +1006,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1069,7 +1015,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1080,7 +1025,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1095,7 +1039,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1106,7 +1049,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1117,7 +1059,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1127,7 +1068,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1138,7 +1078,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "registry.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1153,7 +1092,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1164,7 +1102,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1174,7 +1111,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1185,7 +1121,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1211,7 +1146,6 @@ Array [
   Object {
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "quay.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -1222,7 +1156,6 @@ Array [
     "headers": Object {
       "accept": "application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "quay.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
