@@ -1,7 +1,12 @@
+import is from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import {
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../util/fs';
 import type { LockFile } from './types';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
@@ -44,4 +49,18 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
     paths.push(conf.pnpDataPath || './.pnp.data.json');
   }
   return paths;
+}
+
+export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
+  const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
+  if (is.string(yarnrcYml)) {
+    const paths = getZeroInstallPaths(yarnrcYml);
+    for (const p of paths) {
+      if (await localPathExists(getSiblingFileName(yarnrcYmlPath, p))) {
+        logger.debug(`Detected Yarn zero-install in ${p}`);
+        return true;
+      }
+    }
+  }
+  return false;
 }

@@ -6,11 +6,7 @@ import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import {
-  getSiblingFileName,
-  localPathExists,
-  readLocalFile,
-} from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -23,7 +19,7 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
 import type { NpmPackage, NpmPackageDependency } from './types';
-import { getZeroInstallPaths } from './yarn';
+import { isZeroInstall } from './yarn';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -124,18 +120,7 @@ export async function extractPackageFile(
   }
 
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
-  const yarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
-  let yarnZeroInstall = false;
-  if (is.string(yarnrcYml)) {
-    const paths = getZeroInstallPaths(yarnrcYml);
-    for (const p of paths) {
-      if (await localPathExists(getSiblingFileName(fileName, p))) {
-        logger.debug({ p }, 'Yarn zero-install is detected');
-        yarnZeroInstall = true;
-        break;
-      }
-    }
-  }
+  const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
 
   let lernaJsonFile: string;
   let lernaPackages: string[];
