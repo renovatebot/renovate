@@ -79,7 +79,7 @@ export async function generateLockFile(
     };
 
     const commands = [];
-    let cmdOptions = '';
+    let cmdOptions = ''; // should have a leading space
     if (config.skipInstalls !== false) {
       if (isYarn1) {
         const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
@@ -93,13 +93,13 @@ export async function generateLockFile(
         }
       } else if (isYarnModeAvailable) {
         // Don't run the link step and only fetch what's necessary to compute an updated lockfile
-        cmdOptions += '--mode=update-lockfile';
+        cmdOptions += ' --mode=update-lockfile';
       }
     }
 
     if (isYarn1) {
       cmdOptions +=
-        '--ignore-engines --ignore-platform --network-timeout 100000';
+        ' --ignore-engines --ignore-platform --network-timeout 100000';
       extraEnv.YARN_CACHE_FOLDER = env.YARN_CACHE_FOLDER;
     } else {
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
@@ -112,7 +112,7 @@ export async function generateLockFile(
       } else if (isYarnModeAvailable) {
         if (config.skipInstalls === false) {
           // Don't run the build scripts
-          cmdOptions += '--mode=skip-build';
+          cmdOptions += ' --mode=skip-build';
         }
       } else {
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
@@ -136,7 +136,7 @@ export async function generateLockFile(
     }
 
     // This command updates the lock file based on package.json
-    commands.push(`yarn install ${cmdOptions}`.trim());
+    commands.push(`yarn install${cmdOptions}`);
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
@@ -148,14 +148,14 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
-            .join(' ')} ${cmdOptions}`.trim()
+            .join(' ')}${cmdOptions}`
         );
       } else {
         // `yarn up` updates to the latest release, so the range should be specified
         commands.push(
           `yarn up ${lockUpdates
             .map((update) => `${update.depName}@${update.newValue}`)
-            .join(' ')} ${cmdOptions}`.trim()
+            .join(' ')}${cmdOptions}`
         );
       }
     }
@@ -171,9 +171,9 @@ export async function generateLockFile(
         if (isYarn1) {
           commands.push(`npx yarn-deduplicate --strategy ${s}`);
           // Run yarn again in case any changes are necessary
-          commands.push(`yarn install ${cmdOptions}`.trim());
+          commands.push(`yarn install${cmdOptions}`);
         } else if (isYarnDedupeAvailable && s === 'highest') {
-          commands.push(`yarn dedupe --strategy ${s} ${cmdOptions}`.trim());
+          commands.push(`yarn dedupe --strategy ${s}${cmdOptions}`);
         } else {
           logger.debug(`yarn dedupe ${s} not available`);
         }
