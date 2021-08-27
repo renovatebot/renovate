@@ -29,7 +29,11 @@ export function updateDependency(
 export const language = LANGUAGE_JAVA;
 
 export const defaultConfig = {
-  fileMatch: ['\\.gradle(\\.kts)?$', '(^|/)gradle.properties$', '\\.versions\\.toml$'],
+  fileMatch: [
+    '\\.gradle(\\.kts)?$',
+    '(^|/)gradle.properties$',
+    '\\.versions\\.toml$',
+  ],
   timeout: 600,
   versioning: gradleVersioning.id,
 };
