@@ -126,10 +126,6 @@ e.g.
 }
 ```
 
-## composerIgnorePlatformReqs
-
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.s
-
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
@@ -418,7 +414,7 @@ It could then be used in a repository config or preset like so:
 }
 ```
 
-Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
+Secret names must start with an upper or lower case character and can contain only characters, digits, or underscores.
 
 ## skipInstalls
 

@@ -17,14 +17,26 @@ describe('manager/gradle-wrapper/extract', () => {
 
     it('extracts bin version line', () => {
       const res = extractPackageFile(propertiesFile1);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: '4.8',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
     });
 
     it('extracts all version line', () => {
       const res = extractPackageFile(propertiesFile2);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: '4.10.3',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
     });
 
     it('extracts prerelease version line', () => {
@@ -40,8 +52,14 @@ describe('manager/gradle-wrapper/extract', () => {
 
     it('handles whitespace', () => {
       const res = extractPackageFile(whitespacePropertiesFile);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: '4.10.3',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
     });
   });
 });

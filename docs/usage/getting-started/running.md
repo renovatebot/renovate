@@ -64,7 +64,7 @@ It is built similarly to the "full" Renovate image described above, but with the
 - It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
 - It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
 - It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
-- It's licensed using a end-user license agreement (EULA) and not the Affero General Public License (AGPL)
+- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
 
 WSOP supports GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
 Documentation can be found in its public GitHub repository [`whitesource/renovate-on-prem`](https://github.com/whitesource/renovate-on-prem).
@@ -191,7 +191,7 @@ Don't forget to configure `platform=azure` somewhere in config.
 
 #### Gitea
 
-First, [create a access token](https://docs.gitea.io/en-us/api-usage/#authentication-via-the-api) for your bot account.
+First, [create an access token](https://docs.gitea.io/en-us/api-usage/#authentication-via-the-api) for your bot account.
 Configure it as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=gitea` somewhere in config.
 
