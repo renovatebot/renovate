@@ -46,7 +46,7 @@ async function getECRAuthToken(
       'Could not extract authorizationToken from ECR getAuthorizationToken response'
     );
   } catch (err) {
-    logger.debug({ err }, 'err');
+    logger.trace({ err }, 'err');
     logger.debug('ECR getAuthorizationToken error');
   }
   return null;
