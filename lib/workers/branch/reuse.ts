@@ -1,9 +1,9 @@
 import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
+import type { RangeStrategy } from '../../types';
 import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
 import type { BranchConfig } from '../types';
-import type { RangeStrategy } from '../../types';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
