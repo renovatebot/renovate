@@ -1,3 +1,4 @@
+import { parse } from '@iarna/toml';
 import * as upath from 'upath';
 import {
   id as datasource,
@@ -67,6 +68,7 @@ export async function extractAllPackageFiles(
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
         // Implement TOML file parsing and extraction
+        parse(content);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
