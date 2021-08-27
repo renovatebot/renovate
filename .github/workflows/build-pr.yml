@@ -97,7 +97,7 @@ jobs:
       - name: Lint
         run: |
           yarn ls-lint
-          yarn eslint -f ./tools/eslint-gh-reporter.js
+          yarn eslint -f gha
           yarn prettier
           yarn markdown-lint
 
