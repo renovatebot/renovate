@@ -23,10 +23,13 @@ Renovate does not support:
 - Android projects that require extra configuration to run (e.g. setting the Android SDK)
 - Gradle versions prior to version 5.0.
 
-### How It Works
+### Custom registry support, and authentication
 
-Renovate uses a plugin to search and extract versions from projects.
-Once the Gradle plugin has detected the dependencies, lookups and updating will be performed like usual with datasources and direct patching of files.
+The manager for Gradle makes use of the `maven` datasource.
+Renovate can be configured to access additional repositories
+and access repositories authenticated, see below.
+
+Unless using `deepExtract`, Renovate does not make use of authentication credentials available to Gradle.
 
 ## Gradle Wrapper
 
@@ -96,6 +99,19 @@ module.exports = {
       matchHost: 'https://artifactory.yourcompany.com/',
       username: process.env.ARTIFACTORY_USERNAME,
       password: process.env.ARTIFACTORY_PASSWORD,
+    },
+  ],
+};
+```
+
+One can also overwrite the repositories to use for version lookup through configuration.
+
+```js
+module.exports = {
+  packageRules: [
+    {
+      matchDatasources: ['maven'],
+      registryUrls: ['https://repo-a.tld/repo', 'https://repo-b.tld/repo'],
     },
   ],
 };
