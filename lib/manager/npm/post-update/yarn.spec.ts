@@ -97,6 +97,27 @@ describe('manager/npm/post-update/yarn', () => {
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
 
+  it('does not use global cache if zero install is detected', async () => {
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    fs.readFile.mockImplementation(
+      (filename, encoding) =>
+        new Promise<string>((resolve) => resolve('package-lock-contents'))
+    );
+    const config = {
+      constraints: {
+        yarn: '>= 2.0.0',
+      },
+      postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+      managerData: { yarnZeroInstall: true },
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+
   it.each([
     ['1.22.0', '^1.10.0'],
     ['2.1.0', '>= 2.0.0'],

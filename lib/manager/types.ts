@@ -271,4 +271,7 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   yarnLock?: string;
   branchName?: string;
   reuseExistingBranch?: boolean;
+  managerData?: {
+    yarnZeroInstall?: boolean;
+  };
 }
