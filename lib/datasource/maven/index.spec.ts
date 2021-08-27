@@ -358,7 +358,6 @@ describe('datasource/maven/index', () => {
       { version: '1.0.0' },
       { version: '1.0.1-SNAPSHOT' },
     ]);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('skips missing snapshot releases', async () => {
@@ -380,7 +379,6 @@ describe('datasource/maven/index', () => {
     const { releases } = await get('org.example:package', baseUrl);
 
     expect(releases).toMatchObject([{ version: '1.0.0' }]);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   it('skips invalid snapshot releases', async () => {
@@ -404,7 +402,6 @@ describe('datasource/maven/index', () => {
     const { releases } = await get('org.example:package', baseUrl);
 
     expect(releases).toMatchObject([{ version: '1.0.0' }]);
-    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
   describe('fetching parent info', () => {
