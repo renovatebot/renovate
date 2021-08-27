@@ -15,6 +15,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -137,6 +138,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -299,6 +301,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -347,6 +350,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": "package-lock.json",
   "npmrc": undefined,
@@ -413,6 +417,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -466,6 +471,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -601,6 +607,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": "lerna.json",
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -736,6 +743,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": "lerna.json",
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -871,6 +879,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -892,6 +901,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": "lerna.json",
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1029,6 +1039,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": "lerna.json",
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1050,6 +1061,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": "lerna.json",
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1073,6 +1085,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1210,6 +1223,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1327,6 +1341,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
   },
   "npmLock": undefined,
   "npmrc": undefined,
@@ -1462,6 +1477,7 @@ Object {
   "lernaPackages": undefined,
   "managerData": Object {
     "lernaJsonFile": undefined,
+    "yarnZeroInstall": true,
   },
   "npmLock": undefined,
   "npmrc": undefined,
