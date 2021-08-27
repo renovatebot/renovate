@@ -92,10 +92,10 @@ describe('datasource/docker/common', () => {
       );
 
       expect(headers).toMatchInlineSnapshot(`
-        Object {
-          "authorization": "some-authType some-token",
-        }
-      `);
+Object {
+  "authorization": "some-authType some-token",
+}
+`);
     });
 
     it('returns "Bearer token" if only token provided', async () => {
@@ -109,10 +109,10 @@ describe('datasource/docker/common', () => {
       );
 
       expect(headers).toMatchInlineSnapshot(`
-        Object {
-          "authorization": "Bearer some-token",
-        }
-      `);
+Object {
+  "authorization": "Bearer some-token",
+}
+`);
     });
 
     it('fails', async () => {

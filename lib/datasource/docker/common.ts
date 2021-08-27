@@ -46,7 +46,7 @@ async function getECRAuthToken(
       'Could not extract authorizationToken from ECR getAuthorizationToken response'
     );
   } catch (err) {
-    logger.trace({ err }, 'err');
+    logger.debug({ err }, 'err');
     logger.debug('ECR getAuthorizationToken error');
   }
   return null;
@@ -117,12 +117,22 @@ export async function getAuthHeaders(
     delete opts.password;
     delete opts.token;
 
-    // TODO: This seems totally wrong to me
-    // if (authenticateHeader.scheme.toUpperCase() === 'BASIC') {
-    //   logger.trace(`Using Basic auth for docker registry ${registryHost}`);
-    //   await http.get(apiCheckUrl, opts);
-    //   return opts.headers;
-    // }
+    // If realm isn't an url, we should directly use auth header
+    // Can happen when we get a Basic auth or some other auth type
+    // * WWW-Authenticate: Basic realm="Artifactory Realm"
+    // * Www-Authenticate: Basic realm="https://123456789.dkr.ecr.eu-central-1.amazonaws.com/",service="ecr.amazonaws.com"
+    // * www-authenticate: Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"
+    // * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
+    if (
+      authenticateHeader.scheme.toUpperCase() !== 'BEARER' ||
+      parseUrl(authenticateHeader.parms.realm) == null
+    ) {
+      logger.trace(
+        { registryHost, dockerRepository, authenticateHeader },
+        `Invalid realm, testing direct auth`
+      );
+      return opts.headers;
+    }
 
     const authUrl = `${authenticateHeader.parms.realm}?service=${authenticateHeader.parms.service}&scope=repository:${dockerRepository}:pull`;
     logger.trace(
