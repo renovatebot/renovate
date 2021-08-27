@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
 import type { BranchConfig } from '../types';
+import type { RangeStrategy } from '../../types';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
@@ -92,7 +93,7 @@ export async function shouldReuseExistingBranch(
   // skipped but the lockfile update is executed, the lockfile will have a different result than if it was executed
   // along with the changes to the package.json. Thus ending up with an incomplete branch update
   // This is why we are skipping branch reuse in this case (#10050)
-  const groupedByPackageFile = {};
+  const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
   for (const upgrade of config.upgrades) {
     groupedByPackageFile[upgrade.packageFile] =
       groupedByPackageFile[upgrade.packageFile] || new Set();
