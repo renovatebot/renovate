@@ -12,8 +12,6 @@ const hostRules = mocked(_hostRules);
 jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../util/host-rules');
 
-jest.setTimeout(10000000);
-
 type ECR = _AWS.ECR;
 type GetAuthorizationTokenCommandOutput =
   _AWS.GetAuthorizationTokenCommandOutput;
