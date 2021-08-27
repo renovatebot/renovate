@@ -7,6 +7,7 @@ import { chmod } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import gradleVersioning from '../../versioning/gradle';
 import { id as npmVersioning } from '../../versioning/npm';
+import { GradleVersionExtract } from './types';
 
 export const extraEnv = {
   GRADLE_OPTS:
@@ -77,11 +78,6 @@ export function getJavaVersioning(): string {
 const DISTRIBUTION_URL_REGEX = regEx(
   '^(?:distributionUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$'
 );
-
-export interface GradleVersionExtract {
-  url: string;
-  version: string;
-}
 
 export function extractGradleVersion(
   fileContent: string
