@@ -12,6 +12,12 @@ const unknownFormatFileContent = loadFixture(
 const whitespacePropertiesFile = loadFixture(
   'gradle-wrapper-whitespace.properties'
 );
+const customTypeBinFileContent = loadFixture(
+  'custom-gradle-wrapper-bin.properties'
+);
+const customTypeAllFileContent = loadFixture(
+  'custom-gradle-wrapper-all.properties'
+);
 
 describe('manager/gradle-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
@@ -29,6 +35,8 @@ describe('manager/gradle-wrapper/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: '4.8',
+          replaceString:
+            'https\\://services.gradle.org/distributions/gradle-4.8-bin.zip',
           datasource: 'gradle-version',
           depName: 'gradle',
           versioning: 'gradle',
@@ -41,6 +49,8 @@ describe('manager/gradle-wrapper/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: '4.10.3',
+          replaceString:
+            'https\\://services.gradle.org/distributions/gradle-4.10.3-all.zip',
           datasource: 'gradle-version',
           depName: 'gradle',
           versioning: 'gradle',
@@ -50,8 +60,16 @@ describe('manager/gradle-wrapper/extract', () => {
 
     it('extracts version for property file with prerelease version in distributionUrl', () => {
       const res = extractPackageFile(prereleaseVersionFileContent);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps[0].currentValue).toBe('7.0-milestone-1');
+      expect(res.deps).toEqual([
+        {
+          currentValue: '7.0-milestone-1',
+          replaceString:
+            'https\\://services.gradle.org/distributions/gradle-7.0-milestone-1-bin.zip',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
     });
 
     it('extracts version for property file with unnecessary whitespace in distributionUrl', () => {
@@ -59,6 +77,36 @@ describe('manager/gradle-wrapper/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: '4.10.3',
+          replaceString:
+            'https\\://services.gradle.org/distributions/gradle-4.10.3-all.zip',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
+    });
+
+    it('extracts version for property file with custom distribution of type "bin" in distributionUrl', () => {
+      const res = extractPackageFile(customTypeBinFileContent);
+      expect(res.deps).toEqual([
+        {
+          currentValue: '1.3.7',
+          replaceString:
+            'https\\://domain.tld/repository/maven-releases/tld/domain/gradle-wrapper/custom-gradle-wrapper/1.3.7/custom-gradle-wrapper-1.3.7-bin.zip',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
+    });
+
+    it('extracts version for property file with custom distribution of type "all" in distributionUrl', () => {
+      const res = extractPackageFile(customTypeAllFileContent);
+      expect(res.deps).toEqual([
+        {
+          currentValue: '6.6.6',
+          replaceString:
+            'https\\://domain.tld/repository/maven-releases/tld/domain/gradle-wrapper/custom-gradle-wrapper/6.6.6/custom-gradle-wrapper-6.6.6-all.zip',
           datasource: 'gradle-version',
           depName: 'gradle',
           versioning: 'gradle',
