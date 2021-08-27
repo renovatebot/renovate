@@ -2,6 +2,7 @@ import { NormalizedOptions } from 'got';
 import { partial } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITEA,
+  PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 import { applyAuthorization, removeAuthorization } from './auth';
@@ -65,6 +66,43 @@ describe('util/http/auth', () => {
           },
           "hostType": "gitea",
           "token": "XXXX",
+        }
+      `);
+    });
+
+    it('github token', () => {
+      const opts: GotOptions = {
+        headers: {},
+        token: 'XXX',
+        hostType: PLATFORM_TYPE_GITHUB,
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toEqual({
+        headers: {
+          authorization: 'token XXX',
+        },
+        hostType: 'github',
+        token: 'XXX',
+      });
+    });
+
+    it('github token for datasource using github api', () => {
+      const opts: GotOptions = {
+        headers: {},
+        token: 'ZZZZ',
+        hostType: 'github-releases',
+      };
+      applyAuthorization(opts);
+
+      expect(opts).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "authorization": "token ZZZZ",
+          },
+          "hostType": "github-releases",
+          "token": "ZZZZ",
         }
       `);
     });

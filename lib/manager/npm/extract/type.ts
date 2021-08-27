@@ -6,7 +6,7 @@ export function mightBeABrowserLibrary(packageJson: NpmPackage): boolean {
     // it's not published
     return false;
   }
-  if (packageJson.main === undefined) {
+  if (packageJson.main === undefined && packageJson.exports === undefined) {
     // it can't be required
     return false;
   }
