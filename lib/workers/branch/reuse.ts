@@ -119,7 +119,7 @@ export async function shouldReuseExistingBranch(
   // skipped but the postUpdateOptions is executed, the lockfile will have a different result than if it was executed
   // along with the changes to the package.json. Thus ending up with an incomplete branch update
   // This is why we are skipping branch reuse when postUpdateOptions is used (#10050)
-  if ((config.postUpdateOptions as string[])?.length > 0) {
+  if (config.postUpdateOptions?.length > 0) {
     logger.debug(`Branch is using postUpdateOptions`);
     return {
       reuseExistingBranch: false,
