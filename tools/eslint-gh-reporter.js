@@ -1,10 +1,13 @@
 const { error } = require('@actions/core');
 const { issueCommand } = require('@actions/core/lib/command');
 const stripAnsi = require('strip-ansi');
-const upath = require('upath');
+const { relative } = require('upath');
 
 const ROOT = process.cwd();
 
+/**
+ * @param {import('eslint').Linter.Severity} severity
+ */
 function getCmd(severity) {
   switch (severity) {
     case 2:
@@ -16,11 +19,14 @@ function getCmd(severity) {
   }
 }
 
+/**
+ * @param {string} path
+ */
 function getPath(path) {
-  return upath.relative(ROOT, path).replace(/\\/g, '/');
+  return relative(ROOT, path).replace(/\\/g, '/');
 }
 
-/** @type {import('eslint').CLIEngine.Formatter} */
+/** @type {import('eslint').ESLint.Formatter['format']} */
 const formatter = (results) => {
   try {
     for (const { filePath, messages } of results) {
