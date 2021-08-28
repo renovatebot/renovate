@@ -24,7 +24,6 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
     } else {
       logger.fatal('No config file found on disk - skipping');
     }
-
     process.exit(1);
   }
   const { isMigrated, migratedConfig } = migrateConfig(config);
