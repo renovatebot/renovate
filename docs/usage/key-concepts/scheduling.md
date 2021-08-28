@@ -17,7 +17,7 @@ You can override the default timezone by setting your own `timezone` config opti
 
 When we talk about scheduling Renovate, there are 2 senses in which you can schedule Renovate:
 
-- A global sense: when the bot is allowed to do work at all
+- A global sense: when the bot is allowed to do work at all. This is determined by the bot admin using tools such as `cron`
 - A specific sense: when Renovate is allowed to look for updates to a specific dependency
 
 While as an end user you may think of scheduling in terms of when you allow it to raise updates, it's important to remember that such updates can only occur if the bot gets the opportunity to run within the schedule window you provide.
@@ -43,7 +43,7 @@ At a high level you need to follow these steps:
 
 1. Tell Renovate what `timezone` you want to use
 1. Learn about the scheduling syntax
-1. Optional: limit when Renovate bot itself can run, via custom config or _schedule preset_
+1. Optional: configure a "in repository schedule"
 1. Optional: create packageRules with a custom `schedule` for specific packages
 
 ### Setting your timezone
@@ -83,9 +83,12 @@ Renovate uses the [@breejs/later](https://github.com/breejs/later) library to pa
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text) for more details.
 The _@breejs/later_ library also handles the concepts of "days", time_before", and "time_after".
 
-### Limit when Renovate bot itself runs
+### In repository schedule configuration
 
-Be sure to give Renovate bot enough time to process your repository.
+Reminder: the times when the Renovate process runs are controlled by the bot admin using tools such as `cron`.
+If you use the GitHub hosted app, the default is that Renovate will always be allowed to run.
+
+Be sure to schedule enough time for Renovate to process your repository.
 Do not set schedules like "Run Renovate for an hour each Sunday" as you _will_ run into problems.
 
 Say you want Renovate bot to run each day before 2 am:
@@ -112,7 +115,7 @@ Or you could tell Renovate to run outside of common office hours like this:
 
 Renovate has preset schedules that you might want to use, go to [Schedule Presets](https://docs.renovatebot.com/presets-schedule/) to see them.
 
-These preset schedules only affect when Renovate bot itself runs, and do not affect any specific dependencies/packages.
+These preset schedules only affect when Renovate bot checks for udpates, and do not affect any specific dependencies/packages.
 
 ### Schedule when to update specific dependencies
 
