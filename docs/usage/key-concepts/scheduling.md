@@ -115,7 +115,7 @@ Or you could tell Renovate to run outside of common office hours like this:
 
 Renovate has preset schedules that you might want to use, go to [Schedule Presets](https://docs.renovatebot.com/presets-schedule/) to see them.
 
-These preset schedules only affect when Renovate bot checks for udpates, and do not affect any specific dependencies/packages.
+These preset schedules only affect when Renovate bot checks for updates, and do not affect any specific dependencies/packages.
 
 ### Schedule when to update specific dependencies
 
