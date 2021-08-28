@@ -1,3 +1,4 @@
+import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import { GitTreeNode } from '../../git';
 
 export type GitLabBranch = {
@@ -12,3 +13,10 @@ export type GitlabTreeNode = {
   id: string;
   name: string;
 } & GitTreeNode;
+
+export const GITLAB_API_USING_HOST_TYPES = [
+  PLATFORM_TYPE_GITLAB,
+  'gitlab-releases',
+  'gitlab-tags',
+  'pod',
+];

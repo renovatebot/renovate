@@ -11,10 +11,9 @@ export class GitlabReleasesDatasource extends Datasource {
 
   static readonly registryStrategy = 'first';
 
-  override http = new GitlabHttp();
-
   constructor() {
     super(GitlabReleasesDatasource.id);
+    this.http = new GitlabHttp(GitlabReleasesDatasource.id);
   }
 
   @cache({

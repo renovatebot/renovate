@@ -4,9 +4,9 @@ import { GitlabHttp } from '../../util/http/gitlab';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabTag } from './types';
 
-const gitlabApi = new GitlabHttp();
-
 export const id = 'gitlab-tags';
+const gitlabApi = new GitlabHttp(id);
+
 export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://gitlab.com'];
 export const registryStrategy = 'first';
