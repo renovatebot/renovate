@@ -7,11 +7,12 @@ import {
   getGithubRelease,
   getSourceUrlBase,
   http,
+  id,
 } from './common';
 import { findDigestAsset, mapDigestAssetToRelease } from './digest';
 import type { GithubRelease } from './types';
 
-export const id = 'github-releases';
+export { id };
 export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';

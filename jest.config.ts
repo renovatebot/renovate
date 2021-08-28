@@ -25,7 +25,7 @@ const config: InitialOptionsTsJest = {
     },
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
-  reporters: ['default', './tmp/tools/jest-gh-reporter.js'],
+  reporters: ci ? ['default', 'jest-github-actions-reporter'] : ['default'],
   setupFilesAfterEnv: ['jest-extended', '<rootDir>/test/setup.ts'],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   testEnvironment: 'node',

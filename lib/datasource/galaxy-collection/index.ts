@@ -17,9 +17,9 @@ export class GalaxyCollectionDatasource extends Datasource {
     super(GalaxyCollectionDatasource.id);
   }
 
-  readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
