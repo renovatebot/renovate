@@ -205,7 +205,5 @@ describe('manager/gradle/shallow/extract', () => {
         ],
       },
     ]);
-    console.log(res[0].deps);
-    console.log(res);
   });
 });
