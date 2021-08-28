@@ -16,12 +16,16 @@ Renovate detects versions that are specified in a string `'group:artifact:versio
 
 Renovate can update `build.gradle`/`build.gradle.kts` files in the root of the repository.
 It also updates any `*.gradle`/`*.gradle.kts` files in a subdirectory as multi-project configurations.
+Renovate also tries to find updates for dependencies whose version is defined in a `*.properties` file,
+and scans for `*.versions.toml` files to keep [catalogs](https://docs.gradle.org/current/userguide/platforms.html) up to date.
 
 Renovate does not support:
 
-- Projects which do not have either a `build.gradle` or `build.gradle.kts` in the repository root
-- Android projects that require extra configuration to run (e.g. setting the Android SDK)
+- Projects which do not have either a `build.gradle` or `build.gradle.kts` in the repository root.
+- Android projects that require extra configuration to run (e.g. setting the Android SDK).
 - Gradle versions prior to version 5.0.
+- Catalogs defined inside a `build.gradle` or `build.gradle.kts` file rather than in TOML.
+- Catalogs with version ranges and using the `required`, `strictly`, `preferred`, `reject`, and `rejectAll` version declarations.
 
 ### How It Works
 
