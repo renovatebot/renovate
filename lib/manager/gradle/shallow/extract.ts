@@ -6,6 +6,7 @@ import {
 } from '../../../datasource/maven';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { dependencyPattern } from '../../pip_requirements/extract';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -38,6 +39,16 @@ function elevateFileReplacePositionField(
   }));
 }
 
+function findIndexAfter(
+  content: string,
+  sliceAfter: string,
+  find: string
+): number {
+  return content
+    .slice(content.indexOf(sliceAfter) + sliceAfter.length)
+    .indexOf(find);
+}
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
@@ -68,7 +79,36 @@ export async function extractAllPackageFiles(
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
         // Implement TOML file parsing and extraction
-        parse(content);
+        const tomlContent = parse(content);
+        const versions = tomlContent['versions'];
+        const libs = tomlContent['libraries'];
+        const libSubContent = content.slice(content.indexOf('libraries'));
+        const versionSubContent = content.slice(content.indexOf('versions'));
+        for (const libraryName in libs as object) {
+          let { group, name, module, version } = libs[libraryName];
+          if (name == null || group == null) {
+            const split = module.split(':');
+            group = split[0];
+            name = split[1];
+          }
+          const currentVersion =
+            typeof version == 'string' ? version : versions[version.ref];
+          const fileReplacePosition =
+            typeof version == 'string'
+              ? findIndexAfter(libSubContent, libraryName, currentVersion)
+              : findIndexAfter(versionSubContent, version.ref, currentVersion);
+          const dependency = {
+            depName: `${group}:${name}`,
+            groupName: group,
+            currentValue: currentVersion,
+            managerData: {
+              fileReplacePosition: fileReplacePosition,
+              packageFile: packageFile,
+            },
+          };
+          console.log(dependency);
+          extractedDeps.push(dependency);
+        }
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
@@ -83,6 +123,7 @@ export async function extractAllPackageFiles(
         });
         registry[dir] = { ...registry[dir], ...gradleVars };
         updateVars(gradleVars);
+        console.log('ASDSAWD', deps);
         extractedDeps.push(...deps);
       }
     } catch (e) {
