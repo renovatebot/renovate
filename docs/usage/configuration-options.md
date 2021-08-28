@@ -364,6 +364,7 @@ However, this also means that all platform constraints (including PHP version) w
 
 To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
+Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
 The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
 
 If an empty array is configured, Renovate uses its default behaviour.
