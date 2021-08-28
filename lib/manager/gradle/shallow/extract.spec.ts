@@ -162,6 +162,50 @@ describe('manager/gradle/shallow/extract', () => {
     };
     mockFs(fsMock);
     const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle/libs.versions.toml',
+        deps: [
+          {
+            depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
+            groupName: 'io.gitlab.arturbosch.detekt',
+            currentValue: '1.17.0',
+            managerData: {
+              fileReplacePosition: 21,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'io.kotest:kotest-assertions-core-jvm',
+            groupName: 'io.kotest',
+            currentValue: '4.6.0',
+            managerData: {
+              fileReplacePosition: 39,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'io.kotest:kotest-runner-junit5',
+            groupName: 'io.kotest',
+            currentValue: '4.6.0',
+            managerData: {
+              fileReplacePosition: 39,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'org.mockito:mockito-core',
+            groupName: 'org.mockito',
+            currentValue: '3.10.0',
+            managerData: {
+              fileReplacePosition: 460,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+        ],
+      },
+    ]);
     console.log(res[0].deps);
+    console.log(res);
   });
 });

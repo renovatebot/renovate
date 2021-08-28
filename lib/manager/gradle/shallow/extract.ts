@@ -44,9 +44,8 @@ function findIndexAfter(
   sliceAfter: string,
   find: string
 ): number {
-  return content
-    .slice(content.indexOf(sliceAfter) + sliceAfter.length)
-    .indexOf(find);
+  const slicePoint = content.indexOf(sliceAfter) + sliceAfter.length;
+  return slicePoint + content.slice(slicePoint).indexOf(find);
 }
 
 export async function extractAllPackageFiles(
@@ -82,8 +81,10 @@ export async function extractAllPackageFiles(
         const tomlContent = parse(content);
         const versions = tomlContent['versions'];
         const libs = tomlContent['libraries'];
-        const libSubContent = content.slice(content.indexOf('libraries'));
-        const versionSubContent = content.slice(content.indexOf('versions'));
+        const libStartIndex = content.indexOf('libraries');
+        const libSubContent = content.slice(libStartIndex);
+        const versionStartIndex = content.indexOf('versions');
+        const versionSubContent = content.slice(versionStartIndex);
         for (const libraryName in libs as object) {
           let { group, name, module, version } = libs[libraryName];
           if (name == null || group == null) {
@@ -95,8 +96,10 @@ export async function extractAllPackageFiles(
             typeof version == 'string' ? version : versions[version.ref];
           const fileReplacePosition =
             typeof version == 'string'
-              ? findIndexAfter(libSubContent, libraryName, currentVersion)
-              : findIndexAfter(versionSubContent, version.ref, currentVersion);
+              ? libStartIndex +
+                findIndexAfter(libSubContent, libraryName, currentVersion)
+              : versionStartIndex +
+                findIndexAfter(versionSubContent, version.ref, currentVersion);
           const dependency = {
             depName: `${group}:${name}`,
             groupName: group,
@@ -106,7 +109,6 @@ export async function extractAllPackageFiles(
               packageFile: packageFile,
             },
           };
-          console.log(dependency);
           extractedDeps.push(dependency);
         }
       } else if (isGradleFile(packageFile)) {
@@ -123,7 +125,6 @@ export async function extractAllPackageFiles(
         });
         registry[dir] = { ...registry[dir], ...gradleVars };
         updateVars(gradleVars);
-        console.log('ASDSAWD', deps);
         extractedDeps.push(...deps);
       }
     } catch (e) {
