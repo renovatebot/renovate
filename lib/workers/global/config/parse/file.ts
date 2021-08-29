@@ -22,6 +22,7 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
       logger.fatal('No custom config file found on disk');
       process.exit(1);
     } else {
+      // Do nothing
       logger.debug('No config file found on disk - skipping');
     }
   }
