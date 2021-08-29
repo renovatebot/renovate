@@ -6,7 +6,6 @@ import {
 } from '../../../datasource/maven';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { dependencyPattern } from '../../pip_requirements/extract';
 import type {
   ExtractConfig,
   PackageDependency,
