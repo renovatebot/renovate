@@ -94,7 +94,7 @@ export function extractGradleVersion(
       };
     }
   }
-  logger.info(
+  logger.debug(
     'Gradle wrapper version and url could not be extracted from properties - skipping update'
   );
 
