@@ -209,7 +209,6 @@
     "@types/changelog-filename-regex": "2.0.0",
     "@types/clean-git-ref": "2.0.0",
     "@types/conventional-commits-detector": "1.0.0",
-    "@types/dedent": "0.7.0",
     "@types/eslint": "7.28.0",
     "@types/fs-extra": "9.0.12",
     "@types/git-url-parse": "9.0.1",
