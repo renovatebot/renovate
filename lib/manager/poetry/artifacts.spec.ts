@@ -32,7 +32,7 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-describe('.updateArtifacts()', () => {
+describe('manager/poetry/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);

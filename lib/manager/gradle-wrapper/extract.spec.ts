@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const propertiesFile1 = loadFixture('gradle-wrapper-1.properties');
@@ -9,7 +9,7 @@ const whitespacePropertiesFile = loadFixture(
   'gradle-wrapper-whitespace.properties'
 );
 
-describe(getName(), () => {
+describe('manager/gradle-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
@@ -17,14 +17,26 @@ describe(getName(), () => {
 
     it('extracts bin version line', () => {
       const res = extractPackageFile(propertiesFile1);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: '4.8',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
     });
 
     it('extracts all version line', () => {
       const res = extractPackageFile(propertiesFile2);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: '4.10.3',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
     });
 
     it('extracts prerelease version line', () => {
@@ -40,8 +52,14 @@ describe(getName(), () => {
 
     it('handles whitespace', () => {
       const res = extractPackageFile(whitespacePropertiesFile);
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: '4.10.3',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'gradle',
+        },
+      ]);
     });
   });
 });

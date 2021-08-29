@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
-import { env, fs, getName, hostRules } from '../../../test/util';
+import { env, fs, hostRules } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
@@ -19,7 +19,7 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-describe(getName(), () => {
+describe('manager/mix/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -87,7 +87,6 @@ describe(getName(), () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -95,7 +94,7 @@ describe(getName(), () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([{ file: { contents: 'New mix.lock', name: 'mix.lock' } }]);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -161,7 +160,6 @@ describe(getName(), () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -169,7 +167,9 @@ describe(getName(), () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'mix.lock', stderr: 'not found' } },
+    ]);
   });
 
   it('catches exec errors', async () => {
@@ -178,7 +178,6 @@ describe(getName(), () => {
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'mix.exs',
@@ -186,6 +185,8 @@ describe(getName(), () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'mix.lock', stderr: 'exec-error' } },
+    ]);
   });
 });

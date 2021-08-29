@@ -1,7 +1,7 @@
 import type { RangeConfig } from '../types';
 import { getRangeStrategy } from '.';
 
-describe('getRangeStrategy', () => {
+describe('manager/setup-cfg/range', () => {
   it('returns same if not auto', () => {
     const config: RangeConfig = { rangeStrategy: 'widen' };
     expect(getRangeStrategy(config)).toEqual('widen');

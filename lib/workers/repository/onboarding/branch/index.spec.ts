@@ -3,7 +3,6 @@ import {
   RenovateConfig,
   fs,
   getConfig,
-  getName,
   git,
   mocked,
   platform,
@@ -30,7 +29,7 @@ jest.mock('./config');
 
 const cache = mocked(_cache);
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
     let config: RenovateConfig;
     beforeEach(() => {

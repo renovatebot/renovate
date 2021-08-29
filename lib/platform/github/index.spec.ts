@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture, mocked } from '../../../test/util';
+import { loadFixture, mocked } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -11,7 +11,7 @@ import type { Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(), () => {
+describe('platform/github/index', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -129,6 +129,17 @@ describe(getName(), () => {
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('should add initialized platform with predefined generic host rule for github api', async () => {
+      expect(
+        await github.initPlatform({
+          token: 'abc123',
+          username: 'renovate-bot',
+          gitAuthor: 'renovate@whitesourcesoftware.com',
+        } as any)
+      ).toMatchSnapshot();
+      expect(hostRules.add).toMatchSnapshot();
     });
   });
 

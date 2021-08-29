@@ -10,7 +10,7 @@ const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning'
 ).allowedValues;
 
-describe('allVersioning.get(versioning)', () => {
+describe('versioning/index', () => {
   it('has api', () => {
     // FIXME: explicit assert condition
     expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
@@ -113,7 +113,7 @@ describe('allVersioning.get(versioning)', () => {
     it('dummy', () => {
       class DummyScheme extends GenericVersioningApi {
         // eslint-disable-next-line class-methods-use-this
-        protected _compare(_version: string, _other: string): number {
+        protected override _compare(_version: string, _other: string): number {
           throw new Error('Method not implemented.');
         }
 

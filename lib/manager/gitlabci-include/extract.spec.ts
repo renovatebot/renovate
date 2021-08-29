@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const yamlFile = loadFixture('gitlab-ci.1.yaml');
 
-describe(getName(), () => {
+describe('manager/gitlabci-include/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(

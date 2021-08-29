@@ -1,12 +1,11 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import * as hostRules from '../host-rules';
 import { BitbucketServerHttp, setBaseUrl } from './bitbucket-server';
 
 const baseUrl = 'https://git.example.com';
 
-describe(getName(), () => {
+describe('util/http/bitbucket-server', () => {
   let api: BitbucketServerHttp;
   beforeEach(() => {
     api = new BitbucketServerHttp();

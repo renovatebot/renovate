@@ -1,4 +1,3 @@
-import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getConfig } from './defaults';
 import { setGlobalConfig } from './global';
@@ -15,7 +14,7 @@ interface TestRenovateConfig extends RenovateConfig {
   node?: RenovateSharedConfig;
 }
 
-describe(getName(), () => {
+describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
       const config: TestRenovateConfig = {
@@ -723,6 +722,33 @@ describe(getName(), () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
   });
+
+  it('it migrates composerIgnorePlatformReqs values', () => {
+    let config: TestRenovateConfig;
+    let res: MigratedConfig;
+
+    config = {
+      composerIgnorePlatformReqs: true,
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBe(true);
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
+
+    config = {
+      composerIgnorePlatformReqs: false,
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBe(true);
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toBeNull();
+
+    config = {
+      composerIgnorePlatformReqs: [],
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBe(false);
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
+  });
+
   it('it migrates gradle-lite', () => {
     const config: RenovateConfig = {
       gradle: {

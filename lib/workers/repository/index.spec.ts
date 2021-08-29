@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended';
 
-import { RenovateConfig, getConfig, getName, mocked } from '../../../test/util';
+import { RenovateConfig, getConfig, mocked } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import * as _process from './process';
 import { ExtractResult } from './process/extract-update';
@@ -13,7 +13,7 @@ jest.mock('./process');
 jest.mock('./result');
 jest.mock('./error');
 
-describe(getName(), () => {
+describe('workers/repository/index', () => {
   describe('renovateRepository()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

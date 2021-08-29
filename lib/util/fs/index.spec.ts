@@ -1,7 +1,7 @@
 import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
-import { getName, mocked } from '../../../test/util';
+import { mocked } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import * as _env from '../exec/env';
 import {
@@ -19,7 +19,7 @@ import {
 jest.mock('../../util/exec/env');
 const env = mocked(_env);
 
-describe(getName(), () => {
+describe('util/fs/index', () => {
   describe('readLocalFile', () => {
     beforeEach(() => {
       setGlobalConfig({ localDir: '' });
@@ -37,9 +37,7 @@ describe(getName(), () => {
       expect(await readLocalFile(__dirname)).toBeNull();
     });
   });
-});
 
-describe(getName(), () => {
   describe('localPathExists', () => {
     it('returns true for file', async () => {
       expect(await localPathExists(__filename)).toBe(true);
@@ -53,9 +51,7 @@ describe(getName(), () => {
       );
     });
   });
-});
 
-describe(getName(), () => {
   describe('findLocalSiblingOrParent', () => {
     it('returns path for file', async () => {
       await withDir(

@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { TerraformProviderDatasource } from '.';
 
 const consulData: any = loadFixture('azurerm-provider.json');
@@ -14,7 +14,7 @@ const terraformProviderDatasource = new TerraformProviderDatasource();
 const primaryUrl = terraformProviderDatasource.defaultRegistryUrls[0];
 const secondaryUrl = terraformProviderDatasource.defaultRegistryUrls[1];
 
-describe(getName(), () => {
+describe('datasource/terraform-provider/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock

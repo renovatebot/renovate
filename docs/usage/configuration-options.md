@@ -357,6 +357,22 @@ Usually left empty except for internal use (multiple base branches, and vulnerab
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
 
+## composerIgnorePlatformReqs
+
+By default, Renovate will run Composer with `--ignore-platform-reqs` as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
+However, this also means that all platform constraints (including PHP version) will be ignored by default, which can result in updated dependencies that are not compatible with your platform.
+
+To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
+Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
+Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
+The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
+
+If an empty array is configured, Renovate uses its default behaviour.
+
+Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-platform-req` during Composer invocation.
+This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
+The Composer output should inform you about the reasons the update failed.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
@@ -402,6 +418,16 @@ This option applies only to the `gradle` manager.
 
 ## dependencyDashboard
 
+Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:base` preset.
+
+To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
+
+```json
+{
+  "extends": ["config:base", ":disableDependencyDashboard"]
+}
+```
+
 Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
 This issue contains a list of all PRs pending, open, closed (unmerged) or in error.
 The goal of this issue is to give visibility into all updates that Renovate is managing.
@@ -423,7 +449,7 @@ This feature allows you to use Renovate's Dependency Dashboard to force approval
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
 You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
 
-Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explictly.
+Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explicitly.
 
 You can configure Renovate to wait for approval for:
 
