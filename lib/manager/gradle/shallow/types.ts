@@ -66,7 +66,7 @@ export interface GradleCatalog {
   versions?: Map<string, string>;
   libraries?: Map<
     string,
-    GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor
+    GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor | string
   >;
   plugins?: Map<string, GradleCatalogPluginDescriptor>;
 }

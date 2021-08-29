@@ -1,3 +1,4 @@
+import { BatchCheckLayerAvailabilityRequest } from '@aws-sdk/client-ecr';
 import { parse } from '@iarna/toml';
 import * as upath from 'upath';
 import {
@@ -89,12 +90,16 @@ export async function extractAllPackageFiles(
         const versionStartIndex = content.indexOf('versions');
         const versionSubContent = content.slice(versionStartIndex);
         for (const libraryName in libs as object) {
-          let { group, name, module, version } = libs[libraryName];
-          if (name == null || group == null) {
-            const split = module.split(':');
-            group = split[0];
-            name = split[1];
-          }
+          const libDescriptor = libs[libraryName];
+          const group =
+            typeof libDescriptor === 'string'
+              ? libDescriptor.split(':')[0]
+              : libDescriptor.group || libDescriptor.module?.split(':')[0];
+          const name =
+            typeof libDescriptor === 'string'
+              ? libDescriptor.split(':')[1]
+              : libDescriptor.name || libDescriptor.module?.split(':')[1];
+          const version = libDescriptor.version || libDescriptor.split(':')[2];
           const currentVersion =
             typeof version == 'string' ? version : versions[version.ref];
           const fileReplacePosition =

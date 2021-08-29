@@ -144,7 +144,6 @@ describe('manager/gradle/shallow/extract', () => {
     };
     mockFs(fsMock);
     const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
-    console.log(Object.keys(fsMock));
     expect(res).toMatchObject([
       {
         packageFile: 'gradle/libs.versions.toml',
@@ -182,6 +181,58 @@ describe('manager/gradle/shallow/extract', () => {
             currentValue: '3.10.0',
             managerData: {
               fileReplacePosition: 460,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("can run Javier's example", async () => {
+    const tomlFile = loadFixture('2/libs.versions.toml');
+    const fsMock = {
+      'gradle/libs.versions.toml': tomlFile,
+    };
+    mockFs(fsMock);
+    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle/libs.versions.toml',
+        deps: [
+          {
+            depName: 'com.squareup.okhttp3:okhttp',
+            groupName: 'com.squareup.okhttp3',
+            currentValue: '4.9.0',
+            managerData: {
+              fileReplacePosition: 99,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'com.squareup.okio:okio',
+            groupName: 'com.squareup.okio',
+            currentValue: '2.8.0',
+            managerData: {
+              fileReplacePosition: 161,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'com.squareup.picasso:picasso',
+            groupName: 'com.squareup.picasso',
+            currentValue: '2.5.1',
+            managerData: {
+              fileReplacePosition: 243,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'com.squareup.retrofit2:retrofit',
+            groupName: 'com.squareup.retrofit2',
+            currentValue: '2.8.2',
+            managerData: {
+              fileReplacePosition: 41,
               packageFile: 'gradle/libs.versions.toml',
             },
           },

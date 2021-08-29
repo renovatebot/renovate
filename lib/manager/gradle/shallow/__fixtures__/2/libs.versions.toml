@@ -1,0 +1,13 @@
+[versions]
+kotlin = "1.5.21"
+retrofit = "2.8.2"
+
+[libraries]
+okHttp = "com.squareup.okhttp3:okhttp:4.9.0"
+okio = { module = "com.squareup.okio:okio", version = "2.8.0" }
+picasso = { group = "com.squareup.picasso", name = "picasso", version = "2.5.1" }
+retrofit2-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+
+[plugins]
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version = "1.5.21" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
