@@ -28,9 +28,11 @@ describe('workers/global/config/parse/file', () => {
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toEqual('bump');
     });
+
     it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', () => {
       expect(file.getConfig({})).toEqual({});
     });
+
     it('fatal error and exit if error in parsing config.js', () => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
@@ -53,6 +55,7 @@ describe('workers/global/config/parse/file', () => {
 
       fs.unlinkSync(configFile);
     });
+
     it('fatal error and exit if custom config file does not exist', () => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
