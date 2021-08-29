@@ -90,7 +90,7 @@ describe('workers/global/config/parse/index', () => {
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);
     });
-    it('supports Bitbucket username/passwod', async () => {
+    it('supports Bitbucket username/password', async () => {
       defaultArgv = defaultArgv.concat([
         '--platform=bitbucket',
         '--username=user',
