@@ -40,7 +40,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitions: ApplicationDefinition[] = loadAll(content);
+  const definitions = loadAll(content) as ApplicationDefinition[];
 
   const deps = definitions
     .map((definition) => createDependency(definition))
