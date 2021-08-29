@@ -18,7 +18,12 @@ describe('workers/global/config/parse/index', () => {
       jest.resetModules();
       configParser = await import('./index');
       defaultArgv = getArgv();
-      defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
+      defaultEnv = {
+        RENOVATE_CONFIG_FILE: upath.resolve(
+          __dirname,
+          './__fixtures__/default.js'
+        ),
+      };
       jest.mock('delay', () => Promise.resolve());
     });
     it('supports token in env', async () => {
