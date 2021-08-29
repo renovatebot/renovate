@@ -13,7 +13,11 @@ import type {
 } from '../../types';
 import type { GradleManagerData } from '../types';
 import { parseGradle, parseProps } from './parser';
-import type { PackageVariables, VariableRegistry } from './types';
+import type {
+  GradleCatalog,
+  PackageVariables,
+  VariableRegistry,
+} from './types';
 import {
   getVars,
   isGradleFile,
@@ -77,9 +81,9 @@ export async function extractAllPackageFiles(
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
         // Implement TOML file parsing and extraction
-        const tomlContent = parse(content);
-        const versions = tomlContent['versions'];
-        const libs = tomlContent['libraries'];
+        const tomlContent = parse(content) as GradleCatalog;
+        const versions = tomlContent.versions;
+        const libs = tomlContent.libraries;
         const libStartIndex = content.indexOf('libraries');
         const libSubContent = content.slice(libStartIndex);
         const versionStartIndex = content.indexOf('versions');
