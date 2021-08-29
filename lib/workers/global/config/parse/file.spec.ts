@@ -28,7 +28,7 @@ describe('workers/global/config/parse/file', () => {
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toEqual('bump');
     });
-    it('parse with no fatal error if there is no RENOVATE_CONFIG_FILE in env', () => {
+    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', () => {
       expect(file.getConfig({})).toEqual({});
     });
     it('fatal error and exit if error in parsing config.js', () => {
