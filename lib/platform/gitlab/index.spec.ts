@@ -115,6 +115,19 @@ describe('platform/gitlab/index', () => {
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it(`should reuse existing gitAuthor`, async () => {
+      httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
+        version: '13.3.6-ee',
+      });
+      expect(
+        await gitlab.initPlatform({
+          token: 'some-token',
+          endpoint: undefined,
+          gitAuthor: 'somebody',
+        })
+      ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
+    });
   });
 
   describe('getRepos', () => {

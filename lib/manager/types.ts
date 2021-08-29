@@ -41,7 +41,7 @@ export interface CustomExtractConfig extends ExtractConfig {
 export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
-  composerIgnorePlatformReqs?: boolean;
+  composerIgnorePlatformReqs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
