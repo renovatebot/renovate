@@ -53,7 +53,7 @@ describe('workers/global/config/parse/file', () => {
 
       fs.unlinkSync(configFile);
     });
-    it('fatal error and exit if config file does not exist', () => {
+    it('fatal error and exit if custom config file does not exist', () => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
         .mockImplementation(() => undefined as never);
