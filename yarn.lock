@@ -1797,10 +1797,10 @@
     jest-diff "^27.0.0"
     pretty-format "^27.0.0"
 
-"@types/js-yaml@4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-4.0.2.tgz#4117a7a378593a218e9d6f0ef44ce6d5d9edf7fa"
-  integrity sha512-KbeHS/Y4R+k+5sWXEYzAZKuB1yQlZtEghuhRxrVRLaqhtoG5+26JwQsa4HyS3AWX8v1Uwukma5HheduUDskasA==
+"@types/js-yaml@4.0.3":
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-4.0.3.tgz#9f33cd6fbf0d5ec575dc8c8fc69c7fec1b4eb200"
+  integrity sha512-5t9BhoORasuF5uCPr+d5/hdB++zRFUTMIZOzbNkr+jZh3yQht4HYbRDyj9fY8n2TZT30iW9huzav73x4NikqWg==
 
 "@types/json-dup-key-validator@1.0.0":
   version "1.0.0"
@@ -1897,10 +1897,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.6.1.tgz#aee62c7b966f55fc66c7b6dfa1d58db2a616da61"
   integrity sha512-Sr7BhXEAer9xyGuCN3Ek9eg9xPviCF2gfu9kTfuU2HkTVAMYSDeX40fvpmo72n5nansg3nsBjuQBrsS28r+NUw==
 
-"@types/node@14.17.10":
-  version "14.17.10"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.10.tgz#93f4b095af275a0427114579c10ec7aa696729d7"
-  integrity sha512-09x2d6kNBwjHgyh3jOUE2GE4DFoxDriDvWdu6mFhMP1ysynGYazt4ecZmJlL6/fe4Zi2vtYvTvtL7epjQQrBhA==
+"@types/node@14.17.11":
+  version "14.17.11"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.11.tgz#82d266d657aec5ff01ca59f2ffaff1bb43f7bf0f"
+  integrity sha512-n2OQ+0Bz6WEsUjrvcHD1xZ8K+Kgo4cn9/w94s1bJS690QMUWfJPW/m7CCb7gPkA1fcYwL2UpjXP/rq/Eo41m6w==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -7004,10 +7004,10 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-nock@13.1.1:
-  version "13.1.1"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-13.1.1.tgz#3c830129d4560957f59b6f480a41ddbaf9cf57af"
-  integrity sha512-YKTR9MjfK3kS9/l4nuTxyYm30cgOExRHzkLNhL8nhEUyU4f8Za/dRxOqjhVT1vGs0svWo3dDnJTUX1qxYeWy5w==
+nock@13.1.2:
+  version "13.1.2"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-13.1.2.tgz#eedcef89e1c1e8db4e1b3cdcfef91f453f6d32b5"
+  integrity sha512-BDjokoeGZnBghmvwCcDJ1yM5TDRMRAJfGi1xIzX5rKTlifbyx1oRpAVl3aNhEA3kGbUSEPD7gBLmwVdnQibrIA==
   dependencies:
     debug "^4.1.0"
     json-stringify-safe "^5.0.1"

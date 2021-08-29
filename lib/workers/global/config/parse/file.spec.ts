@@ -16,11 +16,6 @@ describe('workers/global/config/parse/file', () => {
   });
 
   describe('.getConfig()', () => {
-    it('returns empty env', () => {
-      expect(file.getConfig({ RENOVATE_CONFIG_FILE: 'dummylocation' })).toEqual(
-        {}
-      );
-    });
     it('parses custom config file', () => {
       const configFile = upath.resolve(__dirname, './__fixtures__/file.js');
       expect(file.getConfig({ RENOVATE_CONFIG_FILE: configFile })).toEqual(
@@ -33,7 +28,15 @@ describe('workers/global/config/parse/file', () => {
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toEqual('bump');
     });
-    it('informs user when error in parsing config.js', () => {
+
+    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', () => {
+      expect(file.getConfig({})).toEqual({});
+    });
+
+    it('fatal error and exit if error in parsing config.js', () => {
+      const mockProcessExit = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
       const configFile = upath.resolve(tmp.path, './file3.js');
       const fileContent = `module.exports = {
         "platform": "github",
@@ -47,16 +50,21 @@ describe('workers/global/config/parse/file', () => {
         "repositories": [ "test/test" ],
       };`;
       fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
-      expect(
-        file.getConfig({ RENOVATE_CONFIG_FILE: configFile })
-      ).toStrictEqual({});
+      file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+
       fs.unlinkSync(configFile);
     });
-  });
-  it('handles when invalid file location is provided', () => {
-    const configFile = upath.resolve(tmp.path, './file4.js');
-    expect(file.getConfig({ RENOVATE_CONFIG_FILE: configFile })).toStrictEqual(
-      {}
-    );
+
+    it('fatal error and exit if custom config file does not exist', () => {
+      const mockProcessExit = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+
+      const configFile = upath.resolve(tmp.path, './file4.js');
+      file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+    });
   });
 });
