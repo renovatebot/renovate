@@ -5,7 +5,7 @@ yarn pretty-quick --staged
 
 BRANCH_NAME=$(git branch --show-current)
 
-if [ "$BRANCH_NAME" = "main" ]; then
+if [ "$BRANCH_NAME" = "maina" ]; then
   echo
   echo "Aborting commit."
   echo "You're committing to the main branch, usually this is not what you want to do."

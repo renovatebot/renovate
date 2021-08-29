@@ -1,4 +1,3 @@
-import { BatchCheckLayerAvailabilityRequest } from '@aws-sdk/client-ecr';
 import { parse } from '@iarna/toml';
 import * as upath from 'upath';
 import {
