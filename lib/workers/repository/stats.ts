@@ -30,25 +30,21 @@ export function printRequestStats(): void {
     requestHosts[hostname].push(httpRequest);
   }
   logger.trace({ allRequests, requestHosts }, 'full stats');
-  const hostStats: string[] = [];
+  const hostStats: Record<string, any> = {};
   let totalRequests = 0;
   for (const [hostname, requests] of Object.entries(requestHosts)) {
-    const hostRequests = requests.length;
-    totalRequests += hostRequests;
+    const requestCount = requests.length;
+    totalRequests += requestCount;
     const requestSum = requests
       .map(({ duration }) => duration)
       .reduce((a, b) => a + b, 0);
-    const requestAvg = Math.round(requestSum / hostRequests);
+    const requestAvgMs = Math.round(requestSum / requestCount);
 
     const queueSum = requests
       .map(({ queueDuration }) => queueDuration)
       .reduce((a, b) => a + b, 0);
-    const queueAvg = Math.round(queueSum / hostRequests);
-    const requestCount =
-      `${hostRequests} ` + (hostRequests > 1 ? 'requests' : 'request');
-    hostStats.push(
-      `${hostname}, ${requestCount}, ${requestAvg}ms request average, ${queueAvg}ms queue average`
-    );
+    const queueAvgMs = Math.round(queueSum / requestCount);
+    hostStats[hostname] = { requestCount, requestAvgMs, queueAvgMs };
   }
   logger.debug({ hostStats, totalRequests }, 'http statistics');
 }
