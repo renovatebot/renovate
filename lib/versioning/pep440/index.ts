@@ -46,7 +46,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string => {
 
 export const isSingleVersion = (constraint: string): string =>
   isVersion(constraint) ||
-  (constraint.startsWith('==') && isVersion(constraint.substring(2).trim()));
+  (constraint?.startsWith('==') && isVersion(constraint.substring(2).trim()));
 
 export { isVersion, matches };
 

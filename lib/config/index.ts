@@ -1,12 +1,7 @@
 import { logger } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
 import * as options from './options';
-import type {
-  AllConfig,
-  ManagerConfig,
-  RenovateConfig,
-  RenovateConfigStage,
-} from './types';
+import type { AllConfig, RenovateConfig, RenovateConfigStage } from './types';
 import { mergeChildConfig } from './utils';
 
 export { mergeChildConfig };
@@ -14,8 +9,8 @@ export { mergeChildConfig };
 export function getManagerConfig(
   config: RenovateConfig,
   manager: string
-): ManagerConfig {
-  let managerConfig: ManagerConfig = {
+): RenovateConfig {
+  let managerConfig: RenovateConfig = {
     ...config,
     language: null,
     manager: null,
