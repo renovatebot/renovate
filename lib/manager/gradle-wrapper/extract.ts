@@ -6,11 +6,12 @@ import { extractGradleVersion } from './utils';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
   logger.trace('gradle-wrapper.extractPackageFile()');
-  const currentValue = extractGradleVersion(fileContent);
-  if (currentValue) {
+  const extractResult = extractGradleVersion(fileContent);
+  if (extractResult) {
     const dependency: PackageDependency = {
       depName: 'gradle',
-      currentValue,
+      currentValue: extractResult.version,
+      replaceString: extractResult.url,
       datasource: GradleVersionDatasource.id,
       versioning,
     };
