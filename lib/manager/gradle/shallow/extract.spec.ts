@@ -184,6 +184,38 @@ describe('manager/gradle/shallow/extract', () => {
               packageFile: 'gradle/libs.versions.toml',
             },
           },
+          {
+            depName: 'io.gitlab.arturbosch.detekt',
+            depType: 'plugin',
+            currentValue: '1.17.0',
+            commitMessageTopic: 'plugin detekt',
+            lookupName:
+              'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 21,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
+          {
+            depName: 'org.danilopianini.publish-on-central',
+            depType: 'plugin',
+            currentValue: '0.5.0',
+            commitMessageTopic: 'plugin publish-on-central',
+            lookupName:
+              'org.danilopianini.publish-on-central:org.danilopianini.publish-on-central.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 68,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
         ],
       },
     ]);
@@ -235,6 +267,38 @@ describe('manager/gradle/shallow/extract', () => {
               fileReplacePosition: 41,
               packageFile: 'gradle/libs.versions.toml',
             },
+          },
+          {
+            depName: 'org.jetbrains.kotlin.jvm',
+            depType: 'plugin',
+            currentValue: '1.5.21',
+            commitMessageTopic: 'plugin kotlinJvm',
+            lookupName:
+              'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 415,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
+          {
+            depName: 'org.jetbrains.kotlin.plugin.serialization',
+            depType: 'plugin',
+            currentValue: '1.5.21',
+            commitMessageTopic: 'plugin kotlinSerialization',
+            lookupName:
+              'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 21,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
           },
         ],
       },

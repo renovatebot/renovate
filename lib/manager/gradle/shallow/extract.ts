@@ -15,6 +15,7 @@ import type { GradleManagerData } from '../types';
 import { parseGradle, parseProps } from './parser';
 import type {
   GradleCatalog,
+  GradleCatalogPluginDescriptor,
   PackageVariables,
   VariableRegistry,
 } from './types';
@@ -111,6 +112,34 @@ export async function extractAllPackageFiles(
             depName: `${group}:${name}`,
             groupName: group,
             currentValue: currentVersion,
+            managerData: { fileReplacePosition, packageFile },
+          };
+          extractedDeps.push(dependency);
+        }
+        const plugins = tomlContent.plugins || {};
+        const pluginsStartIndex = content.indexOf('[plugins]');
+        const pluginsSubContent = content.slice(pluginsStartIndex);
+        for (const pluginName of Object.keys(plugins)) {
+          const pluginDescriptor = plugins[
+            pluginName
+          ] as GradleCatalogPluginDescriptor;
+          const pluginId = pluginDescriptor.id;
+          const version = pluginDescriptor.version;
+          const currentVersion: string =
+            typeof version === 'string' ? version : versions[version.ref];
+          const fileReplacePosition =
+            typeof version === 'string'
+              ? pluginsStartIndex +
+                findIndexAfter(pluginsSubContent, pluginId, currentVersion)
+              : versionStartIndex +
+                findIndexAfter(versionSubContent, version.ref, currentVersion);
+          const dependency = {
+            depType: 'plugin',
+            depName: pluginId,
+            lookupName: `${pluginId}:${pluginId}.gradle.plugin`,
+            registryUrls: ['https://plugins.gradle.org/m2/'],
+            currentValue: currentVersion,
+            commitMessageTopic: `plugin ${pluginName}`,
             managerData: { fileReplacePosition, packageFile },
           };
           extractedDeps.push(dependency);
