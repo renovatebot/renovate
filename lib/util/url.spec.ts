@@ -1,5 +1,6 @@
 import {
   ensurePathPrefix,
+  joinUrlParts,
   parseUrl,
   resolveBaseUrl,
   trimTrailingSlash,
@@ -88,5 +89,21 @@ describe('util/url', () => {
     expect(
       ensurePathPrefix('https://index.docker.io/v2/something', '/v2')
     ).toBe('https://index.docker.io/v2/something');
+  });
+
+  it('joinUrlParts', () => {
+    const registryUrl = 'https://some.test';
+    expect(joinUrlParts(registryUrl, 'foo')).toBe(`${registryUrl}/foo`);
+    expect(joinUrlParts(registryUrl, '/?foo')).toBe(`${registryUrl}?foo`);
+    expect(joinUrlParts(registryUrl, '/foo/bar/')).toBe(
+      `${registryUrl}/foo/bar/`
+    );
+    expect(joinUrlParts(`${registryUrl}/foo/`, '/foo/bar')).toBe(
+      `${registryUrl}/foo/foo/bar`
+    );
+    expect(joinUrlParts(`${registryUrl}/api/`, '/foo/bar')).toBe(
+      `${registryUrl}/api/foo/bar`
+    );
+    expect(joinUrlParts('foo//////')).toBe('foo/');
   });
 });
