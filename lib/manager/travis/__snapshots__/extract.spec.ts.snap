@@ -4,13 +4,13 @@ exports[`manager/travis/extract extractPackageFile() returns results 1`] = `
 Object {
   "deps": Array [
     Object {
-      "currentValue": 6,
+      "currentValue": "6",
       "datasource": "github-tags",
       "depName": "node",
       "lookupName": "nodejs/node",
     },
     Object {
-      "currentValue": 8,
+      "currentValue": "8",
       "datasource": "github-tags",
       "depName": "node",
       "lookupName": "nodejs/node",

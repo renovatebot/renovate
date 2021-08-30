@@ -21,7 +21,7 @@ export async function getDockerConstraint(
     'utf8'
   );
 
-  const version = extractGradleVersion(fileContent);
+  const version = extractGradleVersion(fileContent)?.version;
 
   return getJavaContraint(version);
 }

@@ -63,6 +63,7 @@ export async function generateLockFile(
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && gte(minYarnVersion, '2.2.0');
+    const isYarnModeAvailable = minYarnVersion && gte(minYarnVersion, '3.0.0');
 
     let installYarn = 'npm i -g yarn';
     if (isYarn1 && minYarnVersion) {
@@ -77,22 +78,28 @@ export async function generateLockFile(
       CI: 'true',
     };
 
-    if (isYarn1 && config.skipInstalls !== false) {
-      const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
-      if (!offlineMirror) {
-        logger.debug('Updating yarn.lock only - skipping node_modules');
-        // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-        preCommands.push(getOptimizeCommand());
-        if (yarnPath) {
-          preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
+    const commands = [];
+    let cmdOptions = ''; // should have a leading space
+    if (config.skipInstalls !== false) {
+      if (isYarn1) {
+        const { offlineMirror, yarnPath } = await checkYarnrc(cwd);
+        if (!offlineMirror) {
+          logger.debug('Updating yarn.lock only - skipping node_modules');
+          // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+          preCommands.push(getOptimizeCommand());
+          if (yarnPath) {
+            preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
+          }
         }
+      } else if (isYarnModeAvailable) {
+        // Don't run the link step and only fetch what's necessary to compute an updated lockfile
+        cmdOptions += ' --mode=update-lockfile';
       }
     }
-    const commands = [];
-    let cmdOptions = '';
+
     if (isYarn1) {
       cmdOptions +=
-        '--ignore-engines --ignore-platform --network-timeout 100000';
+        ' --ignore-engines --ignore-platform --network-timeout 100000';
       extraEnv.YARN_CACHE_FOLDER = env.YARN_CACHE_FOLDER;
     } else {
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
@@ -102,6 +109,11 @@ export async function generateLockFile(
     if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
+      } else if (isYarnModeAvailable) {
+        if (config.skipInstalls === false) {
+          // Don't run the build scripts
+          cmdOptions += ' --mode=skip-build';
+        }
       } else {
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
       }
@@ -124,7 +136,7 @@ export async function generateLockFile(
     }
 
     // This command updates the lock file based on package.json
-    commands.push(`yarn install ${cmdOptions}`.trim());
+    commands.push(`yarn install${cmdOptions}`);
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
@@ -136,14 +148,14 @@ export async function generateLockFile(
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
-            .join(' ')} ${cmdOptions}`.trim()
+            .join(' ')}${cmdOptions}`
         );
       } else {
         // `yarn up` updates to the latest release, so the range should be specified
         commands.push(
           `yarn up ${lockUpdates
             .map((update) => `${update.depName}@${update.newValue}`)
-            .join(' ')}`
+            .join(' ')}${cmdOptions}`
         );
       }
     }
@@ -159,9 +171,9 @@ export async function generateLockFile(
         if (isYarn1) {
           commands.push(`npx yarn-deduplicate --strategy ${s}`);
           // Run yarn again in case any changes are necessary
-          commands.push(`yarn install ${cmdOptions}`.trim());
+          commands.push(`yarn install${cmdOptions}`);
         } else if (isYarnDedupeAvailable && s === 'highest') {
-          commands.push(`yarn dedupe --strategy ${s}`);
+          commands.push(`yarn dedupe --strategy ${s}${cmdOptions}`);
         } else {
           logger.debug(`yarn dedupe ${s} not available`);
         }

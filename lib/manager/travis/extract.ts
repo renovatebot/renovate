@@ -19,7 +19,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       depName: 'node',
       datasource: datasourceGithubTags.id,
       lookupName: 'nodejs/node',
-      currentValue,
+      currentValue: currentValue.toString(),
     }));
   }
   if (!deps.length) {

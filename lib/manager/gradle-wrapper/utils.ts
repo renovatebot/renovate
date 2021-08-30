@@ -2,10 +2,12 @@ import type { Stats } from 'fs';
 import os from 'os';
 import upath from 'upath';
 import { getGlobalConfig } from '../../config/global';
+import { logger } from '../../logger';
 import { chmod } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import gradleVersioning from '../../versioning/gradle';
 import { id as npmVersioning } from '../../versioning/npm';
+import { GradleVersionExtract } from './types';
 
 export const extraEnv = {
   GRADLE_OPTS:
@@ -72,20 +74,29 @@ export function getJavaVersioning(): string {
   return npmVersioning;
 }
 
-// https://regex101.com/r/1GaQ2X/1
+// https://regex101.com/r/IcOs7P/1
 const DISTRIBUTION_URL_REGEX = regEx(
-  '^(?:distributionUrl\\s*=\\s*)\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip\\s*$'
+  '^(?:distributionUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$'
 );
 
-export function extractGradleVersion(fileContent: string): string | null {
+export function extractGradleVersion(
+  fileContent: string
+): GradleVersionExtract | null {
   const lines = fileContent?.split('\n') ?? [];
 
   for (const line of lines) {
     const distributionUrlMatch = DISTRIBUTION_URL_REGEX.exec(line);
+
     if (distributionUrlMatch) {
-      return distributionUrlMatch.groups.version;
+      return {
+        url: distributionUrlMatch.groups.url,
+        version: distributionUrlMatch.groups.version,
+      };
     }
   }
+  logger.debug(
+    'Gradle wrapper version and url could not be extracted from properties - skipping update'
+  );
 
   return null;
 }
