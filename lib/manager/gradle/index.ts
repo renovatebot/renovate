@@ -32,7 +32,7 @@ export const defaultConfig = {
   fileMatch: [
     '\\.gradle(\\.kts)?$',
     '(^|/)gradle.properties$',
-    '\\.versions\\.toml$',
+    'gradle\\/.+\\.toml$',
   ],
   timeout: 600,
   versioning: gradleVersioning.id,
