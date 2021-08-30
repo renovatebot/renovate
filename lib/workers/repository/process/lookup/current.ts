@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import type { VersioningApi } from '../../../../versioning/types';
 import type { LookupUpdateConfig } from './types';
@@ -10,6 +11,9 @@ export function getCurrentVersion(
   allVersions: string[]
 ): string | null {
   const { currentValue, lockedVersion } = config;
+  if (!is.string(currentValue)) {
+    return null;
+  }
   if (versioning.isVersion(currentValue)) {
     return currentValue;
   }
