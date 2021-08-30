@@ -611,7 +611,7 @@ describe('datasource/docker/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:my/node:pull  "',
         })
