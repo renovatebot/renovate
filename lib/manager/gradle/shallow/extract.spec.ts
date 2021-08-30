@@ -240,4 +240,14 @@ describe('manager/gradle/shallow/extract', () => {
       },
     ]);
   });
+
+  it('ignores an empty TOML', async () => {
+    const tomlFile = '';
+    const fsMock = {
+      'gradle/libs.versions.toml': tomlFile,
+    };
+    mockFs(fsMock);
+    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    expect(res).toBeNull();
+  });
 });

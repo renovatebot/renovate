@@ -82,27 +82,27 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         // Implement TOML file parsing and extraction
         const tomlContent = parse(content) as GradleCatalog;
-        const versions = tomlContent.versions;
-        const libs = tomlContent.libraries;
+        const versions = tomlContent.versions || {};
+        const libs = tomlContent.libraries || {};
         const libStartIndex = content.indexOf('libraries');
         const libSubContent = content.slice(libStartIndex);
         const versionStartIndex = content.indexOf('versions');
         const versionSubContent = content.slice(versionStartIndex);
-        for (const libraryName in libs as object) {
+        for (const libraryName of Object.keys(libs)) {
           const libDescriptor = libs[libraryName];
-          const group =
+          const group: string =
             typeof libDescriptor === 'string'
               ? libDescriptor.split(':')[0]
               : libDescriptor.group || libDescriptor.module?.split(':')[0];
-          const name =
+          const name: string =
             typeof libDescriptor === 'string'
               ? libDescriptor.split(':')[1]
               : libDescriptor.name || libDescriptor.module?.split(':')[1];
           const version = libDescriptor.version || libDescriptor.split(':')[2];
           const currentVersion =
-            typeof version == 'string' ? version : versions[version.ref];
+            typeof version === 'string' ? version : versions[version.ref];
           const fileReplacePosition =
-            typeof version == 'string'
+            typeof version === 'string'
               ? libStartIndex +
                 findIndexAfter(libSubContent, libraryName, currentVersion)
               : versionStartIndex +
@@ -111,10 +111,7 @@ export async function extractAllPackageFiles(
             depName: `${group}:${name}`,
             groupName: group,
             currentValue: currentVersion,
-            managerData: {
-              fileReplacePosition: fileReplacePosition,
-              packageFile: packageFile,
-            },
+            managerData: { fileReplacePosition, packageFile },
           };
           extractedDeps.push(dependency);
         }
