@@ -75,7 +75,10 @@ async function getDockerApiTags(
   }
   let page = 1;
   do {
-    const res = await http.getJson<{ tags: string[] }>(url, { headers });
+    const res = await http.getJson<{ tags: string[] }>(url, {
+      headers,
+      noAuth: true,
+    });
     tags = tags.concat(res.body.tags);
     const linkHeader = parseLinkHeader(res.headers.link as string);
     url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
