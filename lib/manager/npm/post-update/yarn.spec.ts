@@ -81,10 +81,7 @@ describe('manager/npm/post-update/yarn', () => {
       stdout: '3.0.0',
       stderr: '',
     });
-    fs.readFile.mockImplementation(
-      (filename, encoding) =>
-        new Promise<string>((resolve) => resolve('package-lock-contents'))
-    );
+    fs.readFile.mockResolvedValueOnce('package-lock-contents');
     const config = {
       constraints: {
         yarn: '3.0.0',
@@ -102,10 +99,7 @@ describe('manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    fs.readFile.mockImplementation(
-      (filename, encoding) =>
-        new Promise<string>((resolve) => resolve('package-lock-contents'))
-    );
+    fs.readFile.mockResolvedValueOnce('package-lock-contents');
     const config = {
       constraints: {
         yarn: '>= 2.0.0',
