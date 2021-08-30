@@ -9,10 +9,6 @@ import type { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 
-export interface ManagerConfig {
-  registryUrls?: string[];
-}
-
 export interface ManagerData<T> {
   managerData?: T;
 }
@@ -38,7 +34,7 @@ export interface CustomExtractConfig extends ExtractConfig {
   versioningTemplate?: string;
 }
 
-export interface UpdateArtifactsConfig extends ManagerConfig {
+export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
   composerIgnorePlatformReqs?: string[];
@@ -259,7 +255,7 @@ export interface ManagerApi {
 }
 
 // TODO: name and properties used by npm manager
-export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
+export interface PostUpdateConfig extends Record<string, any> {
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
