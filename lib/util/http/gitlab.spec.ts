@@ -79,11 +79,16 @@ describe('util/http/gitlab', () => {
       hostType: GitlabReleasesDatasource.id,
       token: 'def',
     });
-    httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200);
-    await gitlabApiDatasource.get('/some-url');
-    const [req] = httpMock.getTrace();
-    expect(req).toBeDefined();
-    expect(req.headers.authorization).toBe('Bearer def');
+    httpMock
+      .scope(gitlabApiHost, { reqheaders: { authorization: 'Bearer def' } })
+      .get('/api/v4/some-url')
+      .reply(200);
+    const response = await gitlabApiDatasource.get('/some-url');
+    expect(response).not.toBeNull();
+
+    const trace = httpMock.getTrace();
+    expect(trace).toHaveLength(1);
+    expect(trace).toMatchSnapshot();
   });
 
   it('attempts to paginate', async () => {
