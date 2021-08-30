@@ -369,6 +369,7 @@ export async function extractPackageFile(
     ...lockFiles,
     managerData: {
       lernaJsonFile,
+      yarnZeroInstall,
     },
     lernaClient,
     lernaPackages,
