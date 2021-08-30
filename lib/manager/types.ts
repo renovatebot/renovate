@@ -255,7 +255,9 @@ export interface ManagerApi {
 }
 
 // TODO: name and properties used by npm manager
-export interface PostUpdateConfig extends Record<string, any> {
+export interface PostUpdateConfig<T = Record<string, any>>
+  extends Record<string, any>,
+    ManagerData<T> {
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
@@ -267,7 +269,4 @@ export interface PostUpdateConfig extends Record<string, any> {
   yarnLock?: string;
   branchName?: string;
   reuseExistingBranch?: boolean;
-  managerData?: {
-    yarnZeroInstall?: boolean;
-  };
 }
