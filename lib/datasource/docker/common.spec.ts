@@ -75,7 +75,7 @@ describe('datasource/docker/common', () => {
     beforeEach(() => {
       httpMock
         .scope('https://my.local.registry')
-        .get('/v2/')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
       hostRules.hosts.mockReturnValue([]);
     });
@@ -92,10 +92,10 @@ describe('datasource/docker/common', () => {
       );
 
       expect(headers).toMatchInlineSnapshot(`
-        Object {
-          "authorization": "some-authType some-token",
-        }
-      `);
+Object {
+  "authorization": "some-authType some-token",
+}
+`);
     });
 
     it('returns "Bearer token" if only token provided', async () => {
@@ -109,10 +109,26 @@ describe('datasource/docker/common', () => {
       );
 
       expect(headers).toMatchInlineSnapshot(`
-        Object {
-          "authorization": "Bearer some-token",
-        }
-      `);
+Object {
+  "authorization": "Bearer some-token",
+}
+`);
+    });
+
+    it('fails', async () => {
+      httpMock.clear(false);
+
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {});
+
+      const headers = await dockerCommon.getAuthHeaders(
+        'https://my.local.registry',
+        'https://my.local.registry/prefix'
+      );
+
+      expect(headers).toBeNull();
     });
   });
 });

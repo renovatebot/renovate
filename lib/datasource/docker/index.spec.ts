@@ -70,6 +70,7 @@ describe('datasource/docker/index', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null if errored', async () => {
       httpMock
         .scope(baseUrl)
@@ -84,6 +85,7 @@ describe('datasource/docker/index', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null if empty header', async () => {
       httpMock
         .scope(baseUrl)
@@ -98,11 +100,12 @@ describe('datasource/docker/index', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns digest', async () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
         })
@@ -123,11 +126,12 @@ describe('datasource/docker/index', () => {
       expect(res).toBe('some-digest');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('falls back to body for digest', async () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
         })
@@ -171,11 +175,12 @@ describe('datasource/docker/index', () => {
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('supports docker insecure registry', async () => {
       httpMock
         .scope(baseUrl.replace('https', 'http'))
         .get('/')
-        .reply(200, '', {})
+        .reply(200)
         .get('/library/some-dep/manifests/latest')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
       hostRules.find.mockReturnValueOnce({ insecureRegistry: true });
@@ -186,15 +191,14 @@ describe('datasource/docker/index', () => {
       expect(res).toBe('some-digest');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('supports basic authentication', async () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .get('/')
-        .reply(200)
         .get('/library/some-dep/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
       const res = await getDigest(
@@ -208,14 +212,15 @@ describe('datasource/docker/index', () => {
       );
       expect(trace).toMatchSnapshot();
     });
+
     it('returns null for 403 with basic authentication', async () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .get('/')
+        .get('/library/some-dep/manifests/some-tag')
         .reply(403);
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-dep' },
@@ -224,15 +229,14 @@ describe('datasource/docker/index', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('passes credentials to ECR client', async () => {
       httpMock
         .scope(amazonUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .get('/')
-        .reply(200)
         .get('/node/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
@@ -258,15 +262,14 @@ describe('datasource/docker/index', () => {
         region: 'us-east-1',
       });
     });
+
     it('supports ECR authentication', async () => {
       httpMock
         .scope(amazonUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .get('/')
-        .reply(200)
         .get('/node/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
@@ -286,15 +289,11 @@ describe('datasource/docker/index', () => {
       expect(trace[1].headers.authorization).toBe('Basic abcdef');
       expect(trace).toMatchSnapshot();
     });
+
     it('continues without token if ECR authentication could not be extracted', async () => {
-      httpMock
-        .scope(amazonUrl)
-        .get('/')
-        .reply(200, '', {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .get('/')
-        .reply(403);
+      httpMock.scope(amazonUrl).get('/').reply(401, '', {
+        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+      });
       mockEcrAuthResolve();
 
       const res = await getDigest(
@@ -307,16 +306,12 @@ describe('datasource/docker/index', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('continues without token if ECR authentication fails', async () => {
       hostRules.find.mockReturnValue({});
-      httpMock
-        .scope(amazonUrl)
-        .get('/')
-        .reply(200, '', {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .get('/')
-        .reply(403);
+      httpMock.scope(amazonUrl).get('/').reply(401, '', {
+        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+      });
       mockEcrAuthReject('some error');
       const res = await getDigest(
         {
@@ -328,6 +323,7 @@ describe('datasource/docker/index', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('continues without token, when no header is present', async () => {
       httpMock
         .scope(baseUrl)
@@ -344,11 +340,12 @@ describe('datasource/docker/index', () => {
       expect(res).toBe('some-digest');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('supports scoped names', async () => {
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
         })
@@ -367,12 +364,14 @@ describe('datasource/docker/index', () => {
       expect(res).toBe('some-digest');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should throw error for 429', async () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
     it('should throw error for 5xx', async () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
       await expect(
@@ -396,6 +395,7 @@ describe('datasource/docker/index', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('uses custom registry with registryUrls', async () => {
       const tags = ['1.0.0'];
       httpMock
@@ -427,6 +427,7 @@ describe('datasource/docker/index', () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('uses custom registry in depName', async () => {
       const tags = ['1.0.0'];
       httpMock
@@ -446,6 +447,7 @@ describe('datasource/docker/index', () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('uses quay api', async () => {
       const tags = [{ name: '5.0.12' }];
       httpMock
@@ -467,6 +469,7 @@ describe('datasource/docker/index', () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('uses quay api and test error', async () => {
       httpMock
         .scope('https://quay.io')
@@ -483,6 +486,7 @@ describe('datasource/docker/index', () => {
         'external-host-error'
       );
     });
+
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
         .scope(amazonUrl)
@@ -502,12 +506,13 @@ describe('datasource/docker/index', () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
       const tags = ['1.0.0'];
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
         })
@@ -530,12 +535,13 @@ describe('datasource/docker/index', () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
       const tags = ['1.0.0'];
       httpMock
         .scope(baseUrl)
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
         })
@@ -558,12 +564,13 @@ describe('datasource/docker/index', () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('adds no library/ prefix for other registries', async () => {
       const tags = ['1.0.0'];
       httpMock
         .scope('https://k8s.gcr.io/v2/')
         .get('/')
-        .reply(200, '', {
+        .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://k8s.gcr.io/v2/token",service="k8s.gcr.io"',
         })
@@ -584,6 +591,7 @@ describe('datasource/docker/index', () => {
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns null on error', async () => {
       httpMock
         .scope(baseUrl)
@@ -601,14 +609,9 @@ describe('datasource/docker/index', () => {
 
     it('returns null if no auth', async () => {
       hostRules.find.mockReturnValue({});
-      httpMock
-        .scope(baseUrl)
-        .get('/')
-        .reply(200, undefined, {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .get('/')
-        .reply(403);
+      httpMock.scope(baseUrl).get('/').reply(401, undefined, {
+        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+      });
       const res = await getPkgReleases({
         datasource: id,
         depName: 'node',
@@ -771,9 +774,7 @@ describe('datasource/docker/index', () => {
       const trace = httpMock.getTrace();
       expect(res).toMatchSnapshot();
       expect(trace).toMatchSnapshot();
-      expect(trace[1].headers.authorization).toBe(
-        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
-      );
+      expect(trace[1].headers.authorization).toBeUndefined();
       expect(trace[trace.length - 1].headers.authorization).toBeUndefined();
     });
   });

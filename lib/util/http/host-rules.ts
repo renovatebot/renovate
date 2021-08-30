@@ -6,14 +6,20 @@ import { GotOptions } from './types';
 // Apply host rules to requests
 
 export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
-  const options = { ...inOptions };
+  const options: GotOptions = { ...inOptions };
   const foundRules =
     hostRules.find({
       hostType: options.hostType,
       url,
     }) || /* istanbul ignore next: can only happen in tests */ {};
   const { username, password, token, enabled, authType } = foundRules;
-  if (options.headers?.authorization || options.password || options.token) {
+  if (options.noAuth) {
+    logger.trace({ url }, `Authorization disabled`);
+  } else if (
+    options.headers?.authorization ||
+    options.password ||
+    options.token
+  ) {
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {
     logger.trace({ url }, `Applying Basic authentication`);
