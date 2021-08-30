@@ -30,7 +30,12 @@ export function printRequestStats(): void {
     requestHosts[hostname].push(httpRequest);
   }
   logger.trace({ allRequests, requestHosts }, 'full stats');
-  const hostStats: Record<string, any> = {};
+  type HostStats = {
+    requestCount: number;
+    requestAvgMs: number;
+    queueAvgMs: number;
+  };
+  const hostStats: Record<string, HostStats> = {};
   let totalRequests = 0;
   for (const [hostname, requests] of Object.entries(requestHosts)) {
     const requestCount = requests.length;
