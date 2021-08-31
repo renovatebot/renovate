@@ -67,7 +67,7 @@ Array [
 
 exports[`datasource/nuget/index getReleases handles paginated results (v2) 1`] = `
 Object {
-  "registryUrl": "https://www.nuget.org/api/v2/",
+  "registryUrl": "https://www.nuget.org/api/v2",
   "releases": Array [
     Object {
       "version": "1.0.0",
@@ -104,7 +104,7 @@ Array [
 
 exports[`datasource/nuget/index getReleases processes real data (v2) 1`] = `
 Object {
-  "registryUrl": "https://www.nuget.org/api/v2/",
+  "registryUrl": "https://www.nuget.org/api/v2",
   "releases": Array [
     Object {
       "releaseTimestamp": "2011-01-07T07:57:55.387Z",
@@ -2052,7 +2052,7 @@ Array [
 
 exports[`datasource/nuget/index getReleases processes real data with no github project url (v2) 1`] = `
 Object {
-  "registryUrl": "https://www.nuget.org/api/v2/",
+  "registryUrl": "https://www.nuget.org/api/v2",
   "releases": Array [
     Object {
       "version": "3.11.0",
@@ -2078,7 +2078,7 @@ Array [
 
 exports[`datasource/nuget/index getReleases processes real data without project url (v2) 1`] = `
 Object {
-  "registryUrl": "https://www.nuget.org/api/v2/",
+  "registryUrl": "https://www.nuget.org/api/v2",
   "releases": Array [
     Object {
       "version": "2.5.7.10213",

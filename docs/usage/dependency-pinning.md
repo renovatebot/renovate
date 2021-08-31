@@ -126,6 +126,8 @@ So to reduce the interruptions of automated dependency updates, consider putting
 - Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
 - Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
 
+To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
+
 ### Grouping related packages
 
 Although it's good to isolate each dependency update for ease of troubleshooting, there are times when the extra noise isn't worth it, or when packages naturally belong together anyway (such as all `babel` packages).
