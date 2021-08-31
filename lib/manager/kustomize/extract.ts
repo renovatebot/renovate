@@ -5,7 +5,6 @@ import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import * as dockerVersioning from '../../versioning/docker';
 import { splitImageParts } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Image, Kustomize } from './types';
@@ -70,7 +69,6 @@ export function extractImage(image: Image): PackageDependency | null {
 
     return {
       datasource: datasourceDocker.id,
-      versioning: dockerVersioning.id,
       depName,
       currentValue: nameDep.currentValue,
       currentDigest: digest,
@@ -91,7 +89,6 @@ export function extractImage(image: Image): PackageDependency | null {
     return {
       ...dep,
       datasource: datasourceDocker.id,
-      versioning: dockerVersioning.id,
       replaceString: newTag,
     };
   }
