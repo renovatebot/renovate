@@ -105,6 +105,10 @@ export async function generateLockFile(
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
       extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
+      if (!config.managerData?.yarnZeroInstall) {
+        logger.debug('Enabling global cache as zero-install is not detected');
+        extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
+      }
     }
     if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
       if (isYarn1) {
