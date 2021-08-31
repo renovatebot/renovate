@@ -97,7 +97,6 @@ export function extractImage(image: Image): PackageDependency | null {
     return {
       ...nameDep,
       datasource: datasourceDocker.id,
-      versioning: dockerVersioning.id,
       replaceString: image.newName,
     };
   }

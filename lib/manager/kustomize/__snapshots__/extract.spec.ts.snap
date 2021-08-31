@@ -9,7 +9,6 @@ Object {
       "datasource": "docker",
       "depName": "postgres",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
-      "versioning": "docker",
     },
     Object {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
@@ -17,7 +16,6 @@ Object {
       "datasource": "docker",
       "depName": "postgres",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
-      "versioning": "docker",
     },
     Object {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
@@ -48,7 +46,6 @@ Object {
       "datasource": "docker",
       "depName": "postgres",
       "replaceString": "11",
-      "versioning": "docker",
     },
     Object {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
@@ -56,7 +53,6 @@ Object {
       "datasource": "docker",
       "depName": "postgres",
       "replaceString": "11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
-      "versioning": "docker",
     },
     Object {
       "currentValue": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
@@ -108,7 +104,6 @@ Object {
       "datasource": "docker",
       "depName": "awesome/postgres",
       "replaceString": "awesome/postgres:11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
-      "versioning": "docker",
     },
     Object {
       "currentDigest": undefined,
@@ -116,7 +111,6 @@ Object {
       "datasource": "docker",
       "depName": "awesome/postgres",
       "replaceString": "awesome/postgres:11",
-      "versioning": "docker",
     },
     Object {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
@@ -124,7 +118,6 @@ Object {
       "datasource": "docker",
       "depName": "awesome/postgres",
       "replaceString": "awesome/postgres@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
-      "versioning": "docker",
     },
   ],
 }
@@ -173,7 +166,6 @@ Array [
     "datasource": "docker",
     "depName": "node",
     "replaceString": "v0.1.0",
-    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -181,7 +173,6 @@ Array [
     "datasource": "docker",
     "depName": "group/instance",
     "replaceString": "v0.0.1",
-    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -189,7 +180,6 @@ Array [
     "datasource": "docker",
     "depName": "quay.io/test/repo",
     "replaceString": "v0.0.2",
-    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -197,7 +187,6 @@ Array [
     "datasource": "docker",
     "depName": "gitlab.com/org/suborg/image",
     "replaceString": "v0.0.3",
-    "versioning": "docker",
   },
   Object {
     "currentDigest": undefined,
@@ -205,7 +194,6 @@ Array [
     "datasource": "docker",
     "depName": "but.this.lives.on.local/private-registry",
     "replaceString": "v0.0.4",
-    "versioning": "docker",
   },
   Object {
     "currentValue": 2.5,
