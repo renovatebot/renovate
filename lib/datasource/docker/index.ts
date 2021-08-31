@@ -3,6 +3,7 @@ import parseLinkHeader from 'parse-link-header';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
+import { hasKey } from '../../util/object';
 import { ensurePathPrefix } from '../../util/url';
 import {
   api as dockerVersioning,
@@ -12,7 +13,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
   defaultRegistryUrls,
   ecrRegex,
-  extractDigestFromResponse,
+  extractDigestFromResponseBody,
   getAuthHeaders,
   getLabels,
   getManifestResponse,
@@ -191,13 +192,27 @@ export async function getDigest(
     if (cachedResult !== undefined) {
       return cachedResult;
     }
-    const manifestResponse = await getManifestResponse(
+    let manifestResponse = await getManifestResponse(
       registryHost,
       dockerRepository,
-      newTag
+      newTag,
+      'head'
     );
     if (manifestResponse) {
-      digest = extractDigestFromResponse(manifestResponse) || null;
+      if (hasKey('docker-content-digest', manifestResponse.headers)) {
+        digest = manifestResponse.headers['docker-content-digest'] || null;
+      } else {
+        logger.debug(
+          { registryHost },
+          'Missing docker content digest header, pulling full manifest'
+        );
+        manifestResponse = await getManifestResponse(
+          registryHost,
+          dockerRepository,
+          newTag
+        );
+        digest = extractDigestFromResponseBody(manifestResponse);
+      }
       logger.debug({ digest }, 'Got docker digest');
     }
   } catch (err) /* istanbul ignore next */ {
@@ -243,6 +258,7 @@ export async function getReleases({
   }
   const releases = tags.map((version) => ({ version }));
   const ret: ReleaseResult = {
+    registryUrl: registryHost,
     releases,
   };
 
