@@ -18,5 +18,4 @@ export const GITLAB_API_USING_HOST_TYPES = [
   PLATFORM_TYPE_GITLAB,
   'gitlab-releases',
   'gitlab-tags',
-  'pod',
 ];

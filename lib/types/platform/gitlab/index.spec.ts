@@ -4,7 +4,6 @@ import {
 } from '../../../constants/platforms';
 import { GitlabReleasesDatasource } from '../../../datasource/gitlab-releases';
 import { id as GL_TAGS_DS } from '../../../datasource/gitlab-tags';
-import { id as POD_DS } from '../../../datasource/pod';
 import { GITLAB_API_USING_HOST_TYPES } from './index';
 
 describe('types/platform/gitlab/index', () => {
@@ -13,7 +12,6 @@ describe('types/platform/gitlab/index', () => {
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(GitlabReleasesDatasource.id)
     ).toBeTrue();
-    expect(GITLAB_API_USING_HOST_TYPES.includes(POD_DS)).toBeTrue();
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(PLATFORM_TYPE_GITLAB)
     ).toBeTrue();
