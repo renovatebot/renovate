@@ -81,16 +81,31 @@ describe('manager/npm/post-update/yarn', () => {
       stdout: '3.0.0',
       stderr: '',
     });
-    fs.readFile.mockImplementation(
-      (filename, encoding) =>
-        new Promise<string>((resolve) => resolve('package-lock-contents'))
-    );
+    fs.readFile.mockResolvedValueOnce('package-lock-contents');
     const config = {
       constraints: {
         yarn: '3.0.0',
       },
       postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       skipInstalls: false,
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+
+  it('does not use global cache if zero install is detected', async () => {
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    fs.readFile.mockResolvedValueOnce('package-lock-contents');
+    const config = {
+      constraints: {
+        yarn: '>= 2.0.0',
+      },
+      postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+      managerData: { yarnZeroInstall: true },
     };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toEqual('package-lock-contents');
