@@ -1,9 +1,9 @@
 import { getGlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import type { RangeStrategy } from '../../types';
 import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
+import type { BranchConfig } from '../types';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
@@ -11,7 +11,7 @@ type ParentBranch = {
 };
 
 export async function shouldReuseExistingBranch(
-  config: RenovateConfig
+  config: BranchConfig
 ): Promise<ParentBranch> {
   const { branchName } = config;
   // Check if branch exists
