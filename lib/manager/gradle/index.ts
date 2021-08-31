@@ -33,6 +33,7 @@ export const defaultConfig = {
     '\\.gradle(\\.kts)?$',
     '(^|/)gradle.properties$',
     '(^|\\//gradle\\/.+\\.toml$',
+    '\\.versions\\.toml$',
   ],
   timeout: 600,
   versioning: gradleVersioning.id,
