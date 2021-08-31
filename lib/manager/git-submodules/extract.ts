@@ -5,7 +5,7 @@ import { getGlobalConfig } from '../../config/global';
 import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
-import type { ManagerConfig, PackageFile } from '../types';
+import type { ExtractConfig, PackageFile } from '../types';
 import { GitModule } from './types';
 
 async function getUrl(
@@ -86,7 +86,7 @@ async function getModules(
 export default async function extractPackageFile(
   _content: string,
   fileName: string,
-  config: ManagerConfig
+  config: ExtractConfig
 ): Promise<PackageFile | null> {
   const { localDir } = getGlobalConfig();
   const git = Git(localDir);

@@ -375,11 +375,6 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }
 
-export interface ManagerConfig extends RenovateConfig {
-  language: string;
-  manager: string;
-}
-
 export interface MigratedConfig {
   isMigrated: boolean;
   migratedConfig: RenovateConfig;
