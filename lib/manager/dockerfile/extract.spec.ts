@@ -265,6 +265,20 @@ describe('manager/dockerfile/extract', () => {
         },
       ]);
     });
+
+    it('handles prefixes', () => {
+      const res = extractPackageFile('FROM amd64/ubuntu:18.04\n').deps;
+      expect(res).toMatchSnapshot([
+        {
+          currentValue: '18.04',
+          depName: 'ubuntu',
+          lookupName: 'amd64/ubuntu',
+          versioning: 'ubuntu',
+          autoReplaceStringTemplate:
+            '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      ]);
+    });
   });
   describe('getDep()', () => {
     it('rejects null', () => {

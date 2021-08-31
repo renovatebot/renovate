@@ -22,6 +22,7 @@
       "args": [
         "--runInBand",
         "--collectCoverage=false",
+        "--testTimeout 100000000",
         "--runTestsByPath",
         "${relativeFile}"
       ],
@@ -42,7 +43,11 @@
       "request": "launch",
       "name": "Jest All",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["--runInBand", "--collectCoverage=false"],
+      "args": [
+        "--runInBand",
+        "--collectCoverage=false",
+        "--testTimeout 100000000"
+      ],
       "env": {
         "NODE_ENV": "test",
         "LOG_LEVEL": "debug"
@@ -64,7 +69,12 @@
       "disableOptimisticBPs": true,
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "yarn",
-      "args": ["jest", "--runInBand", "--watchAll=false"]
+      "args": [
+        "jest",
+        "--runInBand",
+        "--watchAll=false",
+        "--testTimeout 100000000"
+      ]
     }
   ]
 }

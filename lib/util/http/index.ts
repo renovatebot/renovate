@@ -26,6 +26,12 @@ export interface HttpOptions {
   password?: string;
   baseUrl?: string;
   headers?: OutgoingHttpHeaders;
+
+  /**
+   * Do not use authentication
+   */
+  noAuth?: boolean;
+
   throwHttpErrors?: boolean;
   useCache?: boolean;
 }

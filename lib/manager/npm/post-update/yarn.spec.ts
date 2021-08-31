@@ -32,10 +32,12 @@ describe('manager/npm/post-update/yarn', () => {
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
+
   it.each([
     ['1.22.0', '^1.10.0', 2],
     ['2.1.0', '>= 2.0.0', 1],
     ['2.2.0', '2.2.0', 1],
+    ['3.0.0', '3.0.0', 1],
   ])(
     'generates lock files using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
@@ -73,9 +75,50 @@ describe('manager/npm/post-update/yarn', () => {
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
-  it.each([['1.22.0'], ['2.1.0']])(
+
+  it('only skips build if skipInstalls is false', async () => {
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '3.0.0',
+      stderr: '',
+    });
+    fs.readFile.mockResolvedValueOnce('package-lock-contents');
+    const config = {
+      constraints: {
+        yarn: '3.0.0',
+      },
+      postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+      skipInstalls: false,
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+
+  it('does not use global cache if zero install is detected', async () => {
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    fs.readFile.mockResolvedValueOnce('package-lock-contents');
+    const config = {
+      constraints: {
+        yarn: '>= 2.0.0',
+      },
+      postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+      managerData: { yarnZeroInstall: true },
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+
+  it.each([
+    ['1.22.0', '^1.10.0'],
+    ['2.1.0', '>= 2.0.0'],
+    ['3.0.0', '3.0.0'],
+  ])(
     'performs lock file updates using yarn v%s',
-    async (yarnVersion) => {
+    async (yarnVersion, yarnCompatibility) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -90,7 +133,7 @@ describe('manager/npm/post-update/yarn', () => {
       });
       const config = {
         constraints: {
-          yarn: yarnVersion === '1.22.0' ? '^1.10.0' : '>= 2.0.0',
+          yarn: yarnCompatibility,
         },
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
@@ -104,6 +147,7 @@ describe('manager/npm/post-update/yarn', () => {
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
+
   it.each([['1.22.0']])(
     'performs lock file updates and full install using yarn v%s',
     async (yarnVersion) => {
@@ -126,6 +170,7 @@ describe('manager/npm/post-update/yarn', () => {
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
+
   it.each([
     ['1.22.0', '^1.10.0', 2],
     ['2.1.0', '>= 2.0.0', 1],
@@ -160,6 +205,7 @@ describe('manager/npm/post-update/yarn', () => {
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec, {
       stdout: '1.9.4',
@@ -174,6 +220,7 @@ describe('manager/npm/post-update/yarn', () => {
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
+
   describe('checkYarnrc()', () => {
     it('returns offline mirror and yarn path', async () => {
       fs.readFile.mockImplementation((filename, encoding) => {
@@ -189,6 +236,7 @@ describe('manager/npm/post-update/yarn', () => {
       // FIXME: explicit assert condition
       expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
     });
+
     it('returns no offline mirror and unquoted yarn path', async () => {
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
