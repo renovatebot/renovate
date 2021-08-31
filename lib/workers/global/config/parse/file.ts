@@ -18,9 +18,13 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
     if (err instanceof SyntaxError || err instanceof TypeError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
       process.exit(1);
+    } else if (env.RENOVATE_CONFIG_FILE) {
+      logger.fatal('No custom config file found on disk');
+      process.exit(1);
+    } else {
+      // istanbul ignore next: we can ignore this
+      logger.debug('No config file found on disk - skipping');
     }
-    // Do nothing
-    logger.debug('No config file found on disk - skipping');
   }
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
