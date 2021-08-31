@@ -1,9 +1,9 @@
 import { getGlobalConfig } from '../../config/global';
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import type { RangeStrategy } from '../../types';
 import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
-import type { BranchConfig } from '../types';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
@@ -11,7 +11,7 @@ type ParentBranch = {
 };
 
 export async function shouldReuseExistingBranch(
-  config: BranchConfig
+  config: RenovateConfig
 ): Promise<ParentBranch> {
   const { branchName } = config;
   // Check if branch exists
@@ -111,20 +111,6 @@ export async function shouldReuseExistingBranch(
         isModified: false,
       };
     }
-  }
-
-  // Branches can get in an inconsistent state if postUpdateOptions is used.
-  // package.json updates are run conditionally, but postUpdateOptions are run everytime
-  // On the first execution, everything is executed, but if on a second execution the package.json modification is
-  // skipped but the postUpdateOptions is executed, the lockfile will have a different result than if it was executed
-  // along with the changes to the package.json. Thus ending up with an incomplete branch update
-  // This is why we are skipping branch reuse when postUpdateOptions is used (#10050)
-  if (config.postUpdateOptions?.length > 0) {
-    logger.debug(`Branch is using postUpdateOptions`);
-    return {
-      reuseExistingBranch: false,
-      isModified: false,
-    };
   }
 
   return { reuseExistingBranch: true, isModified: false };

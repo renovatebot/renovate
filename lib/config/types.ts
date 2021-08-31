@@ -44,7 +44,6 @@ export interface RenovateSharedConfig {
   hashedBranchLength?: number;
   npmrc?: string;
   platform?: string;
-  postUpdateOptions?: string[];
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
@@ -187,6 +186,7 @@ export interface RenovateConfig
   dependencyDashboardLabels?: string[];
   packageFile?: string;
   packageRules?: PackageRule[];
+  postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 

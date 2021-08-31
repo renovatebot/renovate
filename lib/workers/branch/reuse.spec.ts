@@ -88,17 +88,6 @@ describe('workers/branch/reuse', () => {
       expect(res.reuseExistingBranch).toBe(true);
     });
 
-    it('returns false if does not need rebasing but has postUpdateOptions', async () => {
-      config.postUpdateOptions = ['yarnDedupeFewer'];
-      git.branchExists.mockReturnValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...pr,
-        isConflicted: false,
-      });
-      const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
-    });
-
     it('returns true if unmergeable and cannot rebase', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
