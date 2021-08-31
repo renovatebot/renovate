@@ -142,13 +142,23 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     const cacheKey = crypto
       .createHash('md5')
-      .update('got-' + JSON.stringify({ url, headers: options.headers }))
+      .update(
+        'got-' +
+          JSON.stringify({
+            url,
+            headers: options.headers,
+            method: options.method,
+          })
+      )
       .digest('hex');
 
     let resPromise;
 
     // Cache GET requests unless useCache=false
-    if (options.method === 'get' && options.useCache !== false) {
+    if (
+      ['get', 'head'].includes(options.method) &&
+      options.useCache !== false
+    ) {
       resPromise = memCache.get(cacheKey);
     }
 
