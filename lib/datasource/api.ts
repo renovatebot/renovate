@@ -1,4 +1,5 @@
 import { AdoptiumJavaDatasource } from './adoptium-java';
+import { ArtifactoryDatasource } from './artifactory';
 import { BitBucketTagsDatasource } from './bitbucket-tags';
 import { CdnJsDatasource } from './cdnjs';
 import { ClojureDatasource } from './clojure';
@@ -38,6 +39,7 @@ const api = new Map<string, DatasourceApi>();
 export default api;
 
 api.set(AdoptiumJavaDatasource.id, new AdoptiumJavaDatasource());
+api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set('bitbucket-tags', new BitBucketTagsDatasource());
 api.set('cdnjs', new CdnJsDatasource());
 api.set('clojure', new ClojureDatasource());
