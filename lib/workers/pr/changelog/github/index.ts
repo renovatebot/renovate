@@ -30,8 +30,10 @@ export async function getTags(
 
     return tags.map((tag) => tag.name).filter(Boolean);
   } catch (err) {
-    logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
-    logger.debug({ err });
+    logger.debug(
+      { sourceRepo: repository, err },
+      'Failed to fetch Github tags'
+    );
     // istanbul ignore if
     if (err.message?.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
