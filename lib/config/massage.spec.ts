@@ -42,5 +42,20 @@ describe('config/massage', () => {
       expect(res).toMatchSnapshot();
       expect(res.packageRules).toHaveLength(3);
     });
+    it('does not massage lockFileMaintenance', () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          {
+            matchManagers: ['helmv3'],
+            matchBaseBranches: ['release/ft10/1.9.x'],
+            lockFileMaintenance: { enabled: true },
+            schedule: 'at any time',
+          },
+        ],
+      };
+      const res = massage.massageConfig(config);
+      expect(res).toMatchSnapshot();
+      expect(res.packageRules).toHaveLength(1);
+    });
   });
 });
