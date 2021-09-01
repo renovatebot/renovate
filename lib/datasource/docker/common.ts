@@ -260,20 +260,18 @@ function digestFromManifestStr(str: hasha.HashaInput): string {
   return 'sha256:' + hasha(str, { algorithm: 'sha256' });
 }
 
-export function extractDigestFromResponse(
+export function extractDigestFromResponseBody(
   manifestResponse: HttpResponse
 ): string {
-  if (manifestResponse.headers['docker-content-digest'] === undefined) {
-    return digestFromManifestStr(manifestResponse.body);
-  }
-  return manifestResponse.headers['docker-content-digest'] as string;
+  return digestFromManifestStr(manifestResponse.body);
 }
 
 // TODO: debug why quay throws errors (#9612)
 export async function getManifestResponse(
   registryHost: string,
   dockerRepository: string,
-  tag: string
+  tag: string,
+  mode: 'head' | 'get' = 'get'
 ): Promise<HttpResponse> {
   logger.debug(
     `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag})`
@@ -287,7 +285,7 @@ export async function getManifestResponse(
     headers.accept =
       'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json';
     const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
-    const manifestResponse = await http.get(url, {
+    const manifestResponse = await http[mode](url, {
       headers,
       noAuth: true,
     });
