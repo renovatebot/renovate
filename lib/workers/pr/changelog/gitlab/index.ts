@@ -1,4 +1,6 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
+import type { GitlabRelease } from '../../../../datasource/gitlab-releases/types';
+import type { GitlabTag } from '../../../../datasource/gitlab-tags/types';
 import { logger } from '../../../../logger';
 import type { GitlabTreeNode } from '../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../util/http/gitlab';
@@ -20,7 +22,7 @@ export async function getTags(
     repository
   )}/repository/tags?per_page=100`;
   try {
-    const res = await http.getJson<{ name: string }[]>(url, {
+    const res = await http.getJson<GitlabTag[]>(url, {
       paginate: true,
     });
 
@@ -32,7 +34,10 @@ export async function getTags(
 
     return tags.map((tag) => tag.name).filter(Boolean);
   } catch (err) {
-    logger.info({ sourceRepo: repository }, 'Failed to fetch Gitlab tags');
+    logger.debug(
+      { sourceRepo: repository, err },
+      'Failed to fetch Gitlab tags'
+    );
     // istanbul ignore if
     if (err.message?.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
@@ -101,14 +106,8 @@ export async function getReleaseList(
   const apiUrl = `${ensureTrailingSlash(
     apiBaseUrl
   )}projects/${repoId}/releases`;
-  const res = await http.getJson<
-    {
-      name: string;
-      release: string;
-      description: string;
-      tag_name: string;
-    }[]
-  >(`${apiUrl}?per_page=100`, {
+
+  const res = await http.getJson<GitlabRelease[]>(`${apiUrl}?per_page=100`, {
     paginate: true,
   });
   return res.body.map((release) => ({
