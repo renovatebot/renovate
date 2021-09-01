@@ -228,7 +228,7 @@ describe('workers/pr/changelog/release-notes', () => {
           {
             ...githubProject,
             repository: 'some/other-repository',
-            depName: 'some',
+            depName: 'other',
           },
           '1.0.1'
         );
