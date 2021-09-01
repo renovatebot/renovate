@@ -1,4 +1,5 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
+import type { GitlabRelease } from '../../../../datasource/gitlab-releases/types';
 import type { GitlabTag } from '../../../../datasource/gitlab-tags/types';
 import { logger } from '../../../../logger';
 import type { GitlabTreeNode } from '../../../../types/platform/gitlab';
@@ -107,14 +108,7 @@ export async function getReleaseList(
   )}projects/${repoId}/releases`;
 
   // TODO: use type from PR #11226
-  const res = await http.getJson<
-    {
-      name: string;
-      release: string;
-      description: string;
-      tag_name: string;
-    }[]
-  >(`${apiUrl}?per_page=100`, {
+  const res = await http.getJson<GitlabRelease[]>(`${apiUrl}?per_page=100`, {
     paginate: true,
   });
   return res.body.map((release) => ({
