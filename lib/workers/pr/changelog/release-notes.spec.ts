@@ -252,7 +252,8 @@ describe('workers/pr/changelog/release-notes', () => {
             { tag_name: `${prefix}1.0.0` },
             {
               tag_name: `${prefix}1.0.1`,
-              body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+              description:
+                'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
             },
           ]);
 
