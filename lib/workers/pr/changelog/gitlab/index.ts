@@ -107,7 +107,6 @@ export async function getReleaseList(
     apiBaseUrl
   )}projects/${repoId}/releases`;
 
-  // TODO: use type from PR #11226
   const res = await http.getJson<GitlabRelease[]>(`${apiUrl}?per_page=100`, {
     paginate: true,
   });
