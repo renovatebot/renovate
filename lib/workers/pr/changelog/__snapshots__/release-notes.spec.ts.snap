@@ -5,7 +5,8 @@ Object {
   "a": 1,
   "hasReleaseNotes": false,
   "project": Object {
-    "github": "https://github.com/nodeca/js-yaml",
+    "repository": "https://github.com/nodeca/js-yaml",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -24,7 +25,8 @@ Object {
   "a": 1,
   "hasReleaseNotes": false,
   "project": Object {
-    "gitlab": "https://gitlab.com/gitlab-org/gitter/webapp/",
+    "repository": "https://gitlab.com/gitlab-org/gitter/webapp/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -137,7 +139,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "" 1`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
 ",
@@ -148,7 +150,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -163,85 +165,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 3`] = `
-Object {
-  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
-",
-  "id": undefined,
-  "name": undefined,
-  "tag": "v1.0.1",
-  "url": "https://github.com/some/other-repository/releases/v1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 4`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 5`] = `
-Object {
-  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
-",
-  "id": undefined,
-  "name": undefined,
-  "tag": "other-1.0.1",
-  "url": "https://github.com/some/other-repository/releases/other-1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 6`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 7`] = `
-Object {
-  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
-",
-  "id": undefined,
-  "name": undefined,
-  "tag": "other_v1.0.1",
-  "url": "https://github.com/some/other-repository/releases/other_v1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 8`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
-  },
-]
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 9`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other@" 1`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
 ",
@@ -252,7 +176,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 10`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other@" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -267,9 +191,94 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other_v" 1`] = `
+Object {
+  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
+",
+  "id": undefined,
+  "name": undefined,
+  "tag": "other_v1.0.1",
+  "url": "https://github.com/some/other-repository/releases/other_v1.0.1",
+}
+`;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other_v" 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other-" 1`] = `
+Object {
+  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
+",
+  "id": undefined,
+  "name": undefined,
+  "tag": "other-1.0.1",
+  "url": "https://github.com/some/other-repository/releases/other-1.0.1",
+}
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other-" 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "v" 1`] = `
+Object {
+  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
+",
+  "id": undefined,
+  "name": undefined,
+  "tag": "v1.0.1",
+  "url": "https://github.com/some/other-repository/releases/v1.0.1",
+}
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "v" 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/other-repository/releases?per_page=100",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "" 1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/1.0.1",
+}
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -284,9 +293,16 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "other-" 1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "other-1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/other-1.0.1",
+}
+`;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "other-" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -301,9 +317,16 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "v" 1`] = `
+Object {
+  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
+  "name": undefined,
+  "tag": "v1.0.1",
+  "url": "https://gitlab.com/some/other-repository/tags/v1.0.1",
+}
+`;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "v" 2`] = `
 Array [
   Object {
     "headers": Object {

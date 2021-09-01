@@ -130,8 +130,9 @@ export async function getChangeLogJSON({
     project: {
       apiBaseUrl,
       baseUrl,
-      gitlab: repository,
-      repository: sourceUrl,
+      type: 'gitlab',
+      repository,
+      sourceUrl,
       depName,
     },
     versions: changelogReleases,
