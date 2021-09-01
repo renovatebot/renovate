@@ -24,12 +24,15 @@ export async function getReleaseList(
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
   try {
-    if (type === 'gitlab') {
-      return await gitlab.getReleaseList(apiBaseUrl, repository);
-    }
+    switch (type) {
+      case 'gitlab':
+        return await gitlab.getReleaseList(apiBaseUrl, repository);
+      case 'github':
+        return await github.getReleaseList(apiBaseUrl, repository);
 
-    if (type === 'github') {
-      return await github.getReleaseList(apiBaseUrl, repository);
+      default:
+        logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
+        return [];
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
@@ -168,20 +171,23 @@ export async function getReleaseNotesMdFileInner(
 ): Promise<ChangeLogFile> | null {
   const { apiBaseUrl, repository, sourceDirectory, type } = project;
   try {
-    if (type === 'gitlab') {
-      return await gitlab.getReleaseNotesMd(
-        repository,
-        apiBaseUrl,
-        sourceDirectory
-      );
-    }
+    switch (type) {
+      case 'gitlab':
+        return await gitlab.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
+      case 'github':
+        return await github.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
 
-    if (type === 'github') {
-      return await github.getReleaseNotesMd(
-        repository,
-        apiBaseUrl,
-        sourceDirectory
-      );
+      default:
+        logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
+        return null;
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {

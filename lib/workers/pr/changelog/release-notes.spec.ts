@@ -87,6 +87,10 @@ describe('workers/pr/changelog/release-notes', () => {
     it('returns input if invalid', async () => {
       const input = { a: 1 };
       expect(await addReleaseNotes(input as never)).toEqual(input);
+      expect(await addReleaseNotes(null)).toBeNull();
+      expect(await addReleaseNotes({ versions: [] } as never)).toStrictEqual({
+        versions: [],
+      });
     });
 
     it('returns ChangeLogResult', async () => {
@@ -511,6 +515,16 @@ describe('workers/pr/changelog/release-notes', () => {
       // FIXME: explicit assert condition
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
+    });
+
+    it('ignores invalid', async () => {
+      const res = await getReleaseNotesMd(
+        {
+          repository: 'nodeca/js-yaml',
+        } as ChangeLogProject,
+        '3.10.0'
+      );
+      expect(res).toBeNull();
     });
 
     describe('ReleaseNotes Correctness', () => {
