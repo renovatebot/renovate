@@ -49,7 +49,7 @@ describe('config/massage', () => {
             matchManagers: ['helmv3'],
             matchBaseBranches: ['release/ft10/1.9.x'],
             lockFileMaintenance: { enabled: true },
-            schedule: 'at any time',
+            schedule: ['at any time'],
           },
         ],
       };
