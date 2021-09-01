@@ -212,7 +212,7 @@ describe('workers/pr/changelog/release-notes', () => {
     });
 
     it.each([[''], ['v'], ['other-'], ['other_v'], ['other@']])(
-      'gets release notes with body',
+      'gets release notes with body "%s"',
       async (prefix) => {
         httpMock
           .scope('https://api.github.com/')
@@ -239,7 +239,7 @@ describe('workers/pr/changelog/release-notes', () => {
     );
 
     it.each([[''], ['v'], ['other-']])(
-      'gets release notes with body from gitlab repo %s',
+      'gets release notes with body from gitlab repo "%s"',
       async (prefix) => {
         httpMock
           .scope('https://api.gitlab.com/')
