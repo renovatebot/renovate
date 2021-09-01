@@ -58,6 +58,10 @@ export function getDep(
       if (dep.depName.startsWith(`${prefix}/`)) {
         dep.lookupName = dep.depName;
         dep.depName = dep.depName.replace(`${prefix}/`, '');
+        if (specifyReplaceString) {
+          dep.autoReplaceStringTemplate =
+            '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+        }
       }
     }
   }
