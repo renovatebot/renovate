@@ -20,13 +20,13 @@ Renovate also tries to find updates for dependencies whose version is defined in
 
 Renovate does not support:
 
-- Projects which do not have either a `build.gradle` or `build.gradle.kts` in the repository root.
-- Android projects that require extra configuration to run (e.g. setting the Android SDK).
-- Gradle versions older than version 5.0.
-- Catalogs defined inside a `build.gradle` or `build.gradle.kts` file rather than in TOML.
-- Catalogs with version ranges.
-- Catalogs using the `required`, `strictly`, `preferred`, `reject`, and `rejectAll` version declarations.
-- Catalogs with custom names that do not end in `.toml`.
+- Projects which do not have either a `build.gradle` or `build.gradle.kts` in the repository root
+- Android projects that require extra configuration to run (e.g. setting the Android SDK)
+- Gradle versions older than version 5.0
+- Catalogs defined inside a `build.gradle` or `build.gradle.kts` file rather than in TOML
+- Catalogs with version ranges
+- Catalogs using the `required`, `strictly`, `preferred`, `reject`, and `rejectAll` version declarations
+- Catalogs with custom names that do not end in `.toml`
 - Catalogs outside the `gradle` folder whose names do not end in `.versions.toml`
 
 ### How It Works
