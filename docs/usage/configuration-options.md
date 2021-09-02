@@ -719,6 +719,14 @@ If configured, Renovate bypasses its normal major/minor/patch upgrade logic and 
 Beware that Renovate follows tags strictly.
 For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
 
+## gitAuthor
+
+You can customize the Git author that's used whenever Renovate creates a commit.
+The `gitAuthor` option accepts a RFC5322-compliant string.
+
+**Note** We strongly recommend that the Git author email you use is unique to Renovate.
+Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
+
 ## gitIgnoredAuthors
 
 Specify commit authors ignored by Renovate.

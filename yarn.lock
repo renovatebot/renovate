@@ -1958,10 +1958,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.7.6.tgz#8666478db8095aa66e25b7e469f3e7b53ea2855e"
   integrity sha512-VESVNFoa/ahYA62xnLBjo5ur6gPsgEE5cNRy8SrdnkZ2nwJSW0kJ4ufbFr2zuU9ALtHM8juY53VcRoTA7htXSg==
 
-"@types/node@14.17.11":
-  version "14.17.11"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.11.tgz#82d266d657aec5ff01ca59f2ffaff1bb43f7bf0f"
-  integrity sha512-n2OQ+0Bz6WEsUjrvcHD1xZ8K+Kgo4cn9/w94s1bJS690QMUWfJPW/m7CCb7gPkA1fcYwL2UpjXP/rq/Eo41m6w==
+"@types/node@14.17.12":
+  version "14.17.12"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.12.tgz#7a31f720b85a617e54e42d24c4ace136601656c7"
+  integrity sha512-vhUqgjJR1qxwTWV5Ps5txuy2XMdf7Fw+OrdChRboy8BmWUPkckOhphaohzFG6b8DW7CrxaBMdrdJ47SYFq1okw==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -3767,10 +3767,10 @@ electron-to-chromium@^1.3.811:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.822.tgz#7036edc7f669b0aa79e9801dc5f56866c6ddc0b2"
   integrity sha512-k7jG5oYYHxF4jx6PcqwHX3JVME/OjzolqOZiIogi9xtsfsmTjTdie4x88OakYFPEa8euciTgCCzvVNwvmjHb1Q==
 
-email-addresses@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-4.0.0.tgz#94fa214c30f943b02eaf91da717d89ff6a19e345"
-  integrity sha512-Nas3sSSiD5lSIoqBos0FMjB9h4clHxXuAahHKGJ5doRWavEB7pBHzOxnI7R5f1MuGNrrSnsZFJ81HCBv0DZmnw==
+email-addresses@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-5.0.0.tgz#7ae9e7f58eef7d5e3e2c2c2d3ea49b78dc854fa6"
+  integrity sha512-4OIPYlA6JXqtVn8zpHpGiI7vE6EQOAg16aGnDMIAlZVinnoZ8208tW1hAbjWydgN/4PLTT9q+O1K6AH/vALJGw==
 
 emittery@^0.8.1:
   version "0.8.1"
@@ -7033,10 +7033,10 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-nock@13.1.2:
-  version "13.1.2"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-13.1.2.tgz#eedcef89e1c1e8db4e1b3cdcfef91f453f6d32b5"
-  integrity sha512-BDjokoeGZnBghmvwCcDJ1yM5TDRMRAJfGi1xIzX5rKTlifbyx1oRpAVl3aNhEA3kGbUSEPD7gBLmwVdnQibrIA==
+nock@13.1.3:
+  version "13.1.3"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-13.1.3.tgz#110b005965654a8ffb798e87bad18b467bff15f9"
+  integrity sha512-YKj0rKQWMGiiIO+Y65Ut8OEgYM3PplLU2+GAhnPmqZdBd6z5IskgdBqWmjzA6lH3RF0S2a3wiAlrMOF5Iv2Jeg==
   dependencies:
     debug "^4.1.0"
     json-stringify-safe "^5.0.1"
@@ -8463,10 +8463,10 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-semantic-release@17.4.6:
-  version "17.4.6"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-17.4.6.tgz#a9e53da3d43ac07250c55b6939857587be2ecaa2"
-  integrity sha512-0B1OGkW8gzQjLbj3H5G4fJyy73HAWsoDnzWYyfNJHyyyLi1acQd+id4O7U+12wXTk9G83pXCgSFj9oYTvocFMA==
+semantic-release@17.4.7:
+  version "17.4.7"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-17.4.7.tgz#88e1dce7294cc43acc54c4e0a83f582264567206"
+  integrity sha512-3Ghu8mKCJgCG3QzE5xphkYWM19lGE3XjFdOXQIKBM2PBpBvgFQ/lXv31oX0+fuN/UjNFO/dqhNs8ATLBhg6zBg==
   dependencies:
     "@semantic-release/commit-analyzer" "^8.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -8638,10 +8638,10 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@2.44.0:
-  version "2.44.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.44.0.tgz#94eca4162b7e21707b5a1a40b22e6f29b007d3a8"
-  integrity sha512-wIjcAmymhzgdaM0Y/a+XxmNGlivvHQTPZDYXVmyHMShVDwdeVqu3+OOyDbYu0DnfVzqLs2EOxRTgMNbC3YquwQ==
+simple-git@2.45.0:
+  version "2.45.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.45.0.tgz#4d53b146fc23496099ebfc7af5b0d605d0e3e504"
+  integrity sha512-wu/Ujs9IXn0HuyYm4HyRvne+EKsjJSWKEMkB3wQa3gNHSMHt7y3oeNX9zRQ3UBPk7bRRMLLHAdIZCZfHT9ehPg==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
