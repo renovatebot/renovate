@@ -2,7 +2,7 @@ This package will manage two parts of the `kustomization.yaml` file:
 
 1. [remote bases](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md)
 2. [image tags](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/image.md)
-3. [components]()https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md
+3. [components](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/components.md)
 
 **How It Works**
 
