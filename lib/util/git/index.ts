@@ -234,6 +234,27 @@ async function setBranchPrefix(branchPrefix: string): Promise<void> {
   }
 }
 
+export async function writeGitAuthor(): Promise<void> {
+  const { gitAuthorName, gitAuthorEmail } = config;
+  try {
+    if (gitAuthorName) {
+      logger.debug({ gitAuthorName }, 'Setting git author name');
+      await git.addConfig('user.name', gitAuthorName);
+    }
+    if (gitAuthorEmail) {
+      logger.debug({ gitAuthorEmail }, 'Setting git author email');
+      await git.addConfig('user.email', gitAuthorEmail);
+    }
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    logger.debug(
+      { err, gitAuthorName, gitAuthorEmail },
+      'Error setting git author config'
+    );
+    throw new Error(TEMPORARY_ERROR);
+  }
+}
+
 export async function setUserRepoConfig({
   branchPrefix,
   gitIgnoredAuthors,
@@ -344,21 +365,7 @@ export async function syncGit(): Promise<void> {
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
-  try {
-    const { gitAuthorName, gitAuthorEmail } = config;
-    if (gitAuthorName) {
-      logger.debug({ gitAuthorName }, 'Setting git author name');
-      await git.addConfig('user.name', gitAuthorName);
-    }
-    if (gitAuthorEmail) {
-      logger.debug({ gitAuthorEmail }, 'Setting git author email');
-      await git.addConfig('user.email', gitAuthorEmail);
-    }
-  } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
-    logger.debug({ err }, 'Error setting git author config');
-    throw new Error(TEMPORARY_ERROR);
-  }
+  await writeGitAuthor();
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
   if (config.branchPrefix) {
     await setBranchPrefix(config.branchPrefix);
