@@ -6,7 +6,6 @@ import {
 } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { RepoParams, RepoResult, platform } from '../../../platform';
-import { setGitAuthor } from '../../../util/git';
 
 // TODO: fix types
 export type WorkerPlatformConfig = RepoResult &
@@ -63,7 +62,6 @@ export async function initApis(
 ): Promise<WorkerPlatformConfig> {
   let config: WorkerPlatformConfig = { ...input } as never;
   config = await getPlatformConfig(config as never);
-  setGitAuthor(config.gitAuthor);
   await validateOptimizeForDisabled(config);
   await validateIncludeForks(config);
   npmApi.resetMemCache();

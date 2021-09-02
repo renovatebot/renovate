@@ -3,7 +3,7 @@ import type { AllConfig } from '../config/types';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
-import { setNoVerify, setPrivateKey } from '../util/git';
+import { setGitAuthor, setNoVerify, setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
 import platforms from './api';
 import type { Platform } from './types';
@@ -53,6 +53,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
     returnConfig.gitAuthor = platformInfo.gitAuthor;
   }
+  setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
     hostType: returnConfig.platform,
     matchHost: URL.parse(returnConfig.endpoint).hostname,
