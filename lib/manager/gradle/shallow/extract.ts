@@ -76,9 +76,12 @@ export async function extractAllPackageFiles(
         updateVars(vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const updatesFromCatalog = parseCatalog(packageFile, content);
-        console.log(updatesFromCatalog);
-        extractedDeps.push(...updatesFromCatalog);
+        try {
+          const updatesFromCatalog = parseCatalog(packageFile, content);
+          extractedDeps.push(...updatesFromCatalog);
+        } catch (error) {
+          logger.warn({ error }, 'TOML parsing error');
+        }
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
