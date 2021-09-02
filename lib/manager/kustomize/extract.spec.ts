@@ -246,7 +246,7 @@ describe('manager/kustomize/extract', () => {
       const res = extractPackageFile(kustomizeDepsInResources);
       expect(res).not.toBeNull();
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res.deps).toHaveLength(3);
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
       expect(res.deps[1].currentValue).toEqual('1.19.0');
       expect(res.deps[2].currentValue).toEqual('1.18.0');
