@@ -274,9 +274,11 @@ export async function writeGitAuthor(): Promise<void> {
 export async function setUserRepoConfig({
   branchPrefix,
   gitIgnoredAuthors,
+  gitAuthor,
 }: RenovateConfig): Promise<void> {
   await setBranchPrefix(branchPrefix);
   config.ignoredAuthors = gitIgnoredAuthors ?? [];
+  setGitAuthor(gitAuthor);
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -381,7 +383,6 @@ export async function syncGit(): Promise<void> {
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
-  await writeGitAuthor();
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
   if (config.branchPrefix) {
     await setBranchPrefix(config.branchPrefix);
@@ -733,6 +734,7 @@ export async function commitFiles({
   }
   const { localDir } = getGlobalConfig();
   await configSigningKey(localDir);
+  await writeGitAuthor();
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
