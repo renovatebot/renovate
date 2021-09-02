@@ -205,14 +205,6 @@ This should be set to a Personal Access Token (GitHub only) when `forkMode` is s
 Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
-## gitAuthor
-
-You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
-
-**Note** We strongly recommend that the Git author email you use is unique to Renovate.
-Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
-
 ## gitNoVerify
 
 Controls when Renovate passes the `--no-verify` flag to `git`.

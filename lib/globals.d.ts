@@ -9,12 +9,6 @@ declare interface Error {
   validationMessage?: string;
 }
 
-declare namespace NodeJS {
-  interface Global {
-    gitAuthor?: { name: string; email: string };
-  }
-}
-
 // can't use `resolveJsonModule` because it will copy json files and change dist path
 
 declare module '*/package.json' {

@@ -24,6 +24,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { parseGitAuthor } from './author';
 import { GitNoVerifyOption, getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
@@ -44,8 +45,6 @@ interface StorageConfig {
   currentBranch?: string;
   url: string;
   extraCloneOpts?: GitOptions;
-  gitAuthorName?: string;
-  gitAuthorEmail?: string;
   cloneSubmodules?: boolean;
 }
 
@@ -57,6 +56,8 @@ interface LocalConfig extends StorageConfig {
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
   ignoredAuthors: string[];
+  gitAuthorName?: string;
+  gitAuthorEmail?: string;
 }
 
 // istanbul ignore next
@@ -234,12 +235,50 @@ async function setBranchPrefix(branchPrefix: string): Promise<void> {
   }
 }
 
+export function setGitAuthor(gitAuthor: string): void {
+  const gitAuthorParsed = parseGitAuthor(
+    gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
+  );
+  if (!gitAuthorParsed) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = 'None';
+    error.validationError = 'Invalid gitAuthor';
+    error.validationMessage = `gitAuthor is not parsed as valid RFC5322 format: ${gitAuthor}`;
+    throw error;
+  }
+  config.gitAuthorName = gitAuthorParsed.name;
+  config.gitAuthorEmail = gitAuthorParsed.address;
+}
+
+export async function writeGitAuthor(): Promise<void> {
+  const { gitAuthorName, gitAuthorEmail } = config;
+  try {
+    if (gitAuthorName) {
+      logger.debug({ gitAuthorName }, 'Setting git author name');
+      await git.addConfig('user.name', gitAuthorName);
+    }
+    if (gitAuthorEmail) {
+      logger.debug({ gitAuthorEmail }, 'Setting git author email');
+      await git.addConfig('user.email', gitAuthorEmail);
+    }
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    logger.debug(
+      { err, gitAuthorName, gitAuthorEmail },
+      'Error setting git author config'
+    );
+    throw new Error(TEMPORARY_ERROR);
+  }
+}
+
 export async function setUserRepoConfig({
   branchPrefix,
   gitIgnoredAuthors,
+  gitAuthor,
 }: RenovateConfig): Promise<void> {
   await setBranchPrefix(branchPrefix);
   config.ignoredAuthors = gitIgnoredAuthors ?? [];
+  setGitAuthor(gitAuthor);
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -343,21 +382,6 @@ export async function syncGit(): Promise<void> {
       throw new Error(REPOSITORY_EMPTY);
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
-  }
-  try {
-    const { gitAuthorName, gitAuthorEmail } = config;
-    if (gitAuthorName) {
-      logger.debug({ gitAuthorName }, 'Setting git author name');
-      await git.addConfig('user.name', gitAuthorName);
-    }
-    if (gitAuthorEmail) {
-      logger.debug({ gitAuthorEmail }, 'Setting git author email');
-      await git.addConfig('user.email', gitAuthorEmail);
-    }
-  } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
-    logger.debug({ err }, 'Error setting git author config');
-    throw new Error(TEMPORARY_ERROR);
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
   if (config.branchPrefix) {
@@ -710,6 +734,7 @@ export async function commitFiles({
   }
   const { localDir } = getGlobalConfig();
   await configSigningKey(localDir);
+  await writeGitAuthor();
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
