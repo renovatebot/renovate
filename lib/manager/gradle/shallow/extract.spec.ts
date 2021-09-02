@@ -67,7 +67,79 @@ describe('manager/gradle/shallow/extract', () => {
       },
     ]);
   });
+  it('works with file-ext', async () => {
+    mockFs({
+      'gradle.properties': '',
+      'build.gradle': 'url "https://example.com"; "foo:bar:1.2.3@zip"',
+      'settings.gradle': null,
+    });
 
+    const res = await extractAllPackageFiles({} as never, [
+      'build.gradle',
+      'gradle.properties',
+      'settings.gradle',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle.properties',
+        deps: [],
+      },
+      {
+        packageFile: 'build.gradle',
+        deps: [
+          {
+            depName: 'foo:bar',
+            currentValue: '1.2.3',
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://example.com',
+            ],
+          },
+        ],
+      },
+      {
+        datasource: 'maven',
+        deps: [],
+        packageFile: 'settings.gradle',
+      },
+    ]);
+  });
+  it('works with file-ext-var', async () => {
+    mockFs({
+      'gradle.properties': 'baz=1.2.3',
+      'build.gradle': 'url "https://example.com"; "foo:bar:$baz@zip"',
+      'settings.gradle': null,
+    });
+
+    const res = await extractAllPackageFiles({} as never, [
+      'build.gradle',
+      'gradle.properties',
+      'settings.gradle',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle.properties',
+        deps: [
+          {
+            depName: 'foo:bar',
+            currentValue: '1.2.3',
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://example.com',
+            ],
+          },
+        ],
+      },
+      { packageFile: 'build.gradle', deps: [] },
+      {
+        datasource: 'maven',
+        deps: [],
+        packageFile: 'settings.gradle',
+      },
+    ]);
+  });
   it('inherits gradle variables', async () => {
     const fsMock = {
       'gradle.properties': 'foo=1.0.0',
