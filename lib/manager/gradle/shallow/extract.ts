@@ -38,15 +38,6 @@ function elevateFileReplacePositionField(
   }));
 }
 
-function findIndexAfter(
-  content: string,
-  sliceAfter: string,
-  find: string
-): number {
-  const slicePoint = content.indexOf(sliceAfter) + sliceAfter.length;
-  return slicePoint + content.slice(slicePoint).indexOf(find);
-}
-
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
