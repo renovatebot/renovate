@@ -1024,8 +1024,7 @@ Example:
 This can be a base URL (e.g. `https://api.github.com`) or a hostname like `github.com` or `api.github.com`.
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
-When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not
-already present, to ensure it can only match against whole domain segments.
+When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
 
 ### timeout
 
