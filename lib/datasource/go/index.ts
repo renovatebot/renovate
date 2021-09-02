@@ -16,7 +16,8 @@ export { id } from './common';
 
 export const customRegistrySupport = false;
 
-const gitlabRegExp = /^(https:\/\/[^/]*gitlab\.[^/]*)\/(.*)$/;
+const gitlabHttpsRegExp = /^(https:\/\/[^/]*gitlab\.[^/]*)\/(.*)$/;
+const gitlabRegExp = /^(gitlab\.[^/]*)\/(.*)$/;
 const bitbucket = new BitBucketTagsDatasource();
 
 async function getDatasource(goModule: string): Promise<DataSource | null> {
@@ -68,12 +69,24 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
           .replace(/\/$/, ''),
       };
     }
-    const gitlabRes = gitlabRegExp.exec(goSourceUrl);
-    if (gitlabRes) {
+    const gitlabUrl = gitlabHttpsRegExp.exec(goSourceUrl);
+    const gitlabModule = gitlabRegExp.exec(goModule);
+    const gitlabUrlName = gitlabUrl?.[2].replace(/\/$/, '');
+    const gitlabModuleName = gitlabModule?.[2].replace(/\/$/, '');
+
+    if (gitlabModuleName?.startsWith(gitlabUrlName)) {
       return {
         datasource: gitlab.id,
-        registryUrl: gitlabRes[1],
-        lookupName: gitlabRes[2].replace(/\/$/, ''),
+        registryUrl: gitlabUrl[1],
+        lookupName: gitlabModuleName,
+      };
+    }
+
+    if (gitlabUrl) {
+      return {
+        datasource: gitlab.id,
+        registryUrl: gitlabUrl[1],
+        lookupName: gitlabUrlName,
       };
     }
 
@@ -199,7 +212,7 @@ export async function getReleases(
   const nameParts = lookupName.replace(/\/v\d+$/, '').split('/');
   logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
 
-  // If it has more than 3 parts it's a submodule
+  // If it has more than 3 parts it's a submodule or subgroup (gitlab only)
   if (nameParts.length > 3) {
     const prefix = nameParts.slice(3, nameParts.length).join('/');
     logger.trace(`go.getReleases.prefix:${prefix}`);
@@ -215,10 +228,21 @@ export async function getReleases(
       });
     logger.trace({ submodReleases }, 'go.getReleases');
 
-    return {
-      sourceUrl: res.sourceUrl,
-      releases: submodReleases,
-    };
+    // If not from gitlab -> no subgroups -> must be submodule
+    if (!(source.datasource === gitlab.id)) {
+      return {
+        sourceUrl: res.sourceUrl,
+        releases: submodReleases,
+      };
+    }
+    // If from gitlab and directory one level above has tags -> has to be submodule, since groups can't have tags
+    // If not, it's simply a repo in a subfolder, and the normal tags are used.
+    if (submodReleases.length) {
+      return {
+        sourceUrl: res.sourceUrl,
+        releases: submodReleases,
+      };
+    }
   }
 
   if (res.releases) {
