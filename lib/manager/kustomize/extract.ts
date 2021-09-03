@@ -84,7 +84,10 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  pkg.bases = (pkg.bases || []).concat(pkg.resources || []);
+  pkg.bases = (pkg.bases || []).concat(
+    pkg.resources || [],
+    pkg.components || []
+  );
   pkg.images = pkg.images || [];
 
   return pkg;
