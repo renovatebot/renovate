@@ -78,10 +78,7 @@ async function getOnboardingConfigContents(
 ): Promise<string> {
   const editorConfig = await EditorConfig.getInstance();
   const codeFormat = editorConfig.getCodeFormat(fileName);
-  const jsonWriter = new JSONWriter(
-    codeFormat.indentationType,
-    codeFormat.indentationSize
-  );
+  const jsonWriter = new JSONWriter(codeFormat);
   const onboardingConfig = await getOnboardingConfig(config);
   return jsonWriter.write(onboardingConfig);
 }
