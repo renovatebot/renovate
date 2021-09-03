@@ -741,6 +741,7 @@ export async function commitFiles({
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const fileNames: string[] = [];
     const deletedFiles: string[] = [];
+    const ignoredFiles: string[] = [];
     for (const file of files) {
       // istanbul ignore if
       if (file.name === '|delete|') {
@@ -751,6 +752,7 @@ export async function commitFiles({
         } catch (err) /* istanbul ignore next */ {
           checkForPlatformFailure(err);
           logger.warn({ err, fileName }, 'Cannot delete file');
+          ignoredFiles.push(fileName);
         }
       } else if (await isDirectory(join(localDir, file.name))) {
         fileNames.push(file.name);
@@ -790,7 +792,10 @@ export async function commitFiles({
       logger.warn({ commitRes }, 'Detected empty commit - aborting git push');
       return null;
     }
-    logger.debug({ deletedFiles, result: commitRes }, `git commit`);
+    logger.debug(
+      { deletedFiles, ignoredFiles, result: commitRes },
+      `git commit`
+    );
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
