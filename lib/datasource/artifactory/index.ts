@@ -30,28 +30,28 @@ export class ArtifactoryDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    if (!registryUrl) {
+      throw new ExternalHostError(new Error());
+    }
+
     const url = `${registryUrl}/${lookupName}`;
 
     const result: ReleaseResult = {
       homepage: 'https://jfrog.com/artifactory',
-      sourceUrl: url,
       releases: [],
     };
     try {
       const response = await this.http.get(url);
-      logger.debug('sourceUrl: ' + result.sourceUrl);
-      logger.debug('lookupName: ' + lookupName);
-      logger.debug('response.body\n');
-      logger.debug(response.body);
-      const body: HTMLElement = parse(response.body);
-      // logger.debug('parsed body\n');
-      // logger.debug(body);
+      const body = parse(ArtifactoryDatasource.cleanSimpleHtml(response.body));
       const nodes = body.querySelectorAll('a');
-      logger.debug('nodes:' + String(nodes.length));
 
       let candidates: string[] = [];
       nodes.forEach((node) => candidates.push(node.innerHTML));
-      candidates = candidates.filter((candidate) => candidate !== '../');
+
+      // filter out hyperlink to navigate to parent folder
+      candidates = candidates.filter(
+        (candidate) => candidate !== '../' && candidate !== '..'
+      );
 
       candidates.forEach((candidate) => {
         const parsedCandidate: string =
@@ -72,6 +72,7 @@ export class ArtifactoryDatasource extends Datasource {
         );
       }
     } catch (err) {
+      // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode !== 404) {
           throw new ExternalHostError(err);
@@ -81,5 +82,13 @@ export class ArtifactoryDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  private static cleanSimpleHtml(html: string): string {
+    return (
+      html
+        // preformatted text hides the a nodes otherwise
+        .replace(/<\/?pre>/g, '')
+    );
   }
 }

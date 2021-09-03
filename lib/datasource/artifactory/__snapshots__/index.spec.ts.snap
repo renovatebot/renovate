@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/artifactory/index getReleases parses real data 1`] = `
+Object {
+  "homepage": "https://jfrog.com/artifactory",
+  "registryUrl": "https://jfrog.company.com/artifactory",
+  "releases": Array [
+    Object {
+      "version": "1.0.0",
+    },
+    Object {
+      "version": "1.0.1",
+    },
+    Object {
+      "version": "1.0.2",
+    },
+    Object {
+      "version": "1.0.3",
+    },
+  ],
+}
+`;
+
+exports[`datasource/artifactory/index getReleases parses real data: without slash at the end 1`] = `
+Object {
+  "homepage": "https://jfrog.com/artifactory",
+  "registryUrl": "https://jfrog.company.com/artifactory",
+  "releases": Array [
+    Object {
+      "version": "1.0.0",
+    },
+    Object {
+      "version": "1.0.1",
+    },
+    Object {
+      "version": "1.0.2",
+    },
+    Object {
+      "version": "1.0.3",
+    },
+  ],
+}
+`;
