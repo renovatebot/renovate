@@ -1311,13 +1311,18 @@ describe('platform/bitbucket-server/index', () => {
             .twice()
             .reply(200, { conflicted: false });
 
-          expect(await bitbucket.getPr(3)).toMatchSnapshot();
+          const author = global.gitAuthor;
+          try {
+            expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-          expect(await bitbucket.getPr(5)).toMatchSnapshot();
+            expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-          expect(await bitbucket.getPr(5)).toMatchSnapshot();
+            expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-          expect(httpMock.getTrace()).toMatchSnapshot();
+            expect(httpMock.getTrace()).toMatchSnapshot();
+          } finally {
+            global.gitAuthor = author;
+          }
         });
 
         it('gets a closed PR', async () => {

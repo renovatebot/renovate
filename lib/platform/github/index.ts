@@ -420,6 +420,8 @@ export async function initRepo({
   await git.initRepo({
     ...config,
     url,
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,

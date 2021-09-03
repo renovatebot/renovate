@@ -180,6 +180,8 @@ export async function initRepo({
     ...config,
     url,
     extraCloneOpts: getStorageExtraCloneOpts(opts),
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {

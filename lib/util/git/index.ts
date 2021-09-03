@@ -24,7 +24,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { parseGitAuthor } from './author';
 import { GitNoVerifyOption, getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
@@ -45,6 +44,8 @@ interface StorageConfig {
   currentBranch?: string;
   url: string;
   extraCloneOpts?: GitOptions;
+  gitAuthorName?: string;
+  gitAuthorEmail?: string;
   cloneSubmodules?: boolean;
 }
 
@@ -56,8 +57,6 @@ interface LocalConfig extends StorageConfig {
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
   ignoredAuthors: string[];
-  gitAuthorName?: string;
-  gitAuthorEmail?: string;
 }
 
 // istanbul ignore next
@@ -233,21 +232,6 @@ async function setBranchPrefix(branchPrefix: string): Promise<void> {
       throw err;
     }
   }
-}
-
-export function setGitAuthor(gitAuthor: string): void {
-  const gitAuthorParsed = parseGitAuthor(
-    gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
-  );
-  if (!gitAuthorParsed) {
-    const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = 'None';
-    error.validationError = 'Invalid gitAuthor';
-    error.validationMessage = `gitAuthor is not parsed as valid RFC5322 format: ${gitAuthor}`;
-    throw error;
-  }
-  config.gitAuthorName = gitAuthorParsed.name;
-  config.gitAuthorEmail = gitAuthorParsed.address;
 }
 
 export async function writeGitAuthor(): Promise<void> {

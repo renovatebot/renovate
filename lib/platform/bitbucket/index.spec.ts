@@ -726,6 +726,7 @@ describe('platform/bitbucket/index', () => {
 
     it('canRebase', async () => {
       expect.assertions(4);
+      const author = global.gitAuthor;
       const scope = await initRepoMock();
       scope
         .get('/2.0/repositories/some/repo/pullrequests/3')
@@ -746,13 +747,22 @@ describe('platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5/diff')
         .twice()
         .reply(200, diff);
-      expect(await bitbucket.getPr(3)).toMatchSnapshot();
+      try {
+        expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        global.gitAuthor = {
+          email: 'renovate@whitesourcesoftware.com',
+          name: 'bot',
+        };
+        expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
+        expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-      expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(httpMock.getTrace()).toMatchSnapshot();
+      } finally {
+        global.gitAuthor = author;
+      }
     });
   });
 
