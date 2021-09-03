@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`util/git/author parseGitAuthor escapes names 1`] = `"name [what]"`;
+exports[`platform/index escapes names 1`] = `"name [what]"`;
 
-exports[`util/git/author parseGitAuthor parses bot email 1`] = `
+exports[`platform/index parses bot email 1`] = `
 Object {
   "address": "some[bot]@users.noreply.github.com",
   "name": "some[bot]",
 }
 `;
 
-exports[`util/git/author parseGitAuthor parses bot name and email 1`] = `
+exports[`platform/index parses bot name and email 1`] = `
 Object {
   "address": "some[bot]@users.noreply.github.com",
   "name": "some[bot]",
