@@ -9,7 +9,6 @@ import Git, {
   TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
-import { configFileNames } from '../../config/app-strings';
 import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -740,11 +739,20 @@ export async function commitFiles({
     await git.raw(['clean', '-fd']);
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const fileNames: string[] = [];
-    const deleted: string[] = [];
+    const deletedFiles: string[] = [];
+    const ignoredFiles: string[] = [];
     for (const file of files) {
       // istanbul ignore if
       if (file.name === '|delete|') {
-        deleted.push(file.contents as string);
+        const fileName = file.contents as string;
+        try {
+          await git.rm([fileName]);
+          deletedFiles.push(fileName);
+        } catch (err) /* istanbul ignore next */ {
+          checkForPlatformFailure(err);
+          logger.warn({ err, fileName }, 'Cannot delete file');
+          ignoredFiles.push(fileName);
+        }
       } else if (await isDirectory(join(localDir, file.name))) {
         fileNames.push(file.name);
         await gitAdd(file.name);
@@ -760,22 +768,8 @@ export async function commitFiles({
         await fs.outputFile(join(localDir, file.name), contents);
       }
     }
-    // istanbul ignore if
-    if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
-      fileNames.unshift('-f');
-    }
     if (fileNames.length) {
       await gitAdd(fileNames);
-    }
-    if (deleted.length) {
-      for (const f of deleted) {
-        try {
-          await git.rm([f]);
-        } catch (err) /* istanbul ignore next */ {
-          checkForPlatformFailure(err);
-          logger.debug({ err }, 'Cannot delete ' + f);
-        }
-      }
     }
 
     const commitOptions: Options = {};
@@ -793,7 +787,10 @@ export async function commitFiles({
       logger.warn({ commitRes }, 'Detected empty commit - aborting git push');
       return null;
     }
-    logger.debug({ result: commitRes }, `git commit`);
+    logger.debug(
+      { deletedFiles, ignoredFiles, result: commitRes },
+      `git commit`
+    );
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
