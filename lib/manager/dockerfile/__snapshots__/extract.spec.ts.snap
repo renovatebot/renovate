@@ -346,6 +346,22 @@ Array [
 ]
 `;
 
+exports[`manager/dockerfile/extract extractPackageFile() handles prefixes 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "18.04",
+    "datasource": "docker",
+    "depName": "ubuntu",
+    "depType": "final",
+    "lookupName": "amd64/ubuntu",
+    "replaceString": "amd64/ubuntu:18.04",
+    "versioning": "ubuntu",
+  },
+]
+`;
+
 exports[`manager/dockerfile/extract extractPackageFile() handles quay hosts with port 1`] = `
 Object {
   "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",

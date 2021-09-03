@@ -297,8 +297,6 @@ const platform: Platform = {
     await git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
     });
 
     // Reset cached resources

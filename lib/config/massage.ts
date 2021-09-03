@@ -47,7 +47,6 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       'patch',
       'pin',
       'digest',
-      'lockFileMaintenance',
       'rollback',
     ];
     for (const rule of massagedConfig.packageRules) {

@@ -97,7 +97,7 @@ jobs:
       - name: Lint
         run: |
           yarn ls-lint
-          yarn eslint
+          yarn eslint -f gha
           yarn prettier
           yarn markdown-lint
 
