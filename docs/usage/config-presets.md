@@ -56,6 +56,8 @@ An additional benefit of using source code hosting is that the same token/authen
 | GitLab with preset path with a tag | `gitlab>abc/foo=1.2.5//path/xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `path/xyz.json` | `1.2.5.`       |
 | Gitea default                      | `gitea>abc/foo`                  | `default` | `https://gitea.com/abc/foo`          | `default.json`  | Default branch |
 | Gitea with preset name             | `gitea>abc/foo:xyz`              | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`      | Default branch |
+| Gitea default with a tag           | `gitea>abc/foo=1.2.5`            | `default` | `https://gitea.com/abc/foo`          | `default.json`  | `1.2.5.`       |
+| Gitea with preset name with a tag  | `gitea>abc/foo=1.2.5:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`      | `1.2.5.`       |
 | Local default                      | `local>abc/foo`                  | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
 | Local with preset path             | `local>abc/foo//path/xyz`        | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
 | Local default with a tag           | `local>abc/foo=1.2.5`            | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.5.`       |
