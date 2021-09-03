@@ -1,6 +1,6 @@
 import { KnownProps, parseString } from 'editorconfig';
 import type { ParseStringResult } from 'editorconfig/src/lib/ini';
-import globToRegExp from 'glob-to-regexp';
+import { makeRe } from 'minimatch';
 import { logger } from '../../logger/index';
 import { localPathExists, readLocalFile } from '../fs';
 import type { CodeFormat } from './code-format';
@@ -13,7 +13,7 @@ export class EditorConfig {
 
   private constructor(parseResult: ParseStringResult = []) {
     for (const [sectionName, sectionBody] of parseResult) {
-      const regExp = globToRegExp(sectionName ?? '*');
+      const regExp = makeRe(sectionName ?? '*');
       this.formats.set(regExp, sectionBody);
     }
   }
