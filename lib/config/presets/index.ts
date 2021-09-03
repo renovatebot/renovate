@@ -65,11 +65,17 @@ export function replaceArgs(
 }
 
 export function parsePreset(input: string): ParsedPreset {
+  // https://regex101.com/r/vMTIpo/1
+  // @somescope/somepackagename=1.0.0:webapp(eslint)
+  // renovate-config-somepackagename=1.0.0:test(eslint)
+  // someRepo/renovate-sharedconfig=1.0.3:docker
+  // (?<packageName>[^:=(]+)((?:=)(?<presetTag>[^:(]+))?((?::)(?<presetName>[^(]*))?((?:\()(?<presetParams>.*)(?:\)))?
   let str = input;
   let presetSource: string;
   let presetPath: string;
   let packageName: string;
   let presetName: string;
+  let packageTag: string;
   let params: string[];
   if (str.startsWith('github>')) {
     presetSource = 'github';
@@ -149,17 +155,35 @@ export function parsePreset(input: string): ParsedPreset {
     }
     [, packageName, presetPath, presetName] = re.exec(str);
   } else {
-    // non-scoped namespace
-    [, packageName] = /(.*?)(:|$)/.exec(str);
-    presetName = str.slice(packageName.length + 1);
+    const matches =
+      /(?<packageName>[^:=]+)((?:=)(?<packageTag>[^:]+))?((?::)(?<presetName>.*))?/.exec(
+        str
+      );
+
+    packageName = matches.groups.packageName;
+    if ('packageTag' in matches.groups) {
+      packageTag = matches.groups.packageTag;
+    }
+    if ('presetName' in matches.groups) {
+      presetName = matches.groups.presetName;
+    }
+
     if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;
     }
-    if (presetName === '') {
+    if (presetName === '' || presetName == null) {
       presetName = 'default';
     }
   }
-  return { presetSource, presetPath, packageName, presetName, params };
+
+  return {
+    presetSource,
+    presetPath,
+    packageName,
+    presetName,
+    packageTag,
+    params,
+  };
 }
 
 export async function getPreset(
@@ -175,13 +199,20 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const { presetSource, packageName, presetPath, presetName, params } =
-    parsePreset(preset);
+  const {
+    presetSource,
+    packageName,
+    presetPath,
+    presetName,
+    packageTag,
+    params,
+  } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
     packageName,
     presetPath,
     presetName,
     baseConfig,
+    packageTag,
   });
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);

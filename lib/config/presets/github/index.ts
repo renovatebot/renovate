@@ -15,9 +15,16 @@ const http = new GithubHttp();
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
-  endpoint: string
+  endpoint: string,
+  packageTag: string
 ): Promise<Preset> {
-  const url = `${endpoint}repos/${repo}/contents/${fileName}`;
+  logger.trace(`Preset URL, fetchJSONFile ${packageTag}`);
+  let ref = '';
+  if (packageTag != null) {
+    ref = `?ref=${packageTag}`;
+  }
+  const url = `${endpoint}repos/${repo}/contents/${fileName}${ref}`;
+  logger.trace(`Preset URL is: ${url}`);
   let res: { body: { content: string } };
   try {
     res = await http.getJson(url);
@@ -45,13 +52,16 @@ export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
   presetPath: string,
-  endpoint = Endpoint
+  endpoint = Endpoint,
+  packageTag: string = null
 ): Promise<Preset> {
+  logger.trace(`Preset URL, getPresetFromEndpoint ${packageTag}`);
   return fetchPreset({
     pkgName,
     filePreset,
     presetPath,
     endpoint,
+    packageTag,
     fetch: fetchJSONFile,
   });
 }
@@ -60,6 +70,14 @@ export function getPreset({
   packageName: pkgName,
   presetName = 'default',
   presetPath,
+  packageTag = null,
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(pkgName, presetName, presetPath, Endpoint);
+  logger.trace(`Preset URL, getpreset ${packageTag}`);
+  return getPresetFromEndpoint(
+    pkgName,
+    presetName,
+    presetPath,
+    Endpoint,
+    packageTag
+  );
 }
