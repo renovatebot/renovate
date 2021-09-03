@@ -1900,10 +1900,10 @@
   resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-2.0.1.tgz#4be7e91283de747ca061a071ef0c3747a710bda1"
   integrity sha512-EqwKd+cuzQ6Jz/zsFYOofHzSfZSh1x3eBBj9+2IYk5vF3I1JnysPFK/I0YnkJ0artgvVY3jJYf2fGdIzoK0UIA==
 
-"@types/markdown-it@12.2.0":
-  version "12.2.0"
-  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-12.2.0.tgz#f609929ac1e50cf0d039473fb331ebc62e313b34"
-  integrity sha512-YEpywby5S2wt64C2E3bcpLvtIV8BuCj+4AGtL7tU51V8Vr1qwm+cX9gFfWRyclgLC0UK/7w2heYmhymDi+snzw==
+"@types/markdown-it@12.2.1":
+  version "12.2.1"
+  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-12.2.1.tgz#ca36e1edce6f15a770f3e99e68622d1d2e2f0c65"
+  integrity sha512-iij+ilRX/vxtUPCREjn74xzHo/RorHJDwOsJ6X+TgKw7zSvazhVXnDfwlTnyLOMdiVUjtRYU4CrcUZ7Aci4PmQ==
   dependencies:
     "@types/linkify-it" "*"
     "@types/mdurl" "*"
