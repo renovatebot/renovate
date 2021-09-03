@@ -68,8 +68,8 @@ describe('workers/pr/changelog/release-notes', () => {
     const now = DateTime.local();
     it.each([
       [now, 55],
-      [now.minus({ week: 2 }), 1435],
-      [now.minus({ year: 1 }), 14495],
+      [now.minus({ weeks: 2 }), 1435],
+      [now.minus({ years: 1 }), 14495],
     ])('works with string date (%s, %i)', (date, minutes) => {
       expect(releaseNotesCacheMinutes(date?.toISO())).toEqual(minutes);
     });
