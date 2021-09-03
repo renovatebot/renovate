@@ -18,7 +18,6 @@ export async function fetchJSONFile(
   endpoint: string,
   packageTag: string
 ): Promise<Preset> {
-  logger.trace(`Preset URL, fetchJSONFile ${packageTag}`);
   let ref = '';
   if (packageTag != null) {
     ref = `?ref=${packageTag}`;
