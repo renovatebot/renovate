@@ -208,6 +208,15 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://domain.com' }).token).toEqual('def');
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
+    it('matches on matchHost with dot prefix', () => {
+      add({
+        matchHost: '.domain.com',
+        token: 'def',
+      });
+      expect(find({ url: 'https://api.domain.com' }).token).toEqual('def');
+      expect(find({ url: 'https://domain.com' }).token).toBeUndefined();
+      expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
+    });
     it('matches on hostType and endpoint', () => {
       add({
         hostType: datasourceNuget.id,

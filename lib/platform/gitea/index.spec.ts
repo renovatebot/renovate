@@ -176,8 +176,6 @@ describe('platform/gitea/index', () => {
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
 
-    global.gitAuthor = { name: 'Renovate', email: 'renovate@example.com' };
-
     setBaseUrl('https://gitea.renovatebot.com/api/v1');
   });
 
@@ -562,7 +560,9 @@ describe('platform/gitea/index', () => {
         partial<ght.Branch>({
           commit: {
             id: mockCommitHash,
-            author: partial<ght.CommitUser>({ email: global.gitAuthor.email }),
+            author: partial<ght.CommitUser>({
+              email: 'renovate@whitesourcesoftware.com',
+            }),
           },
         })
       );

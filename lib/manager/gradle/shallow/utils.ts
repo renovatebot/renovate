@@ -81,6 +81,11 @@ export function isPropsFile(path: string): boolean {
   return filename === 'gradle.properties';
 }
 
+export function isTOMLFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename.endsWith('.toml');
+}
+
 export function toAbsolutePath(packageFile: string): string {
   return upath.join(packageFile.replace(/^[/\\]*/, '/'));
 }
