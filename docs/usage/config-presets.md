@@ -37,21 +37,29 @@ In order to achieve these goals, preset configs allow for a very modular approac
 
 ## Preset Hosting
 
-In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs. You can also set a git tag (like a semver) to use specific releases of your shared config.
 An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
-| name                    | example use                | preset    | resolves as                          | filename        |
-| ----------------------- | -------------------------- | --------- | ------------------------------------ | --------------- |
-| GitHub default          | `github>abc/foo`           | `default` | `https://github.com/abc/foo`         | `default.json`  |
-| GitHub with preset name | `github>abc/foo:xyz`       | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`      |
-| GitHub with preset path | `github>abc/foo//path/xyz` | `xyz`     | `https://github.com/abc/foo`         | `path/xyz.json` |
-| GitLab default          | `gitlab>abc/foo`           | `default` | `https://gitlab.com/abc/foo`         | `default.json`  |
-| GitLab with preset name | `gitlab>abc/foo:xyz`       | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`      |
-| GitLab with preset path | `gitlab>abc/foo//path/xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `path/xyz.json` |
-| Gitea default           | `gitea>abc/foo`            | `default` | `https://gitea.com/abc/foo`          | `default.json`  |
-| Gitea with preset name  | `gitea>abc/foo:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`      |
-| Local default           | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json`  |
-| Local with preset path  | `local>abc/foo//path/xyz`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` |
+| name                               | example use                      | preset    | resolves as                          | filename        | tag            |
+| ---------------------------------- | -------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
+| GitHub default                     | `github>abc/foo`                 | `default` | `https://github.com/abc/foo`         | `default.json`  | Default branch |
+| GitHub with preset name            | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`      | Default branch |
+| GitHub with preset path            | `github>abc/foo//path/xyz`       | `xyz`     | `https://github.com/abc/foo`         | `path/xyz.json` | Default branch |
+| GitHub default with a tag          | `github>abc/foo=1.2.5`           | `default` | `https://github.com/abc/foo`         | `default.json`  | `1.2.5.`       |
+| GitHub with preset name with a tag | `github>abc/foo=1.2.5:xyz`       | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`      | `1.2.5.`       |
+| GitHub with preset path with a tag | `github>abc/foo=1.2.5//path/xyz` | `xyz`     | `https://github.com/abc/foo`         | `path/xyz.json` | `1.2.5.`       |
+| GitLab default                     | `gitlab>abc/foo`                 | `default` | `https://gitlab.com/abc/foo`         | `default.json`  | Default branch |
+| GitLab with preset name            | `gitlab>abc/foo:xyz`             | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`      | Default branch |
+| GitLab with preset path            | `gitlab>abc/foo//path/xyz`       | `xyz`     | `https://gitlab.com/abc/foo`         | `path/xyz.json` | Default branch |
+| GitLab default with a tag          | `gitlab>abc/foo=1.2.5`           | `default` | `https://gitlab.com/abc/foo`         | `default.json`  | `1.2.5.`       |
+| GitLab with preset name with a tag | `gitlab>abc/foo=1.2.5:xyz`       | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`      | `1.2.5.`       |
+| GitLab with preset path with a tag | `gitlab>abc/foo=1.2.5//path/xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `path/xyz.json` | `1.2.5.`       |
+| Gitea default                      | `gitea>abc/foo`                  | `default` | `https://gitea.com/abc/foo`          | `default.json`  | Default branch |
+| Gitea with preset name             | `gitea>abc/foo:xyz`              | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`      | Default branch |
+| Local default                      | `local>abc/foo`                  | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
+| Local with preset path             | `local>abc/foo//path/xyz`        | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
+| Local default with a tag           | `local>abc/foo=1.2.5`            | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.5.`       |
+| Local with preset path with a tag  | `local>abc/foo=1.2.5//path/xyz`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.5.`       |
 
 Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported. One workaround is to use distinct files instead of sub-presets.
 
