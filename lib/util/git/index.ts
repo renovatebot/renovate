@@ -705,20 +705,6 @@ export type CommitFilesConfig = {
   force?: boolean;
 };
 
-async function gitAdd(files: string | string[]): Promise<void> {
-  try {
-    await git.add(files);
-  } catch (err) /* istanbul ignore next */ {
-    if (
-      !err.message.includes(
-        'The following paths are ignored by one of your .gitignore files'
-      )
-    ) {
-      throw err;
-    }
-  }
-}
-
 export async function commitFiles({
   branchName,
   files,
@@ -738,13 +724,14 @@ export async function commitFiles({
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
-    const fileNames: string[] = [];
     const deletedFiles: string[] = [];
+    const addedModifiedFiles: string[] = [];
     const ignoredFiles: string[] = [];
     for (const file of files) {
+      let fileName = file.name;
       // istanbul ignore if
-      if (file.name === '|delete|') {
-        const fileName = file.contents as string;
+      if (fileName === '|delete|') {
+        fileName = file.contents as string;
         try {
           await git.rm([fileName]);
           deletedFiles.push(fileName);
@@ -753,11 +740,10 @@ export async function commitFiles({
           logger.warn({ err, fileName }, 'Cannot delete file');
           ignoredFiles.push(fileName);
         }
-      } else if (await isDirectory(join(localDir, file.name))) {
-        fileNames.push(file.name);
-        await gitAdd(file.name);
+      } else if (await isDirectory(join(localDir, fileName))) {
+        logger.warn({ fileName }, 'Skipping directory commit');
+        ignoredFiles.push(fileName);
       } else {
-        fileNames.push(file.name);
         let contents: Buffer;
         // istanbul ignore else
         if (typeof file.contents === 'string') {
@@ -765,11 +751,22 @@ export async function commitFiles({
         } else {
           contents = file.contents;
         }
-        await fs.outputFile(join(localDir, file.name), contents);
+        await fs.outputFile(join(localDir, fileName), contents);
+        try {
+          await git.add(fileName);
+          addedModifiedFiles.push(fileName);
+        } catch (err) /* istanbul ignore next */ {
+          if (
+            !err.message.includes(
+              'The following paths are ignored by one of your .gitignore files'
+            )
+          ) {
+            throw err;
+          }
+          logger.debug({ fileName }, 'Cannot commit ignored file');
+          ignoredFiles.push(file.name);
+        }
       }
-    }
-    if (fileNames.length) {
-      await gitAdd(fileNames);
     }
 
     const commitOptions: Options = {};
@@ -794,7 +791,7 @@ export async function commitFiles({
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
-        { branchName, fileNames },
+        { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'
       );
       return null;
