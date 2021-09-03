@@ -9,7 +9,6 @@ import Git, {
   TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
-import { configFileNames } from '../../config/app-strings';
 import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -768,10 +767,6 @@ export async function commitFiles({
         }
         await fs.outputFile(join(localDir, file.name), contents);
       }
-    }
-    // istanbul ignore if
-    if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
-      fileNames.unshift('-f');
     }
     if (fileNames.length) {
       await gitAdd(fileNames);
