@@ -65,11 +65,6 @@ export function replaceArgs(
 }
 
 export function parsePreset(input: string): ParsedPreset {
-  // https://regex101.com/r/vMTIpo/1
-  // @somescope/somepackagename=1.0.0:webapp(eslint)
-  // renovate-config-somepackagename=1.0.0:test(eslint)
-  // someRepo/renovate-sharedconfig=1.0.3:docker
-  // (?<packageName>[^:=(]+)((?:=)(?<presetTag>[^:(]+))?((?::)(?<presetName>[^(]*))?((?:\()(?<presetParams>.*)(?:\)))?
   let str = input;
   let presetSource: string;
   let presetPath: string;
