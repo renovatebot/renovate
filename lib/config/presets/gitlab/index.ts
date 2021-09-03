@@ -69,7 +69,6 @@ export function getPresetFromEndpoint(
   endpoint = Endpoint,
   packageTag: string = null
 ): Promise<Preset> {
-  logger.trace(`Preset URL, getPresetFromEndpoint ${packageTag}`);
   return fetchPreset({
     pkgName,
     filePreset: presetName,
@@ -86,7 +85,6 @@ export function getPreset({
   presetName = 'default',
   packageTag = null,
 }: PresetConfig): Promise<Preset> {
-  logger.trace(`Preset URL, getPreset ${packageTag}`);
   return getPresetFromEndpoint(
     pkgName,
     presetName,

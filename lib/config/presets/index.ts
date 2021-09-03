@@ -144,7 +144,7 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
-    const re = /^([\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/;
+    const re = /^([\w\-./]+?)(?:=(.*))?\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/;
 
     // Validation
     if (str.includes(':')) {
@@ -153,20 +153,12 @@ export function parsePreset(input: string): ParsedPreset {
     if (!re.test(str)) {
       throw new Error(PRESET_INVALID);
     }
-    [, packageName, presetPath, presetName] = re.exec(str);
+    [, packageName, packageTag, presetPath, presetName] = re.exec(str);
   } else {
-    const matches =
-      /(?<packageName>[^:=]+)((?:=)(?<packageTag>[^:]+))?((?::)(?<presetName>.*))?/.exec(
+    [, packageName, packageTag, presetName] =
+      /^(?<packageName>[^:=]+)(?:=(?<packageTag>[^:]+))?(?::(?<presetName>.*))?$/.exec(
         str
       );
-
-    packageName = matches.groups.packageName;
-    if ('packageTag' in matches.groups) {
-      packageTag = matches.groups.packageTag;
-    }
-    if ('presetName' in matches.groups) {
-      presetName = matches.groups.presetName;
-    }
 
     if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;
