@@ -35,6 +35,11 @@ const presetSources: Record<string, PresetApi> = {
   internal,
 };
 
+const nonScopedPresetWithSubdirRegex =
+  /^(?<packageName>[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-.]+?))?$/;
+const gitPresetRegex =
+  /^(?<packageName>[\w\-./]+?)(?::(?<presetName>[\w\-./]+?))?(?:#(?<packageTag>[\w\-.]+?))?$/;
+
 export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>
@@ -139,22 +144,18 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
-    const re =
-      /^([\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)(?:#([\w\-.]+?))?$/;
 
     // Validation
     if (str.includes(':')) {
       throw new Error(PRESET_PROHIBITED_SUBPRESET);
     }
-    if (!re.test(str)) {
+    if (!nonScopedPresetWithSubdirRegex.test(str)) {
       throw new Error(PRESET_INVALID);
     }
-    [, packageName, presetPath, presetName, packageTag] = re.exec(str);
+    [, packageName, presetPath, presetName, packageTag] =
+      nonScopedPresetWithSubdirRegex.exec(str);
   } else {
-    [, packageName, presetName, packageTag] =
-      /^(?<packageName>[\w\-./]+?)(?::(?<presetName>[\w\-./]+?))?(?:#(?<packageTag>[\w\-.]+?))?$/.exec(
-        str
-      );
+    [, packageName, presetName, packageTag] = gitPresetRegex.exec(str);
 
     if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;

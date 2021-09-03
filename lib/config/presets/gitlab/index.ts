@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitLabBranch } from '../../../types/platform/gitlab';
@@ -38,14 +39,14 @@ export async function fetchJSONFile(
   try {
     const urlEncodedRepo = encodeURIComponent(repo);
     const urlEncodedPkgName = encodeURIComponent(fileName);
-    if (packageTag == null) {
+    if (is.nonEmptyString(packageTag)) {
+      ref = `?ref=${packageTag}`;
+    } else {
       const defaultBranchName = await getDefaultBranchName(
         urlEncodedRepo,
         endpoint
       );
       ref = `?ref=${defaultBranchName}`;
-    } else {
-      ref = `?ref=${packageTag}`;
     }
     url += `projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw${ref}`;
     logger.info(`Preset URL is: ${url}`);

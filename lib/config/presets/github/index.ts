@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { GithubHttp } from '../../../util/http/github';
@@ -19,7 +20,7 @@ export async function fetchJSONFile(
   packageTag: string
 ): Promise<Preset> {
   let ref = '';
-  if (packageTag != null) {
+  if (is.nonEmptyString(packageTag)) {
     ref = `?ref=${packageTag}`;
   }
   const url = `${endpoint}repos/${repo}/contents/${fileName}${ref}`;
