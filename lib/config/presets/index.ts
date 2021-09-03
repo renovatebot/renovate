@@ -139,7 +139,8 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
-    const re = /^([\w\-./]+?)(?:=(.*))?\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/;
+    const re =
+      /^([\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)(?:#([\w\-.]+?))?$/;
 
     // Validation
     if (str.includes(':')) {
@@ -148,10 +149,10 @@ export function parsePreset(input: string): ParsedPreset {
     if (!re.test(str)) {
       throw new Error(PRESET_INVALID);
     }
-    [, packageName, packageTag, presetPath, presetName] = re.exec(str);
+    [, packageName, presetPath, presetName, packageTag] = re.exec(str);
   } else {
-    [, packageName, packageTag, presetName] =
-      /^(?<packageName>[^:=]+)(?:=(?<packageTag>[^:]+))?(?::(?<presetName>.*))?$/.exec(
+    [, packageName, presetName, packageTag] =
+      /^(?<packageName>[\w\-./]+?)(?::(?<presetName>[\w\-./]+?))?(?:#(?<packageTag>[\w\-.]+?))?$/.exec(
         str
       );
 

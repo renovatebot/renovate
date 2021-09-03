@@ -54,16 +54,16 @@ An additional benefit of using source code hosting is that the same token/authen
 | ---------------------------------- | -------------------------- | --------- | ------------------------------------ | -------------- | -------------- |
 | GitHub default                     | `github>abc/foo`           | `default` | `https://github.com/abc/foo`         | `default.json` | Default branch |
 | GitHub with preset name            | `github>abc/foo:xyz`       | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`     | Default branch |
-| GitHub default with a tag          | `github>abc/foo=1.5.4`     | `default` | `https://github.com/abc/foo`         | `default.json` | `1.5.4`        |
-| GitHub with preset name with a tag | `github>abc/foo=1.5.4:xyz` | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`     | `1.5.4`        |
+| GitHub default with a tag          | `github>abc/foo#1.5.4`     | `default` | `https://github.com/abc/foo`         | `default.json` | `1.5.4`        |
+| GitHub with preset name with a tag | `github>abc/foo:xyz#1.5.4` | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`     | `1.5.4`        |
 | GitLab default                     | `gitlab>abc/foo`           | `default` | `https://gitlab.com/abc/foo`         | `default.json` | Default branch |
 | GitLab with preset name            | `gitlab>abc/foo:xyz`       | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`     | Default branch |
-| GitLab default with a tag          | `gitlab>abc/foo=1.5.4`     | `default` | `https://gitlab.com/abc/foo`         | `default.json` | `1.5.4`        |
-| GitLab with preset name with a tag | `gitlab>abc/foo=1.5.4:xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`     | `1.5.4`        |
+| GitLab default with a tag          | `gitlab>abc/foo#1.5.4`     | `default` | `https://gitlab.com/abc/foo`         | `default.json` | `1.5.4`        |
+| GitLab with preset name with a tag | `gitlab>abc/foo:xyz#1.5.4` | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`     | `1.5.4`        |
 | Gitea default                      | `gitea>abc/foo`            | `default` | `https://gitea.com/abc/foo`          | `default.json` | Default branch |
 | Gitea with preset name             | `gitea>abc/foo:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`     | Default branch |
-| Gitea default with a tag           | `gitea>abc/foo=1.5.4`      | `default` | `https://gitea.com/abc/foo`          | `default.json` | `1.5.4`        |
-| Gitea with preset name with a tag  | `gitea>abc/foo=1.5.4:xyz`  | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`     | `1.5.4`        |
+| Gitea default with a tag           | `gitea>abc/foo#1.5.4`      | `default` | `https://gitea.com/abc/foo`          | `default.json` | `1.5.4`        |
+| Gitea with preset name with a tag  | `gitea>abc/foo:xyz#1.5.4`  | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`     | `1.5.4`        |
 | Local default                      | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json` | Default branch |
-| Local default with a tag           | `local>abc/foo=1.5.4`      | `default` | `https://github.company.com/abc/foo` | `default.json` | `1.5.4`        |
-| Local with preset name with a tag  | `local>abc/foo=1.5.4:xyz`  | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`     | `1.5.4`        |
+| Local default with a tag           | `local>abc/foo#1.5.4`      | `default` | `https://github.company.com/abc/foo` | `default.json` | `1.5.4`        |
+| Local with preset name with a tag  | `local>abc/foo:xyz#1.5.4`  | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`     | `1.5.4`        |
