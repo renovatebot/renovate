@@ -2,14 +2,13 @@ import { KnownProps, parseString } from 'editorconfig';
 import type { ParseStringResult } from 'editorconfig/src/lib/ini';
 import { makeRe } from 'minimatch';
 import { logger } from '../../logger/index';
+import * as memCache from '../cache/memory/index';
 import { localPathExists, readLocalFile } from '../fs';
 import type { CodeFormat } from './code-format';
 import { IndentationType } from './indentation-type';
 
 export class EditorConfig {
   private readonly formats: Map<RegExp, KnownProps> = new Map();
-
-  private static instance?: EditorConfig;
 
   private constructor(parseResult: ParseStringResult = []) {
     for (const [sectionName, sectionBody] of parseResult) {
@@ -19,23 +18,27 @@ export class EditorConfig {
   }
 
   public static async getInstance(): Promise<EditorConfig> {
-    if (EditorConfig.instance === undefined) {
+    let instance = memCache.get(this.name);
+
+    if (instance === undefined) {
       const editorConfigContent = await this.getEditorConfigContent();
 
       if (editorConfigContent === undefined) {
-        EditorConfig.instance = new EditorConfig();
+        instance = new EditorConfig();
       } else {
         const parseResult = parseString(editorConfigContent);
         logger.debug('.editorconfig file successfully parsed');
-        EditorConfig.instance = new EditorConfig(parseResult);
+        instance = new EditorConfig(parseResult);
       }
+
+      memCache.set(this.name, instance);
     }
 
-    return EditorConfig.instance;
+    return instance;
   }
 
   public static reset(): void {
-    delete this.instance;
+    memCache.set(this.name, undefined);
   }
 
   public getCodeFormat(fileName: string): CodeFormat {
