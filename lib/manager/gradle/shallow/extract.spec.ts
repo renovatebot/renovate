@@ -67,6 +67,7 @@ describe('manager/gradle/shallow/extract', () => {
       },
     ]);
   });
+
   it('works with file-ext', async () => {
     mockFs({
       'gradle.properties': '',
@@ -105,6 +106,7 @@ describe('manager/gradle/shallow/extract', () => {
       },
     ]);
   });
+
   it('works with file-ext-var', async () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
@@ -140,6 +142,7 @@ describe('manager/gradle/shallow/extract', () => {
       },
     ]);
   });
+
   it('inherits gradle variables', async () => {
     const fsMock = {
       'gradle.properties': 'foo=1.0.0',
