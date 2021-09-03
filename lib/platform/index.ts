@@ -53,7 +53,6 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
     returnConfig.gitAuthor = platformInfo.gitAuthor;
   }
-  // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
     hostType: returnConfig.platform,

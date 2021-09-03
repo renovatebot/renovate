@@ -634,6 +634,7 @@ const options: RenovateOptions[] = [
     name: 'gitAuthor',
     description: 'Author to use for Git commits. Must conform to RFC5322.',
     type: 'string',
+    globalOnly: true,
   },
   {
     name: 'gitPrivateKey',
