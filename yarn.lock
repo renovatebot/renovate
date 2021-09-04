@@ -6469,17 +6469,6 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-markdown-it@12.0.4:
-  version "12.0.4"
-  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-12.0.4.tgz#eec8247d296327eac3ba9746bdeec9cfcc751e33"
-  integrity sha512-34RwOXZT8kyuOJy25oJNJoulO8L0bTHYWXcdZBYZqFnjIy3NgjeoM3FmPXIOFQ26/lSHYMr8oc62B6adxXcb3Q==
-  dependencies:
-    argparse "^2.0.1"
-    entities "~2.1.0"
-    linkify-it "^3.0.1"
-    mdurl "^1.0.1"
-    uc.micro "^1.0.5"
-
 markdown-it@12.2.0:
   version "12.2.0"
   resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-12.2.0.tgz#091f720fd5db206f80de7a8d1f1a7035fd0d38db"
@@ -6503,30 +6492,30 @@ markdownlint-cli2-formatter-default@^0.0.2:
   resolved "https://registry.yarnpkg.com/markdownlint-cli2-formatter-default/-/markdownlint-cli2-formatter-default-0.0.2.tgz#76f1a064d70966178dfe3bb489af9423d830ca79"
   integrity sha512-jIz1X3SIC8sX4NDFqQFUXL+JEtfnDoN4i+xocEu+etcxGX455pHb6sx86f/yVk4mKJ2o7aNe2ydSx9an22BfBg==
 
-markdownlint-cli2@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/markdownlint-cli2/-/markdownlint-cli2-0.2.0.tgz#cecbd8a85ab21b070668e57c3aaa7f6f3056e2fc"
-  integrity sha512-/MIaG2MOlm39SBApQbeHK847/bgX6FfUPZMpCzA2UMYXR8NTwzTdjQAXjjLBK6+zG52GWKyhdmBKobkhLnq8wQ==
+markdownlint-cli2@0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/markdownlint-cli2/-/markdownlint-cli2-0.3.0.tgz#415407003021b48343a63bd177ed76f4aedc064b"
+  integrity sha512-0nmB8MMqxwTolfkOaGW9RLqkBVG6DW6oBTyDKd3SP+7e8FPhihg6KBqpz1puj37C2Wd3POS98xiE1GljEVNyHw==
   dependencies:
     globby "~11.0.4"
-    markdownlint "~0.23.1"
+    markdownlint "~0.24.0"
     markdownlint-cli2-formatter-default "^0.0.2"
-    markdownlint-rule-helpers "~0.14.0"
+    markdownlint-rule-helpers "~0.15.0"
     micromatch "~4.0.4"
     strip-json-comments "~3.1.1"
     yaml "~1.10.2"
 
-markdownlint-rule-helpers@~0.14.0:
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/markdownlint-rule-helpers/-/markdownlint-rule-helpers-0.14.0.tgz#4d0e1ae320e85559d8cbed1490934855791627bb"
-  integrity sha512-vRTPqSU4JK8vVXmjICHSBhwXUvbfh/VJo+j7hvxqe15tLJyomv3FLgFdFgb8kpj0Fe8SsJa/TZUAXv7/sN+N7A==
+markdownlint-rule-helpers@~0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/markdownlint-rule-helpers/-/markdownlint-rule-helpers-0.15.0.tgz#11434c573649b9235ae70b967314f5711f7d8fa8"
+  integrity sha512-A+9mswc3m/kkqpJCqntmte/1VKhDJ+tjZsERLz5L4h/Qr7ht2/BkGkgY5E7/wsxIhcpl+ctIfz+oS3PQrMOB2w==
 
-markdownlint@~0.23.1:
-  version "0.23.1"
-  resolved "https://registry.yarnpkg.com/markdownlint/-/markdownlint-0.23.1.tgz#98292b5d340d01e9c113f3d7fb3b2ccf89628dc2"
-  integrity sha512-iOEwhDfNmq2IJlaA8mzEkHYUi/Hwoa6Ss+HO5jkwUR6wQ4quFr0WzSx+Z9rsWZKUaPbyirIdL1zGmJRkWawr4Q==
+markdownlint@~0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/markdownlint/-/markdownlint-0.24.0.tgz#224b53f671367a237d40c8be1745c7be9a322671"
+  integrity sha512-OJIGsGFV/rC9irI5E1FMy6v9hdACSwaa+EN3224Y5KG8zj2EYzdHOw0pOJovIYmjNfEZ9BtxUY4P7uYHTSNnbQ==
   dependencies:
-    markdown-it "12.0.4"
+    markdown-it "12.2.0"
 
 marked-terminal@^4.1.1:
   version "4.1.1"
