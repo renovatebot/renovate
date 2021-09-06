@@ -19,6 +19,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -37,11 +38,23 @@ Array [
 exports[`manager/helmv3/artifacts returns updated Chart.lock 1`] = `
 Array [
   Object {
+    "file": Object {
+      "contents": "New Chart.lock",
+      "name": "Chart.lock",
+    },
+  },
+]
+`;
+
+exports[`manager/helmv3/artifacts returns updated Chart.lock 2`] = `
+Array [
+  Object {
     "cmd": "helm dependency update ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -60,11 +73,23 @@ Array [
 exports[`manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 1`] = `
 Array [
   Object {
+    "file": Object {
+      "contents": "New Chart.lock",
+      "name": "Chart.lock",
+    },
+  },
+]
+`;
+
+exports[`manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 2`] = `
+Array [
+  Object {
     "cmd": "helm dependency update ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -83,6 +108,17 @@ Array [
 exports[`manager/helmv3/artifacts returns updated Chart.lock with docker 1`] = `
 Array [
   Object {
+    "file": Object {
+      "contents": "New Chart.lock",
+      "name": "Chart.lock",
+    },
+  },
+]
+`;
+
+exports[`manager/helmv3/artifacts returns updated Chart.lock with docker 2`] = `
+Array [
+  Object {
     "cmd": "docker pull renovate/helm",
     "options": Object {
       "encoding": "utf-8",
@@ -95,11 +131,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm dependency update ''\\"",
+    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm dependency update ''\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "HELM_EXPERIMENTAL_OCI": "1",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

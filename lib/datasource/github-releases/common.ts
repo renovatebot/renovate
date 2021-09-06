@@ -3,9 +3,10 @@ import { ensureTrailingSlash } from '../../util/url';
 import type { GithubRelease } from './types';
 
 const defaultSourceUrlBase = 'https://github.com/';
+export const id = 'github-releases';
 
 export const cacheNamespace = 'datasource-github-releases';
-export const http = new GithubHttp();
+export const http = new GithubHttp(id);
 
 export function getSourceUrlBase(registryUrl: string): string {
   // default to GitHub.com if no GHE host is specified.

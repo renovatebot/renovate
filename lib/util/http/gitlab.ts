@@ -20,11 +20,14 @@ export interface GitlabHttpOptions extends InternalHttpOptions {
 }
 
 export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
-  constructor(options?: GitlabHttpOptions) {
-    super(PLATFORM_TYPE_GITLAB, options);
+  constructor(
+    type: string = PLATFORM_TYPE_GITLAB,
+    options?: GitlabHttpOptions
+  ) {
+    super(type, options);
   }
 
-  protected async request<T>(
+  protected override async request<T>(
     url: string | URL,
     options?: GitlabInternalOptions & GitlabHttpOptions
   ): Promise<HttpResponse<T> | null> {

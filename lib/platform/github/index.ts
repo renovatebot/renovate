@@ -23,7 +23,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash } from '../../util/url';
+import { ensureTrailingSlash, parseUrl } from '../../util/url';
 import type {
   AggregatedVulnerabilities,
   BranchStatusConfig,
@@ -35,6 +35,7 @@ import type {
   FindPRConfig,
   Issue,
   MergePRConfig,
+  PlatformParams,
   PlatformResult,
   Pr,
   RepoParams,
@@ -80,12 +81,7 @@ export async function initPlatform({
   token,
   username,
   gitAuthor,
-}: {
-  endpoint: string;
-  token: string;
-  username?: string;
-  gitAuthor?: string;
-}): Promise<PlatformResult> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
@@ -118,6 +114,13 @@ export async function initPlatform({
     gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
+
+  // Generic github hostRule that per default all datasources using github api are enabled
+  const genericGithubHostRule = {
+    matchHost: parseUrl(defaults.endpoint).hostname,
+    token,
+  };
+  hostRules.add(genericGithubHostRule);
   return platformConfig;
 }
 
@@ -417,8 +420,6 @@ export async function initRepo({
   await git.initRepo({
     ...config,
     url,
-    gitAuthorName: global.gitAuthor?.name,
-    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,

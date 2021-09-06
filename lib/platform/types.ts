@@ -14,12 +14,13 @@ export interface PlatformParams {
   token?: string;
   username?: string;
   password?: string;
+  gitAuthor?: string;
 }
 
 export interface PlatformResult {
   endpoint: string;
-  renovateUsername?: any;
-  gitAuthor?: any;
+  renovateUsername?: string;
+  gitAuthor?: string;
 }
 
 export interface RepoResult {

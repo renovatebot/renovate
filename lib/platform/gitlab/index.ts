@@ -79,6 +79,7 @@ let draftPrefix = DRAFT_PREFIX;
 export async function initPlatform({
   endpoint,
   token,
+  gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -89,21 +90,32 @@ export async function initPlatform({
   } else {
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
-  let gitAuthor: string;
+  const platformConfig: PlatformResult = {
+    endpoint: defaults.endpoint,
+  };
   let gitlabVersion: string;
   try {
-    const user = (
-      await gitlabApi.getJson<{ email: string; name: string; id: number }>(
-        `user`,
-        { token }
-      )
-    ).body;
-    gitAuthor = `${user.name} <${user.email}>`;
-    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
-    gitlabVersion = (
-      await gitlabApi.getJson<{ version: string }>('version', { token })
-    ).body.version.split('-')[0];
+    if (!gitAuthor) {
+      const user = (
+        await gitlabApi.getJson<{ email: string; name: string; id: number }>(
+          `user`,
+          { token }
+        )
+      ).body;
+      platformConfig.gitAuthor = `${user.name} <${user.email}>`;
+    }
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      const version = (
+        await gitlabApi.getJson<{ version: string }>('version', { token })
+      ).body;
+      gitlabVersion = version.version;
+    }
     logger.debug('GitLab version is: ' + gitlabVersion);
+    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
+    [gitlabVersion] = gitlabVersion.split('-');
     defaults.version = gitlabVersion;
   } catch (err) {
     logger.debug(
@@ -112,13 +124,10 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  draftPrefix = lt(gitlabVersion, '13.2.0')
+  draftPrefix = lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-    gitAuthor,
-  };
+
   return platformConfig;
 }
 
@@ -277,8 +286,6 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url,
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');

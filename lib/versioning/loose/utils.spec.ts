@@ -32,7 +32,7 @@ describe('versioning/loose/utils', () => {
   describe('GenericVersioningApi', () => {
     class DummyScheme extends GenericVersioningApi {
       // eslint-disable-next-line class-methods-use-this
-      protected _compare(_version: string, _other: string): number {
+      protected override _compare(_version: string, _other: string): number {
         return _version ? _version.localeCompare(_other) : 0;
       }
 

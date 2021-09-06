@@ -126,10 +126,6 @@ e.g.
 }
 ```
 
-## composerIgnorePlatformReqs
-
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.s
-
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
@@ -208,14 +204,6 @@ You probably have no need for this option - it is an experimental setting for th
 This should be set to a Personal Access Token (GitHub only) when `forkMode` is set to `true`.
 Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
-
-## gitAuthor
-
-You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
-
-**Note** We strongly recommend that the Git author email you use is unique to Renovate.
-Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
 ## gitNoVerify
 
@@ -418,7 +406,7 @@ It could then be used in a repository config or preset like so:
 }
 ```
 
-Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
+Secret names must start with an upper or lower case character and can contain only characters, digits, or underscores.
 
 ## skipInstalls
 

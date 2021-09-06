@@ -61,3 +61,32 @@ export interface ParseGradleResult {
   urls: string[];
   vars: PackageVariables;
 }
+
+export interface GradleCatalog {
+  versions?: Map<string, string>;
+  libraries?: Map<
+    string,
+    GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor | string
+  >;
+  plugins?: Map<string, GradleCatalogPluginDescriptor>;
+}
+
+export interface GradleCatalogModuleDescriptor {
+  module: string;
+  version: string | VersionPointer;
+}
+
+export interface GradleCatalogArtifactDescriptor {
+  name: string;
+  group: string;
+  version: string | VersionPointer;
+}
+
+export interface GradleCatalogPluginDescriptor {
+  id: string;
+  version: string | VersionPointer;
+}
+
+export interface VersionPointer {
+  ref: string;
+}
