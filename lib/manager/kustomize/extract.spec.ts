@@ -247,8 +247,10 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[1].currentValue).toEqual('1.19.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
     });
+
     const postgresDigest =
       'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c';
+      
     it('extracts from newTag', () => {
       expect(extractPackageFile(newTag)).toMatchSnapshot({
         deps: [
@@ -268,6 +270,7 @@ describe('manager/kustomize/extract', () => {
         ],
       });
     });
+
     it('extracts from digest', () => {
       expect(extractPackageFile(digest)).toMatchSnapshot({
         deps: [
@@ -293,6 +296,7 @@ describe('manager/kustomize/extract', () => {
         ],
       });
     });
+
     it('extracts newName', () => {
       expect(extractPackageFile(newName)).toMatchSnapshot({
         deps: [
