@@ -6875,33 +6875,6 @@ Array [
 ]
 `;
 
-exports[`platform/github/index initPlatform() should add initialized platform with predefined generic host rule for github api 1`] = `
-Object {
-  "endpoint": "https://api.github.com/",
-  "gitAuthor": "renovate@whitesourcesoftware.com",
-  "renovateUsername": "renovate-bot",
-}
-`;
-
-exports[`platform/github/index initPlatform() should add initialized platform with predefined generic host rule for github api 2`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "matchHost": "api.github.com",
-        "token": "abc123",
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-  ],
-}
-`;
-
 exports[`platform/github/index initPlatform() should support custom endpoint 1`] = `
 Object {
   "endpoint": "https://ghe.renovatebot.com/",
