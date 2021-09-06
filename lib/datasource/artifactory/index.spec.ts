@@ -4,8 +4,6 @@ import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { ArtifactoryDatasource } from '.';
 
-const artifactoryReleasesHtml = loadFixture('releases.html');
-
 const datasource = ArtifactoryDatasource.id;
 
 const testRegistryUrl = 'https://jfrog.company.com/artifactory';
@@ -21,11 +19,11 @@ function getPath(folder: string): string {
 
 describe('datasource/artifactory/index', () => {
   describe('getReleases', () => {
-    it('parses real data', async () => {
+    it('parses real data (folders): with slash at the end', async () => {
       httpMock
         .scope(testRegistryUrl)
         .get(getPath(testLookupName))
-        .reply(200, artifactoryReleasesHtml);
+        .reply(200, loadFixture('releases-as-folders.html'));
       const res = await getPkgReleases({
         ...testConfig,
         datasource,
@@ -35,11 +33,11 @@ describe('datasource/artifactory/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('parses real data: without slash at the end', async () => {
+    it('parses real data (files): without slash at the end', async () => {
       httpMock
         .scope(testRegistryUrl)
         .get(getPath(testLookupName))
-        .reply(200, loadFixture('releases-wo-slash.html'));
+        .reply(200, loadFixture('releases-as-files.html'));
       const res = await getPkgReleases({
         ...testConfig,
         datasource,
