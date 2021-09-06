@@ -214,25 +214,6 @@ async function cleanLocalBranches(): Promise<void> {
   }
 }
 
-/*
- * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
- * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
- */
-async function setBranchPrefix(branchPrefix: string): Promise<void> {
-  config.branchPrefix = branchPrefix;
-  // If the repo is already cloned then set branchPrefix now, otherwise it will be called again during syncGit()
-  if (gitInitialized) {
-    logger.debug('Setting branchPrefix: ' + branchPrefix);
-    const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-    try {
-      await git.fetch(['origin', ref, '--depth=5', '--force']);
-    } catch (err) /* istanbul ignore next */ {
-      checkForPlatformFailure(err);
-      throw err;
-    }
-  }
-}
-
 export function setGitAuthor(gitAuthor: string): void {
   const gitAuthorParsed = parseGitAuthor(
     gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
@@ -272,7 +253,7 @@ export async function writeGitAuthor(): Promise<void> {
 export function setUserRepoConfig({
   gitIgnoredAuthors,
   gitAuthor,
-}: RenovateConfig): Promise<void> {
+}: RenovateConfig): void {
   config.ignoredAuthors = gitIgnoredAuthors ?? [];
   setGitAuthor(gitAuthor);
 }
