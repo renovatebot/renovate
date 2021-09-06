@@ -30,8 +30,11 @@ export class ArtifactoryDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (!registryUrl) {
-      throw new ExternalHostError(new Error());
+    if (registryUrl === defaultRegistryUrl) {
+      logger.warn(
+        'artifactory datasource requires custom registryUrl. Skipping datasource'
+      );
+      return null;
     }
 
     const url = `${registryUrl}/${lookupName}`;

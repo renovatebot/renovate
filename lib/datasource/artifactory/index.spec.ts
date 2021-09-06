@@ -2,6 +2,7 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import { logger as _logger } from '../../logger';
 import { ArtifactoryDatasource } from '.';
 
 const datasource = ArtifactoryDatasource.id;
@@ -18,6 +19,13 @@ function getPath(folder: string): string {
 }
 
 describe('datasource/artifactory/index', () => {
+  let logger: jest.Mocked<typeof _logger>;
+
+  beforeEach(async () => {
+    jest.mock('../../logger');
+    logger = (await import('../../logger')).logger as never;
+  });
+
   describe('getReleases', () => {
     it('parses real data (folders): with slash at the end', async () => {
       httpMock
@@ -47,14 +55,19 @@ describe('datasource/artifactory/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('throws without registryUrl', async () => {
-      await expect(
-        getPkgReleases({
-          datasource,
-          depName: testLookupName,
-          lookupName: testLookupName,
-        })
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    it('returns null without registryUrl + warning', async () => {
+      jest.resetModules();
+      jest.resetAllMocks();
+      const res = await getPkgReleases({
+        datasource,
+        depName: testLookupName,
+        lookupName: testLookupName,
+      });
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'artifactory datasource requires custom registryUrl. Skipping datasource'
+      );
+      expect(res).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
