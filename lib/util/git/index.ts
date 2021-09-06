@@ -9,7 +9,6 @@ import Git, {
   TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
-import { configFileNames } from '../../config/app-strings';
 import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -24,6 +23,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { parseGitAuthor } from './author';
 import { GitNoVerifyOption, getNoVerify } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
@@ -44,8 +44,6 @@ interface StorageConfig {
   currentBranch?: string;
   url: string;
   extraCloneOpts?: GitOptions;
-  gitAuthorName?: string;
-  gitAuthorEmail?: string;
   cloneSubmodules?: boolean;
 }
 
@@ -57,6 +55,8 @@ interface LocalConfig extends StorageConfig {
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
   ignoredAuthors: string[];
+  gitAuthorName?: string;
+  gitAuthorEmail?: string;
 }
 
 // istanbul ignore next
@@ -234,12 +234,50 @@ async function setBranchPrefix(branchPrefix: string): Promise<void> {
   }
 }
 
+export function setGitAuthor(gitAuthor: string): void {
+  const gitAuthorParsed = parseGitAuthor(
+    gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
+  );
+  if (!gitAuthorParsed) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = 'None';
+    error.validationError = 'Invalid gitAuthor';
+    error.validationMessage = `gitAuthor is not parsed as valid RFC5322 format: ${gitAuthor}`;
+    throw error;
+  }
+  config.gitAuthorName = gitAuthorParsed.name;
+  config.gitAuthorEmail = gitAuthorParsed.address;
+}
+
+export async function writeGitAuthor(): Promise<void> {
+  const { gitAuthorName, gitAuthorEmail } = config;
+  try {
+    if (gitAuthorName) {
+      logger.debug({ gitAuthorName }, 'Setting git author name');
+      await git.addConfig('user.name', gitAuthorName);
+    }
+    if (gitAuthorEmail) {
+      logger.debug({ gitAuthorEmail }, 'Setting git author email');
+      await git.addConfig('user.email', gitAuthorEmail);
+    }
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    logger.debug(
+      { err, gitAuthorName, gitAuthorEmail },
+      'Error setting git author config'
+    );
+    throw new Error(TEMPORARY_ERROR);
+  }
+}
+
 export async function setUserRepoConfig({
   branchPrefix,
   gitIgnoredAuthors,
+  gitAuthor,
 }: RenovateConfig): Promise<void> {
   await setBranchPrefix(branchPrefix);
   config.ignoredAuthors = gitIgnoredAuthors ?? [];
+  setGitAuthor(gitAuthor);
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -343,21 +381,6 @@ export async function syncGit(): Promise<void> {
       throw new Error(REPOSITORY_EMPTY);
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
-  }
-  try {
-    const { gitAuthorName, gitAuthorEmail } = config;
-    if (gitAuthorName) {
-      logger.debug({ gitAuthorName }, 'Setting git author name');
-      await git.addConfig('user.name', gitAuthorName);
-    }
-    if (gitAuthorEmail) {
-      logger.debug({ gitAuthorEmail }, 'Setting git author email');
-      await git.addConfig('user.email', gitAuthorEmail);
-    }
-  } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
-    logger.debug({ err }, 'Error setting git author config');
-    throw new Error(TEMPORARY_ERROR);
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
   if (config.branchPrefix) {
@@ -682,20 +705,6 @@ export type CommitFilesConfig = {
   force?: boolean;
 };
 
-async function gitAdd(files: string | string[]): Promise<void> {
-  try {
-    await git.add(files);
-  } catch (err) /* istanbul ignore next */ {
-    if (
-      !err.message.includes(
-        'The following paths are ignored by one of your .gitignore files'
-      )
-    ) {
-      throw err;
-    }
-  }
-}
-
 export async function commitFiles({
   branchName,
   files,
@@ -710,21 +719,31 @@ export async function commitFiles({
   }
   const { localDir } = getGlobalConfig();
   await configSigningKey(localDir);
+  await writeGitAuthor();
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
-    const fileNames: string[] = [];
-    const deleted: string[] = [];
+    const deletedFiles: string[] = [];
+    const addedModifiedFiles: string[] = [];
+    const ignoredFiles: string[] = [];
     for (const file of files) {
+      let fileName = file.name;
       // istanbul ignore if
-      if (file.name === '|delete|') {
-        deleted.push(file.contents as string);
-      } else if (await isDirectory(join(localDir, file.name))) {
-        fileNames.push(file.name);
-        await gitAdd(file.name);
+      if (fileName === '|delete|') {
+        fileName = file.contents as string;
+        try {
+          await git.rm([fileName]);
+          deletedFiles.push(fileName);
+        } catch (err) /* istanbul ignore next */ {
+          checkForPlatformFailure(err);
+          logger.warn({ err, fileName }, 'Cannot delete file');
+          ignoredFiles.push(fileName);
+        }
+      } else if (await isDirectory(join(localDir, fileName))) {
+        logger.warn({ fileName }, 'Skipping directory commit');
+        ignoredFiles.push(fileName);
       } else {
-        fileNames.push(file.name);
         let contents: Buffer;
         // istanbul ignore else
         if (typeof file.contents === 'string') {
@@ -732,23 +751,20 @@ export async function commitFiles({
         } else {
           contents = file.contents;
         }
-        await fs.outputFile(join(localDir, file.name), contents);
-      }
-    }
-    // istanbul ignore if
-    if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
-      fileNames.unshift('-f');
-    }
-    if (fileNames.length) {
-      await gitAdd(fileNames);
-    }
-    if (deleted.length) {
-      for (const f of deleted) {
+        await fs.outputFile(join(localDir, fileName), contents);
         try {
-          await git.rm([f]);
+          await git.add(fileName);
+          addedModifiedFiles.push(fileName);
         } catch (err) /* istanbul ignore next */ {
-          checkForPlatformFailure(err);
-          logger.debug({ err }, 'Cannot delete ' + f);
+          if (
+            !err.message.includes(
+              'The following paths are ignored by one of your .gitignore files'
+            )
+          ) {
+            throw err;
+          }
+          logger.debug({ fileName }, 'Cannot commit ignored file');
+          ignoredFiles.push(file.name);
         }
       }
     }
@@ -768,11 +784,14 @@ export async function commitFiles({
       logger.warn({ commitRes }, 'Detected empty commit - aborting git push');
       return null;
     }
-    logger.debug({ result: commitRes }, `git commit`);
+    logger.debug(
+      { deletedFiles, ignoredFiles, result: commitRes },
+      `git commit`
+    );
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
-        { branchName, fileNames },
+        { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'
       );
       return null;

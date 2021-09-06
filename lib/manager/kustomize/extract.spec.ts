@@ -242,14 +242,16 @@ describe('manager/kustomize/extract', () => {
     it('does nothing with kustomize empty kustomize files', () => {
       expect(extractPackageFile(kustomizeEmpty)).toBeNull();
     });
-    it('should extract bases from bases block and the resources block', () => {
+    it('should extract bases resources and components from their respective blocks', () => {
       const res = extractPackageFile(kustomizeDepsInResources);
       expect(res).not.toBeNull();
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res.deps).toHaveLength(3);
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
       expect(res.deps[1].currentValue).toEqual('1.19.0');
+      expect(res.deps[2].currentValue).toEqual('1.18.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
+      expect(res.deps[2].depName).toEqual('fluxcd/flux');
     });
     it('extracts sha256 instead of tag', () => {
       expect(extractPackageFile(sha)).toMatchSnapshot({
