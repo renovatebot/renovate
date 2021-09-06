@@ -47,17 +47,6 @@ describe('datasource/artifactory/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('throws for 5xx', async () => {
-      httpMock.scope(testRegistryUrl).get(getPath(testLookupName)).reply(502);
-      await expect(
-        getPkgReleases({
-          ...testConfig,
-          datasource,
-          lookupName: testLookupName,
-        })
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    });
-
     it('throws without registryUrl', async () => {
       await expect(
         getPkgReleases({
@@ -82,18 +71,26 @@ describe('datasource/artifactory/index', () => {
       ).toBeNull();
     });
 
-    it('throws for error', async () => {
-      httpMock
-        .scope(testRegistryUrl)
-        .get(getPath(testLookupName))
-        .replyWithError('error in unit tests');
+    it('throws for error diff than 404', async () => {
+      httpMock.scope(testRegistryUrl).get(getPath(testLookupName)).reply(502);
       await expect(
         getPkgReleases({
           ...testConfig,
           datasource,
           lookupName: testLookupName,
         })
-      ).rejects.toThrow();
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for 404', async () => {
+      httpMock.scope(testRegistryUrl).get(getPath(testLookupName)).reply(404);
+      expect(
+        await getPkgReleases({
+          ...testConfig,
+          datasource,
+          lookupName: testLookupName,
+        })
+      ).toBeNull();
     });
   });
 });
