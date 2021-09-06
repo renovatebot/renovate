@@ -7,8 +7,9 @@ Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceUrl": "https://gitlab.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -154,8 +155,9 @@ Object {
     "apiBaseUrl": "https://gitlab-enterprise.example.com/api/v4/",
     "baseUrl": "https://gitlab-enterprise.example.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab-enterprise.example.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceUrl": "https://gitlab-enterprise.example.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -197,8 +199,9 @@ Object {
     "apiBaseUrl": "https://git.test.com/api/v4/",
     "baseUrl": "https://git.test.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://git.test.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceUrl": "https://git.test.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -240,8 +243,9 @@ Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceUrl": "https://gitlab.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -403,8 +407,9 @@ Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceUrl": "https://gitlab.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {
@@ -550,8 +555,9 @@ Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
     "depName": "renovate",
-    "gitlab": "meno/dropzone",
-    "repository": "https://gitlab.com/meno/dropzone/",
+    "repository": "meno/dropzone",
+    "sourceUrl": "https://gitlab.com/meno/dropzone/",
+    "type": "gitlab",
   },
   "versions": Array [
     Object {

@@ -126,6 +126,7 @@ const repoGroups = {
     'https://github.com/neutrinojs/neutrino',
     'https://github.com/mozilla-neutrino/neutrino-dev',
   ],
+  nexpect: 'https://github.com/fluffynuts/NExpect',
   nextjs: [
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',

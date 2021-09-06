@@ -11,12 +11,14 @@ import type {
   PackageFile,
 } from '../../types';
 import type { GradleManagerData } from '../types';
+import { parseCatalog } from './extract/catalog';
 import { parseGradle, parseProps } from './parser';
 import type { PackageVariables, VariableRegistry } from './types';
 import {
   getVars,
   isGradleFile,
   isPropsFile,
+  isTOMLFile,
   reorderFiles,
   toAbsolutePath,
 } from './utils';
@@ -64,6 +66,13 @@ export async function extractAllPackageFiles(
         const { vars, deps } = parseProps(content, packageFile);
         updateVars(vars);
         extractedDeps.push(...deps);
+      } else if (isTOMLFile(packageFile)) {
+        try {
+          const updatesFromCatalog = parseCatalog(packageFile, content);
+          extractedDeps.push(...updatesFromCatalog);
+        } catch (error) {
+          logger.warn({ error }, 'TOML parsing error');
+        }
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
