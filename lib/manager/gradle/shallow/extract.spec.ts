@@ -1,5 +1,5 @@
 import { extractAllPackageFiles } from '..';
-import { fs } from '../../../../test/util';
+import { fs, loadFixture } from '../../../../test/util';
 
 jest.mock('../../../util/fs');
 
@@ -210,5 +210,183 @@ describe('manager/gradle/shallow/extract', () => {
         ],
       },
     ]);
+  });
+
+  it('works with dependency catalogs', async () => {
+    const tomlFile = loadFixture('1/libs.versions.toml');
+    const fsMock = {
+      'gradle/libs.versions.toml': tomlFile,
+    };
+    mockFs(fsMock);
+    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle/libs.versions.toml',
+        deps: [
+          {
+            depName: 'io.gitlab.arturbosch.detekt:detekt-formatting',
+            groupName: 'io.gitlab.arturbosch.detekt',
+            currentValue: '1.17.0',
+            managerData: {
+              fileReplacePosition: 21,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'io.kotest:kotest-assertions-core-jvm',
+            groupName: 'io.kotest',
+            currentValue: '4.6.0',
+            managerData: {
+              fileReplacePosition: 39,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'io.kotest:kotest-runner-junit5',
+            groupName: 'io.kotest',
+            currentValue: '4.6.0',
+            managerData: {
+              fileReplacePosition: 39,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'org.mockito:mockito-core',
+            groupName: 'org.mockito',
+            currentValue: '3.10.0',
+            managerData: {
+              fileReplacePosition: 460,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'io.gitlab.arturbosch.detekt',
+            depType: 'plugin',
+            currentValue: '1.17.0',
+            commitMessageTopic: 'plugin detekt',
+            lookupName:
+              'io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 21,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
+          {
+            depName: 'org.danilopianini.publish-on-central',
+            depType: 'plugin',
+            currentValue: '0.5.0',
+            commitMessageTopic: 'plugin publish-on-central',
+            lookupName:
+              'org.danilopianini.publish-on-central:org.danilopianini.publish-on-central.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 68,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("can run Javier's example", async () => {
+    const tomlFile = loadFixture('2/libs.versions.toml');
+    const fsMock = {
+      'gradle/libs.versions.toml': tomlFile,
+    };
+    mockFs(fsMock);
+    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle/libs.versions.toml',
+        deps: [
+          {
+            depName: 'com.squareup.okhttp3:okhttp',
+            groupName: 'com.squareup.okhttp3',
+            currentValue: '4.9.0',
+            managerData: {
+              fileReplacePosition: 99,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'com.squareup.okio:okio',
+            groupName: 'com.squareup.okio',
+            currentValue: '2.8.0',
+            managerData: {
+              fileReplacePosition: 161,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'com.squareup.picasso:picasso',
+            groupName: 'com.squareup.picasso',
+            currentValue: '2.5.1',
+            managerData: {
+              fileReplacePosition: 243,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'com.squareup.retrofit2:retrofit',
+            groupName: 'com.squareup.retrofit2',
+            currentValue: '2.8.2',
+            managerData: {
+              fileReplacePosition: 41,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+          },
+          {
+            depName: 'org.jetbrains.kotlin.jvm',
+            depType: 'plugin',
+            currentValue: '1.5.21',
+            commitMessageTopic: 'plugin kotlinJvm',
+            lookupName:
+              'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 415,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
+          {
+            depName: 'org.jetbrains.kotlin.plugin.serialization',
+            depType: 'plugin',
+            currentValue: '1.5.21',
+            commitMessageTopic: 'plugin kotlinSerialization',
+            lookupName:
+              'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 21,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('ignores an empty TOML', async () => {
+    const tomlFile = '';
+    const fsMock = {
+      'gradle/libs.versions.toml': tomlFile,
+    };
+    mockFs(fsMock);
+    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    expect(res).toBeNull();
   });
 });

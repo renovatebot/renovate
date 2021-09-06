@@ -3,8 +3,7 @@ import type { AllConfig } from '../config/types';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
 import type { HostRule } from '../types';
-import { setNoVerify, setPrivateKey } from '../util/git';
-import { parseGitAuthor } from '../util/git/author';
+import { setGitAuthor, setNoVerify, setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
 import platforms from './api';
 import type { Platform } from './types';
@@ -46,30 +45,16 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };
-  let gitAuthor: string;
   // istanbul ignore else
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
-    gitAuthor = config.gitAuthor;
+    returnConfig.gitAuthor = config.gitAuthor;
   } else if (platformInfo?.gitAuthor) {
     logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
-    gitAuthor = platformInfo.gitAuthor;
-  } else {
-    logger.debug(
-      'Using default gitAuthor: Renovate Bot <renovate@whitesourcesoftware.com>'
-    );
-    gitAuthor = 'Renovate Bot <renovate@whitesourcesoftware.com>';
+    returnConfig.gitAuthor = platformInfo.gitAuthor;
   }
-  const gitAuthorParsed = parseGitAuthor(gitAuthor);
-  // istanbul ignore if
-  if (!gitAuthorParsed) {
-    throw new Error('Init: gitAuthor is not parsed as valid RFC5322 format');
-  }
-  global.gitAuthor = {
-    name: gitAuthorParsed.name,
-    email: gitAuthorParsed.address,
-  };
-
+  // This is done for validation and will be overridden later once repo config is incorporated
+  setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
     hostType: returnConfig.platform,
     matchHost: URL.parse(returnConfig.endpoint).hostname,
