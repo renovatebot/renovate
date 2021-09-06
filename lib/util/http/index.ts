@@ -171,7 +171,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       resPromise = memCache.get(cacheKey);
     }
 
-    // istanbul ignore else: no chache tests
+    // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
       const queueTask = (): Promise<Response<T>> => {
