@@ -39,6 +39,7 @@ function replaceAsString(
       }
     }
   }
+  // istanbul ignore next
   throw new Error();
 }
 
