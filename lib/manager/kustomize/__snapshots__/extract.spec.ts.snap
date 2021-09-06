@@ -67,7 +67,7 @@ Array [
 ]
 `;
 
-exports[`manager/kustomize/extract extractPackageFile() should extract bases from bases block and the resources block 1`] = `
+exports[`manager/kustomize/extract extractPackageFile() should extract bases resources and components from their respective blocks 1`] = `
 Array [
   Object {
     "currentValue": "v0.0.1",
@@ -76,6 +76,11 @@ Array [
   },
   Object {
     "currentValue": "1.19.0",
+    "datasource": "github-tags",
+    "depName": "fluxcd/flux",
+  },
+  Object {
+    "currentValue": "1.18.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
   },

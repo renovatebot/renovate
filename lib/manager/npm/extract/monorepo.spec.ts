@@ -57,6 +57,7 @@ describe('manager/npm/extract/monorepo', () => {
         )
       ).toBe(true);
     });
+
     it('updates internal packages', async () => {
       const packageFiles = [
         {
@@ -110,6 +111,7 @@ describe('manager/npm/extract/monorepo', () => {
         )
       ).toBe(false);
     });
+
     it('uses yarn workspaces package settings with lerna', async () => {
       const packageFiles = [
         {
@@ -134,6 +136,7 @@ describe('manager/npm/extract/monorepo', () => {
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
     });
+
     it('uses yarn workspaces package settings without lerna', async () => {
       const packageFiles = [
         {
@@ -149,6 +152,33 @@ describe('manager/npm/extract/monorepo', () => {
         {
           packageFile: 'packages/b/package.json',
           packageJsonName: '@org/b',
+        },
+      ];
+      await detectMonorepos(packageFiles, false);
+      // FIXME: explicit assert condition
+      expect(packageFiles).toMatchSnapshot();
+    });
+
+    it('uses yarnZeroInstall and skipInstalls from yarn workspaces package settings', async () => {
+      const packageFiles = [
+        {
+          packageFile: 'package.json',
+          managerData: {
+            yarnZeroInstall: true,
+          },
+          skipInstalls: false,
+          npmrc: '@org:registry=//registry.some.org\n',
+          yarnWorkspacesPackages: 'packages/*',
+        },
+        {
+          packageFile: 'packages/a/package.json',
+          packageJsonName: '@org/a',
+          yarnLock: 'yarn.lock',
+        },
+        {
+          packageFile: 'packages/b/package.json',
+          packageJsonName: '@org/b',
+          skipInstalls: true,
         },
       ];
       await detectMonorepos(packageFiles, false);
