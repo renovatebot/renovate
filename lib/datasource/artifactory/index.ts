@@ -18,9 +18,9 @@ export class ArtifactoryDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  override readonly caching = false;
+  override readonly caching = true;
 
-  //  override readonly defaultVersioning = rubyVersioningId;
+  override readonly registryStrategy = 'merge';
 
   @cache({
     namespace: `datasource-${datasource}`,
@@ -87,7 +87,7 @@ export class ArtifactoryDatasource extends Datasource {
   private static cleanSimpleHtml(html: string): string {
     return (
       html
-        // preformatted text hides the a nodes otherwise
+        // preformatted text hides the "a" nodes otherwise
         .replace(/<\/?pre>/g, '')
     );
   }
