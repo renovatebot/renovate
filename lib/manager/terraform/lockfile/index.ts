@@ -80,7 +80,9 @@ export async function updateArtifacts({
       // update all locks in the file during maintenance --> only update version in constraints
       const maintenanceUpdates = await updateAllLocks(locks);
       updates.push(...maintenanceUpdates);
-    } else {
+    } else if (
+      ['provider', 'required_provider'].includes(updatedDeps[0].depType)
+    ) {
       // update only specific locks but with constrain updates
       const dep = updatedDeps[0];
 

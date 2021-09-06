@@ -7,9 +7,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "@renovate/no",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -59,9 +60,10 @@ Object {
     "apiBaseUrl": "https://github-enterprise.example.com/api/v3/",
     "baseUrl": "https://github-enterprise.example.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github-enterprise.example.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github-enterprise.example.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -111,9 +113,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -163,9 +166,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -215,9 +219,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
@@ -267,9 +272,10 @@ Object {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
-    "github": "chalk/chalk",
-    "repository": "https://github.com/chalk/chalk",
+    "repository": "chalk/chalk",
     "sourceDirectory": undefined,
+    "sourceUrl": "https://github.com/chalk/chalk",
+    "type": "github",
   },
   "versions": Array [
     Object {
