@@ -105,7 +105,11 @@ async function gotRoutine<T>(
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
-  constructor(private hostType: string, private options?: HttpOptions) {}
+  private options?: GotOptions;
+
+  constructor(private hostType: string, options?: HttpOptions) {
+    this.options = merge<GotOptions>(options, { context: { hostType } });
+  }
 
   protected async request<T>(
     requestUrl: string | URL,
