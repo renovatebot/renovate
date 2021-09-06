@@ -22,6 +22,15 @@ export async function prAlreadyExisted(
   if (pr) {
     logger.debug('Found closed PR with current title');
     const prDetails = await platform.getPr(pr.number);
+
+    const renovateIgnoreLabel = prDetails.labels?.indexOf('renovate-ignore');
+
+    // istanbul ignore if
+    if (prDetails.state === PrState.Closed && renovateIgnoreLabel) {
+      logger.debug('Found label: renovateIgnoreLabel');
+      return null;
+    }
+
     // istanbul ignore if
     if (prDetails.state === PrState.Open) {
       logger.debug('PR reopened - aborting run');

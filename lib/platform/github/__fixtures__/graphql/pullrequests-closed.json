@@ -31,6 +31,13 @@
                   "body": ":tada: This PR is included in version 13.63.5 :tada:\n\nThe release is available on:\n- [npm package (@latest dist-tag)](https://www.npmjs.com/package/renovate)\n- [GitHub release](https://github.com/renovatebot/renovate/releases/tag/13.63.5)\n\nYour **[semantic-release](https://github.com/semantic-release/semantic-release)** bot :package::rocket:"
                 }
               ]
+            },
+            "labels": {
+              "nodes": [
+                {
+                  "name": "renovate"
+                }
+              ]
             }
           }
         ]

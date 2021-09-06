@@ -24,6 +24,15 @@ describe('workers/branch/check-existing', () => {
       expect(await prAlreadyExisted(config)).toBeNull();
       expect(platform.findPr).toHaveBeenCalledTimes(1);
     });
+    it('returns null if closed PR found with label renovate-ignore', async () => {
+      platform.findPr.mockResolvedValueOnce({ number: 12 } as never);
+      platform.getPr.mockResolvedValueOnce({
+        number: 12,
+        state: PrState.Closed,
+        labels: ['renovate-ignore'],
+      } as never);
+      expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
+    });
     it('returns true if first check hits', async () => {
       platform.findPr.mockResolvedValueOnce({ number: 12 } as never);
       platform.getPr.mockResolvedValueOnce({

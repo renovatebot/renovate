@@ -502,6 +502,9 @@ async function getClosedPrs(): Promise<PrList> {
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = pr.state.toLowerCase();
         pr.sourceBranch = pr.headRefName;
+        if (pr.labels) {
+          pr.labels = pr.labels.nodes.map((label) => label.name);
+        }
         delete pr.headRefName;
         pr.comments = pr.comments.nodes.map((comment) => ({
           id: comment.databaseId,
@@ -688,6 +691,7 @@ export async function getPrList(): Promise<Pr[]> {
             sourceBranch: pr.head.ref,
             sha: pr.head.sha,
             title: pr.title,
+            labels: pr.labels,
             state:
               pr.state === PrState.Closed && pr.merged_at?.length
                 ? /* istanbul ignore next */ PrState.Merged

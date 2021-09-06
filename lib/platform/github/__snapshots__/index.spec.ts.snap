@@ -542,6 +542,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -564,7 +572,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -688,6 +696,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -710,7 +726,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -834,6 +850,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -856,7 +880,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -969,6 +993,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -991,7 +1023,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1096,6 +1128,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -1118,7 +1158,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1223,6 +1263,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -1245,7 +1293,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1361,6 +1409,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -1383,7 +1439,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3587,6 +3643,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -3609,7 +3673,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3920,6 +3984,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -3942,7 +4014,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4233,6 +4305,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -4255,7 +4335,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5104,6 +5184,9 @@ Your **[semantic-release](https://github.com/semantic-release/semantic-release)*
     },
   ],
   "displayNumber": "Pull Request #2499",
+  "labels": Array [
+    "renovate",
+  ],
   "number": 2499,
   "sourceBranch": "renovate/delay-4.x",
   "state": "merged",
@@ -5306,6 +5389,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -5328,7 +5419,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5723,6 +5814,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -5745,7 +5844,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5980,6 +6079,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -6002,7 +6109,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6235,6 +6342,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -6257,7 +6372,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6474,6 +6589,14 @@ Array [
                 },
               },
               "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
               "number": null,
               "state": null,
               "title": null,
@@ -6496,7 +6619,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token abc123",
-      "content-length": "674",
+      "content-length": "764",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

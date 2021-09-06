@@ -38,6 +38,11 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
         state
         headRefName
         title
+        labels(last: 100) {
+          nodes {
+            name
+          }
+        }
         comments(last: 100) {
           nodes {
             databaseId

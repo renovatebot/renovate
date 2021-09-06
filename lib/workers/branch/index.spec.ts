@@ -229,6 +229,17 @@ describe('workers/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
+    it('does not skip branch if closed PR with "renovate-ignore" label is found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      git.branchExists.mockReturnValue(true);
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce({
+        number: 13,
+        state: PrState.Closed,
+        labels: ['renovate-ignore'],
+      } as Pr);
+      await branchWorker.processBranch(config);
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+    });
     it('skips branch if merged PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
