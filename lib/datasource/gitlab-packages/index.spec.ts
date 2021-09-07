@@ -1,10 +1,9 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { datasource } from './common';
 
-describe(getName(), () => {
+describe('datasource/gitlab-packages/index', () => {
   describe('getReleases', () => {
     it('returns package from custom registry', async () => {
       const body = [

@@ -41,6 +41,11 @@ describe('util/http/host-rules', () => {
       hostType: 'gitlab-tags',
       token: 'abc',
     });
+
+    hostRules.add({
+      hostType: 'gitlab-packages',
+      token: 'abc',
+    });
   });
 
   afterEach(() => {
@@ -148,6 +153,19 @@ describe('util/http/host-rules', () => {
           "authType": undefined,
         },
         "hostType": "gitlab-tags",
+        "token": "abc",
+      }
+    `);
+  });
+
+  it('fallback to gitlab-packages', () => {
+    expect(applyHostRules(url, { ...options, hostType: 'gitlab-packages' }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "context": Object {
+          "authType": undefined,
+        },
+        "hostType": "gitlab-packages",
         "token": "abc",
       }
     `);

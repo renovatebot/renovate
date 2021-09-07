@@ -11,13 +11,13 @@ import type { GitlabPackage } from './types';
 export class GitlabPackagesDatasource extends Datasource {
   static readonly id = datasource;
 
-  protected http: GitlabHttp;
+  protected override http: GitlabHttp;
 
-  caching = true;
+  override caching = true;
 
-  customRegistrySupport = true;
+  override customRegistrySupport = true;
 
-  defaultVersioning = 'docker';
+  override defaultVersioning = 'docker';
 
   constructor() {
     super(datasource);
