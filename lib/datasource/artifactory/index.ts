@@ -67,12 +67,16 @@ export class ArtifactoryDatasource extends Datasource {
         result.releases.push(thisRelease);
       });
 
+      const logMessage: string = 'of ' + lookupName + ' under ' + url;
       if (result.releases.length) {
-        logger.debug('Found ' + String(result.releases.length) + ' releases');
-      } else {
-        logger.debug(
-          'Not found any version of ' + lookupName + ' under ' + url
+        logger.trace(
+          'artifactory: Found ' +
+            String(result.releases.length) +
+            ' ' +
+            logMessage
         );
+      } else {
+        logger.trace('artifactory: Not found any version ' + logMessage);
       }
     } catch (err) {
       // istanbul ignore else: not testable with nock
