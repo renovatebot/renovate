@@ -60,9 +60,8 @@ export class ArtifactoryDatasource extends Datasource {
           candidate.slice(-1) === '/' ? candidate.slice(0, -1) : candidate;
 
         const thisRelease: Release = {
-          version: '',
+          version: parsedCandidate,
         };
-        thisRelease.version = parsedCandidate;
         result.releases.push(thisRelease);
       });
 
