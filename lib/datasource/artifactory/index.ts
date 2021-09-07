@@ -40,7 +40,6 @@ export class ArtifactoryDatasource extends Datasource {
     const url = `${registryUrl}/${lookupName}`;
 
     const result: ReleaseResult = {
-      homepage: 'https://jfrog.com/artifactory',
       releases: [],
     };
     try {

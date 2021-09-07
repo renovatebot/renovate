@@ -2,7 +2,6 @@
 
 exports[`datasource/artifactory/index getReleases parses real data (files): without slash at the end 1`] = `
 Object {
-  "homepage": "https://jfrog.com/artifactory",
   "registryUrl": "https://jfrog.company.com/artifactory",
   "releases": Array [
     Object {
@@ -23,7 +22,6 @@ Object {
 
 exports[`datasource/artifactory/index getReleases parses real data (folders): with slash at the end 1`] = `
 Object {
-  "homepage": "https://jfrog.com/artifactory",
   "registryUrl": "https://jfrog.company.com/artifactory",
   "releases": Array [
     Object {
