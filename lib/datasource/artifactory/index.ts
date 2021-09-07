@@ -5,7 +5,7 @@ import { parse } from '../../util/html';
 import { HttpError } from '../../util/http/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl } from './common';
+import { datasource } from './common';
 
 export class ArtifactoryDatasource extends Datasource {
   static readonly id = datasource;
@@ -16,7 +16,7 @@ export class ArtifactoryDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override readonly defaultRegistryUrls = [];
 
   override readonly caching = true;
 
@@ -30,7 +30,7 @@ export class ArtifactoryDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (registryUrl === defaultRegistryUrl) {
+    if (!registryUrl) {
       logger.warn(
         'artifactory datasource requires custom registryUrl. Skipping datasource'
       );
