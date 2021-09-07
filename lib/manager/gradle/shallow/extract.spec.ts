@@ -1,5 +1,6 @@
 import { extractAllPackageFiles } from '..';
 import { fs, loadFixture } from '../../../../test/util';
+import type { ExtractConfig } from '../../types';
 
 jest.mock('../../../util/fs');
 
@@ -24,7 +25,7 @@ describe('manager/gradle/shallow/extract', () => {
       'build.gradle': '',
     });
 
-    const res = await extractAllPackageFiles({} as never, [
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
       'build.gradle',
       'gradle.properties',
     ]);
@@ -39,7 +40,7 @@ describe('manager/gradle/shallow/extract', () => {
       'settings.gradle': null,
     });
 
-    const res = await extractAllPackageFiles({} as never, [
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
       'build.gradle',
       'gradle.properties',
       'settings.gradle',
@@ -75,7 +76,7 @@ describe('manager/gradle/shallow/extract', () => {
       'settings.gradle': null,
     });
 
-    const res = await extractAllPackageFiles({} as never, [
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
       'build.gradle',
       'gradle.properties',
       'settings.gradle',
@@ -114,7 +115,7 @@ describe('manager/gradle/shallow/extract', () => {
       'settings.gradle': null,
     });
 
-    const res = await extractAllPackageFiles({} as never, [
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
       'build.gradle',
       'gradle.properties',
       'settings.gradle',
@@ -156,7 +157,10 @@ describe('manager/gradle/shallow/extract', () => {
 
     mockFs(fsMock);
 
-    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
 
     expect(res).toMatchObject([
       { packageFile: 'gradle.properties', deps: [] },
@@ -187,7 +191,10 @@ describe('manager/gradle/shallow/extract', () => {
 
     mockFs(fsMock);
 
-    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
 
     expect(res).toMatchObject([
       {
@@ -218,7 +225,10 @@ describe('manager/gradle/shallow/extract', () => {
       'gradle/libs.versions.toml': tomlFile,
     };
     mockFs(fsMock);
-    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
     expect(res).toMatchObject([
       {
         packageFile: 'gradle/libs.versions.toml',
@@ -302,7 +312,10 @@ describe('manager/gradle/shallow/extract', () => {
       'gradle/libs.versions.toml': tomlFile,
     };
     mockFs(fsMock);
-    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
     expect(res).toMatchObject([
       {
         packageFile: 'gradle/libs.versions.toml',
@@ -344,6 +357,27 @@ describe('manager/gradle/shallow/extract', () => {
             },
           },
           {
+            depName: 'google-firebase-analytics',
+            managerData: {
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            skipReason: 'no-version',
+          },
+          {
+            depName: 'google-firebase-crashlytics',
+            managerData: {
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            skipReason: 'no-version',
+          },
+          {
+            depName: 'google-firebase-messaging',
+            managerData: {
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            skipReason: 'no-version',
+          },
+          {
             depName: 'org.jetbrains.kotlin.jvm',
             depType: 'plugin',
             currentValue: '1.5.21',
@@ -351,7 +385,7 @@ describe('manager/gradle/shallow/extract', () => {
             lookupName:
               'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
             managerData: {
-              fileReplacePosition: 415,
+              fileReplacePosition: 661,
               packageFile: 'gradle/libs.versions.toml',
             },
             registryUrls: [
@@ -386,7 +420,10 @@ describe('manager/gradle/shallow/extract', () => {
       'gradle/libs.versions.toml': tomlFile,
     };
     mockFs(fsMock);
-    const res = await extractAllPackageFiles({} as never, Object.keys(fsMock));
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
     expect(res).toBeNull();
   });
 });
