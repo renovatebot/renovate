@@ -38,6 +38,7 @@ export class ArtifactoryDatasource extends Datasource {
     }
 
     const url = `${registryUrl}/${lookupName}`;
+    const contextForLogging: string = lookupName + ' under ' + url;
 
     const result: ReleaseResult = {
       releases: [],
@@ -65,21 +66,23 @@ export class ArtifactoryDatasource extends Datasource {
         result.releases.push(thisRelease);
       });
 
-      const logMessage: string = 'of ' + lookupName + ' under ' + url;
       if (result.releases.length) {
         logger.trace(
           'artifactory: Found ' +
             String(result.releases.length) +
-            ' ' +
-            logMessage
+            ' versions of ' +
+            contextForLogging
         );
       } else {
-        logger.trace('artifactory: Not found any version ' + logMessage);
+        logger.trace(
+          'artifactory: Not found any version of ' + contextForLogging
+        );
       }
     } catch (err) {
       // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode === 404) {
+          logger.warn('artifactory: Not found error for ' + contextForLogging);
           return null;
         } else if (err.response?.statusCode !== 404) {
           throw new ExternalHostError(err);

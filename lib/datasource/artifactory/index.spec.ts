@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { logger as _logger } from '../../logger';
+import { logger } from '../../logger';
 import { ArtifactoryDatasource } from '.';
 
 const datasource = ArtifactoryDatasource.id;
@@ -19,11 +19,9 @@ function getPath(folder: string): string {
 }
 
 describe('datasource/artifactory/index', () => {
-  let logger: jest.Mocked<typeof _logger>;
-
   beforeEach(async () => {
+    jest.resetAllMocks();
     jest.mock('../../logger');
-    logger = (await import('../../logger')).logger as never;
   });
 
   describe('getReleases', () => {
@@ -56,8 +54,6 @@ describe('datasource/artifactory/index', () => {
     });
 
     it('returns null without registryUrl + warning', async () => {
-      jest.resetModules();
-      jest.resetAllMocks();
       const res = await getPkgReleases({
         datasource,
         depName: testLookupName,
@@ -95,7 +91,7 @@ describe('datasource/artifactory/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it('throws for 404', async () => {
+    it('404 returns null', async () => {
       httpMock.scope(testRegistryUrl).get(getPath(testLookupName)).reply(404);
       expect(
         await getPkgReleases({
@@ -104,6 +100,10 @@ describe('datasource/artifactory/index', () => {
           lookupName: testLookupName,
         })
       ).toBeNull();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'artifactory: Not found error for project under https://jfrog.company.com/artifactory/project'
+      );
     });
   });
 });
