@@ -84,6 +84,12 @@ function extractDependency({
 }): PackageDependency<GradleManagerData> {
   if (typeof descriptor === 'string') {
     const [groupName, name, currentValue] = descriptor.split(':');
+    if (!currentValue) {
+      return {
+        depName,
+        skipReason: SkipReason.NoVersion,
+      };
+    }
     return {
       depName: `${groupName}:${name}`,
       groupName,

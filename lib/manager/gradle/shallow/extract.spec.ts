@@ -357,6 +357,20 @@ describe('manager/gradle/shallow/extract', () => {
             },
           },
           {
+            depName: 'google-firebase-analytics',
+            managerData: {
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            skipReason: 'no-version',
+          },
+          {
+            depName: 'google-firebase-crashlytics',
+            managerData: {
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            skipReason: 'no-version',
+          },
+          {
             depName: 'google-firebase-messaging',
             managerData: {
               packageFile: 'gradle/libs.versions.toml',
@@ -371,7 +385,7 @@ describe('manager/gradle/shallow/extract', () => {
             lookupName:
               'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
             managerData: {
-              fileReplacePosition: 497,
+              fileReplacePosition: 661,
               packageFile: 'gradle/libs.versions.toml',
             },
             registryUrls: [
