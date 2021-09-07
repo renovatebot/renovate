@@ -79,7 +79,7 @@ export interface GradleCatalogModuleDescriptor {
 export interface GradleCatalogArtifactDescriptor {
   name: string;
   group: string;
-  version: string | VersionPointer;
+  version?: string | VersionPointer;
 }
 
 export interface GradleCatalogPluginDescriptor {
