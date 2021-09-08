@@ -1,17 +1,54 @@
+import {
+  GITHUB_API_USING_HOST_TYPES,
+  GITLAB_API_USING_HOST_TYPES,
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platforms';
 import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
+import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
-import { GotOptions } from './types';
+import type { GotOptions } from './types';
+
+function findMatchingRules(options: GotOptions, url: string): HostRule {
+  const { hostType } = options;
+  let res = hostRules.find({ hostType, url });
+
+  // Fallback to `github` hostType
+  if (
+    GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== PLATFORM_TYPE_GITHUB
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: PLATFORM_TYPE_GITHUB,
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  // Fallback to `gitlab` hostType
+  if (
+    GITLAB_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== PLATFORM_TYPE_GITLAB
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: PLATFORM_TYPE_GITLAB,
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  return res;
+}
 
 // Apply host rules to requests
-
 export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   const options: GotOptions = { ...inOptions };
-  const foundRules =
-    hostRules.find({
-      hostType: options.hostType,
-      url,
-    }) || /* istanbul ignore next: can only happen in tests */ {};
+  const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
