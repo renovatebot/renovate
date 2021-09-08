@@ -1,5 +1,4 @@
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import { parse } from '../../util/html';
 import { HttpError } from '../../util/http/types';
@@ -82,10 +81,10 @@ export class ArtifactoryDatasource extends Datasource {
       // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode === 404) {
-          logger.warn('artifactory: Not found error for ' + contextForLogging);
+          logger.warn(
+            'artifactory: "Not Found" error for ' + contextForLogging
+          );
           return null;
-        } else if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
         }
       }
       this.handleGenericErrors(err);

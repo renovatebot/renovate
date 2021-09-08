@@ -19,7 +19,7 @@ function getPath(folder: string): string {
 }
 
 describe('datasource/artifactory/index', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.mock('../../logger');
   });
@@ -53,6 +53,25 @@ describe('datasource/artifactory/index', () => {
       expect(res).toMatchSnapshot();
     });
 
+    it('parses real data (merge strategy with 2 registries)', async () => {
+      httpMock
+        .scope(testRegistryUrl)
+        .get(getPath(testLookupName))
+        .reply(200, loadFixture('releases-as-files.html'));
+      httpMock
+        .scope(testRegistryUrl)
+        .get(getPath(testLookupName))
+        .reply(200, '<html>\n<h1>Header</h1>\n<a>1.3.0</a>\n<hmtl/>');
+      const res = await getPkgReleases({
+        registryUrls: [testRegistryUrl, testRegistryUrl],
+        depName: testLookupName,
+        datasource,
+        lookupName: testLookupName,
+      });
+      expect(res.releases).toHaveLength(5);
+      expect(res).toMatchSnapshot();
+    });
+
     it('returns null without registryUrl + warning', async () => {
       const res = await getPkgReleases({
         datasource,
@@ -80,17 +99,6 @@ describe('datasource/artifactory/index', () => {
       ).toBeNull();
     });
 
-    it('throws for error diff than 404', async () => {
-      httpMock.scope(testRegistryUrl).get(getPath(testLookupName)).reply(502);
-      await expect(
-        getPkgReleases({
-          ...testConfig,
-          datasource,
-          lookupName: testLookupName,
-        })
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    });
-
     it('404 returns null', async () => {
       httpMock.scope(testRegistryUrl).get(getPath(testLookupName)).reply(404);
       expect(
@@ -102,8 +110,33 @@ describe('datasource/artifactory/index', () => {
       ).toBeNull();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        'artifactory: Not found error for project under https://jfrog.company.com/artifactory/project'
+        'artifactory: "Not Found" error for project under https://jfrog.company.com/artifactory/project'
       );
+    });
+
+    it('throws for error diff than 404', async () => {
+      httpMock.scope(testRegistryUrl).get(getPath(testLookupName)).reply(502);
+      await expect(
+        getPkgReleases({
+          ...testConfig,
+          datasource,
+          lookupName: testLookupName,
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws no Http error', async () => {
+      httpMock
+        .scope(testRegistryUrl)
+        .get(getPath(testLookupName))
+        .replyWithError('unknown error');
+      const res = await getPkgReleases({
+        ...testConfig,
+        datasource,
+        lookupName: testLookupName,
+      });
+      expect(res).toBeNull();
+      expect(res).toMatchSnapshot();
     });
   });
 });

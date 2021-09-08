@@ -39,3 +39,32 @@ Object {
   ],
 }
 `;
+
+exports[`datasource/artifactory/index getReleases parses real data (merge strategy with 2 registries) 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "version": "1.0.0",
+    },
+    Object {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "version": "1.0.1",
+    },
+    Object {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "version": "1.0.2",
+    },
+    Object {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "version": "1.0.3",
+    },
+    Object {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "version": "1.3.0",
+    },
+  ],
+}
+`;
+
+exports[`datasource/artifactory/index getReleases throws no Http error 1`] = `null`;
