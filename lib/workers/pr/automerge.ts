@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { deleteBranch, isBranchModified } from '../../util/git';
-import { getBranchStatus } from '../branch/status-checks';
+import { resolveBranchStatus } from '../branch/status-checks';
 import { BranchConfig } from '../types';
 
 export enum PrAutomergeBlockReason {
@@ -52,7 +52,7 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: PrAutomergeBlockReason.PlatformNotReady,
     };
   }
-  const branchStatus = await getBranchStatus(
+  const branchStatus = await resolveBranchStatus(
     config.branchName,
     config.ignoreTests
   );

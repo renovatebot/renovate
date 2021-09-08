@@ -7,12 +7,12 @@ import {
   isActiveConfidenceLevel,
 } from '../../util/merge-confidence';
 
-export async function getBranchStatus(
+export async function resolveBranchStatus(
   branchName: string,
   ignoreTests = false
 ): Promise<BranchStatus> {
   logger.debug(
-    `getBranchStatus(branchName=${branchName}, ignoreTests=${ignoreTests})`
+    `resolveBranchStatus(branchName=${branchName}, ignoreTests=${ignoreTests})`
   );
 
   if (ignoreTests) {

@@ -3,7 +3,7 @@ import { BranchStatus } from '../../types';
 import {
   ConfidenceConfig,
   StabilityConfig,
-  getBranchStatus,
+  resolveBranchStatus,
   setConfidence,
   setStability,
 } from './status-checks';
@@ -90,7 +90,7 @@ describe('workers/branch/status-checks', () => {
 
   describe('getBranchStatus', () => {
     it('should return green if ignoreTests=true', async () => {
-      expect(await getBranchStatus('somebranch', true)).toBe(
+      expect(await resolveBranchStatus('somebranch', true)).toBe(
         BranchStatus.green
       );
     });

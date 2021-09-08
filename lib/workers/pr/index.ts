@@ -13,7 +13,7 @@ import { sampleSize } from '../../util';
 import { stripEmojis } from '../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import * as template from '../../util/template';
-import { getBranchStatus } from '../branch/status-checks';
+import { resolveBranchStatus } from '../branch/status-checks';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
 import type { BranchConfig, PrBlockedBy } from '../types';
 import { getPrBody } from './body';
@@ -165,7 +165,7 @@ export async function ensurePr(
     config.forcePr = true;
   }
 
-  const branchStatus = await getBranchStatus(
+  const branchStatus = await resolveBranchStatus(
     config.branchName,
     config.ignoreTests
   );
