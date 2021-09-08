@@ -51,26 +51,33 @@ export class ArtifactoryDatasource extends Datasource {
           style: true,
         },
       });
-
       const nodes = body.querySelectorAll('a');
 
-      let candidates: string[] = [];
-      nodes.forEach((node) => candidates.push(node.innerHTML));
+      nodes
+        .filter(
+          // filter out hyperlink to navigate to parent folder
+          (node) => node.innerHTML !== '../' && node.innerHTML !== '..'
+        )
+        .forEach(
+          // extract version and published time for each node
+          (node) => {
+            const version: string =
+              node.innerHTML.slice(-1) === '/'
+                ? node.innerHTML.slice(0, -1)
+                : node.innerHTML;
 
-      // filter out hyperlink to navigate to parent folder
-      candidates = candidates.filter(
-        (candidate) => candidate !== '../' && candidate !== '..'
-      );
+            const published = ArtifactoryDatasource.parseReleaseTimestamp(
+              node.nextSibling?.text
+            );
 
-      candidates.forEach((candidate) => {
-        const parsedCandidate: string =
-          candidate.slice(-1) === '/' ? candidate.slice(0, -1) : candidate;
+            const thisRelease: Release = {
+              version,
+              releaseTimestamp: published,
+            };
 
-        const thisRelease: Release = {
-          version: parsedCandidate,
-        };
-        result.releases.push(thisRelease);
-      });
+            result.releases.push(thisRelease);
+          }
+        );
 
       if (result.releases.length) {
         logger.trace(
@@ -98,5 +105,9 @@ export class ArtifactoryDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  private static parseReleaseTimestamp(rawText: string): string {
+    return rawText.trim().replace(/ ?-$/, '');
   }
 }
