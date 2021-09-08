@@ -44,7 +44,14 @@ export class ArtifactoryDatasource extends Datasource {
     };
     try {
       const response = await this.http.get(url);
-      const body = parse(ArtifactoryDatasource.cleanSimpleHtml(response.body));
+      const body = parse(response.body, {
+        blockTextElements: {
+          script: true,
+          noscript: true,
+          style: true,
+        },
+      });
+
       const nodes = body.querySelectorAll('a');
 
       let candidates: string[] = [];
@@ -91,13 +98,5 @@ export class ArtifactoryDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
-  }
-
-  private static cleanSimpleHtml(html: string): string {
-    return (
-      html
-        // preformatted text hides the "a" nodes otherwise
-        .replace(/<\/?pre>/g, '')
-    );
   }
 }
