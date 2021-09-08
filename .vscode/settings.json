@@ -14,5 +14,31 @@
   },
   "omnisharp.autoStart": false,
   "jest.autoRun": "off",
-  "jest.jestCommandLine": "yarn jest"
+  "jest.jestCommandLine": "yarn jest",
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#ffffff",
+    "activityBar.activeBorder": "#df9f9f",
+    "activityBar.background": "#ffffff",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#df9f9f",
+    "activityBarBadge.foreground": "#15202b",
+    "editorGroup.border": "#ffffff",
+    "panel.border": "#ffffff",
+    "sideBar.border": "#ffffff",
+    "statusBar.background": "#ffffff",
+    "statusBar.border": "#ffffff",
+    "statusBar.debuggingBackground": "#ffffff",
+    "statusBar.debuggingBorder": "#ffffff",
+    "statusBar.debuggingForeground": "#15202b",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#e6e6e6",
+    "tab.activeBorder": "#ffffff",
+    "titleBar.activeBackground": "#eeeeee",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.border": "#eeeeee",
+    "titleBar.inactiveBackground": "#eeeeee99",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#3a96ba"
 }
