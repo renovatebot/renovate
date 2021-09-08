@@ -15,8 +15,6 @@ export class ArtifactoryDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
-  override readonly defaultRegistryUrls = [];
-
   override readonly caching = true;
 
   override readonly registryStrategy = 'merge';
