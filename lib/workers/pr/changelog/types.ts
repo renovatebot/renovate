@@ -22,11 +22,11 @@ export interface ChangeLogRelease {
 
 export interface ChangeLogProject {
   depName?: string;
-  github?: string;
-  gitlab?: string;
+  type: 'github' | 'gitlab';
   apiBaseUrl?: string;
   baseUrl: string;
   repository: string;
+  sourceUrl: string;
   sourceDirectory?: string;
 }
 

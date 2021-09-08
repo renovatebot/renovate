@@ -30,7 +30,6 @@ describe('platform/github/index', () => {
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
-    delete global.gitAuthor;
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
@@ -129,17 +128,6 @@ describe('platform/github/index', () => {
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('should add initialized platform with predefined generic host rule for github api', async () => {
-      expect(
-        await github.initPlatform({
-          token: 'abc123',
-          username: 'renovate-bot',
-          gitAuthor: 'renovate@whitesourcesoftware.com',
-        } as any)
-      ).toMatchSnapshot();
-      expect(hostRules.add).toMatchSnapshot();
     });
   });
 
@@ -1900,10 +1888,6 @@ describe('platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.post('/graphql').reply(200, graphqlOpenPullRequests);
-      global.gitAuthor = {
-        name: 'Renovate Bot',
-        email: 'renovate@whitesourcesoftware.com',
-      };
       await github.initRepo({
         repository: 'some/repo',
       } as any);

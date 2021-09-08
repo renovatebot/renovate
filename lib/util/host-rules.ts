@@ -85,7 +85,10 @@ function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
     return false;
   }
   const { hostname } = parsedUrl;
-  return hostname === rule.matchHost || hostname.endsWith(`.${rule.matchHost}`);
+  const dotPrefixedMatchHost = rule.matchHost.startsWith('.')
+    ? rule.matchHost
+    : `.${rule.matchHost}`;
+  return hostname === rule.matchHost || hostname.endsWith(dotPrefixedMatchHost);
 }
 
 export function find(search: HostRuleSearch): HostRule {

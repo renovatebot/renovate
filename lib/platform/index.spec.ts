@@ -61,6 +61,11 @@ describe('platform/index', () => {
       gitAuthor: 'user@domain.com',
       hostRules: [
         {
+          matchHost: 'api.bitbucket.org',
+          password: '123',
+          username: 'abc',
+        },
+        {
           hostType: 'bitbucket',
           matchHost: 'api.bitbucket.org',
           password: '123',
@@ -69,32 +74,5 @@ describe('platform/index', () => {
       ],
       platform: PLATFORM_TYPE_BITBUCKET,
     });
-  });
-
-  it('returns null if empty email given', () => {
-    expect(platform.parseGitAuthor(undefined)).toBeNull();
-  });
-  it('parses bot email', () => {
-    // FIXME: explicit assert condition
-    expect(
-      platform.parseGitAuthor('some[bot]@users.noreply.github.com')
-    ).toMatchSnapshot();
-  });
-  it('parses bot name and email', () => {
-    // FIXME: explicit assert condition
-    expect(
-      platform.parseGitAuthor(
-        '"some[bot]" <some[bot]@users.noreply.github.com>'
-      )
-    ).toMatchSnapshot();
-  });
-  it('escapes names', () => {
-    // FIXME: explicit assert condition
-    expect(
-      platform.parseGitAuthor('name [what] <name@what.com>').name
-    ).toMatchSnapshot();
-  });
-  it('gives up', () => {
-    expect(platform.parseGitAuthor('a.b.c')).toBeNull();
   });
 });
