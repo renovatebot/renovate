@@ -694,7 +694,7 @@ export async function commitFiles({
           deletedFiles.push(fileName);
         } catch (err) /* istanbul ignore next */ {
           checkForPlatformFailure(err);
-          logger.warn({ err, fileName }, 'Cannot delete file');
+          logger.trace({ err, fileName }, 'Cannot delete file');
           ignoredFiles.push(fileName);
         }
       } else if (await isDirectory(join(localDir, fileName))) {

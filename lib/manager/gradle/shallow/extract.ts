@@ -67,12 +67,8 @@ export async function extractAllPackageFiles(
         updateVars(vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        try {
-          const updatesFromCatalog = parseCatalog(packageFile, content);
-          extractedDeps.push(...updatesFromCatalog);
-        } catch (error) {
-          logger.warn({ error }, 'TOML parsing error');
-        }
+        const updatesFromCatalog = parseCatalog(packageFile, content);
+        extractedDeps.push(...updatesFromCatalog);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
@@ -89,9 +85,9 @@ export async function extractAllPackageFiles(
         updateVars(gradleVars);
         extractedDeps.push(...deps);
       }
-    } catch (e) {
+    } catch (err) {
       logger.warn(
-        { config, packageFile },
+        { err, config, packageFile },
         `Failed to process Gradle file: ${packageFile}`
       );
     }
