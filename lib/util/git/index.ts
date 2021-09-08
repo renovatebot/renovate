@@ -737,21 +737,23 @@ export async function commitFiles({
           deletedFiles.push(fileName);
         } catch (err) /* istanbul ignore next */ {
           checkForPlatformFailure(err);
-          logger.warn({ err, fileName }, 'Cannot delete file');
+          logger.trace({ err, fileName }, 'Cannot delete file');
           ignoredFiles.push(fileName);
         }
-      } else if (await isDirectory(join(localDir, fileName))) {
-        logger.warn({ fileName }, 'Skipping directory commit');
-        ignoredFiles.push(fileName);
       } else {
-        let contents: Buffer;
-        // istanbul ignore else
-        if (typeof file.contents === 'string') {
-          contents = Buffer.from(file.contents);
+        if (await isDirectory(join(localDir, fileName))) {
+          // This is usually a git submodule update
+          logger.trace({ fileName }, 'Adding directory commit');
         } else {
-          contents = file.contents;
+          let contents: Buffer;
+          // istanbul ignore else
+          if (typeof file.contents === 'string') {
+            contents = Buffer.from(file.contents);
+          } else {
+            contents = file.contents;
+          }
+          await fs.outputFile(join(localDir, fileName), contents);
         }
-        await fs.outputFile(join(localDir, fileName), contents);
         try {
           await git.add(fileName);
           addedModifiedFiles.push(fileName);
