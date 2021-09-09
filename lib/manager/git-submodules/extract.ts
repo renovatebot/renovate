@@ -122,10 +122,7 @@ export default async function extractPackageFile(
         currentDigest,
       });
     } catch (err) /* istanbul ignore next */ {
-      logger.warn(
-        { err },
-        'Error mapping git submodules during extraction'
-      );
+      logger.warn({ err }, 'Error mapping git submodules during extraction');
     }
   }
 
