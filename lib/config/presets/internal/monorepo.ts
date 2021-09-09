@@ -12,6 +12,10 @@ const repoGroups = {
     'https://github.com/arcus-azure/arcus.backgroundjobs',
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
+  'algoliasearch-client-javascript':
+    'https://github.com/algolia/algoliasearch-client-javascript',
+  'algoliasearch-autocomplete':
+    'https://github.com/algolia/autocomplete',
   'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',
   'apollo-server': 'https://github.com/apollographql/apollo-server',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
