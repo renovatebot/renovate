@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { ClojureDatasource } from '.';
@@ -78,7 +78,7 @@ function get(
   return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
 }
 
-describe(getName(), () => {
+describe('datasource/clojure/index', () => {
   beforeEach(() => {
     hostRules.add({
       hostType: ClojureDatasource.id,
@@ -232,6 +232,11 @@ describe(getName(), () => {
   it('supports scm.url values prefixed with "scm:"', async () => {
     const pom = loadFixture('pom.scm-prefix.xml', upath.join('..', 'maven'));
     mockGenericPackage({ pom });
+
+    httpMock
+      .scope('https://repo.maven.apache.org')
+      .get('/maven2/org/example/package/maven-metadata.xml')
+      .reply(200, '###');
 
     const { sourceUrl } = await get();
 

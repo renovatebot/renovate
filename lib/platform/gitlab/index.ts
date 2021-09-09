@@ -4,6 +4,7 @@ import delay from 'delay';
 import pAll from 'p-all';
 import { lt } from 'semver';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -30,7 +31,9 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
+  GitUrlOption,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
@@ -59,6 +62,7 @@ let config: {
   defaultBranch: string;
   cloneSubmodules: boolean;
   ignorePrAuthor: boolean;
+  squash: boolean;
 } = {} as any;
 
 const defaults = {
@@ -70,12 +74,12 @@ const defaults = {
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
-let authorId: number;
 let draftPrefix = DRAFT_PREFIX;
 
 export async function initPlatform({
   endpoint,
   token,
+  gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -86,22 +90,32 @@ export async function initPlatform({
   } else {
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
-  let gitAuthor: string;
+  const platformConfig: PlatformResult = {
+    endpoint: defaults.endpoint,
+  };
   let gitlabVersion: string;
   try {
-    const user = (
-      await gitlabApi.getJson<{ email: string; name: string; id: number }>(
-        `user`,
-        { token }
-      )
-    ).body;
-    gitAuthor = `${user.name} <${user.email}>`;
-    authorId = user.id;
-    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
-    gitlabVersion = (
-      await gitlabApi.getJson<{ version: string }>('version', { token })
-    ).body.version.split('-')[0];
+    if (!gitAuthor) {
+      const user = (
+        await gitlabApi.getJson<{ email: string; name: string; id: number }>(
+          `user`,
+          { token }
+        )
+      ).body;
+      platformConfig.gitAuthor = `${user.name} <${user.email}>`;
+    }
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      const version = (
+        await gitlabApi.getJson<{ version: string }>('version', { token })
+      ).body;
+      gitlabVersion = version.version;
+    }
     logger.debug('GitLab version is: ' + gitlabVersion);
+    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
+    [gitlabVersion] = gitlabVersion.split('-');
     defaults.version = gitlabVersion;
   } catch (err) {
     logger.debug(
@@ -110,13 +124,10 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  draftPrefix = lt(gitlabVersion, '13.2.0')
+  draftPrefix = lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-    gitAuthor,
-  };
+
   return platformConfig;
 }
 
@@ -162,11 +173,62 @@ export async function getJsonFile(
   return JSON.parse(raw);
 }
 
+function getRepoUrl(
+  repository: string,
+  gitUrl: GitUrlOption | undefined,
+  res: HttpResponse<RepoResponse>
+): string {
+  if (gitUrl === 'ssh') {
+    if (!res.body.ssh_url_to_repo) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+    }
+    logger.debug({ url: res.body.ssh_url_to_repo }, `using ssh URL`);
+    return res.body.ssh_url_to_repo;
+  }
+
+  const opts = hostRules.find({
+    hostType: defaults.hostType,
+    url: defaults.endpoint,
+  });
+
+  if (
+    gitUrl === 'endpoint' ||
+    process.env.GITLAB_IGNORE_REPO_URL ||
+    res.body.http_url_to_repo === null
+  ) {
+    if (res.body.http_url_to_repo === null) {
+      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
+    }
+    if (process.env.GITLAB_IGNORE_REPO_URL) {
+      logger.warn(
+        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.'
+      );
+    }
+
+    const { protocol, host, pathname } = parseUrl(defaults.endpoint);
+    const newPathname = pathname.slice(0, pathname.indexOf('/api'));
+    const url = URL.format({
+      protocol: protocol.slice(0, -1) || 'https',
+      auth: 'oauth2:' + opts.token,
+      host,
+      pathname: newPathname + '/' + repository + '.git',
+    });
+    logger.debug({ url }, 'using URL based on configured endpoint');
+    return url;
+  }
+
+  logger.debug({ url: res.body.http_url_to_repo }, `using http URL`);
+  const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
+  repoUrl.auth = 'oauth2:' + opts.token;
+  return URL.format(repoUrl);
+}
+
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  gitUrl,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -212,39 +274,18 @@ export async function initRepo({
       throw new Error(TEMPORARY_ERROR);
     }
     config.mergeMethod = res.body.merge_method || 'merge';
+    if (res.body.squash_option) {
+      config.squash =
+        res.body.squash_option === 'always' ||
+        res.body.squash_option === 'default_on';
+    }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
-    const opts = hostRules.find({
-      hostType: defaults.hostType,
-      url: defaults.endpoint,
-    });
-    let url: string;
-    if (
-      process.env.GITLAB_IGNORE_REPO_URL ||
-      res.body.http_url_to_repo === null
-    ) {
-      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
-      const { protocol, host, pathname } = parseUrl(defaults.endpoint);
-      const newPathname = pathname.slice(0, pathname.indexOf('/api'));
-      url = URL.format({
-        protocol: protocol.slice(0, -1) || 'https',
-        auth: 'oauth2:' + opts.token,
-        host,
-        pathname: newPathname + '/' + repository + '.git',
-      });
-      logger.debug({ url }, 'using URL based on configured endpoint');
-    } else {
-      logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
-      const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-      repoUrl.auth = 'oauth2:' + opts.token;
-      url = URL.format(repoUrl);
-    }
+    const url = getRepoUrl(repository, gitUrl, res);
     await git.initRepo({
       ...config,
       url,
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
@@ -398,10 +439,8 @@ async function fetchPrList(): Promise<Pr[]> {
     per_page: '100',
   } as any;
   // istanbul ignore if
-  if (config.ignorePrAuthor) {
-    // https://docs.gitlab.com/ee/api/merge_requests.html#list-merge-requests
-    // default: `scope=created_by_me`
-    searchParams.scope = 'all';
+  if (!config.ignorePrAuthor) {
+    searchParams.scope = 'created_by_me';
   }
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
@@ -440,12 +479,35 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
+async function ignoreApprovals(pr: number): Promise<void> {
+  try {
+    const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
+    const { body: rules } = await gitlabApi.getJson<{ name: string }[]>(url);
+    const ruleName = 'renovateIgnoreApprovals';
+    const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
+    if (!zeroApproversRule) {
+      await gitlabApi.postJson(url, {
+        body: {
+          name: ruleName,
+          approvals_required: 0,
+        },
+      });
+    }
+  } catch (err) {
+    logger.warn({ err }, 'GitLab: Error adding approval rule');
+  }
+}
+
 async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
   if (platformOptions?.gitLabAutomerge) {
     try {
+      if (platformOptions?.gitLabIgnoreApprovals) {
+        await ignoreApprovals(pr);
+      }
+
       const desiredStatus = 'can_be_merged';
       const retryTimes = 5;
 
@@ -502,6 +564,7 @@ export async function createPr({
         title,
         description,
         labels: is.array(labels) ? labels.join(',') : null,
+        squash: config.squash,
       },
     }
   );
@@ -580,10 +643,10 @@ export async function updatePr({
   await tryPrAutomerge(iid, platformOptions);
 }
 
-export async function mergePr(iid: number): Promise<boolean> {
+export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
   try {
     await gitlabApi.putJson(
-      `projects/${config.repository}/merge_requests/${iid}/merge`,
+      `projects/${config.repository}/merge_requests/${id}/merge`,
       {
         body: {
           should_remove_source_branch: true,
@@ -730,7 +793,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
     const query = getQueryString({
       per_page: '100',
-      author_id: `${authorId}`,
+      scope: 'created_by_me',
       state: 'opened',
     });
     const res = await gitlabApi.getJson<
@@ -782,7 +845,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    return getIssue(issue.iid);
+    return await getIssue(issue.iid);
   } catch (err) /* istanbul ignore next */ {
     logger.warn('Error finding issue');
     return null;

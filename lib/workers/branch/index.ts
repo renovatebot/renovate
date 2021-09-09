@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -416,7 +416,7 @@ export async function processBranch(
     } else if (config.updatedArtifacts?.length && branchPr) {
       // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
       // istanbul ignore if
-      if (getAdminConfig().dryRun) {
+      if (getGlobalConfig().dryRun) {
         logger.info(
           `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`
         );
@@ -479,7 +479,7 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
-        if (getAdminConfig().dryRun) {
+        if (getGlobalConfig().dryRun) {
           logger.info('DRY-RUN: Would delete branch' + config.branchName);
         } else {
           await deleteBranchSilently(config.branchName);
@@ -657,7 +657,7 @@ export async function processBranch(
             config.suppressNotifications.includes('lockFileErrors')
           )
         ) {
-          if (getAdminConfig().dryRun) {
+          if (getGlobalConfig().dryRun) {
             logger.info(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );
@@ -679,7 +679,7 @@ export async function processBranch(
         // Check if state needs setting
         if (existingState !== state) {
           logger.debug(`Updating status check state to failed`);
-          if (getAdminConfig().dryRun) {
+          if (getGlobalConfig().dryRun) {
             logger.info(
               'DRY-RUN: Would set branch status in ' + config.branchName
             );

@@ -1,7 +1,7 @@
-import { RenovateConfig, getName, platform } from '../../../../test/util';
+import { RenovateConfig, platform } from '../../../../test/util';
 import { raiseDeprecationWarnings } from './deprecated';
 
-describe(getName(), () => {
+describe('workers/repository/process/deprecated', () => {
   describe('raiseDeprecationWarnings()', () => {
     it('returns if onboarding', async () => {
       const config = {};
@@ -59,6 +59,7 @@ describe(getName(), () => {
       ];
       platform.getIssueList.mockResolvedValue(mockIssue);
       await raiseDeprecationWarnings(config, packageFiles);
+      // FIXME: explicit assert condition
       expect(platform.ensureIssue.mock.calls).toMatchSnapshot();
       expect(platform.getIssueList).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);

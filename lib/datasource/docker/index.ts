@@ -3,6 +3,7 @@ import parseLinkHeader from 'parse-link-header';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
+import { hasKey } from '../../util/object';
 import { ensurePathPrefix } from '../../util/url';
 import {
   api as dockerVersioning,
@@ -12,7 +13,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import {
   defaultRegistryUrls,
   ecrRegex,
-  extractDigestFromResponse,
+  extractDigestFromResponseBody,
   getAuthHeaders,
   getLabels,
   getManifestResponse,
@@ -75,7 +76,10 @@ async function getDockerApiTags(
   }
   let page = 1;
   do {
-    const res = await http.getJson<{ tags: string[] }>(url, { headers });
+    const res = await http.getJson<{ tags: string[] }>(url, {
+      headers,
+      noAuth: true,
+    });
     tags = tags.concat(res.body.tags);
     const linkHeader = parseLinkHeader(res.headers.link as string);
     url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
@@ -100,10 +104,12 @@ async function getTags(
       return cachedResult;
     }
 
-    const isQuay = registryHost === 'https://quay.io';
+    const isQuay = /^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i.test(
+      registryHost
+    );
     let tags: string[] | null;
     if (isQuay) {
-      tags = await getTagsQuayRegistry(dockerRepository);
+      tags = await getTagsQuayRegistry(registryHost, dockerRepository);
     } else {
       tags = await getDockerApiTags(registryHost, dockerRepository);
     }
@@ -186,13 +192,27 @@ export async function getDigest(
     if (cachedResult !== undefined) {
       return cachedResult;
     }
-    const manifestResponse = await getManifestResponse(
+    let manifestResponse = await getManifestResponse(
       registryHost,
       dockerRepository,
-      newTag
+      newTag,
+      'head'
     );
     if (manifestResponse) {
-      digest = extractDigestFromResponse(manifestResponse) || null;
+      if (hasKey('docker-content-digest', manifestResponse.headers)) {
+        digest = manifestResponse.headers['docker-content-digest'] || null;
+      } else {
+        logger.debug(
+          { registryHost },
+          'Missing docker content digest header, pulling full manifest'
+        );
+        manifestResponse = await getManifestResponse(
+          registryHost,
+          dockerRepository,
+          newTag
+        );
+        digest = extractDigestFromResponseBody(manifestResponse);
+      }
       logger.debug({ digest }, 'Got docker digest');
     }
   } catch (err) /* istanbul ignore next */ {
@@ -238,6 +258,7 @@ export async function getReleases({
   }
   const releases = tags.map((version) => ({ version }));
   const ret: ReleaseResult = {
+    registryUrl: registryHost,
     releases,
   };
 

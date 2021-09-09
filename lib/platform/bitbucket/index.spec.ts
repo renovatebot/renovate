@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -34,7 +33,7 @@ lxml==3.6.0
 mccabe==0.6.1
 `;
 
-describe(getName(), () => {
+describe('platform/bitbucket/index', () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -100,6 +99,7 @@ describe(getName(), () => {
       );
     });
     it('should init', async () => {
+      httpMock.scope(baseUrl).get('/2.0/user').reply(200);
       expect(
         await bitbucket.initPlatform({
           username: 'abc',
@@ -611,6 +611,10 @@ describe(getName(), () => {
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/undefined/pullrequests/3/comments?pagelen=100')
+        .reply(500);
       expect(
         await bitbucket.ensureComment({
           number: 3,
@@ -623,6 +627,10 @@ describe(getName(), () => {
 
   describe('ensureCommentRemoval()', () => {
     it('does not throw', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/undefined/pullrequests/3/comments?pagelen=100')
+        .reply(500);
       expect(
         await bitbucket.ensureCommentRemoval({ number: 3, topic: 'topic' })
       ).toMatchSnapshot();
@@ -718,7 +726,6 @@ describe(getName(), () => {
 
     it('canRebase', async () => {
       expect.assertions(4);
-      const author = global.gitAuthor;
       const scope = await initRepoMock();
       scope
         .get('/2.0/repositories/some/repo/pullrequests/3')
@@ -739,22 +746,13 @@ describe(getName(), () => {
         .get('/2.0/repositories/some/repo/pullrequests/5/diff')
         .twice()
         .reply(200, diff);
-      try {
-        expect(await bitbucket.getPr(3)).toMatchSnapshot();
+      expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-        global.gitAuthor = {
-          email: 'renovate@whitesourcesoftware.com',
-          name: 'bot',
-        };
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-        global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      } finally {
-        global.gitAuthor = author;
-      }
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -812,10 +810,66 @@ describe(getName(), () => {
   });
 
   describe('mergePr()', () => {
-    it('posts Merge', async () => {
+    it('posts Merge with optional merge strategy', async () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
-      await bitbucket.mergePr(5, 'branch');
+      await bitbucket.mergePr({
+        branchName: 'branch',
+        id: 5,
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('posts Merge with auto', async () => {
+      const scope = await initRepoMock();
+      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
+      await bitbucket.mergePr({
+        branchName: 'branch',
+        id: 5,
+        strategy: 'auto',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('posts Merge with merge-commit', async () => {
+      const scope = await initRepoMock();
+      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
+      await bitbucket.mergePr({
+        branchName: 'branch',
+        id: 5,
+        strategy: 'merge-commit',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('posts Merge with squash', async () => {
+      const scope = await initRepoMock();
+      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
+      await bitbucket.mergePr({
+        branchName: 'branch',
+        id: 5,
+        strategy: 'squash',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('does not post Merge with rebase', async () => {
+      await bitbucket.mergePr({
+        branchName: 'branch',
+        id: 5,
+        strategy: 'rebase',
+      });
+      expect(httpMock.getTrace()).toEqual([]);
+    });
+
+    it('posts Merge with fast-forward', async () => {
+      const scope = await initRepoMock();
+      scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
+      await bitbucket.mergePr({
+        branchName: 'branch',
+        id: 5,
+        strategy: 'fast-forward',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

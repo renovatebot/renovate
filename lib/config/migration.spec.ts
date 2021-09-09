@@ -1,7 +1,6 @@
-import { getName } from '../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
-import { setAdminConfig } from './admin';
 import { getConfig } from './defaults';
+import { setGlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
   MigratedConfig,
@@ -12,10 +11,10 @@ import type {
 const defaultConfig = getConfig();
 
 interface TestRenovateConfig extends RenovateConfig {
-  node?: RenovateSharedConfig & { supportPolicy?: unknown };
+  node?: RenovateSharedConfig;
 }
 
-describe(getName(), () => {
+describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
       const config: TestRenovateConfig = {
@@ -273,7 +272,14 @@ describe(getName(), () => {
         parentConfig
       );
       expect(isMigrated).toBe(true);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            matchPackagePatterns: '^(@angular|typescript)',
+            groupName: 'angular packages',
+          },
+        ],
+      });
     });
     it('overrides existing automerge setting', () => {
       const config: TestRenovateConfig = {
@@ -349,7 +355,6 @@ describe(getName(), () => {
       const config: TestRenovateConfig = {
         node: {
           enabled: true,
-          supportPolicy: ['lts'],
           automerge: 'none' as never,
         },
       };
@@ -365,9 +370,6 @@ describe(getName(), () => {
       expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
         true
       );
-      expect(
-        (migratedConfig.node as TestRenovateConfig).supportPolicy
-      ).toBeDefined();
     });
     it('migrates packageFiles', () => {
       const config: TestRenovateConfig = {
@@ -444,7 +446,13 @@ describe(getName(), () => {
         config,
         defaultConfig
       );
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig).toEqual({
+        baseBranches: [],
+        commitMessage: 'test',
+        ignorePaths: [],
+        includePaths: ['test'],
+        rebaseWhen: 'auto',
+      });
       expect(isMigrated).toBe(true);
     });
     it('it migrates semanticCommits', () => {
@@ -625,7 +633,24 @@ describe(getName(), () => {
         defaultConfig
       );
       expect(isMigrated).toBe(true);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            excludePackageNames: ['baz'],
+            excludePackagePatterns: ['^baz'],
+            matchBaseBranches: ['master'],
+            matchDatasources: ['orb'],
+            matchDepTypes: ['peerDependencies'],
+            matchLanguages: ['python'],
+            matchManagers: ['dockerfile'],
+            matchPackageNames: ['foo'],
+            matchPackagePatterns: ['^bar'],
+            matchPaths: ['package.json'],
+            matchSourceUrlPrefixes: ['https://github.com/vuejs/vue'],
+            matchUpdateTypes: ['major'],
+          },
+        ],
+      });
     });
   });
   it('it migrates nested packageRules', () => {
@@ -662,18 +687,9 @@ describe(getName(), () => {
   it('it migrates hostRules fields', () => {
     const config: RenovateConfig = {
       hostRules: [
-        {
-          baseUrl: 'https://some.domain.com',
-          token: 'abc123',
-        },
-        {
-          domainName: 'domain.com',
-          token: 'abc123',
-        },
-        {
-          hostName: 'some.domain.com',
-          token: 'abc123',
-        },
+        { baseUrl: 'https://some.domain.com', token: 'abc123' },
+        { domainName: 'domain.com', token: 'abc123' },
+        { hostName: 'some.domain.com', token: 'abc123' },
       ],
     } as any;
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -681,10 +697,16 @@ describe(getName(), () => {
       defaultConfig
     );
     expect(isMigrated).toBe(true);
-    expect(migratedConfig).toMatchSnapshot();
+    expect(migratedConfig).toEqual({
+      hostRules: [
+        { matchHost: 'https://some.domain.com', token: 'abc123' },
+        { matchHost: 'domain.com', token: 'abc123' },
+        { matchHost: 'some.domain.com', token: 'abc123' },
+      ],
+    });
   });
   it('it migrates presets', () => {
-    setAdminConfig({
+    setGlobalConfig({
       migratePresets: {
         '@org': 'local>org/renovate-config',
         '@org2/foo': '',
@@ -693,6 +715,56 @@ describe(getName(), () => {
     const config: RenovateConfig = {
       extends: ['@org', '@org2/foo'],
     } as any;
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
+  });
+
+  it('it migrates composerIgnorePlatformReqs values', () => {
+    let config: TestRenovateConfig;
+    let res: MigratedConfig;
+
+    config = {
+      composerIgnorePlatformReqs: true,
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBe(true);
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
+
+    config = {
+      composerIgnorePlatformReqs: false,
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBe(true);
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toBeNull();
+
+    config = {
+      composerIgnorePlatformReqs: [],
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBe(false);
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
+  });
+
+  it('it migrates gradle-lite', () => {
+    const config: RenovateConfig = {
+      gradle: {
+        enabled: false,
+      },
+      'gradle-lite': {
+        enabled: true,
+        fileMatch: ['foo'],
+      },
+      packageRules: [
+        {
+          matchManagers: ['gradle-lite'],
+          separateMinorPatch: true,
+        },
+      ],
+    };
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(
       config,
       defaultConfig

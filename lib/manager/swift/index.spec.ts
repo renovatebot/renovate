@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const pkgContent = loadFixture(`SamplePackage.swift`);
 
-describe(getName(), () => {
+describe('manager/swift/index', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty content', () => {
       expect(extractPackageFile(null)).toBeNull();
@@ -97,31 +97,37 @@ describe(getName(), () => {
       ).not.toBeNull();
     });
     it('parses package descriptions', () => {
+      // FIXME: explicit assert condition
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]`
         )
       ).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"...)]`
         )
       ).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..."1.2.4")]`
         )
       ).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..<"1.2.4")]`
         )
       ).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..."1.2.3")]`
         )
       ).toMatchSnapshot();
+      // FIXME: explicit assert condition
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..<"1.2.3")]`
@@ -129,6 +135,7 @@ describe(getName(), () => {
       ).toMatchSnapshot();
     });
     it('parses multiple packages', () => {
+      // FIXME: explicit assert condition
       expect(extractPackageFile(pkgContent)).toMatchSnapshot();
     });
   });

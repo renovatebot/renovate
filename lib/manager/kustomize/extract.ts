@@ -1,8 +1,10 @@
+import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Image, Kustomize } from './types';
@@ -38,8 +40,15 @@ export function extractBase(base: string): PackageDependency | null {
 export function extractImage(image: Image): PackageDependency | null {
   if (image?.name && image.newTag) {
     const replaceString = image.newTag;
-    let currentValue;
-    let currentDigest;
+    let currentValue: string | undefined;
+    let currentDigest: string | undefined;
+    if (!is.string(replaceString)) {
+      return {
+        depName: image.newName ?? image.name,
+        currentValue: replaceString,
+        skipReason: SkipReason.InvalidValue,
+      };
+    }
     if (replaceString.startsWith('sha256:')) {
       currentDigest = replaceString;
       currentValue = undefined;
@@ -75,7 +84,10 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  pkg.bases = (pkg.bases || []).concat(pkg.resources || []);
+  pkg.bases = (pkg.bases || []).concat(
+    pkg.resources || [],
+    pkg.components || []
+  );
   pkg.images = pkg.images || [];
 
   return pkg;

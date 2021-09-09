@@ -122,6 +122,12 @@ function handleGotError(
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
+  if (
+    err.statusCode === 410 &&
+    err.body?.message === 'Issues are disabled for this repo'
+  ) {
+    throw err;
+  }
   if (err.statusCode === 404) {
     logger.debug({ url: path }, 'GitHub 404');
   } else {
@@ -152,11 +158,14 @@ function constructAcceptString(input?: any): string {
 }
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
-  constructor(options?: GithubHttpOptions) {
-    super(PLATFORM_TYPE_GITHUB, options);
+  constructor(
+    hostType: string = PLATFORM_TYPE_GITHUB,
+    options?: GithubHttpOptions
+  ) {
+    super(hostType, options);
   }
 
-  protected async request<T>(
+  protected override async request<T>(
     url: string | URL,
     options?: GithubInternalOptions & GithubHttpOptions,
     okToRetry = true

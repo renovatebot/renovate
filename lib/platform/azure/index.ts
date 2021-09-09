@@ -24,6 +24,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -179,8 +180,6 @@ export async function initRepo({
     ...config,
     url,
     extraCloneOpts: getStorageExtraCloneOpts(opts),
-    gitAuthorName: global.gitAuthor?.name,
-    gitAuthorEmail: global.gitAuthor?.email,
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
@@ -608,10 +607,10 @@ export async function setBranchStatus({
   logger.trace(`Created commit status of ${state} on branch ${branchName}`);
 }
 
-export async function mergePr(
-  pullRequestId: number,
-  branchName: string
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: pullRequestId,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
   const azureApiGit = await azureApi.gitApi();
 

@@ -2,12 +2,12 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { getName } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
+import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
 import { GitNoVerifyOption, setNoVerify } from '.';
 
-describe(getName(), () => {
+describe('util/git/index', () => {
   jest.setTimeout(15000);
 
   const masterCommitDate = new Date();
@@ -71,13 +71,12 @@ describe(getName(), () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setAdminConfig({ localDir: tmpDir.path });
+    setGlobalConfig({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
-      gitAuthorName: 'Jest',
-      gitAuthorEmail: 'Jest@example.com',
     });
     await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    git.setGitAuthor('Jest <Jest@example.com>');
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
@@ -105,6 +104,7 @@ describe(getName(), () => {
   });
   describe('getFileList()', () => {
     it('should return the correct files', async () => {
+      // FIXME: explicit assert condition
       expect(await git.getFileList()).toMatchSnapshot();
     });
     it('should exclude submodules', async () => {
@@ -117,6 +117,7 @@ describe(getName(), () => {
       });
       await git.syncGit();
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      // FIXME: explicit assert condition
       expect(await git.getFileList()).toMatchSnapshot();
       await repo.reset(['--hard', 'HEAD^']);
     });
@@ -202,6 +203,7 @@ describe(getName(), () => {
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes'
       );
+      // FIXME: explicit assert condition
       expect(branchFiles).toMatchSnapshot();
     });
   });
@@ -414,6 +416,7 @@ describe(getName(), () => {
 
   describe('getCommitMessages()', () => {
     it('returns commit messages', async () => {
+      // FIXME: explicit assert condition
       expect(await git.getCommitMessages()).toMatchSnapshot();
     });
   });
@@ -461,6 +464,7 @@ describe(getName(), () => {
 
       expect(git.branchExists('test')).toBeFalsy();
 
+      // FIXME: explicit assert condition
       expect(await git.getCommitMessages()).toMatchSnapshot();
 
       await git.checkoutBranch('develop');
@@ -542,6 +546,11 @@ describe(getName(), () => {
       const repo = Git(tmpDir.path);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
+    });
+  });
+  describe('setGitAuthor()', () => {
+    it('throws for invalid', () => {
+      expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
     });
   });
 });

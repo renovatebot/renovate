@@ -1,8 +1,7 @@
-import { getName } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import { processHostRules } from './rules';
 
-describe(getName(), () => {
+describe('manager/npm/post-update/rules', () => {
   describe('processHostRules()', () => {
     beforeEach(() => {
       hostRules.clear();
@@ -26,6 +25,7 @@ describe(getName(), () => {
         password: 'pass123',
       });
       const res = processHostRules();
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns mixed rules content', () => {
@@ -47,6 +47,7 @@ describe(getName(), () => {
         password: 'pass123',
       });
       const res = processHostRules();
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

@@ -66,7 +66,6 @@ export function extractPackageFile(content: string): PackageFile {
   try {
     const deps = findDependencies(parsedContent, []);
     if (deps.length) {
-      logger.debug({ deps }, 'Found dependencies in helm-values');
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {

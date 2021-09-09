@@ -8,6 +8,10 @@ env:
   PYTHON_VERSION: 3.9
   SKIP_JAVA_TESTS: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,7 +25,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7 # renovate: tag=v2.3.0
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954 # renovate: tag=v2.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -50,7 +54,7 @@ jobs:
         run: yarn jest --maxWorkers=2 --ci
 
       - name: Codecov
-        uses: codecov/codecov-action@51d810878be5422784e86451c0e7c14e5860ec47 # renovate: tag=v2.0.2
+        uses: codecov/codecov-action@5a8bb4701eca7ba3673f21664b887f652c58d0a3 # renovate: tag=v2.0.3
         if: always()
 
       # build after tests to exclude files
@@ -72,7 +76,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7 # renovate: tag=v2.3.0
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954 # renovate: tag=v2.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -93,7 +97,7 @@ jobs:
       - name: Lint
         run: |
           yarn ls-lint
-          yarn eslint
+          yarn eslint -f gha
           yarn prettier
           yarn markdown-lint
 

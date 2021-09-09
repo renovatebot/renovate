@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
 import {
@@ -8,7 +7,7 @@ import {
   satisfiesConfidenceLevel,
 } from '.';
 
-describe(getName(), () => {
+describe('util/merge-confidence/index', () => {
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {
       expect(isActiveConfidenceLevel(null)).toBe(false);
@@ -162,6 +161,14 @@ describe(getName(), () => {
           'minor'
         )
       ).toBe('neutral');
+
+      // FIXME: no cache hit
+      httpMock
+        .scope('https://badges.renovateapi.com')
+        .get(
+          `/packages/${datasource}/${depName}-new/${newVersion}/confidence.api/${currentVersion}`
+        )
+        .reply(403);
       // memory cache
       expect(
         await getMergeConfidenceLevel(

@@ -3,6 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
+  plugins: ['@renovate'],
   extends: [
     'airbnb-typescript/base',
     'plugin:import/errors',
@@ -51,6 +52,9 @@ module.exports = {
         memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
       },
     ],
+
+    // mdast is a types only package `@types/mdast`
+    'import/no-unresolved': ['error', { ignore: ['^mdast$'] }],
     'import/order': [
       'error',
       {
@@ -102,6 +106,7 @@ module.exports = {
 
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
+    '@renovate/jest-root-describe': 2,
   },
   settings: {
     'import/parsers': {
@@ -131,12 +136,38 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.mjs'],
+      files: ['**/*.{js,mjs}'],
 
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/explicit-module-boundary-types': 0,
         '@typescript-eslint/restrict-template-expressions': 0,
+      },
+    },
+    {
+      files: ['tools/**/*.{ts,js,mjs}'],
+      env: {
+        node: true,
+      },
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          { devDependencies: true },
+        ],
+      },
+    },
+    {
+      files: ['tools/**/*.js'],
+      rules: {
+        // need commonjs
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+    {
+      files: ['*.mjs'],
+      rules: {
+        // esm always requires extensions
+        'import/extensions': 0,
       },
     },
   ],

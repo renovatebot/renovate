@@ -1,21 +1,18 @@
-import { getName, git, mocked, partial } from '../../../test/util';
-import { getConfig } from '../../config/defaults';
+import { getConfig, git, mocked, partial, platform } from '../../../test/util';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import { Pr, platform as _platform } from '../../platform';
+import type { Pr } from '../../platform/types';
 import { BranchStatus } from '../../types';
 import * as _limits from '../global/limits';
 import type { BranchConfig } from '../types';
 import * as prAutomerge from './automerge';
 import * as _changelogHelper from './changelog';
-import { getChangeLogJSON } from './changelog';
+import type { ChangeLogResult } from './changelog';
 import * as codeOwners from './code-owners';
 import * as prWorker from '.';
 
 const codeOwnersMock = mocked(codeOwners);
 const changelogHelper = mocked(_changelogHelper);
 const gitlabChangelogHelper = mocked(_changelogHelper);
-const platform = mocked(_platform);
-const defaultConfig = getConfig();
 const limits = mocked(_limits);
 
 jest.mock('../../util/git');
@@ -24,12 +21,12 @@ jest.mock('./code-owners');
 jest.mock('../global/limits');
 
 function setupChangelogMock() {
-  changelogHelper.getChangeLogJSON = jest.fn();
   const resultValue = {
     project: {
+      type: 'github',
       baseUrl: 'https://github.com/',
-      github: 'renovateapp/dummy',
-      repository: 'https://github.com/renovateapp/dummy',
+      repository: 'renovateapp/dummy',
+      sourceUrl: 'https://github.com/renovateapp/dummy',
     },
     hasReleaseNotes: true,
     versions: [
@@ -51,7 +48,7 @@ function setupChangelogMock() {
         },
       },
     ],
-  };
+  } as ChangeLogResult;
   const errorValue = {
     error: _changelogHelper.ChangeLogError.MissingGithubToken,
   };
@@ -61,12 +58,12 @@ function setupChangelogMock() {
 }
 
 function setupGitlabChangelogMock() {
-  gitlabChangelogHelper.getChangeLogJSON = jest.fn();
   const resultValue = {
     project: {
+      type: 'gitlab',
       baseUrl: 'https://gitlab.com/',
-      gitlab: 'renovateapp/gitlabdummy',
-      repository: 'https://gitlab.com/renovateapp/gitlabdummy',
+      repository: 'renovateapp/gitlabdummy',
+      sourceUrl: 'https://gitlab.com/renovateapp/gitlabdummy',
     },
     hasReleaseNotes: true,
     versions: [
@@ -88,7 +85,7 @@ function setupGitlabChangelogMock() {
         },
       },
     ],
-  };
+  } as ChangeLogResult;
   const errorValue = {
     error: _changelogHelper.ChangeLogError.MissingGithubToken,
   };
@@ -97,13 +94,13 @@ function setupGitlabChangelogMock() {
   gitlabChangelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
 }
 
-describe(getName(), () => {
+describe('workers/pr/index', () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;
     beforeEach(() => {
       config = partial<BranchConfig>({
-        ...defaultConfig,
+        ...getConfig(),
       });
       pr = partial<Pr>({
         canMerge: true,
@@ -180,7 +177,7 @@ describe(getName(), () => {
       jest.resetAllMocks();
       setupChangelogMock();
       config = partial<BranchConfig>({
-        ...defaultConfig,
+        ...getConfig(),
       });
       config.branchName = 'renovate/dummy-1.x';
       config.prTitle = 'Update dependency dummy to v1.1.0';
@@ -199,9 +196,7 @@ describe(getName(), () => {
         displayNumber: 'New Pull Request',
       } as never);
       config.upgrades = [config];
-      platform.massageMarkdown = jest.fn((input) => input);
-      platform.getBranchPr = jest.fn();
-      platform.getBranchStatus = jest.fn();
+      platform.massageMarkdown.mockImplementation((input) => input);
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -242,6 +237,7 @@ describe(getName(), () => {
       config.schedule = ['before 5am'];
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      // FIXME: explicit assert condition
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
       config.branchName = 'renovate/dummy-1.x';
@@ -251,18 +247,19 @@ describe(getName(), () => {
     });
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      config.logJSON = await getChangeLogJSON(config);
+      config.logJSON = await changelogHelper.getChangeLogJSON(config);
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = ['before 5am'];
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      // FIXME: explicit assert condition
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
     it('should not create PR if limit is reached', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      config.logJSON = await getChangeLogJSON(config);
+      config.logJSON = await changelogHelper.getChangeLogJSON(config);
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = ['before 5am'];
@@ -273,7 +270,7 @@ describe(getName(), () => {
     });
     it('should create PR if limit is reached but dashboard checked', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      config.logJSON = await getChangeLogJSON(config);
+      config.logJSON = await changelogHelper.getChangeLogJSON(config);
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = ['before 5am'];
@@ -313,10 +310,11 @@ describe(getName(), () => {
       config.recreateClosed = true;
       config.rebaseWhen = 'never';
       for (const upgrade of config.upgrades) {
-        upgrade.logJSON = await getChangeLogJSON(upgrade);
+        upgrade.logJSON = await changelogHelper.getChangeLogJSON(upgrade);
       }
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      // FIXME: explicit assert condition
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
     });
     it('should add note about Pin', async () => {
@@ -327,9 +325,10 @@ describe(getName(), () => {
       config.schedule = ['before 5am'];
       config.timezone = 'some timezone';
       config.rebaseWhen = 'behind-base-branch';
-      config.logJSON = await getChangeLogJSON(config);
+      config.logJSON = await changelogHelper.getChangeLogJSON(config);
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      // FIXME: explicit assert condition
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       expect(platform.createPr.mock.calls[0][0].prBody).toContain(
         'this Pin PR'
@@ -337,7 +336,6 @@ describe(getName(), () => {
     });
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      platform.createPr = jest.fn();
       platform.createPr.mockImplementationOnce(() => {
         throw new Error('Validation Failed (422)');
       });
@@ -401,6 +399,7 @@ describe(getName(), () => {
       config.assignees = ['@foo', 'bar'];
       config.reviewers = ['foo', '@bar', 'foo@bar.com'];
       config.filterUnavailableUsers = true;
+      // optional function is undefined by jest
       platform.filterUnavailableUsers = jest.fn();
       platform.filterUnavailableUsers.mockResolvedValue(['foo']);
       await prWorker.ensurePr(config);
@@ -519,7 +518,7 @@ describe(getName(), () => {
       config.semanticCommitScope = null;
       config.automerge = true;
       config.schedule = ['before 5am'];
-      config.logJSON = await getChangeLogJSON(config);
+      config.logJSON = await changelogHelper.getChangeLogJSON(config);
       const { pr } = await prWorker.ensurePr(config);
       expect(platform.updatePr.mock.calls).toMatchSnapshot();
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -533,7 +532,7 @@ describe(getName(), () => {
       config.semanticCommitScope = null;
       config.automerge = true;
       config.schedule = ['before 5am'];
-      config.logJSON = await getChangeLogJSON(config);
+      config.logJSON = await changelogHelper.getChangeLogJSON(config);
       const { pr } = await prWorker.ensurePr(config);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(pr).toMatchObject(modifiedPr);
@@ -542,9 +541,10 @@ describe(getName(), () => {
       config.newValue = '1.2.0';
       config.automerge = true;
       config.schedule = ['before 5am'];
-      config.logJSON = await getChangeLogJSON(config);
+      config.logJSON = await changelogHelper.getChangeLogJSON(config);
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       const { pr } = await prWorker.ensurePr(config);
+      // FIXME: explicit assert condition
       expect(pr).toMatchSnapshot();
     });
     it('should return modified existing PR title', async () => {
@@ -554,6 +554,7 @@ describe(getName(), () => {
         title: 'wrong',
       });
       const { pr } = await prWorker.ensurePr(config);
+      // FIXME: explicit assert condition
       expect(pr).toMatchSnapshot();
     });
     it('should create PR if branch tests failed', async () => {
@@ -608,9 +609,8 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'status-success';
       config.privateRepo = false;
-      config.logJSON = await getChangeLogJSON(config);
-      config.logJSON.project.gitlab = 'someproject';
-      delete config.logJSON.project.github;
+      config.logJSON = await changelogHelper.getChangeLogJSON(config);
+      config.logJSON.project.repository = 'someproject';
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
@@ -628,11 +628,13 @@ describe(getName(), () => {
 
     it('should trigger GitLab automerge when configured', async () => {
       config.gitLabAutomerge = true;
+      config.gitLabIgnoreApprovals = true;
       config.automerge = true;
       await prWorker.ensurePr(config);
       const args = platform.createPr.mock.calls[0];
       expect(args[0].platformOptions).toMatchObject({
         gitLabAutomerge: true,
+        gitLabIgnoreApprovals: true,
       });
     });
 

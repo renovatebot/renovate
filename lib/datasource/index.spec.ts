@@ -1,4 +1,5 @@
-import { getName, logger, mocked } from '../../test/util';
+import * as httpMock from '../../test/http-mock';
+import { logger, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -25,7 +26,7 @@ const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe(getName(), () => {
+describe('datasource/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -116,9 +117,10 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'react-native',
     });
-    expect(res).toMatchSnapshot();
-    expect(res.changelogUrl).toBeDefined();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res).toMatchSnapshot({
+      changelogUrl:
+        'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
+    });
   });
   it('applies extractVersion', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -145,10 +147,16 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'node',
     });
-    expect(res).toMatchSnapshot();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res).toMatchSnapshot({
+      sourceUrl: 'https://github.com/nodejs/node',
+    });
   });
   it('ignores and warns for registryUrls', async () => {
+    httpMock
+      .scope('https://galaxy.ansible.com')
+      .get('/api/v1/roles/')
+      .query({ owner__username: 'some', name: 'dep' })
+      .reply(200, {});
     await datasource.getPkgReleases({
       datasource: GalaxyDatasource.id,
       depName: 'some.dep',
@@ -163,7 +171,7 @@ describe(getName(), () => {
       depName: 'something',
       registryUrls: ['https://docker.com', 'https://docker.io'],
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toBeNull();
   });
   it('hunts registries and returns success', async () => {
     packagistDatasource.getReleases.mockResolvedValueOnce(null);
@@ -228,8 +236,18 @@ describe(getName(), () => {
       depName: 'something',
       registryUrls: ['https://reg1.com', 'https://reg2.io'],
     });
-    expect(res).toMatchSnapshot();
-    expect(res.releases).toHaveLength(2);
+    expect(res).toEqual({
+      releases: [
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.0.0',
+        },
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.1.0',
+        },
+      ],
+    });
   });
   it('merges registries and aborts on ExternalHostError', async () => {
     mavenDatasource.getReleases.mockImplementationOnce(() => {

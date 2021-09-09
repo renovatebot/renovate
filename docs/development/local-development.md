@@ -10,7 +10,7 @@ For example, if you think anything is unclear, or you think something needs to b
 
 You need the following dependencies for local development:
 
-- Git
+- Git `>=2.22.0`
 - Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
@@ -147,6 +147,8 @@ We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again.
 You usually don't need to fix any Prettier errors by hand.
 
+If you're only working on the documentation files, you can use the `yarn doc-fix` command to format your work.
+
 ## Keeping your Renovate fork up to date
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
@@ -189,7 +191,7 @@ The example command will delete any existing `debug.log` and then save Renovate'
 We want stay backwards-compatible as much as possible, as well as make the code configurable.
 So most new functionality should be controllable via configuration options.
 
-Create your new configuration option in the `lib/config/definitions.ts` file.
+Create your new configuration option in the `lib/config/options/index.ts` file.
 Also create documentation for the option in the `website/docs/configuration-options.md` file.
 
 ## Debugging

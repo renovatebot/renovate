@@ -1,6 +1,10 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture, loadJsonFixture } from '../../../test/util';
+import {
+  loadBinaryFixture,
+  loadFixture,
+  loadJsonFixture,
+} from '../../../test/util';
 import * as rubyVersioning from '../../versioning/ruby';
 import { resetCache } from './get-rubygems-org';
 import * as rubygems from '.';
@@ -8,8 +12,10 @@ import * as rubygems from '.';
 const rubygemsOrgVersions = loadFixture('rubygems-org.txt');
 const railsInfo = loadJsonFixture('rails/info.json');
 const railsVersions = loadJsonFixture('rails/versions.json');
+const railsDependencies = loadBinaryFixture('dependencies-rails.dat');
+const emptyMarshalArray = Buffer.from([4, 8, 91, 0]);
 
-describe(getName(), () => {
+describe('datasource/rubygems/index', () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 
@@ -149,6 +155,7 @@ describe(getName(), () => {
       expect(await getPkgReleases(params)).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('falls back to info when version request fails', async () => {
       httpMock
         .scope('https://thirdparty.com/')
@@ -167,7 +174,45 @@ describe(getName(), () => {
         .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
         .reply(500, {});
+      httpMock
+        .scope('https://firstparty.com/basepath')
+        .get('/api/v1/gems/rails.json')
+        .reply(500);
       expect(await getPkgReleases(params)).toBeNull();
+    });
+
+    it('falls back to dependencies api', async () => {
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(404, railsInfo)
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(200, railsDependencies);
+
+      const res = await getPkgReleases(params);
+      expect(res?.releases).toHaveLength(339);
+    });
+
+    it('returns null for GitHub Packages package miss', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['https://rubygems.pkg.github.com/example'];
+      httpMock
+        .scope('https://rubygems.pkg.github.com/example')
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(200, emptyMarshalArray);
+      expect(await getPkgReleases(newparams)).toBeNull();
+    });
+
+    it('returns a dep for GitHub Packages package hit', async () => {
+      const newparams = { ...params };
+      newparams.registryUrls = ['https://rubygems.pkg.github.com/example'];
+      httpMock
+        .scope('https://rubygems.pkg.github.com/example')
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(200, railsDependencies);
+      const res = await getPkgReleases(newparams);
+      expect(res.releases).toHaveLength(339);
+      expect(res).toMatchSnapshot();
     });
   });
 });

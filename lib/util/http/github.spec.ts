@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -7,6 +6,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import { id as GITHUB_RELEASES_ID } from '../../datasource/github-releases';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 
@@ -38,7 +38,7 @@ query(
 }
 `;
 
-describe(getName(), () => {
+describe('util/http/github', () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
     githubApi = new GithubHttp();
@@ -62,7 +62,23 @@ describe(getName(), () => {
       expect(req.headers.accept).toBe(
         'some-accept, application/vnd.github.machine-man-preview+json'
       );
+      expect(req.headers.authorization).toBe('token abc123');
     });
+
+    it('supports different datasources', async () => {
+      const githubApiDatasource = new GithubHttp(GITHUB_RELEASES_ID);
+      hostRules.add({ hostType: 'github', token: 'abc' });
+      hostRules.add({
+        hostType: GITHUB_RELEASES_ID,
+        token: 'def',
+      });
+      httpMock.scope(githubApiHost).get('/some-url').reply(200);
+      await githubApiDatasource.get('/some-url');
+      const [req] = httpMock.getTrace();
+      expect(req).toBeDefined();
+      expect(req.headers.authorization).toBe('token def');
+    });
+
     it('paginates', async () => {
       const url = '/some-url';
       httpMock
@@ -149,6 +165,7 @@ describe(getName(), () => {
           );
         await githubApi.getJson(url);
       }
+
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
         httpMock.scope(githubApiHost).get(url).replyWithError(error);
@@ -158,6 +175,13 @@ describe(getName(), () => {
       it('should throw Not found', async () => {
         await expect(fail(404)).rejects.toThrow(
           'Response code 404 (Not Found)'
+        );
+      });
+      it('should throw 410', async () => {
+        await expect(
+          fail(410, { message: 'Issues are disabled for this repo' })
+        ).rejects.toThrow(
+          'Response code 410 (Issues are disabled for this repo)'
         );
       });
       it('should throw rate limit exceeded', async () => {

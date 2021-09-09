@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { getAdminConfig, setAdminConfig } from '../../config/admin';
+import { getGlobalConfig, setGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
@@ -30,14 +30,14 @@ export async function renovateRepository(
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = setAdminConfig(repoConfig);
+  let config = setGlobalConfig(repoConfig);
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
   let repoResult: ProcessResult;
   queue.clear();
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   try {
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);

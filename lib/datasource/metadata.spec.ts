@@ -1,16 +1,16 @@
-import { getName } from '../../test/util';
 import * as datasourceMaven from './maven';
 import { addMetaData } from './metadata';
 import * as datasourceNpm from './npm';
-import * as datasourcePypi from './pypi';
+import { PypiDatasource } from './pypi';
+import type { ReleaseResult } from './types';
 
-describe(getName(), () => {
+describe('datasource/metadata', () => {
   it('Should do nothing if dep is not specified', () => {
     expect(addMetaData()).toBeUndefined();
   });
 
   it('Should handle manualChangelogUrls', () => {
-    const dep = {
+    const dep: ReleaseResult = {
       releases: [
         { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
         {
@@ -22,15 +22,18 @@ describe(getName(), () => {
       ],
     };
 
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'django';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep).toMatchSnapshot();
+    expect(dep).toMatchSnapshot({
+      changelogUrl:
+        'https://github.com/django/django/tree/master/docs/releases',
+    });
   });
 
   it('Should handle manualSourceUrls', () => {
-    const dep = {
+    const dep: ReleaseResult = {
       releases: [
         { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
         {
@@ -42,15 +45,17 @@ describe(getName(), () => {
       ],
     };
 
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'mkdocs';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep).toMatchSnapshot();
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://github.com/mkdocs/mkdocs',
+    });
   });
 
   it('Should handle parsing of sourceUrls correctly', () => {
-    const dep = {
+    const dep: ReleaseResult = {
       sourceUrl: 'https://github.com/carltongibson/django-filter/tree/master',
       releases: [
         { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
@@ -62,15 +67,17 @@ describe(getName(), () => {
         { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
       ],
     };
-    const datasource = datasourcePypi.id;
+    const datasource = PypiDatasource.id;
     const lookupName = 'django-filter';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep).toMatchSnapshot();
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://github.com/carltongibson/django-filter',
+    });
   });
 
   it('Should handle parsing of sourceUrls correctly for GitLab also', () => {
-    const dep = {
+    const dep: ReleaseResult = {
       sourceUrl: 'https://gitlab.com/meno/dropzone/tree/master',
       releases: [
         { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
@@ -84,7 +91,9 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep).toMatchSnapshot();
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://gitlab.com/meno/dropzone',
+    });
   });
   it('Should handle failed parsing of sourceUrls for GitLab', () => {
     const dep = {
@@ -101,7 +110,9 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep).toMatchSnapshot();
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://gitlab-nope',
+    });
   });
   it('Should handle failed parsing of sourceUrls for other', () => {
     const dep = {
@@ -118,7 +129,9 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep).toMatchSnapshot();
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://nope-nope-nope',
+    });
   });
   it('Should handle non-url', () => {
     const dep = {
@@ -135,6 +148,7 @@ describe(getName(), () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
+    expect(dep).not.toContainKey('sourceUrl');
     expect(dep).toMatchSnapshot();
   });
 

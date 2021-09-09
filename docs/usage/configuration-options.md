@@ -173,6 +173,25 @@ Example use:
 }
 ```
 
+## automergeStrategy
+
+This setting is only applicable if you opt-in by configuring `automerge` to `true` and `automergeType` to `pr` for any of your dependencies.
+
+The automerge strategy defaults to `auto`, in which Renovate will make its best guess as to how to merge pull requests.
+This generally results in Renovate respecting the strategy configured in the platform itself for the repository if possible.
+Acceptable values are:
+
+- `auto`, in which the choice is left to Renovate
+- `fast-forward`, which generally involves no new commits in the resultant tree, but "fast-forwarding" the main branch reference
+- `merge-commit`, which generally involves synthesizing a new merge commit
+- `rebase`, which generally involves rewriting history as part of the merge — but usually retaining the individual commits
+- `squash`, which generally involves flattening the commits that are being merged into a single new commit
+
+Not all platforms support all pull request merge strategies.
+In cases where a merge strategy is not supported by the platform, Renovate will hold off on merging instead of silently merging in a way you didn't wish for.
+
+The only platform that supports `automergeStrategy` is Bitbucket Cloud.
+
 ## automergeType
 
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
@@ -263,7 +282,7 @@ Or if you wish to avoid forward slashes in branch names then you could use `reno
 e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `additionalBranchPrefix`, like `"additionalBranchPrefix": "{{parentDir}}-"`.
 
 Note that this setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
-If you wish to change that too, you need to also configure the field `onboardingBranch` in your admin bot config.
+If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
 
 ## branchTopic
 
@@ -286,6 +305,10 @@ Make sure that version is a pinned version of course, as otherwise it won't be v
 For `sbt` note that Renovate will update the version string only for packages that have the version string in their project's `built.sbt` file.
 
 ## cloneSubmodules
+
+Enabling this option will mean that any detected Git submodules will be cloned at time of repository clone.
+
+Important: private submodules aren't supported by Renovate, unless the underlying `ssh` layer already has the appropriate permissions.
 
 ## commitBody
 
@@ -334,6 +357,22 @@ Usually left empty except for internal use (multiple base branches, and vulnerab
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
 
+## composerIgnorePlatformReqs
+
+By default, Renovate will run Composer with `--ignore-platform-reqs` as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
+However, this also means that all platform constraints (including PHP version) will be ignored by default, which can result in updated dependencies that are not compatible with your platform.
+
+To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
+Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
+Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
+The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
+
+If an empty array is configured, Renovate uses its default behaviour.
+
+Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-platform-req` during Composer invocation.
+This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
+The Composer output should inform you about the reasons the update failed.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
@@ -371,7 +410,23 @@ If you need to _override_ constraints that Renovate detects from the repository,
 
 Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
+## deepExtract
+
+If configured to `true`, then dependency extraction will be done using the relevant package manager instead of JavaScript-based parsing.
+
+This option applies only to the `gradle` manager.
+
 ## dependencyDashboard
+
+Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:base` preset.
+
+To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
+
+```json
+{
+  "extends": ["config:base", ":disableDependencyDashboard"]
+}
+```
 
 Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
 This issue contains a list of all PRs pending, open, closed (unmerged) or in error.
@@ -394,7 +449,7 @@ This feature allows you to use Renovate's Dependency Dashboard to force approval
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
 You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
 
-Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explictly.
+Note: When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explicitly.
 
 You can configure Renovate to wait for approval for:
 
@@ -548,7 +603,7 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used to encrypt npm tokens.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
 
 ## excludeCommitPaths
 
@@ -664,6 +719,14 @@ If configured, Renovate bypasses its normal major/minor/patch upgrade logic and 
 Beware that Renovate follows tags strictly.
 For example, if you are following a tag like `next` and then that stream is released as `stable` and `next` is no longer being updated then that means your dependencies also won't be getting updated.
 
+## gitAuthor
+
+You can customize the Git author that's used whenever Renovate creates a commit.
+The `gitAuthor` option accepts a RFC5322-compliant string.
+
+**Note** We strongly recommend that the Git author email you use is unique to Renovate.
+Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
+
 ## gitIgnoredAuthors
 
 Specify commit authors ignored by Renovate.
@@ -686,9 +749,20 @@ If you enabled `automerge` in the Renovate config, you can speed up the automerg
 Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
+## gitLabIgnoreApprovals
+
+Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
+This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`.
+Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
+
 ## golang
 
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
+
+For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://golang.org/ref/mod#module-proxy)).
+
+But when you use the `direct` or `off` keywords Renovate will fallback to its own fetching strategy (i.e. directly from GitHub, etc).
 
 ## group
 
@@ -880,6 +954,22 @@ An example for npm basic auth with token:
 
 This will generate the following header: `authorization: Basic <some-token>`.
 
+To use a bare token in the authorization header (required by e.g. Hex) - use the `authType` "Token-Only":
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://hex.pm/api/repos/private_repo/",
+      "token": "<some-token>",
+      "authType": "Token-Only"
+    }
+  ]
+}
+```
+
+This will generate the header `authorization: <some-token>`.
+
 ### concurrentRequestLimit
 
 Usually the default setting is fine, but you can use `concurrentRequestLimit` to limit the number of concurrent outstanding requests.
@@ -934,6 +1024,7 @@ Example:
 This can be a base URL (e.g. `https://api.github.com`) or a hostname like `github.com` or `api.github.com`.
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
+When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
 
 ### timeout
 
@@ -1113,12 +1204,12 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 ## npmToken
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
 Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See [Private npm module support](https://docs.renovatebot.com/private-modules) for details on how this is used.
+See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
 
 ## packageRules
 
@@ -1559,7 +1650,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
-Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (an admin-only configuration option) in order to be executed.
+Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
 
 e.g.
@@ -2246,12 +2337,6 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 <!-- markdownlint-enable MD001 -->
 
-## supportPolicy
-
-Language support is limited to those listed below:
-
-- **Node.js** - [Read our Node.js documentation](https://docs.renovatebot.com/node#configuring-support-policy)
-
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
@@ -2298,6 +2383,11 @@ However there are cases where updates might be desirable - e.g. if you have conf
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
 
+## updatePinnedDependencies
+
+By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
+You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
 ## versioning
 
 Usually, each language or package manager has a specific type of "versioning":
@@ -2342,5 +2432,3 @@ To disable the vulnerability alerts functionality completely, configure like thi
   }
 }
 ```
-
-## yarnrc

@@ -1,4 +1,4 @@
-import { fs, getConfig, getName, mocked } from '../../../../test/util';
+import { fs, getConfig, mocked } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import * as _html from '../../../manager/html';
 import * as _fileMatch from './file-match';
@@ -11,7 +11,7 @@ jest.mock('../../../util/fs');
 const fileMatch = mocked(_fileMatch);
 const html = mocked(_html);
 
-describe(getName(), () => {
+describe('workers/repository/extract/manager-files', () => {
   describe('getManagerPackageFiles()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -47,6 +47,7 @@ describe(getName(), () => {
         deps: [{}, { replaceString: 'abc' }],
       })) as never;
       const res = await getManagerPackageFiles(managerConfig);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns files with extractAllPackageFiles', async () => {
@@ -60,6 +61,7 @@ describe(getName(), () => {
         '{"dependencies":{"chalk":"2.0.0"}}'
       );
       const res = await getManagerPackageFiles(managerConfig);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

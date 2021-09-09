@@ -1,7 +1,6 @@
-import { getName } from '../../test/util';
 import { linkify } from './markdown';
 
-describe(getName(), () => {
+describe('util/markdown', () => {
   describe('.linkify', () => {
     const md = `Some references:
 
@@ -15,6 +14,7 @@ describe(getName(), () => {
 *   Mention: @wooorm
 `;
     it('works', async () => {
+      // FIXME: explicit assert condition
       expect(await linkify(md, { repository: 'some/repo' })).toMatchSnapshot();
     });
   });

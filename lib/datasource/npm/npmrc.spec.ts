@@ -1,5 +1,5 @@
-import { getName, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { mocked } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
 import * as _sanitize from '../../util/sanitize';
 import { getNpmrc, setNpmrc } from './npmrc';
 
@@ -7,10 +7,10 @@ jest.mock('../../util/sanitize');
 
 const sanitize = mocked(_sanitize);
 
-describe(getName(), () => {
+describe('datasource/npm/npmrc', () => {
   beforeEach(() => {
     setNpmrc('');
-    setAdminConfig();
+    setGlobalConfig();
     jest.resetAllMocks();
   });
 
@@ -38,7 +38,7 @@ describe(getName(), () => {
   });
 
   it('sanitize _authtoken with high trust', () => {
-    setAdminConfig({ exposeAllEnv: true });
+    setGlobalConfig({ exposeAllEnv: true });
     process.env.TEST_TOKEN = 'test';
     setNpmrc(
       // eslint-disable-next-line no-template-curly-in-string

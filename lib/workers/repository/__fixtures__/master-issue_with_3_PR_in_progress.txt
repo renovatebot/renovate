@@ -1,4 +1,4 @@
-This issue contains a list of Renovate updates and their statuses.
+This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
 
 ## Open
 
@@ -7,5 +7,5 @@ These updates have all been created already. Click a checkbox below to force a r
  - [ ] <!-- rebase-branch=branchName1 -->[pr1](../pull/1)
  - [ ] <!-- rebase-branch=branchName2 -->[pr2](../pull/2) (`dep2`, `dep3`)
  - [ ] <!-- rebase-branch=branchName3 -->[pr3](../pull/3)
- - [ ] <!-- rebase-all-open-prs -->**Check this option to rebase all the above open PRs at once**
+ - [ ] <!-- rebase-all-open-prs -->**Click on this checkbox to rebase all open PRs at once**
 

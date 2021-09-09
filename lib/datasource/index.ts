@@ -7,6 +7,7 @@ import * as memCache from '../util/cache/memory';
 import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
+import { trimTrailingSlash } from '../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -200,7 +201,7 @@ function resolveRegistryUrls(
   } else {
     registryUrls = [...defaultRegistryUrls];
   }
-  return registryUrls.filter(Boolean);
+  return registryUrls.filter(Boolean).map(trimTrailingSlash);
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
@@ -365,10 +366,13 @@ export function getDigest(
   const datasource = getDatasourceFor(config.datasource);
   const lookupName = config.lookupName || config.depName;
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  return datasource.getDigest(
-    { lookupName, registryUrl: registryUrls[0] },
-    value
-  );
+  const digestConfig: DigestConfig = {
+    registryUrl: registryUrls[0],
+    currentValue: config.currentValue,
+    currentDigest: config.currentDigest,
+    lookupName,
+  };
+  return datasource.getDigest(digestConfig, value);
 }
 
 export function getDefaultConfig(

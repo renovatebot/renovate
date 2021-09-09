@@ -1,9 +1,8 @@
 import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { ManagerConfig, RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { logger } from '../../../logger';
-import { getPackageUpdates } from '../../../manager';
 import type { PackageDependency, PackageFile } from '../../../manager/types';
 import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
@@ -12,7 +11,7 @@ import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
 async function fetchDepUpdates(
-  packageFileConfig: ManagerConfig & PackageFile,
+  packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
   let dep = clone(indep);
@@ -38,11 +37,6 @@ async function fetchDepUpdates(
         ...dep,
         ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
       };
-    } else {
-      dep = {
-        ...dep,
-        ...(await getPackageUpdates(packageFileConfig.manager, depConfig)),
-      };
     }
     dep.updates = dep.updates || [];
   }
@@ -51,7 +45,7 @@ async function fetchDepUpdates(
 
 async function fetchManagerPackagerFileUpdates(
   config: RenovateConfig,
-  managerConfig: ManagerConfig,
+  managerConfig: RenovateConfig,
   pFile: PackageFile
 ): Promise<void> {
   const { packageFile } = pFile;

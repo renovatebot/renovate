@@ -31,6 +31,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -213,8 +214,6 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url: gitUrl,
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
       cloneSubmodules,
     });
 
@@ -962,10 +961,10 @@ export async function updatePr({
 }
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp261
-export async function mergePr(
-  prNo: number,
-  branchName: string
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: prNo,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // Used for "automerge" feature
   try {

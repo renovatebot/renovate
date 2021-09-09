@@ -523,6 +523,10 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Renovate Dependency Dashboard creation',
     dependencyDashboard: true,
   },
+  disableDependencyDashboard: {
+    description: 'Disable Renovate Dependency Dashboard creation',
+    dependencyDashboard: false,
+  },
   dependencyDashboardApproval: {
     description: 'Enable Renovate Dependency Dashboard approval workflow',
     dependencyDashboardApproval: true,
@@ -567,20 +571,5 @@ export const presets: Record<string, Preset> = {
     description: 'Remove the checkbox controls from PRs',
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
-  },
-  enableGradleLite: {
-    description: 'Enable the gradle-lite manager',
-    'gradle-lite': {
-      enabled: true,
-    },
-  },
-  switchToGradleLite: {
-    description: 'Enable the gradle-lite manager and disable gradle',
-    gradle: {
-      enabled: false,
-    },
-    'gradle-lite': {
-      enabled: true,
-    },
   },
 };

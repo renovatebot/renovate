@@ -1,6 +1,6 @@
 import nuget from '.';
 
-describe('nuget.', () => {
+describe('versioning/nuget/index', () => {
   describe('isVersion and isValid', () => {
     [
       '9.0.3',
@@ -14,6 +14,7 @@ describe('nuget.', () => {
       '5.1.2-+',
     ].forEach((version) => {
       it(version, () => {
+        // FIXME: explicit assert condition
         expect(nuget.isVersion(version)).toMatchSnapshot();
         expect(nuget.isValid(version)).toMatchSnapshot();
       });
@@ -29,6 +30,7 @@ describe('nuget.', () => {
       '2.3.4-beta+1990ef74',
     ].forEach((version) => {
       it(version, () => {
+        // FIXME: explicit assert condition
         expect(nuget.isStable(version)).toMatchSnapshot();
       });
     });

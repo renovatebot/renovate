@@ -1,4 +1,4 @@
-import { getOptions } from '../config/definitions';
+import { getOptions } from '../config/options';
 import { loadModules } from '../util/modules';
 import { isVersioningApiConstructor } from './common';
 import { GenericVersion, GenericVersioningApi } from './loose/generic';
@@ -10,8 +10,9 @@ const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning'
 ).allowedValues;
 
-describe('allVersioning.get(versioning)', () => {
+describe('versioning/index', () => {
   it('has api', () => {
+    // FIXME: explicit assert condition
     expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
   });
   it('validates', () => {
@@ -32,6 +33,8 @@ describe('allVersioning.get(versioning)', () => {
     const vers = allVersioning.getVersionings();
 
     const loadedVers = loadModules(__dirname);
+    // TODO: revert rez in #10930
+    delete loadedVers.rez;
     expect(Array.from(vers.keys())).toEqual(Object.keys(loadedVers));
 
     for (const name of vers.keys()) {
@@ -112,7 +115,7 @@ describe('allVersioning.get(versioning)', () => {
     it('dummy', () => {
       class DummyScheme extends GenericVersioningApi {
         // eslint-disable-next-line class-methods-use-this
-        protected _compare(_version: string, _other: string): number {
+        protected override _compare(_version: string, _other: string): number {
           throw new Error('Method not implemented.');
         }
 

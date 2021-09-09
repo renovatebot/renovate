@@ -1,4 +1,4 @@
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -67,7 +67,7 @@ export async function addAssigneesReviewers(
       }
       if (assignees.length > 0) {
         // istanbul ignore if
-        if (getAdminConfig().dryRun) {
+        if (getGlobalConfig().dryRun) {
           logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
         } else {
           await platform.addAssignees(pr.number, assignees);
@@ -96,7 +96,7 @@ export async function addAssigneesReviewers(
       }
       if (reviewers.length > 0) {
         // istanbul ignore if
-        if (getAdminConfig().dryRun) {
+        if (getGlobalConfig().dryRun) {
           logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
         } else {
           await platform.addReviewers(pr.number, reviewers);
@@ -124,6 +124,7 @@ export function getPlatformPrOptions(
       config.automerge &&
       config.automergeType === 'pr' &&
       config.gitLabAutomerge,
+    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
   };
 }
 
@@ -277,9 +278,7 @@ export async function ensurePr(
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
         if (logJSON.project) {
-          upgrade.repoName = logJSON.project.github
-            ? logJSON.project.github
-            : logJSON.project.gitlab;
+          upgrade.repoName = logJSON.project.repository;
         }
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
@@ -302,7 +301,7 @@ export async function ensurePr(
           [
             '\n',
             ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
-            'If you are using the hosted GitLab app, please follow [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes). If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/self-hosting.md#githubcom-token-for-release-notes) instead.',
+            'If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
             '\n',
           ].join('\n'),
         ];
@@ -382,7 +381,7 @@ export async function ensurePr(
         );
       }
       // istanbul ignore if
-      if (getAdminConfig().dryRun) {
+      if (getGlobalConfig().dryRun) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
         await platform.updatePr({
@@ -405,7 +404,7 @@ export async function ensurePr(
     let pr: Pr;
     try {
       // istanbul ignore if
-      if (getAdminConfig().dryRun) {
+      if (getGlobalConfig().dryRun) {
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
@@ -448,7 +447,7 @@ export async function ensurePr(
           { branch: branchName },
           'Deleting branch due to server error'
         );
-        if (getAdminConfig().dryRun) {
+        if (getGlobalConfig().dryRun) {
           logger.info('DRY-RUN: Would delete branch: ' + config.branchName);
         } else {
           await deleteBranch(branchName);
@@ -469,7 +468,7 @@ export async function ensurePr(
       content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
-      if (getAdminConfig().dryRun) {
+      if (getGlobalConfig().dryRun) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
         await platform.ensureComment({

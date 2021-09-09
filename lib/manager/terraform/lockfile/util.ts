@@ -8,8 +8,6 @@ import type {
   ProviderSlice,
 } from './types';
 
-export const repositoryRegex = /^hashicorp\/(?<lookupName>\S+)$/;
-
 const providerStartLineRegex =
   /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/;
 const versionLineRegex =
@@ -20,8 +18,11 @@ const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/;
 
 const lockFile = '.terraform.lock.hcl';
 
-export function readLockFile(packageFilePath: string): Promise<string> {
-  const lockFilePath = getSiblingFileName(packageFilePath, lockFile);
+export function findLockFile(packageFilePath: string): string {
+  return getSiblingFileName(packageFilePath, lockFile);
+}
+
+export function readLockFile(lockFilePath: string): Promise<string> {
   return readLocalFile(lockFilePath, 'utf8');
 }
 
@@ -104,7 +105,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] {
 
     const lock: ProviderLock = {
       lookupName,
-      registryUrl,
+      registryUrl: `https://${registryUrl}`,
       version,
       constraints,
       hashes,
@@ -126,6 +127,7 @@ export function isPinnedVersion(value: string): boolean {
 
 export function writeLockUpdates(
   updates: ProviderLockUpdate[],
+  lockFilePath: string,
   oldLockFileContent: string
 ): UpdateArtifactsResult {
   const lines = oldLockFileContent.split('\n');
@@ -202,7 +204,7 @@ export function writeLockUpdates(
 
   return {
     file: {
-      name: lockFile,
+      name: lockFilePath,
       contents: newContent,
     },
   };

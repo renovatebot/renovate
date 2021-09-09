@@ -1,9 +1,11 @@
-import { getName } from '../../test/util';
-import { PLATFORM_TYPE_AZURE } from '../constants/platforms';
+import {
+  PLATFORM_TYPE_AZURE,
+  PLATFORM_TYPE_GITHUB,
+} from '../constants/platforms';
 import * as datasourceNuget from '../datasource/nuget';
 import { add, clear, find, findAll, hosts } from './host-rules';
 
-describe(getName(), () => {
+describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
   });
@@ -41,6 +43,7 @@ describe(getName(), () => {
         username: 'user1',
         password: 'pass1',
       } as any);
+      // FIXME: explicit assert condition
       expect(find({ url: 'https://some.endpoint/v3/' })).toMatchSnapshot();
     });
   });
@@ -59,6 +62,7 @@ describe(getName(), () => {
         password: 'p4$$w0rd',
         token: undefined,
       } as any);
+      // FIXME: explicit assert condition
       expect(find({ hostType: datasourceNuget.id })).toMatchSnapshot();
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://nuget.org' })
@@ -83,6 +87,7 @@ describe(getName(), () => {
         hostType: datasourceNuget.id,
         token: 'abc',
       });
+      // FIXME: explicit assert condition
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
@@ -104,11 +109,78 @@ describe(getName(), () => {
           .token
       ).toBeUndefined();
     });
+
+    it('matches on specific path', () => {
+      // Initialized platform holst rule
+      add({
+        hostType: PLATFORM_TYPE_GITHUB,
+        matchHost: 'https://api.github.com',
+        token: 'abc',
+      });
+      // Initialized generic host rule for github platform
+      add({
+        hostType: PLATFORM_TYPE_GITHUB,
+        matchHost: 'https://api.github.com',
+        token: 'abc',
+      });
+      // specific host rule for using other token in different org
+      add({
+        hostType: PLATFORM_TYPE_GITHUB,
+        matchHost: 'https://api.github.com/repos/org-b/',
+        token: 'def',
+      });
+      expect(
+        find({
+          hostType: PLATFORM_TYPE_GITHUB,
+          url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
+        }).token
+      ).toEqual('def');
+    });
+
+    it('matches for several hostTypes when no hostType rule is configured', () => {
+      add({
+        matchHost: 'https://api.github.com',
+        token: 'abc',
+      });
+      expect(
+        find({
+          hostType: PLATFORM_TYPE_GITHUB,
+          url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
+        }).token
+      ).toEqual('abc');
+      expect(
+        find({
+          hostType: 'github-releases',
+          url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
+        }).token
+      ).toEqual('abc');
+    });
+
+    it('matches if hostType is configured and host rule is filtered with datasource', () => {
+      add({
+        hostType: PLATFORM_TYPE_GITHUB,
+        matchHost: 'https://api.github.com',
+        token: 'abc',
+      });
+      add({
+        hostType: 'github-tags',
+        matchHost: 'https://api.github.com/repos/org-b/',
+        token: 'def',
+      });
+      expect(
+        find({
+          hostType: 'github-tags',
+          url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
+        }).token
+      ).toEqual('def');
+    });
+
     it('matches on hostName', () => {
       add({
         hostName: 'nuget.local',
         token: 'abc',
       } as any);
+      // FIXME: explicit assert condition
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
@@ -136,6 +208,15 @@ describe(getName(), () => {
       expect(find({ url: 'https://domain.com' }).token).toEqual('def');
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
+    it('matches on matchHost with dot prefix', () => {
+      add({
+        matchHost: '.domain.com',
+        token: 'def',
+      });
+      expect(find({ url: 'https://api.domain.com' }).token).toEqual('def');
+      expect(find({ url: 'https://domain.com' }).token).toBeUndefined();
+      expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
+    });
     it('matches on hostType and endpoint', () => {
       add({
         hostType: datasourceNuget.id,
@@ -153,6 +234,7 @@ describe(getName(), () => {
         matchHost: 'https://nuget.local/api',
         token: 'abc',
       } as any);
+      // FIXME: explicit assert condition
       expect(
         find({
           hostType: datasourceNuget.id,

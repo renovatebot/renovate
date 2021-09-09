@@ -1,5 +1,5 @@
 import hasha from 'hasha';
-import { getName, git, mocked } from '../../../../test/util';
+import { git, mocked } from '../../../../test/util';
 import type { PackageFile } from '../../../manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
@@ -21,7 +21,7 @@ branchify.branchifyUpgrades.mockResolvedValueOnce({
   branchList: ['branchName'],
 });
 
-describe(getName(), () => {
+describe('workers/repository/process/extract-update', () => {
   describe('extract()', () => {
     it('runs with no baseBranches', async () => {
       const config = {
@@ -32,6 +32,7 @@ describe(getName(), () => {
       git.checkoutBranch.mockResolvedValueOnce('abc123');
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       await expect(update(config, res.branches)).resolves.not.toThrow();
     });
@@ -44,6 +45,7 @@ describe(getName(), () => {
       git.checkoutBranch.mockResolvedValueOnce('abc123');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
+      // FIXME: explicit assert condition
       expect(packageFiles).toMatchSnapshot();
     });
     it('uses repository cache', async () => {

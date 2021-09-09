@@ -32,7 +32,7 @@ In general try to make a good-faith effort to label things correctly.
 
 ### Closing issues
 
-You can close a issue yourself if it's:
+You can close an issue yourself if it's:
 
 - Spam
 - Obviously fixed
@@ -45,7 +45,7 @@ It's not very often that you'll need to close a PR, but you can certainly do it 
 
 ### Reopen issues
 
-Sometimes a bug is fixed with a PR that links to a issue.
+Sometimes a bug is fixed with a PR that links to an issue.
 When the PR is merged, the issue is automatically closed.
 Sometimes the bug was not really fixed, and someone says: "Hey this is still broken for me."
 In that case, re-open the issue only if it's definitely the same problem (users often associate different problems together incorrectly).
@@ -53,7 +53,7 @@ Otherwise, ask the user to open a new issue if it seems like it is different.
 
 ### Assign issues
 
-You can assign a issue to yourself, so that others know you're going to work on the issue.
+You can assign an issue to yourself, so that others know you're going to work on the issue.
 GitHub allows issues to be assigned to any project collaborator or to any non-collaborator who has created or commented on the issue, so you can also assign in either of those cases if it makes sense.
 
 ### Mark duplicate issues and pull requests
@@ -77,8 +77,8 @@ In those cases you can lock the discussion to prevent further escalation.
 
 ### Individually convert issues to discussions
 
-Sometimes a issue that's raised at the Renovate repository is not really a bug or a feature request.
-This happens most often because a user files a bug for things that are really a misstake in the Renovate configuration.
+Sometimes an issue that's raised at the Renovate repository is not really a bug or a feature request.
+This happens most often because a user files a bug for things that are really a mistake in the Renovate configuration.
 Those "configuration help" issues are then moved to the discussions board for further help.
 
 ### Moving issues from `status:requirements` to `status:ready`

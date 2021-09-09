@@ -12,7 +12,6 @@ import type {
   ComposerManagerData,
   Repo,
 } from './types';
-import { extractContraints } from './utils';
 
 /**
  * The regUrl is expected to be a base URL. GitLab composer repository installation guide specifies
@@ -115,8 +114,6 @@ export async function extractPackageFile(
   if (registryUrls.length !== 0) {
     res.registryUrls = registryUrls;
   }
-
-  res.constraints = extractContraints(composerJson, lockParsed);
 
   const deps = [];
   const depTypes = ['require', 'require-dev'];

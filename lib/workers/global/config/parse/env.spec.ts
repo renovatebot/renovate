@@ -1,4 +1,3 @@
-import { getName } from '../../../../../test/util';
 import type { RenovateOptions } from '../../../../config/types';
 import {
   PLATFORM_TYPE_BITBUCKET,
@@ -6,7 +5,7 @@ import {
 } from '../../../../constants/platforms';
 import * as env from './env';
 
-describe(getName(), () => {
+describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
       expect(env.getConfig({})).toEqual({ hostRules: [] });
@@ -46,12 +45,14 @@ describe(getName(), () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_TOKEN: 'github.com token',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitHub custom endpoint', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitHub custom endpoint and github.com', () => {
@@ -60,6 +61,7 @@ describe(getName(), () => {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitHub custom endpoint and gitlab.com', () => {
@@ -67,6 +69,7 @@ describe(getName(), () => {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitLab token', () => {
@@ -74,6 +77,7 @@ describe(getName(), () => {
         RENOVATE_PLATFORM: PLATFORM_TYPE_GITLAB,
         RENOVATE_TOKEN: 'a gitlab.com token',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitLab custom endpoint', () => {
@@ -82,6 +86,7 @@ describe(getName(), () => {
         RENOVATE_TOKEN: 'a gitlab token',
         RENOVATE_ENDPOINT: 'a gitlab endpoint',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports Azure DevOps', () => {
@@ -90,6 +95,7 @@ describe(getName(), () => {
         RENOVATE_TOKEN: 'an Azure DevOps token',
         RENOVATE_ENDPOINT: 'an Azure DevOps endpoint',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports docker username/password', () => {
@@ -97,12 +103,14 @@ describe(getName(), () => {
         DOCKER_USERNAME: 'some-username',
         DOCKER_PASSWORD: 'some-password',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports password-only', () => {
       const envParam: NodeJS.ProcessEnv = {
         NPM_PASSWORD: 'some-password',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports domain and host names with case insensitivity', () => {
@@ -133,6 +141,7 @@ describe(getName(), () => {
       const envParam: NodeJS.ProcessEnv = {
         PYPI_TOKEN: 'some-token',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('rejects incomplete datasource env token', () => {
@@ -154,6 +163,7 @@ describe(getName(), () => {
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports Bitbucket username/password', () => {
@@ -163,6 +173,7 @@ describe(getName(), () => {
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
       };
+      // FIXME: explicit assert condition
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('merges full config from env', () => {

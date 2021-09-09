@@ -1,5 +1,5 @@
-import { getAdminConfig } from '../../config/admin';
-import * as datasourcePypi from '../../datasource/pypi';
+import { getGlobalConfig } from '../../config/global';
+import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { exec } from '../../util/exec';
@@ -49,7 +49,7 @@ export async function extractSetupFile(
   let cmd = 'python';
   const extractPy = await getExtractFile();
   const args = [`"${extractPy}"`, `"${packageFile}"`];
-  if (getAdminConfig().binarySource !== 'docker') {
+  if (getGlobalConfig().binarySource !== 'docker') {
     logger.debug('Running python via global command');
     cmd = await getPythonAlias();
   }
@@ -122,7 +122,7 @@ export async function extractPackageFile(
         depName,
         currentValue,
         managerData: { lineNumber },
-        datasource: datasourcePypi.id,
+        datasource: PypiDatasource.id,
       };
       return dep;
     })

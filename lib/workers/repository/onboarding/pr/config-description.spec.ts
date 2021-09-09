@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import type { PackageFile } from '../../../../manager/types';
 import { getConfigDesc } from './config-description';
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -12,6 +12,7 @@ describe(getName(), () => {
     it('returns empty', () => {
       delete config.description;
       const res = getConfigDesc(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns a full list', () => {
@@ -36,6 +37,7 @@ describe(getName(), () => {
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];
       const res = getConfigDesc(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('contains the onboardingConfigFileName if set', () => {

@@ -754,6 +754,20 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() should update pinned versions if updatePinnedDependencies=true 1`] = `
+Array [
+  Object {
+    "bucket": "non-major",
+    "newMajor": 0,
+    "newMinor": 0,
+    "newValue": "0.0.35",
+    "newVersion": "0.0.35",
+    "releaseTimestamp": "2017-04-27T16:59:06.479Z",
+    "updateType": "patch",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() should warn if no version matches dist-tag 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8 1`] = `
