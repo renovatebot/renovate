@@ -85,7 +85,7 @@ Object {
 
 exports[`platform/azure/util getStorageExtraCloneOpts should configure personal access token 1`] = `
 Object {
-  "-c": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+  "-c": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3OHRlc3Q=",
 }
 `;
 

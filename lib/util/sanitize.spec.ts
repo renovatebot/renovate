@@ -9,7 +9,7 @@ describe('util/sanitize', () => {
     expect(sanitize(null)).toBeNull();
   });
   it('sanitizes secrets from strings', () => {
-    const token = 'abc123token';
+    const token = '123testtoken';
     const username = 'userabc';
     const password = 'password123';
     add(token);
