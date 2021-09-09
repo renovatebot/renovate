@@ -9,6 +9,10 @@ on:
   schedule:
     - cron: '0 13 * * 1'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   security-events: write
 
