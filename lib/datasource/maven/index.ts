@@ -1,5 +1,4 @@
-import url from 'url';
-import pAll from 'p-all';
+import pMap from 'p-map';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
@@ -166,31 +165,33 @@ async function filterMissingArtifacts(
     await packageCache.get<ArtifactsInfo>(cacheNamespace, cacheKey);
 
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
-    const versionUrls = versions.map(
-      async (version): Promise<[string, url.URL | null]> => {
+    const results: ArtifactInfoResult[] = await pMap(
+      versions,
+      async (version): Promise<ArtifactInfoResult | null> => {
         const artifactUrl = getMavenUrl(
           dependency,
           repoUrl,
           await createUrlForDependencyPom(version, dependency, repoUrl)
         );
-        return [version, artifactUrl];
-      }
+
+        if (artifactUrl) {
+          return [version, await isHttpResourceExists(artifactUrl)];
+        }
+
+        return null;
+      },
+      { concurrency: 5 }
     );
-    const queue = (await Promise.all(versionUrls))
-      .filter(([_, artifactUrl]) => Boolean(artifactUrl))
-      .map(
-        ([version, artifactUrl]) =>
-          async (): Promise<ArtifactInfoResult> =>
-            [version, await isHttpResourceExists(artifactUrl)]
+
+    artifactsInfo = results
+      .filter((value) => value != null)
+      .reduce(
+        (acc, [key, value]) => ({
+          ...acc,
+          [key]: value,
+        }),
+        {}
       );
-    const results = await pAll(queue, { concurrency: 5 });
-    artifactsInfo = results.reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: value,
-      }),
-      {}
-    );
 
     // Retry earlier for status other than 404
     const cacheTTL = Object.values(artifactsInfo).some((x) => x === null)
