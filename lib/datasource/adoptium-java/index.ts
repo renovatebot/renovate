@@ -27,7 +27,8 @@ export class AdoptiumJavaDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      `${registryUrl}:${getImageType(lookupName)}`,
   })
   async getReleases({
     registryUrl,
