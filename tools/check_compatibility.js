@@ -12,7 +12,7 @@ function checkGitVersion() {
       parseInt(gitVersion[1], 10) >= 22 &&
       parseInt(gitVersion[2], 10) >= 0
     ) {
-      shell.echo('VERSION OK');
+      process.exit(0);
     } else {
       // shell.echo('WARNING: GIT VERSION NOT COMAPTIBLE');
       throw new Error('GIT VERSION NOT COMAPTIBLE');
