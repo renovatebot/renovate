@@ -17,7 +17,7 @@ describe('logger/err-serializer', () => {
       },
       options: {
         headers: {
-          authorization: 'Bearer abc',
+          authorization: 'Bearer testtoken',
         },
       },
     });

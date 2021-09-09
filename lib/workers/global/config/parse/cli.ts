@@ -86,7 +86,7 @@ export function getConfig(input: string[]): AllConfig {
     /* eslint-disable no-console */
     console.log('  Examples:');
     console.log('');
-    console.log('    $ renovate --token abc123 singapore/lint-condo');
+    console.log('    $ renovate --token 123test singapore/lint-condo');
     console.log(
       '    $ LOG_LEVEL=debug renovate --labels=renovate,dependency --ignore-unstable=false singapore/lint-condo'
     );
