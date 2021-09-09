@@ -291,6 +291,7 @@ export async function initRepo({
           {
             token: forkToken || opts.token,
             paginate: true,
+            pageLimit: 100,
           }
         )
       ).body.map((r) => r.full_name);
