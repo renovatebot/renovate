@@ -52,7 +52,7 @@ describe('util/http/github', () => {
 
   describe('HTTP', () => {
     it('supports app mode', async () => {
-      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
+      hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock.scope(githubApiHost).get('/some-url').reply(200);
       await githubApi.get('/some-url', {
         headers: { accept: 'some-accept' },
@@ -62,7 +62,7 @@ describe('util/http/github', () => {
       expect(req.headers.accept).toBe(
         'some-accept, application/vnd.github.machine-man-preview+json'
       );
-      expect(req.headers.authorization).toBe('token abc123');
+      expect(req.headers.authorization).toBe('token 123test');
     });
 
     it('supports different datasources', async () => {
@@ -359,7 +359,7 @@ describe('util/http/github', () => {
       expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
     });
     it('supports app mode', async () => {
-      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
+      hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock
         .scope(githubApiHost)
         .post('/graphql')

@@ -111,7 +111,7 @@ describe('util/http/auth', () => {
       const opts: GotOptions = {
         headers: {},
         // Personal Access Token is exactly 20 characters long
-        token: '01234567890123456789',
+        token: '0123456789012345test',
         hostType: PLATFORM_TYPE_GITLAB,
       };
 
@@ -120,10 +120,10 @@ describe('util/http/auth', () => {
       expect(opts).toMatchInlineSnapshot(`
         Object {
           "headers": Object {
-            "Private-token": "01234567890123456789",
+            "Private-token": "0123456789012345test",
           },
           "hostType": "gitlab",
-          "token": "01234567890123456789",
+          "token": "0123456789012345test",
         }
       `);
     });
@@ -132,7 +132,7 @@ describe('util/http/auth', () => {
       const opts: GotOptions = {
         headers: {},
         token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
         hostType: PLATFORM_TYPE_GITLAB,
       };
 
@@ -141,10 +141,10 @@ describe('util/http/auth', () => {
       expect(opts).toMatchInlineSnapshot(`
         Object {
           "headers": Object {
-            "authorization": "Bearer a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
+            "authorization": "Bearer a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test",
           },
           "hostType": "gitlab",
-          "token": "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
+          "token": "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test",
         }
       `);
     });
@@ -152,8 +152,7 @@ describe('util/http/auth', () => {
     it(`npm basic token`, () => {
       const opts: GotOptions = {
         headers: {},
-        token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+        token: 'test',
         hostType: 'npm',
         context: {
           authType: 'Basic',
@@ -167,19 +166,17 @@ describe('util/http/auth', () => {
           authType: 'Basic',
         },
         headers: {
-          authorization:
-            'Basic a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+          authorization: 'Basic test',
         },
         hostType: 'npm',
-        token:
-          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+        token: 'test',
       });
     });
 
     it(`bare token`, () => {
       const opts: GotOptions = {
         headers: {},
-        token: '01234567890123456789',
+        token: 'test',
         context: {
           authType: 'Token-Only',
         },
@@ -192,9 +189,9 @@ describe('util/http/auth', () => {
           authType: 'Token-Only',
         },
         headers: {
-          authorization: '01234567890123456789',
+          authorization: 'test',
         },
-        token: '01234567890123456789',
+        token: 'test',
       });
     });
   });
