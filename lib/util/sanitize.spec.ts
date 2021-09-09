@@ -1,7 +1,6 @@
-import { getName } from '../../test/util';
 import { add, clear, sanitize } from './sanitize';
 
-describe(getName(), () => {
+describe('util/sanitize', () => {
   beforeEach(() => {
     clear();
   });

@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, hostRules, loadJsonFixture } from '../../../test/util';
+import { hostRules, loadJsonFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { HexDatasource } from '.';
 
@@ -12,7 +12,7 @@ jest.mock('../../util/host-rules');
 const baseUrl = 'https://hex.pm/api';
 const datasource = HexDatasource.id;
 
-describe(getName(), () => {
+describe('datasource/hex/index', () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({});

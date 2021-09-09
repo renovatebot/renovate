@@ -35,6 +35,7 @@ import type {
   FindPRConfig,
   Issue,
   MergePRConfig,
+  PlatformParams,
   PlatformResult,
   Pr,
   RepoParams,
@@ -80,12 +81,7 @@ export async function initPlatform({
   token,
   username,
   gitAuthor,
-}: {
-  endpoint: string;
-  token: string;
-  username?: string;
-  gitAuthor?: string;
-}): Promise<PlatformResult> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
@@ -118,6 +114,7 @@ export async function initPlatform({
     gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
+
   return platformConfig;
 }
 
@@ -417,8 +414,6 @@ export async function initRepo({
   await git.initRepo({
     ...config,
     url,
-    gitAuthorName: global.gitAuthor?.name,
-    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,

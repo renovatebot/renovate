@@ -1,8 +1,7 @@
-import { getName } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import { processHostRules } from './rules';
 
-describe(getName(), () => {
+describe('manager/npm/post-update/rules', () => {
   describe('processHostRules()', () => {
     beforeEach(() => {
       hostRules.clear();

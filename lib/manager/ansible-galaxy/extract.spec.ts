@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import extractPackageFile, { getSliceEndNumber } from './extract';
 
 const yamlFile1 = loadFixture('requirements01.yml');
@@ -8,7 +8,7 @@ const collections1 = loadFixture('collections1.yml');
 const collections2 = loadFixture('collections2.yml');
 const galaxy = loadFixture('galaxy.yml');
 
-describe(getName(), () => {
+describe('manager/ansible-galaxy/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', 'requirements.yml')).toBeNull();

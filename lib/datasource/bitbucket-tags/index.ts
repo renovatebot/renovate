@@ -106,7 +106,7 @@ export class BitBucketTagsDatasource extends Datasource {
     key: ({ registryUrl, lookupName }: DigestConfig) =>
       BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'digest'),
   })
-  async getDigest(
+  override async getDigest(
     { lookupName: repo, registryUrl }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {

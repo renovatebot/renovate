@@ -3,7 +3,6 @@ import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   getConfig,
-  getName,
   loadFixture,
   logger,
   platform,
@@ -41,7 +40,7 @@ async function dryRun(
   expect(platform.ensureIssue).toHaveBeenCalledTimes(ensureIssueCalls);
 }
 
-describe(getName(), () => {
+describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
     it('reads dashboard body', async () => {
       const conf: RenovateConfig = {};
@@ -66,7 +65,7 @@ describe(getName(), () => {
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
@@ -86,7 +85,7 @@ describe(getName(), () => {
         },
       ];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run

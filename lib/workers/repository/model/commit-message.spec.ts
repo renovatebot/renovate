@@ -1,7 +1,6 @@
-import { getName } from '../../../../test/util';
 import { CommitMessage } from './commit-message';
 
-describe(getName(), () => {
+describe('workers/repository/model/commit-message', () => {
   describe('CommitMessage', () => {
     const TEST_CASES: ReadonlyArray<
       [message: string, prefix: string | undefined, result: string]

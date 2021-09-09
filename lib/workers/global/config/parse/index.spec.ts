@@ -1,5 +1,4 @@
 import upath from 'upath';
-import { getName } from '../../../../../test/util';
 import { readFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 
@@ -10,7 +9,7 @@ try {
   // file does not exist
 }
 
-describe(getName(), () => {
+describe('workers/global/config/parse/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];
@@ -19,7 +18,12 @@ describe(getName(), () => {
       jest.resetModules();
       configParser = await import('./index');
       defaultArgv = getArgv();
-      defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
+      defaultEnv = {
+        RENOVATE_CONFIG_FILE: upath.resolve(
+          __dirname,
+          './__fixtures__/default.js'
+        ),
+      };
       jest.mock('delay', () => Promise.resolve());
     });
     it('supports token in env', async () => {
@@ -86,7 +90,7 @@ describe(getName(), () => {
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);
     });
-    it('supports Bitbucket username/passwod', async () => {
+    it('supports Bitbucket username/password', async () => {
       defaultArgv = defaultArgv.concat([
         '--platform=bitbucket',
         '--username=user',

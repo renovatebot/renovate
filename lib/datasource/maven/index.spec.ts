@@ -1,6 +1,6 @@
 import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
@@ -74,7 +74,7 @@ function get(
   return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
 }
 
-describe(getName(), () => {
+describe('datasource/maven/index', () => {
   beforeEach(() => {
     hostRules.add({
       hostType: datasource,

@@ -4,7 +4,6 @@ import {
   exec as _cpExec,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
-import { getName } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
@@ -25,7 +24,7 @@ interface TestInput {
   adminConfig?: Partial<RepoGlobalConfig>;
 }
 
-describe(getName(), () => {
+describe('util/exec/index', () => {
   let processEnvOrig: NodeJS.ProcessEnv;
 
   const cacheDir = '/tmp/renovate/cache/';

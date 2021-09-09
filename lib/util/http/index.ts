@@ -10,7 +10,12 @@ import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import type { GotOptions, OutgoingHttpHeaders, RequestStats } from './types';
+import type {
+  GotJSONOptions,
+  GotOptions,
+  OutgoingHttpHeaders,
+  RequestStats,
+} from './types';
 
 // TODO: refactor code to remove this (#9651)
 import './legacy';
@@ -21,6 +26,12 @@ export interface HttpOptions {
   password?: string;
   baseUrl?: string;
   headers?: OutgoingHttpHeaders;
+
+  /**
+   * Do not use authentication
+   */
+  noAuth?: boolean;
+
   throwHttpErrors?: boolean;
   useCache?: boolean;
 }
@@ -31,7 +42,7 @@ export interface HttpPostOptions extends HttpOptions {
 
 export interface InternalHttpOptions extends HttpOptions {
   json?: Record<string, unknown>;
-  responseType?: 'json';
+  responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
@@ -42,12 +53,16 @@ export interface HttpResponse<T = string> {
   authorization?: boolean;
 }
 
-function cloneResponse<T>(response: any): HttpResponse<T> {
+function cloneResponse<T extends Buffer | string | any>(
+  response: HttpResponse<T>
+): HttpResponse<T> {
+  const { body, statusCode, headers } = response;
   // clone body and headers so that the cached result doesn't get accidentally mutated
+  // Don't use json clone for buffers
   return {
-    statusCode: response.statusCode,
-    body: clone<T>(response.body),
-    headers: clone(response.headers),
+    statusCode,
+    body: body instanceof Buffer ? (body.slice() as T) : clone<T>(body),
+    headers: clone(headers),
     authorization: !!response.authorization,
   };
 }
@@ -69,6 +84,11 @@ function applyDefaultHeaders(options: Options): void {
   };
 }
 
+// Note on types:
+// options.requestType can be either 'json' or 'buffer', but `T` should be
+// `Buffer` in the latter case.
+// We don't declare overload signatures because it's immediately wrapped by
+// `request`.
 async function gotRoutine<T>(
   url: string,
   options: GotOptions,
@@ -76,8 +96,11 @@ async function gotRoutine<T>(
 ): Promise<Response<T>> {
   logger.trace({ url, options }, 'got request');
 
-  const resp = await got<T>(url, options);
-  const duration = resp.timings.phases.total || 0;
+  // Cheat the TS compiler using `as` to pick a specific overload.
+  // Otherwise it doesn't typecheck.
+  const resp = await got<T>(url, options as GotJSONOptions);
+  const duration =
+    resp.timings.phases.total || /* istanbul ignore next: can't be tested */ 0;
 
   const httpRequests = memCache.get('http-requests') || [];
   httpRequests.push({ ...requestStats, duration });
@@ -87,7 +110,11 @@ async function gotRoutine<T>(
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
-  constructor(private hostType: string, private options?: HttpOptions) {}
+  private options?: GotOptions;
+
+  constructor(private hostType: string, options?: HttpOptions) {
+    this.options = merge<GotOptions>(options, { context: { hostType } });
+  }
 
   protected async request<T>(
     requestUrl: string | URL,
@@ -124,16 +151,27 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     const cacheKey = crypto
       .createHash('md5')
-      .update('got-' + JSON.stringify({ url, headers: options.headers }))
+      .update(
+        'got-' +
+          JSON.stringify({
+            url,
+            headers: options.headers,
+            method: options.method,
+          })
+      )
       .digest('hex');
 
     let resPromise;
 
     // Cache GET requests unless useCache=false
-    if (options.method === 'get' && options.useCache !== false) {
+    if (
+      ['get', 'head'].includes(options.method) &&
+      options.useCache !== false
+    ) {
       resPromise = memCache.get(cacheKey);
     }
 
+    // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
       const queueTask = (): Promise<Response<T>> => {
@@ -170,6 +208,23 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
   head(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request<string>(url, { ...options, method: 'head' });
+  }
+
+  protected requestBuffer(
+    url: string | URL,
+    httpOptions?: InternalHttpOptions
+  ): Promise<HttpResponse<Buffer> | null> {
+    return this.request<Buffer>(url, {
+      ...httpOptions,
+      responseType: 'buffer',
+    });
+  }
+
+  getBuffer(
+    url: string,
+    options: HttpOptions = {}
+  ): Promise<HttpResponse<Buffer> | null> {
+    return this.requestBuffer(url, options);
   }
 
   private async requestJson<T = unknown>(

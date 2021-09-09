@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { fs, getName, loadFixture, mocked } from '../../../../test/util';
+import { fs, loadFixture, mocked } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
@@ -28,7 +28,7 @@ const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
   typeof getPkgReleases
 >;
 
-describe(getName(), () => {
+describe('manager/terraform/lockfile/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -61,7 +61,7 @@ describe(getName(), () => {
     ).toBeNull();
   });
 
-  it('update single dependency with exact constraint', async () => {
+  it('update single dependency with exact constraint and depType provider', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
     fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
 
@@ -79,7 +79,13 @@ describe(getName(), () => {
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
-      updatedDeps: [{ depName: 'hashicorp/aws', lookupName: 'hashicorp/aws' }],
+      updatedDeps: [
+        {
+          depName: 'hashicorp/aws',
+          lookupName: 'hashicorp/aws',
+          depType: 'provider',
+        },
+      ],
       newPackageFileContent: '',
       config: localConfig,
     });
@@ -90,6 +96,66 @@ describe(getName(), () => {
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
+  });
+
+  it('update single dependency with exact constraint and and depType required_provider', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(validLockfile as any);
+    fs.getSiblingFileName.mockReturnValueOnce('.terraform.lock.hcl');
+
+    mockHash.mockResolvedValueOnce([
+      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+    ]);
+
+    const localConfig: UpdateArtifactsConfig = {
+      updateType: 'minor',
+      newVersion: '3.36.0',
+      newValue: '3.36.0',
+      ...config,
+    };
+
+    const result = await updateArtifacts({
+      packageFileName: 'main.tf',
+      updatedDeps: [
+        {
+          depName: 'hashicorp/aws',
+          lookupName: 'hashicorp/aws',
+          depType: 'required_provider',
+        },
+      ],
+      newPackageFileContent: '',
+      config: localConfig,
+    });
+    expect(result).not.toBeNull();
+    expect(result).toBeArrayOfSize(1);
+    expect(result[0].file).not.toBeNull();
+    expect(result[0].file).toMatchSnapshot();
+
+    expect(mockHash.mock.calls).toBeArrayOfSize(1);
+    expect(mockHash.mock.calls).toMatchSnapshot();
+  });
+
+  it('do not update dependency with depType module', async () => {
+    const localConfig: UpdateArtifactsConfig = {
+      updateType: 'minor',
+      newVersion: '3.36.0',
+      newValue: '3.36.0',
+      ...config,
+    };
+
+    const result = await updateArtifacts({
+      packageFileName: 'main.tf',
+      updatedDeps: [
+        {
+          depName: 'terraform-aws-modules/vpc/aws',
+          lookupName: 'terraform-aws-modules/vpc/aws',
+          depType: 'module',
+        },
+      ],
+      newPackageFileContent: '',
+      config: localConfig,
+    });
+    expect(result).toBeNull();
   });
 
   it('update single dependency with range constraint and minor update from private registry', async () => {
@@ -113,6 +179,7 @@ describe(getName(), () => {
       updatedDeps: [
         {
           depName: 'azurerm',
+          depType: 'provider',
           lookupName: 'azurerm',
           registryUrls: ['https://registry.example.com'],
         },
@@ -147,7 +214,13 @@ describe(getName(), () => {
 
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
-      updatedDeps: [{ depName: 'random', lookupName: 'hashicorp/random' }],
+      updatedDeps: [
+        {
+          depName: 'random',
+          lookupName: 'hashicorp/random',
+          depType: 'provider',
+        },
+      ],
       newPackageFileContent: '',
       config: localConfig,
     });
@@ -178,7 +251,13 @@ describe(getName(), () => {
 
     const result = await updateArtifacts({
       packageFileName: 'test/main.tf',
-      updatedDeps: [{ depName: 'random', lookupName: 'hashicorp/random' }],
+      updatedDeps: [
+        {
+          depName: 'random',
+          lookupName: 'hashicorp/random',
+          depType: 'provider',
+        },
+      ],
       newPackageFileContent: '',
       config: localConfig,
     });

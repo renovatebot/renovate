@@ -7,7 +7,7 @@ const mastodonGemfileLock = loadFixture('Gemfile.mastodon.lock');
 const rubyCIGemfileLock = loadFixture('Gemfile.rubyci.lock');
 const gitlabFossGemfileLock = loadFixture('Gemfile.gitlab-foss.lock');
 
-describe('/lib/manager/bundler/locked-version', () => {
+describe('manager/bundler/locked-version', () => {
   test('Parse Rails Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(railsGemfileLock);
     expect(parsedLockEntries.size).toEqual(185);

@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -34,7 +33,7 @@ lxml==3.6.0
 mccabe==0.6.1
 `;
 
-describe(getName(), () => {
+describe('platform/bitbucket/index', () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -727,7 +726,6 @@ describe(getName(), () => {
 
     it('canRebase', async () => {
       expect.assertions(4);
-      const author = global.gitAuthor;
       const scope = await initRepoMock();
       scope
         .get('/2.0/repositories/some/repo/pullrequests/3')
@@ -748,22 +746,13 @@ describe(getName(), () => {
         .get('/2.0/repositories/some/repo/pullrequests/5/diff')
         .twice()
         .reply(200, diff);
-      try {
-        expect(await bitbucket.getPr(3)).toMatchSnapshot();
+      expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-        global.gitAuthor = {
-          email: 'renovate@whitesourcesoftware.com',
-          name: 'bot',
-        };
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-        global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      } finally {
-        global.gitAuthor = author;
-      }
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 

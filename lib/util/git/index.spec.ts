@@ -2,12 +2,12 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { getName } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
+import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
 import { GitNoVerifyOption, setNoVerify } from '.';
 
-describe(getName(), () => {
+describe('util/git/index', () => {
   jest.setTimeout(15000);
 
   const masterCommitDate = new Date();
@@ -74,10 +74,9 @@ describe(getName(), () => {
     setGlobalConfig({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
-      gitAuthorName: 'Jest',
-      gitAuthorEmail: 'Jest@example.com',
     });
-    await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    git.setGitAuthor('Jest <Jest@example.com>');
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
@@ -160,7 +159,7 @@ describe(getName(), () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
     });
     it('should return false when author is ignored', async () => {
-      await git.setUserRepoConfig({
+      git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
       expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
@@ -495,7 +494,7 @@ describe(getName(), () => {
         url: base.path,
       });
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
 
       await git.initRepo({
@@ -505,7 +504,7 @@ describe(getName(), () => {
       await repo.checkout('renovate/test');
       await repo.commit('past message3', ['--amend']);
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
     });
 
@@ -547,6 +546,11 @@ describe(getName(), () => {
       const repo = Git(tmpDir.path);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
+    });
+  });
+  describe('setGitAuthor()', () => {
+    it('throws for invalid', () => {
+      expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
     });
   });
 });

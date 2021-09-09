@@ -3,7 +3,7 @@ import { extractLockFileEntries } from './locked-version';
 
 const gemLockFile = loadFixture('Gemfile.rails.lock');
 
-describe('extract lib/manager/bundler/gemfile.rails.lock', () => {
+describe('manager/bundler/gemfile', () => {
   it('matches the expected output', () => {
     const res = extractLockFileEntries(gemLockFile);
     expect(res.size).toEqual(185);

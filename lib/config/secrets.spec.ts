@@ -1,11 +1,11 @@
-import { defaultConfig, getName } from '../../test/util';
+import { defaultConfig } from '../../test/util';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
 } from '../constants/error-messages';
 import { applySecretsToConfig, validateConfigSecrets } from './secrets';
 
-describe(getName(), () => {
+describe('config/secrets', () => {
   describe('validateConfigSecrets(config)', () => {
     it('works with default config', () => {
       expect(() => validateConfigSecrets(defaultConfig)).not.toThrow();

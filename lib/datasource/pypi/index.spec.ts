@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
 import { PypiDatasource } from '.';
 
@@ -16,7 +16,7 @@ const mixedHyphensResponse = loadFixture('versions-html-mixed-hyphens.html');
 const baseUrl = 'https://pypi.org/pypi';
 const datasource = PypiDatasource.id;
 
-describe(getName(), () => {
+describe('datasource/pypi/index', () => {
   describe('getReleases', () => {
     const OLD_ENV = process.env;
 

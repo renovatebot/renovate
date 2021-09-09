@@ -24,7 +24,7 @@ jest.mock('../../util/git');
 const datasource = mocked(_datasource);
 
 const config: UpdateArtifactsConfig = {
-  composerIgnorePlatformReqs: true,
+  composerIgnorePlatformReqs: [],
   ignoreScripts: false,
 };
 
@@ -41,7 +41,7 @@ const repoStatus = partial<StatusResult>({
   deleted: [],
 });
 
-describe('.updateArtifacts()', () => {
+describe('manager/composer/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -276,7 +276,6 @@ describe('.updateArtifacts()', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -284,17 +283,16 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([{ artifactError: { lockFile: 'composer.lock' } }]);
   });
 
   it('catches unmet requirements errors', async () => {
+    const stderr =
+      'fooYour requirements could not be resolved to an installable set of packages.bar';
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
-      throw new Error(
-        'fooYour requirements could not be resolved to an installable set of packages.bar'
-      );
+      throw new Error(stderr);
     });
-    // FIXME: explicit assert condition
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -302,7 +300,9 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([
+      { artifactError: { lockFile: 'composer.lock', stderr } },
+    ]);
   });
 
   it('throws for disk space', async () => {
@@ -337,7 +337,29 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          composerIgnorePlatformReqs: false,
+          composerIgnorePlatformReqs: null,
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('adds all ignorePlatformReq items', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
+    git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          composerIgnorePlatformReqs: ['ext-posix', 'ext-sodium'],
         },
       })
     ).not.toBeNull();

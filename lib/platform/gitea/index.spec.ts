@@ -5,7 +5,7 @@ import {
   RepoParams,
   RepoResult,
 } from '..';
-import { getName, partial } from '../../../test/util';
+import { partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -26,7 +26,7 @@ import * as ght from './gitea-helper';
  */
 const GITEA_VERSION = '1.14.0+dev-754-g5d2b7ba63';
 
-describe(getName(), () => {
+describe('platform/gitea/index', () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
@@ -175,8 +175,6 @@ describe(getName(), () => {
     gitvcs = require('../../util/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
-
-    global.gitAuthor = { name: 'Renovate', email: 'renovate@example.com' };
 
     setBaseUrl('https://gitea.renovatebot.com/api/v1');
   });
@@ -574,7 +572,9 @@ describe(getName(), () => {
         partial<ght.Branch>({
           commit: {
             id: mockCommitHash,
-            author: partial<ght.CommitUser>({ email: global.gitAuthor.email }),
+            author: partial<ght.CommitUser>({
+              email: 'renovate@whitesourcesoftware.com',
+            }),
           },
         })
       );

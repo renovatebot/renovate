@@ -1,6 +1,6 @@
 import { readFile, readdir } from 'fs-extra';
 
-describe('versioning metadata', () => {
+describe('versioning/versioning-metadata', () => {
   it('readme no markdown headers', async () => {
     const allVersioning = (await readdir('lib/versioning')).filter(
       (item) => !item.includes('.')
@@ -26,7 +26,8 @@ describe('versioning metadata', () => {
       (item) => !item.includes('.') && !item.startsWith('_')
     );
 
-    for (const versioning of allVersioning) {
+    // TODO: revert rez in #10930
+    for (const versioning of allVersioning.filter((v) => v !== 'rez')) {
       const versioningObj = require(`./${versioning}`);
       expect(versioningObj.id).toEqual(versioning);
       expect(versioningObj.displayName).toBeDefined();

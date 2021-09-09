@@ -19,7 +19,7 @@ jest.unmock('.');
 jest.mock('fs-extra');
 const fs: any = _fs;
 
-describe('logger', () => {
+describe('logger/index', () => {
   it('inits', () => {
     expect(logger).toBeDefined();
   });

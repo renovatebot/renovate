@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -168,7 +167,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe(getName(), () => {
+describe('platform/bitbucket-server/index', () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -1312,18 +1311,13 @@ describe(getName(), () => {
             .twice()
             .reply(200, { conflicted: false });
 
-          const author = global.gitAuthor;
-          try {
-            expect(await bitbucket.getPr(3)).toMatchSnapshot();
+          expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-            expect(await bitbucket.getPr(5)).toMatchSnapshot();
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            expect(await bitbucket.getPr(5)).toMatchSnapshot();
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            expect(httpMock.getTrace()).toMatchSnapshot();
-          } finally {
-            global.gitAuthor = author;
-          }
+          expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('gets a closed PR', async () => {

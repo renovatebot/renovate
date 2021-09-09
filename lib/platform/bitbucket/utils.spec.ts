@@ -6,7 +6,7 @@ const range = (count: number) => [...Array(count).keys()];
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe('accumulateValues()', () => {
+describe('platform/bitbucket/utils', () => {
   beforeEach(() => {
     setBaseUrl(baseUrl);
   });

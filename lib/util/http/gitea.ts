@@ -33,7 +33,7 @@ export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
     super(PLATFORM_TYPE_GITEA, options);
   }
 
-  protected async request<T>(
+  protected override async request<T>(
     path: string,
     options?: InternalHttpOptions & GiteaHttpOptions
   ): Promise<HttpResponse<T> | null> {

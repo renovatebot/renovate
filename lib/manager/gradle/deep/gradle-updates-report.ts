@@ -1,7 +1,11 @@
-import { exists, readFile, writeFile } from 'fs-extra';
 import { join } from 'upath';
 import * as datasourceSbtPackage from '../../../datasource/sbt-package';
 import { logger } from '../../../logger';
+import {
+  localPathExists,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
 import type {
   BuildDependency,
   GradleDependencyWithRepos,
@@ -11,7 +15,7 @@ import type {
 export const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 
 export async function createRenovateGradlePlugin(
-  localDir: string
+  gradleRoot = '.'
 ): Promise<void> {
   const content = `
 import groovy.json.JsonOutput
@@ -47,11 +51,11 @@ gradle.buildFinished {
    def json = JsonOutput.toJson(output)
    outputFile.write json
 }`;
-  const gradleInitFile = join(localDir, 'renovate-plugin.gradle');
+  const gradleInitFile = join(gradleRoot, 'renovate-plugin.gradle');
   logger.debug(
     'Creating renovate-plugin.gradle file with renovate gradle plugin'
   );
-  await writeFile(gradleInitFile, content);
+  await writeLocalFile(gradleInitFile, content);
 }
 
 async function readGradleReport(localDir: string): Promise<GradleProject[]> {
@@ -59,11 +63,11 @@ async function readGradleReport(localDir: string): Promise<GradleProject[]> {
     localDir,
     GRADLE_DEPENDENCY_REPORT_FILENAME
   );
-  if (!(await exists(renovateReportFilename))) {
+  if (!(await localPathExists(renovateReportFilename))) {
     return [];
   }
 
-  const contents = await readFile(renovateReportFilename, 'utf8');
+  const contents = await readLocalFile(renovateReportFilename, 'utf8');
   try {
     return JSON.parse(contents);
   } catch (err) {

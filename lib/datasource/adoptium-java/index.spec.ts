@@ -1,13 +1,14 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { datasource, defaultRegistryUrl, pageSize } from './common';
 
 const res1 = loadFixture('page.json');
+const jre = loadFixture('jre.json');
 
-function getPath(page: number): string {
-  return `/v3/release_versions?page_size=${pageSize}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
+function getPath(page: number, imageType = 'jdk'): string {
+  return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
 }
 function* range(start: number, end: number): Generator<number, number, number> {
   yield start;
@@ -17,7 +18,9 @@ function* range(start: number, end: number): Generator<number, number, number> {
   yield* range(start + 1, end);
 }
 
-describe(getName(), () => {
+const depName = 'java';
+
+describe('datasource/adoptium-java/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
       httpMock
@@ -27,10 +30,9 @@ describe(getName(), () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for 404', async () => {
@@ -38,10 +40,9 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -52,10 +53,9 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws for 5xx', async () => {
@@ -63,21 +63,29 @@ describe(getName(), () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('processes real data', async () => {
       httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, res1);
       const res = await getPkgReleases({
         datasource,
-        depName: 'adoptium-java',
+        depName,
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
-      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('processes real data (jre)', async () => {
+      httpMock.scope(defaultRegistryUrl).get(getPath(0, 'jre')).reply(200, jre);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'java-jre',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
     });
 
     it('pages', async () => {
@@ -91,11 +99,10 @@ describe(getName(), () => {
         .reply(404);
       const res = await getPkgReleases({
         datasource,
-        depName: 'adoptium-java',
+        depName,
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(50);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

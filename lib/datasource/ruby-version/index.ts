@@ -13,11 +13,11 @@ export class RubyVersionDatasource extends Datasource {
     super(RubyVersionDatasource.id);
   }
 
-  readonly defaultRegistryUrls = ['https://www.ruby-lang.org/'];
+  override readonly defaultRegistryUrls = ['https://www.ruby-lang.org/'];
 
-  readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = false;
 
-  readonly defaultVersioning = rubyVersioningId;
+  override readonly defaultVersioning = rubyVersioningId;
 
   @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
   async getReleases({

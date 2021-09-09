@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const tf1 = loadFixture('1.tf');
@@ -8,7 +8,7 @@ const tf2 = `module "relative" {
 `;
 const helm = loadFixture('helm.tf');
 
-describe(getName(), () => {
+describe('manager/terraform/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

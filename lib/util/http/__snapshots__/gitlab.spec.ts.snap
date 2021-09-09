@@ -6,7 +6,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
+      "authorization": "Bearer abc123",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -22,7 +22,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
+      "authorization": "Bearer abc123",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -33,7 +33,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
+      "authorization": "Bearer abc123",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -44,7 +44,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
+      "authorization": "Bearer abc123",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -60,7 +60,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
+      "authorization": "Bearer abc123",
       "host": "mycompany.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -71,7 +71,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
+      "authorization": "Bearer abc123",
       "host": "mycompany.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -82,7 +82,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
+      "authorization": "Bearer abc123",
       "host": "mycompany.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
@@ -98,11 +98,26 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer 123test",
+      "authorization": "Bearer abc123",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
+    "url": "https://gitlab.com/api/v4/some-url",
+  },
+]
+`;
+
+exports[`util/http/gitlab supports different datasources 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer def",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
     "url": "https://gitlab.com/api/v4/some-url",
   },
 ]

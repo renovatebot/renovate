@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../../../test/util';
+import { loadFixture } from '../../../../../test/util';
 import * as npmUpdater from '.';
 
 const readFixture = (x: string): string => loadFixture(x, '../..');
@@ -6,7 +6,7 @@ const readFixture = (x: string): string => loadFixture(x, '../..');
 const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');
 
-describe(getName(), () => {
+describe('manager/npm/update/dependency/index', () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {
