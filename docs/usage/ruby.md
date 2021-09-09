@@ -17,9 +17,9 @@ Renovate supports upgrading dependencies in Bundler's Gemfiles and their accompa
 
 ## Caveats
 
-- Renovate doesn't update dependencies without a version constraint. Example: `gem 'some-gem', '~> 1.2.3'` will update
-  `some-gem` if a new version matching the constraint if available, but `gem 'some-gem'` won't. If you always want to
-  stay at the latest available version, consider specifying `gem 'some-gem', '> 0'`.
+Renovate doesn't update dependencies without a version constraint.
+Example: `gem 'some-gem', '~> 1.2.3'` will update `some-gem` if a new version matching the constraint is available, but `gem 'some-gem'` won't.
+If you always want to have the latest available version, consider specifying `gem 'some-gem', '> 0'`.
 
 ## Enabling
 
