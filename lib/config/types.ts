@@ -99,7 +99,7 @@ export interface RepoGlobalConfig {
   dryRun?: boolean;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
-  privateKey?: string | Buffer;
+  privateKey?: string;
   localDir?: string;
   cacheDir?: string;
 }
