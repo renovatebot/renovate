@@ -57,14 +57,18 @@ export function tryDecrypt(
 export function decryptConfig(config: RenovateConfig): RenovateConfig {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
-  const { privateKey } = getGlobalConfig();
+  const { privateKey, privateKeyOld } = getGlobalConfig();
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');
       if (privateKey) {
         for (const [eKey, eVal] of Object.entries(val)) {
           logger.debug('Trying to decrypt ' + eKey);
-          const decryptedStr = tryDecrypt(privateKey, eVal);
+          let decryptedStr = tryDecrypt(privateKey, eVal);
+          if (privateKeyOld && !is.nonEmptyString(decryptedStr)) {
+            logger.debug(`Trying to decrypt with old private key`);
+            decryptedStr = tryDecrypt(privateKeyOld, eVal);
+          }
           if (!is.nonEmptyString(decryptedStr)) {
             const error = new Error('config-validation');
             error.validationError = `Failed to decrypt field ${eKey}. Please re-encrypt and try again.`;

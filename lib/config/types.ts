@@ -100,6 +100,7 @@ export interface RepoGlobalConfig {
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;
+  privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
 }
