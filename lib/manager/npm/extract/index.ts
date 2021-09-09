@@ -19,6 +19,7 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
 import type { NpmPackage, NpmPackageDependency } from './types';
+import { isZeroInstall } from './yarn';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -28,6 +29,9 @@ function parseDepName(depType: string, key: string): string {
   const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key) ?? [];
   return depName;
 }
+
+const RE_REPOSITORY_GITHUB_SSH_FORMAT =
+  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/;
 
 export async function extractPackageFile(
   content: string,
@@ -117,6 +121,10 @@ export async function extractPackageFile(
       }
     }
   }
+
+  const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
+  const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+
   let lernaJsonFile: string;
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
@@ -253,17 +261,28 @@ export async function extractPackageFile(
       return dep;
     }
     const [depNamePart, depRefPart] = hashSplit;
-    const githubOwnerRepo = depNamePart
-      .replace(/^github:/, '')
-      .replace(/^git\+/, '')
-      .replace(/^https:\/\/github\.com\//, '')
-      .replace(/\.git$/, '');
-    const githubRepoSplit = githubOwnerRepo.split('/');
-    if (githubRepoSplit.length !== 2) {
-      dep.skipReason = SkipReason.UnknownVersion;
-      return dep;
+
+    let githubOwnerRepo: string;
+    let githubOwner: string;
+    let githubRepo: string;
+    const matchUrlSshFormat = RE_REPOSITORY_GITHUB_SSH_FORMAT.exec(depNamePart);
+    if (matchUrlSshFormat === null) {
+      githubOwnerRepo = depNamePart
+        .replace(/^github:/, '')
+        .replace(/^git\+/, '')
+        .replace(/^https:\/\/github\.com\//, '')
+        .replace(/\.git$/, '');
+      const githubRepoSplit = githubOwnerRepo.split('/');
+      if (githubRepoSplit.length !== 2) {
+        dep.skipReason = SkipReason.UnknownVersion;
+        return dep;
+      }
+      [githubOwner, githubRepo] = githubRepoSplit;
+    } else {
+      githubOwner = matchUrlSshFormat[1];
+      githubRepo = matchUrlSshFormat[2];
+      githubOwnerRepo = `${githubOwner}/${githubRepo}`;
     }
-    const [githubOwner, githubRepo] = githubRepoSplit;
     const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/;
     if (
       !githubValidRegex.test(githubOwner) ||
@@ -342,11 +361,12 @@ export async function extractPackageFile(
   }
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
-    if (hasFancyRefs && lockFiles.npmLock) {
+    if ((hasFancyRefs && lockFiles.npmLock) || yarnZeroInstall) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
       //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
+      //  - Also, do not skip install if Yarn zero-install is used
       logger.debug('Automatically setting skipInstalls to false');
       skipInstalls = false;
     } else {
@@ -363,6 +383,7 @@ export async function extractPackageFile(
     ...lockFiles,
     managerData: {
       lernaJsonFile,
+      yarnZeroInstall,
     },
     lernaClient,
     lernaPackages,

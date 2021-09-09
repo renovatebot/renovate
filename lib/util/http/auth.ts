@@ -1,17 +1,19 @@
 import is from '@sindresorhus/is';
-import { NormalizedOptions } from 'got';
+import type { NormalizedOptions } from 'got';
 import {
+  GITHUB_API_USING_HOST_TYPES,
+  GITLAB_API_USING_HOST_TYPES,
   PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
-import { GITHUB_API_USING_HOST_TYPES } from '../../types';
-import { GotOptions } from './types';
+import type { GotOptions } from './types';
 
 export function applyAuthorization(inOptions: GotOptions): GotOptions {
-  const options = { ...inOptions };
-  if (options.headers?.authorization) {
+  const options: GotOptions = { ...inOptions };
+
+  if (options.headers?.authorization || options.noAuth) {
     return options;
   }
+
   if (options.token) {
     if (options.hostType === PLATFORM_TYPE_GITEA) {
       options.headers.authorization = `token ${options.token}`;
@@ -27,7 +29,7 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
           );
         }
       }
-    } else if (options.hostType === PLATFORM_TYPE_GITLAB) {
+    } else if (GITLAB_API_USING_HOST_TYPES.includes(options.hostType)) {
       // GitLab versions earlier than 12.2 only support authentication with
       // a personal access token, which is 20 characters long.
       if (options.token.length === 20) {

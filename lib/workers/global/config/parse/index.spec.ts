@@ -18,7 +18,12 @@ describe('workers/global/config/parse/index', () => {
       jest.resetModules();
       configParser = await import('./index');
       defaultArgv = getArgv();
-      defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
+      defaultEnv = {
+        RENOVATE_CONFIG_FILE: upath.resolve(
+          __dirname,
+          './__fixtures__/default.js'
+        ),
+      };
       jest.mock('delay', () => Promise.resolve());
     });
     it('supports token in env', async () => {
@@ -31,7 +36,7 @@ describe('workers/global/config/parse/index', () => {
       defaultArgv = defaultArgv.concat([
         '--token=abc',
         '--pr-footer=custom',
-        '--log-context=abc123',
+        '--log-context=123test',
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
@@ -40,7 +45,7 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
         ['prFooter', 'custom'],
-        ['logContext', 'abc123'],
+        ['logContext', '123test'],
       ]);
     });
 
@@ -85,7 +90,7 @@ describe('workers/global/config/parse/index', () => {
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);
     });
-    it('supports Bitbucket username/passwod', async () => {
+    it('supports Bitbucket username/password', async () => {
       defaultArgv = defaultArgv.concat([
         '--platform=bitbucket',
         '--username=user',

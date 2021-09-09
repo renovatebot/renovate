@@ -30,9 +30,8 @@ describe('platform/github/index', () => {
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
-    delete global.gitAuthor;
     hostRules.find.mockReturnValue({
-      token: 'abc123',
+      token: '123test',
     });
   });
 
@@ -50,7 +49,7 @@ describe('platform/github/index', () => {
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(
-        github.initPlatform({ token: 'abc123' } as any)
+        github.initPlatform({ token: '123test' } as any)
       ).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -64,7 +63,7 @@ describe('platform/github/index', () => {
         .get('/user/emails')
         .reply(400);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -78,14 +77,14 @@ describe('platform/github/index', () => {
         .get('/user/emails')
         .reply(200, [{}]);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should support gitAuthor and username', async () => {
       expect(
         await github.initPlatform({
-          token: 'abc123',
+          token: '123test',
           username: 'renovate-bot',
           gitAuthor: 'renovate@whitesourcesoftware.com',
         } as any)
@@ -105,7 +104,7 @@ describe('platform/github/index', () => {
           },
         ]);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -125,21 +124,10 @@ describe('platform/github/index', () => {
       expect(
         await github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
-          token: 'abc123',
+          token: '123test',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('should add initialized platform with predefined generic host rule for github api', async () => {
-      expect(
-        await github.initPlatform({
-          token: 'abc123',
-          username: 'renovate-bot',
-          gitAuthor: 'renovate@whitesourcesoftware.com',
-        } as any)
-      ).toMatchSnapshot();
-      expect(hostRules.add).toMatchSnapshot();
     });
   });
 
@@ -1900,10 +1888,6 @@ describe('platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.post('/graphql').reply(200, graphqlOpenPullRequests);
-      global.gitAuthor = {
-        name: 'Renovate Bot',
-        email: 'renovate@whitesourcesoftware.com',
-      };
       await github.initRepo({
         repository: 'some/repo',
       } as any);
@@ -2099,10 +2083,10 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initPlatform({
         endpoint: 'https://github.company.com',
-        token: 'abc123',
+        token: '123test',
       });
       hostRules.find.mockReturnValue({
-        token: 'abc123',
+        token: '123test',
       });
       await github.initRepo({
         repository: 'some/repo',

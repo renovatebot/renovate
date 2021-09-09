@@ -195,3 +195,37 @@ Array [
   },
 ]
 `;
+
+exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock with yarn v3.0.0 1`] = `
+Array [
+  Object {
+    "constraints": Object {
+      "yarn": "^3.0.0",
+    },
+    "deps": Array [
+      Object {
+        "currentValue": "1.0.0",
+        "depName": "a",
+        "lockedVersion": "1.0.0",
+      },
+      Object {
+        "currentValue": "2.0.0",
+        "depName": "b",
+        "lockedVersion": "2.0.0",
+      },
+      Object {
+        "currentValue": "^3.0.0",
+        "depName": "yarn",
+        "depType": "engines",
+        "lockedVersion": undefined,
+        "lookupName": "@yarnpkg/cli",
+      },
+    ],
+    "lockFiles": Array [
+      "yarn.lock",
+    ],
+    "npmLock": "package-lock.json",
+    "yarnLock": "yarn.lock",
+  },
+]
+`;

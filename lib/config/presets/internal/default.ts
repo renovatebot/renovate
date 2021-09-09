@@ -33,6 +33,12 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  enablePreCommit: {
+    description: 'Enable the pre-commit manager',
+    'pre-commit': {
+      enabled: true,
+    },
+  },
   ignoreModulesAndTests: {
     description:
       'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories',
