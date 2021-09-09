@@ -181,6 +181,22 @@ describe('datasource/repology/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('returns null on Resolver ambiguous binary package', async () => {
+      mockResolverCall('ubuntu_20_04', 'git', 'binname', {
+        status: 300,
+        body: '[]',
+      });
+
+      expect(
+        await getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'ubuntu_20_04/git',
+        })
+      ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('throws without repository and package name', async () => {
       await expect(
         getPkgReleases({
