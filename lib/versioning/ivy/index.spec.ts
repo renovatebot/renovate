@@ -1,4 +1,3 @@
-import { getName } from '../../../test/util';
 import {
   REV_TYPE_LATEST,
   REV_TYPE_RANGE,
@@ -9,7 +8,7 @@ import ivy from '.';
 
 const { getNewValue, isValid, isVersion, matches } = ivy;
 
-describe(getName(), () => {
+describe('versioning/ivy/index', () => {
   it('parses dynamic revisions', () => {
     expect(parseDynamicRevision(null)).toBeNull();
     expect(parseDynamicRevision('')).toBeNull();
@@ -59,9 +58,7 @@ describe(getName(), () => {
 
     expect(parseDynamicRevision('[0,1),(1,)')).toBeNull();
   });
-});
 
-describe(getName(), () => {
   it('isValid', () => {
     expect(isValid('')).toBe(false);
     expect(isValid('1.0.0')).toBe(true);

@@ -3,8 +3,8 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
-import { getAdminConfig } from './admin';
-import { getOptions } from './definitions';
+import { getGlobalConfig } from './global';
+import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
   MigratedConfig,
@@ -32,6 +32,7 @@ const removedOptions = [
   'groupPrBody',
   'statusCheckVerify',
   'lazyGrouping',
+  'supportPolicy',
 ];
 
 // Returns a migrated config
@@ -55,7 +56,7 @@ export function migrateConfig(
       'optionalDependencies',
       'peerDependencies',
     ];
-    const { migratePresets } = getAdminConfig();
+    const { migratePresets } = getGlobalConfig();
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
         delete migratedConfig[key];
@@ -517,6 +518,12 @@ export function migrateConfig(
         }
       } else if (key === 'binarySource' && val === 'auto') {
         migratedConfig.binarySource = 'global';
+      } else if (key === 'composerIgnorePlatformReqs') {
+        if (val === true) {
+          migratedConfig.composerIgnorePlatformReqs = [];
+        } else if (val === false) {
+          migratedConfig.composerIgnorePlatformReqs = null;
+        }
       }
       const migratedTemplates = {
         fromVersion: 'currentVersion',
@@ -580,6 +587,23 @@ export function migrateConfig(
         }
       }
     }
+    if (is.nonEmptyArray(migratedConfig.matchManagers)) {
+      if (migratedConfig.matchManagers.includes('gradle-lite')) {
+        if (!migratedConfig.matchManagers.includes('gradle')) {
+          migratedConfig.matchManagers.push('gradle');
+        }
+        migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
+          (manager) => manager !== 'gradle-lite'
+        );
+      }
+    }
+    if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
+      migratedConfig.gradle = mergeChildConfig(
+        migratedConfig.gradle || {},
+        migratedConfig['gradle-lite']
+      );
+    }
+    delete migratedConfig['gradle-lite'];
     const isMigrated = !dequal(config, migratedConfig);
     if (isMigrated) {
       // recursive call in case any migrated configs need further migrating

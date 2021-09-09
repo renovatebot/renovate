@@ -81,7 +81,7 @@ For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure Dev
 
 ### Yarn users
 
-To do a succesfull `yarn install` you need to match the URL of the registry fully.
+To do a successful `yarn install` you need to match the URL of the registry fully.
 Use the `matchHost` config option to specify the full path to the registry.
 
 ```javascript

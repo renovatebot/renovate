@@ -16,7 +16,7 @@ type TestConfig = PackageRuleInputConfig & {
   groupName?: string;
 };
 
-describe('applyPackageRules()', () => {
+describe('util/package-rules', () => {
   const config1: TestConfig = {
     foo: 'bar',
 

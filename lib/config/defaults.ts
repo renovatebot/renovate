@@ -1,4 +1,4 @@
-import { getOptions } from './definitions';
+import { getOptions } from './options';
 import type { AllConfig, RenovateOptions } from './types';
 
 const defaultValues = {

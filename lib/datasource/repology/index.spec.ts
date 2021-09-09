@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import type { RepologyPackage } from './types';
@@ -52,7 +52,7 @@ const fixtureGcc = loadFixture(`gcc.json`);
 const fixturePulseaudio = loadFixture(`pulseaudio.json`);
 const fixtureJdk = loadFixture(`openjdk.json`);
 
-describe(getName(), () => {
+describe('datasource/repology/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateLockFile catches errors 1`] = `
+exports[`manager/npm/post-update/pnpm catches errors 1`] = `
 Array [
   Object {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
@@ -23,7 +23,7 @@ Array [
 ]
 `;
 
-exports[`generateLockFile finds pnpm globally 1`] = `
+exports[`manager/npm/post-update/pnpm finds pnpm globally 1`] = `
 Array [
   Object {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
@@ -46,7 +46,7 @@ Array [
 ]
 `;
 
-exports[`generateLockFile generates lock files 1`] = `
+exports[`manager/npm/post-update/pnpm generates lock files 1`] = `
 Array [
   Object {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
@@ -69,7 +69,7 @@ Array [
 ]
 `;
 
-exports[`generateLockFile performs lock file maintenance 1`] = `
+exports[`manager/npm/post-update/pnpm performs lock file maintenance 1`] = `
 Array [
   Object {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",

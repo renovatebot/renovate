@@ -10,7 +10,7 @@ For example, if you think anything is unclear, or you think something needs to b
 
 You need the following dependencies for local development:
 
-- Git
+- Git `>=2.33.0`
 - Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
@@ -191,7 +191,7 @@ The example command will delete any existing `debug.log` and then save Renovate'
 We want stay backwards-compatible as much as possible, as well as make the code configurable.
 So most new functionality should be controllable via configuration options.
 
-Create your new configuration option in the `lib/config/definitions.ts` file.
+Create your new configuration option in the `lib/config/options/index.ts` file.
 Also create documentation for the option in the `website/docs/configuration-options.md` file.
 
 ## Debugging

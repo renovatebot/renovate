@@ -3,12 +3,11 @@ import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   getConfig,
-  getName,
   loadFixture,
   logger,
   platform,
 } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { setGlobalConfig } from '../../config/global';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import type { Platform } from '../../platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
@@ -33,7 +32,7 @@ async function dryRun(
   ensureIssueCalls = 0
 ) {
   jest.clearAllMocks();
-  setAdminConfig({ dryRun: true });
+  setGlobalConfig({ dryRun: true });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
@@ -41,7 +40,7 @@ async function dryRun(
   expect(platform.ensureIssue).toHaveBeenCalledTimes(ensureIssueCalls);
 }
 
-describe(getName(), () => {
+describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
     it('reads dashboard body', async () => {
       const conf: RenovateConfig = {};
@@ -61,12 +60,12 @@ describe(getName(), () => {
 
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
-      setAdminConfig();
+      setGlobalConfig();
     });
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
@@ -86,7 +85,7 @@ describe(getName(), () => {
         },
       ];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run

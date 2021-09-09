@@ -1,10 +1,8 @@
-import { getName } from '../../../test/util';
 import updateArtifacts from './artifacts';
 
-describe(getName(), () => {
+describe('manager/git-submodules/artifact', () => {
   describe('updateArtifacts()', () => {
     it('returns empty content', () => {
-      // FIXME: explicit assert condition
       expect(
         updateArtifacts({
           packageFileName: '',
@@ -12,10 +10,9 @@ describe(getName(), () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([{ file: { contents: '', name: '' } }]);
     });
     it('returns two modules', () => {
-      // FIXME: explicit assert condition
       expect(
         updateArtifacts({
           packageFileName: '',
@@ -23,7 +20,10 @@ describe(getName(), () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([
+        { file: { name: 'renovate' } },
+        { file: { name: 'renovate-pro' } },
+      ]);
     });
   });
 });

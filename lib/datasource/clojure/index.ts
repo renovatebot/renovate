@@ -10,11 +10,12 @@ export class ClojureDatasource extends Datasource {
     super(ClojureDatasource.id);
   }
 
-  readonly registryStrategy = 'merge';
+  override readonly registryStrategy = 'merge';
 
-  readonly customRegistrySupport = true;
-
-  readonly defaultRegistryUrls = ['https://clojars.org/repo', MAVEN_REPO];
+  override readonly defaultRegistryUrls = [
+    'https://clojars.org/repo',
+    MAVEN_REPO,
+  ];
 
   // eslint-disable-next-line class-methods-use-this
   getReleases({

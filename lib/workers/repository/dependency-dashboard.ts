@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
@@ -113,6 +113,15 @@ export async function ensureDependencyDashboard(
       )
     )
   ) {
+    if (getGlobalConfig().dryRun) {
+      logger.info(
+        'DRY-RUN: Would close Dependency Dashboard ' +
+          config.dependencyDashboardTitle
+      );
+    } else {
+      logger.debug('Closing Dependency Dashboard');
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
+    }
     return;
   }
   // istanbul ignore if
@@ -125,7 +134,7 @@ export async function ensureDependencyDashboard(
     is.nonEmptyArray(branches) &&
     branches.some((branch) => branch.result !== BranchResult.Automerged);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
-    if (getAdminConfig().dryRun) {
+    if (getGlobalConfig().dryRun) {
       logger.info(
         'DRY-RUN: Would close Dependency Dashboard ' +
           config.dependencyDashboardTitle
@@ -338,7 +347,7 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  if (getAdminConfig().dryRun) {
+  if (getGlobalConfig().dryRun) {
     logger.info(
       'DRY-RUN: Would ensure Dependency Dashboard ' +
         config.dependencyDashboardTitle

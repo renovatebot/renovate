@@ -18,6 +18,7 @@ Array [
     "lernaPackages": undefined,
     "managerData": Object {
       "lernaJsonFile": undefined,
+      "yarnZeroInstall": false,
     },
     "npmLock": undefined,
     "npmrc": undefined,
@@ -29,7 +30,6 @@ Array [
     "skipInstalls": undefined,
     "yarnLock": undefined,
     "yarnWorkspacesPackages": undefined,
-    "yarnrc": undefined,
   },
 ]
 `;

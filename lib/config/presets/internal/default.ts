@@ -33,6 +33,12 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  enablePreCommit: {
+    description: 'Enable the pre-commit manager',
+    'pre-commit': {
+      enabled: true,
+    },
+  },
   ignoreModulesAndTests: {
     description:
       'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories',
@@ -571,20 +577,5 @@ export const presets: Record<string, Preset> = {
     description: 'Remove the checkbox controls from PRs',
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
-  },
-  enableGradleLite: {
-    description: 'Enable the gradle-lite manager',
-    'gradle-lite': {
-      enabled: true,
-    },
-  },
-  switchToGradleLite: {
-    description: 'Enable the gradle-lite manager and disable gradle',
-    gradle: {
-      enabled: false,
-    },
-    'gradle-lite': {
-      enabled: true,
-    },
   },
 };

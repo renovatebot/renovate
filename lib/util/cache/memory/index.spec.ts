@@ -1,6 +1,6 @@
 import * as memCache from '.';
 
-describe('getRepoCache', () => {
+describe('util/cache/memory/index', () => {
   it('returns undefined if not init', () => {
     expect(memCache.get('key1')).toBeUndefined();
   });

@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -10,7 +9,7 @@ import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
 
-describe(getName(), () => {
+describe('util/http/index', () => {
   let http: Http;
 
   beforeEach(() => {
@@ -208,5 +207,12 @@ describe(getName(), () => {
     expect(foo).toBeTrue();
     expect(bar).toBeTrue();
     expect(baz).toBeTrue();
+  });
+
+  it('getBuffer', async () => {
+    httpMock.scope(baseUrl).get('/').reply(200, Buffer.from('test'));
+    const res = await http.getBuffer('http://renovate.com');
+    expect(res.body).toBeInstanceOf(Buffer);
+    expect(res.body.toString('utf-8')).toEqual('test');
   });
 });

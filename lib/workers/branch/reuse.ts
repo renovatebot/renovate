@@ -1,8 +1,9 @@
-import { getAdminConfig } from '../../config/admin';
-import type { RenovateConfig } from '../../config/types';
+import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
+import type { RangeStrategy } from '../../types';
 import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
+import type { BranchConfig } from '../types';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
@@ -10,7 +11,7 @@ type ParentBranch = {
 };
 
 export async function shouldReuseExistingBranch(
-  config: RenovateConfig
+  config: BranchConfig
 ): Promise<ParentBranch> {
   const { branchName } = config;
   // Check if branch exists
@@ -35,7 +36,7 @@ export async function shouldReuseExistingBranch(
     if (pr.labels?.includes(config.rebaseLabel)) {
       logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
       // istanbul ignore if
-      if (getAdminConfig().dryRun) {
+      if (getGlobalConfig().dryRun) {
         logger.info(
           `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
         );
@@ -86,5 +87,31 @@ export async function shouldReuseExistingBranch(
     logger.debug(`Branch is not mergeable but can't be rebased`);
   }
   logger.debug(`Branch does not need rebasing`);
+
+  // Branches can get in an inconsistent state if "update-lockfile" is used at the same time as other strategies
+  // On the first execution, everything is executed, but if on a second execution the package.json modification is
+  // skipped but the lockfile update is executed, the lockfile will have a different result than if it was executed
+  // along with the changes to the package.json. Thus ending up with an incomplete branch update
+  // This is why we are skipping branch reuse in this case (#10050)
+  const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
+  for (const upgrade of config.upgrades) {
+    groupedByPackageFile[upgrade.packageFile] =
+      groupedByPackageFile[upgrade.packageFile] || new Set();
+    groupedByPackageFile[upgrade.packageFile].add(upgrade.rangeStrategy);
+
+    if (
+      groupedByPackageFile[upgrade.packageFile].size > 1 &&
+      groupedByPackageFile[upgrade.packageFile].has('update-lockfile')
+    ) {
+      logger.debug(
+        `Detected multiple rangeStrategies along with update-lockfile`
+      );
+      return {
+        reuseExistingBranch: false,
+        isModified: false,
+      };
+    }
+  }
+
   return { reuseExistingBranch: true, isModified: false };
 }

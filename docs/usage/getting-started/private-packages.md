@@ -30,7 +30,7 @@ Note: if you self-host Renovate, and have a self-hosted registry which _doesn't_
 Renovate supports config presets, including those which are private.
 
 Although npm presets were the first type supported, they are now deprecated and it is recommend that all users migrate to git-hosted "local" presets instead.
-However if you do still use them, private modules should work if you configure the `npmrc` file including token credentials in your bot admin config.
+However if you do still use them, private modules should work if you configure the `npmrc` file including token credentials in your bot global config.
 Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.
 
 The recommended way of using local presets is to configure then using "local" presets, e.g. `"extends": ["local>myorg/renovate-config"]`, and ensure that the platform token has access to that repo.
@@ -96,7 +96,7 @@ It can be confusing for people who host their own source code privately to be as
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
 
-- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, it might be better to create a "empty" account just for this purpose.
+- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, it might be better to create an "empty" account just for this purpose.
 - Add the PAT to Renovate using the environment variable `GITHUB_COM_TOKEN`
 
 ## Package Manager Credentials for Artifact Updating

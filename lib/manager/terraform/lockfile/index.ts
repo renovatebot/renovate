@@ -62,14 +62,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`terraform.updateArtifacts(${packageFileName})`);
 
-  // TODO remove experimental flag, if functionality is confirmed
-  if (!process.env.RENOVATE_X_TERRAFORM_LOCK_FILE) {
-    logger.debug(
-      `terraform.updateArtifacts: skipping updates. Experimental feature not activated`
-    );
-    return null;
-  }
-
   const lockFilePath = findLockFile(packageFileName);
   try {
     const lockFileContent = await readLockFile(lockFilePath);
@@ -88,7 +80,9 @@ export async function updateArtifacts({
       // update all locks in the file during maintenance --> only update version in constraints
       const maintenanceUpdates = await updateAllLocks(locks);
       updates.push(...maintenanceUpdates);
-    } else {
+    } else if (
+      ['provider', 'required_provider'].includes(updatedDeps[0].depType)
+    ) {
       // update only specific locks but with constrain updates
       const dep = updatedDeps[0];
 

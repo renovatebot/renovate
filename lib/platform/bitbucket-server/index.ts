@@ -214,8 +214,6 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url: gitUrl,
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
       cloneSubmodules,
     });
 

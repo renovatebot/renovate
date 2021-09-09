@@ -28,7 +28,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option).
+The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
 
 ```json
 {
@@ -126,10 +126,6 @@ e.g.
 }
 ```
 
-## composerIgnorePlatformReqs
-
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.s
-
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
@@ -209,14 +205,6 @@ This should be set to a Personal Access Token (GitHub only) when `forkMode` is s
 Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
-## gitAuthor
-
-You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
-
-**Note** We strongly recommend that the Git author email you use is unique to Renovate.
-Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
-
 ## gitNoVerify
 
 Controls when Renovate passes the `--no-verify` flag to `git`.
@@ -237,6 +225,17 @@ Before the first commit in a repository, Renovate will:
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
+
+## gitUrl
+
+Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
+Currently works for GitLab only.
+
+Possible values:
+
+- `default`: use HTTPS URLs provided by the platform for Git
+- `ssh`: use SSH URLs provided by the platform for Git
+- `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
 ## logContext
 
@@ -407,7 +406,7 @@ It could then be used in a repository config or preset like so:
 }
 ```
 
-Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
+Secret names must start with an upper or lower case character and can contain only characters, digits, or underscores.
 
 ## skipInstalls
 

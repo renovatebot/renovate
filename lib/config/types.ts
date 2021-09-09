@@ -85,8 +85,8 @@ export interface GlobalOnlyConfig {
 }
 
 // Config options used within the repository worker, but not user configurable
-// The below should contain config options where admin=true
-export interface RepoAdminConfig {
+// The below should contain config options where globalOnly=true
+export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
@@ -270,7 +270,7 @@ export interface RenovateOptionBase {
    * If true, the option can only be configured by people with access to the Renovate instance.
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
-  admin?: boolean;
+  globalOnly?: boolean;
 
   allowedValues?: string[];
 
@@ -373,11 +373,6 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
-}
-
-export interface ManagerConfig extends RenovateConfig {
-  language: string;
-  manager: string;
 }
 
 export interface MigratedConfig {

@@ -2,8 +2,8 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
@@ -26,7 +26,7 @@ jest.mock('../../../lib/util/git');
 jest.mock('../../../lib/util/host-rules');
 jest.mock('./host-rules');
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
@@ -34,7 +34,14 @@ const adminConfig: RepoAdminConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-describe('bundler.updateArtifacts()', () => {
+const updatedGemfileLock = {
+  file: {
+    contents: 'Updated Gemfile.lock',
+    name: 'Gemfile.lock',
+  },
+};
+
+describe('manager/bundler/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -45,14 +52,11 @@ describe('bundler.updateArtifacts()', () => {
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     docker.resetPrefetchedImages();
 
-    setAdminConfig(adminConfig);
-
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      join(adminConfig.cacheDir, './others/gem')
-    );
+    setGlobalConfig(adminConfig);
+    fs.ensureCacheDir.mockResolvedValue('/tmp/cache/others/gem');
   });
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
   it('returns null by default', async () => {
     expect(
@@ -72,7 +76,6 @@ describe('bundler.updateArtifacts()', () => {
       modified: [],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -80,7 +83,7 @@ describe('bundler.updateArtifacts()', () => {
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
-    ).toMatchSnapshot();
+    ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works for default binarySource', async () => {
@@ -92,7 +95,6 @@ describe('bundler.updateArtifacts()', () => {
       modified: ['Gemfile.lock'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -100,11 +102,11 @@ describe('bundler.updateArtifacts()', () => {
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([updatedGemfileLock]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
-    setAdminConfig({ ...adminConfig, binarySource: 'global' });
+    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
     fs.readLocalFile.mockResolvedValueOnce(null);
@@ -113,7 +115,6 @@ describe('bundler.updateArtifacts()', () => {
       modified: ['Gemfile.lock'],
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -121,12 +122,12 @@ describe('bundler.updateArtifacts()', () => {
         newPackageFileContent: 'Updated Gemfile content',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([updatedGemfileLock]);
     expect(execSnapshots).toMatchSnapshot();
   });
   describe('Docker', () => {
     beforeEach(() => {
-      setAdminConfig({
+      setGlobalConfig({
         ...adminConfig,
         binarySource: 'docker',
       });
@@ -147,7 +148,6 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -155,11 +155,11 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
     it('constraints options', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -174,7 +174,6 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -188,11 +187,11 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid constraints options', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -207,7 +206,6 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -221,12 +219,12 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('injects bundler host configuration environment variables', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -254,7 +252,6 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -262,12 +259,12 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('injects bundler host configuration as command with bundler < 2', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -295,7 +292,6 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -308,12 +304,12 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('injects bundler host configuration as command with bundler >= 2', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -341,7 +337,6 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -354,12 +349,12 @@ describe('bundler.updateArtifacts()', () => {
             },
           },
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
 
     it('injects bundler host configuration as command with bundler == latest', async () => {
-      setAdminConfig({ ...adminConfig, binarySource: 'docker' });
+      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -387,7 +382,6 @@ describe('bundler.updateArtifacts()', () => {
         modified: ['Gemfile.lock'],
       } as StatusResult);
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
-      // FIXME: explicit assert condition
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -395,7 +389,7 @@ describe('bundler.updateArtifacts()', () => {
           newPackageFileContent: 'Updated Gemfile content',
           config,
         })
-      ).toMatchSnapshot();
+      ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchSnapshot();
     });
   });
@@ -410,7 +404,6 @@ describe('bundler.updateArtifacts()', () => {
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as StatusResult);
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -421,7 +414,13 @@ describe('bundler.updateArtifacts()', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([
+      {
+        artifactError: {
+          lockFile: 'Gemfile.lock',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lockFileMaintenance', async () => {

@@ -1,6 +1,6 @@
-import { getName, git, mocked } from '../../../../test/util';
-import { setAdminConfig } from '../../../config/admin';
+import { git, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
+import { setGlobalConfig } from '../../../config/global';
 import * as _lockFiles from '../../../manager/npm/post-update';
 import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _npm from '../../../manager/npm/post-update/npm';
@@ -28,10 +28,10 @@ hostRules.find = jest.fn((_) => ({
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
-describe(getName(), () => {
+describe('workers/branch/lock-files/index', () => {
   describe('writeUpdatedPackageFiles', () => {
     beforeEach(() => {
-      setAdminConfig({
+      setGlobalConfig({
         localDir: 'some-tmp-dir',
       });
       fs.outputFile = jest.fn();
@@ -70,7 +70,7 @@ describe(getName(), () => {
   });
   describe('getAdditionalFiles', () => {
     beforeEach(() => {
-      setAdminConfig({
+      setGlobalConfig({
         localDir: 'some-tmp-dir',
       });
       git.getFile.mockResolvedValueOnce('some lock file contents');

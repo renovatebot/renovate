@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { api as ubuntu } from '.';
 
-describe(getName(), () => {
+describe('versioning/ubuntu/index', () => {
   // validation
 
   it('isValid', () => {

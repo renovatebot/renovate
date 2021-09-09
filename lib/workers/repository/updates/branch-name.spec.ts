@@ -1,8 +1,7 @@
-import { getName } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import { generateBranchName } from './branch-name';
 
-describe(getName(), () => {
+describe('workers/repository/updates/branch-name', () => {
   describe('getBranchName()', () => {
     it('uses groupName if no slug defined', () => {
       const upgrade: RenovateConfig = {
@@ -225,11 +224,11 @@ describe(getName(), () => {
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-^-name3' },
-          expectedBranchName: 'renovate/bad-branch---name3',
+          expectedBranchName: 'renovate/bad-branch-name3',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name : 4' },
-          expectedBranchName: 'renovate/bad-branch-name---4',
+          expectedBranchName: 'renovate/bad-branch-name-4',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name5/' },
@@ -250,6 +249,14 @@ describe(getName(), () => {
         {
           upgrade: { branchName: 'renovate/bad-branch-name9.' },
           expectedBranchName: 'renovate/bad-branch-name9',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch--name10' },
+          expectedBranchName: 'renovate/bad-branch-name10',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad--branch---name11' },
+          expectedBranchName: 'renovate/bad-branch-name11',
         },
       ];
       fixtures.forEach((fixture) => {

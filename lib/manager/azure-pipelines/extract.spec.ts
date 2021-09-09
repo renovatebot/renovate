@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import {
   extractContainer,
   extractPackageFile,
@@ -14,7 +14,7 @@ const azurePipelinesNoDependency = loadFixture(
   'azure-pipelines-no-dependency.yaml'
 );
 
-describe(getName(), () => {
+describe('manager/azure-pipelines/extract', () => {
   it('should parse a valid azure-pipelines file', () => {
     const file = parseAzurePipelines(azurePipelines, 'some-file');
     expect(file).not.toBeNull();
@@ -72,7 +72,6 @@ describe(getName(), () => {
 
   describe('extractContainer()', () => {
     it('should extract container information', () => {
-      // FIXME: explicit assert condition
       expect(
         extractContainer({
           image: 'ubuntu:16.04',

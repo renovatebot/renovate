@@ -1,6 +1,6 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -85,7 +85,7 @@ export function extractPackageFile(
     res.registryUrls = registryUrls.map((url) => {
       // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
       const cleaned = url.replace(/^"/, '').replace(/"$/, '');
-      if (!getAdminConfig().exposeAllEnv) {
+      if (!getGlobalConfig().exposeAllEnv) {
         return cleaned;
       }
       // interpolate any environment variables

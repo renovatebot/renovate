@@ -1,5 +1,5 @@
 import { mergeChildConfig } from '../../../../config';
-import { getAdminConfig } from '../../../../config/admin';
+import { getGlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_FORKED,
@@ -7,7 +7,7 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import { checkoutBranch } from '../../../../util/git';
+import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { isOnboarded, onboardingPrExists } from './check';
@@ -30,6 +30,8 @@ export async function checkOnboardingBranch(
     throw new Error(REPOSITORY_FORKED);
   }
   logger.debug('Repo is not onboarded');
+  // global gitAuthor will need to be used
+  setGitAuthor(config.gitAuthor);
   if (await onboardingPrExists(config)) {
     logger.debug('Onboarding PR already exists');
     const commit = await rebaseOnboardingBranch(config);
@@ -66,7 +68,7 @@ export async function checkOnboardingBranch(
       );
     }
   }
-  if (!getAdminConfig().dryRun) {
+  if (!getGlobalConfig().dryRun) {
     await checkoutBranch(onboardingBranch);
   }
   const branchList = [onboardingBranch];
