@@ -392,7 +392,7 @@ sub   rsa4096 2021-09-10 [E]
 The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://renovatebot.com/encrypt> for your own use.
 
-Any encrypted secrets using PGP must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
+Any encrypted secrets using GPG must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
 Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
 
