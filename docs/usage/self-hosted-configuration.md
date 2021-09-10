@@ -365,14 +365,7 @@ You selected this USER-ID:
     "Renovate Bot <renovate@whitesourcesoftware.com>"
 
 Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
-We need to generate a lot of random bytes. It is a good idea to perform
-some other action (type on the keyboard, move the mouse, utilize the
-disks) during the prime generation; this gives the random number
-generator a better chance to gain enough entropy.
-We need to generate a lot of random bytes. It is a good idea to perform
-some other action (type on the keyboard, move the mouse, utilize the
-disks) during the prime generation; this gives the random number
-generator a better chance to gain enough entropy.
+
 gpg: key 0649CC3899F22A66 marked as ultimately trusted
 gpg: revocation certificate stored as '/Users/rhys/.gnupg/openpgp-revocs.d/794B820F34B34A8DF32AADB20649CC3899F22A66.rev'
 public and secret key created and signed.
