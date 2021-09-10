@@ -146,6 +146,7 @@ async function createUrlForDependencyPom(
       dependency,
       repoUrl
     );
+
     if (fullVersion !== null) {
       return `${version}/${dependency.name}-${fullVersion}.pom`;
     }
@@ -174,17 +175,16 @@ async function filterMissingArtifacts(
           await createUrlForDependencyPom(version, dependency, repoUrl)
         );
 
-        if (artifactUrl) {
-          return [version, await isHttpResourceExists(artifactUrl)];
-        }
-
-        return null;
+        return [
+          version,
+          artifactUrl ? await isHttpResourceExists(artifactUrl) : null,
+        ];
       },
       { concurrency: 5 }
     );
 
     artifactsInfo = results
-      .filter((value) => value != null)
+      .filter(([_, artifactUrl]) => Boolean(artifactUrl))
       .reduce(
         (acc, [key, value]) => ({
           ...acc,
