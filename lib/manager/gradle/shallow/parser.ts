@@ -141,21 +141,21 @@ function processDepInterpolation({
   if (interpolationResult && isDependencyString(interpolationResult)) {
     const dep = parseDependencyString(interpolationResult);
     if (dep) {
-      const lastChild = token.children[token.children.length - 1];
-      const lastChildValue = lastChild?.value;
-      const variable = variables[lastChildValue];
-      if (
-        lastChild?.type === TokenType.Variable &&
-        variable &&
-        variable?.value === dep.currentValue
-      ) {
-        dep.managerData = {
-          fileReplacePosition: variable.fileReplacePosition,
-          packageFile: variable.packageFile,
-        };
-        dep.groupName = variable.key;
-        return { deps: [dep] };
-      }
+      token.children.forEach((child) => {
+        const variable = variables[child.value];
+        if (
+          child?.type === TokenType.Variable &&
+          variable &&
+          variable?.value === dep.currentValue
+        ) {
+          dep.managerData = {
+            fileReplacePosition: variable.fileReplacePosition,
+            packageFile: variable.packageFile,
+          };
+          dep.groupName = variable.key;
+        }
+      });
+      return { deps: [dep] };
     }
   }
   return null;
@@ -273,6 +273,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // 'foo.bar:baz:1.2.3'
+    // 'foo.bar:baz:1.2.3@ext'
     matchers: [
       {
         matchType: TokenType.String,
@@ -283,6 +284,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // "foo.bar:baz:${bazVersion}"
+    // "foo.bar:baz:${bazVersion}@ext"
     matchers: [
       {
         matchType: TokenType.StringInterpolation,
