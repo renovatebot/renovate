@@ -1,7 +1,9 @@
 [GitLab Packages API](https://docs.gitlab.com/ee/api/packages.html) supports looking up package versions from [all types of packages registry supported by GitLab](https://docs.gitlab.com/ee/user/packages/package_registry/index.html) and can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
 
-To specify which specific repository should be queried when looking up a package, the `registryUrl` has to be set following this format: `https://gitlab.com/user/project`.
-As an example, `https://gitlab.com/gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list` would look for packages in the generic packages repository of the `gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list` project.
+To specify which specific repository should be queried when looking up a package, the `depName` should be formed with the project path first,
+then the `:` and finally the package name.
+
+As an example, `gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list:@gitlab-org/nk-js` would look for the`@gitlab-org/nk-js` packages in the generic packages repository of the `gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list` project.
 
 If you are using a self-hosted GitLab instance, please note the following requirements:
 
@@ -30,7 +32,7 @@ This can be achieved by configuring a generic regex manager in `renovate.json` f
 Now you may use comments in your `versions.ini` files to automatically update dependencies, which could look like this:
 
 ```ini
-# renovate: datasource=gitlab-packages depName=@gitlab-org/nk-js versioning=semver registryUrl=https://gitlab.com/gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list
+# renovate: datasource=gitlab-packages depName=gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list:@gitlab-org/nk-js versioning=semver registryUrl=https://gitlab.com
 NKJS_VERSION=3.4.0
 
 ```

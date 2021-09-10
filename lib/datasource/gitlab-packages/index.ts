@@ -1,6 +1,6 @@
 import { cache } from '../../util/cache/package/decorator';
 import { GitlabHttp } from '../../util/http/gitlab';
-import * as url from '../../util/url';
+import { joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource } from './common';
@@ -19,6 +19,8 @@ export class GitlabPackagesDatasource extends Datasource {
 
   override defaultVersioning = 'docker';
 
+  override defaultRegistryUrls = ['https://gitlab.com'];
+
   constructor() {
     super(datasource);
     this.http = new GitlabHttp();
@@ -26,18 +28,17 @@ export class GitlabPackagesDatasource extends Datasource {
 
   static getGitlabPackageApiUrl(
     registryUrl: string,
-    lookupName: string
+    projectName: string,
+    packageName: string
   ): string {
-    const parsedRegistryUrl = url.parseUrl(registryUrl);
+    const projectNameEncoded = encodeURIComponent(projectName);
+    const packageNameEncoded = encodeURIComponent(packageName);
 
-    const packageName = encodeURIComponent(lookupName);
-
-    const server = parsedRegistryUrl.origin;
-    const project = encodeURIComponent(parsedRegistryUrl.pathname.substring(1)); // remove leading /
-
-    return url.resolveBaseUrl(
-      server,
-      `/api/v4/projects/${project}/packages?package_name=${packageName}&per_page=100`
+    return joinUrlParts(
+      registryUrl,
+      `api/v4/projects`,
+      projectNameEncoded,
+      `packages?package_name=${packageNameEncoded}&per_page=100`
     );
   }
 
@@ -50,10 +51,16 @@ export class GitlabPackagesDatasource extends Datasource {
     registryUrl,
     lookupName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const split = lookupName.split(':', 2);
+    const projectName = split[0];
+    const packageName = split[1];
+
     const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
       registryUrl,
-      lookupName
+      projectName,
+      packageName
     );
+
     const result: ReleaseResult = {
       releases: null,
     };
@@ -67,7 +74,7 @@ export class GitlabPackagesDatasource extends Datasource {
       result.releases = response
         // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
         // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
-        .filter((r) => r.name === lookupName)
+        .filter((r) => r.name === packageName)
         .map(({ version, created_at }) => ({
           version,
           releaseTimestamp: created_at,
