@@ -17,6 +17,7 @@ const repoGlobalOptions = [
   'exposeAllEnv',
   'migratePresets',
   'privateKey',
+  'privateKeyOld',
   'localDir',
   'cacheDir',
 ];
