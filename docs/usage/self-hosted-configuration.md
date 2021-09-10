@@ -324,8 +324,6 @@ This private key is used to decrypt config files.
 The corresponding public key can be used to create encrypted values for config files.
 If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://renovatebot.com/encrypt>.
 
-Previously, public key encryption was used to encrypt secrets, but this approach has now been deprecated in favor of PGP.
-
 To create the key pair with GPG use the following commands:
 
 - `gpg --full-generate-key` and follow the prompts to generate a key. Name and email are not important to Renovate, and do not configure a passphrase. Use a 4096bit key.
@@ -397,6 +395,8 @@ The public key can be used to replace the existing key in <https://renovatebot.c
 Any encrypted secrets using PGP must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
 Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
+
+Note: smiple public key encryption was previously used to encrypt secrets, but this approach has now been deprecated and no longer documented.
 
 ## privateKeyOld
 
