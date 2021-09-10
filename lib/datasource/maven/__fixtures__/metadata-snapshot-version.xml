@@ -1,30 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><metadata>
   <groupId>org.example</groupId>
   <artifactId>package</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.3-SNAPSHOT</version>
   <versioning>
     <snapshot>
-      <timestamp>20200101.123456</timestamp>
-      <buildNumber>5</buildNumber>
+      <timestamp>20200101.010003</timestamp>
+      <buildNumber>3</buildNumber>
     </snapshot>
-    <snapshotVersions>
-      <snapshotVersion>
-        <extension>jar</extension>
-        <value>1.0.1-20200101.123456-5</value>
-        <updated>20200101123456</updated>
-      </snapshotVersion>
-      <snapshotVersion>
-        <extension>pom</extension>
-        <value>1.0.1-20200101.123456-5</value>
-        <updated>20200101123456</updated>
-      </snapshotVersion>
-      <snapshotVersion>
-        <classifier>javadoc</classifier>
-        <extension>jar</extension>
-        <value>1.0.1-20200101.123456-5</value>
-        <updated>20200101123456</updated>
-      </snapshotVersion>
-    </snapshotVersions>
-    <lastUpdated>20130301200000</lastUpdated>
   </versioning>
 </metadata>

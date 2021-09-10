@@ -11,7 +11,7 @@ const baseUrlCustom = 'https://custom.registry.renovatebot.com';
 
 interface SnapshotOpts {
   version: string;
-  concreteVersions?: string[];
+  jarStatus?: number;
   meta?: string;
 }
 
@@ -44,6 +44,24 @@ function mockGenericPackage(opts: MockOpts = {}) {
         }
       : opts.jars;
 
+  const snapshots =
+    opts.snapshots === undefined
+      ? [
+          {
+            version: '1.0.3-SNAPSHOT',
+            meta: loadFixture('metadata-snapshot-version.xml'),
+            jarStatus: 200,
+          },
+          {
+            version: '1.0.4-SNAPSHOT',
+            meta: loadFixture('metadata-snapshot-version-invalid.xml'),
+          },
+          {
+            version: '1.0.5-SNAPSHOT',
+          },
+        ]
+      : opts.snapshots;
+
   const scope = httpMock.scope(base);
 
   const [group, artifact] = dep.split(':');
@@ -62,6 +80,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
   if (jars) {
     Object.entries(jars).forEach(([version, status]) => {
       const [major, minor, patch] = version
+        .replace('-SNAPSHOT', '')
         .split('.')
         .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
@@ -72,27 +91,41 @@ function mockGenericPackage(opts: MockOpts = {}) {
     });
   }
 
-  if (opts.snapshots !== undefined) {
-    opts.snapshots.forEach((snapshot) => {
+  if (snapshots) {
+    snapshots.forEach((snapshot) => {
       if (snapshot.meta) {
         scope
           .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
           .reply(200, snapshot.meta);
+      } else {
+        scope
+          .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
+          .reply(404, '');
       }
 
-      if (snapshot.concreteVersions) {
-        snapshot.concreteVersions.forEach((concreteVersion) => {
-          const [major, minor, patch] = snapshot.version
-            .split('.')
-            .map((x) => parseInt(x, 10))
-            .map((x) => (x < 10 ? `0${x}` : `${x}`));
-          const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
-          scope
-            .head(
-              `/${packagePath}/${snapshot.version}/${artifact}-${concreteVersion}.pom`
-            )
-            .reply(200, '', { 'Last-Modified': timestamp });
-        });
+      if (snapshot.jarStatus) {
+        const [major, minor, patch] = snapshot.version
+          .replace('-SNAPSHOT', '')
+          .split('.')
+          .map((x) => parseInt(x, 10))
+          .map((x) => (x < 10 ? `0${x}` : `${x}`));
+        const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
+        scope
+          .head(
+            `/${packagePath}/${
+              snapshot.version
+            }/${artifact}-${snapshot.version.replace(
+              '-SNAPSHOT',
+              ''
+            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+          )
+          .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp });
+      } else {
+        scope
+          .head(
+            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
+          )
+          .reply(404, '');
       }
     });
   }
@@ -158,6 +191,7 @@ describe('datasource/maven/index', () => {
       meta: loadFixture('metadata-extra.xml'),
       latest: '3.0.0',
       jars: { '3.0.0': 200 },
+      snapshots: [],
     });
 
     const { releases } = await get(
@@ -168,6 +202,7 @@ describe('datasource/maven/index', () => {
 
     expect(releases).toMatchObject([
       { version: '1.0.0' },
+      { version: '1.0.3-SNAPSHOT' },
       { version: '2.0.0' },
       { version: '3.0.0' },
     ]);
@@ -338,72 +373,6 @@ describe('datasource/maven/index', () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('includes snapshot releases', async () => {
-    mockGenericPackage({
-      meta: loadFixture('metadata-snapshot.xml'),
-      latest: '1.0.0',
-      jars: { '1.0.0': 200 },
-      snapshots: [
-        {
-          version: '1.0.1-SNAPSHOT',
-          concreteVersions: ['1.0.1-20200101.123456-5'],
-          meta: loadFixture('metadata-snapshot-version.xml'),
-        },
-      ],
-    });
-
-    const { releases } = await get('org.example:package', baseUrl);
-
-    expect(releases).toMatchObject([
-      { version: '1.0.0' },
-      { version: '1.0.1-SNAPSHOT' },
-    ]);
-  });
-
-  it('skips missing snapshot releases', async () => {
-    mockGenericPackage({
-      meta: loadFixture('metadata-snapshot.xml'),
-      latest: '1.0.0',
-      jars: { '1.0.0': 200 },
-    });
-
-    httpMock
-      .scope(baseUrl)
-      .get('/org/example/package/1.0.1-SNAPSHOT/maven-metadata.xml')
-      .reply(404, '');
-    httpMock
-      .scope(baseUrl)
-      .head('/org/example/package/1.0.1-SNAPSHOT/package-1.0.1-SNAPSHOT.pom')
-      .reply(404, '');
-
-    const { releases } = await get('org.example:package', baseUrl);
-
-    expect(releases).toMatchObject([{ version: '1.0.0' }]);
-  });
-
-  it('skips invalid snapshot releases', async () => {
-    mockGenericPackage({
-      meta: loadFixture('metadata-snapshot.xml'),
-      latest: '1.0.0',
-      jars: { '1.0.0': 200 },
-      snapshots: [
-        {
-          version: '1.0.1-SNAPSHOT',
-          meta: loadFixture('metadata-snapshot-version-invalid.xml'),
-        },
-      ],
-    });
-
-    httpMock
-      .scope(baseUrl)
-      .head('/org/example/package/1.0.1-SNAPSHOT/package-1.0.1-SNAPSHOT.pom')
-      .reply(404, '');
-
-    const { releases } = await get('org.example:package', baseUrl);
-
-    expect(releases).toMatchObject([{ version: '1.0.0' }]);
-  });
-
   describe('fetching parent info', () => {
     const parentPackage = {
       dep: 'org.example:parent',
@@ -411,6 +380,7 @@ describe('datasource/maven/index', () => {
       pom: loadFixture('parent-scm-homepage/pom.xml'),
       latest: '1.0.0',
       jars: null,
+      snapshots: [],
     };
 
     it('should get source and homepage from parent', async () => {
@@ -419,6 +389,7 @@ describe('datasource/maven/index', () => {
         pom: loadFixture('child-no-info/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
       mockGenericPackage(parentPackage);
 
@@ -437,6 +408,7 @@ describe('datasource/maven/index', () => {
         pom: loadFixture('child-empty/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
 
       const res = await get();
@@ -459,6 +431,7 @@ describe('datasource/maven/index', () => {
         pom: parentPom,
         latest: '2.0.0',
         jars: null,
+        snapshots: [],
       };
 
       const childMeta = loadFixture('child-parent-cycle/child.meta.xml');
@@ -469,12 +442,14 @@ describe('datasource/maven/index', () => {
         pom: childPom,
         latest: '2.0.0',
         jars: null,
+        snapshots: [],
       };
 
       mockGenericPackage({
         ...childPomMock,
         meta: childMeta,
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
       mockGenericPackage(parentPomMock);
       mockGenericPackage(childPomMock);
@@ -496,6 +471,7 @@ describe('datasource/maven/index', () => {
         pom: loadFixture('child-scm/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
       mockGenericPackage(parentPackage);
 
@@ -514,6 +490,7 @@ describe('datasource/maven/index', () => {
         pom: loadFixture('child-url/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
       mockGenericPackage(parentPackage);
 
@@ -532,6 +509,7 @@ describe('datasource/maven/index', () => {
         pom: loadFixture('child-all-info/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
 
       const res = await get();
@@ -549,6 +527,7 @@ describe('datasource/maven/index', () => {
         pom: loadFixture('child-scm-gitatcolon/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
 
       const res = await get();
@@ -565,6 +544,7 @@ describe('datasource/maven/index', () => {
         pom: loadFixture('child-scm-gitatslash/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
 
       const res = await get();
@@ -580,6 +560,7 @@ describe('datasource/maven/index', () => {
         pom: loadFixture('child-scm-gitprotocol/pom.xml'),
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
+        snapshots: [],
       });
 
       const res = await get();
