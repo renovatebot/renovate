@@ -52,7 +52,7 @@ This package will manage two parts of the `kustomization.yaml` file:
   digest: sha256:3eeba3e2caa30d2aba0fd78a34c1bbeebaa1b96c7aa3c95ec9bac44163c5ca4f
 ```
 
-- Images with values ignored by kustomize will be skipped to avoid ambiguity:
+- Images with values ignored by Kustomize will be skipped to avoid ambiguity:
 
 ```yaml
 # bad: skipped because newTag: is ignored when digest: is set
