@@ -43,6 +43,11 @@ export async function parseConfigs(
     delete config.privateKeyPath;
   }
 
+  if (!config.privateKeyOld && config.privateKeyPathOld) {
+    config.privateKey = await readFile(config.privateKeyPathOld, 'utf8');
+    delete config.privateKeyPathOld;
+  }
+
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
     setContext(config.logContext);

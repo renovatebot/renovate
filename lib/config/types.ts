@@ -80,6 +80,7 @@ export interface GlobalOnlyConfig {
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
+  privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }

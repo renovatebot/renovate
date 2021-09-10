@@ -81,9 +81,14 @@ describe('workers/global/config/parse/index', () => {
     });
     it('reads private key from file', async () => {
       const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
+      const privateKeyPathOld = upath.join(
+        __dirname,
+        '__fixtures__/private.pem'
+      );
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,
         RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
+        RENOVATE_PRIVATE_KEY_PATH_OLD: privateKeyPathOld,
       };
       const expected = await readFile(privateKeyPath, 'utf8');
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
