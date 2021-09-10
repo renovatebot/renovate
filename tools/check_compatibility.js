@@ -1,16 +1,16 @@
 const shell = require('shelljs');
 
-function checkGitVersion() {
+function checkgitversion() {
   try {
-    const gitVersion = shell
+    const gitversion = shell
       .exec('git --version', { silent: true })
       .stdout.toString()
       .slice(12)
       .split('.');
     if (
-      parseInt(gitVersion[0], 10) >= 2 &&
-      parseInt(gitVersion[1], 10) >= 22 &&
-      parseInt(gitVersion[2], 10) >= 0
+      parseInt(gitversion[0], 10) >= 2 &&
+      parseInt(gitversion[1], 10) >= 22 &&
+      parseInt(gitversion[2], 10) >= 0
     ) {
       process.exit(0);
     } else {
@@ -22,4 +22,4 @@ function checkGitVersion() {
     process.exit(1);
   }
 }
-checkGitVersion();
+checkgitversion();
