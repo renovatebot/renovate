@@ -5,6 +5,11 @@ import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
 
+hostRules.add({
+  hostType: PLATFORM_TYPE_GITLAB,
+  token: '123test',
+});
+
 const gitlabApiHost = 'https://gitlab.com';
 const selfHostedUrl = 'http://mycompany.com/gitlab';
 
