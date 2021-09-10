@@ -20,7 +20,15 @@ export async function tryDecryptPgp(
       // prettier-ignore
       armoredKey: privateKey.replace(/\n[ \t]+/g, '\n'), // little massage to help a common problem
     });
-    const armoredMessage = `-----BEGIN PGP MESSAGE-----\n\n${encryptedStr}\n-----END PGP MESSAGE-----`;
+    const startBlock = '-----BEGIN PGP MESSAGE-----\n\n';
+    const endBlock = '\n-----END PGP MESSAGE-----';
+    let armoredMessage = encryptedStr.trim();
+    if (!armoredMessage.startsWith(startBlock)) {
+      armoredMessage = `${startBlock}${armoredMessage}`;
+    }
+    if (!armoredMessage.endsWith(endBlock)) {
+      armoredMessage = `${armoredMessage}${endBlock}`;
+    }
     const message = await openpgp.readMessage({
       armoredMessage,
     });
