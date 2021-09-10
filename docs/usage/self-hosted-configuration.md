@@ -396,7 +396,7 @@ Any encrypted secrets using PGP must have a mandatory organization/group scope, 
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
 Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
 
-Note: smiple public key encryption was previously used to encrypt secrets, but this approach has now been deprecated and no longer documented.
+Note: simple public key encryption was previously used to encrypt secrets, but this approach has now been deprecated and no longer documented.
 
 ## privateKeyOld
 
