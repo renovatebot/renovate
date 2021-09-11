@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { PlatformID } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
@@ -19,7 +19,7 @@ import type {
 
 function getPreCommands(): string[] | null {
   const credentials = find({
-    hostType: PLATFORM_TYPE_GITHUB,
+    hostType: PlatformID.Github,
     url: 'https://api.github.com/',
   });
   let preCommands = null;

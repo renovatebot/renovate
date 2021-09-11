@@ -2,7 +2,7 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
+import { PlatformID } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -127,7 +127,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: PLATFORM_TYPE_BITBUCKET,
+    hostType: PlatformID.Bitbucket,
     url: defaults.endpoint,
   });
   config = {

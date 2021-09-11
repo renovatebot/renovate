@@ -3,7 +3,7 @@ import type { NormalizedOptions } from 'got';
 import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-  PLATFORM_TYPE_GITEA,
+  PlatformID,
 } from '../../constants/platforms';
 import type { GotOptions } from './types';
 
@@ -15,7 +15,7 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
   }
 
   if (options.token) {
-    if (options.hostType === PLATFORM_TYPE_GITEA) {
+    if (options.hostType === PlatformID.Gitea) {
       options.headers.authorization = `token ${options.token}`;
     } else if (GITHUB_API_USING_HOST_TYPES.includes(options.hostType)) {
       options.headers.authorization = `token ${options.token}`;

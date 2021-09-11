@@ -1,11 +1,4 @@
-import {
-  PLATFORM_TYPE_AZURE,
-  PLATFORM_TYPE_BITBUCKET,
-  PLATFORM_TYPE_BITBUCKET_SERVER,
-  PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../../../constants/platforms';
+import { PlatformID } from '../../../constants/platforms';
 import * as azure from '../azure';
 import * as bitbucket from '../bitbucket';
 import * as bitbucketServer from '../bitbucket-server';
@@ -15,12 +8,12 @@ import * as gitlab from '../gitlab';
 import type { Preset, PresetConfig } from '../types';
 
 const resolvers = {
-  [PLATFORM_TYPE_AZURE]: azure,
-  [PLATFORM_TYPE_BITBUCKET]: bitbucket,
-  [PLATFORM_TYPE_BITBUCKET_SERVER]: bitbucketServer,
-  [PLATFORM_TYPE_GITEA]: gitea,
-  [PLATFORM_TYPE_GITHUB]: github,
-  [PLATFORM_TYPE_GITLAB]: gitlab,
+  [PlatformID.Azure]: azure,
+  [PlatformID.Bitbucket]: bitbucket,
+  [PlatformID.BitbucketServer]: bitbucketServer,
+  [PlatformID.Gitea]: gitea,
+  [PlatformID.Github]: github,
+  [PlatformID.Gitlab]: gitlab,
 };
 
 export function getPreset({

@@ -9,7 +9,7 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import delay from 'delay';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
-import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
+import { PlatformID } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -73,7 +73,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PLATFORM_TYPE_AZURE,
+  hostType: PlatformID.Azure,
 };
 
 export function initPlatform({

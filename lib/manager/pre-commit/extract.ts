@@ -1,10 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import {
-  PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../../constants/platforms';
+import { PlatformID } from '../../constants/platforms';
 import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
@@ -55,9 +51,9 @@ function determineDatasource(
     return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    [PLATFORM_TYPE_GITEA, gitlabTagsId],
-    [PLATFORM_TYPE_GITHUB, githubTagsId],
-    [PLATFORM_TYPE_GITLAB, gitlabTagsId],
+    [PlatformID.Gitea, gitlabTagsId],
+    [PlatformID.Github, githubTagsId],
+    [PlatformID.Gitlab, gitlabTagsId],
   ]) {
     if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
