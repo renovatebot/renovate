@@ -401,15 +401,15 @@ Doing so will mean that Renovate will first attempt to decrypt using the GPG key
 
 ## privateKeyPath
 
-Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
+Used as an alternative to `privateKey`, if you want the key to be read from disk instead.
 
 ## privateKeyPathOld
 
-Used as an alternative to `privateKeyOld`, if you wish for the key to be read from disk instead.
+Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
 ## productLinks
 
-Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
+Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
 ## redisUrl
 
