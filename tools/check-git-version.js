@@ -14,8 +14,7 @@ function checkGitVersion() {
     ) {
       process.exit(0);
     } else {
-      // shell.echo('WARNING: GIT VERSION NOT COMAPTIBLE');
-      throw new Error('GIT VERSION NOT COMAPTIBLE');
+      throw new Error('Minimum git version 2.33.0 is required');
     }
   } catch (err) {
     shell.echo('ERROR:', err.message);
