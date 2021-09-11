@@ -36,6 +36,11 @@ describe('util/http/host-rules', () => {
       authType: 'Basic',
       token: 'XXX',
     });
+
+    hostRules.add({
+      hostType: 'gitlab-tags',
+      token: 'abc',
+    });
   });
 
   afterEach(() => {
@@ -108,6 +113,42 @@ describe('util/http/host-rules', () => {
       Object {
         "hostType": "github",
         "token": "xxx",
+      }
+    `);
+  });
+
+  it('noAuth', () => {
+    expect(applyHostRules(url, { ...options, noAuth: true }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "hostType": "github",
+        "noAuth": true,
+      }
+    `);
+  });
+
+  it('fallback to github', () => {
+    expect(applyHostRules(url, { ...options, hostType: 'github-tags' }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "context": Object {
+          "authType": undefined,
+        },
+        "hostType": "github-tags",
+        "token": "token",
+      }
+    `);
+  });
+
+  it('fallback to gitlab', () => {
+    expect(applyHostRules(url, { ...options, hostType: 'gitlab-tags' }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "context": Object {
+          "authType": undefined,
+        },
+        "hostType": "gitlab-tags",
+        "token": "abc",
       }
     `);
   });
