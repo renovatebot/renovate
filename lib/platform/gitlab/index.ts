@@ -379,6 +379,14 @@ export async function getBranchStatus(
   }
 
   const branchStatuses = await getStatus(branchName);
+  // istanbul ignore if
+  if (!is.array(branchStatuses)) {
+    logger.warn(
+      { branchName, branchStatuses },
+      'Empty or unexpected branch statuses'
+    );
+    return BranchStatus.yellow;
+  }
   logger.debug(`Got res with ${branchStatuses.length} results`);
   // ignore all skipped jobs
   const res = branchStatuses.filter((check) => check.status !== 'skipped');

@@ -40,7 +40,7 @@ describe('platform/gitlab/index', () => {
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     hostRules.find.mockReturnValue({
-      token: 'abc123',
+      token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
   });

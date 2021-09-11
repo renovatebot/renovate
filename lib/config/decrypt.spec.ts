@@ -31,11 +31,11 @@ describe('config/decrypt', () => {
     });
     it('handles invalid encrypted value', () => {
       config.encrypted = { a: 1 };
-      setGlobalConfig({ privateKey });
+      setGlobalConfig({ privateKey, privateKeyOld: 'invalid-key' });
       expect(() => decryptConfig(config)).toThrow(Error('config-validation'));
     });
     it('replaces npm token placeholder in npmrc', () => {
-      setGlobalConfig({ privateKey });
+      setGlobalConfig({ privateKey: 'invalid-key', privateKeyOld: privateKey }); // test old key failover
       config.npmrc =
         '//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n'; // eslint-disable-line no-template-curly-in-string
       config.encrypted = {

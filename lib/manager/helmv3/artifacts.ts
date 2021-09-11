@@ -17,6 +17,9 @@ async function helmUpdate(manifestPath: string): Promise<void> {
     docker: {
       image: 'helm',
     },
+    extraEnv: {
+      HELM_EXPERIMENTAL_OCI: '1',
+    },
   };
   await exec(cmd, execOptions);
 }

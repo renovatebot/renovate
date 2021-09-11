@@ -453,6 +453,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'privateKeyOld',
+    description: 'Secondary/old private key to try.',
+    stage: 'repository',
+    type: 'string',
+    replaceLineReturns: true,
+    globalOnly: true,
+  },
+  {
     name: 'privateKeyPath',
     description: 'Path to the Server-side private key.',
     stage: 'repository',
