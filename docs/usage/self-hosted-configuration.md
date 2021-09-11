@@ -399,6 +399,8 @@ Decryption with this key will be attempted after `privateKey`.
 If you are migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
 Doing so will mean that Renovate will first attempt to decrypt using the GPG key but fall back to the legacy key and try that next.
 
+You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
+
 ## privateKeyPath
 
 Used as an alternative to `privateKey`, if you want the key to be read from disk instead.
