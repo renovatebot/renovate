@@ -1,5 +1,6 @@
 const shell = require('shelljs');
 
+const GIT_MINIMUM_VERSION = '2.33.0';
 function checkGitVersion() {
   try {
         const regex = /[\d]+(?=.)/g;
@@ -21,9 +22,6 @@ function checkGitVersion() {
       }
     }
     process.exit(0);
-    } else {
-      throw new Error('Minimum git version 2.33.0 is required');
-    }
   } catch (err) {
     shell.echo('ERROR:', err.message);
     process.exit(1);
