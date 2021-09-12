@@ -33,7 +33,7 @@ Renovate's configuration is self-documenting, because you can fill in the `"desc
 
 ## Implementation Approach
 
-In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an `eslint` config.
+In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an ESLint config.
 
 ## Preset Hosting
 
