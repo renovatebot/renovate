@@ -396,18 +396,9 @@ async function getStatus(
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
+  branchName: string
 ): Promise<BranchStatus> {
-  logger.debug(
-    `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
-  );
-
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
+  logger.debug(`getBranchStatus(${branchName})`);
 
   if (!git.branchExists(branchName)) {
     logger.debug('Branch does not exist - cannot fetch status');

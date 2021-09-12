@@ -328,20 +328,9 @@ async function getStatus(
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[]
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
