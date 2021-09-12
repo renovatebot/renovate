@@ -265,16 +265,32 @@ Renovate doesn't support reading `npmRegistries` and `npmScopes` from `.yarnrc.y
 Renovate updates `npmRegistries` in `.yarnrc.yml` with resolved `hostRules` before running Yarn.
 For Renovate to overwrite existing `npmRegistries` entry, the key should match the `matchHost` without the protocol (`http:` or `https:`) and with the trailing slash.
 
-For example, Renovate configuration above this section will update `.yarnrc.yml` as following:
+For example, the Renovate configuration:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://npm.pkg.github.com/",
+      "hostType": "npm",
+      "encrypted": {
+        "token": "<Encrypted PAT Token>"
+      }
+    }
+  ]
+}
+```
+
+will update `.yarnrc.yml` as following:
 
 ```yaml
 npmRegistries:
   //npm.pkg.github.com/:
     npmAuthToken: <Decrypted PAT Token>
   //npm.pkg.github.com:
-    # this will not be overwritten
+    # this will not be overwritten and may conflict
   https://npm.pkg.github.com/:
-    # this will not be overwritten
+    # this will not be overwritten and may conflict
 ```
 
 ### nuget
