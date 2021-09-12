@@ -7,7 +7,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PlatformID } from '../../constants/platforms';
+import { PlatformId } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { GitProtocol } from '../../types/git';
@@ -68,7 +68,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformID.BitbucketServer,
+  hostType: PlatformId.BitbucketServer,
 };
 
 /* istanbul ignore next */

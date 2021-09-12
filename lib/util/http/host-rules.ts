@@ -1,7 +1,7 @@
 import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-  PlatformID,
+  PlatformId,
 } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
@@ -16,11 +16,11 @@ function findMatchingRules(options: GotOptions, url: string): HostRule {
   // Fallback to `github` hostType
   if (
     GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
-    hostType !== PlatformID.Github
+    hostType !== PlatformId.Github
   ) {
     res = {
       ...hostRules.find({
-        hostType: PlatformID.Github,
+        hostType: PlatformId.Github,
         url,
       }),
       ...res,
@@ -30,11 +30,11 @@ function findMatchingRules(options: GotOptions, url: string): HostRule {
   // Fallback to `gitlab` hostType
   if (
     GITLAB_API_USING_HOST_TYPES.includes(hostType) &&
-    hostType !== PlatformID.Gitlab
+    hostType !== PlatformId.Gitlab
   ) {
     res = {
       ...hostRules.find({
-        hostType: PlatformID.Gitlab,
+        hostType: PlatformId.Gitlab,
         url,
       }),
       ...res,

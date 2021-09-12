@@ -15,7 +15,7 @@ import {
   REPOSITORY_NOT_FOUND,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
-import { PlatformID } from '../../constants/platforms';
+import { PlatformId } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -66,7 +66,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: PlatformID.Gitlab,
+  hostType: PlatformId.Gitlab,
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };

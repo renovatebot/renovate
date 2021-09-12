@@ -5,7 +5,7 @@ import {
   platform,
 } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
-import { PlatformID } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants/platforms';
 import * as cleanup from './prune';
 
 jest.mock('../../../util/git');
@@ -14,7 +14,7 @@ let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
-  config.platform = PlatformID.Github;
+  config.platform = PlatformId.Github;
   config.errors = [];
   config.warnings = [];
 });

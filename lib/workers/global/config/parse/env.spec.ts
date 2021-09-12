@@ -1,5 +1,5 @@
 import type { RenovateOptions } from '../../../../config/types';
-import { PlatformID } from '../../../../constants/platforms';
+import { PlatformId } from '../../../../constants/platforms';
 import * as env from './env';
 
 describe('workers/global/config/parse/env', () => {
@@ -71,7 +71,7 @@ describe('workers/global/config/parse/env', () => {
     });
     it('supports GitLab token', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: PlatformID.Gitlab,
+        RENOVATE_PLATFORM: PlatformId.Gitlab,
         RENOVATE_TOKEN: 'a gitlab.com token',
       };
       // FIXME: explicit assert condition
@@ -79,7 +79,7 @@ describe('workers/global/config/parse/env', () => {
     });
     it('supports GitLab custom endpoint', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: PlatformID.Gitlab,
+        RENOVATE_PLATFORM: PlatformId.Gitlab,
         RENOVATE_TOKEN: 'a gitlab token',
         RENOVATE_ENDPOINT: 'a gitlab endpoint',
       };
@@ -155,7 +155,7 @@ describe('workers/global/config/parse/env', () => {
     });
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: PlatformID.Bitbucket,
+        RENOVATE_PLATFORM: PlatformId.Bitbucket,
         RENOVATE_ENDPOINT: 'a bitbucket endpoint',
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
@@ -165,7 +165,7 @@ describe('workers/global/config/parse/env', () => {
     });
     it('supports Bitbucket username/password', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM: PlatformID.Bitbucket,
+        RENOVATE_PLATFORM: PlatformId.Bitbucket,
         RENOVATE_ENDPOINT: 'a bitbucket endpoint',
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',

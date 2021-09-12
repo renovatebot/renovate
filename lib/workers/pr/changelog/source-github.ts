@@ -1,5 +1,5 @@
 import URL from 'url';
-import { PlatformID } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants/platforms';
 import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
@@ -47,7 +47,7 @@ export async function getChangeLogJSON({
     ? 'https://api.github.com/'
     : sourceUrl;
   const config = hostRules.find({
-    hostType: PlatformID.Github,
+    hostType: PlatformId.Github,
     url,
   });
   // istanbul ignore if

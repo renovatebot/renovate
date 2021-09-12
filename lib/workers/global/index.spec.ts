@@ -1,6 +1,6 @@
 import { ERROR, WARN } from 'bunyan';
 import { logger } from '../../../test/util';
-import { PlatformID } from '../../constants/platforms';
+import { PlatformId } from '../../constants/platforms';
 import * as datasourceDocker from '../../datasource/docker';
 import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';
@@ -109,7 +109,7 @@ describe('workers/global/index', () => {
     it('github', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: ['a'],
-        platform: PlatformID.Github,
+        platform: PlatformId.Github,
         endpoint: 'https://github.com/',
       });
       await globalWorker.start();
@@ -119,7 +119,7 @@ describe('workers/global/index', () => {
     it('gitlab', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: [{ repository: 'a' }],
-        platform: PlatformID.Gitlab,
+        platform: PlatformId.Gitlab,
         endpoint: 'https://my.gitlab.com/',
       });
       await globalWorker.start();

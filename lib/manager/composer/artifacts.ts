@@ -5,7 +5,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
-import { PlatformID } from '../../constants/platforms';
+import { PlatformId } from '../../constants/platforms';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -33,7 +33,7 @@ function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
   const githubCredentials = hostRules.find({
-    hostType: PlatformID.Github,
+    hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
   if (githubCredentials?.token) {
@@ -43,7 +43,7 @@ function getAuthJson(): string | null {
   }
 
   hostRules
-    .findAll({ hostType: PlatformID.Gitlab })
+    .findAll({ hostType: PlatformId.Gitlab })
     ?.forEach((gitlabHostRule) => {
       if (gitlabHostRule?.token) {
         const host = gitlabHostRule.resolvedHost || 'gitlab.com';

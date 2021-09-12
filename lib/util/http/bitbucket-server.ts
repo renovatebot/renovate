@@ -1,4 +1,4 @@
-import { PlatformID } from '../../constants/platforms';
+import { PlatformId } from '../../constants/platforms';
 import { resolveBaseUrl } from '../url';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -9,7 +9,7 @@ export const setBaseUrl = (url: string): void => {
 
 export class BitbucketServerHttp extends Http {
   constructor(options?: HttpOptions) {
-    super(PlatformID.BitbucketServer, options);
+    super(PlatformId.BitbucketServer, options);
   }
 
   protected override request<T>(

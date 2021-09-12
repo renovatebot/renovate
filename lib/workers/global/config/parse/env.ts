@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 
 import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
-import { PlatformID } from '../../../../constants/platforms';
+import { PlatformId } from '../../../../constants/platforms';
 import { getDatasourceList } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
@@ -81,7 +81,7 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
 
   if (env.GITHUB_COM_TOKEN) {
     config.hostRules.push({
-      hostType: PlatformID.Github,
+      hostType: PlatformId.Github,
       matchHost: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });

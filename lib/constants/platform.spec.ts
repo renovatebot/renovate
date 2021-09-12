@@ -6,7 +6,7 @@ import { id as POD_DS } from '../datasource/pod';
 import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-  PlatformID,
+  PlatformId,
 } from './platforms';
 
 describe('constants/platform', () => {
@@ -15,21 +15,21 @@ describe('constants/platform', () => {
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(GitlabReleasesDatasource.id)
     ).toBeTrue();
-    expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformID.Gitlab)).toBeTrue();
+    expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformId.Gitlab)).toBeTrue();
   });
 
   it('should be not part of the GITLAB_API_USING_HOST_TYPES ', () => {
-    expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformID.Github)).toBeFalse();
+    expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformId.Github)).toBeFalse();
   });
 
   it('should be part of the GITHUB_API_USING_HOST_TYPES ', () => {
     expect(GITHUB_API_USING_HOST_TYPES.includes(GH_TAGS_DS)).toBeTrue();
     expect(GITHUB_API_USING_HOST_TYPES.includes(GH_RELEASES_DS)).toBeTrue();
     expect(GITHUB_API_USING_HOST_TYPES.includes(POD_DS)).toBeTrue();
-    expect(GITHUB_API_USING_HOST_TYPES.includes(PlatformID.Github)).toBeTrue();
+    expect(GITHUB_API_USING_HOST_TYPES.includes(PlatformId.Github)).toBeTrue();
   });
 
   it('should be not part of the GITHUB_API_USING_HOST_TYPES ', () => {
-    expect(GITHUB_API_USING_HOST_TYPES.includes(PlatformID.Gitlab)).toBeFalse();
+    expect(GITHUB_API_USING_HOST_TYPES.includes(PlatformId.Gitlab)).toBeFalse();
   });
 });
