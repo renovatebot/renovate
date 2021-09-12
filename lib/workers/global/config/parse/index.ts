@@ -39,7 +39,7 @@ export async function parseConfigs(
   }
 
   if (!config.privateKey && config.privateKeyPath) {
-    config.privateKey = await readFile(config.privateKeyPath);
+    config.privateKey = await readFile(config.privateKeyPath, 'utf8');
     delete config.privateKeyPath;
   }
 

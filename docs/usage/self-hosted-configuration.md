@@ -337,6 +337,11 @@ echo 'actual-secret' | openssl rsautl -encrypt -pubin -inkey rsa_pub.pem | base6
 
 Replace `actual-secret` with the secret to encrypt.
 
+## privateKeyOld
+
+Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
+Decryption with this key will be attempted after `privateKey`.
+
 ## privateKeyPath
 
 Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.

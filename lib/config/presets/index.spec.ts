@@ -601,6 +601,12 @@ Object {
         "monorepo:opentelemetry-js",
       ],
       "groupName": "opentelemetry-js monorepo",
+      "matchUpdateTypes": Array [
+        "digest",
+        "patch",
+        "minor",
+        "major",
+      ],
     },
   ],
 }
