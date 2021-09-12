@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - v25
-      - feat/check-git-version
+  
 
   workflow_dispatch:
     inputs:
