@@ -4,6 +4,7 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { getGlobalConfig } from './global';
+import { applyMigrations } from './migrations';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
@@ -57,6 +58,7 @@ export function migrateConfig(
       'peerDependencies',
     ];
     const { migratePresets } = getGlobalConfig();
+    applyMigrations(config, migratedConfig);
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
         delete migratedConfig[key];

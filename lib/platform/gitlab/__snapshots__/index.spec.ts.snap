@@ -1852,7 +1852,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) maps custom statuses to yellow 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) maps custom statuses to yellow 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1879,7 +1879,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) returns failure if any mandatory jobs fails 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns failure if any mandatory jobs fails 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1906,7 +1906,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) returns failure if any mandatory jobs fails and one job is skipped 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns failure if any mandatory jobs fails and one job is skipped 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1933,7 +1933,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) returns pending if no results 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns pending if no results 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1960,7 +1960,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) returns success if all are optional 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if all are optional 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1987,7 +1987,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) returns success if all are success 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if all are success 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2014,7 +2014,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) returns success if job is skipped 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if job is skipped 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2041,7 +2041,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) returns success if optional jobs fail 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns success if optional jobs fail 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2068,7 +2068,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) returns yellow if there are no jobs expect skipped 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) returns yellow if there are no jobs expect skipped 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2095,7 +2095,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/index getBranchStatus(branchName, requiredStatusChecks) throws repository-changed 1`] = `
+exports[`platform/gitlab/index getBranchStatus(branchName, ignoreTests) throws repository-changed 1`] = `
 Array [
   Object {
     "headers": Object {
