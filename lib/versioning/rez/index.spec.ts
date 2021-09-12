@@ -1,9 +1,8 @@
-import { getName } from '../../../test/util';
 import type { RangeStrategy } from '../../types';
 import semver from '../semver';
 import { api as versioning } from '.';
 
-describe(getName(), () => {
+describe('versioning/rez/index', () => {
   describe('equals', () => {
     it.each([
       ['1', '1'],
