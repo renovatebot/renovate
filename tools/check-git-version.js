@@ -5,10 +5,8 @@ const GIT_MINIMUM_VERSION = '2.33.0';
 function checkGitVersion() {
   try {
     const regex = /\d+\.\d+\.\d+/;
-    let gitVersion = shell
-      .exec('git --version', { silent: true })
-      .stdout.toString();
-    gitVersion = gitVersion.match(regex)[0];
+    const { stdout } = shell.exec('git --version', { silent: true });
+    const [ gitVersion ] = regex.exec(stdout);
     if (semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
       throw new Error(
         'Minimum Git version ' + GIT_MINIMUM_VERSION + ' is required'
