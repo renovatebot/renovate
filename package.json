@@ -280,5 +280,6 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "type":"module"
 }
