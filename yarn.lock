@@ -4686,10 +4686,10 @@ git-up@^4.0.0:
     is-ssh "^1.3.0"
     parse-url "^6.0.0"
 
-git-url-parse@11.5.0:
-  version "11.5.0"
-  resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-11.5.0.tgz#acaaf65239cb1536185b19165a24bbc754b3f764"
-  integrity sha512-TZYSMDeM37r71Lqg1mbnMlOqlHd7BSij9qN7XwTkRqSAYFMihGLGhfHwgqQob3GUhEneKnV4nskN9rbQw2KGxA==
+git-url-parse@11.6.0:
+  version "11.6.0"
+  resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-11.6.0.tgz#c634b8de7faa66498a2b88932df31702c67df605"
+  integrity sha512-WWUxvJs5HsyHL6L08wOusa/IXYtMuCAhrMmnTjQPpBU0TTHyDhnOATNH3xNQz7YOQUsqIIPTGr4xiVti1Hsk5g==
   dependencies:
     git-up "^4.0.0"
 
