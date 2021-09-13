@@ -44,7 +44,7 @@ export function rez2npm(input: string): string {
     return input.replace('==', '=');
   }
   if (inclusiveBound.test(input)) {
-    return '>=' + input.replace('..', ' <');
+    return '>=' + input.replace(/\.\./g, ' <');
   }
   if (lowerBound.test(input)) {
     return plus2npm(input);
@@ -74,7 +74,7 @@ export function rez2pep440(input: string): string {
     return input;
   }
   if (inclusiveBound.test(input)) {
-    return '>=' + input.replace('..', ', <');
+    return '>=' + input.replace(/\.\./g, ', <');
   }
   if (lowerBound.test(input)) {
     return plus2npm(input);
