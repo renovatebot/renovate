@@ -36,7 +36,7 @@ describe('workers/global/config/parse/index', () => {
       defaultArgv = defaultArgv.concat([
         '--token=abc',
         '--pr-footer=custom',
-        '--log-context=abc123',
+        '--log-context=123test',
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
@@ -45,7 +45,7 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
         ['prFooter', 'custom'],
-        ['logContext', 'abc123'],
+        ['logContext', '123test'],
       ]);
     });
 
@@ -85,7 +85,7 @@ describe('workers/global/config/parse/index', () => {
         ...defaultEnv,
         RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
       };
-      const expected = await readFile(privateKeyPath);
+      const expected = await readFile(privateKeyPath, 'utf8');
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);
