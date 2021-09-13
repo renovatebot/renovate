@@ -1,4 +1,7 @@
+import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
+import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
+import type { ProviderLock } from './lockfile/types';
 
 export const keyValueExtractionRegex =
   /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/;
@@ -41,4 +44,33 @@ const pathStringRegex = /(.|..)?(\/[^/])+/;
 export function checkIfStringIsPath(path: string): boolean {
   const match = pathStringRegex.exec(path);
   return !!match;
+}
+
+export function massageProviderLookupName(dep: PackageDependency): void {
+  /* eslint-disable no-param-reassign */
+  if (!dep.lookupName) {
+    dep.lookupName = dep.depName;
+  }
+  if (!dep.lookupName.includes('/')) {
+    dep.lookupName = `hashicorp/${dep.lookupName}`;
+  }
+  /* eslint-enable no-param-reassign */
+}
+
+export function getLockedVersion(
+  dep: PackageDependency,
+  locks: ProviderLock[]
+): string {
+  const foundLock = locks.find((lock) => {
+    const depRegistryUrl = dep.registryUrls
+      ? dep.registryUrls[0]
+      : TerraformProviderDatasource.defaultRegistryUrls[0];
+    return (
+      lock.lookupName === dep.lookupName && lock.registryUrl === depRegistryUrl
+    );
+  });
+  if (foundLock) {
+    return foundLock.version;
+  }
+  return undefined;
 }
