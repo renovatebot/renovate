@@ -87,7 +87,7 @@ jobs:
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@5a8bb4701eca7ba3673f21664b887f652c58d0a3 # renovate: tag=v2.0.3
+        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
         if: always() && env.coverage == 'true'
 
       # build after tests to exclude build files from tests
