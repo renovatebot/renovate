@@ -4,7 +4,7 @@ const shell = require('shelljs');
 const GIT_MINIMUM_VERSION = '2.33.0';
 function checkGitVersion() {
   try {
-    const regex = /[\d.]+(?=)/g;
+    const regex = /\d+\.\d+\.\d+/;
     let gitVersion = shell
       .exec('git --version', { silent: true })
       .stdout.toString();
