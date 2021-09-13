@@ -53,7 +53,6 @@ interface LocalConfig extends StorageConfig {
   currentBranchSha: string;
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
-  branchPrefix: string;
   ignoredAuthors: string[];
   gitAuthorName?: string;
   gitAuthorEmail?: string;
@@ -215,25 +214,6 @@ async function cleanLocalBranches(): Promise<void> {
   }
 }
 
-/*
- * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
- * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
- */
-async function setBranchPrefix(branchPrefix: string): Promise<void> {
-  config.branchPrefix = branchPrefix;
-  // If the repo is already cloned then set branchPrefix now, otherwise it will be called again during syncGit()
-  if (gitInitialized) {
-    logger.debug('Setting branchPrefix: ' + branchPrefix);
-    const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-    try {
-      await git.fetch(['origin', ref, '--depth=5', '--force']);
-    } catch (err) /* istanbul ignore next */ {
-      checkForPlatformFailure(err);
-      throw err;
-    }
-  }
-}
-
 export function setGitAuthor(gitAuthor: string): void {
   const gitAuthorParsed = parseGitAuthor(
     gitAuthor || 'Renovate Bot <renovate@whitesourcesoftware.com>'
@@ -270,12 +250,10 @@ export async function writeGitAuthor(): Promise<void> {
   }
 }
 
-export async function setUserRepoConfig({
-  branchPrefix,
+export function setUserRepoConfig({
   gitIgnoredAuthors,
   gitAuthor,
-}: RenovateConfig): Promise<void> {
-  await setBranchPrefix(branchPrefix);
+}: RenovateConfig): void {
   config.ignoredAuthors = gitIgnoredAuthors ?? [];
   setGitAuthor(gitAuthor);
 }
@@ -316,7 +294,7 @@ export async function syncGit(): Promise<void> {
       await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
       await git.pull();
-      await git.fetch(['--depth=10']);
+      await git.fetch();
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
       await resetToBranch(config.currentBranch);
@@ -336,8 +314,8 @@ export async function syncGit(): Promise<void> {
     await fs.emptyDir(localDir);
     const cloneStart = Date.now();
     try {
-      // clone only the default branch
-      const opts = ['--depth=10'];
+      // blobless clone
+      const opts = ['--filter=blob:none'];
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
@@ -383,33 +361,12 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
-  if (config.branchPrefix) {
-    await setBranchPrefix(config.branchPrefix);
-  }
 }
 
 // istanbul ignore next
 export async function getRepoStatus(): Promise<StatusResult> {
   await syncGit();
   return git.status();
-}
-
-async function syncBranch(branchName: string): Promise<void> {
-  await syncGit();
-  if (branchName.startsWith(config.branchPrefix)) {
-    return;
-  }
-  if (config.additionalBranches.includes(branchName)) {
-    return;
-  }
-  config.additionalBranches.push(branchName);
-  // fetch the branch only if it's not part of the existing branchPrefix
-  try {
-    await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
-    await git.fetch(['origin', branchName, '--depth=5']);
-  } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
-  }
 }
 
 export function branchExists(branchName: string): boolean {
@@ -447,7 +404,7 @@ export async function getCommitMessages(): Promise<string[]> {
 
 export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   logger.debug(`Setting current branch to ${branchName}`);
-  await syncBranch(branchName);
+  await syncGit();
   try {
     config.currentBranch = branchName;
     config.currentBranchSha = (
@@ -506,7 +463,7 @@ export function getBranchList(): string[] {
 }
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
-  await syncBranch(branchName);
+  await syncGit();
   try {
     const { currentBranchSha, currentBranch } = config;
     const branches = await git.branch([
@@ -528,7 +485,7 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
-  await syncBranch(branchName);
+  await syncGit();
   // First check cache
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
@@ -580,7 +537,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
 }
 
 export async function deleteBranch(branchName: string): Promise<void> {
-  await syncBranch(branchName);
+  await syncGit();
   try {
     await git.raw(['push', '--delete', 'origin', branchName]);
     logger.debug({ branchName }, 'Deleted remote branch');
@@ -602,7 +559,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 export async function mergeBranch(branchName: string): Promise<void> {
   let status;
   try {
-    await syncBranch(branchName);
+    await syncGit();
     await git.reset(ResetMode.HARD);
     await git.checkout(['-B', branchName, 'origin/' + branchName]);
     await git.checkout([
@@ -633,7 +590,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
 export async function getBranchLastCommitTime(
   branchName: string
 ): Promise<Date> {
-  await syncBranch(branchName);
+  await syncGit();
   try {
     const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
     return new Date(Date.parse(time));
@@ -644,7 +601,7 @@ export async function getBranchLastCommitTime(
 }
 
 export async function getBranchFiles(branchName: string): Promise<string[]> {
-  await syncBranch(branchName);
+  await syncGit();
   try {
     const diff = await git.diffSummary([
       `origin/${branchName}`,
@@ -675,7 +632,7 @@ export async function getFile(
 }
 
 export async function hasDiff(branchName: string): Promise<boolean> {
-  await syncBranch(branchName);
+  await syncGit();
   try {
     return (await git.diff(['HEAD', branchName])) !== '';
   } catch (err) {
@@ -737,21 +694,23 @@ export async function commitFiles({
           deletedFiles.push(fileName);
         } catch (err) /* istanbul ignore next */ {
           checkForPlatformFailure(err);
-          logger.warn({ err, fileName }, 'Cannot delete file');
+          logger.trace({ err, fileName }, 'Cannot delete file');
           ignoredFiles.push(fileName);
         }
-      } else if (await isDirectory(join(localDir, fileName))) {
-        logger.warn({ fileName }, 'Skipping directory commit');
-        ignoredFiles.push(fileName);
       } else {
-        let contents: Buffer;
-        // istanbul ignore else
-        if (typeof file.contents === 'string') {
-          contents = Buffer.from(file.contents);
+        if (await isDirectory(join(localDir, fileName))) {
+          // This is usually a git submodule update
+          logger.trace({ fileName }, 'Adding directory commit');
         } else {
-          contents = file.contents;
+          let contents: Buffer;
+          // istanbul ignore else
+          if (typeof file.contents === 'string') {
+            contents = Buffer.from(file.contents);
+          } else {
+            contents = file.contents;
+          }
+          await fs.outputFile(join(localDir, fileName), contents);
         }
-        await fs.outputFile(join(localDir, fileName), contents);
         try {
           await git.add(fileName);
           addedModifiedFiles.push(fileName);
@@ -814,7 +773,7 @@ export async function commitFiles({
     logger.debug({ result: pushRes }, 'git push');
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await git.fetch(['origin', ref, '--depth=5', '--force']);
+    await git.fetch(['origin', ref, '--force']);
     config.branchCommits[branchName] = (
       await git.revparse([branchName])
     ).trim();
