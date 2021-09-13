@@ -113,6 +113,22 @@ describe('manager/nuget/extract', () => {
         await extractPackageFile(otherContents, otherPackageFile, config)
       ).toMatchSnapshot();
     });
+    it('extracts msbuild-sdks from global.json', async () => {
+      const packageFile = 'msbuild-sdk-files/global.json';
+      const contents = loadFixture(packageFile);
+      // FIXME: explicit assert condition
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchSnapshot();
+    });
+    it('handles malformed global.json', async () => {
+      const packageFile = 'msbuild-sdk-files/invalid-json/global.json';
+      const contents = loadFixture(packageFile);
+      // FIXME: explicit assert condition
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchSnapshot();
+    });
 
     describe('.config/dotnet-tools.json', () => {
       const packageFile = '.config/dotnet-tools.json';
@@ -126,6 +142,7 @@ describe('manager/nuget/extract', () => {
     }
   }
 }`;
+
       it('works', async () => {
         // FIXME: explicit assert condition
         expect(

@@ -295,6 +295,20 @@ Array [
 ]
 `;
 
+exports[`manager/nuget/extract extractPackageFile() extracts msbuild-sdks from global.json 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0",
+      "datasource": null,
+      "depName": "YoloDev.Sdk",
+      "depType": "nuget",
+      "skipReason": "unsupported-datasource",
+    },
+  ],
+}
+`;
+
 exports[`manager/nuget/extract extractPackageFile() extracts package version dependency 1`] = `
 Array [
   Object {
@@ -365,6 +379,8 @@ Object {
   ],
 }
 `;
+
+exports[`manager/nuget/extract extractPackageFile() handles malformed global.json 1`] = `null`;
 
 exports[`manager/nuget/extract extractPackageFile() ignores local feed in NuGet.config 1`] = `
 Object {

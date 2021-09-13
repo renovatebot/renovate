@@ -2,10 +2,11 @@ import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
 import { getGlobalConfig } from '../../config/global';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { hasKey } from '../../util/object';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { DotnetToolsManifest } from './types';
+import type { DotnetToolsManifest, MsbuildGlobalManifest } from './types';
 import { getConfiguredRegistries } from './util';
 
 /**
@@ -105,6 +106,34 @@ export async function extractPackageFile(
       if (registryUrls) {
         dep.registryUrls = registryUrls;
       }
+
+      deps.push(dep);
+    }
+
+    return { deps };
+  }
+
+  if (packageFile.endsWith('global.json')) {
+    const deps: PackageDependency[] = [];
+    let manifest: MsbuildGlobalManifest;
+
+    try {
+      manifest = JSON.parse(content);
+    } catch (err) {
+      logger.debug({ fileName: packageFile }, 'Invalid JSON');
+      return null;
+    }
+
+    for (const depName of Object.keys(manifest['msbuild-sdks'])) {
+      const sdk = manifest['msbuild-sdks'][depName];
+      const currentValue = sdk[0];
+      const dep: PackageDependency = {
+        depType: 'nuget',
+        depName,
+        currentValue,
+        datasource: null,
+        skipReason: SkipReason.UnsupportedDatasource,
+      };
 
       deps.push(dep);
     }
