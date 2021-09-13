@@ -124,6 +124,14 @@ export async function extractPackageFile(
       return null;
     }
 
+    if (manifest['msbuild-sdks'] === undefined) {
+      logger.debug(
+        { fileName: packageFile },
+        'This global.json is not a Nuget file'
+      );
+      return null;
+    }
+
     for (const depName of Object.keys(manifest['msbuild-sdks'])) {
       const sdk = manifest['msbuild-sdks'][depName];
       const currentValue = sdk[0];

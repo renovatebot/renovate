@@ -1,0 +1,9 @@
+{
+  "sdk": {
+    "version": "5.0.302",
+    "rollForward": "latestMajor"
+  },
+  "msbuild-sdks": {
+    "YoloDev.Sdk": "0.2.0"
+  }
+}
