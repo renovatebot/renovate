@@ -137,6 +137,76 @@ Array [
 ]
 `;
 
+exports[`manager/terraform/lockfile/index update multiple dependencies which are not ordered 1`] = `
+Object {
+  "contents": "# This file is maintained automatically by \\"terraform init\\".
+# Manual edits may be lost in future updates.
+
+provider \\"registry.terraform.io/hashicorp/aws\\" {
+  version     = \\"3.1.0\\"
+  constraints = \\"~> 3.0\\"
+  hashes = [
+    \\"h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=\\",
+    \\"h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=\\",
+  ]
+}
+
+provider \\"registry.terraform.io/hashicorp/azurerm\\" {
+  version     = \\"2.56.0\\"
+  constraints = \\"~> 2.50\\"
+  hashes = [
+    \\"h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=\\",
+    \\"h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=\\",
+  ]
+}
+
+provider \\"registry.terraform.io/hashicorp/random\\" {
+  version     = \\"3.1.0\\"
+  constraints = \\"~> 3.0\\"
+  hashes = [
+    \\"h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=\\",
+    \\"h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=\\",
+  ]
+}
+
+provider \\"registry.terraform.io/telmate/proxmox\\" {
+  version     = \\"2.7.0\\"
+  constraints = \\"~> 2.7.0\\"
+  hashes = [
+    \\"h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=\\",
+    \\"h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=\\",
+  ]
+}
+",
+  "name": "test/.terraform.lock.hcl",
+}
+`;
+
+exports[`manager/terraform/lockfile/index update multiple dependencies which are not ordered 2`] = `
+Array [
+  Array [
+    "https://registry.terraform.io",
+    "hashicorp/aws",
+    "3.1.0",
+  ],
+  Array [
+    "https://registry.terraform.io",
+    "hashicorp/random",
+    "3.1.0",
+  ],
+  Array [
+    "https://registry.terraform.io",
+    "hashicorp/azurerm",
+    "2.56.0",
+  ],
+  Array [
+    "https://registry.terraform.io",
+    "telmate/proxmox",
+    "2.7.0",
+  ],
+]
+`;
+
 exports[`manager/terraform/lockfile/index update single dependency in subfolder 1`] = `
 Object {
   "contents": "# This file is maintained automatically by \\"terraform init\\".
