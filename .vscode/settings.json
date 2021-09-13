@@ -1,0 +1,18 @@
+{
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.associations": {
+    "Dockerfile.*": "dockerfile",
+    ".releaserc": "json"
+  },
+  "omnisharp.autoStart": false,
+  "jest.autoRun": "off",
+  "jest.jestCommandLine": "yarn jest"
+}
