@@ -6,8 +6,6 @@ import {
 } from './parse';
 import ivy from '.';
 
-const { getNewValue, isValid, isVersion, matches } = ivy;
-
 describe('versioning/ivy/index', () => {
   test.each`
     input                   | type               | value
@@ -67,7 +65,7 @@ describe('versioning/ivy/index', () => {
     ${'[0,1]'}              | ${true}
     ${'[0,1),(1,2]'}        | ${false}
   `('isValid("$input") === $expected', ({ input, expected }) => {
-    const res = !!isValid(input);
+    const res = !!ivy.isValid(input);
     expect(res).toBe(expected);
   });
 
@@ -96,7 +94,7 @@ describe('versioning/ivy/index', () => {
     ${'[0,1]'}              | ${false}
     ${'[0,1),(1,2]'}        | ${false}
   `('isVersion("$input") === $expected', ({ input, expected }) => {
-    expect(isVersion(input)).toBe(expected);
+    expect(ivy.isVersion(input)).toBe(expected);
   });
 
   test.each`
@@ -138,7 +136,7 @@ describe('versioning/ivy/index', () => {
   `(
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
-      expect(matches(version, range)).toBe(expected);
+      expect(ivy.matches(version, range)).toBe(expected);
     }
   );
 
@@ -162,13 +160,23 @@ describe('versioning/ivy/index', () => {
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      const res = getNewValue({
+      const res = ivy.getNewValue({
         currentValue,
         rangeStrategy,
         currentVersion,
         newVersion,
       });
       expect(res).toEqual(expected);
+    }
+  );
+
+  test.each`
+    versions           | range     | expected
+    ${['0', '1', '2']} | ${'(,2)'} | ${'1'}
+  `(
+    'getSatisfyingVersion($versions, "$range") === $expected',
+    ({ versions, range, expected }) => {
+      expect(ivy.getSatisfyingVersion(versions, range)).toBe(expected);
     }
   );
 });
