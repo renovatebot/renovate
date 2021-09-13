@@ -16,6 +16,7 @@ function getVersionParts(input: string): [string, string] {
 
   return [versionParts[0], '-' + versionParts[1]];
 }
+
 export function padZeroes(input: string): string {
   if (/[~^*]/.test(input)) {
     // ignore ranges
@@ -30,12 +31,14 @@ export function padZeroes(input: string): string {
   }
   return sections.join('.') + stability;
 }
+
 function plus2npm(input: string): string {
   if (input.includes('+')) {
     return '>=' + input.replace('+', ' ');
   }
   return input;
 }
+
 export function rez2npm(input: string): string {
   if (matchVersion.test(input)) {
     return input;
@@ -66,6 +69,7 @@ export function rez2npm(input: string): string {
   }
   return input;
 }
+
 export function rez2pep440(input: string): string {
   if (matchVersion.test(input)) {
     return input;
@@ -96,12 +100,14 @@ export function rez2pep440(input: string): string {
   }
   return input;
 }
+
 export function pep4402rezInclusiveBound(input: string): string {
   return input
     .split(',')
     .map((v) => v.trim().replace(/[<>=]/g, ''))
     .join('..');
 }
+
 export function npm2rezplus(input: string): string {
   return input.trim().replace('>=', '') + '+';
 }

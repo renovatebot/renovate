@@ -24,72 +24,87 @@ export const urls = ['https://github.com/nerdvegas/rez'];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
-const equals = (a: string, b: string): boolean => {
+function equals(a: string, b: string): boolean {
   try {
     return npm.equals(padZeroes(a), padZeroes(b));
   } catch (err) /* istanbul ignore next */ {
     return pep440.equals(a, b);
   }
-};
+}
 
-const getMajor = (version: string): number => {
+function getMajor(version: string): number {
   try {
     return npm.getMajor(padZeroes(version));
   } catch (err) /* istanbul ignore next */ {
     return pep440.getMajor(version);
   }
-};
+}
 
-const getMinor = (version: string): number => {
+function getMinor(version: string): number {
   try {
     return npm.getMinor(padZeroes(version));
   } catch (err) /* istanbul ignore next */ {
     return pep440.getMinor(version);
   }
-};
+}
 
-const getPatch = (version: string): number => {
+function getPatch(version: string): number {
   try {
     return npm.getPatch(padZeroes(version));
   } catch (err) /* istanbul ignore next */ {
     return pep440.getPatch(version);
   }
-};
+}
 
-const isGreaterThan = (a: string, b: string): boolean => {
+function isGreaterThan(a: string, b: string): boolean {
   try {
     return npm.isGreaterThan(padZeroes(a), padZeroes(b));
   } catch (err) /* istanbul ignore next */ {
     return pep440.isGreaterThan(a, b);
   }
-};
+}
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isVersion(padZeroes(version)) &&
-  npm.isLessThanRange(padZeroes(version), rez2npm(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return (
+    npm.isVersion(padZeroes(version)) &&
+    npm.isLessThanRange(padZeroes(version), rez2npm(range))
+  );
+}
 
-export const isValid = (input: string): string | boolean =>
-  npm.isValid(rez2npm(input));
+export function isValid(input: string): string | boolean {
+  return npm.isValid(rez2npm(input));
+}
 
-const isStable = (version: string): boolean => npm.isStable(padZeroes(version));
+function isStable(version: string): boolean {
+  return npm.isStable(padZeroes(version));
+}
 
-const isVersion = (input: string): string | boolean =>
-  npm.isVersion(padZeroes(rez2npm(input)));
+function isVersion(input: string): string | boolean {
+  return npm.isVersion(padZeroes(rez2npm(input)));
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.isVersion(padZeroes(version)) &&
-  npm.matches(padZeroes(version), rez2npm(range));
+function matches(version: string, range: string): boolean {
+  return (
+    npm.isVersion(padZeroes(version)) &&
+    npm.matches(padZeroes(version), rez2npm(range))
+  );
+}
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.getSatisfyingVersion(versions, rez2npm(range));
+function getSatisfyingVersion(versions: string[], range: string): string {
+  return npm.getSatisfyingVersion(versions, rez2npm(range));
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.minSatisfyingVersion(versions, rez2npm(range));
+function minSatisfyingVersion(versions: string[], range: string): string {
+  return npm.minSatisfyingVersion(versions, rez2npm(range));
+}
 
-const isSingleVersion = (constraint: string): string | boolean =>
-  (constraint.trim().startsWith('==') &&
-    isVersion(constraint.trim().substring(2).trim())) ||
-  isVersion(constraint.trim());
+function isSingleVersion(constraint: string): string | boolean {
+  return (
+    (constraint.trim().startsWith('==') &&
+      isVersion(constraint.trim().substring(2).trim())) ||
+    isVersion(constraint.trim())
+  );
+}
 
 function sortVersions(a: string, b: string): number {
   return npm.sortVersions(padZeroes(a), padZeroes(b));
