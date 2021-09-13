@@ -133,6 +133,9 @@ export function writeLockUpdates(
   const lines = oldLockFileContent.split('\n');
 
   const sections: string[][] = [];
+
+  // sort updates in order of appearance in the lockfile
+  updates.sort((a, b) => a.lineNumbers.block.start - b.lineNumbers.block.start);
   updates.forEach((update, index, array) => {
     // re add leading whitespace
     let startWhitespace;
