@@ -10,7 +10,9 @@ function checkGitVersion() {
       .stdout.toString();
     gitVersion = gitVersion.match(regex)[0];
     if (semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
-      throw new Error('Minimum git version 2.33.0 is required');
+      throw new Error(
+        'Minimum git version ' + GIT_MINIMUM_VERSION + ' is required'
+      );
     }
     process.exit(0);
   } catch (err) {
