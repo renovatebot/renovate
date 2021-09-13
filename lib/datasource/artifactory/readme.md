@@ -1,4 +1,3 @@
-This datasource returns releases from given custom _registryUrl(s)_.
+This datasource returns releases from given custom `registryUrl`(s).
 
-The target url is composed by the _registryUrl_ and the _lookupName_,
-which defaults to _depName_ when _lookupName_ is not defined.
+The target URL is composed by the `registryUrl` and the `lookupName`, which defaults to `depName` when `lookupName` is not defined.
