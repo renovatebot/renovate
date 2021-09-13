@@ -81,44 +81,39 @@ export async function updateArtifacts({
       const maintenanceUpdates = await updateAllLocks(locks);
       updates.push(...maintenanceUpdates);
     } else {
-      const lockUpdates = await Promise.all(
-        updatedDeps
-          .filter((dep) =>
-            ['provider', 'required_provider'].includes(dep.depType)
-          )
-          .map(async (dep) => {
-            const lookupName = dep.lookupName ?? dep.depName;
-
-            // handle cases like `Telmate/proxmox`
-            const massagedLookupName = lookupName.toLowerCase();
-
-            const repository = massagedLookupName.includes('/')
-              ? massagedLookupName
-              : `hashicorp/${massagedLookupName}`;
-            const registryUrl = dep.registryUrls
-              ? dep.registryUrls[0]
-              : TerraformProviderDatasource.defaultRegistryUrls[0];
-            const newConstraint = isPinnedVersion(dep.newValue)
-              ? dep.newVersion
-              : dep.newValue;
-            const updateLock = locks.find(
-              (value) => value.lookupName === repository
-            );
-            const update: ProviderLockUpdate = {
-              newVersion: dep.newVersion,
-              newConstraint,
-              newHashes: await TerraformProviderHash.createHashes(
-                registryUrl,
-                repository,
-                dep.newVersion
-              ),
-              ...updateLock,
-            };
-            return update;
-          })
+      const providerDeps = updatedDeps.filter((dep) =>
+        ['provider', 'required_provider'].includes(dep.depType)
       );
+      for (const dep of providerDeps) {
+        const lookupName = dep.lookupName ?? dep.depName;
 
-      updates.push(...lockUpdates);
+        // handle cases like `Telmate/proxmox`
+        const massagedLookupName = lookupName.toLowerCase();
+
+        const repository = massagedLookupName.includes('/')
+          ? massagedLookupName
+          : `hashicorp/${massagedLookupName}`;
+        const registryUrl = dep.registryUrls
+          ? dep.registryUrls[0]
+          : TerraformProviderDatasource.defaultRegistryUrls[0];
+        const newConstraint = isPinnedVersion(dep.newValue)
+          ? dep.newVersion
+          : dep.newValue;
+        const updateLock = locks.find(
+          (value) => value.lookupName === repository
+        );
+        const update: ProviderLockUpdate = {
+          newVersion: dep.newVersion,
+          newConstraint,
+          newHashes: await TerraformProviderHash.createHashes(
+            registryUrl,
+            repository,
+            dep.newVersion
+          ),
+          ...updateLock,
+        };
+        updates.push(update);
+      }
     }
     // if no updates have been found or there are failed hashes abort
     if (
