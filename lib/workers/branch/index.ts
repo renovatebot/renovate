@@ -464,7 +464,7 @@ export async function processBranch(
       !dependencyDashboardCheck &&
       !config.rebaseRequested &&
       commitSha &&
-      (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
+      config.prCreation !== 'immediate'
     ) {
       logger.debug({ commitSha }, `Branch status pending`);
       return {
@@ -475,7 +475,7 @@ export async function processBranch(
     }
 
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    if (branchExists || !config.requiredStatusChecks) {
+    if (branchExists || config.ignoreTests) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
