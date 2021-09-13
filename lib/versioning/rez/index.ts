@@ -1,8 +1,22 @@
 import { api as npm } from '../npm';
 import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
-import { ascendingRange, descendingRange, exactVersion, inclusiveBound, lowerBound, upperBound, versionGroup } from './pattern';
-import { npm2rezplus, padZeroes, pep4402rezInclusiveBound, rez2npm, rez2pep440 } from './transform';
+import {
+  ascendingRange,
+  descendingRange,
+  exactVersion,
+  inclusiveBound,
+  lowerBound,
+  upperBound,
+  versionGroup,
+} from './pattern';
+import {
+  npm2rezplus,
+  padZeroes,
+  pep4402rezInclusiveBound,
+  rez2npm,
+  rez2pep440,
+} from './transform';
 
 export const id = 'rez';
 export const displayName = 'rez';

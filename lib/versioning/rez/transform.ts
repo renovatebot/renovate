@@ -1,4 +1,12 @@
-import { ascendingRange, descendingRange, exactVersion, inclusiveBound, lowerBound, matchVersion, upperBound } from './pattern';
+import {
+  ascendingRange,
+  descendingRange,
+  exactVersion,
+  inclusiveBound,
+  lowerBound,
+  matchVersion,
+  upperBound,
+} from './pattern';
 
 function getVersionParts(input: string): [string, string] {
   const versionParts = input.split('-');
