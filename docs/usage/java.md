@@ -18,8 +18,9 @@ Renovate can update:
 
 - `build.gradle`/`build.gradle.kts` files in the root of the repository
 - `*.gradle`/`*.gradle.kts` files in a subdirectory as multi-project configurations
--  dependencies whose version is defined in a `*.properties` file
--  `*.versions.toml` files in any directory or `*.toml` files inside the `gradle` directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
+- dependencies whose version is defined in a `*.properties` file
+- `*.versions.toml` files in any directory or `*.toml` files inside the `gradle`
+  directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
 
 Renovate does not support:
 
