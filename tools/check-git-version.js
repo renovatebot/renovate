@@ -9,7 +9,7 @@ try {
   const [gitVersion] = regex.exec(stdout);
   if (semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
     throw new Error(
-      'Minimum Git version ' + GIT_MINIMUM_VERSION + ' is required'
+      `Minimum git version ${GIT_MINIMUM_VERSION} is required`
     );
   }
   process.exit(0);
