@@ -11,7 +11,7 @@ function checkGitVersion() {
     gitVersion = gitVersion.match(regex)[0];
     if (semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
       throw new Error(
-        'Minimum git version ' + GIT_MINIMUM_VERSION + ' is required'
+        'Minimum Git version ' + GIT_MINIMUM_VERSION + ' is required'
       );
     }
     process.exit(0);
