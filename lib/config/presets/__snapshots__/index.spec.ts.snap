@@ -33,6 +33,7 @@ Object {
     "Require all status checks to pass before any automerging",
     "Pin dependency versions for <code>devDependencies</code> and retain semver ranges for others",
   ],
+  "ignoreTests": false,
   "ignoreUnstable": true,
   "labels": Array [
     "dependencies",
@@ -85,7 +86,6 @@ Object {
   ],
   "prCreation": "immediate",
   "rebaseWhen": "behind-base-branch",
-  "requiredStatusChecks": Array [],
   "respectLatest": true,
   "schedule": Array [
     "before 8am",
