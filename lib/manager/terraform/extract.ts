@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { ExtractConfig } from '../types';
+import type { ExtractConfig } from '../types';
 import type { PackageDependency, PackageFile } from '../types';
 import { TerraformDependencyTypes } from './common';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
