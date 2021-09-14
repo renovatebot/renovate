@@ -409,6 +409,17 @@ Object {
       "lockedVersion": "2.50.0",
       "lookupName": "hashicorp/azurerm",
     },
+    Object {
+      "currentValue": ">= 1.0",
+      "datasource": "terraform-provider",
+      "depName": "kubernetes",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "example/kubernetes",
+      "registryUrls": Array [
+        "https://terraform.example.com",
+      ],
+    },
   ],
 }
 `;

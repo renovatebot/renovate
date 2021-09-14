@@ -24,8 +24,6 @@ jest.mock('../../util/fs');
 
 describe('manager/terraform/extract', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     setGlobalConfig(adminConfig);
   });
   describe('extractPackageFile()', () => {
@@ -58,7 +56,7 @@ describe('manager/terraform/extract', () => {
         {}
       );
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res.deps).toHaveLength(3);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
     });
   });

@@ -7,5 +7,9 @@ terraform {
     azurerm = {
       version = "~> 2.50.0"
     }
+    kubernetes = {
+      source  = "terraform.example.com/example/kubernetes"
+      version = ">= 1.0"
+    }
   }
 }
