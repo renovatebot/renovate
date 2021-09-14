@@ -36,8 +36,7 @@ export function extractMsbuildGlobalManifest(
   }
 
   for (const depName of Object.keys(manifest['msbuild-sdks'])) {
-    const sdk = manifest['msbuild-sdks'][depName];
-    const currentValue = sdk[0];
+    const currentValue = manifest['msbuild-sdks'][depName];
     const dep: PackageDependency = {
       depType: 'msbuild-sdk',
       depName,

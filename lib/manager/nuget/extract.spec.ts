@@ -128,7 +128,7 @@ describe('manager/nuget/extract', () => {
               "skipReason": "unsupported-datasource",
             },
             Object {
-              "currentValue": "0",
+              "currentValue": "0.2.0",
               "datasource": "nuget",
               "depName": "YoloDev.Sdk",
               "depType": "msbuild-sdk",
