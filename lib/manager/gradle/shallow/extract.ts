@@ -118,7 +118,7 @@ export async function extractAllPackageFiles(
     } /* istanbul ignore next */ else {
       logger.warn(
         { dep },
-        `Failed to process Gradle dependency: ${dep.lookupName}`
+        `Failed to process Gradle dependency`
       );
     }
   });
