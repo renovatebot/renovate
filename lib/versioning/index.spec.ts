@@ -33,6 +33,8 @@ describe('versioning/index', () => {
     const vers = allVersioning.getVersionings();
 
     const loadedVers = loadModules(__dirname);
+    // TODO: revert rez in #10930
+    delete loadedVers.rez;
     expect(Array.from(vers.keys())).toEqual(Object.keys(loadedVers));
 
     for (const name of vers.keys()) {

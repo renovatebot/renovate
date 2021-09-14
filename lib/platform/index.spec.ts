@@ -66,6 +66,11 @@ describe('platform/index', () => {
           password: '123',
           username: 'abc',
         },
+        {
+          matchHost: 'api.bitbucket.org',
+          password: '123',
+          username: 'abc',
+        },
       ],
       platform: PLATFORM_TYPE_BITBUCKET,
     });

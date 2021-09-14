@@ -5,9 +5,10 @@ import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { datasource, defaultRegistryUrl, pageSize } from './common';
 
 const res1 = loadFixture('page.json');
+const jre = loadFixture('jre.json');
 
-function getPath(page: number): string {
-  return `/v3/info/release_versions?page_size=${pageSize}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
+function getPath(page: number, imageType = 'jdk'): string {
+  return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
 }
 function* range(start: number, end: number): Generator<number, number, number> {
   yield start;
@@ -16,6 +17,8 @@ function* range(start: number, end: number): Generator<number, number, number> {
   }
   yield* range(start + 1, end);
 }
+
+const depName = 'java';
 
 describe('datasource/adoptium-java/index', () => {
   describe('getReleases', () => {
@@ -27,7 +30,7 @@ describe('datasource/adoptium-java/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -37,7 +40,7 @@ describe('datasource/adoptium-java/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).toBeNull();
     });
@@ -50,7 +53,7 @@ describe('datasource/adoptium-java/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).toBeNull();
     });
@@ -60,7 +63,7 @@ describe('datasource/adoptium-java/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'adoptium-java',
+          depName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -69,10 +72,20 @@ describe('datasource/adoptium-java/index', () => {
       httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, res1);
       const res = await getPkgReleases({
         datasource,
-        depName: 'adoptium-java',
+        depName,
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
+    });
+
+    it('processes real data (jre)', async () => {
+      httpMock.scope(defaultRegistryUrl).get(getPath(0, 'jre')).reply(200, jre);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'java-jre',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
     });
 
     it('pages', async () => {
@@ -86,7 +99,7 @@ describe('datasource/adoptium-java/index', () => {
         .reply(404);
       const res = await getPkgReleases({
         datasource,
-        depName: 'adoptium-java',
+        depName,
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(50);
