@@ -97,9 +97,11 @@ describe('versioning/poetry/index', () => {
   });
 
   describe('isValid(input)', () => {
+
     it('should support zero-padded version numbers allowed by PEP440', () => {
       expect(versioning.isValid('17.04.0')).toBeTruthy();
     });
+
     it('should return false for irregular version', () => {
       expect(versioning.isValid('17.b4.0')).toBeFalsy();
     });
@@ -109,11 +111,13 @@ describe('versioning/poetry/index', () => {
     it('should support semver with dash', () => {
       expect(versioning.isValid('1.2.3-foo')).toBeTruthy();
     });
+
     it('should support PEP440 prereleases', () => {
       expect(versioning.isValid('1.2.3a0')).toBeTruthy();
       expect(versioning.isValid('1.2.3b1')).toBeTruthy();
       expect(versioning.isValid('1.2.3rc23')).toBeTruthy();
     });
+
     it('should reject semver without dash', () => {
       expect(versioning.isValid('1.2.3foo')).toBeFalsy();
     });
@@ -161,6 +165,7 @@ describe('versioning/poetry/index', () => {
     it('handles short', () => {
       expect(versioning.matches('1.4', '1.4')).toBe(true);
     });
+
     it('handles caret with preleases', () => {
       expect(versioning.matches('0.8.0a1', '^0.8.0-alpha.0')).toBe(true);
       expect(versioning.matches('0.7.4', '^0.8.0-alpha.0')).toBe(false);
@@ -209,6 +214,7 @@ describe('versioning/poetry/index', () => {
         )
       ).toBeNull();
     });
+
     it('handles PyPI preleases', () => {
       expect(
         versioning.minSatisfyingVersion(
@@ -233,6 +239,7 @@ describe('versioning/poetry/index', () => {
         )
       ).toBe('5.0.3');
     });
+
     it('handles PyPI preleases', () => {
       expect(
         versioning.getSatisfyingVersion(
@@ -372,6 +379,7 @@ describe('versioning/poetry/index', () => {
         })
       ).toEqual('^2.0.0');
     });
+
     it('returns currentValue for unqualified newVersion', () => {
       expect(
         versioning.getNewValue({
@@ -382,6 +390,7 @@ describe('versioning/poetry/index', () => {
         })
       ).toEqual('^0.5.15');
     });
+
     it('returns currentValue for invalid newVersion', () => {
       expect(
         versioning.getNewValue({

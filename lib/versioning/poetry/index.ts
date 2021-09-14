@@ -1,6 +1,5 @@
 import { parseRange } from 'semver-utils';
 import { parse } from 'semver';
-import { VERSION } from 'upath';
 import { logger } from '../../logger';
 import { api as npm } from '../npm';
 import { api as pep440 } from '../pep440';
@@ -220,8 +219,9 @@ const equals = (a: string, b: string): boolean => {
   }
 };
 
-const getMajor = (version: string): number =>
-  npm.getMajor(poetry2semver(version));
+function getMajor(version: string): number {
+  return npm.getMajor(poetry2semver(version));
+}
 
 const getMinor = (version: string): number =>
   npm.getMinor(poetry2semver(version));
