@@ -43,7 +43,6 @@ export function extractMsbuildGlobalManifest(
       depName,
       currentValue,
       datasource: datasourceNuget.id,
-      skipReason: SkipReason.UnsupportedDatasource,
     };
 
     deps.push(dep);
