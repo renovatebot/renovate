@@ -7,6 +7,7 @@ describe('versioning/poetry/index', () => {
       ['1.0', '1'],
       ['1.0.0', '1'],
       ['1.9.0', '1.9'],
+      ['1.9b0', '1.9.0-beta.0'],
     ])('%s == %s', (a, b) => {
       expect(versioning.equals(a, b)).toBe(true);
     });
@@ -15,6 +16,7 @@ describe('versioning/poetry/index', () => {
       ['1', '2'],
       ['1.9.1', '1.9'],
       ['1.9-beta', '1.9'],
+      ['1.9b0', '1.9'],
     ])('%s != %s', (a, b) => {
       expect(versioning.equals(a, b)).toBe(false);
     });
@@ -25,6 +27,8 @@ describe('versioning/poetry/index', () => {
       ['1', 1],
       ['1.9', 1],
       ['1.9.0', 1],
+      ['1.9.0b0', 1],
+      ['1.9.0-dev.0', 1],
     ])('%s -> %i', (version, expected) => {
       expect(versioning.getMajor(version)).toEqual(expected);
     });
@@ -35,6 +39,9 @@ describe('versioning/poetry/index', () => {
       ['1', 0],
       ['1.9', 9],
       ['1.9.0', 9],
+      ['1.9.0b0', 9],
+      ['1.9.0-dev.0', 9],
+      ['17.04.01', 4],
     ])('%s -> %i', (version, expected) => {
       expect(versioning.getMinor(version)).toEqual(expected);
     });
@@ -46,6 +53,9 @@ describe('versioning/poetry/index', () => {
       ['1.9', 0],
       ['1.9.0', 0],
       ['1.9.4', 4],
+      ['1.9.4b0', 4],
+      ['1.9.4-dev.0', 4],
+      ['17.04.01', 1],
     ])('%s -> %i', (version, expected) => {
       expect(versioning.getPatch(version)).toEqual(expected);
     });
@@ -58,6 +68,7 @@ describe('versioning/poetry/index', () => {
       ['2.0.0', '1'],
       ['1.10.0', '1.9'],
       ['1.9', '1.9-beta'],
+      ['1.9', '1.9a0'],
     ])('%s > %s', (a, b) => {
       expect(versioning.isGreaterThan(a, b)).toBe(true);
     });
@@ -79,20 +90,29 @@ describe('versioning/poetry/index', () => {
       ['1.9.0', true],
       ['1.9.4', true],
       ['1.9.4-beta', false],
+      ['1.9.4b0', false],
     ])('%s -> %i', (version, expected) => {
       expect(versioning.isStable(version)).toEqual(expected);
     });
   });
 
   describe('isValid(input)', () => {
-    it('should return null for irregular versions', () => {
-      expect(versioning.isValid('17.04.0')).toBeFalsy();
+    it('should support zero-padded version numbers allowed by PEP440', () => {
+      expect(versioning.isValid('17.04.0')).toBeTruthy();
+    });
+    it('should return false for irregular version', () => {
+      expect(versioning.isValid('17.b4.0')).toBeFalsy();
     });
     it('should support simple semver', () => {
       expect(versioning.isValid('1.2.3')).toBeTruthy();
     });
     it('should support semver with dash', () => {
       expect(versioning.isValid('1.2.3-foo')).toBeTruthy();
+    });
+    it('should support PEP440 prereleases', () => {
+      expect(versioning.isValid('1.2.3a0')).toBeTruthy();
+      expect(versioning.isValid('1.2.3b1')).toBeTruthy();
+      expect(versioning.isValid('1.2.3rc23')).toBeTruthy();
     });
     it('should reject semver without dash', () => {
       expect(versioning.isValid('1.2.3foo')).toBeFalsy();
@@ -141,6 +161,10 @@ describe('versioning/poetry/index', () => {
     it('handles short', () => {
       expect(versioning.matches('1.4', '1.4')).toBe(true);
     });
+    it('handles caret with preleases', () => {
+      expect(versioning.matches('0.8.0a1', '^0.8.0-alpha.0')).toBe(true);
+      expect(versioning.matches('0.7.4', '^0.8.0-alpha.0')).toBe(false);
+    });
   });
   describe('isLessThanRange()', () => {
     it('handles comma', () => {
@@ -185,6 +209,14 @@ describe('versioning/poetry/index', () => {
         )
       ).toBeNull();
     });
+    it('handles PyPI preleases', () => {
+      expect(
+        versioning.minSatisfyingVersion(
+          ['0.8.0a2', '0.8.0a7'],
+          '^0.8.0-alpha.0'
+        )
+      ).toBe('0.8.0-alpha.2');
+    });
   });
   describe('getSatisfyingVersion()', () => {
     it('handles comma', () => {
@@ -200,6 +232,14 @@ describe('versioning/poetry/index', () => {
           '5.0, > 5.0.0'
         )
       ).toBe('5.0.3');
+    });
+    it('handles PyPI preleases', () => {
+      expect(
+        versioning.getSatisfyingVersion(
+          ['0.8.0a2', '0.8.0a7'],
+          '^0.8.0-alpha.0'
+        )
+      ).toBe('0.8.0-alpha.7');
     });
   });
 
@@ -332,13 +372,23 @@ describe('versioning/poetry/index', () => {
         })
       ).toEqual('^2.0.0');
     });
-    it('returns currentValue', () => {
+    it('returns currentValue for unqualified newVersion', () => {
       expect(
         versioning.getNewValue({
           currentValue: '^0.5.15',
           rangeStrategy: 'replace',
           currentVersion: '0.5.15',
           newVersion: '0.6',
+        })
+      ).toEqual('^0.5.15');
+    });
+    it('returns currentValue for invalid newVersion', () => {
+      expect(
+        versioning.getNewValue({
+          currentValue: '^0.5.15',
+          rangeStrategy: 'replace',
+          currentVersion: '0.5.15',
+          newVersion: '0.6b.4',
         })
       ).toEqual('^0.5.15');
     });
@@ -426,16 +476,25 @@ describe('versioning/poetry/index', () => {
         })
       ).toEqual('=1.1.0');
     });
-    it('bumps caret to prerelease', () => {
-      expect(
-        versioning.getNewValue({
-          currentValue: '^1',
-          rangeStrategy: 'bump',
-          currentVersion: '1.0.0',
-          newVersion: '1.0.7-prerelease.1',
-        })
-      ).toEqual('^1.0.7-prerelease.1');
-    });
+    it.each([
+      ['^1', '1.0.0', '1.0.7-rc.1', '^1.0.7-rc.1'],
+      ['^1', '1.0.0', '1.0.7-alpha.0', '^1.0.7-alpha.0'],
+      ['^0.8.0-alpha.0', '0.8.0-alpha.0', '0.8.0-alpha.1', '^0.8.0-alpha.1'],
+      ['^0.8.0-alpha.0', '0.8.0-alpha.0', '0.8.0a1', '^0.8.0-alpha.1'],
+      ['^1', '1.0.0', '1.0.7a0', '^1.0.7-alpha.0'],
+    ])(
+      'bumps caret to prerelease',
+      (currentValue, currentVersion, newVersion, result) => {
+        expect(
+          versioning.getNewValue({
+            currentValue: currentValue,
+            rangeStrategy: 'bump',
+            currentVersion: currentVersion,
+            newVersion: newVersion,
+          })
+        ).toEqual(result);
+      }
+    );
     it('replaces with newer', () => {
       expect(
         versioning.getNewValue({
@@ -593,6 +652,8 @@ describe('versioning/poetry/index', () => {
       ['2.0.0', '1'],
       ['1.10.0', '1.9'],
       ['1.9', '1.9-beta'],
+      ['1.9', '1.9b'],
+      ['1.9', '1.9rc0'],
     ])('%s > %s', (a, b) => {
       expect(versioning.sortVersions(a, b)).toBe(1);
     });
