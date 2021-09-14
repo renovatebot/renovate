@@ -35,13 +35,14 @@ describe('workers/repository/onboarding/branch/create', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
-        buildExpectedCommitFilesArgument('chore: Add renovate.json')
+        buildExpectedCommitFilesArgument('chore(deps): add renovate.json')
       );
     });
     it('applies supplied commit message', async () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
       config.onboardingCommitMessage = message;
+      config.semanticCommits = 'disabled';
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
         buildExpectedCommitFilesArgument(`${message}`)
@@ -51,6 +52,7 @@ describe('workers/repository/onboarding/branch/create', () => {
       it('to the default commit message', async () => {
         const prefix = 'RENOV-123';
         config.commitMessagePrefix = prefix;
+        config.onboardingCommitMessage = null;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(

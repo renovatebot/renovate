@@ -78,7 +78,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value in order to override the default onboarding commit message.',
     type: 'string',
-    default: 'chore',
+    default: null,
     globalOnly: true,
     cli: false,
   },
@@ -96,7 +96,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value in order to override the default onboarding PR title.',
     type: 'string',
-    default: 'chore: Configure Renovate',
+    default: 'Configure Renovate',
     globalOnly: true,
     cli: false,
   },

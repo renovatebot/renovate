@@ -36,6 +36,9 @@ export class OnboardingCommitMessageFactory {
   }
 
   private areSemanticCommitsEnabled(): boolean {
-    return this.config.semanticCommits === 'enabled';
+    return (
+      this.config.semanticCommits === 'enabled' ||
+      this.config.semanticCommits === 'auto'
+    );
   }
 }
