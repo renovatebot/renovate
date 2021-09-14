@@ -54,6 +54,9 @@ export function massageProviderLookupName(dep: PackageDependency): void {
   if (!dep.lookupName.includes('/')) {
     dep.lookupName = `hashicorp/${dep.lookupName}`;
   }
+
+  // handle cases like `Telmate/proxmox`
+  dep.lookupName = dep.lookupName.toLowerCase();
   /* eslint-enable no-param-reassign */
 }
 
@@ -61,14 +64,13 @@ export function getLockedVersion(
   dep: PackageDependency,
   locks: ProviderLock[]
 ): string {
-  const foundLock = locks.find((lock) => {
-    const depRegistryUrl = dep.registryUrls
-      ? dep.registryUrls[0]
-      : TerraformProviderDatasource.defaultRegistryUrls[0];
-    return (
+  const depRegistryUrl = dep.registryUrls
+    ? dep.registryUrls[0]
+    : TerraformProviderDatasource.defaultRegistryUrls[0];
+  const foundLock = locks.find(
+    (lock) =>
       lock.lookupName === dep.lookupName && lock.registryUrl === depRegistryUrl
-    );
-  });
+  );
   if (foundLock) {
     return foundLock.version;
   }
