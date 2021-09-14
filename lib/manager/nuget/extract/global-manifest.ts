@@ -25,6 +25,15 @@ export function extractMsbuildGlobalManifest(
     );
     return null;
   }
+    
+  if (manifest.sdk?.version) {
+    deps.push({
+      depType: 'sdk',
+      depName: 'dotnet-sdk',
+      currentValue: manifest.sdk?.version,
+      skipReason: SkipReason.UnsupportedDatasource,
+    });
+  }
 
   for (const depName of Object.keys(manifest['msbuild-sdks'])) {
     const sdk = manifest['msbuild-sdks'][depName];
