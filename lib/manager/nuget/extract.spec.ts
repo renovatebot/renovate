@@ -113,17 +113,17 @@ describe('manager/nuget/extract', () => {
         await extractPackageFile(otherContents, otherPackageFile, config)
       ).toMatchSnapshot();
     });
+
     it('extracts msbuild-sdks from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.json';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
       expect(await extractPackageFile(contents, packageFile, config))
         .toMatchInlineSnapshot(`
         Object {
           "deps": Array [
             Object {
               "currentValue": "0",
-              "datasource": null,
+              "datasource": "nuget",
               "depName": "YoloDev.Sdk",
               "depType": "nuget",
               "skipReason": "unsupported-datasource",
@@ -132,18 +132,18 @@ describe('manager/nuget/extract', () => {
         }
       `);
     });
+
     it('handles malformed global.json', async () => {
       const packageFile = 'msbuild-sdk-files/invalid-json/global.json';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toBeNull();
     });
+
     it('handles not-a-nuget global.json', async () => {
       const packageFile = 'msbuild-sdk-files/not-nuget/global.json';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
       expect(
         await extractPackageFile(contents, packageFile, config)
       ).toBeNull();
