@@ -50,6 +50,7 @@ const staticGroups = {
     extends: [
       'group:nodeJs',
       'group:allApollographql',
+      'group:codemirror',
       'group:fortawesome',
       'group:fusionjs',
       'group:glimmer',
@@ -117,6 +118,15 @@ const staticGroups = {
         matchDatasources: ['docker'],
         matchPackagePrefixes: ['mcr.microsoft.com/dotnet/core/'],
         groupName: '.NET Core Docker containers',
+      },
+    ],
+  },
+  codemirror: {
+    description: 'Group CodeMirror packages together',
+    packageRules: [
+      {
+        groupName: 'CodeMirror',
+        matchPackagePrefixes: ['@codemirror/'],
       },
     ],
   },

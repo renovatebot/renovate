@@ -185,7 +185,6 @@ const patternGroups = {
   'aws-java-sdk-v2': '^software.amazon.awssdk:',
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
-  codemirror: '^@codemirror/',
 };
 
 export const presets: Record<string, Preset> = {};
