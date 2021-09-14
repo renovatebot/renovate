@@ -39,7 +39,7 @@ For more details on GitLab security for bots, please see the [GitLab Bot Securit
 
 ## Repository onboarding
 
-Once you have enabled Renovate on a repository, you will receive a "Configure Renovate" Pull Request looking something like this:
+Once you have enabled Renovate on a repository, you will receive a "chore: Configure Renovate" Pull Request looking something like this:
 
 ![Onboarding](../assets/images/onboarding.png)
 
@@ -57,7 +57,7 @@ Warnings and errors should be fixed on the base branch (e.g. `main`) so that Ren
 
 ### Configuration location
 
-The "Configure Renovate" PR will include a `renovate.json` file in the root directory, with suggested default settings.
+The "chore: Configure Renovate" PR will include a `renovate.json` file in the root directory, with suggested default settings.
 If you don't want a `renovate.json` file in your repository you can use one of the following files instead:
 
 - `renovate.json5`
@@ -125,9 +125,9 @@ Perhaps you really liked the interactive onboarding PR and want to use it again.
 You can follow the steps below to nuke the config and get a new PR.
 Any existing Renovate PRs will be closed after you've completed these steps.
 
-1. Find your original `Configure Renovate` PR
+1. Find your original `chore: Configure Renovate` PR
 1. Rename the original PR to something else, e.g. `Configure Renovate - old`
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
-Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
+Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "chore: Configure Renovate" PR.
 If you're using the hosted WhiteSource Renovate App and you don't receive a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.

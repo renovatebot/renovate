@@ -35,7 +35,7 @@ describe('workers/repository/onboarding/branch/create', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
-        buildExpectedCommitFilesArgument('Add renovate.json')
+        buildExpectedCommitFilesArgument('chore: Add renovate.json')
       );
     });
     it('applies supplied commit message', async () => {

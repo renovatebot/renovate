@@ -239,7 +239,7 @@ However, Renovate also allows users to explicitly configure `baseBranches`, e.g.
 - You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
 
-It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
+It's possible to add this setting into the `renovate.json` file as part of the "chore: Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
 
 ## bbUseDefaultReviewers
