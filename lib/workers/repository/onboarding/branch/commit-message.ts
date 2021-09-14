@@ -21,7 +21,7 @@ export class OnboardingCommitMessageFactory {
     const commitMessage = new CommitMessage();
 
     if (commitMessagePrefix) {
-      commitMessage.setCustomPrefix(commitMessagePrefix || 'chore:');
+      commitMessage.setCustomPrefix(commitMessagePrefix);
     } else if (this.areSemanticCommitsEnabled()) {
       commitMessage.setSemanticPrefix(semanticCommitType, semanticCommitScope);
     }

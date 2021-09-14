@@ -78,7 +78,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value in order to override the default onboarding commit message.',
     type: 'string',
-    default: null,
+    default: 'chore',
     globalOnly: true,
     cli: false,
   },
