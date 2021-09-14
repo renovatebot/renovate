@@ -99,6 +99,7 @@ export async function extractAllPackageFiles(
 
   elevateFileReplacePositionField(extractedDeps).forEach((dep) => {
     const key = dep.managerData?.packageFile;
+    // istanbul ignore else
     if (key) {
       const pkgFile: PackageFile = packageFilesByName[key];
       const { deps } = pkgFile;
@@ -113,7 +114,7 @@ export async function extractAllPackageFiles(
         ],
       });
       packageFilesByName[key] = pkgFile;
-    } /* istanbul ignore else */ else {
+    } else {
       logger.warn({ dep }, `Failed to process Gradle dependency`);
     }
   });
