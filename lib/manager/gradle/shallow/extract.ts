@@ -1,11 +1,9 @@
-import { DeploymentStatus } from 'azure-devops-node-api/interfaces/ReleaseInterfaces';
 import * as upath from 'upath';
 import {
   id as datasource,
   defaultRegistryUrls,
 } from '../../../datasource/maven';
 import { logger } from '../../../logger';
-import { SkipReason } from '../../../types';
 import { readLocalFile } from '../../../util/fs';
 import type {
   ExtractConfig,
@@ -116,10 +114,7 @@ export async function extractAllPackageFiles(
       });
       packageFilesByName[key] = pkgFile;
     } /* istanbul ignore next */ else {
-      logger.warn(
-        { dep },
-        `Failed to process Gradle dependency`
-      );
+      logger.warn({ dep }, `Failed to process Gradle dependency`);
     }
   });
 
