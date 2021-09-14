@@ -10,7 +10,7 @@ async function checkGitVersion() {
     const stdout = await git.raw('--version');
     const [gitVersion] = regex.exec(stdout);
     if (semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
-      throw new Error(`Minimum git version ${GIT_MINIMUM_VERSION} is required`);
+      throw new Error(`Minimum Git version ${GIT_MINIMUM_VERSION} is required`);
     }
     process.exit(0);
   } catch (err) {
