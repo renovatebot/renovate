@@ -1,6 +1,8 @@
 import type { Preset } from '../types';
 import * as monorepos from './monorepo';
 
+const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
+
 const staticGroups = {
   all: {
     description: 'Group all updates together',
@@ -596,6 +598,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
       {
         description: `Group packages from ${monorepo} monorepo together`,
         extends: `monorepo:${monorepo}`,
+        matchUpdateTypes: nonPinUpdateTypes,
         groupName: `${monorepo} monorepo`,
       },
     ],
