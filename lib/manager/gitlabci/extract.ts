@@ -11,7 +11,7 @@ const commentsRe = /^\s*#/;
 const whitespaceRe = /^(?<whitespace>\s*)/;
 const imageRe =
   /^(?<whitespace>\s*)image:(?:\s+['"]?(?<image>[^\s'"]+)['"]?)?\s*$/;
-const nameRe = /^\s*name:\s+['"]?(?<depName>[^\s'"]+|)['"]?\s*$/;
+const nameRe = /^\s*name:\s+['"]?(?<depName>[^\s'"]+)['"]?\s*$/;
 const serviceRe = /^\s*-\s*(?:name:\s+)?['"]?(?<depName>[^\s'"]+)['"]?\s*$/;
 
 function skipCommentLines(
