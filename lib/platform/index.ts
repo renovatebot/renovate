@@ -65,13 +65,13 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     }
   });
   returnConfig.hostRules = returnConfig.hostRules || [];
-  returnConfig.hostRules.push(platformRule);
-  hostRules.add(platformRule);
   const typedPlatformRule = {
     ...platformRule,
     hostType: returnConfig.platform,
   };
   returnConfig.hostRules.push(typedPlatformRule);
   hostRules.add(typedPlatformRule);
+  returnConfig.hostRules.push(platformRule);
+  hostRules.add(platformRule);
   return returnConfig;
 }
