@@ -114,6 +114,46 @@ describe('manager/nuget/extract', () => {
       ).toMatchSnapshot();
     });
 
+    it('extracts msbuild-sdks from global.json', async () => {
+      const packageFile = 'msbuild-sdk-files/global.json';
+      const contents = loadFixture(packageFile);
+      expect(await extractPackageFile(contents, packageFile, config))
+        .toMatchInlineSnapshot(`
+        Object {
+          "deps": Array [
+            Object {
+              "currentValue": "5.0.302",
+              "depName": "dotnet-sdk",
+              "depType": "dotnet-sdk",
+              "skipReason": "unsupported-datasource",
+            },
+            Object {
+              "currentValue": "0.2.0",
+              "datasource": "nuget",
+              "depName": "YoloDev.Sdk",
+              "depType": "msbuild-sdk",
+            },
+          ],
+        }
+      `);
+    });
+
+    it('handles malformed global.json', async () => {
+      const packageFile = 'msbuild-sdk-files/invalid-json/global.json';
+      const contents = loadFixture(packageFile);
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toBeNull();
+    });
+
+    it('handles not-a-nuget global.json', async () => {
+      const packageFile = 'msbuild-sdk-files/not-nuget/global.json';
+      const contents = loadFixture(packageFile);
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toBeNull();
+    });
+
     describe('.config/dotnet-tools.json', () => {
       const packageFile = '.config/dotnet-tools.json';
       const contents = `{
@@ -126,6 +166,7 @@ describe('manager/nuget/extract', () => {
     }
   }
 }`;
+
       it('works', async () => {
         // FIXME: explicit assert condition
         expect(
