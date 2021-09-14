@@ -96,7 +96,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value in order to override the default onboarding PR title.',
     type: 'string',
-    default: 'Configure Renovate',
+    default: 'chore: Configure Renovate',
     globalOnly: true,
     cli: false,
   },
