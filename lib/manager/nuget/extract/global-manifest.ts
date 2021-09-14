@@ -28,7 +28,7 @@ export function extractMsbuildGlobalManifest(
 
   if (manifest.sdk?.version) {
     deps.push({
-      depType: 'sdk',
+      depType: 'dotnet-sdk',
       depName: 'dotnet-sdk',
       currentValue: manifest.sdk?.version,
       skipReason: SkipReason.UnsupportedDatasource,
@@ -39,7 +39,7 @@ export function extractMsbuildGlobalManifest(
     const sdk = manifest['msbuild-sdks'][depName];
     const currentValue = sdk[0];
     const dep: PackageDependency = {
-      depType: 'sdk',
+      depType: 'msbuild-sdk',
       depName,
       currentValue,
       datasource: datasourceNuget.id,

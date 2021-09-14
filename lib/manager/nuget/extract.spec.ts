@@ -124,14 +124,14 @@ describe('manager/nuget/extract', () => {
             Object {
               "currentValue": "5.0.302",
               "depName": "dotnet-sdk",
-              "depType": "sdk",
+              "depType": "dotnet-sdk",
               "skipReason": "unsupported-datasource",
             },
             Object {
               "currentValue": "0",
               "datasource": "nuget",
               "depName": "YoloDev.Sdk",
-              "depType": "sdk",
+              "depType": "msbuild-sdk",
             },
           ],
         }
