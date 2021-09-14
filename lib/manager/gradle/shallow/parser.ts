@@ -24,7 +24,6 @@ import {
   isDependencyString,
   parseDependencyString,
 } from './utils';
-import { SkipReason } from '../../../types';
 
 function matchTokens(
   tokens: Token[],
