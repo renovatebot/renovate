@@ -98,20 +98,22 @@ export async function extractAllPackageFiles(
   }
 
   elevateFileReplacePositionField(extractedDeps).forEach((dep) => {
-    const key = dep.managerData.packageFile;
-    const pkgFile: PackageFile = packageFilesByName[key];
-    const { deps } = pkgFile;
-    deps.push({
-      ...dep,
-      registryUrls: [
-        ...new Set([
-          ...defaultRegistryUrls,
-          ...(dep.registryUrls || []),
-          ...registryUrls,
-        ]),
-      ],
-    });
-    packageFilesByName[key] = pkgFile;
+    const key = dep.managerData?.packageFile;
+    if (key) {
+      const pkgFile: PackageFile = packageFilesByName[key];
+      const { deps } = pkgFile;
+      deps.push({
+        ...dep,
+        registryUrls: [
+          ...new Set([
+            ...defaultRegistryUrls,
+            ...(dep.registryUrls || []),
+            ...registryUrls,
+          ]),
+        ],
+      });
+      packageFilesByName[key] = pkgFile;
+    }
   });
 
   return Object.values(packageFilesByName);
