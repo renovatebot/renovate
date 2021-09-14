@@ -5,7 +5,11 @@ import * as hostRules from '../host-rules';
 export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = GitUrlParse(url);
 
-  parsedUrl.token = token;
+  if (parsedUrl.user.includes(token)) {
+    parsedUrl.token = parsedUrl.user;
+  } else {
+    parsedUrl.token = token;
+  }
 
   const protocol = /^https?$/.exec(parsedUrl.protocol)
     ? parsedUrl.protocol
