@@ -25,7 +25,7 @@ export function extractMsbuildGlobalManifest(
     );
     return null;
   }
-    
+
   if (manifest.sdk?.version) {
     deps.push({
       depType: 'sdk',
