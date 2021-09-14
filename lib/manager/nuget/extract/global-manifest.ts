@@ -18,7 +18,7 @@ export function extractMsbuildGlobalManifest(
     return null;
   }
 
-  if (!manifest['msbuild-sdks'] && (!manifest.sdk || !manifest.sdk.version)) {
+  if (!manifest['msbuild-sdks'] && !manifest.sdk?.version) {
     logger.debug(
       { fileName: packageFile },
       'This global.json is not a Nuget file'
