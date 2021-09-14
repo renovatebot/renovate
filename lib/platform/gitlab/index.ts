@@ -370,19 +370,9 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    return BranchStatus.green;
-  }
-  if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
 
   if (!git.branchExists(branchName)) {
     throw new Error(REPOSITORY_CHANGED);
@@ -614,7 +604,7 @@ export async function getPr(iid: number): Promise<Pr> {
     pr.canMerge = false;
     pr.isConflicted = true;
   } else if (pr.state === PrState.Open) {
-    const branchStatus = await getBranchStatus(pr.sourceBranch, []);
+    const branchStatus = await getBranchStatus(pr.sourceBranch);
     if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
     }

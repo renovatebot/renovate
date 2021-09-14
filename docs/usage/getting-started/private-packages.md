@@ -257,6 +257,12 @@ The end-result looks like this:
 }
 ```
 
+#### Yarn 2+
+
+Renovate doesn't support reading `npmRegistries` and `npmScopes` from `.yarnrc.yml`, so `hostRules` (or `npmToken`) and `npmrc` should be configured like above.
+Renovate updates `npmRegistries` in `.yarnrc.yml` with resolved `hostRules` before running Yarn.
+For Renovate to overwrite existing `npmRegistries` entry, the key should match the `matchHost` without the protocol (`http:` or `https:`) and with the trailing slash.
+
 ### nuget
 
 For each known NuGet registry, Renovate searches for `hostRules` with `hostType=nuget` and matching host.

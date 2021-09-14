@@ -1317,13 +1317,10 @@ const options: RenovateOptions[] = [
     default: 'automergeComment',
   },
   {
-    name: 'requiredStatusChecks',
-    description:
-      'List of status checks that must pass before automerging. Set to null to enable automerging without tests.',
-    type: 'array',
-    subType: 'string',
-    cli: false,
-    env: false,
+    name: 'ignoreTests',
+    description: 'Set to true to enable automerging without tests.',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'transitiveRemediation',
