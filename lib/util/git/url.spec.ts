@@ -39,6 +39,13 @@ describe('util/git/url', () => {
       );
     });
 
+    it('returns https url with token with included username', () => {
+      hostRules.find.mockReturnValueOnce({ token: 'token' });
+      expect(
+        getRemoteUrlWithToken('https://oauth2:token@foo.bar/bar/foo')
+      ).toBe('https://oauth2:token@foo.bar/bar/foo');
+    });
+
     it('returns https url with token for non-http protocols', () => {
       hostRules.find.mockReturnValueOnce({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://foo.bar/')).toBe(
