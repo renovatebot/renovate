@@ -113,7 +113,7 @@ export async function extractAllPackageFiles(
         ],
       });
       packageFilesByName[key] = pkgFile;
-    } else /* istanbul ignore next */ {
+    } /* istanbul ignore next */ else {
       logger.warn({ dep }, `Failed to process Gradle dependency`);
     }
   });
