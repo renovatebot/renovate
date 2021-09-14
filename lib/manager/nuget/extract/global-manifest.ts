@@ -39,7 +39,7 @@ export function extractMsbuildGlobalManifest(
     const sdk = manifest['msbuild-sdks'][depName];
     const currentValue = sdk[0];
     const dep: PackageDependency = {
-      depType: 'nuget',
+      depType: 'sdk',
       depName,
       currentValue,
       datasource: datasourceNuget.id,
