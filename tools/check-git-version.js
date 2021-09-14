@@ -18,4 +18,6 @@ async function checkGitVersion() {
     process.exit(1);
   }
 }
-checkGitVersion();
+(async () => {
+  checkGitVersion();
+})();
