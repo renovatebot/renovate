@@ -48,7 +48,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('returns if PR does not need updating', async () => {
       platform.getBranchPr.mockResolvedValue(
         partial<Pr>({
-          title: 'Configure Renovate',
+          title: 'chore: Configure Renovate',
           body: createPrBody,
         })
       );
@@ -60,7 +60,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
-          title: 'Configure Renovate',
+          title: 'chore: Configure Renovate',
           body: createPrBody,
           isConflicted: true,
         })
@@ -74,7 +74,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
-          title: 'Configure Renovate',
+          title: 'chore: Configure Renovate',
           body: createPrBody,
         })
       );
@@ -93,7 +93,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
-          title: 'Configure Renovate',
+          title: 'chore: Configure Renovate',
           body: createPrBody,
           isConflicted: true,
         })
