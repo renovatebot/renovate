@@ -30,15 +30,18 @@ describe('manager/terraform/extract', () => {
     it('returns null for empty', async () => {
       expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
     });
+
     it('extracts', async () => {
       const res = await extractPackageFile(tf1, '1.tf', {});
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(46);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(8);
     });
+
     it('returns null if only local deps', async () => {
       expect(await extractPackageFile(tf2, '2.tf', {})).toBeNull();
     });
+
     it('extract helm releases', async () => {
       const res = await extractPackageFile(helm, 'helm.tf', {});
       expect(res).toMatchSnapshot();
