@@ -18,7 +18,4 @@ const git = simpleGit();
     shell.echo('ERROR:', err.message);
     process.exit(1);
   }
-}
-(async () => {
-  checkGitVersion();
 })();
