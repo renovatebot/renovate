@@ -13,7 +13,7 @@ const git = simpleGit();
     if (semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
       throw new Error(`Minimum Git version ${GIT_MINIMUM_VERSION} is required`);
     }
-    console.log('Found git version: ' + gitVersion);
+    shell.echo('Found git version: ', gitVersion);
     process.exit(0);
   } catch (err) {
     shell.echo('ERROR:', err.message);
