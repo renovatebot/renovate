@@ -48,7 +48,7 @@ describe('config/secrets', () => {
       const config = {
         prTitle: '{{ secrets.ARTIFACTORY_TOKEN }}',
         secrets: {
-          ARTIFACTORY_TOKEN: 'abc123==',
+          ARTIFACTORY_TOKEN: '123test==',
         },
       };
       expect(() => applySecretsToConfig(config)).toThrow(CONFIG_VALIDATION);
@@ -61,7 +61,7 @@ describe('config/secrets', () => {
     });
     it('replaces secrets in the top level', () => {
       const config = {
-        secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
         npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',
       };
       const res = applySecretsToConfig(config);
@@ -70,7 +70,7 @@ describe('config/secrets', () => {
     });
     it('replaces secrets in a subobject', () => {
       const config = {
-        secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
         npm: { npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}' },
       };
       const res = applySecretsToConfig(config);
@@ -79,7 +79,7 @@ describe('config/secrets', () => {
     });
     it('replaces secrets in a array of objects', () => {
       const config = {
-        secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
         hostRules: [
           { hostType: 'npm', token: '{{ secrets.ARTIFACTORY_TOKEN }}' },
         ],

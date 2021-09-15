@@ -35,7 +35,7 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
-  if (rangeStrategy === 'replace') {
+  if (['replace', 'update-lockfile'].includes(rangeStrategy)) {
     if (/~>\s*0\.\d+/.test(currentValue) && npm.getMajor(newVersion) === 0) {
       const testFullVersion = /(~>\s*0\.)(\d+)\.\d$/;
       let replaceValue = '';

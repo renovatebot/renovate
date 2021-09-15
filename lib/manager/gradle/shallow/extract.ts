@@ -67,12 +67,8 @@ export async function extractAllPackageFiles(
         updateVars(vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        try {
-          const updatesFromCatalog = parseCatalog(packageFile, content);
-          extractedDeps.push(...updatesFromCatalog);
-        } catch (error) {
-          logger.warn({ error }, 'TOML parsing error');
-        }
+        const updatesFromCatalog = parseCatalog(packageFile, content);
+        extractedDeps.push(...updatesFromCatalog);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
@@ -89,9 +85,9 @@ export async function extractAllPackageFiles(
         updateVars(gradleVars);
         extractedDeps.push(...deps);
       }
-    } catch (e) {
+    } catch (err) {
       logger.warn(
-        { config, packageFile },
+        { err, config, packageFile },
         `Failed to process Gradle file: ${packageFile}`
       );
     }
@@ -102,20 +98,25 @@ export async function extractAllPackageFiles(
   }
 
   elevateFileReplacePositionField(extractedDeps).forEach((dep) => {
-    const key = dep.managerData.packageFile;
-    const pkgFile: PackageFile = packageFilesByName[key];
-    const { deps } = pkgFile;
-    deps.push({
-      ...dep,
-      registryUrls: [
-        ...new Set([
-          ...defaultRegistryUrls,
-          ...(dep.registryUrls || []),
-          ...registryUrls,
-        ]),
-      ],
-    });
-    packageFilesByName[key] = pkgFile;
+    const key = dep.managerData?.packageFile;
+    // istanbul ignore else
+    if (key) {
+      const pkgFile: PackageFile = packageFilesByName[key];
+      const { deps } = pkgFile;
+      deps.push({
+        ...dep,
+        registryUrls: [
+          ...new Set([
+            ...defaultRegistryUrls,
+            ...(dep.registryUrls || []),
+            ...registryUrls,
+          ]),
+        ],
+      });
+      packageFilesByName[key] = pkgFile;
+    } else {
+      logger.warn({ dep }, `Failed to process Gradle dependency`);
+    }
   });
 
   return Object.values(packageFilesByName);
