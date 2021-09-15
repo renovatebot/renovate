@@ -11,7 +11,11 @@ const git = simpleGit();
     const stdout = await git.raw('--version');
     const [gitVersion] = regex.exec(stdout);
     if (semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
-      throw new Error(`Minimum Git version ${GIT_MINIMUM_VERSION} is required`);
+      if (process.env.CI) {
+        shell.echo(`::error ::Minimum Git version ${GIT_MINIMUM_VERSION} is required`);
+      } else {
+        throw new Error(`Minimum Git version ${GIT_MINIMUM_VERSION} is required`);
+      }
     }
     shell.echo('Found git version: ', gitVersion);
     process.exit(0);
