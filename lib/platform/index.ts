@@ -71,7 +71,5 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   };
   returnConfig.hostRules.push(typedPlatformRule);
   hostRules.add(typedPlatformRule);
-  returnConfig.hostRules.push(platformRule);
-  hostRules.add(platformRule);
   return returnConfig;
 }
