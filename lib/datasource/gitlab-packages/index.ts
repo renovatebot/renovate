@@ -17,8 +17,6 @@ export class GitlabPackagesDatasource extends Datasource {
 
   override customRegistrySupport = true;
 
-  override defaultVersioning = 'docker';
-
   override defaultRegistryUrls = ['https://gitlab.com'];
 
   constructor() {
