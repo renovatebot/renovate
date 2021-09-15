@@ -13,7 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
     runs-on: ubuntu-latest
 
     # tests shouldn't need more time
@@ -100,6 +99,7 @@ jobs:
           yarn eslint -f gha
           yarn prettier
           yarn markdown-lint
+          yarn git-check
 
       - name: Test schema
         run: yarn test-schema
