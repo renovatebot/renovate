@@ -5,9 +5,9 @@ import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { VERSION_PATTERN } from './patterns';
 import {
+  npm2poetry,
   poetry2npm,
   poetry2semver,
-  npm2poetry,
   semver2poetry,
 } from './transform';
 
@@ -33,6 +33,10 @@ function getPatch(version: string): number {
   return npm.getPatch(poetry2semver(version));
 }
 
+function isVersion(input: string): boolean {
+  return VERSION_PATTERN.test(input);
+}
+
 function isGreaterThan(a: string, b: string): boolean {
   return npm.isGreaterThan(poetry2semver(a), poetry2semver(b));
 }
@@ -50,10 +54,6 @@ function isValid(input: string): string | boolean {
 
 function isStable(version: string): boolean {
   return npm.isStable(poetry2semver(version));
-}
-
-function isVersion(input: string): boolean {
-  return VERSION_PATTERN.test(input);
 }
 
 function matches(version: string, range: string): boolean {
@@ -143,8 +143,8 @@ function getNewValue({
 
   // Explicitly check whether this is a fully-qualified version
   if (
-    (newVersion.match(VERSION_PATTERN)?.groups?.release || '').split('.')
-      .length != 3
+    (VERSION_PATTERN.exec(newVersion)?.groups?.release || '').split('.')
+      .length !== 3
   ) {
     logger.debug(
       'Cannot massage python version to npm - returning currentValue'

@@ -1,13 +1,13 @@
 import { parse } from 'semver';
-import { VERSION_PATTERN, RANGE_COMPARATOR_PATTERN } from './patterns';
+import { RANGE_COMPARATOR_PATTERN, VERSION_PATTERN } from './patterns';
 
-function parseLetterTag(letter?: string, number?: string) {
-  if (letter != undefined) {
-    if (number == undefined) {
-      number = '0';
-    }
+function parseLetterTag(
+  letter?: string,
+  number?: string
+): { letter?: string; number?: string } | null {
+  if (letter !== undefined) {
     // apply the same normalizations as poetry
-    var spellings = {
+    const spellings = {
       alpha: 'a',
       beta: 'b',
       c: 'rc',
@@ -16,11 +16,15 @@ function parseLetterTag(letter?: string, number?: string) {
       r: 'post',
       rev: 'post',
     };
-    return { letter: spellings[letter] || letter, number: number };
+    return {
+      letter: spellings[letter] || letter,
+      number: number === undefined ? '0' : number,
+    };
   }
-  if (letter == undefined && number != undefined) {
-    return { letter: 'post', number: number };
+  if (letter === undefined && number !== undefined) {
+    return { letter: 'post', number };
   }
+  return null;
 }
 
 function notEmpty(s: string): boolean {
@@ -35,16 +39,18 @@ function notEmpty(s: string): boolean {
  */
 export function poetry2semver(
   poetry_version: string,
-  padRelease: boolean = true
+  padRelease = true
 ): string | null {
-  const match = poetry_version.match(VERSION_PATTERN);
+  const match = VERSION_PATTERN.exec(poetry_version);
   if (!match) {
     return null;
   }
   // trim leading zeros from valid numbers
-  let releaseParts = (match?.groups?.release || '')
+  const releaseParts = (match?.groups?.release || '')
     .split('.')
-    .map((segment) => (isNaN(parseInt(segment)) ? segment : parseInt(segment)));
+    .map((segment) =>
+      Number.isNaN(parseInt(segment, 10)) ? segment : parseInt(segment, 10)
+    );
   while (padRelease && releaseParts.length < 3) {
     releaseParts.push(0);
   }
@@ -52,15 +58,15 @@ export function poetry2semver(
   const post = parseLetterTag(match.groups.post_l, match.groups.post_n);
   const dev = parseLetterTag(match.groups.dev_l, match.groups.dev_n);
 
-  let parts = [releaseParts.map((num) => num.toString()).join('.')];
-  if (pre != undefined) {
-    parts.push('-' + pre.letter + '.' + pre.number);
+  const parts = [releaseParts.map((num) => num.toString()).join('.')];
+  if (pre !== null) {
+    parts.push(`-${pre.letter}.${pre.number}`);
   }
-  if (post != undefined) {
-    parts.push('-' + post.letter + '.' + post.number);
+  if (post !== null) {
+    parts.push(`-${post.letter}.${post.number}`);
   }
-  if (dev != undefined) {
-    parts.push('-' + dev.letter + '.' + dev.number);
+  if (dev !== null) {
+    parts.push(`-${dev.letter}.${dev.number}`);
   }
 
   return parts.join('');
@@ -75,7 +81,7 @@ export function semver2poetry(version?: string): string | null {
   if (!s) {
     return null;
   }
-  var spellings = {
+  const spellings = {
     a: 'alpha',
     b: 'beta',
     c: 'rc',
@@ -117,13 +123,13 @@ export function poetry2npm(input: string): string {
 export function npm2poetry(range: string): string {
   // apply poetry-style normalizations to versions embedded in range string
   // (i.e. anything that is not a range operator, potentially surrounded by whitespace)
-  range = range
+  const transformedRange = range
     .split(RANGE_COMPARATOR_PATTERN)
     .map((chunk) => semver2poetry(chunk) || chunk)
     .join('');
 
   // Note: this doesn't remove the ^
-  const res = range
+  const res = transformedRange
     .split(' ')
     .map((str) => str.trim())
     .filter(notEmpty);

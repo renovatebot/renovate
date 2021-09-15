@@ -97,7 +97,6 @@ describe('versioning/poetry/index', () => {
   });
 
   describe('isValid(input)', () => {
-
     it('should support zero-padded version numbers allowed by PEP440', () => {
       expect(versioning.isValid('17.04.0')).toBeTruthy();
     });
@@ -498,10 +497,10 @@ describe('versioning/poetry/index', () => {
       (currentValue, currentVersion, newVersion, result) => {
         expect(
           versioning.getNewValue({
-            currentValue: currentValue,
+            currentValue,
             rangeStrategy: 'bump',
-            currentVersion: currentVersion,
-            newVersion: newVersion,
+            currentVersion,
+            newVersion,
           })
         ).toEqual(result);
       }
