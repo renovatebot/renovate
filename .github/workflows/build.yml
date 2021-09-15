@@ -76,6 +76,7 @@ jobs:
           git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
           npm config set scripts-prepend-node-path true
+          git --version
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
