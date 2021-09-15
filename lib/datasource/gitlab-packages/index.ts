@@ -49,7 +49,7 @@ export class GitlabPackagesDatasource extends Datasource {
     registryUrl,
     lookupName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const [ projectName,  packageName ] = lookupName.split(':', 2);
+    const [projectName, packageName] = lookupName.split(':', 2);
 
     const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
       registryUrl,
