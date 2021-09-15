@@ -1,6 +1,8 @@
 import { logger } from '../../logger';
+import type { ExtractConfig } from '../types';
 import type { PackageDependency, PackageFile } from '../types';
 import { TerraformDependencyTypes } from './common';
+import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
 import {
   analyzeTerraformProvider,
@@ -34,7 +36,11 @@ const contentCheckList = [
   ' "docker_image" ',
 ];
 
-export function extractPackageFile(content: string): PackageFile | null {
+export async function extractPackageFile(
+  content: string,
+  fileName: string,
+  config: ExtractConfig
+): Promise<PackageFile | null> {
   logger.trace({ content }, 'terraform.extractPackageFile()');
   if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
@@ -99,13 +105,24 @@ export function extractPackageFile(content: string): PackageFile | null {
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting terraform plugins');
   }
+
+  const locks = [];
+  const lockFilePath = findLockFile(fileName);
+  if (lockFilePath) {
+    const lockFileContent = await readLockFile(lockFilePath);
+    if (lockFileContent) {
+      const extractedLocks = extractLocks(lockFileContent);
+      locks.push(...extractedLocks);
+    }
+  }
+
   deps.forEach((dep) => {
     switch (dep.managerData.terraformDependencyType) {
       case TerraformDependencyTypes.required_providers:
-        analyzeTerraformRequiredProvider(dep);
+        analyzeTerraformRequiredProvider(dep, locks);
         break;
       case TerraformDependencyTypes.provider:
-        analyzeTerraformProvider(dep);
+        analyzeTerraformProvider(dep, locks);
         break;
       case TerraformDependencyTypes.module:
         analyseTerraformModule(dep);
