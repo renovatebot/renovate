@@ -13,6 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test:
     runs-on: ubuntu-latest
 
     # tests shouldn't need more time
