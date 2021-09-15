@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - v25
+      - feat/check-git-version # remove before merging
 
   workflow_dispatch:
     inputs:
