@@ -100,6 +100,7 @@ jobs:
           yarn eslint -f gha
           yarn prettier
           yarn markdown-lint
+          yarn git-check
 
       - name: Test schema
         run: yarn test-schema
