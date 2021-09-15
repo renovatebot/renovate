@@ -22,7 +22,7 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     # lint shouldn't need more than 10 min
     timeout-minutes: 15
