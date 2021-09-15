@@ -27,10 +27,12 @@ function notEmpty(s: string): boolean {
   return s !== '';
 }
 
-// Parse versions like poetry.core.masonry.version.Version does (union of SemVer
-// and PEP440, with normalization of certain prerelease tags), and emit in SemVer
-// format. NOTE: this silently discards the epoch field in PEP440 versions, as
-// it has no equivalent in SemVer.
+/**
+ * Parse versions like poetry.core.masonry.version.Version does (union of SemVer
+ * and PEP440, with normalization of certain prerelease tags), and emit in SemVer
+ * format. NOTE: this silently discards the epoch field in PEP440 versions, as
+ * it has no equivalent in SemVer.
+ */
 export function poetry2semver(
   poetry_version: string,
   padRelease: boolean = true
@@ -64,7 +66,7 @@ export function poetry2semver(
   return parts.join('');
 }
 
-// Reverse normalizations applied by poetry2semver
+/** Reverse normalizations applied by poetry2semver */
 export function semver2poetry(version?: string): string | null {
   if (!version) {
     return null;
@@ -83,11 +85,13 @@ export function semver2poetry(version?: string): string | null {
   return s.format();
 }
 
-// Translate a poetry-style version range to npm format
-//
-// This function works like cargo2npm, but it doesn't
-// add a '^', because poetry treats versions without operators as
-// exact versions.
+/**
+ * Translate a poetry-style version range to npm format
+ *
+ * This function works like cargo2npm, but it doesn't
+ * add a '^', because poetry treats versions without operators as
+ * exact versions.
+ */
 export function poetry2npm(input: string): string {
   // replace commas with spaces, then split at valid semver comparators
   const chunks = input
@@ -103,11 +107,13 @@ export function poetry2npm(input: string): string {
   return transformed;
 }
 
-// Translate an npm-style version range to poetry format
-//
-// NOTE: This function is largely copied from cargo versioning code.
-// Poetry uses commas (like in cargo) instead of spaces (like in npm)
-// for AND operation.
+/**
+ * Translate an npm-style version range to poetry format
+ *
+ * NOTE: This function is largely copied from cargo versioning code.
+ * Poetry uses commas (like in cargo) instead of spaces (like in npm)
+ * for AND operation.
+ */
 export function npm2poetry(range: string): string {
   // apply poetry-style normalizations to versions embedded in range string
   // (i.e. anything that is not a range operator, potentially surrounded by whitespace)
