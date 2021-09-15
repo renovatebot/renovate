@@ -401,6 +401,7 @@ describe('versioning/poetry/index', () => {
         })
       ).toEqual('^0.5.15');
     });
+
     it('bumps naked caret', () => {
       expect(
         versioning.getNewValue({
@@ -485,6 +486,7 @@ describe('versioning/poetry/index', () => {
         })
       ).toEqual('=1.1.0');
     });
+
     it.each([
       ['^1', '1.0.0', '1.0.7-rc.1', '^1.0.7-rc.1'],
       ['^1', '1.0.0', '1.0.7-alpha.0', '^1.0.7-alpha.0'],
@@ -504,6 +506,7 @@ describe('versioning/poetry/index', () => {
         ).toEqual(result);
       }
     );
+
     it('replaces with newer', () => {
       expect(
         versioning.getNewValue({
