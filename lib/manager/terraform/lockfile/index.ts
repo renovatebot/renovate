@@ -4,6 +4,7 @@ import { TerraformProviderDatasource } from '../../../datasource/terraform-provi
 import { logger } from '../../../logger';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../../types';
+import { massageProviderLookupName } from '../util';
 import { TerraformProviderHash } from './hash';
 import type { ProviderLock, ProviderLockUpdate } from './types';
 import {
@@ -85,30 +86,23 @@ export async function updateArtifacts({
         ['provider', 'required_provider'].includes(dep.depType)
       );
       for (const dep of providerDeps) {
-        const lookupName = dep.lookupName ?? dep.depName;
+        massageProviderLookupName(dep);
+        const { registryUrls, newVersion, newValue, lookupName } = dep;
 
-        // handle cases like `Telmate/proxmox`
-        const massagedLookupName = lookupName.toLowerCase();
-
-        const repository = massagedLookupName.includes('/')
-          ? massagedLookupName
-          : `hashicorp/${massagedLookupName}`;
-        const registryUrl = dep.registryUrls
-          ? dep.registryUrls[0]
+        const registryUrl = registryUrls
+          ? registryUrls[0]
           : TerraformProviderDatasource.defaultRegistryUrls[0];
-        const newConstraint = isPinnedVersion(dep.newValue)
-          ? dep.newVersion
-          : dep.newValue;
+        const newConstraint = isPinnedVersion(newValue) ? newVersion : newValue;
         const updateLock = locks.find(
-          (value) => value.lookupName === repository
+          (value) => value.lookupName === lookupName
         );
         const update: ProviderLockUpdate = {
-          newVersion: dep.newVersion,
+          newVersion,
           newConstraint,
           newHashes: await TerraformProviderHash.createHashes(
             registryUrl,
-            repository,
-            dep.newVersion
+            lookupName,
+            newVersion
           ),
           ...updateLock,
         };
