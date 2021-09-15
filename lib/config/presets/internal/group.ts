@@ -102,6 +102,15 @@ const staticGroups = {
       },
     ],
   },
+  codemirror: {
+    description: 'Group CodeMirror packages together',
+    packageRules: [
+      {
+        groupName: 'CodeMirror',
+        matchPackagePrefixes: ['@codemirror/'],
+      },
+    ],
+  },
   definitelyTyped: {
     description: 'Group all @types packages together',
     packageRules: [
@@ -118,15 +127,6 @@ const staticGroups = {
         matchDatasources: ['docker'],
         matchPackagePrefixes: ['mcr.microsoft.com/dotnet/core/'],
         groupName: '.NET Core Docker containers',
-      },
-    ],
-  },
-  codemirror: {
-    description: 'Group CodeMirror packages together',
-    packageRules: [
-      {
-        groupName: 'CodeMirror',
-        matchPackagePrefixes: ['@codemirror/'],
       },
     ],
   },
