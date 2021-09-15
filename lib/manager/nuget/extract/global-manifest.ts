@@ -35,16 +35,18 @@ export function extractMsbuildGlobalManifest(
     });
   }
 
-  for (const depName of Object.keys(manifest['msbuild-sdks'])) {
-    const currentValue = manifest['msbuild-sdks'][depName];
-    const dep: PackageDependency = {
-      depType: 'msbuild-sdk',
-      depName,
-      currentValue,
-      datasource: datasourceNuget.id,
-    };
+  if (manifest['msbuild-sdks']) {
+    for (const depName of Object.keys(manifest['msbuild-sdks'])) {
+      const currentValue = manifest['msbuild-sdks'][depName];
+      const dep: PackageDependency = {
+        depType: 'msbuild-sdk',
+        depName,
+        currentValue,
+        datasource: datasourceNuget.id,
+      };
 
-    deps.push(dep);
+      deps.push(dep);
+    }
   }
 
   return { deps };

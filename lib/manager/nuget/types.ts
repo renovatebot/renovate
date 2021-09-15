@@ -16,8 +16,8 @@ export interface Registry {
 }
 
 export interface MsbuildGlobalManifest {
-  readonly sdk: MsbuildSdk;
-  readonly 'msbuild-sdks': Record<string, string>;
+  readonly sdk?: MsbuildSdk;
+  readonly 'msbuild-sdks'?: Record<string, string>;
 }
 
 export interface MsbuildSdk {

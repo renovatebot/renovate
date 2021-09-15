@@ -117,25 +117,41 @@ describe('manager/nuget/extract', () => {
     it('extracts msbuild-sdks from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.json';
       const contents = loadFixture(packageFile);
-      expect(await extractPackageFile(contents, packageFile, config))
-        .toMatchInlineSnapshot(`
-        Object {
-          "deps": Array [
-            Object {
-              "currentValue": "5.0.302",
-              "depName": "dotnet-sdk",
-              "depType": "dotnet-sdk",
-              "skipReason": "unsupported-datasource",
-            },
-            Object {
-              "currentValue": "0.2.0",
-              "datasource": "nuget",
-              "depName": "YoloDev.Sdk",
-              "depType": "msbuild-sdk",
-            },
-          ],
-        }
-      `);
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue: '5.0.302',
+            depName: 'dotnet-sdk',
+            depType: 'dotnet-sdk',
+            skipReason: 'unsupported-datasource',
+          },
+          {
+            currentValue: '0.2.0',
+            datasource: 'nuget',
+            depName: 'YoloDev.Sdk',
+            depType: 'msbuild-sdk',
+          },
+        ],
+      });
+    });
+
+    it('extracts dotnet-sdk from global.json', async () => {
+      const packageFile = 'msbuild-sdk-files/global.1.json';
+      const contents = loadFixture(packageFile);
+      expect(
+        await extractPackageFile(contents, 'global.json', config)
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue: '5.0.302',
+            depName: 'dotnet-sdk',
+            depType: 'dotnet-sdk',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
     });
 
     it('handles malformed global.json', async () => {
