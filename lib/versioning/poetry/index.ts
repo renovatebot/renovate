@@ -63,13 +63,19 @@ function matches(version: string, range: string): boolean {
 
 function getSatisfyingVersion(versions: string[], range: string): string {
   return semver2poetry(
-    npm.getSatisfyingVersion(versions.map(poetry2semver), poetry2npm(range))
+    npm.getSatisfyingVersion(
+      versions.map((version) => poetry2semver(version)),
+      poetry2npm(range)
+    )
   );
 }
 
 function minSatisfyingVersion(versions: string[], range: string): string {
   return semver2poetry(
-    npm.minSatisfyingVersion(versions.map(poetry2semver), poetry2npm(range))
+    npm.minSatisfyingVersion(
+      versions.map((version) => poetry2semver(version)),
+      poetry2npm(range)
+    )
   );
 }
 
