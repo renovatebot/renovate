@@ -44,11 +44,6 @@ describe('util/http/host-rules', () => {
     });
 
     hostRules.add({
-      hostType: 'gitlab-packages',
-      token: 'abc',
-    });
-    
-    hostRules.add({
       hostType: 'github-releases',
       username: 'some',
       password: 'xxx',
@@ -170,19 +165,6 @@ describe('util/http/host-rules', () => {
           "authType": undefined,
         },
         "hostType": "gitlab-tags",
-        "token": "abc",
-      }
-    `);
-  });
-
-  it('fallback to gitlab-packages', () => {
-    expect(applyHostRules(url, { ...options, hostType: 'gitlab-packages' }))
-      .toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
-          "authType": undefined,
-        },
-        "hostType": "gitlab-packages",
         "token": "abc",
       }
     `);
