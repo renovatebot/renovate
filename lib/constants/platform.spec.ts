@@ -1,5 +1,6 @@
 import { id as GH_RELEASES_DS } from '../datasource/github-releases';
 import { id as GH_TAGS_DS } from '../datasource/github-tags';
+import { GitlabPackagesDatasource } from '../datasource/gitlab-packages';
 import { GitlabReleasesDatasource } from '../datasource/gitlab-releases';
 import { id as GL_TAGS_DS } from '../datasource/gitlab-tags';
 import { id as POD_DS } from '../datasource/pod';
@@ -15,6 +16,9 @@ describe('constants/platform', () => {
     expect(GITLAB_API_USING_HOST_TYPES.includes(GL_TAGS_DS)).toBeTrue();
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(GitlabReleasesDatasource.id)
+    ).toBeTrue();
+    expect(
+      GITLAB_API_USING_HOST_TYPES.includes(GitlabPackagesDatasource.id)
     ).toBeTrue();
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(PLATFORM_TYPE_GITLAB)
