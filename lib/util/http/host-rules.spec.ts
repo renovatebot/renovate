@@ -1,6 +1,7 @@
 import {
   PLATFORM_TYPE_GITEA,
   PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 import { bootstrap } from '../../proxy';
 import * as hostRules from '../host-rules';
@@ -38,13 +39,19 @@ describe('util/http/host-rules', () => {
     });
 
     hostRules.add({
-      hostType: 'gitlab-tags',
+      hostType: PLATFORM_TYPE_GITLAB,
       token: 'abc',
     });
 
     hostRules.add({
       hostType: 'gitlab-packages',
       token: 'abc',
+    });
+    
+    hostRules.add({
+      hostType: 'github-releases',
+      username: 'some',
+      password: 'xxx',
     });
   });
 
@@ -130,6 +137,16 @@ describe('util/http/host-rules', () => {
         "noAuth": true,
       }
     `);
+  });
+
+  it('no fallback', () => {
+    expect(
+      applyHostRules(url, { ...options, hostType: 'github-releases' })
+    ).toEqual({
+      hostType: 'github-releases',
+      username: 'some',
+      password: 'xxx',
+    });
   });
 
   it('fallback to github', () => {
