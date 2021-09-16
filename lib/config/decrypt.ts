@@ -101,27 +101,37 @@ export async function tryDecrypt(
               if (scopedRepository === repository) {
                 decryptedStr = value;
               } else {
-                logger.warn(
+                logger.debug(
                   { scopedRepository },
                   'Secret is scoped to a different repository'
                 );
+                const error = new Error('config-validation');
+                error.validationError = `Encrypted secret is scoped to a different repository: ${scopedRepository}.`;
+                throw error;
               }
             } else {
               const scopedOrg = `${orgName}/`;
               if (repository.startsWith(scopedOrg)) {
                 decryptedStr = value;
               } else {
-                logger.warn(
+                logger.debug(
                   { scopedOrg },
                   'Secret is scoped to a different org'
                 );
+                const error = new Error('config-validation');
+                error.validationError = `Encrypted secret is scoped to a different org" ${scopedOrg}.`;
+                throw error;
               }
             }
           } else {
-            logger.warn('Missing scope from decrypted object');
+            const error = new Error('config-validation');
+            error.validationError = `Encrypted value in config is missing a scope.`;
+            throw error;
           }
         } else {
-          logger.warn('Decrypted object is missing a value');
+          const error = new Error('config-validation');
+          error.validationError = `Encrypted value in config is missing a value.`;
+          throw error;
         }
       } catch (err) {
         logger.warn({ err }, 'Could not parse decrypted string');
