@@ -1,0 +1,32 @@
+import { getGlobalConfig } from '../../config/global';
+import { logger } from '../../logger';
+import { platform } from '../../platform';
+import { BranchStatus } from '../../types';
+import type { BranchConfig } from '../types';
+
+export async function setArtifactsErrorStatus(
+  config: BranchConfig
+): Promise<void> {
+  const context = `renovate/artifacts`;
+  const description = 'Artifact file update failure';
+  const state = BranchStatus.red;
+  const existingState = await platform.getBranchStatusCheck(
+    config.branchName,
+    context
+  );
+  // Check if state needs setting
+  if (existingState !== state) {
+    console.log(existingState);
+    logger.debug(`Updating status check state to failed`);
+    if (getGlobalConfig().dryRun) {
+      logger.info('DRY-RUN: Would set branch status in ' + config.branchName);
+    } else {
+      await platform.setBranchStatus({
+        branchName: config.branchName,
+        context,
+        description,
+        state,
+      });
+    }
+  }
+}
