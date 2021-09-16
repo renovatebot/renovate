@@ -7,6 +7,11 @@ import type { BranchConfig } from '../types';
 export async function setArtifactErrorStatus(
   config: BranchConfig
 ): Promise<void> {
+  if (!config.artifactErrors?.length) {
+    // no errors
+    return;
+  }
+
   const context = `renovate/artifacts`;
   const description = 'Artifact file update failure';
   const state = BranchStatus.red;
@@ -14,6 +19,7 @@ export async function setArtifactErrorStatus(
     config.branchName,
     context
   );
+
   // Check if state needs setting
   if (existingState !== state) {
     logger.debug(`Updating status check state to failed`);

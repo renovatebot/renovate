@@ -394,7 +394,6 @@ export async function processBranch(
     removeMeta(['dep']);
 
     if (config.artifactErrors?.length) {
-      await setArtifactErrorStatus(config);
       if (config.releaseTimestamp) {
         logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
         const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
@@ -458,6 +457,7 @@ export async function processBranch(
       logger.info({ commitSha }, `Branch ${action}`);
     }
     // Set branch statuses
+    await setArtifactErrorStatus(config);
     await setStability(config);
     await setConfidence(config);
 
