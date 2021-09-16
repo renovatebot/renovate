@@ -603,7 +603,10 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
+See [Private module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
+
+Note: encrypted secrets must have at least an org/group scope, and optionally a repository scope.
+This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
 
 ## excludeCommitPaths
 
@@ -1860,7 +1863,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
 
 Renovate's `"auto"` strategy works like this for npm:
 
