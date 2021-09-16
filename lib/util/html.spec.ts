@@ -19,6 +19,7 @@ describe('util/html', () => {
     const childNodesA = body.querySelectorAll('a');
     expect(childNodesA).toHaveLength(0);
   });
+
   it('parses HTML: use additional options to discover child nodes on PRE blocks', () => {
     const body = parse('<div>Hello, world!</div>\n<pre><a>node A</a></pre>', {
       blockTextElements: {},
