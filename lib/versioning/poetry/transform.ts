@@ -55,7 +55,9 @@ export function poetry2semver(
     releaseParts.push(0);
   }
   const pre = parseLetterTag(match.groups.pre_l, match.groups.pre_n);
-  const post = parseLetterTag(match.groups.post_l, match.groups.post_n);
+  const post = match.groups.post_n1
+    ? parseLetterTag(undefined, match.groups.post_n1)
+    : parseLetterTag(match.groups.post_l, match.groups.post_n);
   const dev = parseLetterTag(match.groups.dev_l, match.groups.dev_n);
 
   const parts = [releaseParts.map((num) => num.toString()).join('.')];

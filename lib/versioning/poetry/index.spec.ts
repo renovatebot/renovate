@@ -8,6 +8,8 @@ describe('versioning/poetry/index', () => {
       ['1.0.0', '1'],
       ['1.9.0', '1.9'],
       ['1.9b0', '1.9.0-beta.0'],
+      ['1.9.0-0', '1.9.0-post.0'],
+      ['1.9.0-post', '1.9.0-post.0'],
     ])('%s == %s', (a, b) => {
       expect(versioning.equals(a, b)).toBe(true);
     });
