@@ -21,7 +21,7 @@ export class ArtifactoryDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) => `${registryUrl}:${lookupName}`,
   })
   async getReleases({
     lookupName,

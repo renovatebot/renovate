@@ -13,6 +13,7 @@ describe('util/html', () => {
     const body = parse('');
     expect(body.childNodes).toHaveLength(0);
   });
+
   it('parses HTML: PRE block hides child nodes', () => {
     const body = parse('<div>Hello, world!</div>\n<pre><a>node A</a></pre>');
     const childNodesA = body.querySelectorAll('a');
