@@ -102,6 +102,7 @@ export async function getDependency(
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
 
     if (sourceUrlSplit.length > 5) {
+      /* istanbul ignore next */
       if (dep.sourceDirectory) {
         logger.debug(
           { dependency: packageName },
