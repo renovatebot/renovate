@@ -80,6 +80,7 @@ export async function getDependency(
         sourceUrl = res.repository.url;
       }
     }
+
     // Simplify response before caching and returning
     const dep: NpmDependency = {
       name: res.name,
@@ -93,6 +94,26 @@ export async function getDependency(
     if (res.repository?.directory) {
       dep.sourceDirectory = res.repository.directory;
     }
+
+    // Massage the repository URL for non-complaint strings (see issue #4610)
+    // Remove the non-complaint segments of path, so the URL looks like "<scheme>://<domain>/<vendor>/<repo>"
+    // and add directory to the repository
+    const sourceUrlCopy = `${sourceUrl}`;
+    const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
+
+    if (sourceUrlSplit.length > 5) {
+      if (dep.sourceDirectory) {
+        logger.debug(
+          { dependency: packageName },
+          `Ambiguity: dependency has the repository URL path and repository/directory set at once; have to override repository/directory`
+        );
+      }
+      dep.sourceUrl = sourceUrlSplit.slice(0, 5).join('/');
+      dep.sourceDirectory = sourceUrlSplit
+        .slice(5, sourceUrlSplit.length)
+        .join('/');
+    }
+
     if (latestVersion.deprecated) {
       dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
       dep.deprecationSource = id;
