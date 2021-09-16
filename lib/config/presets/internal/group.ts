@@ -50,6 +50,7 @@ const staticGroups = {
     extends: [
       'group:nodeJs',
       'group:allApollographql',
+      'group:codemirror',
       'group:fortawesome',
       'group:fusionjs',
       'group:glimmer',
@@ -98,6 +99,15 @@ const staticGroups = {
       {
         extends: 'packages:apollographql',
         groupName: 'Apollo GraphQL packages',
+      },
+    ],
+  },
+  codemirror: {
+    description: 'Group CodeMirror packages together',
+    packageRules: [
+      {
+        groupName: 'CodeMirror',
+        matchPackagePrefixes: ['@codemirror/'],
       },
     ],
   },
