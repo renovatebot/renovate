@@ -1,7 +1,6 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { api as npm } from '../npm';
-import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { VERSION_PATTERN } from './patterns';
 import {
@@ -49,7 +48,7 @@ function isLessThanRange(version: string, range: string): boolean {
 }
 
 function isValid(input: string): string | boolean {
-  return npm.isValid(poetry2npm(input)) || pep440.isValid(input);
+  return npm.isValid(poetry2npm(input));
 }
 
 function isStable(version: string): boolean {

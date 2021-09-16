@@ -128,6 +128,11 @@ describe('versioning/poetry/index', () => {
       expect(versioning.isValid('^1.2.3')).toBeTruthy();
       expect(versioning.isValid('>1.2.3')).toBeTruthy();
     });
+    it('should support pep440 comparators', () => {
+      expect(versioning.isValid('~=1.9')).toBeTruthy();
+      expect(versioning.isValid('==1.9')).toBeTruthy();
+      expect(versioning.isValid('===1.9.4')).toBeTruthy();
+    });
     it('should reject github repositories', () => {
       expect(versioning.isValid('renovatebot/renovate')).toBeFalsy();
       expect(versioning.isValid('renovatebot/renovate#master')).toBeFalsy();
@@ -164,7 +169,11 @@ describe('versioning/poetry/index', () => {
     it('handles short', () => {
       expect(versioning.matches('1.4', '1.4')).toBe(true);
     });
-
+    it('handles PEP440 ranges', () => {
+      expect(versioning.matches('1.9.4', '==1.9')).toBe(true);
+      expect(versioning.matches('1.9.4', '===1.9.4')).toBe(true);
+      expect(versioning.matches('1.9.4', '===1.9.3')).toBe(false);
+    });
     it('handles caret with preleases', () => {
       expect(versioning.matches('0.8.0a1', '^0.8.0-alpha.0')).toBe(true);
       expect(versioning.matches('0.7.4', '^0.8.0-alpha.0')).toBe(false);

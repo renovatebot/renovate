@@ -109,7 +109,8 @@ export function poetry2npm(input: string): string {
   // do not pad versions with zeros in a range
   const transformed = chunks
     .map((chunk) => poetry2semver(chunk, false) || chunk)
-    .join('');
+    .join('')
+    .replace(/===/, '=');
   return transformed;
 }
 
