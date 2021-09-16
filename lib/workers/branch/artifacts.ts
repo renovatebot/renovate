@@ -4,7 +4,7 @@ import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import type { BranchConfig } from '../types';
 
-export async function setArtifactsErrorStatus(
+export async function setArtifactErrorStatus(
   config: BranchConfig
 ): Promise<void> {
   const context = `renovate/artifacts`;
@@ -16,7 +16,6 @@ export async function setArtifactsErrorStatus(
   );
   // Check if state needs setting
   if (existingState !== state) {
-    console.log(existingState);
     logger.debug(`Updating status check state to failed`);
     if (getGlobalConfig().dryRun) {
       logger.info('DRY-RUN: Would set branch status in ' + config.branchName);

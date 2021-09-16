@@ -36,7 +36,7 @@ import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../types';
-import { setArtifactsErrorStatus } from './artifacts';
+import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
@@ -394,7 +394,7 @@ export async function processBranch(
     removeMeta(['dep']);
 
     if (config.artifactErrors?.length) {
-      await setArtifactsErrorStatus(config);
+      await setArtifactErrorStatus(config);
       if (config.releaseTimestamp) {
         logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
         const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
