@@ -149,7 +149,7 @@ export async function ensurePr(
 
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
-  const { branchName, prTitle, upgrades } = config;
+  const { branchName, ignoreTests, prTitle, upgrades } = config;
   const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[
     config.branchName
   ];
@@ -164,11 +164,7 @@ export async function ensurePr(
     logger.debug('Forcing PR because of artifact errors');
     config.forcePr = true;
   }
-
-  const branchStatus = await resolveBranchStatus(
-    config.branchName,
-    config.ignoreTests
-  );
+  let branchStatus: BranchStatus;
 
   // Only create a PR if a branch automerge has failed
   if (
@@ -176,6 +172,7 @@ export async function ensurePr(
     config.automergeType.startsWith('branch') &&
     !config.forcePr
   ) {
+    branchStatus ||= await resolveBranchStatus(branchName, ignoreTests);
     logger.debug(
       `Branch is configured for branch automerge, branch status) is: ${branchStatus}`
     );
@@ -204,6 +201,7 @@ export async function ensurePr(
   }
   if (config.prCreation === 'status-success') {
     logger.debug('Checking branch combined status');
+    branchStatus ||= await resolveBranchStatus(branchName, ignoreTests);
     if (branchStatus !== BranchStatus.green) {
       logger.debug(`Branch status is "${branchStatus}" - not creating PR`);
       return { prBlockedBy: 'AwaitingTests' };
@@ -221,6 +219,7 @@ export async function ensurePr(
     !config.forcePr
   ) {
     logger.debug('Checking branch combined status');
+    branchStatus ||= await resolveBranchStatus(branchName, ignoreTests);
     if (branchStatus === BranchStatus.yellow) {
       logger.debug(`Branch status is "${branchStatus}" - checking timeout`);
       const lastCommitTime = await getBranchLastCommitTime(branchName);
