@@ -84,7 +84,12 @@ entries:
       name: rowanruseler
     name: pgadmin4
     sources:
+    - https://some.test
     - https://github.com/rowanruseler/helm-charts
     urls:
     - pgadmin4-1.7.2.tgz
     version: 1.7.2
+  dummy:
+  - home:
+    urls:
+    - some.tgz

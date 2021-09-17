@@ -1,7 +1,8 @@
 import type { HelmRelease } from './types';
 
 const chartRepo = /charts?|helm|helm-charts/i;
-const githubUrl = /^(?<url>https:\/\/github\.com\/[^/]+\/(?<repo>[^/]+))[/$]/;
+const githubUrl =
+  /^(?<url>https:\/\/github\.com\/[^/]+\/(?<repo>[^/]+))(?:\/|$)/;
 const githubRelease = /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//;
 
 export function findSourceUrl(release: HelmRelease): string {

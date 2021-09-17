@@ -56,7 +56,7 @@ export class HelmDatasource extends Datasource {
           sourceUrl: findSourceUrl(releases[0]),
           releases: releases.map((release) => ({
             version: release.version,
-            releaseTimestamp: release.created ? release.created : null,
+            releaseTimestamp: release.created ?? null,
           })),
         };
       }
