@@ -101,7 +101,7 @@ export async function getDependency(
     const sourceUrlCopy = `${sourceUrl}`;
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
 
-    if (sourceUrlSplit.length > 5) {
+    if (sourceUrlSplit.length > 7) {
       /* istanbul ignore next */
       if (dep.sourceDirectory) {
         logger.debug(
@@ -111,7 +111,7 @@ export async function getDependency(
       }
       dep.sourceUrl = sourceUrlSplit.slice(0, 5).join('/');
       dep.sourceDirectory = sourceUrlSplit
-        .slice(5, sourceUrlSplit.length)
+        .slice(7, sourceUrlSplit.length)
         .join('/');
     }
 
