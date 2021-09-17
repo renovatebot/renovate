@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { resolve } from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
@@ -80,10 +81,10 @@ export async function updateArtifacts({
           newPackageFileContent.replace(config.newValue, config.currentValue)
         );
         const checksum = await getDistributionChecksum(distributionUrl);
-        cmd += ` --gradle-distribution-sha256-sum ${checksum}`;
+        cmd += ` --gradle-distribution-sha256-sum ${quote(checksum)}`;
       }
     } else {
-      cmd += ` --gradle-version ${config.newValue}`;
+      cmd += ` --gradle-version ${quote(config.newValue)}`;
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
