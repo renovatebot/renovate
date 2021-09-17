@@ -11,7 +11,7 @@ import type { RepoGlobalConfig } from '../../config/types';
 import * as fs from '../../util/fs';
 import type { ExtractConfig } from '../types';
 import * as extract from './extract';
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './extract-light';
 
 const packageFile = 'setup.py';
 const content = loadFixture(packageFile);
