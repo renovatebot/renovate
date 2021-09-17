@@ -79,10 +79,8 @@ export class ArtifactoryDatasource extends Datasource {
 
       if (result.releases.length) {
         logger.trace(
-          'artifactory: Found ' +
-            String(result.releases.length) +
-            ' versions of ' +
-            contextForLogging
+        { registryUrl, lookupName, versions: result.releases.length },
+          'artifactory: Found versions'
         );
       } else {
         logger.trace(
