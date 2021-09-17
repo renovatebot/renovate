@@ -31,6 +31,7 @@ export class ArtifactoryDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (!registryUrl) {
       logger.warn(
+        { lookupName },
         'artifactory datasource requires custom registryUrl. Skipping datasource'
       );
       return null;

@@ -3,6 +3,7 @@ import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { joinUrlParts } from '../../util/url';
 import { ArtifactoryDatasource } from '.';
 
 const datasource = ArtifactoryDatasource.id;
@@ -21,7 +22,6 @@ function getPath(folder: string): string {
 describe('datasource/artifactory/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.mock('../../logger');
   });
 
   describe('getReleases', () => {
@@ -36,7 +36,9 @@ describe('datasource/artifactory/index', () => {
         lookupName: testLookupName,
       });
       expect(res.releases).toHaveLength(4);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        registryUrl: 'https://jfrog.company.com/artifactory',
+      });
     });
 
     it('parses real data (files): without slash at the end', async () => {
@@ -50,20 +52,26 @@ describe('datasource/artifactory/index', () => {
         lookupName: testLookupName,
       });
       expect(res.releases).toHaveLength(4);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        registryUrl: 'https://jfrog.company.com/artifactory',
+      });
     });
 
     it('parses real data (merge strategy with 2 registries)', async () => {
+      const secondRegistryUrl: string = joinUrlParts(
+        testRegistryUrl,
+        'production'
+      );
       httpMock
         .scope(testRegistryUrl)
         .get(getPath(testLookupName))
         .reply(200, loadFixture('releases-as-files.html'));
       httpMock
-        .scope(testRegistryUrl)
+        .scope(secondRegistryUrl)
         .get(getPath(testLookupName))
         .reply(200, '<html>\n<h1>Header</h1>\n<a>1.3.0</a>\n<hmtl/>');
       const res = await getPkgReleases({
-        registryUrls: [testRegistryUrl, testRegistryUrl],
+        registryUrls: [testRegistryUrl, secondRegistryUrl],
         depName: testLookupName,
         datasource,
         lookupName: testLookupName,
@@ -80,6 +88,7 @@ describe('datasource/artifactory/index', () => {
       });
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
+        { lookupName: 'project' },
         'artifactory datasource requires custom registryUrl. Skipping datasource'
       );
       expect(res).toBeNull();
@@ -140,7 +149,6 @@ describe('datasource/artifactory/index', () => {
         lookupName: testLookupName,
       });
       expect(res).toBeNull();
-      expect(res).toMatchSnapshot();
     });
   });
 });
