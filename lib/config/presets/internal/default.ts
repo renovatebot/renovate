@@ -529,6 +529,12 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Renovate Dependency Dashboard creation',
     dependencyDashboard: true,
   },
+  dependencyDashboardWithLabel: {
+    description:
+      'Enable Renovate Dependency Dashboard creation with label <code>{{arg0}}</code>',
+    dependencyDashboard: true,
+    dependencyDashboardLabels: ['{{arg0}}'],
+  },
   disableDependencyDashboard: {
     description: 'Disable Renovate Dependency Dashboard creation',
     dependencyDashboard: false,
