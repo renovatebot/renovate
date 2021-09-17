@@ -95,8 +95,8 @@ export async function getDependency(
       dep.sourceDirectory = res.repository.directory;
     }
 
-    // Massage the repository URL for non-complaint strings (see issue #4610)
-    // Remove the non-complaint segments of path, so the URL looks like "<scheme>://<domain>/<vendor>/<repo>"
+    // Massage the repository URL for non-compliant strings (see issue #4610)
+    // Remove the non-compliant segments of path, so the URL looks like "<scheme>://<domain>/<vendor>/<repo>"
     // and add directory to the repository
     const sourceUrlCopy = `${sourceUrl}`;
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');

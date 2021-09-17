@@ -231,7 +231,7 @@ describe('datasource/npm/get', () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
-  it('massages non-complaint repository urls', async () => {
+  it('massages non-compliant repository urls', async () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 
     httpMock
@@ -250,7 +250,7 @@ describe('datasource/npm/get', () => {
     const dep = await getDependency('@neutrinojs/react');
 
     expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep.sourceDirectory).toBe('tree/master/packages/react');
+    expect(dep.sourceDirectory).toBe('packages/react');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
 Array [
