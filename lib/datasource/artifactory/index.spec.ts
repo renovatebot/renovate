@@ -110,7 +110,11 @@ describe('datasource/artifactory/index', () => {
       ).toBeNull();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        'artifactory: "Not Found" error for project under https://jfrog.company.com/artifactory/project'
+        {
+          lookupName: 'project',
+          registryUrl: 'https://jfrog.company.com/artifactory',
+        },
+        'artifactory: `Not Found` error'
       );
     });
 

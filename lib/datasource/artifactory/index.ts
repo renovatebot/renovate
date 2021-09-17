@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { parse } from '../../util/html';
 import { HttpError } from '../../util/http/types';
+import { joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource } from './common';
@@ -21,7 +22,8 @@ export class ArtifactoryDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) => `${registryUrl}:${lookupName}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      `${registryUrl}:${lookupName}`,
   })
   async getReleases({
     lookupName,
@@ -34,8 +36,7 @@ export class ArtifactoryDatasource extends Datasource {
       return null;
     }
 
-    const url = `${registryUrl}/${lookupName}`;
-    const contextForLogging: string = lookupName + ' under ' + url;
+    const url = joinUrlParts(registryUrl, lookupName);
 
     const result: ReleaseResult = {
       releases: [],
@@ -79,12 +80,13 @@ export class ArtifactoryDatasource extends Datasource {
 
       if (result.releases.length) {
         logger.trace(
-        { registryUrl, lookupName, versions: result.releases.length },
+          { registryUrl, lookupName, versions: result.releases.length },
           'artifactory: Found versions'
         );
       } else {
         logger.trace(
-          'artifactory: Not found any version of ' + contextForLogging
+          { registryUrl, lookupName },
+          'artifactory: No versions found'
         );
       }
     } catch (err) {
@@ -92,7 +94,8 @@ export class ArtifactoryDatasource extends Datasource {
       if (err instanceof HttpError) {
         if (err.response?.statusCode === 404) {
           logger.warn(
-            'artifactory: "Not Found" error for ' + contextForLogging
+            { registryUrl, lookupName },
+            'artifactory: `Not Found` error'
           );
           return null;
         }
