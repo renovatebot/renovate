@@ -19,7 +19,7 @@ function cleanupNamedGroups(regexSource: string): string {
 
 const rangePattern = cleanupNamedGroups(RANGE_PATTERN);
 const versionPattern = `(?:${rangePattern}(?:\\s*,\\s*${rangePattern})*)`;
-const depNamePattern = '(?:[a-zA-Z][-_a-zA-Z0-9]+[a-zA-Z0-9])';
+const depNamePattern = '(?:[a-zA-Z][-_a-zA-Z0-9]*[a-zA-Z0-9])';
 const depPattern = [
   '^',
   `(?<depName>${depNamePattern})`,
@@ -36,12 +36,12 @@ function handler(ctx: Context, token: StringValueToken): Context {
     const { depName, currentValue } = match.groups ?? {};
     if (depName) {
       const dep: PackageDependency<ManagerData> = {
-        datasource: PypiDatasource.id,
         depName,
         currentValue,
         managerData: {
           lineNumber: token.line - 1,
         },
+        datasource: PypiDatasource.id,
       };
 
       return {
