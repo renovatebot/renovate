@@ -19,7 +19,7 @@ function cleanupNamedGroups(regexSource: string): string {
 
 const rangePattern = cleanupNamedGroups(RANGE_PATTERN);
 const versionPattern = `(?:${rangePattern}(?:\\s*,\\s*${rangePattern})*)`;
-const depNamePattern = '(?:[-_a-zA-Z0-9]+)';
+const depNamePattern = '(?:[a-zA-Z][-_a-zA-Z0-9]+[a-zA-Z0-9])';
 const depPattern = [
   '^',
   `(?<depName>${depNamePattern})`,
