@@ -14,6 +14,7 @@ import type {
 } from '../../config/types';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { getProblems, logger, setMeta } from '../../logger';
+import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
@@ -97,6 +98,22 @@ export async function start(): Promise<number> {
 
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
+
+    if (config.writeDiscoveredRepos) {
+      const path =
+        typeof config.writeDiscoveredRepos === 'string'
+          ? config.writeDiscoveredRepos
+          : undefined;
+      if (!path) {
+        logger.error(`Failed to interpret path value ${path}`);
+        return 1;
+      }
+      const content = JSON.stringify(config.repositories);
+      await writeFile(path, content);
+      logger.info(`Written discovered repositories to ${path}`);
+      return 0;
+    }
+
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (haveReachedLimits()) {
