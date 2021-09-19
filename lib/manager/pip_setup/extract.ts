@@ -85,5 +85,5 @@ export function extractPackageFile(
   _config: ExtractConfig
 ): PackageFile | null {
   const res = python.query<Context>(content, query, { deps: [] });
-  return res.deps.length ? res : null;
+  return res?.deps?.length ? res : null;
 }
