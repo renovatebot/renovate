@@ -427,7 +427,7 @@ Mandatory if a GitHub app token is in use using the CLI.
 
 ## writeDiscoveredRepos
 
-Optional parameter which allows to write the discovered repositories into a json file instead of renovating them.
+Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

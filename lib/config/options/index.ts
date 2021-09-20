@@ -2046,7 +2046,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'writeDiscoveredRepos',
-    description: 'Writes discovered repositories to a file and then exit.',
+    description: 'Writes discovered repositories to a JSON file and then exit.',
     type: 'string',
     globalOnly: true,
     env: false,
