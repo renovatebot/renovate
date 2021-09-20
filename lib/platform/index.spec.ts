@@ -61,11 +61,6 @@ describe('platform/index', () => {
       gitAuthor: 'user@domain.com',
       hostRules: [
         {
-          matchHost: 'api.bitbucket.org',
-          password: '123',
-          username: 'abc',
-        },
-        {
           hostType: 'bitbucket',
           matchHost: 'api.bitbucket.org',
           password: '123',
