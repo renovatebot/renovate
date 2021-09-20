@@ -95,13 +95,13 @@ export async function getDependency(
       dep.sourceDirectory = res.repository.directory;
     }
 
-    // Massage the repository URL for non-compliant strings (see issue #4610)
+    // Massage the repository URL for non-compliant strings for github (see issue #4610)
     // Remove the non-compliant segments of path, so the URL looks like "<scheme>://<domain>/<vendor>/<repo>"
     // and add directory to the repository
     const sourceUrlCopy = `${sourceUrl}`;
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
 
-    if (sourceUrlSplit.length > 7) {
+    if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
       /* istanbul ignore next */
       if (dep.sourceDirectory) {
         logger.debug(
