@@ -152,20 +152,5 @@ describe('workers/global/index', () => {
       expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
     });
-
-    it('fail on malformed parameter flag', async () => {
-      configParser.parseConfigs.mockResolvedValueOnce({
-        repositories: ['myOrg/myRepo'],
-        platform: PLATFORM_TYPE_GITHUB,
-        endpoint: 'https://github.com/',
-        writeDiscoveredRepos: 1,
-      });
-      fs.writeFile.mockReturnValueOnce(null);
-
-      expect(await globalWorker.start()).toEqual(1);
-      expect(fs.writeFile).toHaveBeenCalledTimes(0);
-      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
-      expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
-    });
   });
 });

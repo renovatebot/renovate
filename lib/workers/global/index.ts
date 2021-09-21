@@ -99,18 +99,12 @@ export async function start(): Promise<number> {
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
 
-    if (config.writeDiscoveredRepos) {
-      const path =
-        typeof config.writeDiscoveredRepos === 'string'
-          ? config.writeDiscoveredRepos
-          : undefined;
-      if (!path) {
-        logger.error(`Failed to interpret path value ${path}`);
-        return 1;
-      }
+    if (is.nonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
-      await writeFile(path, content);
-      logger.info(`Written discovered repositories to ${path}`);
+      await writeFile(config.writeDiscoveredRepos, content);
+      logger.info(
+        `Written discovered repositories to ${config.writeDiscoveredRepos}`
+      );
       return 0;
     }
 
