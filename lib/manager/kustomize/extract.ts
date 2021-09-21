@@ -5,7 +5,7 @@ import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import * as dockerVersioning from '../../versioning/docker';
+import { splitImageParts } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Image, Kustomize } from './types';
 
@@ -21,7 +21,8 @@ export function extractBase(base: string): PackageDependency | null {
     return null;
   }
 
-  if (match?.groups.path.startsWith('github.com')) {
+  const { path } = match.groups;
+  if (path.startsWith('github.com:') || path.startsWith('github.com/')) {
     return {
       currentValue: match.groups.currentValue,
       datasource: datasourceGitHubTags.id,
@@ -31,37 +32,72 @@ export function extractBase(base: string): PackageDependency | null {
 
   return {
     datasource: datasourceGitTags.id,
-    depName: match.groups.path.replace('.git', ''),
+    depName: path.replace('.git', ''),
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,
   };
 }
 
 export function extractImage(image: Image): PackageDependency | null {
-  if (image?.name && image.newTag) {
-    const replaceString = image.newTag;
-    let currentValue: string | undefined;
-    let currentDigest: string | undefined;
-    if (!is.string(replaceString)) {
+  if (!image.name) {
+    return null;
+  }
+  const nameDep = splitImageParts(image.newName ?? image.name);
+  const { depName } = nameDep;
+  const { digest, newTag } = image;
+  if (digest && newTag) {
+    logger.warn(
+      { newTag, digest },
+      'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`'
+    );
+    return {
+      depName,
+      currentValue: newTag,
+      currentDigest: digest,
+      skipReason: SkipReason.InvalidDependencySpecification,
+    };
+  }
+
+  if (digest) {
+    if (!is.string(digest) || !digest.startsWith('sha256:')) {
       return {
-        depName: image.newName ?? image.name,
-        currentValue: replaceString,
+        depName,
+        currentValue: digest,
         skipReason: SkipReason.InvalidValue,
       };
     }
-    if (replaceString.startsWith('sha256:')) {
-      currentDigest = replaceString;
-      currentValue = undefined;
-    } else {
-      currentValue = replaceString;
-    }
+
     return {
       datasource: datasourceDocker.id,
-      versioning: dockerVersioning.id,
-      depName: image.newName ?? image.name,
-      currentValue,
-      currentDigest,
-      replaceString,
+      depName,
+      currentValue: nameDep.currentValue,
+      currentDigest: digest,
+      replaceString: digest,
+    };
+  }
+
+  if (newTag) {
+    if (!is.string(newTag) || newTag.startsWith('sha256:')) {
+      return {
+        depName,
+        currentValue: newTag,
+        skipReason: SkipReason.InvalidValue,
+      };
+    }
+
+    const dep = splitImageParts(`${depName}:${newTag}`);
+    return {
+      ...dep,
+      datasource: datasourceDocker.id,
+      replaceString: newTag,
+    };
+  }
+
+  if (image.newName) {
+    return {
+      ...nameDep,
+      datasource: datasourceDocker.id,
+      replaceString: image.newName,
     };
   }
 

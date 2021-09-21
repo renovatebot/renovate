@@ -186,20 +186,6 @@ describe('platform/bitbucket/index', () => {
   });
 
   describe('getBranchStatus()', () => {
-    it('getBranchStatus 1', async () => {
-      await initRepoMock();
-      expect(await bitbucket.getBranchStatus('master', null)).toBe(
-        BranchStatus.green
-      );
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('getBranchStatus 2', async () => {
-      await initRepoMock();
-      expect(await bitbucket.getBranchStatus('master', ['foo'])).toBe(
-        BranchStatus.red
-      );
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
     it('getBranchStatus 3', async () => {
       const scope = await initRepoMock();
       scope
@@ -219,9 +205,7 @@ describe('platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('master', [])).toBe(
-        BranchStatus.red
-      );
+      expect(await bitbucket.getBranchStatus('master')).toBe(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('getBranchStatus 4', async () => {
@@ -246,7 +230,7 @@ describe('platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('branch', [])).toBe(
+      expect(await bitbucket.getBranchStatus('branch')).toBe(
         BranchStatus.green
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -273,7 +257,7 @@ describe('platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('pending/branch', [])).toBe(
+      expect(await bitbucket.getBranchStatus('pending/branch')).toBe(
         BranchStatus.yellow
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -297,9 +281,9 @@ describe('platform/bitbucket/index', () => {
         .reply(200, {
           values: [],
         });
-      expect(
-        await bitbucket.getBranchStatus('branch-with-empty-status', [])
-      ).toBe(BranchStatus.yellow);
+      expect(await bitbucket.getBranchStatus('branch-with-empty-status')).toBe(
+        BranchStatus.yellow
+      );
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
