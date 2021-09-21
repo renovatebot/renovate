@@ -53,12 +53,16 @@ export interface HttpResponse<T = string> {
   authorization?: boolean;
 }
 
-function cloneResponse<T>(response: any): HttpResponse<T> {
+function cloneResponse<T extends Buffer | string | any>(
+  response: HttpResponse<T>
+): HttpResponse<T> {
+  const { body, statusCode, headers } = response;
   // clone body and headers so that the cached result doesn't get accidentally mutated
+  // Don't use json clone for buffers
   return {
-    statusCode: response.statusCode,
-    body: clone<T>(response.body),
-    headers: clone(response.headers),
+    statusCode,
+    body: body instanceof Buffer ? (body.slice() as T) : clone<T>(body),
+    headers: clone(headers),
     authorization: !!response.authorization,
   };
 }
@@ -95,7 +99,8 @@ async function gotRoutine<T>(
   // Cheat the TS compiler using `as` to pick a specific overload.
   // Otherwise it doesn't typecheck.
   const resp = await got<T>(url, options as GotJSONOptions);
-  const duration = resp.timings.phases.total || 0;
+  const duration =
+    resp.timings.phases.total || /* istanbul ignore next: can't be tested */ 0;
 
   const httpRequests = memCache.get('http-requests') || [];
   httpRequests.push({ ...requestStats, duration });
@@ -166,6 +171,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       resPromise = memCache.get(cacheKey);
     }
 
+    // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
       const queueTask = (): Promise<Response<T>> => {

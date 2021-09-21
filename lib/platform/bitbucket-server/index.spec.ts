@@ -1749,10 +1749,6 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
-            BranchStatus.green
-          );
-
           expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.green
           );
@@ -1772,7 +1768,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.yellow
           );
 
@@ -1786,7 +1782,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.yellow
           );
 
@@ -1805,7 +1801,7 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.red
           );
 
@@ -1815,7 +1811,7 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.red
           );
 
@@ -1825,9 +1821,9 @@ Followed by some information.
         it('throws repository-changed', async () => {
           git.branchExists.mockReturnValue(false);
           await initRepo();
-          await expect(
-            bitbucket.getBranchStatus('somebranch', [])
-          ).rejects.toThrow(REPOSITORY_CHANGED);
+          await expect(bitbucket.getBranchStatus('somebranch')).rejects.toThrow(
+            REPOSITORY_CHANGED
+          );
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

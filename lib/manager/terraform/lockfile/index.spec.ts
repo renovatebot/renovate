@@ -22,6 +22,7 @@ const adminConfig = {
 };
 
 const validLockfile = loadFixture('validLockfile.hcl');
+const validLockfile2 = loadFixture('validLockfile2.hcl');
 
 const mockHash = mocked(TerraformProviderHash).createHashes;
 const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
@@ -70,13 +71,6 @@ describe('manager/terraform/lockfile/index', () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    const localConfig: UpdateArtifactsConfig = {
-      updateType: 'minor',
-      newVersion: '3.36.0',
-      newValue: '3.36.0',
-      ...config,
-    };
-
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: [
@@ -84,10 +78,12 @@ describe('manager/terraform/lockfile/index', () => {
           depName: 'hashicorp/aws',
           lookupName: 'hashicorp/aws',
           depType: 'provider',
+          newVersion: '3.36.0',
+          newValue: '3.36.0',
         },
       ],
       newPackageFileContent: '',
-      config: localConfig,
+      config,
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
@@ -107,13 +103,6 @@ describe('manager/terraform/lockfile/index', () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    const localConfig: UpdateArtifactsConfig = {
-      updateType: 'minor',
-      newVersion: '3.36.0',
-      newValue: '3.36.0',
-      ...config,
-    };
-
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: [
@@ -121,10 +110,12 @@ describe('manager/terraform/lockfile/index', () => {
           depName: 'hashicorp/aws',
           lookupName: 'hashicorp/aws',
           depType: 'required_provider',
+          newVersion: '3.36.0',
+          newValue: '3.36.0',
         },
       ],
       newPackageFileContent: '',
-      config: localConfig,
+      config,
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
@@ -136,13 +127,6 @@ describe('manager/terraform/lockfile/index', () => {
   });
 
   it('do not update dependency with depType module', async () => {
-    const localConfig: UpdateArtifactsConfig = {
-      updateType: 'minor',
-      newVersion: '3.36.0',
-      newValue: '3.36.0',
-      ...config,
-    };
-
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: [
@@ -150,10 +134,12 @@ describe('manager/terraform/lockfile/index', () => {
           depName: 'terraform-aws-modules/vpc/aws',
           lookupName: 'terraform-aws-modules/vpc/aws',
           depType: 'module',
+          newVersion: '3.36.0',
+          newValue: '3.36.0',
         },
       ],
       newPackageFileContent: '',
-      config: localConfig,
+      config,
     });
     expect(result).toBeNull();
   });
@@ -167,13 +153,6 @@ describe('manager/terraform/lockfile/index', () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    const localConfig: UpdateArtifactsConfig = {
-      updateType: 'minor',
-      newVersion: '2.56.0',
-      newValue: '~> 2.50',
-      ...config,
-    };
-
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: [
@@ -182,10 +161,12 @@ describe('manager/terraform/lockfile/index', () => {
           depType: 'provider',
           lookupName: 'azurerm',
           registryUrls: ['https://registry.example.com'],
+          newVersion: '2.56.0',
+          newValue: '~> 2.50',
         },
       ],
       newPackageFileContent: '',
-      config: localConfig,
+      config,
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
@@ -205,13 +186,6 @@ describe('manager/terraform/lockfile/index', () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    const localConfig: UpdateArtifactsConfig = {
-      updateType: 'major',
-      newVersion: '3.1.0',
-      newValue: '~> 3.0',
-      ...config,
-    };
-
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: [
@@ -219,10 +193,12 @@ describe('manager/terraform/lockfile/index', () => {
           depName: 'random',
           lookupName: 'hashicorp/random',
           depType: 'provider',
+          newVersion: '3.1.0',
+          newValue: '~> 3.0',
         },
       ],
       newPackageFileContent: '',
-      config: localConfig,
+      config,
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
@@ -242,13 +218,6 @@ describe('manager/terraform/lockfile/index', () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    const localConfig: UpdateArtifactsConfig = {
-      updateType: 'major',
-      newVersion: '3.1.0',
-      newValue: '~> 3.0',
-      ...config,
-    };
-
     const result = await updateArtifacts({
       packageFileName: 'test/main.tf',
       updatedDeps: [
@@ -256,10 +225,12 @@ describe('manager/terraform/lockfile/index', () => {
           depName: 'random',
           lookupName: 'hashicorp/random',
           depType: 'provider',
+          newVersion: '3.1.0',
+          newValue: '~> 3.0',
         },
       ],
       newPackageFileContent: '',
-      config: localConfig,
+      config,
     });
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
@@ -267,6 +238,59 @@ describe('manager/terraform/lockfile/index', () => {
     expect(result[0].file).toMatchSnapshot();
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
+    expect(mockHash.mock.calls).toMatchSnapshot();
+  });
+
+  it('update multiple dependencies which are not ordered', async () => {
+    fs.readLocalFile.mockResolvedValue(validLockfile2 as any);
+    fs.getSiblingFileName.mockReturnValue('test/.terraform.lock.hcl');
+
+    mockHash.mockResolvedValue([
+      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+    ]);
+
+    const result = await updateArtifacts({
+      packageFileName: 'test/main.tf',
+      updatedDeps: [
+        {
+          depName: 'aws',
+          lookupName: 'hashicorp/aws',
+          depType: 'provider',
+          newVersion: '3.1.0',
+          newValue: '~> 3.0',
+        },
+        {
+          depName: 'random',
+          lookupName: 'hashicorp/random',
+          depType: 'provider',
+          newVersion: '3.1.0',
+          newValue: '~> 3.0',
+        },
+        {
+          depName: 'azurerm',
+          lookupName: 'hashicorp/azurerm',
+          depType: 'provider',
+          newVersion: '2.56.0',
+          newValue: '~> 2.50',
+        },
+        {
+          depName: 'proxmox',
+          lookupName: 'Telmate/proxmox',
+          depType: 'provider',
+          newVersion: '2.7.0',
+          newValue: '~> 2.7.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config,
+    });
+    expect(result).not.toBeNull();
+    expect(result).toBeArrayOfSize(1);
+    expect(result[0].file).not.toBeNull();
+    expect(result[0].file).toMatchSnapshot();
+
+    expect(mockHash.mock.calls).toBeArrayOfSize(4);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 
