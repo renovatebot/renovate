@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { getGlobalConfig } from '../../config/global';
+import { PlatformId } from '../../constants';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
-import { PlatformId } from '../../constants';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';

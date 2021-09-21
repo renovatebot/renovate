@@ -490,16 +490,18 @@ export function migrateConfig(
           delete migratedConfig.node;
         }
       } else if (is.array(val)) {
-        const newArray = [];
-        for (const item of migratedConfig[key] as unknown[]) {
-          if (is.object(item) && !is.array(item)) {
-            const arrMigrate = migrateConfig(item as RenovateConfig, key);
-            newArray.push(arrMigrate.migratedConfig);
-          } else {
-            newArray.push(item);
+        if (is.array(migratedConfig?.[key])) {
+          const newArray = [];
+          for (const item of migratedConfig[key] as unknown[]) {
+            if (is.object(item) && !is.array(item)) {
+              const arrMigrate = migrateConfig(item as RenovateConfig, key);
+              newArray.push(arrMigrate.migratedConfig);
+            } else {
+              newArray.push(item);
+            }
           }
+          migratedConfig[key] = newArray;
         }
-        migratedConfig[key] = newArray;
       } else if (key === 'compatibility' && is.object(val)) {
         migratedConfig.constraints = migratedConfig.compatibility;
         delete migratedConfig.compatibility;

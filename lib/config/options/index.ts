@@ -468,6 +468,13 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'privateKeyPathOld',
+    description: 'Path to the Server-side old private key.',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'encrypted',
     description:
       'A configuration object containing configuration encrypted with project key.',

@@ -35,8 +35,14 @@ describe('util/http/host-rules', () => {
     });
 
     hostRules.add({
-      hostType: 'gitlab-tags',
+      hostType: PlatformId.Gitlab,
       token: 'abc',
+    });
+
+    hostRules.add({
+      hostType: 'github-releases',
+      username: 'some',
+      password: 'xxx',
     });
   });
 
@@ -122,6 +128,16 @@ describe('util/http/host-rules', () => {
         "noAuth": true,
       }
     `);
+  });
+
+  it('no fallback', () => {
+    expect(
+      applyHostRules(url, { ...options, hostType: 'github-releases' })
+    ).toEqual({
+      hostType: 'github-releases',
+      username: 'some',
+      password: 'xxx',
+    });
   });
 
   it('fallback to github', () => {

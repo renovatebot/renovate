@@ -1,8 +1,8 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
-import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { PlatformId } from '../../constants';
+import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';

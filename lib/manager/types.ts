@@ -137,6 +137,7 @@ export interface LookupUpdate {
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+  newValue?: string;
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
   currentDigestShort?: string;

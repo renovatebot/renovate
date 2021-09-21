@@ -772,4 +772,15 @@ describe('config/migration', () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
   });
+  it('migrates empty requiredStatusChecks', () => {
+    const config: RenovateConfig = {
+      requiredStatusChecks: [],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
+  });
 });

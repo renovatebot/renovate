@@ -1,6 +1,6 @@
 import * as httpMock from '../../test/http-mock';
-import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { PlatformId } from '../constants';
+import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { loadModules } from '../util/modules';
 import type { Platform } from './types';
 import * as platform from '.';
@@ -60,11 +60,6 @@ describe('platform/index', () => {
       endpoint: 'https://api.bitbucket.org/',
       gitAuthor: 'user@domain.com',
       hostRules: [
-        {
-          matchHost: 'api.bitbucket.org',
-          password: '123',
-          username: 'abc',
-        },
         {
           hostType: 'bitbucket',
           matchHost: 'api.bitbucket.org',

@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import pAll from 'p-all';
 import { lt } from 'semver';
+import { PlatformId } from '../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -15,7 +16,6 @@ import {
   REPOSITORY_NOT_FOUND,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
-import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';

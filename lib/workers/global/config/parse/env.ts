@@ -80,6 +80,7 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   });
 
   if (env.GITHUB_COM_TOKEN) {
+    logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
     config.hostRules.push({
       hostType: PlatformId.Github,
       matchHost: 'github.com',
@@ -119,6 +120,7 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
         const existingRule = hostRules.find(
           (hr) => hr.hostType === hostType && hr.matchHost === matchHost
         );
+        logger.debug(`Converting ${envName} into a global host rule`);
         if (existingRule) {
           // Add current field to existing rule
           existingRule[suffix] = env[envName];

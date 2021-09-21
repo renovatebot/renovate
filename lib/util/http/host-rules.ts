@@ -13,6 +13,11 @@ function findMatchingRules(options: GotOptions, url: string): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 
+  if (res.token || res.username || res.password) {
+    // do not fallback if we already have auth infos
+    return res;
+  }
+
   // Fallback to `github` hostType
   if (
     GITHUB_API_USING_HOST_TYPES.includes(hostType) &&

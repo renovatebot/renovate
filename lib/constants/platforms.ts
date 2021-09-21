@@ -18,4 +18,5 @@ export const GITLAB_API_USING_HOST_TYPES = [
   PlatformId.Gitlab,
   'gitlab-releases',
   'gitlab-tags',
+  'gitlab-packages',
 ];
