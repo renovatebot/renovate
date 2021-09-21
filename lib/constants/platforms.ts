@@ -1,4 +1,4 @@
-export enum PlatformId {
+export const enum PlatformId {
   Azure = 'azure',
   Bitbucket = 'bitbucket',
   BitbucketServer = 'bitbucket-server',
