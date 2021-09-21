@@ -160,7 +160,7 @@ export function parsePreset(input: string): ParsedPreset {
     if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;
     }
-    if (presetName === '' || presetName == null) {
+    if (!is.nonEmptyString(presetName)) {
       presetName = 'default';
     }
   }
