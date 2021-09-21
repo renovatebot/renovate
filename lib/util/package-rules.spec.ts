@@ -1,5 +1,10 @@
 import type { PackageRuleInputConfig, UpdateType } from '../config/types';
-import { ProgrammingLanguage } from '../constants/programming-language';
+import {
+  LANGUAGE_DOCKER,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PYTHON,
+} from '../constants/languages';
 
 import * as datasourceDocker from '../datasource/docker';
 import { OrbDatasource } from '../datasource/orb';
@@ -246,7 +251,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: ProgrammingLanguage.JavaScript,
+      language: LANGUAGE_JAVASCRIPT,
       manager: 'meteor',
       depName: 'node',
     };
@@ -265,7 +270,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: ProgrammingLanguage.Python,
+      language: LANGUAGE_PYTHON,
       manager: 'pipenv',
       depName: 'node',
     };
@@ -276,10 +281,7 @@ describe('util/package-rules', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: [
-            ProgrammingLanguage.JavaScript,
-            ProgrammingLanguage.NodeJS,
-          ],
+          matchLanguages: [LANGUAGE_JAVASCRIPT, LANGUAGE_NODE],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -287,7 +289,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: ProgrammingLanguage.JavaScript,
+      language: LANGUAGE_JAVASCRIPT,
       manager: 'meteor',
       depName: 'node',
     };
@@ -298,7 +300,7 @@ describe('util/package-rules', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: [ProgrammingLanguage.Docker],
+          matchLanguages: [LANGUAGE_DOCKER],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -306,7 +308,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: ProgrammingLanguage.Python,
+      language: LANGUAGE_PYTHON,
       manager: 'pipenv',
       depName: 'node',
     };

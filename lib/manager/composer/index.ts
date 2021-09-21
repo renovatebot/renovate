@@ -1,10 +1,10 @@
-import { ProgrammingLanguage } from '../../constants/programming-language';
+import { LANGUAGE_PHP } from '../../constants/languages';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { getRangeStrategy } from './range';
 import { composerVersioningId } from './utils';
 
-const language = ProgrammingLanguage.PHP;
+const language = LANGUAGE_PHP;
 export const supportsLockFileMaintenance = true;
 
 export { extractPackageFile, updateArtifacts, language, getRangeStrategy };

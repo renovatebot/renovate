@@ -1,4 +1,16 @@
-import { ProgrammingLanguage } from '../constants/programming-language';
+import {
+  LANGUAGE_DART,
+  LANGUAGE_DOCKER,
+  LANGUAGE_DOT_NET,
+  LANGUAGE_ELIXIR,
+  LANGUAGE_GOLANG,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PHP,
+  LANGUAGE_PYTHON,
+  LANGUAGE_RUBY,
+  LANGUAGE_RUST,
+} from '../constants/languages';
 import type { RangeStrategy } from '../types';
 import managers from './api';
 import type {
@@ -11,7 +23,19 @@ import type {
 
 const managerList = Array.from(managers.keys());
 
-const languageList = Object.values(ProgrammingLanguage);
+const languageList = [
+  LANGUAGE_DART,
+  LANGUAGE_DOCKER,
+  LANGUAGE_DOT_NET,
+  LANGUAGE_ELIXIR,
+  LANGUAGE_GOLANG,
+  LANGUAGE_JAVASCRIPT,
+  LANGUAGE_NODE,
+  LANGUAGE_PHP,
+  LANGUAGE_PYTHON,
+  LANGUAGE_RUBY,
+  LANGUAGE_RUST,
+];
 
 export function get<T extends keyof ManagerApi>(
   manager: string,

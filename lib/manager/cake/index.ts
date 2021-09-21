@@ -1,10 +1,10 @@
 import moo from 'moo';
-import { ProgrammingLanguage } from '../../constants/programming-language';
+import { LANGUAGE_DOT_NET } from '../../constants/languages';
 import { id as datasource } from '../../datasource/nuget';
 import { SkipReason } from '../../types';
 import { PackageDependency, PackageFile } from '../types';
 
-export const language = ProgrammingLanguage.NET;
+export const language = LANGUAGE_DOT_NET;
 
 export const defaultConfig = {
   fileMatch: ['\\.cake$'],

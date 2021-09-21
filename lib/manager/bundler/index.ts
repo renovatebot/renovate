@@ -1,10 +1,10 @@
-import { ProgrammingLanguage } from '../../constants/programming-language';
+import { LANGUAGE_RUBY } from '../../constants/languages';
 import * as rubyVersioning from '../../versioning/ruby';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { getRangeStrategy } from './range';
 
-const language = ProgrammingLanguage.Ruby;
+const language = LANGUAGE_RUBY;
 export const supportsLockFileMaintenance = true;
 
 /*

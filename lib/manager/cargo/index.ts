@@ -1,9 +1,9 @@
-import { ProgrammingLanguage } from '../../constants/programming-language';
+import { LANGUAGE_RUST } from '../../constants/languages';
 import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 
-const language = ProgrammingLanguage.Rust;
+const language = LANGUAGE_RUST;
 export const supportsLockFileMaintenance = true;
 
 export { extractPackageFile, updateArtifacts, language };

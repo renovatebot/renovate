@@ -1,8 +1,8 @@
-import { ProgrammingLanguage } from '../../constants/programming-language';
+import { LANGUAGE_JAVASCRIPT } from '../../constants/languages';
 
 export { extractPackageFile } from './extract';
 
-export const language = ProgrammingLanguage.JavaScript;
+export const language = LANGUAGE_JAVASCRIPT;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)package.js$'],
