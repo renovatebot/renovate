@@ -208,3 +208,10 @@ export function prInfo(pr: PrResponse): Pr {
     createdAt: pr.created_on,
   };
 }
+
+export interface UserResponse {
+  display_name: string;
+  account_id: string;
+  nickname: string;
+  account_status: string
+}
