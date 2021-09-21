@@ -206,7 +206,11 @@ function resolveRegistryUrls(
 
 export function getDefaultVersioning(datasourceName: string): string {
   const datasource = getDatasourceFor(datasourceName);
-  return datasource.defaultVersioning || 'semver';
+  // istanbul ignore if: wrong regex manager config?
+  if (!datasource) {
+    logger.warn({ datasourceName }, 'Missing datasource!');
+  }
+  return datasource?.defaultVersioning || 'semver';
 }
 
 async function fetchReleases(
