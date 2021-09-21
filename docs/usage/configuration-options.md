@@ -1078,8 +1078,28 @@ The above is the same as if you wrote this package rule:
 
 ## ignorePaths
 
-Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering.
-For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
+With this setting you can selectively ignore package files that would normally be "autodiscovered" and updated by Renovate.
+
+For instance if your repository has an `"**/examples/**"` directory with many `package.json` files that you want to ignore.
+
+<!-- TODO: Grabbed the ignorePaths array from our internal preset ignoreModulesAndTests located at: /lib/config/presets/internal/defaults.ts -->
+<!-- TODO: This example should probably be wrapped in a `packageRule` array? -->
+<!-- TODO: Not sure what the correct example should be. -->
+
+```json
+{
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**"
+  ]
+}
+```
 
 ## ignorePrAuthor
 
