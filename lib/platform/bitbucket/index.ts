@@ -30,7 +30,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody, mergeBodyTransformer } from './utils';
+import { PrResponse, RepoInfoBody, mergeBodyTransformer, UserResponse } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -712,13 +712,28 @@ export async function updatePr({
     )
   ).body;
 
+  let activeReviewers: Array<any> = new Array();
+
+  // Remove any previous PR reviewers that are now inactive to avoid PR update errors
+  pr.reviewers.forEach(async (reviewer, index) => {
+    let reviewerUser = (
+      await bitbucketHttp.getJson<UserResponse>(
+        `/2.0/users/${reviewer.account_id}`
+      )
+    ).body;
+
+    if (reviewerUser.account_status === "active") {
+      activeReviewers.push(reviewer);
+    }
+  });
+
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     {
       body: {
         title,
         description: sanitize(description),
-        reviewers: pr.reviewers,
+        reviewers: activeReviewers,
       },
     }
   );
