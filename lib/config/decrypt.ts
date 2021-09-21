@@ -1,10 +1,48 @@
 import crypto from 'crypto';
 import is from '@sindresorhus/is';
+import * as openpgp from 'openpgp';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { add } from '../util/sanitize';
 import { getGlobalConfig } from './global';
 import type { RenovateConfig } from './types';
+
+export async function tryDecryptPgp(
+  privateKey: string,
+  encryptedStr: string
+): Promise<string | null> {
+  if (encryptedStr.length < 500) {
+    // optimization during transition of public key -> pgp
+    return null;
+  }
+  try {
+    const pk = await openpgp.readPrivateKey({
+      // prettier-ignore
+      armoredKey: privateKey.replace(/\n[ \t]+/g, '\n'), // little massage to help a common problem
+    });
+    const startBlock = '-----BEGIN PGP MESSAGE-----\n\n';
+    const endBlock = '\n-----END PGP MESSAGE-----';
+    let armoredMessage = encryptedStr.trim();
+    if (!armoredMessage.startsWith(startBlock)) {
+      armoredMessage = `${startBlock}${armoredMessage}`;
+    }
+    if (!armoredMessage.endsWith(endBlock)) {
+      armoredMessage = `${armoredMessage}${endBlock}`;
+    }
+    const message = await openpgp.readMessage({
+      armoredMessage,
+    });
+    const { data } = await openpgp.decrypt({
+      message,
+      decryptionKeys: pk,
+    });
+    logger.debug('Decrypted config using openpgp');
+    return data;
+  } catch (err) {
+    logger.debug({ err }, 'Could not decrypt using openpgp');
+    return null;
+  }
+}
 
 export function tryDecryptPublicKeyDefault(
   privateKey: string,
@@ -17,7 +55,7 @@ export function tryDecryptPublicKeyDefault(
       .toString();
     logger.debug('Decrypted config using default padding');
   } catch (err) {
-    logger.debug('Failed to decrypt using default padding');
+    logger.debug('Could not decrypt using default padding');
   }
   return decryptedStr;
 }
@@ -38,23 +76,80 @@ export function tryDecryptPublicKeyPKCS1(
       )
       .toString();
   } catch (err) {
-    logger.debug('Failed to decrypt using PKCS1 padding');
+    logger.debug('Could not decrypt using PKCS1 padding');
   }
   return decryptedStr;
 }
 
-export function tryDecrypt(
+export async function tryDecrypt(
   privateKey: string,
-  encryptedStr: string
-): string | null {
-  let decryptedStr = tryDecryptPublicKeyDefault(privateKey, encryptedStr);
-  if (!is.string(decryptedStr)) {
-    decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
+  encryptedStr: string,
+  repository: string
+): Promise<string | null> {
+  let decryptedStr: string = null;
+  if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
+    const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
+    if (decryptedObjStr) {
+      try {
+        const decryptedObj = JSON.parse(decryptedObjStr);
+        const { o: org, r: repo, v: value } = decryptedObj;
+        if (is.nonEmptyString(value)) {
+          if (is.nonEmptyString(org)) {
+            const orgName = org.replace(/\/$/, ''); // Strip trailing slash
+            if (is.nonEmptyString(repo)) {
+              const scopedRepository = `${orgName}/${repo}`;
+              if (scopedRepository === repository) {
+                decryptedStr = value;
+              } else {
+                logger.debug(
+                  { scopedRepository },
+                  'Secret is scoped to a different repository'
+                );
+                const error = new Error('config-validation');
+                error.validationError = `Encrypted secret is scoped to a different repository: ${scopedRepository}.`;
+                throw error;
+              }
+            } else {
+              const scopedOrg = `${orgName}/`;
+              if (repository.startsWith(scopedOrg)) {
+                decryptedStr = value;
+              } else {
+                logger.debug(
+                  { scopedOrg },
+                  'Secret is scoped to a different org'
+                );
+                const error = new Error('config-validation');
+                error.validationError = `Encrypted secret is scoped to a different org" ${scopedOrg}.`;
+                throw error;
+              }
+            }
+          } else {
+            const error = new Error('config-validation');
+            error.validationError = `Encrypted value in config is missing a scope.`;
+            throw error;
+          }
+        } else {
+          const error = new Error('config-validation');
+          error.validationError = `Encrypted value in config is missing a value.`;
+          throw error;
+        }
+      } catch (err) {
+        logger.warn({ err }, 'Could not parse decrypted string');
+      }
+    }
+  } else {
+    decryptedStr = tryDecryptPublicKeyDefault(privateKey, encryptedStr);
+    if (!is.string(decryptedStr)) {
+      decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
+    }
   }
   return decryptedStr;
 }
 
-export function decryptConfig(config: RenovateConfig): RenovateConfig {
+export async function decryptConfig(
+  config: RenovateConfig,
+  repository: string
+): Promise<RenovateConfig> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
   const { privateKey, privateKeyOld } = getGlobalConfig();
@@ -64,10 +159,10 @@ export function decryptConfig(config: RenovateConfig): RenovateConfig {
       if (privateKey) {
         for (const [eKey, eVal] of Object.entries(val)) {
           logger.debug('Trying to decrypt ' + eKey);
-          let decryptedStr = tryDecrypt(privateKey, eVal);
+          let decryptedStr = await tryDecrypt(privateKey, eVal, repository);
           if (privateKeyOld && !is.nonEmptyString(decryptedStr)) {
             logger.debug(`Trying to decrypt with old private key`);
-            decryptedStr = tryDecrypt(privateKeyOld, eVal);
+            decryptedStr = await tryDecrypt(privateKeyOld, eVal, repository);
           }
           if (!is.nonEmptyString(decryptedStr)) {
             const error = new Error('config-validation');
@@ -113,17 +208,20 @@ export function decryptConfig(config: RenovateConfig): RenovateConfig {
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {
       decryptedConfig[key] = [];
-      val.forEach((item) => {
+      for (const item of val) {
         if (is.object(item) && !is.array(item)) {
           (decryptedConfig[key] as RenovateConfig[]).push(
-            decryptConfig(item as RenovateConfig)
+            await decryptConfig(item as RenovateConfig, repository)
           );
         } else {
           (decryptedConfig[key] as unknown[]).push(item);
         }
-      });
+      }
     } else if (is.object(val) && key !== 'content') {
-      decryptedConfig[key] = decryptConfig(val as RenovateConfig);
+      decryptedConfig[key] = await decryptConfig(
+        val as RenovateConfig,
+        repository
+      );
     }
   }
   delete decryptedConfig.encrypted;

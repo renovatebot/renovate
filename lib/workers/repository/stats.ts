@@ -20,14 +20,28 @@ export function printRequestStats(): void {
   });
   const allRequests: string[] = [];
   const requestHosts: Record<string, RequestStats[]> = {};
+  const rawUrls: Record<string, number> = {};
   for (const httpRequest of httpRequests) {
     const { method, url, duration, queueDuration } = httpRequest;
+    const [baseUrl] = url.split('?');
+    // put method last for better sorting
+    const urlKey = `${baseUrl} (${method.toUpperCase()})`;
+    if (rawUrls[urlKey]) {
+      rawUrls[urlKey] += 1;
+    } else {
+      rawUrls[urlKey] = 1;
+    }
     allRequests.push(
       `${method.toUpperCase()} ${url} ${duration} ${queueDuration}`
     );
     const { hostname } = URL.parse(url);
     requestHosts[hostname] = requestHosts[hostname] || [];
     requestHosts[hostname].push(httpRequest);
+  }
+  const urls: Record<string, number> = {};
+  // Sort urls for easier reading
+  for (const url of Object.keys(rawUrls).sort()) {
+    urls[url] = rawUrls[url];
   }
   logger.trace({ allRequests, requestHosts }, 'full stats');
   type HostStats = {
@@ -51,5 +65,5 @@ export function printRequestStats(): void {
     const queueAvgMs = Math.round(queueSum / requestCount);
     hostStats[hostname] = { requestCount, requestAvgMs, queueAvgMs };
   }
-  logger.debug({ hostStats, totalRequests }, 'http statistics');
+  logger.debug({ urls, hostStats, totalRequests }, 'http statistics');
 }
