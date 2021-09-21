@@ -38,6 +38,7 @@ export interface RenovateSharedConfig {
   includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
+  ignoreTests?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
@@ -55,7 +56,6 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
-  requiredStatusChecks?: string[];
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string;
@@ -80,6 +80,7 @@ export interface GlobalOnlyConfig {
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
+  privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }
@@ -99,7 +100,8 @@ export interface RepoGlobalConfig {
   dryRun?: boolean;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
-  privateKey?: string | Buffer;
+  privateKey?: string;
+  privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
 }

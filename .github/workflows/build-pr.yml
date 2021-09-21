@@ -43,6 +43,7 @@ jobs:
           git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
           npm config set scripts-prepend-node-path true
+          git --version
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
@@ -54,7 +55,7 @@ jobs:
         run: yarn jest --maxWorkers=2 --ci
 
       - name: Codecov
-        uses: codecov/codecov-action@5a8bb4701eca7ba3673f21664b887f652c58d0a3 # renovate: tag=v2.0.3
+        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
         if: always()
 
       # build after tests to exclude files
@@ -100,6 +101,7 @@ jobs:
           yarn eslint -f gha
           yarn prettier
           yarn markdown-lint
+          yarn git-check
 
       - name: Test schema
         run: yarn test-schema
