@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';

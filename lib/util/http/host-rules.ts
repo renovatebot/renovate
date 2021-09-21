@@ -2,7 +2,7 @@ import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
   PlatformId,
-} from '../../constants/platforms';
+} from '../../constants';
 import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';

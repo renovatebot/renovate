@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import * as hostRules from '../host-rules';
 import { BitbucketServerHttp, setBaseUrl } from './bitbucket-server';
 

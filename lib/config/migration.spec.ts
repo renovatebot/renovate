@@ -1,4 +1,4 @@
-import { PlatformId } from '../constants/platforms';
+import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
 import { setGlobalConfig } from './global';
 import * as configMigration from './migration';

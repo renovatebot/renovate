@@ -1,6 +1,6 @@
 import * as httpMock from '../../test/http-mock';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
-import { PlatformId } from '../constants/platforms';
+import { PlatformId } from '../constants';
 import { loadModules } from '../util/modules';
 import type { Platform } from './types';
 import * as platform from '.';

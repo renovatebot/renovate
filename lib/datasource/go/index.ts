@@ -1,5 +1,5 @@
 import URL from 'url';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';

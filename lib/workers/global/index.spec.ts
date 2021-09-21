@@ -1,6 +1,6 @@
 import { ERROR, WARN } from 'bunyan';
 import { logger } from '../../../test/util';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import * as datasourceDocker from '../../datasource/docker';
 import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';

@@ -1,5 +1,5 @@
 import type { RenovateOptions } from '../../../../config/types';
-import { PlatformId } from '../../../../constants/platforms';
+import { PlatformId } from '../../../../constants';
 import * as env from './env';
 
 describe('workers/global/config/parse/env', () => {

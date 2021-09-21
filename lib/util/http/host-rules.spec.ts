@@ -1,4 +1,4 @@
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { bootstrap } from '../../proxy';
 import * as hostRules from '../host-rules';
 import { applyHostRules } from './host-rules';

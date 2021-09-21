@@ -4,7 +4,7 @@ import { ICoreApi } from 'azure-devops-node-api/CoreApi';
 import { IGitApi } from 'azure-devops-node-api/GitApi';
 import { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { HostRule } from '../../types';
 import * as hostRules from '../../util/host-rules';
 

@@ -1,4 +1,4 @@
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import * as _hostRules from '../../util/host-rules';
 
 describe('platform/azure/azure-got-wrapper', () => {

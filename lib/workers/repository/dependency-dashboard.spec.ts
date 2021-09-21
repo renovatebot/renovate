@@ -8,7 +8,7 @@ import {
   platform,
 } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import type { Platform } from '../../platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';

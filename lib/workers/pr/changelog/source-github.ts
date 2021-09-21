@@ -1,5 +1,5 @@
 import URL from 'url';
-import { PlatformId } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants';
 import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';

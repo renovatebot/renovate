@@ -1,4 +1,4 @@
-import { PlatformId } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants';
 import * as azure from '../azure';
 import * as bitbucket from '../bitbucket';
 import * as bitbucketServer from '../bitbucket-server';

@@ -4,7 +4,7 @@ import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
   PlatformId,
-} from '../../constants/platforms';
+} from '../../constants';
 import type { GotOptions } from './types';
 
 export function applyAuthorization(inOptions: GotOptions): GotOptions {

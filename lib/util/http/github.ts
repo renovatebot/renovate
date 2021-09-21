@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
+import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { PlatformId } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';

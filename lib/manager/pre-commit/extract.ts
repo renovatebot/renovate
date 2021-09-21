@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';

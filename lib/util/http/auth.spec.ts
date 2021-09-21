@@ -1,6 +1,6 @@
 import { NormalizedOptions } from 'got';
 import { partial } from '../../../test/util';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { GotOptions } from './types';
 

@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { PlatformId } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import type { BranchUpgradeConfig } from '../../types';

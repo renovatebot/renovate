@@ -1,4 +1,4 @@
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { resolveBaseUrl } from '../url';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 

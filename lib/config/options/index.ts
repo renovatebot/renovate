@@ -1,4 +1,4 @@
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { getManagers } from '../../manager';
 import { getPlatformList } from '../../platform';
 import { getVersioningList } from '../../versioning';

@@ -1,5 +1,5 @@
 import parseLinkHeader from 'parse-link-header';
-import { PlatformId } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { parseUrl } from '../url';

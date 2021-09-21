@@ -5,7 +5,7 @@ import {
   platform,
 } from '../../../../test/util';
 import { setGlobalConfig } from '../../../config/global';
-import { PlatformId } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants';
 import * as cleanup from './prune';
 
 jest.mock('../../../util/git');

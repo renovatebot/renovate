@@ -1,4 +1,4 @@
-import { PlatformId } from '../constants/platforms';
+import { PlatformId } from '../constants';
 import * as datasourceNuget from '../datasource/nuget';
 import { add, clear, find, findAll, hosts } from './host-rules';
 
