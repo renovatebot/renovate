@@ -102,7 +102,6 @@ export async function getDependency(
     const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
 
     if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
-      /* istanbul ignore next */
       if (dep.sourceDirectory) {
         logger.debug(
           { dependency: packageName },
