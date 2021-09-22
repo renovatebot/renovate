@@ -1,5 +1,5 @@
-import { lang, query as q } from '@renovate/parser-utils';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
+import { lang, query as q } from '@renovatebot/parser-utils';
 import { StringValueToken } from '../../../../parser-utils/lib/lexer/types';
 import { PypiDatasource } from '../../datasource/pypi';
 import { SkipReason } from '../../types';
