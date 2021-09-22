@@ -2051,6 +2051,13 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     globalOnly: true,
   },
+  {
+    name: 'writeDiscoveredRepos',
+    description: 'Writes discovered repositories to a JSON file and then exit.',
+    type: 'string',
+    globalOnly: true,
+    env: false,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

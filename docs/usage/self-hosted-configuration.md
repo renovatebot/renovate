@@ -487,3 +487,13 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 ## username
 
 Mandatory if a GitHub app token is in use using the CLI.
+
+## writeDiscoveredRepos
+
+Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+
+Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
+
+```json
+["myOrg/myRepo", "myOrg/anotherRepo"]
+```
