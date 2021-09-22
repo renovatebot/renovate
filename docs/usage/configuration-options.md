@@ -1078,28 +1078,18 @@ The above is the same as if you wrote this package rule:
 
 ## ignorePaths
 
+Renovate will extract dependencies from every file it finds in a repository, unless that file is explicitly ignored.
 With this setting you can selectively ignore package files that would normally be "autodiscovered" and updated by Renovate.
 
-For instance if your repository has an `"**/examples/**"` directory with many `package.json` files that you want to ignore.
-
-<!-- TODO: Grabbed the ignorePaths array from our internal preset ignoreModulesAndTests located at: /lib/config/presets/internal/defaults.ts -->
-<!-- TODO: This example should probably be wrapped in a `packageRule` array? -->
-<!-- TODO: Not sure what the correct example should be. -->
+For instance if you have a project with an `"**/examples/**"` directory you wish to ignore:
 
 ```json
 {
-  "ignorePaths": [
-    "**/node_modules/**",
-    "**/bower_components/**",
-    "**/vendor/**",
-    "**/examples/**",
-    "**/__tests__/**",
-    "**/test/**",
-    "**/tests/**",
-    "**/__fixtures__/**"
-  ]
+  "ignorePaths": ["**/examples/**"]
 }
 ```
+
+Useful to know: Renovate's default ignore is `node_modules` and `bower_components` only, however if you are extending the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
 ## ignorePrAuthor
 
