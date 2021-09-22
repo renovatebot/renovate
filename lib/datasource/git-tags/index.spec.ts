@@ -11,6 +11,7 @@ const depName = 'https://github.com/example/example.git';
 const lsRemote1 = loadFixture('ls-remote-1.txt', '../git-refs');
 
 const datasource = GitTagsDatasource.id;
+const datasourceInstance = new GitTagsDatasource();
 
 describe('datasource/git-tags/index', () => {
   describe('getReleases', () => {
@@ -53,7 +54,7 @@ describe('datasource/git-tags/index', () => {
           return Promise.resolve(lsRemote1);
         },
       });
-      const digest = await new GitTagsDatasource().getDigest(
+      const digest = await datasourceInstance.getDigest(
         { datasource, depName: 'a tag to look up' },
         'notfound'
       );
@@ -65,7 +66,7 @@ describe('datasource/git-tags/index', () => {
           return Promise.resolve(lsRemote1);
         },
       });
-      const digest = await new GitTagsDatasource().getDigest(
+      const digest = await datasourceInstance.getDigest(
         { datasource, depName: 'a tag to look up' },
         'v1.0.2'
       );
@@ -77,7 +78,7 @@ describe('datasource/git-tags/index', () => {
           return Promise.resolve(lsRemote1);
         },
       });
-      const digest = await new GitTagsDatasource().getDigest(
+      const digest = await datasourceInstance.getDigest(
         { datasource, depName: 'another tag to look up' },
         undefined
       );

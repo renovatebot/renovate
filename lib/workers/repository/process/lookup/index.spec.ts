@@ -9,6 +9,7 @@ import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import * as datasourceDocker from '../../../../datasource/docker';
 import { id as datasourceDockerId } from '../../../../datasource/docker';
 import { GitRefsDatasource } from '../../../../datasource/git-refs';
+import { GitDatasource } from '../../../../datasource/git-refs/base';
 import * as datasourceGithubReleases from '../../../../datasource/github-releases';
 import { id as datasourceGithubTagsId } from '../../../../datasource/github-tags';
 import { id as datasourceNpmId } from '../../../../datasource/npm';
@@ -1366,6 +1367,14 @@ describe('workers/repository/process/lookup/index', () => {
             .mockResolvedValue('4b825dc642cb6eb9a060e54bf8d69288fbee4904'),
         })),
       }));
+
+      jest.spyOn(GitDatasource, 'getRawRefs').mockResolvedValueOnce([
+        {
+          value: 'HEAD',
+          hash: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+          type: '',
+        },
+      ]);
 
       config.depName = 'some-path';
       config.versioning = gitVersioningId;

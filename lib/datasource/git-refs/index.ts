@@ -1,6 +1,7 @@
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
 import * as semver from '../../versioning/semver';
+import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { GitDatasource } from './base';
 import type { RawRefs } from './types';
@@ -8,8 +9,8 @@ import type { RawRefs } from './types';
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
-export class GitRefsDatasource extends GitDatasource {
-  static override readonly id = 'git-refs';
+export class GitRefsDatasource extends Datasource {
+  static readonly id = 'git-refs';
 
   constructor() {
     super(GitRefsDatasource.id);
@@ -22,7 +23,7 @@ export class GitRefsDatasource extends GitDatasource {
     key: ({ lookupName }: GetReleasesConfig) => lookupName,
   })
   // eslint-disable-next-line class-methods-use-this
-  async getReleases({
+  override async getReleases({
     lookupName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const rawRefs: RawRefs[] = await GitDatasource.getRawRefs(
@@ -54,8 +55,8 @@ export class GitRefsDatasource extends GitDatasource {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async getDigest(
-    { lookupName }: Partial<DigestConfig>,
+  override async getDigest(
+    { lookupName }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
     const rawRefs: RawRefs[] = await GitDatasource.getRawRefs(
