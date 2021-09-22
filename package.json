@@ -71,7 +71,6 @@
     "yarn"
   ],
   "author": "Rhys Arkins <rhys@arkins.net>",
-  "contributors": [],
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/renovatebot/renovate/issues"
