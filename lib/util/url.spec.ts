@@ -84,7 +84,7 @@ describe('util/url', () => {
       'https://index.docker.io/v2/'
     );
     expect(ensurePathPrefix('https://index.docker.io/v2', '/v2')).toBe(
-      'https://index.docker.io/v2/'
+      'https://index.docker.io/v2'
     );
     expect(
       ensurePathPrefix('https://index.docker.io/v2/something', '/v2')
