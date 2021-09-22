@@ -1081,7 +1081,7 @@ The above is the same as if you wrote this package rule:
 Renovate will extract dependencies from every file it finds in a repository, unless that file is explicitly ignored.
 With this setting you can selectively ignore package files that would normally be "autodiscovered" and updated by Renovate.
 
-For instance if you have a project with an `"**/examples/**"` directory you wish to ignore:
+For instance if you have a project with an `"examples/"` directory you wish to ignore:
 
 ```json
 {
