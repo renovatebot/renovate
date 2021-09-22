@@ -1,0 +1,8 @@
+{
+  "files": ["readme.md"],
+  "imageSize": 100,
+  "contributorsPerLine": 7,
+  "contributorsSortAlphabetically": false,
+  "skipCi": "true",
+  "contributors": []
+}
