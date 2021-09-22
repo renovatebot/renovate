@@ -3,6 +3,7 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
+  findLocalSiblingOrParent,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -24,7 +25,7 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(packageFileName, 'mix.lock');
+  const lockFileName = await findLocalSiblingOrParent(packageFileName, 'mix.lock');
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
