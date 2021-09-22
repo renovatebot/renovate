@@ -1,5 +1,6 @@
+import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
-import { logger } from '../../../test/util';
+import { fs, logger } from '../../../test/util';
 import { PlatformId } from '../../constants';
 import * as datasourceDocker from '../../datasource/docker';
 import * as _platform from '../../platform';
@@ -9,6 +10,7 @@ import * as _limits from './limits';
 import * as globalWorker from '.';
 
 jest.mock('../repository');
+jest.mock('../../util/fs');
 
 // imports are readonly
 const repositoryWorker = _repositoryWorker;
@@ -125,6 +127,27 @@ describe('workers/global/index', () => {
       await globalWorker.start();
       expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('write repositories to file', () => {
+    it('successfully write file', async () => {
+      configParser.parseConfigs.mockResolvedValueOnce({
+        repositories: ['myOrg/myRepo'],
+        platform: PlatformId.Github,
+        endpoint: 'https://github.com/',
+        writeDiscoveredRepos: '/tmp/renovate-output.json',
+      });
+      fs.writeFile.mockReturnValueOnce(null);
+
+      expect(await globalWorker.start()).toEqual(0);
+      expect(fs.writeFile).toHaveBeenCalledTimes(1);
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        '/tmp/renovate-output.json',
+        '["myOrg/myRepo"]'
+      );
+      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+      expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
     });
   });
 });
