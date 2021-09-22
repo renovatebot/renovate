@@ -243,7 +243,7 @@ describe('datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'abcdef' }],
+        authorizationData: [{ authorizationToken: 'test_token' }],
       });
 
       await getDigest(
@@ -276,7 +276,7 @@ describe('datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'abc' }],
+        authorizationData: [{ authorizationToken: 'test' }],
       });
 
       const res = await getDigest(
@@ -353,7 +353,7 @@ describe('datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-other-dep:pull'
         )
-        .reply(200, { access_token: 'some-token' });
+        .reply(200, { access_token: 'test' });
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-other-dep' },
         '8.0.0-alpine'
@@ -528,7 +528,7 @@ describe('datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/node:pull'
         )
-        .reply(200, { token: 'some-token ' });
+        .reply(200, { token: 'test' });
       const res = await getPkgReleases({
         datasource: id,
         depName: 'node',
@@ -556,7 +556,7 @@ describe('datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/node:pull'
         )
-        .reply(200, { token: 'some-token ' });
+        .reply(200, { token: 'test' });
       const res = await getPkgReleases({
         datasource: id,
         depName: 'docker.io/node',

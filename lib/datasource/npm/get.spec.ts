@@ -152,14 +152,14 @@ describe('datasource/npm/get', () => {
     const npmrc = ``;
     hostRules.add({
       matchHost: 'https://registry.npmjs.org',
-      token: 'XXX',
+      token: 'abc',
       authType: 'Basic',
     });
 
     httpMock
       .scope('https://registry.npmjs.org', {
         reqheaders: {
-          authorization: 'Basic XXX',
+          authorization: 'Basic abc',
         },
       })
       .get('/renovate')

@@ -1,6 +1,8 @@
 import type { Preset } from '../types';
 import * as monorepos from './monorepo';
 
+const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
+
 const staticGroups = {
   all: {
     description: 'Group all updates together',
@@ -48,6 +50,7 @@ const staticGroups = {
     extends: [
       'group:nodeJs',
       'group:allApollographql',
+      'group:codemirror',
       'group:fortawesome',
       'group:fusionjs',
       'group:glimmer',
@@ -96,6 +99,15 @@ const staticGroups = {
       {
         extends: 'packages:apollographql',
         groupName: 'Apollo GraphQL packages',
+      },
+    ],
+  },
+  codemirror: {
+    description: 'Group CodeMirror packages together',
+    packageRules: [
+      {
+        groupName: 'CodeMirror',
+        matchPackagePrefixes: ['@codemirror/'],
       },
     ],
   },
@@ -596,6 +608,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
       {
         description: `Group packages from ${monorepo} monorepo together`,
         extends: `monorepo:${monorepo}`,
+        matchUpdateTypes: nonPinUpdateTypes,
         groupName: `${monorepo} monorepo`,
       },
     ],

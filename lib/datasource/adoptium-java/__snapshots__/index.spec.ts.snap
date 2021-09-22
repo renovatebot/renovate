@@ -159,6 +159,21 @@ Object {
 }
 `;
 
+exports[`datasource/adoptium-java/index getReleases processes real data (jre) 1`] = `
+Object {
+  "homepage": "https://adoptium.net",
+  "registryUrl": "https://api.adoptium.net/",
+  "releases": Array [
+    Object {
+      "version": "8.0.302+8",
+    },
+    Object {
+      "version": "11.0.12+7",
+    },
+  ],
+}
+`;
+
 exports[`datasource/adoptium-java/index getReleases processes real data 1`] = `
 Object {
   "homepage": "https://adoptium.net",

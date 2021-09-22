@@ -27,6 +27,8 @@ Therefore if you need Renovate to support any non-npm lock files like Bundler th
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
+Renovate requires Node.js >=14.15.0 as well as Git >=2.33.0.
+
 #### Docker image
 
 The `renovate` npm package is also distributed via pre-built Node.js images on Docker Hub (`renovate/renovate`).
