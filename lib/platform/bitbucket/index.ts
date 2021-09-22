@@ -712,31 +712,50 @@ export async function updatePr({
     )
   ).body;
 
-  let activeReviewers: Array<any> = new Array();
+  try {
+    await bitbucketHttp.putJson(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      {
+        body: {
+          title,
+          description: sanitize(description),
+          reviewers: pr.reviewers,
+        },
+      }
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'PR contains inactive reviewer accounts.  Will try setting only active reviewers');
 
-  // Remove any previous PR reviewers that are now inactive to avoid PR update errors
-  pr.reviewers.forEach(async (reviewer, index) => {
-    let reviewerUser = (
-      await bitbucketHttp.getJson<UserResponse>(
-        `/2.0/users/${reviewer.account_id}`
-      )
-    ).body;
+    // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+    let activeReviewers: Array<any> = new Array();
 
-    if (reviewerUser.account_status === "active") {
-      activeReviewers.push(reviewer);
-    }
-  });
+    // Validate that each previous PR reviewer account is still active
+    pr.reviewers.forEach(async (reviewer, index) => {
+      let reviewerUser = (
+        await bitbucketHttp.getJson<UserResponse>(
+          `/2.0/users/${reviewer.account_id}`
+        )
+      ).body;
 
-  await bitbucketHttp.putJson(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        reviewers: activeReviewers,
-      },
-    }
-  );
+      if (reviewerUser.account_status === "active") {
+        activeReviewers.push(reviewer);
+      }
+    });
+
+    await bitbucketHttp.putJson(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      {
+        body: {
+          title,
+          description: sanitize(description),
+          reviewers: activeReviewers,
+        },
+      }
+    );
+  }
+
+
+
 
   if (state === PrState.Closed && pr) {
     await bitbucketHttp.postJson(
