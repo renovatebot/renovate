@@ -4,7 +4,6 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   findLocalSiblingOrParent,
-  getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
@@ -25,7 +24,10 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = await findLocalSiblingOrParent(packageFileName, 'mix.lock');
+  const lockFileName = await findLocalSiblingOrParent(
+    packageFileName,
+    'mix.lock'
+  );
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
