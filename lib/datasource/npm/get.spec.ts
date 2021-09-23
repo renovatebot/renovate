@@ -269,7 +269,45 @@ describe('datasource/npm/get', () => {
     `);
   });
 
-  it('warns about repo directory override', async () => {
+  it('handles mixed sourceUrls in releases', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/vue')
+      .reply(200, {
+        name: 'vue',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/vuejs/vue.git',
+        },
+        versions: {
+          '2.0.0': {
+            repository: {
+              type: 'git',
+              url: 'https://github.com/vuejs/vue.git',
+            },
+          },
+          '3.0.0': {
+            repository: {
+              type: 'git',
+              url: 'https://github.com/vuejs/vue-next.git',
+            },
+          },
+        },
+        'dist-tags': { latest: '2.0.0' },
+      });
+
+    const dep = await getDependency('vue');
+
+    expect(dep.sourceUrl).toBe('https://github.com/vuejs/vue.git');
+    expect(dep.releases[0].sourceUrl).toBeUndefined();
+    expect(dep.releases[1].sourceUrl).toEqual(
+      'https://github.com/vuejs/vue-next.git'
+    );
+  });
+
+  it('does not override sourceDirectory', async () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 
     httpMock
@@ -280,7 +318,7 @@ describe('datasource/npm/get', () => {
         repository: {
           type: 'git',
           url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
-          directory: 'path/to/directory',
+          directory: 'packages/foo',
         },
         versions: { '1.0.0': {} },
         'dist-tags': { latest: '1.0.0' },
@@ -289,7 +327,7 @@ describe('datasource/npm/get', () => {
     const dep = await getDependency('@neutrinojs/react');
 
     expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep.sourceDirectory).toBe('packages/react');
+    expect(dep.sourceDirectory).toBe('packages/foo');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
       Array [
