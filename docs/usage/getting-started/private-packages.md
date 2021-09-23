@@ -180,6 +180,8 @@ You can add an `.npmrc` authentication line to your Renovate config under the fi
 ```
 
 If configured like this, Renovate will use this to authenticate with npm and will ignore any `.npmrc` files(s) it finds checked into the repository.
+If you wish for the values in your `config.npmrc` to be _merged_ (prepended) with any values found in repos then also set `config.npmrcMerge=true`.
+This merge approach is similar to how `npm` itself behaves if `.npmrc` is found in both the user home directory as well as a project.
 
 #### Add npmToken to Renovate config
 
