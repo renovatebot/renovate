@@ -152,14 +152,14 @@ describe('datasource/npm/get', () => {
     const npmrc = ``;
     hostRules.add({
       matchHost: 'https://registry.npmjs.org',
-      token: 'XXX',
+      token: 'abc',
       authType: 'Basic',
     });
 
     httpMock
       .scope('https://registry.npmjs.org', {
         reqheaders: {
-          authorization: 'Basic XXX',
+          authorization: 'Basic abc',
         },
       })
       .get('/renovate')
@@ -229,5 +229,122 @@ describe('datasource/npm/get', () => {
     expect(await getDependency('npm-error-402')).toBeNull();
 
     expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('massages non-compliant repository urls', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+
+    const dep = await getDependency('@neutrinojs/react');
+
+    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep.sourceDirectory).toBe('packages/react');
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": Object {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br",
+            "authorization": "Bearer XXX",
+            "host": "test.org",
+            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
+  });
+
+  it('warns about repo directory override', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+          directory: 'path/to/directory',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+
+    const dep = await getDependency('@neutrinojs/react');
+
+    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep.sourceDirectory).toBe('packages/react');
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": Object {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br",
+            "authorization": "Bearer XXX",
+            "host": "test.org",
+            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
+  });
+
+  it('does not massage non-github non-compliant repository urls', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+
+    const dep = await getDependency('@neutrinojs/react');
+
+    expect(dep.sourceUrl).toBe(
+      'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react'
+    );
+    expect(dep.sourceDirectory).toBeUndefined();
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": Object {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br",
+            "authorization": "Bearer XXX",
+            "host": "test.org",
+            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
   });
 });

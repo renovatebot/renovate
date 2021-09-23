@@ -453,8 +453,23 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'privateKeyOld',
+    description: 'Secondary/old private key to try.',
+    stage: 'repository',
+    type: 'string',
+    replaceLineReturns: true,
+    globalOnly: true,
+  },
+  {
     name: 'privateKeyPath',
     description: 'Path to the Server-side private key.',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
+    name: 'privateKeyPathOld',
+    description: 'Path to the Server-side old private key.',
     stage: 'repository',
     type: 'string',
     globalOnly: true,
@@ -573,6 +588,14 @@ const options: RenovateOptions[] = [
     description: 'String copy of npmrc file. Use \\n instead of line breaks.',
     stage: 'branch',
     type: 'string',
+  },
+  {
+    name: 'npmrcMerge',
+    description:
+      'Whether to merge config.npmrc with repo .npmrc content if both are found.',
+    stage: 'branch',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'npmToken',
@@ -1302,13 +1325,10 @@ const options: RenovateOptions[] = [
     default: 'automergeComment',
   },
   {
-    name: 'requiredStatusChecks',
-    description:
-      'List of status checks that must pass before automerging. Set to null to enable automerging without tests.',
-    type: 'array',
-    subType: 'string',
-    cli: false,
-    env: false,
+    name: 'ignoreTests',
+    description: 'Set to true to enable automerging without tests.',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'transitiveRemediation',
@@ -2038,6 +2058,13 @@ const options: RenovateOptions[] = [
     default: 'default',
     stage: 'repository',
     globalOnly: true,
+  },
+  {
+    name: 'writeDiscoveredRepos',
+    description: 'Writes discovered repositories to a JSON file and then exit.',
+    type: 'string',
+    globalOnly: true,
+    env: false,
   },
 ];
 
