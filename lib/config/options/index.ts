@@ -592,7 +592,7 @@ const options: RenovateOptions[] = [
   {
     name: 'npmrcMerge',
     description:
-      'Whether to merge config npmrc with repo .npmrc content if both are found.',
+      'Whether to merge config.npmrc with repo .npmrc content if both are found.',
     stage: 'branch',
     type: 'boolean',
     default: false,
