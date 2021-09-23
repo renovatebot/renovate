@@ -590,6 +590,14 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
+    name: 'npmrcMerge',
+    description:
+      'Whether to merge config npmrc with repo .npmrc content if both are found.',
+    stage: 'branch',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'npmToken',
     description: 'npm token used for authenticating with the default registry.',
     stage: 'branch',

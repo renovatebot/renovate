@@ -96,29 +96,33 @@ export async function extractPackageFile(
 
   let npmrc: string;
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
-  const npmrcContent = await readLocalFile(npmrcFileName, 'utf8');
-  if (is.string(npmrcContent)) {
-    if (is.string(config.npmrc)) {
+  let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
+  if (is.string(repoNpmrc)) {
+    if (is.string(config.npmrc) && !config.npmrcMerge) {
       logger.debug(
         { npmrcFileName },
-        'Repo .npmrc file is ignored due to presence of config.npmrc'
+        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=force'
       );
     } else {
-      npmrc = npmrcContent;
-      if (npmrc?.includes('package-lock')) {
-        logger.debug('Stripping package-lock setting from .npmrc');
-        npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
+      npmrc = config.npmrc || '';
+      if (npmrc.length) {
+        npmrc = npmrc.replace(/\n?$/, '\n');
       }
-      if (npmrc.includes('=${') && !getGlobalConfig().exposeAllEnv) {
+      if (repoNpmrc?.includes('package-lock')) {
+        logger.debug('Stripping package-lock setting from .npmrc');
+        repoNpmrc = repoNpmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
+      }
+      if (repoNpmrc.includes('=${') && !getGlobalConfig().exposeAllEnv) {
         logger.debug(
           { npmrcFileName },
           'Stripping .npmrc file of lines with variables'
         );
-        npmrc = npmrc
+        repoNpmrc = repoNpmrc
           .split('\n')
           .filter((line) => !line.includes('=${'))
           .join('\n');
       }
+      npmrc += repoNpmrc;
     }
   }
 

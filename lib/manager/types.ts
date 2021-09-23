@@ -20,6 +20,7 @@ export interface ExtractConfig {
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
+  npmrcMerge?: boolean;
   skipInstalls?: boolean;
   updateInternalDeps?: boolean;
   deepExtract?: boolean;

@@ -1232,6 +1232,13 @@ Typically you would encrypt it and put it inside the `encrypted` object.
 
 See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
 
+## npmrcMerge
+
+This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
+
+If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and therefore its values ignored.
+If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
+
 ## packageRules
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
