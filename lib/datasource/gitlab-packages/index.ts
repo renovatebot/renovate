@@ -1,5 +1,6 @@
 import { cache } from '../../util/cache/package/decorator';
 import { GitlabHttp } from '../../util/http/gitlab';
+import { HttpError } from '../../util/http/types';
 import { joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -66,18 +67,40 @@ export class GitlabPackagesDatasource extends Datasource {
       response = (
         await this.http.getJson<GitlabPackage[]>(apiUrl, { paginate: true })
       ).body;
-
-      result.releases = response
-        // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
-        // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
-        .filter((r) => r.name === packageName)
-        .map(({ version, created_at }) => ({
-          version,
-          releaseTimestamp: created_at,
-        }));
-    } catch (err) {
-      this.handleGenericErrors(err);
+    } catch (err1) {
+      if (err1 instanceof HttpError) {
+        // If the projects endpoint return 404, we can try with the groups endpoint, as we want
+        // to support both.
+        if (err1.response?.statusCode === 404) {
+          const groupApiUrl = apiUrl.replace(
+            'api/v4/projects',
+            'api/v4/groups'
+          );
+          try {
+            response = (
+              await this.http.getJson<GitlabPackage[]>(groupApiUrl, {
+                paginate: true,
+              })
+            ).body;
+          } catch (err2) {
+            this.handleGenericErrors(err1);
+          }
+        } else {
+          this.handleGenericErrors(err1);
+        }
+      } else {
+        this.handleGenericErrors(err1);
+      }
     }
+
+    result.releases = response
+      // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
+      // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
+      .filter((r) => r.name === packageName)
+      .map(({ version, created_at }) => ({
+        version,
+        releaseTimestamp: created_at,
+      }));
 
     return result.releases?.length ? result : null;
   }
