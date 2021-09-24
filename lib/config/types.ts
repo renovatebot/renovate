@@ -44,6 +44,7 @@ export interface RenovateSharedConfig {
   dependencyDashboardApproval?: boolean;
   hashedBranchLength?: number;
   npmrc?: string;
+  npmrcMerge?: boolean;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
