@@ -83,7 +83,7 @@ export class GitlabPackagesDatasource extends Datasource {
               })
             ).body;
           } catch (err2) {
-            this.handleGenericErrors(err1);
+            this.handleGenericErrors(err2);
           }
         } else {
           this.handleGenericErrors(err1);

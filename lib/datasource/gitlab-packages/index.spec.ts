@@ -152,5 +152,30 @@ describe('datasource/gitlab-packages/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
     });
+
+    it('throws for 5xx - groups endpoint', async () => {
+      httpMock
+        .scope('https://gitlab.com')
+        .get('/api/v4/projects/user%2Fgroup1/packages')
+        .query({
+          package_name: 'mypkg',
+          per_page: '100',
+        })
+        .reply(404)
+        .get('/api/v4/groups/user%2Fgroup1/packages')
+        .query({
+          package_name: 'mypkg',
+          per_page: '100',
+        })
+        .reply(502);
+
+      await expect(
+        getPkgReleases({
+          datasource,
+          registryUrls: ['https://gitlab.com'],
+          depName: 'user/group1:mypkg',
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
   });
 });
