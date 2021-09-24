@@ -271,7 +271,7 @@ If you have too many concurrent branches which rebase themselves each run, Renov
 Solutions:
 
 - Decrease the concurrent branch limit (note: this won't go and delete any existing, so won't have an effect until you either merge or close existing ones manually)
-- Remove automerge and/or automatic rebasing (set `rebaseWhen` to `conflicted`). However if you have branch protection saying PRs must be up to date then it's not ideal to remove automatic rebasing.
+- Remove automerge and/or automatic rebasing (set `rebaseWhen` to `conflicted`). However if you have branch protection saying PRs must be up to date then it's not ideal to remove automatic rebasing
 
 ## branchName
 
