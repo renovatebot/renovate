@@ -2,7 +2,13 @@
 
 exports[`datasource/aws-machine-image/index getReleases returns images from the aws api 1`] = `
 Object {
-  "releases": Array [],
+  "releases": Array [
+    Object {
+      "isDeprecated": false,
+      "releaseTimestamp": "2021-09-14T22:00:24.000Z",
+      "version": "ami-05f83986b0fe58ada",
+    },
+  ],
 }
 `;
 

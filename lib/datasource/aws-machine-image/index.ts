@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
+import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
-import { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import { GetReleasesConfig, ReleaseResult } from '../types';
 
+export const defaultVersioning = amazonMachineImageVersioning.id;
 export class AwsMachineImageDataSource extends Datasource {
   static readonly id = 'amazon-machine-image';
+
+  override readonly defaultVersioning = amazonMachineImageVersioning.id;
 
   readonly ec2: EC2Client;
 
@@ -31,20 +35,22 @@ export class AwsMachineImageDataSource extends Datasource {
         Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
     );
 
+    const latestImage = sortedImages.pop();
+
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(amiFilters, null, 2));
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(sortedImages, null, 2));
 
     const ret = {
-      releases: sortedImages.map(
-        (image): Release => ({
-          version: image.ImageId,
-          releaseTimestamp: image.CreationDate,
+      releases: [
+        {
+          version: latestImage.ImageId,
+          releaseTimestamp: latestImage.CreationDate,
           isDeprecated:
-            (Date.parse(image.DeprecationTime) ?? this.now) < this.now,
-        })
-      ),
+            (Date.parse(latestImage.DeprecationTime) ?? this.now) < this.now,
+        },
+      ],
     };
     console.log(JSON.stringify(ret, null, 2));
     return ret;
