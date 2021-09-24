@@ -21,6 +21,37 @@ export function resetCache(): void {
   resetMemCache();
 }
 
+interface PackageSource {
+  sourceUrl?: string;
+  sourceDirectory?: string;
+}
+
+function getPackageSource(repository: any): PackageSource {
+  const res: PackageSource = {};
+  if (repository) {
+    if (is.nonEmptyString(repository)) {
+      res.sourceUrl = repository;
+    } else if (is.nonEmptyString(repository.url)) {
+      res.sourceUrl = repository.url;
+    }
+    if (is.nonEmptyString(repository.directory)) {
+      res.sourceDirectory = repository.directory;
+    }
+    const sourceUrlCopy = `${res.sourceUrl}`;
+    const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
+    if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
+      // Massage the repository URL for non-compliant strings for github (see issue #4610)
+      // Remove the non-compliant segments of path, so the URL looks like "<scheme>://<domain>/<vendor>/<repo>"
+      // and add directory to the repository
+      res.sourceUrl = sourceUrlSplit.slice(0, 5).join('/');
+      res.sourceDirectory ||= sourceUrlSplit
+        .slice(7, sourceUrlSplit.length)
+        .join('/');
+    }
+  }
+  return res;
+}
+
 export async function getDependency(
   packageName: string
 ): Promise<NpmDependency | null> {
@@ -70,49 +101,19 @@ export async function getDependency(
     res.repository = res.repository || latestVersion.repository;
     res.homepage = res.homepage || latestVersion.homepage;
 
-    // Determine repository URL
-    let sourceUrl: string;
-
-    if (res.repository) {
-      if (is.string(res.repository)) {
-        sourceUrl = res.repository;
-      } else if (res.repository.url) {
-        sourceUrl = res.repository.url;
-      }
-    }
+    const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
 
     // Simplify response before caching and returning
     const dep: NpmDependency = {
       name: res.name,
       homepage: res.homepage,
       sourceUrl,
+      sourceDirectory,
       versions: {},
       releases: null,
       'dist-tags': res['dist-tags'],
       registryUrl,
     };
-    if (res.repository?.directory) {
-      dep.sourceDirectory = res.repository.directory;
-    }
-
-    // Massage the repository URL for non-compliant strings for github (see issue #4610)
-    // Remove the non-compliant segments of path, so the URL looks like "<scheme>://<domain>/<vendor>/<repo>"
-    // and add directory to the repository
-    const sourceUrlCopy = `${sourceUrl}`;
-    const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
-
-    if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
-      if (dep.sourceDirectory) {
-        logger.debug(
-          { dependency: packageName },
-          `Ambiguity: dependency has the repository URL path and repository/directory set at once; have to override repository/directory`
-        );
-      }
-      dep.sourceUrl = sourceUrlSplit.slice(0, 5).join('/');
-      dep.sourceDirectory = sourceUrlSplit
-        .slice(7, sourceUrlSplit.length)
-        .join('/');
-    }
 
     if (latestVersion.deprecated) {
       dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
@@ -130,6 +131,16 @@ export async function getDependency(
       }
       if (res.versions[version].deprecated) {
         release.isDeprecated = true;
+      }
+      const source = getPackageSource(res.versions[version].repository);
+      if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
+        release.sourceUrl = source.sourceUrl;
+      }
+      if (
+        source.sourceDirectory &&
+        source.sourceDirectory !== dep.sourceDirectory
+      ) {
+        release.sourceDirectory = source.sourceDirectory;
       }
       return release;
     });
