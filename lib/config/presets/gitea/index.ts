@@ -17,7 +17,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag: string
+  packageTag?: string
 ): Promise<Preset> {
   let res: RepoContents;
   try {
