@@ -2,6 +2,9 @@ import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
+const pipeRegex = /^\s* - pipe:\s*'?"?([^\s'"]+)'?"?\s*$/;
+const dockerImageRegex = /^\s*-?\s?image:\s*'?"?([^\s'"]+)'?"?\s*$/;
+
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
 
@@ -10,12 +13,12 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
 
-      const pipeMatch = /^\s* - pipe:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
+      const pipeMatch = pipeRegex.exec(line);
       if (pipeMatch) {
         const pipe = pipeMatch[1];
         const pipeSplit = pipe.split(':');
-        const depName = pipeSplit[0].trim();
-        const currentValue = pipeSplit[1].trim();
+        const depName = pipeSplit[0];
+        const currentValue = pipeSplit[1];
 
         const dep: PackageDependency = {
           depName,
@@ -34,9 +37,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
 
-      const dockerImageMatch = /^\s*-?\s?image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(
-        line
-      );
+      const dockerImageMatch = dockerImageRegex.exec(line);
       if (dockerImageMatch) {
         const currentFrom = dockerImageMatch[1];
         const dep = getDep(currentFrom);
