@@ -248,10 +248,11 @@ Configuring this to `true` means that Renovate will detect and apply the default
 
 ## branchConcurrentLimit
 
-By default, Renovate won't enforce any concurrent branch limits. If you want the same limit for both concurrent branches
-and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
-However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (
-e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
+By default, Renovate won't enforce any concurrent branch limits.
+The `config:base` preset that many extend from limits the amount of concurrent branches.
+
+If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
+However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
 
 This limit is enforced on a per-repository basis.
 
@@ -262,6 +263,15 @@ Example config:
   "branchConcurrentLimit": 3
 }
 ```
+
+Warning: increasing the `branchConcurrentLimit` increases the time it takes for Renovate to complete rebasing a PR branch when it's behind the target branch.
+If you find that Renovate is too slow when rebasing out-of-date branches, decrease the `branchConcurrentLimit`.
+
+If you have too many concurrent branches which rebase themselves each run, Renovate can take a lot of time to rebase.
+Solutions:
+
+- Decrease the concurrent branch limit (note: this won't go and delete any existing, so won't have an effect until you either merge or close existing ones manually)
+- Remove automerge and/or automatic rebasing (set `rebaseWhen` to `conflicted`). However if you have branch protection saying PRs must be up to date then it's not ideal to remove automatic rebasing.
 
 ## branchName
 
