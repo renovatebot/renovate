@@ -66,7 +66,8 @@ An additional benefit of using source code hosting is that the same token/authen
 | Local default with a tag           | `local>abc/foo#1.2.5`            | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.5.`       |
 | Local with preset path with a tag  | `local>abc/foo//path/xyz#1.2.5`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.5.`       |
 
-Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported. One workaround is to use distinct files instead of sub-presets.
+Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported.
+One workaround is to use distinct files instead of sub-presets.
 
 ## Example configs
 
