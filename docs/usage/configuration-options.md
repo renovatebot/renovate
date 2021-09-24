@@ -249,7 +249,7 @@ Configuring this to `true` means that Renovate will detect and apply the default
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.
-The `config:base` preset that many extend from limits the amount of concurrent branches.
+The `config:base` preset that many extend from limits the amount of concurrent branches to 20, but in most cases we would recommend lower values such as 5 or 10.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
 However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
@@ -264,7 +264,7 @@ Example config:
 }
 ```
 
-Warning: increasing the `branchConcurrentLimit` increases the time it takes for Renovate to complete rebasing a PR branch when it's behind the target branch.
+Warning: Leaving PRs/branches as unlimited or as a high number increases the time it takes for Renovate to process a repository.
 If you find that Renovate is too slow when rebasing out-of-date branches, decrease the `branchConcurrentLimit`.
 
 If you have too many concurrent branches which rebase themselves each run, Renovate can take a lot of time to rebase.
