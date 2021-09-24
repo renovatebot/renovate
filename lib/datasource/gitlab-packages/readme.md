@@ -37,3 +37,15 @@ NKJS_VERSION=3.4.0
 ```
 
 By default, `gitlab-packages` uses the `docker` versioning scheme.
+
+In order to reduce the risk of collision, it can be useful to filter by package type by using on of theses alternatives datasources instead of the `gitlab-packages` one:
+
+- `gitlab-packages-generic`
+- `gitlab-packages-conan`
+- `gitlab-packages-maven`
+- `gitlab-packages-npm`
+- `gitlab-packages-pypi`
+- `gitlab-packages-composer`
+- `gitlab-packages-nuget`
+- `gitlab-packages-helm`
+- `gitlab-packages-golang`

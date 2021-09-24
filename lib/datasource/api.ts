@@ -11,7 +11,10 @@ import * as gitRefs from './git-refs';
 import * as gitTags from './git-tags';
 import * as githubReleases from './github-releases';
 import * as githubTags from './github-tags';
-import { GitlabPackagesDatasource } from './gitlab-packages';
+import {
+  GitlabPackagesDatasource,
+  GitlabPackagesType,
+} from './gitlab-packages';
 import { GitlabReleasesDatasource } from './gitlab-releases';
 import * as gitlabTags from './gitlab-tags';
 import * as go from './go';
@@ -52,7 +55,46 @@ api.set('git-refs', gitRefs);
 api.set('git-tags', gitTags);
 api.set('github-releases', githubReleases);
 api.set('github-tags', githubTags);
-api.set('gitlab-packages', new GitlabPackagesDatasource());
+api.set(
+  'gitlab-packages',
+  new GitlabPackagesDatasource(GitlabPackagesType.None)
+);
+api.set(
+  'gitlab-packages-generic',
+  new GitlabPackagesDatasource(GitlabPackagesType.Generic)
+);
+api.set(
+  'gitlab-packages-conan',
+  new GitlabPackagesDatasource(GitlabPackagesType.Conan)
+);
+api.set(
+  'gitlab-packages-maven',
+  new GitlabPackagesDatasource(GitlabPackagesType.Maven)
+);
+api.set(
+  'gitlab-packages-npm',
+  new GitlabPackagesDatasource(GitlabPackagesType.Npm)
+);
+api.set(
+  'gitlab-packages-pypi',
+  new GitlabPackagesDatasource(GitlabPackagesType.Pypi)
+);
+api.set(
+  'gitlab-packages-composer',
+  new GitlabPackagesDatasource(GitlabPackagesType.Composer)
+);
+api.set(
+  'gitlab-packages-nuget',
+  new GitlabPackagesDatasource(GitlabPackagesType.Nuget)
+);
+api.set(
+  'gitlab-packages-helm',
+  new GitlabPackagesDatasource(GitlabPackagesType.Helm)
+);
+api.set(
+  'gitlab-packages-golang',
+  new GitlabPackagesDatasource(GitlabPackagesType.Golang)
+);
 api.set('gitlab-tags', gitlabTags);
 api.set(GitlabReleasesDatasource.id, new GitlabReleasesDatasource());
 api.set('go', go);

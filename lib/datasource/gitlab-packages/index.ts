@@ -8,6 +8,19 @@ import type { GitlabPackage } from './types';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
+export enum GitlabPackagesType {
+  None = '',
+  Generic = 'generic',
+  Conan = 'conan',
+  Maven = 'maven',
+  Npm = 'npm',
+  Pypi = 'pypi',
+  Composer = 'composer',
+  Nuget = 'nuget',
+  Helm = 'helm',
+  Golang = 'golang',
+}
+
 export class GitlabPackagesDatasource extends Datasource {
   static readonly id = datasource;
 
@@ -19,12 +32,15 @@ export class GitlabPackagesDatasource extends Datasource {
 
   override defaultRegistryUrls = ['https://gitlab.com'];
 
-  constructor() {
+  packageType: GitlabPackagesType;
+
+  constructor(packageType: GitlabPackagesType) {
     super(datasource);
     this.http = new GitlabHttp();
+    this.packageType = packageType;
   }
 
-  static getGitlabPackageApiUrl(
+  getGitlabPackageApiUrl(
     registryUrl: string,
     projectName: string,
     packageName: string
@@ -32,11 +48,17 @@ export class GitlabPackagesDatasource extends Datasource {
     const projectNameEncoded = encodeURIComponent(projectName);
     const packageNameEncoded = encodeURIComponent(packageName);
 
+    let extraArgs = '';
+
+    if (this.packageType !== GitlabPackagesType.None) {
+      extraArgs += '&package_type=' + this.packageType;
+    }
+
     return joinUrlParts(
       registryUrl,
       `api/v4/projects`,
       projectNameEncoded,
-      `packages?package_name=${packageNameEncoded}&per_page=100`
+      `packages?package_name=${packageNameEncoded}${extraArgs}&per_page=100`
     );
   }
 
@@ -51,7 +73,7 @@ export class GitlabPackagesDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [projectName, packageName] = lookupName.split(':', 2);
 
-    const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
+    const apiUrl = this.getGitlabPackageApiUrl(
       registryUrl,
       projectName,
       packageName
