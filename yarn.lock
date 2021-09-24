@@ -1512,10 +1512,10 @@
   dependencies:
     xregexp "4.4.1"
 
-"@renovatebot/parser-utils@0.0.2":
-  version "0.0.2"
-  resolved "https://npm.pkg.github.com/download/@renovatebot/parser-utils/0.0.2/1533ba41f3c8e7af8f99782f6434ffaff09591d18af5644a277e4e1a2811cd71#4b0e760458826cb12fcd737ee9683d3f512e30fd"
-  integrity sha512-JZw6yNpa9yQRRqWSt2lG135AsWIgbPaoGP0HLZ0bKTn/et5IN+L4yKqHQ5CQgzDQDAz8VaQRruu531C58E1f+A==
+"@renovatebot/parser-utils@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@renovatebot/parser-utils/-/parser-utils-0.0.4.tgz#b6208c081859099548409668c882da950040c10d"
+  integrity sha512-JIWim4gyZkTD1rzjtRiZm7Qk+Pv/LLWV4HFO2cL+E1VUbprOdi5czP8wwEULH1XIRV38BIPrB2Jxj7uZOFHrKg==
   dependencies:
     "@thi.ng/zipper" "1.0.3"
     "@types/moo" "0.5.5"

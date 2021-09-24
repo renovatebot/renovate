@@ -36,7 +36,6 @@ const config: InitialOptionsTsJest = {
       isolatedModules: true,
     },
   },
-  transformIgnorePatterns: ['@renovate/parser-utils'],
 };
 
 export default config;
