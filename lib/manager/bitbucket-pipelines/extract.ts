@@ -16,9 +16,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const pipeMatch = pipeRegex.exec(line);
       if (pipeMatch) {
         const pipe = pipeMatch[1];
-        const pipeSplit = pipe.split(':');
-        const depName = pipeSplit[0];
-        const currentValue = pipeSplit[1];
+        const [ depName, currentValue ] = pipe.split(':');
 
         const dep: PackageDependency = {
           depName,
