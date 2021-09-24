@@ -10,8 +10,7 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   try {
     const lines = content.split('\n');
-    for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      const line = lines[lineNumber];
+    for (const line of lines) {
 
       const pipeMatch = pipeRegex.exec(line);
       if (pipeMatch) {
