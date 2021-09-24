@@ -23,7 +23,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           datasource: 'bitbucket-tags',
         };
 
-        logger.debug(
+        logger.trace(
           {
             depName: dep.depName,
             currentValue: dep.currentValue,
@@ -41,7 +41,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         const currentFrom = dockerImageMatch[1];
         const dep = getDep(currentFrom);
 
-        logger.debug(
+        logger.trace(
           {
             depName: dep.depName,
             currentValue: dep.currentValue,

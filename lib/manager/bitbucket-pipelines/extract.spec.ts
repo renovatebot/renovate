@@ -1,5 +1,4 @@
 import { loadFixture } from '../../../test/util';
-
 import { extractPackageFile } from './extract';
 
 const bitbucketPipelinesYAML = loadFixture('bitbucket-pipelines.yaml');
