@@ -337,7 +337,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     matchers: [
       {
         matchType: TokenType.Word,
-        matchValue: ['mavenCentral', 'jcenter', 'google'],
+        matchValue: ['mavenCentral', 'jcenter', 'google', 'gradlePluginPortal'],
         tokenMapKey: 'registryName',
       },
       { matchType: TokenType.LeftParen },
