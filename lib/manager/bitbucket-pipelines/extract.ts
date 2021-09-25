@@ -11,11 +11,10 @@ export function extractPackageFile(content: string): PackageFile | null {
   try {
     const lines = content.split('\n');
     for (const line of lines) {
-
       const pipeMatch = pipeRegex.exec(line);
       if (pipeMatch) {
         const pipe = pipeMatch[1];
-        const [ depName, currentValue ] = pipe.split(':');
+        const [depName, currentValue] = pipe.split(':');
 
         const dep: PackageDependency = {
           depName,
