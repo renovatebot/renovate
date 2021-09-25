@@ -12,6 +12,12 @@ Keep in mind that Renovate automerges take a bit of time, do not expect Renovate
 Wait for at least an hour or two before troubleshooting to ensure that Renovate has had the time to run once in a state where tests have passed and the branch is up-to-date with its base branch.
 If you or others keep committing to the default branch then Renovate cannot find a suitable gap to automerge into!
 
+Once a branch is automerged, the "Git state" needs to be recalculated for every remaining branch.
+At times, merging one branch could result in another branch's updates being changed or even removed as unnecessary.
+Our process is that automerging branches need to be up-to-date with their target branch before automerging.
+Therefore merging multiple branches in a row won't reliably work, we prefer not to do that.
+What all this means is that Renovate will only automerge one or two updates at once, before you need to wait for the next run.
+
 As a general guide, we recommend that you enable automerge for any type of dependency updates where you would just click "merge" anyway.
 For any updates where you want to review the release notes - or code - before you merge, you can keep automerge disabled.
 
