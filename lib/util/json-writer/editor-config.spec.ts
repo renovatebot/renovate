@@ -1,26 +1,14 @@
 import mock from 'mock-fs';
+import { loadFixture } from '../../../test/util';
 import { configFileNames } from '../../config/app-strings';
 import { EditorConfig } from './editor-config';
 import { IndentationType } from './indentation-type';
 
 const defaultConfigFile = configFileNames[0];
 
-const GLOBAL_EDITOR_CONFIG = `
-  [*]
-  indent_style = space
-  indent_size = 6
-`;
-
-const JSON_FILES_EDITOR_CONFIG = `
-  [*.json]
-  indent_style = tab
-`;
-
-const NON_JSON_FILES_EDITOR_CONFIG = `
-  [*.py]
-  indent_style = space
-  indent_size = 6
-`;
+const GLOBAL_EDITOR_CONFIG = loadFixture('.global_editorconfig', '.');
+const JSON_FILES_EDITOR_CONFIG = loadFixture('.json_editorconfig', '.');
+const NON_JSON_FILES_EDITOR_CONFIG = loadFixture('.non_json_editorconfig', '.');
 
 describe('util/json-writer/editor-config', () => {
   afterEach(() => {
