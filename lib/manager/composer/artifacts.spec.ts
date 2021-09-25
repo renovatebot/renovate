@@ -120,6 +120,11 @@ describe('manager/composer/artifacts', () => {
       username: 'some-other-username',
       password: 'some-other-password',
     });
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      matchHost: 'https://packages-bearer.example.com/',
+      token: 'abcdef0123456789',
+    });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
