@@ -4,7 +4,13 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
-import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO, TokenType } from './common';
+import {
+  GOOGLE_REPO,
+  GRADLE_PLUGIN_PORTAL_REPO,
+  JCENTER_REPO,
+  MAVEN_REPO,
+  TokenType,
+} from './common';
 import { tokenize } from './tokenizer';
 import type {
   MatchConfig,
@@ -215,6 +221,7 @@ function processPredefinedRegistryUrl({
     mavenCentral: MAVEN_REPO,
     jcenter: JCENTER_REPO,
     google: GOOGLE_REPO,
+    gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
   return { urls: [registryUrl] };
 }
