@@ -284,5 +284,20 @@ describe('manager/dockerfile/extract', () => {
     it('rejects null', () => {
       expect(getDep(null)).toEqual({ skipReason: 'invalid-value' });
     });
+
+    it('handles default environment variable values', () => {
+      // eslint-disable-next-line no-template-curly-in-string
+      const res = getDep('${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}');
+      expect(res).toMatchInlineSnapshot(`
+Object {
+  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+  "currentDigest": "abcd",
+  "currentValue": "5.0.0",
+  "datasource": "docker",
+  "depName": "redis",
+  "replaceString": "\${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}",
+}
+`);
+    });
   });
 });

@@ -7,6 +7,24 @@ import type { PackageDependency, PackageFile } from '../types';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
+    // Check if the variable contains default value, and if so return
+    // it as a valid dependency
+    const variableRegex = /^\$\{(.+):-(.+):(.+)@sha256:(.+)\}$/i;
+    const match = variableRegex.exec(currentFrom);
+    if (match) {
+      const depName = match[2];
+      const currentValue = match[3];
+      const currentDigest = match[4];
+      const dep = {
+        depName,
+        currentValue,
+        currentDigest,
+        datasource: 'docker',
+      };
+
+      return dep;
+    }
+
     return {
       skipReason: SkipReason.ContainsVariable,
     };
