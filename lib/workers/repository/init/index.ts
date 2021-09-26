@@ -32,7 +32,7 @@ export async function initRepo(
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);
   config = applySecretsToConfig(config);
-  await setUserRepoConfig(config);
+  setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {
