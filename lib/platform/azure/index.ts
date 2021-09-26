@@ -12,6 +12,7 @@ import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
+import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';
@@ -150,7 +151,7 @@ export async function initRepo({
   // istanbul ignore if
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
-    throw new Error(REPOSITORY_EMPTY);
+    throw new RepositoryError(repository, REPOSITORY_EMPTY);
   }
   config.repoId = repo.id;
   config.project = repo.project.name;

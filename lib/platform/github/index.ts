@@ -63,6 +63,7 @@ import {
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
+import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
 
 const githubApi = new githubHttp.GithubHttp();
 
@@ -208,7 +209,7 @@ export async function initRepo({
     }
     // istanbul ignore if
     if (!repo.defaultBranchRef?.name) {
-      throw new Error(REPOSITORY_EMPTY);
+      throw new RepositoryError(repository, REPOSITORY_EMPTY);
     }
     if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(

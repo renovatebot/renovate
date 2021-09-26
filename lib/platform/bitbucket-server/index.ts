@@ -49,6 +49,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
+import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -180,7 +181,7 @@ export async function initRepo({
 
     // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
     if ([204, 404].includes(branchRes.statusCode)) {
-      throw new Error(REPOSITORY_EMPTY);
+      throw new RepositoryError(repository, REPOSITORY_EMPTY);
     }
 
     let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');

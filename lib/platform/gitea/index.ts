@@ -37,6 +37,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 import { smartLinks } from './utils';
+import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -263,7 +264,7 @@ const platform: Platform = {
     }
     if (repo.empty) {
       logger.debug('Repository is empty - throwing error to abort renovation');
-      throw new Error(REPOSITORY_EMPTY);
+      throw new RepositoryError(repository, REPOSITORY_EMPTY);
     }
 
     if (repo.allow_rebase) {

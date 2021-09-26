@@ -52,6 +52,7 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
+import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
 
 let config: {
   repository: string;
@@ -265,7 +266,7 @@ export async function initRepo({
       throw new Error(REPOSITORY_DISABLED);
     }
     if (res.body.default_branch === null || res.body.empty_repo) {
-      throw new Error(REPOSITORY_EMPTY);
+      throw new RepositoryError(config.repository, REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
     // istanbul ignore if
@@ -290,7 +291,7 @@ export async function initRepo({
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
-      throw new Error(REPOSITORY_EMPTY);
+      throw new RepositoryError(config.repository, REPOSITORY_EMPTY);
     }
     if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
       throw err;
