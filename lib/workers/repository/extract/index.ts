@@ -63,7 +63,7 @@ export async function extractAllDependencies(
     for (const enabledManager of config.enabledManagers) {
       if (
         !(enabledManager in extractResults) ||
-        extractResults[enabledManager].length === 0
+        /* istanbul ignore next */ extractResults[enabledManager].length === 0
       ) {
         logger.warn(
           `Manager ${enabledManager} is listed in enabledManagers config key, but found no packages for it; consider removing it from enabledManagers`
