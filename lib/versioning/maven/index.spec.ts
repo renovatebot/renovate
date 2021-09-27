@@ -1,9 +1,13 @@
-import maven from '.';
+import maven, { isValid as _isValid } from '.';
 
 const { isValid, isVersion, isStable, getMajor, getMinor, getPatch, matches } =
   maven;
 
 describe('versioning/maven/index', () => {
+  it('uses same function module export and api object', () => {
+    expect(isValid).toBe(_isValid);
+  });
+
   test.each`
     version              | expected
     ${'1.0.0'}           | ${true}
