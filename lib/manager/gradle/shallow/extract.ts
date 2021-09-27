@@ -98,20 +98,25 @@ export async function extractAllPackageFiles(
   }
 
   elevateFileReplacePositionField(extractedDeps).forEach((dep) => {
-    const key = dep.managerData.packageFile;
-    const pkgFile: PackageFile = packageFilesByName[key];
-    const { deps } = pkgFile;
-    deps.push({
-      ...dep,
-      registryUrls: [
-        ...new Set([
-          ...defaultRegistryUrls,
-          ...(dep.registryUrls || []),
-          ...registryUrls,
-        ]),
-      ],
-    });
-    packageFilesByName[key] = pkgFile;
+    const key = dep.managerData?.packageFile;
+    // istanbul ignore else
+    if (key) {
+      const pkgFile: PackageFile = packageFilesByName[key];
+      const { deps } = pkgFile;
+      deps.push({
+        ...dep,
+        registryUrls: [
+          ...new Set([
+            ...defaultRegistryUrls,
+            ...(dep.registryUrls || []),
+            ...registryUrls,
+          ]),
+        ],
+      });
+      packageFilesByName[key] = pkgFile;
+    } else {
+      logger.warn({ dep }, `Failed to process Gradle dependency`);
+    }
   });
 
   return Object.values(packageFilesByName);

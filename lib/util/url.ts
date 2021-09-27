@@ -6,7 +6,7 @@ export function joinUrlParts(...parts: string[]): string {
 
 export function ensurePathPrefix(url: string, prefix: string): string {
   const parsed = new URL(url);
-  const fullPath = url.replace(parsed.origin, '');
+  const fullPath = parsed.pathname + parsed.search;
   if (fullPath.startsWith(prefix)) {
     return url;
   }

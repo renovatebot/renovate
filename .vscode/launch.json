@@ -22,7 +22,7 @@
       "args": [
         "--runInBand",
         "--collectCoverage=false",
-        "--testTimeout 100000000",
+        "--testTimeout=100000000",
         "--runTestsByPath",
         "${relativeFile}"
       ],
@@ -46,7 +46,7 @@
       "args": [
         "--runInBand",
         "--collectCoverage=false",
-        "--testTimeout 100000000"
+        "--testTimeout=100000000"
       ],
       "env": {
         "NODE_ENV": "test",
@@ -73,7 +73,7 @@
         "jest",
         "--runInBand",
         "--watchAll=false",
-        "--testTimeout 100000000"
+        "--testTimeout=100000000"
       ]
     }
   ]
