@@ -1,5 +1,5 @@
-FROM containerbase/node:14.16.1@sha256:1ae9b66d0c6c36cb9993c0dd939dfb5b09553bc26798b51f3c723e0aaa7c653c
+FROM containerbase/node:14.17.6@sha256:449af722795fbfec2c8ee00724fea3b1b5a4bbd7bdfecfaf783fa746be48ba19
 
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.10
+RUN install-tool yarn 1.22.11

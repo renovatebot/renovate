@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { id as datasource, parseRegistryUrl } from '.';
@@ -90,7 +90,7 @@ const configV3Multiple = {
   ],
 };
 
-describe(getName(), () => {
+describe('datasource/nuget/index', () => {
   describe('parseRegistryUrl', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -134,11 +134,6 @@ describe(getName(), () => {
       jest.resetAllMocks();
       hostRules.hosts.mockReturnValue([]);
       hostRules.find.mockReturnValue({});
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it(`can't detect nuget feed version`, async () => {

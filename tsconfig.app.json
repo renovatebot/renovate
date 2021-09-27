@@ -16,6 +16,7 @@
     "**/__mocks__/**",
     "**/__fixtures__/**",
     "**/__testutil__/**",
+    "**/test/**",
     "**/*.spec.ts",
     "jest.config.ts",
     "./test",

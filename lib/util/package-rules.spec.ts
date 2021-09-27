@@ -7,7 +7,7 @@ import {
 } from '../constants/languages';
 
 import * as datasourceDocker from '../datasource/docker';
-import * as datasourceOrb from '../datasource/orb';
+import { OrbDatasource } from '../datasource/orb';
 import { applyPackageRules } from './package-rules';
 
 type TestConfig = PackageRuleInputConfig & {
@@ -16,7 +16,7 @@ type TestConfig = PackageRuleInputConfig & {
   groupName?: string;
 };
 
-describe('applyPackageRules()', () => {
+describe('util/package-rules', () => {
   const config1: TestConfig = {
     foo: 'bar',
 
@@ -70,6 +70,7 @@ describe('applyPackageRules()', () => {
         },
       ],
     };
+    // FIXME: explicit assert condition
     expect(applyPackageRules(config)).toMatchSnapshot();
   });
   it('applies both rules for a', () => {
@@ -318,14 +319,14 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [datasourceOrb.id, datasourceDocker.id],
+          matchDatasources: [OrbDatasource.id, datasourceDocker.id],
           x: 1,
         },
       ],
     };
     const dep = {
       depType: 'dependencies',
-      datasource: datasourceOrb.id,
+      datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -342,7 +343,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      datasource: datasourceOrb.id,
+      datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -352,7 +353,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [datasourceOrb.id],
+          matchDatasources: [OrbDatasource.id],
           x: 1,
         },
       ],
@@ -710,8 +711,28 @@ describe('applyPackageRules()', () => {
     expect(res3.x).toBeDefined();
   });
   it('empty rules', () => {
+    // FIXME: explicit assert condition
     expect(
       applyPackageRules({ ...config1, packageRules: null })
     ).toMatchSnapshot();
+  });
+
+  it('creates groupSlug if necessary', () => {
+    const config: TestConfig = {
+      depName: 'foo',
+      packageRules: [
+        {
+          matchPackagePatterns: ['*'],
+          groupName: 'A',
+          groupSlug: 'a',
+        },
+        {
+          matchPackagePatterns: ['*'],
+          groupName: 'B',
+        },
+      ],
+    };
+    const res = applyPackageRules(config);
+    expect(res.groupSlug).toEqual('b');
   });
 });

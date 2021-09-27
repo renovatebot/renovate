@@ -3,10 +3,8 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { UpdateArtifactsConfig } from '../types';
@@ -24,27 +22,30 @@ const env = mocked(_env);
 
 const config: UpdateArtifactsConfig = {};
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
 };
 
-describe('.updateArtifacts()', () => {
-  beforeEach(async () => {
+describe('manager/cargo/artifacts', () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    await setExecConfig(adminConfig as never);
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
   it('returns null if no Cargo.lock found', async () => {
     fs.stat.mockRejectedValue(new Error('not found!'));
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -70,7 +71,11 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
 
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -86,7 +91,33 @@ describe('.updateArtifacts()', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('updates Cargo.lock based on the lookupName, when given', async () => {
+    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    const updatedDeps = [
+      {
+        depName: 'renamedDep1',
+        lookupName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -106,7 +137,11 @@ describe('.updateArtifacts()', () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'crates/one/Cargo.toml',
@@ -136,12 +171,15 @@ describe('.updateArtifacts()', () => {
 
   it('returns updated Cargo.lock with docker', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -158,7 +196,11 @@ describe('.updateArtifacts()', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    const updatedDeps = ['dep1'];
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -166,6 +208,8 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'Cargo.lock', stderr: 'not found' } },
+    ]);
   });
 });

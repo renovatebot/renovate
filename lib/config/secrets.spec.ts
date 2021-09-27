@@ -1,11 +1,11 @@
-import { defaultConfig, getName } from '../../test/util';
+import { defaultConfig } from '../../test/util';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
 } from '../constants/error-messages';
 import { applySecretsToConfig, validateConfigSecrets } from './secrets';
 
-describe(getName(), () => {
+describe('config/secrets', () => {
   describe('validateConfigSecrets(config)', () => {
     it('works with default config', () => {
       expect(() => validateConfigSecrets(defaultConfig)).not.toThrow();
@@ -48,7 +48,7 @@ describe(getName(), () => {
       const config = {
         prTitle: '{{ secrets.ARTIFACTORY_TOKEN }}',
         secrets: {
-          ARTIFACTORY_TOKEN: 'abc123==',
+          ARTIFACTORY_TOKEN: '123test==',
         },
       };
       expect(() => applySecretsToConfig(config)).toThrow(CONFIG_VALIDATION);
@@ -61,7 +61,7 @@ describe(getName(), () => {
     });
     it('replaces secrets in the top level', () => {
       const config = {
-        secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
         npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',
       };
       const res = applySecretsToConfig(config);
@@ -70,7 +70,7 @@ describe(getName(), () => {
     });
     it('replaces secrets in a subobject', () => {
       const config = {
-        secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
         npm: { npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}' },
       };
       const res = applySecretsToConfig(config);
@@ -79,7 +79,7 @@ describe(getName(), () => {
     });
     it('replaces secrets in a array of objects', () => {
       const config = {
-        secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
         hostRules: [
           { hostType: 'npm', token: '{{ secrets.ARTIFACTORY_TOKEN }}' },
         ],

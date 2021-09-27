@@ -1,3 +1,4 @@
+import type { MergeStrategy } from '../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../types';
 
 type VulnerabilityKey = string;
@@ -13,12 +14,13 @@ export interface PlatformParams {
   token?: string;
   username?: string;
   password?: string;
+  gitAuthor?: string;
 }
 
 export interface PlatformResult {
   endpoint: string;
-  renovateUsername?: any;
-  gitAuthor?: any;
+  renovateUsername?: string;
+  gitAuthor?: string;
 }
 
 export interface RepoResult {
@@ -26,9 +28,12 @@ export interface RepoResult {
   isFork: boolean;
 }
 
+export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
+
 export interface RepoParams {
   repository: string;
   endpoint?: string;
+  gitUrl?: GitUrlOption;
   forkMode?: string;
   forkToken?: string;
   includeForks?: boolean;
@@ -77,6 +82,7 @@ export type PlatformPrOptions = {
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabAutomerge?: boolean;
+  gitLabIgnoreApprovals?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -98,6 +104,7 @@ export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
   body: string;
+  labels?: string[];
   once?: boolean;
   shouldReOpen?: boolean;
 }
@@ -113,6 +120,11 @@ export interface FindPRConfig {
   prTitle?: string | null;
   state?: PrState.Open | PrState.Closed | PrState.NotOpen | PrState.All;
   refreshCache?: boolean;
+}
+export interface MergePRConfig {
+  branchName?: string;
+  id: number;
+  strategy?: MergeStrategy;
 }
 export interface EnsureCommentConfig {
   number: number;
@@ -139,6 +151,7 @@ export type EnsureIssueResult = 'updated' | 'created';
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
+  getIssue?(number: number, useCache?: boolean): Promise<Issue>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   getRawFile(fileName: string, repo?: string): Promise<string | null>;
   getJsonFile(fileName: string, repo?: string): Promise<any | null>;
@@ -150,7 +163,7 @@ export interface Platform {
   ): Promise<EnsureIssueResult | null>;
   massageMarkdown(prBody: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
-  mergePr(number: number, branchName: string): Promise<boolean>;
+  mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr>;
@@ -171,10 +184,7 @@ export interface Platform {
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;
-  getBranchStatus(
-    branchName: string,
-    requiredStatusChecks?: string[] | null
-  ): Promise<BranchStatus>;
+  getBranchStatus(branchName: string): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;

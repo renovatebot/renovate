@@ -2,20 +2,24 @@ import URL from 'url';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
-import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
-import * as bitbucket from '../bitbucket-tags';
+import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { http } from './common';
+import * as goproxy from './goproxy';
 import type { DataSource } from './types';
 
-export const id = 'go';
+export { id } from './common';
+
 export const customRegistrySupport = false;
 
-const http = new Http(id);
-const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
+const gitlabHttpsRegExp =
+  /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)[/]?$/;
+const gitlabRegExp = /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)[/]?$/;
+const bitbucket = new BitBucketTagsDatasource();
 
 async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (goModule.startsWith('gopkg.in/')) {
@@ -66,12 +70,24 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
           .replace(/\/$/, ''),
       };
     }
-    const gitlabRes = gitlabRegExp.exec(goSourceUrl);
-    if (gitlabRes) {
+    const gitlabUrl =
+      gitlabHttpsRegExp.exec(goSourceUrl)?.groups?.httpsRegExpUrl;
+    const gitlabUrlName =
+      gitlabHttpsRegExp.exec(goSourceUrl)?.groups?.httpsRegExpName;
+    const gitlabModuleName = gitlabRegExp.exec(goModule)?.groups?.regExpPath;
+
+    if (gitlabUrl && gitlabUrlName) {
+      if (gitlabModuleName?.startsWith(gitlabUrlName)) {
+        return {
+          datasource: gitlab.id,
+          registryUrl: gitlabUrl,
+          lookupName: gitlabModuleName,
+        };
+      }
       return {
         datasource: gitlab.id,
-        registryUrl: gitlabRes[1],
-        lookupName: gitlabRes[2].replace(/\/$/, ''),
+        registryUrl: gitlabUrl,
+        lookupName: gitlabUrlName,
       };
     }
 
@@ -141,9 +157,19 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  *  - Call the respective getReleases in github/gitlab to retrieve the tags
  *  - Filter module tags according to the module path
  */
-export async function getReleases({
-  lookupName,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { lookupName } = config;
+
+  let res: ReleaseResult = null;
+
+  logger.trace(`goproxy.getReleases(${lookupName})`);
+  res = await goproxy.getReleases(config);
+  if (res) {
+    return res;
+  }
+
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
 
@@ -154,8 +180,6 @@ export async function getReleases({
     );
     return null;
   }
-
-  let res: ReleaseResult;
 
   switch (source.datasource) {
     case github.id: {
@@ -189,7 +213,7 @@ export async function getReleases({
   const nameParts = lookupName.replace(/\/v\d+$/, '').split('/');
   logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
 
-  // If it has more than 3 parts it's a submodule
+  // If it has more than 3 parts it's a submodule or subgroup (gitlab only)
   if (nameParts.length > 3) {
     const prefix = nameParts.slice(3, nameParts.length).join('/');
     logger.trace(`go.getReleases.prefix:${prefix}`);
@@ -205,10 +229,18 @@ export async function getReleases({
       });
     logger.trace({ submodReleases }, 'go.getReleases');
 
-    return {
-      sourceUrl: res.sourceUrl,
-      releases: submodReleases,
-    };
+    // If not from gitlab -> no subgroups -> must be submodule
+    // If from gitlab and directory one level above has tags -> has to be submodule, since groups can't have tags
+    // If not, it's simply a repo in a subfolder, and the normal tags are used.
+    if (
+      !(source.datasource === gitlab.id) ||
+      (source.datasource === gitlab.id && submodReleases.length)
+    ) {
+      return {
+        sourceUrl: res.sourceUrl,
+        releases: submodReleases,
+      };
+    }
   }
 
   if (res.releases) {

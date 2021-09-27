@@ -31,6 +31,7 @@ export async function getChangeLogJSON({
   currentVersion,
   newVersion,
   sourceUrl,
+  sourceDirectory,
   releases,
   depName,
   manager,
@@ -67,7 +68,10 @@ export async function getChangeLogJSON({
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
-  const repository = pathname.slice(1).replace(/\/$/, '');
+  const repository = pathname
+    .slice(1)
+    .replace(/\/$/, '')
+    .replace(/\.git$/, '');
   if (repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
@@ -153,8 +157,10 @@ export async function getChangeLogJSON({
     project: {
       apiBaseUrl,
       baseUrl,
-      github: repository,
-      repository: sourceUrl,
+      type: 'github',
+      repository,
+      sourceUrl,
+      sourceDirectory,
       depName,
     },
     versions: changelogReleases,

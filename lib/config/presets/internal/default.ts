@@ -33,6 +33,12 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  enablePreCommit: {
+    description: 'Enable the pre-commit manager',
+    'pre-commit': {
+      enabled: true,
+    },
+  },
   ignoreModulesAndTests: {
     description:
       'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories',
@@ -310,11 +316,11 @@ export const presets: Record<string, Preset> = {
   },
   automergeRequireAllStatusChecks: {
     description: 'Require all status checks to pass before any automerging',
-    requiredStatusChecks: [],
+    ignoreTests: false,
   },
   skipStatusChecks: {
     description: 'Skip status checks and automerge right away',
-    requiredStatusChecks: null,
+    ignoreTests: true,
   },
   maintainLockFilesDisabled: {
     description:
@@ -378,7 +384,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   automergeTypes: {
-    description: 'Update @types/* packages automatically if tests pass',
+    description: 'Update `@types/*` packages automatically if tests pass',
     packageRules: [
       {
         matchPackagePrefixes: ['@types/'],
@@ -523,6 +529,10 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Renovate Dependency Dashboard creation',
     dependencyDashboard: true,
   },
+  disableDependencyDashboard: {
+    description: 'Disable Renovate Dependency Dashboard creation',
+    dependencyDashboard: false,
+  },
   dependencyDashboardApproval: {
     description: 'Enable Renovate Dependency Dashboard approval workflow',
     dependencyDashboardApproval: true,
@@ -552,7 +562,8 @@ export const presets: Record<string, Preset> = {
     ],
   },
   githubComToken: {
-    description: 'Use provided token for github.com lookups',
+    description:
+      'Use provided token for github.com lookups. Do not configure this if you are already running on github.com',
     hostRules: [
       {
         matchHost: 'github.com',
@@ -566,20 +577,5 @@ export const presets: Record<string, Preset> = {
     description: 'Remove the checkbox controls from PRs',
     prBodyTemplate:
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
-  },
-  enableGradleLite: {
-    description: 'Enable the gradle-lite manager',
-    'gradle-lite': {
-      enabled: true,
-    },
-  },
-  switchToGradleLite: {
-    description: 'Enable the gradle-lite manager and disable gradle',
-    gradle: {
-      enabled: false,
-    },
-    'gradle-lite': {
-      enabled: true,
-    },
   },
 };

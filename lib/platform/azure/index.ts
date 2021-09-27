@@ -24,6 +24,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -179,8 +180,6 @@ export async function initRepo({
     ...config,
     url,
     extraCloneOpts: getStorageExtraCloneOpts(opts),
-    gitAuthorName: global.gitAuthor?.name,
-    gitAuthorEmail: global.gitAuthor?.email,
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
@@ -332,19 +331,9 @@ export async function getBranchStatusCheck(
 }
 
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks: string[]
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   const statuses = await getStatusCheck(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
@@ -608,10 +597,10 @@ export async function setBranchStatus({
   logger.trace(`Created commit status of ${state} on branch ${branchName}`);
 }
 
-export async function mergePr(
-  pullRequestId: number,
-  branchName: string
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: pullRequestId,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
   const azureApiGit = await azureApi.gitApi();
 

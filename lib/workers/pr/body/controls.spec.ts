@@ -1,11 +1,11 @@
 import { mock } from 'jest-mock-extended';
-import { getName, git } from '../../../../test/util';
+import { git } from '../../../../test/util';
 import { BranchConfig } from '../../types';
 import { getControls } from './controls';
 
 jest.mock('../../../util/git');
 
-describe(getName(), () => {
+describe('workers/pr/body/controls', () => {
   describe('getControls', () => {
     let branchConfig: BranchConfig;
     beforeEach(() => {
@@ -19,6 +19,7 @@ describe(getName(), () => {
           git.isBranchModified.mockResolvedValue(modified);
         });
         it('has the correct contents', async () => {
+          // FIXME: explicit assert condition
           expect(await getControls(branchConfig)).toMatchSnapshot();
           expect(git.isBranchModified).toHaveBeenCalledTimes(1);
           expect(git.isBranchModified).toHaveBeenCalledWith(

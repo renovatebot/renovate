@@ -21,6 +21,7 @@ export interface GroupConfig extends Record<string, unknown> {
 export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
+  automergeStrategy?: MergeStrategy;
   branchPrefix?: string;
   branchName?: string;
   manager?: string;
@@ -37,11 +38,13 @@ export interface RenovateSharedConfig {
   includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
+  ignoreTests?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
   hashedBranchLength?: number;
   npmrc?: string;
+  npmrcMerge?: boolean;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
@@ -54,7 +57,6 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
-  requiredStatusChecks?: string[];
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string;
@@ -79,24 +81,28 @@ export interface GlobalOnlyConfig {
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
+  privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }
 
 // Config options used within the repository worker, but not user configurable
-// The below should contain config options where admin=true
-export interface RepoAdminConfig {
+// The below should contain config options where globalOnly=true
+export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
+  binarySource?: 'docker' | 'global';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
   exposeAllEnv?: boolean;
-  privateKey?: string | Buffer;
+  migratePresets?: Record<string, string>;
+  privateKey?: string;
+  privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
 }
@@ -175,10 +181,12 @@ export interface RenovateConfig
   dependencyDashboard?: boolean;
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
+  dependencyDashboardIssue?: number;
   dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
+  dependencyDashboardLabels?: string[];
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
@@ -199,7 +207,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 }
 
-export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
+export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
@@ -224,6 +232,13 @@ export type UpdateType =
   | 'bump';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
+
+export type MergeStrategy =
+  | 'auto'
+  | 'fast-forward'
+  | 'merge-commit'
+  | 'rebase'
+  | 'squash';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -258,7 +273,7 @@ export interface RenovateOptionBase {
    * If true, the option can only be configured by people with access to the Renovate instance.
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
-  admin?: boolean;
+  globalOnly?: boolean;
 
   allowedValues?: string[];
 
@@ -361,15 +376,6 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
-}
-
-export interface ManagerConfig extends RenovateConfig {
-  language: string;
-  manager: string;
-}
-
-export interface RenovateCliConfig extends Record<string, any> {
-  repositories?: string[];
 }
 
 export interface MigratedConfig {

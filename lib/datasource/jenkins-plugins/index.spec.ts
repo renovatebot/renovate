@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadJsonFixture } from '../../../test/util';
+import { loadJsonFixture } from '../../../test/util';
 import * as versioning from '../../versioning/docker';
 import { resetCache } from './get';
 import * as jenkins from '.';
@@ -8,7 +8,7 @@ import * as jenkins from '.';
 const jenkinsPluginsVersions = loadJsonFixture('plugin-versions.json');
 const jenkinsPluginsInfo = loadJsonFixture('update-center.actual.json');
 
-describe(getName(), () => {
+describe('datasource/jenkins-plugins/index', () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 
@@ -21,7 +21,6 @@ describe(getName(), () => {
 
     beforeEach(() => {
       resetCache();
-      httpMock.setup();
       process.env.RENOVATE_SKIP_CACHE = 'true';
       jest.resetAllMocks();
     });
@@ -30,7 +29,6 @@ describe(getName(), () => {
       if (!httpMock.allUsed()) {
         throw new Error('Not all http mocks have been used!');
       }
-      httpMock.reset();
       process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 

@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture, mocked } from '../../../test/util';
+import { loadFixture, mocked } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -11,7 +11,7 @@ import type { Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(), () => {
+describe('platform/github/index', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
@@ -30,15 +30,9 @@ describe(getName(), () => {
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
-    delete global.gitAuthor;
     hostRules.find.mockReturnValue({
-      token: 'abc123',
+      token: '123test',
     });
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   const graphqlOpenPullRequests = loadFixture('graphql/pullrequest-1.json');
@@ -55,7 +49,7 @@ describe(getName(), () => {
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(
-        github.initPlatform({ token: 'abc123' } as any)
+        github.initPlatform({ token: '123test' } as any)
       ).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -69,7 +63,7 @@ describe(getName(), () => {
         .get('/user/emails')
         .reply(400);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -83,14 +77,14 @@ describe(getName(), () => {
         .get('/user/emails')
         .reply(200, [{}]);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should support gitAuthor and username', async () => {
       expect(
         await github.initPlatform({
-          token: 'abc123',
+          token: '123test',
           username: 'renovate-bot',
           gitAuthor: 'renovate@whitesourcesoftware.com',
         } as any)
@@ -110,7 +104,7 @@ describe(getName(), () => {
           },
         ]);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -130,7 +124,7 @@ describe(getName(), () => {
       expect(
         await github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
-          token: 'abc123',
+          token: '123test',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -684,26 +678,13 @@ describe(getName(), () => {
     });
   });
   describe('getBranchStatus()', () => {
-    it('returns success if requiredStatusChecks null', async () => {
+    it('returns success if ignoreTests true', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
 
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', null);
-      expect(res).toEqual(BranchStatus.green);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('return failed if unsupported requiredStatusChecks', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-
-      await github.initRepo({
-        repository: 'some/repo',
-      } as any);
-      const res = await github.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should pass through success', async () => {
@@ -720,7 +701,7 @@ describe(getName(), () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -738,7 +719,7 @@ describe(getName(), () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -755,7 +736,7 @@ describe(getName(), () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -789,7 +770,7 @@ describe(getName(), () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -829,7 +810,7 @@ describe(getName(), () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -862,7 +843,7 @@ describe(getName(), () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -1072,8 +1053,10 @@ describe(getName(), () => {
   });
   describe('ensureIssue()', () => {
     it('creates issue', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1100,7 +1083,7 @@ describe(getName(), () => {
             },
           },
         })
-        .post('/repos/undefined/issues')
+        .post('/repos/some/repo/issues')
         .reply(200);
       const res = await github.ensureIssue({
         title: 'new-title',
@@ -1110,8 +1093,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('creates issue if not ensuring only once', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1138,7 +1123,7 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/1')
+        .get('/repos/some/repo/issues/1')
         .reply(404);
       const res = await github.ensureIssue({
         title: 'title-1',
@@ -1148,8 +1133,49 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('does not create issue if ensuring only once', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.post('/graphql').reply(200, {
+        data: {
+          repository: {
+            issues: {
+              pageInfo: {
+                startCursor: null,
+                hasNextPage: false,
+                endCursor: null,
+              },
+              nodes: [
+                {
+                  number: 2,
+                  state: 'open',
+                  title: 'title-2',
+                },
+                {
+                  number: 1,
+                  state: 'closed',
+                  title: 'title-1',
+                },
+              ],
+            },
+          },
+        },
+      });
+      const once = true;
+      const res = await github.ensureIssue({
+        title: 'title-1',
+        body: 'new-content',
+        once,
+      });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('creates issue with labels', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1160,34 +1186,27 @@ describe(getName(), () => {
                   hasNextPage: false,
                   endCursor: null,
                 },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'closed',
-                    title: 'title-1',
-                  },
-                ],
+                nodes: [],
               },
             },
           },
-        });
-      const once = true;
+        })
+        .post('/repos/some/repo/issues')
+        .reply(200);
       const res = await github.ensureIssue({
-        title: 'title-1',
+        title: 'new-title',
         body: 'new-content',
-        once,
+        labels: ['Renovate', 'Maintenance'],
       });
-      expect(res).toBeNull();
+      expect(res).toEqual('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('closes others if ensuring only once', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1219,7 +1238,7 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/3')
+        .get('/repos/some/repo/issues/3')
         .reply(404);
       const once = true;
       const res = await github.ensureIssue({
@@ -1231,8 +1250,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('updates issue', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1259,9 +1280,9 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' })
-        .patch('/repos/undefined/issues/2')
+        .patch('/repos/some/repo/issues/2')
         .reply(200);
       const res = await github.ensureIssue({
         title: 'title-3',
@@ -1271,9 +1292,12 @@ describe(getName(), () => {
       expect(res).toEqual('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('skips update if unchanged', async () => {
-      httpMock
-        .scope(githubApiHost)
+
+    it('updates issue with labels', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1300,7 +1324,52 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
+        .reply(200, { body: 'new-content' })
+        .patch('/repos/some/repo/issues/2')
+        .reply(200);
+      const res = await github.ensureIssue({
+        title: 'title-3',
+        reuseTitle: 'title-2',
+        body: 'newer-content',
+        labels: ['Renovate', 'Maintenance'],
+      });
+      expect(res).toEqual('updated');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('skips update if unchanged', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'newer-content' });
       const res = await github.ensureIssue({
         title: 'title-2',
@@ -1310,8 +1379,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('deletes if duplicate', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1338,9 +1409,9 @@ describe(getName(), () => {
             },
           },
         })
-        .patch('/repos/undefined/issues/1')
+        .patch('/repos/some/repo/issues/1')
         .reply(200)
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'newer-content' });
       const res = await github.ensureIssue({
         title: 'title-1',
@@ -1350,8 +1421,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('creates issue if reopen flag false and issue is not open', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1373,9 +1446,9 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' })
-        .post('/repos/undefined/issues')
+        .post('/repos/some/repo/issues')
         .reply(200);
       const res = await github.ensureIssue({
         title: 'title-2',
@@ -1387,8 +1460,10 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('does not create issue if reopen flag false and issue is already open', async () => {
-      httpMock
-        .scope(githubApiHost)
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
         .post('/graphql')
         .reply(200, {
           data: {
@@ -1410,7 +1485,7 @@ describe(getName(), () => {
             },
           },
         })
-        .get('/repos/undefined/issues/2')
+        .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' });
       const res = await github.ensureIssue({
         title: 'title-2',
@@ -1800,10 +1875,6 @@ describe(getName(), () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.post('/graphql').reply(200, graphqlOpenPullRequests);
-      global.gitAuthor = {
-        name: 'Renovate Bot',
-        email: 'renovate@whitesourcesoftware.com',
-      };
       await github.initRepo({
         repository: 'some/repo',
       } as any);
@@ -1951,7 +2022,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle merge error', async () => {
@@ -1967,7 +2043,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(false);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1989,10 +2070,10 @@ describe(getName(), () => {
       initRepoMock(scope, 'some/repo');
       await github.initPlatform({
         endpoint: 'https://github.company.com',
-        token: 'abc123',
+        token: '123test',
       });
       hostRules.find.mockReturnValue({
-        token: 'abc123',
+        token: '123test',
       });
       await github.initRepo({
         repository: 'some/repo',
@@ -2015,7 +2096,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should try squash after rebase', async () => {
@@ -2031,7 +2117,10 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      await github.mergePr(pr.number, '');
+      await github.mergePr({
+        branchName: '',
+        id: pr.number,
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should try merge after squash', async () => {
@@ -2051,7 +2140,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(true);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should give up', async () => {
@@ -2073,7 +2167,12 @@ describe(getName(), () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr.number, '')).toBe(false);
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

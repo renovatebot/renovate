@@ -7,7 +7,7 @@ import { logger } from '../../../logger';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { formatCommitMessagePrefix } from '../util/commit-message';
+import { CommitMessage } from '../model/commit-message';
 
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
@@ -55,8 +55,13 @@ function getTableValues(
 }
 
 export function generateBranchConfig(
-  branchUpgrades: BranchUpgradeConfig[]
+  upgrades: BranchUpgradeConfig[]
 ): BranchConfig {
+  let branchUpgrades = upgrades;
+  if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
+    // If the branch isn't pending, then remove any upgrades within which *are*
+    branchUpgrades = branchUpgrades.filter((upgrade) => !upgrade.pendingChecks);
+  }
   logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
   let config: BranchConfig = {
     upgrades: [],
@@ -153,7 +158,7 @@ export function generateBranchConfig(
           upgrade
         )})`;
       }
-      upgrade.commitMessagePrefix = formatCommitMessagePrefix(semanticPrefix);
+      upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix);
       upgrade.toLowerCase =
         // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
         upgrade.semanticCommitType.match(/[A-Z]/) === null &&
@@ -305,14 +310,6 @@ export function generateBranchConfig(
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
-  }
-  if (!config.upgrades?.every((upgrade) => upgrade.pendingChecks)) {
-    // A branch should only have pendingChecks if all upgrades have pendingChecks
-    delete config.pendingChecks;
-    // If the branch isn't pending, then remove any upgrades within which *are*
-    config.upgrades = config.upgrades.filter(
-      (upgrade) => !upgrade.pendingChecks
-    );
   }
   const tableRows = config.upgrades
     .map((upgrade) => getTableValues(upgrade))

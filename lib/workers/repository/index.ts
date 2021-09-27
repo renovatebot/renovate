@@ -1,12 +1,13 @@
 import fs from 'fs-extra';
-import { getAdminConfig, setAdminConfig } from '../../config/admin';
+import { getGlobalConfig, setGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
+import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
-import { ensureMasterIssue } from './dependency-dashboard';
+import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
@@ -25,16 +26,18 @@ try {
 
 // istanbul ignore next
 export async function renovateRepository(
-  repoConfig: RenovateConfig
+  repoConfig: RenovateConfig,
+  canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = setAdminConfig(repoConfig);
+  let config = setGlobalConfig(repoConfig);
+  await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
   let repoResult: ProcessResult;
   queue.clear();
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   try {
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);
@@ -45,10 +48,18 @@ export async function renovateRepository(
     );
     await ensureOnboardingPr(config, packageFiles, branches);
     const res = await updateRepo(config, branches);
+    setMeta({ repository: config.repository });
     addSplit('update');
     await setBranchCache(branches);
-    if (res !== 'automerged') {
-      await ensureMasterIssue(config, branches);
+    if (res === 'automerged') {
+      if (canRetry) {
+        logger.info('Renovating repository again after automerge result');
+        const recursiveRes = await renovateRepository(repoConfig, false);
+        return recursiveRes;
+      }
+      logger.debug(`Automerged but already retried once`);
+    } else {
+      await ensureDependencyDashboard(config, branches);
     }
     await finaliseRepo(config, branchList);
     repoResult = processResult(config, res);

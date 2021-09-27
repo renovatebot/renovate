@@ -1,15 +1,20 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
-import * as allVersioning from '../../../../versioning';
+import type { VersioningApi } from '../../../../versioning/types';
 import type { LookupUpdateConfig } from './types';
 
 export function getCurrentVersion(
   config: LookupUpdateConfig,
-  versioning: allVersioning.VersioningApi,
+  versioning: VersioningApi,
   rangeStrategy: string,
   latestVersion: string,
   allVersions: string[]
 ): string | null {
   const { currentValue, lockedVersion } = config;
+  // istanbul ignore if
+  if (!is.string(currentValue)) {
+    return null;
+  }
   if (versioning.isVersion(currentValue)) {
     return currentValue;
   }

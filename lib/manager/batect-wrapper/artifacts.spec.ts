@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
@@ -13,7 +12,11 @@ function artifactForPath(
 ): UpdateArtifact {
   return {
     packageFileName: path,
-    updatedDeps: ['batect/batect'],
+    updatedDeps: [
+      {
+        depName: 'batect/batect',
+      },
+    ],
     newPackageFileContent: 'not used',
     config: {
       newVersion,
@@ -21,10 +24,8 @@ function artifactForPath(
   };
 }
 
-describe(getName(), () => {
+describe('manager/batect-wrapper/artifacts', () => {
   beforeEach(() => {
-    httpMock.setup();
-
     httpMock
       .scope('https://github.com')
       .get('/batect/batect/releases/download/1.2.3/batect')
@@ -46,9 +47,8 @@ describe(getName(), () => {
       .reply(418);
   });
 
-  afterEach(() => {
-    httpMock.reset();
-  });
+  // TODO: fix mocks
+  afterEach(() => httpMock.clear(false));
 
   describe('updateArtifacts', () => {
     it('returns updated files if the wrapper script is in the root directory', async () => {

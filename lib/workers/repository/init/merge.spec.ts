@@ -2,12 +2,13 @@ import {
   RenovateConfig,
   fs,
   getConfig,
-  getName,
   git,
   mocked,
+  platform,
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
+import { initialize } from '../../../util/cache/repository';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
@@ -31,14 +32,19 @@ beforeEach(() => {
 jest.mock('../../../config/migration');
 jest.mock('../../../config/migrate-validate');
 
-describe(getName(), () => {
+describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
-    it('returns config if not found', () => {
+    beforeEach(async () => {
+      await initialize({});
+    });
+
+    it('returns config if not found', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      expect(detectRepoFileConfig()).toMatchSnapshot();
+      // FIXME: explicit assert condition
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
-    it('uses package.json config if found', () => {
+    it('uses package.json config if found', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       const pJson = JSON.stringify({
         name: 'something',
@@ -47,47 +53,58 @@ describe(getName(), () => {
         },
       });
       fs.readLocalFile.mockResolvedValue(pJson);
-      expect(detectRepoFileConfig()).toMatchSnapshot();
+      platform.getJsonFile.mockResolvedValueOnce(pJson);
+      // FIXME: explicit assert condition
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
-    it('returns error if cannot parse', () => {
+    it('returns error if cannot parse', async () => {
       git.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
       fs.readLocalFile.mockResolvedValue('cannot parse');
-      expect(detectRepoFileConfig()).toMatchSnapshot();
+      // FIXME: explicit assert condition
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
-    it('throws error if duplicate keys', () => {
+    it('throws error if duplicate keys', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc']);
       fs.readLocalFile.mockResolvedValue(
         '{ "enabled": true, "enabled": false }'
       );
-      expect(detectRepoFileConfig()).toMatchSnapshot();
+      // FIXME: explicit assert condition
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
-    it('finds and parse renovate.json5', () => {
+    it('finds and parse renovate.json5', async () => {
       git.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
       fs.readLocalFile.mockResolvedValue(`{
         // this is json5 format
       }`);
-      expect(detectRepoFileConfig()).toMatchSnapshot();
+      // FIXME: explicit assert condition
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
-    it('finds .github/renovate.json', () => {
+    it('finds .github/renovate.json', async () => {
       git.getFileList.mockResolvedValue([
         'package.json',
         '.github/renovate.json',
       ]);
       fs.readLocalFile.mockResolvedValue('{}');
-      expect(detectRepoFileConfig()).toMatchSnapshot();
+      // FIXME: explicit assert condition
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
-    it('finds .gitlab/renovate.json', () => {
+    it('finds .gitlab/renovate.json', async () => {
       git.getFileList.mockResolvedValue([
         'package.json',
         '.gitlab/renovate.json',
       ]);
       fs.readLocalFile.mockResolvedValue('{}');
-      expect(detectRepoFileConfig()).toMatchSnapshot();
+      // FIXME: explicit assert condition
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
-    it('finds .renovaterc.json', () => {
+    it('finds .renovaterc.json', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      expect(detectRepoFileConfig()).toMatchSnapshot();
+      platform.getJsonFile.mockResolvedValueOnce('{"something":"new"}');
+      // FIXME: explicit assert condition
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
   });
   describe('checkForRepoConfigError', () => {
@@ -122,6 +139,7 @@ describe(getName(), () => {
         e = err;
       }
       expect(e).toBeDefined();
+      // FIXME: explicit assert condition
       expect(e).toMatchSnapshot();
     });
     it('migrates nested config', async () => {

@@ -1,5 +1,18 @@
 import urlJoin from 'url-join';
 
+export function joinUrlParts(...parts: string[]): string {
+  return urlJoin(...parts);
+}
+
+export function ensurePathPrefix(url: string, prefix: string): string {
+  const parsed = new URL(url);
+  const fullPath = parsed.pathname + parsed.search;
+  if (fullPath.startsWith(prefix)) {
+    return url;
+  }
+  return parsed.origin + prefix + fullPath;
+}
+
 export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
 }

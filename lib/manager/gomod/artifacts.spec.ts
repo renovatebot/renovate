@@ -3,10 +3,8 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
@@ -38,7 +36,7 @@ require gopkg.in/russross/blackfriday.v1 v1.0.0
 replace github.com/pkg/errors => ../errors
 `;
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
@@ -56,19 +54,18 @@ const goEnv = {
   CGO_ENABLED: '1',
 };
 
-describe('.updateArtifacts()', () => {
-  beforeEach(async () => {
+describe('manager/gomod/artifacts', () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
-    await setExecConfig(adminConfig as never);
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -154,8 +151,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -168,15 +164,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Docker,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -189,17 +183,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Global,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -215,17 +205,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Docker,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with goModTidy', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -244,7 +230,6 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          binarySource: BinarySource.Docker,
           postUpdateOptions: ['gomodTidy'],
         },
       })
@@ -265,7 +250,14 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: gomod1,
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'go.sum',
+          stderr: 'This update totally doesnt work',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with gomodUpdateImportPaths', async () => {
@@ -282,7 +274,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -291,7 +283,11 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
@@ -307,7 +303,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/pkg/errors'],
+        updatedDeps: [{ depName: 'github.com/pkg/errors' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -316,7 +312,10 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with specific tool version from constraint', async () => {
@@ -333,7 +332,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -345,7 +344,11 @@ describe('.updateArtifacts()', () => {
           },
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with latest tool version on invalid version constraint', async () => {
@@ -362,7 +365,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -374,7 +377,11 @@ describe('.updateArtifacts()', () => {
           },
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('skips updating import paths for gopkg.in dependencies', async () => {
@@ -390,7 +397,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['gopkg.in/yaml.v2'],
+        updatedDeps: [{ depName: 'gopkg.in/yaml.v2' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -399,7 +406,10 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
 });

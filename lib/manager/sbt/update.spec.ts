@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import * as sbtUpdater from './update';
 
-describe(getName(), () => {
+describe('manager/sbt/update', () => {
   describe('.bumpPackageVersion()', () => {
     const content =
       'name := "test"\n' +
@@ -15,6 +14,7 @@ describe(getName(), () => {
         'patch'
       );
 
+      // FIXME: explicit assert condition
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
     });
@@ -33,7 +33,7 @@ describe(getName(), () => {
         '0.0.1',
         'minor'
       );
-
+      // FIXME: explicit assert condition
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
     });

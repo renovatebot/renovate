@@ -1,8 +1,7 @@
-import { getName } from '../../test/util';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
-describe(getName(), () => {
+describe('config/validation', () => {
   describe('getParentName()', () => {
     it('ignores encrypted in root', () => {
       expect(configValidation.getParentName('encrypted')).toEqual('');
@@ -352,6 +351,7 @@ describe(getName(), () => {
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             registryUrlTemplate: 'foobar',
+            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
           },
         ],
       };

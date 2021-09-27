@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import type { RepologyPackage } from './types';
@@ -52,14 +52,8 @@ const fixtureGcc = loadFixture(`gcc.json`);
 const fixturePulseaudio = loadFixture(`pulseaudio.json`);
 const fixtureJdk = loadFixture(`openjdk.json`);
 
-describe(getName(), () => {
+describe('datasource/repology/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => httpMock.reset());
-
     it('returns null for empty result', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {
         status: 200,
@@ -184,6 +178,22 @@ describe(getName(), () => {
           depName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns null on Resolver ambiguous binary package', async () => {
+      mockResolverCall('ubuntu_20_04', 'git', 'binname', {
+        status: 300,
+        body: '[]',
+      });
+
+      expect(
+        await getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'ubuntu_20_04/git',
+        })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 

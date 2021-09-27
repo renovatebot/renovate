@@ -1,10 +1,4 @@
-import {
-  RenovateConfig,
-  getConfig,
-  getName,
-  git,
-  mocked,
-} from '../../../../test/util';
+import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
 import * as _branchWorker from '../../branch';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
@@ -27,13 +21,13 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(), () => {
+describe('workers/repository/process/write', () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
       const branches: BranchConfig[] = [
         {},
         {},
-        { automergeType: 'pr-comment', requiredStatusChecks: null },
+        { automergeType: 'pr-comment', ignoreTests: true },
         {},
         {},
       ] as never;

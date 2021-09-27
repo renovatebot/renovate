@@ -126,6 +126,8 @@ So to reduce the interruptions of automated dependency updates, consider putting
 - Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
 - Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
 
+To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
+
 ### Grouping related packages
 
 Although it's good to isolate each dependency update for ease of troubleshooting, there are times when the extra noise isn't worth it, or when packages naturally belong together anyway (such as all `babel` packages).
@@ -223,6 +225,6 @@ If/when this starts bothering you, add Renovate rules to reduce the volume, such
 ## References
 
 This is a "living" document and we plan to update it whenever we think of something new or someone makes a valid point we've missed or misunderstood.
-[GitHub Location](https://github.com/renovatebot/renovate/blob/main/website/docs/dependency-pinning.md)
+[GitHub Location](https://github.com/renovatebot/renovate/blob/main/docs/usage/dependency-pinning.md)
 
 Updated 2018-01-19 after [excellent feedback on lockfiles](https://github.com/commitizen/cz-conventional-changelog-default-export/pull/4#issuecomment-358038966) by [@LinusU](https://github.com/LinusU)

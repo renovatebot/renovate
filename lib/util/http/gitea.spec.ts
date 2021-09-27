@@ -1,8 +1,7 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { GiteaHttp, setBaseUrl } from './gitea';
 
-describe(getName(), () => {
+describe('util/http/gitea', () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
   let giteaHttp: GiteaHttp;
@@ -12,14 +11,7 @@ describe(getName(), () => {
 
     jest.resetAllMocks();
 
-    httpMock.reset();
-    httpMock.setup();
-
     setBaseUrl(baseUrl);
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   it('supports responses without pagination when enabled', async () => {

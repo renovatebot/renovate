@@ -1,7 +1,7 @@
-import { getPkgReleases } from '..';
+import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
+import { GitHubReleaseMocker } from './test';
 import { id as datasource } from '.';
 import * as github from '.';
 
@@ -23,17 +23,12 @@ const responseBody = [
   },
 ];
 
-describe(getName(), () => {
+describe('datasource/github-releases/index', () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
       token: 'some-token',
     });
-    httpMock.setup();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('getReleases', () => {
@@ -70,6 +65,67 @@ describe(getName(), () => {
       httpMock.getTrace();
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('getDigest', () => {
+    const lookupName = 'some/dep';
+    const currentValue = 'v1.0.0';
+    const currentDigest = 'v1.0.0-digest';
+
+    const releaseMock = new GitHubReleaseMocker(githubApiHost, lookupName);
+
+    it('requires currentDigest', async () => {
+      const digest = await getDigest({ datasource, lookupName }, currentValue);
+      expect(digest).toBeNull();
+    });
+
+    it('defaults to currentDigest when currentVersion is missing', async () => {
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentDigest,
+        },
+        currentValue
+      );
+      expect(digest).toEqual(currentDigest);
+    });
+
+    it('returns updated digest in new release', async () => {
+      releaseMock.withDigestFileAsset(
+        currentValue,
+        `${currentDigest} asset.zip`
+      );
+      const nextValue = 'v1.0.1';
+      const nextDigest = 'updated-digest';
+      releaseMock.withDigestFileAsset(nextValue, `${nextDigest} asset.zip`);
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentValue,
+          currentDigest,
+        },
+        nextValue
+      );
+      expect(digest).toEqual(nextDigest);
+    });
+
+    // This is awkward, but I found returning `null` in this case to not produce an update
+    // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
+    it('ignores failures verifying currentDigest', async () => {
+      releaseMock.release(currentValue);
+      const digest = await getDigest(
+        {
+          datasource,
+          lookupName,
+          currentValue,
+          currentDigest,
+        },
+        currentValue
+      );
+      expect(digest).toEqual(currentDigest);
     });
   });
 });

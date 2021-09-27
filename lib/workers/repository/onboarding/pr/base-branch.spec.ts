@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 
 import { getBaseBranchDesc } from './base-branch';
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/pr/base-branch', () => {
   describe('getBaseBranchDesc()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -16,11 +16,13 @@ describe(getName(), () => {
     it('describes baseBranch', () => {
       config.baseBranches = ['some-branch'];
       const res = getBaseBranchDesc(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('describes baseBranches', () => {
       config.baseBranches = ['some-branch', 'some-other-branch'];
       const res = getBaseBranchDesc(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

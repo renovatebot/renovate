@@ -1,4 +1,4 @@
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import * as upath from 'upath';
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
@@ -16,7 +16,7 @@ import type {
 } from './types';
 
 function loadConfig(content: string): BatectConfig {
-  const config = safeLoad(content);
+  const config = load(content);
 
   if (typeof config !== 'object') {
     throw new Error(

@@ -25,6 +25,7 @@ import type {
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   Platform,
   PlatformParams,
   PlatformResult,
@@ -296,8 +297,6 @@ const platform: Platform = {
     await git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
     });
 
     // Reset cached resources
@@ -351,19 +350,7 @@ const platform: Platform = {
     }
   },
 
-  async getBranchStatus(
-    branchName: string,
-    requiredStatusChecks?: string[] | null
-  ): Promise<BranchStatus> {
-    if (!requiredStatusChecks) {
-      return BranchStatus.green;
-    }
-
-    if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-      logger.warn({ requiredStatusChecks }, 'Unsupported requiredStatusChecks');
-      return BranchStatus.red;
-    }
-
+  async getBranchStatus(branchName: string): Promise<BranchStatus> {
     let ccs: helper.CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
@@ -563,12 +550,12 @@ const platform: Platform = {
     });
   },
 
-  async mergePr(number: number, branchName: string): Promise<boolean> {
+  async mergePr({ id }: MergePRConfig): Promise<boolean> {
     try {
-      await helper.mergePR(config.repository, number, config.mergeMethod);
+      await helper.mergePR(config.repository, id, config.mergeMethod);
       return true;
     } catch (err) {
-      logger.warn({ err, number }, 'Merging of PR failed');
+      logger.warn({ err, id }, 'Merging of PR failed');
       return false;
     }
   },
@@ -587,22 +574,41 @@ const platform: Platform = {
     return config.issueList;
   },
 
+  async getIssue(number: number, useCache = true): Promise<Issue> {
+    try {
+      const body = (
+        await helper.getIssue(config.repository, number, {
+          useCache,
+        })
+      ).body;
+      return {
+        number,
+        body,
+      };
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err, number }, 'Error getting issue');
+      return null;
+    }
+  },
+
   async findIssue(title: string): Promise<Issue> {
     const issueList = await platform.getIssueList();
     const issue = issueList.find(
       (i) => i.state === 'open' && i.title === title
     );
 
-    if (issue) {
-      logger.debug(`Found Issue #${issue.number}`);
+    if (!issue) {
+      return null;
     }
-    return issue ?? null;
+    logger.debug(`Found Issue #${issue.number}`);
+    return platform.getIssue(issue.number);
   },
 
   async ensureIssue({
     title,
     reuseTitle,
     body: content,
+    labels: labelNames,
     shouldReOpen,
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
@@ -615,6 +621,11 @@ const platform: Platform = {
       if (!issues.length) {
         issues = issueList.filter((i) => i.title === reuseTitle);
       }
+
+      const labels = Array.isArray(labelNames)
+        ? await Promise.all(labelNames.map(lookupLabelByName))
+        : undefined;
+
       // Update any matching issues which currently exist
       if (issues.length) {
         let activeIssue = issues.find((i) => i.state === 'open');
@@ -655,13 +666,36 @@ const platform: Platform = {
 
         // Update issue body and re-open if enabled
         logger.debug(`Updating Issue #${activeIssue.number}`);
-        await helper.updateIssue(config.repository, activeIssue.number, {
-          body,
-          title,
-          state: shouldReOpen
-            ? 'open'
-            : (activeIssue.state as helper.IssueState),
-        });
+        const existingIssue = await helper.updateIssue(
+          config.repository,
+          activeIssue.number,
+          {
+            body,
+            title,
+            state: shouldReOpen
+              ? 'open'
+              : (activeIssue.state as helper.IssueState),
+          }
+        );
+
+        // Test whether the issues need to be updated
+        const existingLabelIds = (existingIssue.labels ?? []).map(
+          (label) => label.id
+        );
+        if (
+          labels &&
+          (labels.length !== existingLabelIds.length ||
+            labels.filter((labelId) => !existingLabelIds.includes(labelId))
+              .length !== 0)
+        ) {
+          await helper.updateIssueLabels(
+            config.repository,
+            activeIssue.number,
+            {
+              labels,
+            }
+          );
+        }
 
         return 'updated';
       }
@@ -670,6 +704,7 @@ const platform: Platform = {
       const issue = await helper.createIssue(config.repository, {
         body,
         title,
+        labels,
       });
       logger.debug(`Created new Issue #${issue.number}`);
       config.issueList = null;
@@ -836,6 +871,7 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
+  getIssue,
   getRawFile,
   getJsonFile,
   getIssueList,

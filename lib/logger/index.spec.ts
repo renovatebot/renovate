@@ -19,13 +19,13 @@ jest.unmock('.');
 jest.mock('fs-extra');
 const fs: any = _fs;
 
-describe('logger', () => {
+describe('logger/index', () => {
   it('inits', () => {
     expect(logger).toBeDefined();
   });
   it('sets and gets context', () => {
-    setContext('abc123');
-    expect(getContext()).toEqual('abc123');
+    setContext('123test');
+    expect(getContext()).toEqual('123test');
   });
   it('supports logging with metadata', () => {
     expect(() => logger.debug({ some: 'meta' }, 'some meta')).not.toThrow();
@@ -61,7 +61,12 @@ describe('logger', () => {
     logger.error({ some: 'meta' }, 'message');
     logger.warn('a warning with a p4$$w0rd');
     logger.info('ignored');
-    expect(getProblems()).toMatchSnapshot();
+    expect(getProblems()).toMatchSnapshot([
+      { msg: 'some meta' },
+      { some: 'meta', password: '***********' },
+      { some: 'meta', msg: 'message' },
+      { msg: 'a warning with a **redacted**' },
+    ]);
     clearProblems();
     expect(getProblems()).toHaveLength(0);
   });

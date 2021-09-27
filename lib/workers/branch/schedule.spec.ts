@@ -1,9 +1,8 @@
 import mockDate from 'mockdate';
-import { getName } from '../../../test/util';
 import type { RenovateConfig } from '../../config/types';
 import * as schedule from './schedule';
 
-describe(getName(), () => {
+describe('workers/branch/schedule', () => {
   describe('hasValidTimezone(schedule)', () => {
     it('returns false for invalid timezone', () => {
       expect(schedule.hasValidTimezone('Asia')[0]).toBe(false);

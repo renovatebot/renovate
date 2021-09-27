@@ -1,6 +1,4 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -8,28 +6,53 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import { id as GITHUB_RELEASES_ID } from '../../datasource/github-releases';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
 
-describe(getName(), () => {
+const graphqlQuery = `
+query(
+  $owner: String!,
+  $name: String!,
+  $count: Int,
+  $cursor: String
+) {
+  repository(owner: $name, name: $name) {
+    testItem (
+      orderBy: { field: UPDATED_AT, direction: DESC },
+      filterBy: { createdBy: "someone" },
+      first: $count,
+      after: $cursor,
+    ) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      nodes {
+        number state title body
+      }
+    }
+  }
+}
+`;
+
+describe('util/http/github', () => {
   let githubApi: GithubHttp;
   beforeEach(() => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
-    httpMock.setup();
   });
 
   afterEach(() => {
-    httpMock.reset();
     hostRules.clear();
   });
 
   describe('HTTP', () => {
     it('supports app mode', async () => {
-      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
+      hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock.scope(githubApiHost).get('/some-url').reply(200);
       await githubApi.get('/some-url', {
         headers: { accept: 'some-accept' },
@@ -39,7 +62,23 @@ describe(getName(), () => {
       expect(req.headers.accept).toBe(
         'some-accept, application/vnd.github.machine-man-preview+json'
       );
+      expect(req.headers.authorization).toBe('token 123test');
     });
+
+    it('supports different datasources', async () => {
+      const githubApiDatasource = new GithubHttp(GITHUB_RELEASES_ID);
+      hostRules.add({ hostType: 'github', token: 'abc' });
+      hostRules.add({
+        hostType: GITHUB_RELEASES_ID,
+        token: 'def',
+      });
+      httpMock.scope(githubApiHost).get('/some-url').reply(200);
+      await githubApiDatasource.get('/some-url');
+      const [req] = httpMock.getTrace();
+      expect(req).toBeDefined();
+      expect(req.headers.authorization).toBe('token def');
+    });
+
     it('paginates', async () => {
       const url = '/some-url';
       httpMock
@@ -107,7 +146,7 @@ describe(getName(), () => {
       async function fail(
         code: number,
         body: any = undefined,
-        headers: nock.ReplyHeaders = undefined
+        headers: httpMock.ReplyHeaders = undefined
       ) {
         const url = '/some-url';
         httpMock
@@ -126,6 +165,7 @@ describe(getName(), () => {
           );
         await githubApi.getJson(url);
       }
+
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
         httpMock.scope(githubApiHost).get(url).replyWithError(error);
@@ -135,6 +175,13 @@ describe(getName(), () => {
       it('should throw Not found', async () => {
         await expect(fail(404)).rejects.toThrow(
           'Response code 404 (Not Found)'
+        );
+      });
+      it('should throw 410', async () => {
+        await expect(
+          fail(410, { message: 'Issues are disabled for this repo' })
+        ).rejects.toThrow(
+          'Response code 410 (Issues are disabled for this repo)'
         );
       });
       it('should throw rate limit exceeded', async () => {
@@ -236,21 +283,6 @@ describe(getName(), () => {
   });
 
   describe('GraphQL', () => {
-    const query = `
-      query {
-        repository(owner: "testOwner", name: "testName") {
-          testItem (orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "someone"}) {
-            pageInfo {
-              endCursor
-              hasNextPage
-            }
-            nodes {
-              number state title body
-            }
-          }
-        }
-      }`;
-
     const page1 = {
       data: {
         repository: {
@@ -321,18 +353,20 @@ describe(getName(), () => {
         .scope('https://ghe.mycompany.com')
         .post('/api/graphql')
         .reply(200, { data: { repository } });
-      await githubApi.queryRepo(query);
+      await githubApi.queryRepo(graphqlQuery);
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
     });
     it('supports app mode', async () => {
-      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
+      hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
         .reply(200, { data: { repository: { testItem: 'XXX' } } });
-      await githubApi.queryRepoField(query, 'testItem', { paginate: false });
+      await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+        paginate: false,
+      });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
@@ -349,7 +383,9 @@ describe(getName(), () => {
           },
         });
       expect(
-        await githubApi.queryRepoField(query, 'testItem', { paginate: false })
+        await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+          paginate: false,
+        })
       ).toEqual([]);
     });
     it('returns empty array for undefined data.', async () => {
@@ -360,13 +396,15 @@ describe(getName(), () => {
           data: { repository: { otherField: 'someval' } },
         });
       expect(
-        await githubApi.queryRepoField(query, 'testItem', { paginate: false })
+        await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+          paginate: false,
+        })
       ).toEqual([]);
     });
     it('throws errors for invalid responses', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(418);
       await expect(
-        githubApi.queryRepoField(query, 'someItem', {
+        githubApi.queryRepoField(graphqlQuery, 'someItem', {
           paginate: false,
         })
       ).rejects.toThrow("Response code 418 (I'm a Teapot)");
@@ -381,7 +419,7 @@ describe(getName(), () => {
             someprop: 'someval',
           },
         });
-      await githubApi.queryRepoField(query, 'testItem');
+      await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(7);
     });
     it('queryRepo', async () => {
@@ -394,7 +432,7 @@ describe(getName(), () => {
         .post('/graphql')
         .reply(200, { data: { repository } });
 
-      const result = await githubApi.queryRepo(query);
+      const result = await githubApi.queryRepo(graphqlQuery);
       expect(httpMock.getTrace()).toHaveLength(1);
       expect(result).toStrictEqual(repository);
     });
@@ -408,7 +446,7 @@ describe(getName(), () => {
         .post('/graphql')
         .reply(200, page3);
 
-      const items = await githubApi.queryRepoField(query, 'testItem');
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(3);
       expect(items).toHaveLength(3);
     });
@@ -420,7 +458,7 @@ describe(getName(), () => {
         .post('/graphql')
         .reply(200, page2);
 
-      const items = await githubApi.queryRepoField(query, 'testItem', {
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem', {
         limit: 2,
       });
       expect(httpMock.getTrace()).toHaveLength(2);
@@ -438,7 +476,7 @@ describe(getName(), () => {
         .post('/graphql')
         .reply(200, page3);
 
-      const items = await githubApi.queryRepoField(query, 'testItem');
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
       const trace = httpMock.getTrace();
@@ -448,7 +486,7 @@ describe(getName(), () => {
     it('throws on 50x if count < 10', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(500);
       await expect(
-        githubApi.queryRepoField(query, 'testItem', {
+        githubApi.queryRepoField(graphqlQuery, 'testItem', {
           count: 9,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);

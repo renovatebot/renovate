@@ -4,16 +4,17 @@ import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
 import * as githubReleases from '../github-releases';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import type { TagResponse } from './types';
+import type { GitHubTag, TagResponse } from './types';
 
 export const id = 'github-tags';
 export const customRegistrySupport = true;
 export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 
-const http = new GithubHttp();
+const http = new GithubHttp(id);
 
 const cacheNamespace = 'datasource-github-tags';
+
 function getCacheKey(registryUrl: string, repo: string, type: string): string {
   return `${registryUrl}:${repo}:${type}`;
 }
@@ -147,12 +148,9 @@ async function getTags({
       : `${sourceUrlBase}api/v3/`;
   // tag
   const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
-  type GitHubTag = {
-    name: string;
-  }[];
 
   const versions = (
-    await http.getJson<GitHubTag>(url, {
+    await http.getJson<GitHubTag[]>(url, {
       paginate: true,
     })
   ).body.map((o) => o.name);

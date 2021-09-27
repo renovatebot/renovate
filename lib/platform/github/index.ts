@@ -20,7 +20,6 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
-import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -35,6 +34,8 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
+  PlatformParams,
   PlatformResult,
   Pr,
   RepoParams,
@@ -42,6 +43,14 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { smartTruncate } from '../utils/pr-body';
+import {
+  closedPrsQuery,
+  getIssuesQuery,
+  openPrsQuery,
+  repoInfoQuery,
+  vulnerabilityAlertsQuery,
+} from './graphql';
+import { massageMarkdownLinks } from './massage-markdown-links';
 import {
   BranchProtection,
   CombinedBranchStatus,
@@ -72,12 +81,7 @@ export async function initPlatform({
   token,
   username,
   gitAuthor,
-}: {
-  endpoint: string;
-  token: string;
-  username?: string;
-  gitAuthor?: string;
-}): Promise<PlatformResult> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
@@ -110,6 +114,7 @@ export async function initPlatform({
     gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
+
   return platformConfig;
 }
 
@@ -191,24 +196,12 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
-    repo = await githubApi.queryRepo<GhRepo>(
-      `{
-      repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-        isFork
-        isArchived
-        nameWithOwner
-        mergeCommitAllowed
-        rebaseMergeAllowed
-        squashMergeAllowed
-        defaultBranchRef {
-          name
-          target {
-            oid
-          }
-        }
-      }
-    }`
-    );
+    repo = await githubApi.queryRepo<GhRepo>(repoInfoQuery, {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+      },
+    });
     // istanbul ignore if
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
@@ -298,6 +291,7 @@ export async function initRepo({
           {
             token: forkToken || opts.token,
             paginate: true,
+            pageLimit: 100,
           }
         )
       ).body.map((r) => r.full_name);
@@ -421,8 +415,6 @@ export async function initRepo({
   await git.initRepo({
     ...config,
     url,
-    gitAuthorName: global.gitAuthor?.name,
-    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
@@ -482,41 +474,22 @@ export async function getRepoForceRebase(): Promise<boolean> {
 async function getClosedPrs(): Promise<PrList> {
   if (!config.closedPrList) {
     config.closedPrList = {};
-    let query;
     try {
       // prettier-ignore
-      query = `
-      query {
-        repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [CLOSED, MERGED], orderBy: {field: UPDATED_AT, direction: DESC}) {
-            pageInfo {
-              endCursor
-              hasNextPage
-            }
-            nodes {
-              number
-              state
-              headRefName
-              title
-              comments(last: 100) {
-                nodes {
-                  databaseId
-                  body
-                }
-              }
-            }
-          }
-        }
-      }
-      `;
       const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        query,
-        'pullRequests'
+        closedPrsQuery,
+        'pullRequests',
+        {
+          variables: {
+            owner: config.repositoryOwner,
+            name: config.repositoryName,
+          },
+        }
       );
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
-        logger.debug({ query }, 'No graphql data, returning empty list');
+        logger.debug('getClosedPrs(): no graphql data');
         return {};
       }
       for (const pr of nodes) {
@@ -536,7 +509,7 @@ async function getClosedPrs(): Promise<PrList> {
       prNumbers.sort();
       logger.debug({ prNumbers }, 'Retrieved closed PR list with graphql');
     } catch (err) /* istanbul ignore next */ {
-      logger.warn({ query, err }, 'getClosedPrs error');
+      logger.warn({ err }, 'getClosedPrs(): error');
     }
   }
   return config.closedPrList;
@@ -546,77 +519,23 @@ async function getOpenPrs(): Promise<PrList> {
   // The graphql query is supported in the current oldest GHE version 2.19
   if (!config.openPrList) {
     config.openPrList = {};
-    let query;
     try {
       // prettier-ignore
-      query = `
-      query {
-        repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [OPEN], orderBy: {field: UPDATED_AT, direction: DESC}) {
-            pageInfo {
-              endCursor
-              hasNextPage
-            }
-            nodes {
-              number
-              headRefName
-              baseRefName
-              title
-              mergeable
-              mergeStateStatus
-              labels(last: 100) {
-                nodes {
-                  name
-                }
-              }
-              assignees {
-                totalCount
-              }
-              reviewRequests {
-                totalCount
-              }
-              commits(first: 2) {
-                nodes {
-                  commit {
-                    author {
-                      email
-                    }
-                    committer {
-                      email
-                    }
-                    parents(last: 1) {
-                      edges {
-                        node {
-                          abbreviatedOid
-                          oid
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              body
-              reviews(first: 1, states:[CHANGES_REQUESTED]){
-                nodes{
-                  state
-                }
-              }
-            }
-          }
-        }
-      }
-      `;
       const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
-        query,
+        openPrsQuery,
         'pullRequests',
         {
+          variables: {
+            owner: config.repositoryOwner,
+            name: config.repositoryName,
+          },
           acceptHeader: 'application/vnd.github.merge-info-preview+json',
         }
       );
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
-        logger.debug({ query }, 'No graphql res.data');
+        logger.debug('getOpenPrs(): no graphql data');
         return {};
       }
       for (const pr of nodes) {
@@ -666,7 +585,7 @@ async function getOpenPrs(): Promise<PrList> {
       prNumbers.sort();
       logger.trace({ prNumbers }, 'Retrieved open PR list with graphql');
     } catch (err) /* istanbul ignore next */ {
-      logger.warn({ query, err }, 'getOpenPrs error');
+      logger.warn({ err }, 'getOpenPrs(): error');
     }
   }
   return config.openPrList;
@@ -880,20 +799,9 @@ async function getStatus(
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks: any[] | undefined
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
@@ -1069,27 +977,17 @@ export async function setBranchStatus({
 
 /* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  // prettier-ignore
-  const query = `
-    query {
-      repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-        issues(orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {createdBy: "${config.renovateUsername}"}) {
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          nodes {
-            number
-            state
-            title
-            body
-          }
-        }
-      }
+  const result = await githubApi.queryRepoField<Issue>(
+    getIssuesQuery,
+    'issues',
+    {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        user: config.renovateUsername,
+      },
     }
-  `;
-
-  const result = await githubApi.queryRepoField<Issue>(query, 'issues');
+  );
 
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
@@ -1106,6 +1004,27 @@ export async function getIssueList(): Promise<Issue[]> {
   return config.issueList;
 }
 
+export async function getIssue(
+  number: number,
+  useCache = true
+): Promise<Issue | null> {
+  try {
+    const issueBody = (
+      await githubApi.getJson<{ body: string }>(
+        `repos/${config.parentRepo || config.repository}/issues/${number}`,
+        { useCache }
+      )
+    ).body.body;
+    return {
+      number,
+      body: issueBody,
+    };
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, number }, 'Error getting issue');
+    return null;
+  }
+}
+
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   const [issue] = (await getIssueList()).filter(
@@ -1115,15 +1034,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  const issueBody = (
-    await githubApi.getJson<{ body: string }>(
-      `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
-    )
-  ).body.body;
-  return {
-    number: issue.number,
-    body: issueBody,
-  };
+  return getIssue(issue.number);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
@@ -1140,6 +1051,7 @@ export async function ensureIssue({
   title,
   reuseTitle,
   body: rawBody,
+  labels,
   once = false,
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
@@ -1189,12 +1101,16 @@ export async function ensureIssue({
       }
       if (shouldReOpen) {
         logger.debug('Patching issue');
+        const data: Record<string, unknown> = { body, state: 'open', title };
+        if (labels) {
+          data.labels = labels;
+        }
         await githubApi.patchJson(
           `repos/${config.parentRepo || config.repository}/issues/${
             issue.number
           }`,
           {
-            body: { body, state: 'open', title },
+            body: data,
           }
         );
         logger.debug('Issue updated');
@@ -1207,6 +1123,7 @@ export async function ensureIssue({
         body: {
           title,
           body,
+          labels: labels || [],
         },
       }
     );
@@ -1216,11 +1133,7 @@ export async function ensureIssue({
     return 'created';
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
-      logger.debug(
-        `Issues are disabled, so could not create issue: ${
-          (err as Error).message
-        }`
-      );
+      logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
@@ -1546,10 +1459,10 @@ export async function updatePr({
   }
 }
 
-export async function mergePr(
-  prNo: number,
-  branchName: string
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: prNo,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
   if (config.prReviewsRequired) {
@@ -1584,12 +1497,13 @@ export async function mergePr(
     options.token = config.forkToken;
   }
   let automerged = false;
+  let automergeResult: any;
   if (config.mergeMethod) {
     // This path is taken if we have auto-detected the allowed merge types from the repo
     options.body.merge_method = config.mergeMethod;
     try {
       logger.debug({ options, url }, `mergePr`);
-      await githubApi.putJson(url, options);
+      automergeResult = await githubApi.putJson(url, options);
       automerged = true;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 405) {
@@ -1609,19 +1523,19 @@ export async function mergePr(
     options.body.merge_method = 'rebase';
     try {
       logger.debug({ options, url }, `mergePr`);
-      await githubApi.putJson(url, options);
+      automergeResult = await githubApi.putJson(url, options);
     } catch (err1) {
       logger.debug({ err: err1 }, `Failed to rebase merge PR`);
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
-        await githubApi.putJson(url, options);
+        automergeResult = await githubApi.putJson(url, options);
       } catch (err2) {
         logger.debug({ err: err2 }, `Failed to merge squash PR`);
         try {
           options.body.merge_method = 'merge';
           logger.debug({ options, url }, `mergePr`);
-          await githubApi.putJson(url, options);
+          automergeResult = await githubApi.putJson(url, options);
         } catch (err3) {
           logger.debug({ err: err3 }, `Failed to merge commit PR`);
           logger.info({ pr: prNo }, 'All merge attempts failed');
@@ -1630,9 +1544,10 @@ export async function mergePr(
       }
     }
   }
-  logger.debug({ pr: prNo }, 'PR merged');
-  // Delete branch
-  await deleteBranch(branchName);
+  logger.debug(
+    { automergeResult: automergeResult.body, pr: prNo },
+    'PR merged'
+  );
   return true;
 }
 
@@ -1640,7 +1555,7 @@ export function massageMarkdown(input: string): string {
   if (config.isGhe) {
     return smartTruncate(input, 60000);
   }
-  const massagedInput = input
+  const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with renovatebot redirector
     .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
     .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
@@ -1649,40 +1564,12 @@ export function massageMarkdown(input: string): string {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  // prettier-ignore
-  const query = `
-  query {
-    repository(owner:"${config.repositoryOwner}", name:"${config.repositoryName}") {
-      vulnerabilityAlerts(last: 100) {
-        edges {
-          node {
-            dismissReason
-            vulnerableManifestFilename
-            vulnerableManifestPath
-            vulnerableRequirements
-            securityAdvisory {
-              description
-              identifiers { type value }
-              references { url }
-              severity
-            }
-            securityVulnerability {
-              package { name ecosystem }
-              firstPatchedVersion { identifier }
-              vulnerableVersionRange
-            }
-          }
-        }
-      }
-    }
-  }`;
-  let vulnerabilityAlerts: {
-    node: VulnerabilityAlert;
-  }[];
+  let vulnerabilityAlerts: { node: VulnerabilityAlert }[];
   try {
     vulnerabilityAlerts = await githubApi.queryRepoField<{
       node: VulnerabilityAlert;
-    }>(query, 'vulnerabilityAlerts', {
+    }>(vulnerabilityAlertsQuery, 'vulnerabilityAlerts', {
+      variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
     });

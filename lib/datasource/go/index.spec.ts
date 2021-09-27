@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, logger, mocked } from '../../../test/util';
+import { logger, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource, getDigest } from '.';
 
@@ -18,6 +18,18 @@ const res1 = `<!DOCTYPE html>
 </head>
 <body>
 Nothing to see here; <a href="https://godoc.org/golang.org/x/text">move along</a>.
+</body>
+</html>`;
+
+const res2 = `<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="go-import" content="gitlab.com/group/subgroup git https://gitlab.com/group/subgroup/repo">
+<meta name="go-source" content="gitlab.com/group/subgroup https://gitlab.com/group/subgroup https://gitlab.com/group/subgroup/-/tree/master{/dir} https://gitlab.com/group/subgroup/-/blob/master{/dir}/{file}#L{line}">
+</head>
+<body>
+go get https://gitlab.com/group/subgroup
 </body>
 </html>`;
 
@@ -46,15 +58,13 @@ const resGitHubEnterprise = `<!DOCTYPE html>
 </body>
 </html>`;
 
-describe(getName(), () => {
+describe('datasource/go/index', () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);
   });
 
   afterEach(() => {
-    httpMock.reset();
     jest.resetAllMocks();
   });
 
@@ -366,6 +376,26 @@ describe(getName(), () => {
       expect(httpCalls).toHaveLength(6);
       expect(httpCalls).toMatchSnapshot();
     });
+    it('support gitlab subgroups', async () => {
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/group/subgroup/repo?go-get=1')
+        .reply(200, res2);
+      httpMock
+        .scope('https://gitlab.com/')
+        .get(
+          '/api/v4/projects/group%2Fsubgroup%2Frepo/repository/tags?per_page=100'
+        )
+        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'gitlab.com/group/subgroup/repo',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('works for nested modules on github', async () => {
       const packages = [
         { datasource, depName: 'github.com/x/text/a' },
@@ -374,7 +404,6 @@ describe(getName(), () => {
       const tags = [{ name: 'a/v1.0.0' }, { name: 'b/v2.0.0' }];
 
       for (const pkg of packages) {
-        httpMock.setup();
         httpMock
           .scope('https://api.github.com/')
           .get('/repos/x/text/tags?per_page=100')
@@ -389,7 +418,7 @@ describe(getName(), () => {
 
         const httpCalls = httpMock.getTrace();
         expect(httpCalls).toMatchSnapshot();
-        httpMock.reset();
+        httpMock.clear();
       }
     });
     it('returns none if no tags match submodules', async () => {
@@ -400,7 +429,6 @@ describe(getName(), () => {
       const tags = [{ name: 'v1.0.0' }, { name: 'v2.0.0' }];
 
       for (const pkg of packages) {
-        httpMock.setup();
         httpMock
           .scope('https://api.github.com/')
           .get('/repos/x/text/tags?per_page=100')
@@ -413,7 +441,7 @@ describe(getName(), () => {
 
         const httpCalls = httpMock.getTrace();
         expect(httpCalls).toMatchSnapshot();
-        httpMock.reset();
+        httpMock.clear();
       }
     });
     it('works for nested modules on github v2+ major upgrades', async () => {
@@ -463,6 +491,196 @@ describe(getName(), () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    describe('GOPROXY', () => {
+      const baseUrl = 'https://proxy.golang.org';
+
+      afterEach(() => {
+        delete process.env.GOPROXY;
+        delete process.env.GONOPROXY;
+        delete process.env.GOPRIVATE;
+      });
+
+      it('skips GONOPROXY and GOPRIVATE packages', async () => {
+        process.env.GOPROXY = baseUrl;
+        process.env.GOPRIVATE = 'github.com/google/*';
+
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/google/btree/tags?per_page=100')
+          .reply(200, [{ name: 'v1.0.0' }, { name: 'v1.0.1' }])
+          .get('/repos/google/btree/releases?per_page=100')
+          .reply(200, []);
+
+        const res = await getPkgReleases({
+          datasource,
+          depName: 'github.com/google/btree',
+        });
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res).toEqual({
+          releases: [
+            { gitRef: 'v1.0.0', version: 'v1.0.0' },
+            { gitRef: 'v1.0.1', version: 'v1.0.1' },
+          ],
+          sourceUrl: 'https://github.com/google/btree',
+        });
+      });
+
+      it('fetches release data from goproxy', async () => {
+        process.env.GOPROXY = baseUrl;
+
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\nv1.0.1\n')
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+          .get('/@v/v1.0.1.info')
+          .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
+
+        const res = await getPkgReleases({
+          datasource,
+          depName: 'github.com/google/btree',
+        });
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res?.releases).toMatchObject([
+          { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28.000Z', version: 'v1.0.1' },
+        ]);
+      });
+
+      it('handles timestamp fetch errors', async () => {
+        process.env.GOPROXY = baseUrl;
+
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\nv1.0.1\n')
+          .get('/@v/v1.0.0.info')
+          .replyWithError('unknown')
+          .get('/@v/v1.0.1.info')
+          .reply(410);
+
+        const res = await getPkgReleases({
+          datasource,
+          depName: 'github.com/google/btree',
+        });
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res?.releases).toMatchObject([
+          { version: 'v1.0.0' },
+          { version: 'v1.0.1' },
+        ]);
+      });
+
+      it('handles pipe fallback', async () => {
+        process.env.GOPROXY = `https://example.com|${baseUrl}`;
+
+        httpMock
+          .scope('https://example.com/github.com/google/btree')
+          .get('/@v/list')
+          .replyWithError('unknown');
+
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\nv1.0.1\n')
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+          .get('/@v/v1.0.1.info')
+          .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
+
+        const res = await getPkgReleases({
+          datasource,
+          depName: 'github.com/google/btree',
+        });
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res?.releases).toMatchObject([
+          { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28.000Z', version: 'v1.0.1' },
+        ]);
+      });
+
+      it('handles comma fallback', async () => {
+        process.env.GOPROXY = [
+          'https://foo.example.com',
+          'https://bar.example.com',
+          baseUrl,
+        ].join(',');
+
+        httpMock
+          .scope('https://foo.example.com/github.com/google/btree')
+          .get('/@v/list')
+          .reply(404);
+
+        httpMock
+          .scope('https://bar.example.com/github.com/google/btree')
+          .get('/@v/list')
+          .reply(410);
+
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\nv1.0.1\n')
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+          .get('/@v/v1.0.1.info')
+          .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' });
+
+        const res = await getPkgReleases({
+          datasource,
+          depName: 'github.com/google/btree',
+        });
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res?.releases).toMatchObject([
+          { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28.000Z', version: 'v1.0.1' },
+        ]);
+      });
+
+      it('short-circuits with comma fallback', async () => {
+        process.env.GOPROXY = [
+          'https://foo.example.com',
+          'https://bar.example.com',
+          'https://baz.example.com',
+          baseUrl,
+        ].join(',');
+
+        httpMock
+          .scope('https://foo.example.com/github.com/google/btree')
+          .get('/@v/list')
+          .reply(404);
+
+        httpMock
+          .scope('https://bar.example.com/github.com/google/btree')
+          .get('/@v/list')
+          .reply(410);
+
+        httpMock
+          .scope('https://baz.example.com/github.com/google/btree')
+          .get('/@v/list')
+          .replyWithError('unknown');
+
+        httpMock
+          .scope('https://api.github.com/')
+          .get('/repos/google/btree/tags?per_page=100')
+          .reply(200, [{ name: 'v1.0.0' }, { name: 'v1.0.1' }])
+          .get('/repos/google/btree/releases?per_page=100')
+          .reply(200, []);
+
+        const res = await getPkgReleases({
+          datasource,
+          depName: 'github.com/google/btree',
+        });
+        expect(httpMock.getTrace()).toMatchSnapshot();
+        expect(res).toEqual({
+          releases: [
+            { gitRef: 'v1.0.0', version: 'v1.0.0' },
+            { gitRef: 'v1.0.1', version: 'v1.0.1' },
+          ],
+          sourceUrl: 'https://github.com/google/btree',
+        });
+      });
     });
   });
 });

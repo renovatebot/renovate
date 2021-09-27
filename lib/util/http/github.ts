@@ -122,6 +122,12 @@ function handleGotError(
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
+  if (
+    err.statusCode === 410 &&
+    err.body?.message === 'Issues are disabled for this repo'
+  ) {
+    throw err;
+  }
   if (err.statusCode === 404) {
     logger.debug({ url: path }, 'GitHub 404');
   } else {
@@ -131,11 +137,12 @@ function handleGotError(
 }
 
 interface GraphqlOptions {
+  variables?: Record<string, string | number | null>;
   paginate?: boolean;
   count?: number;
   limit?: number;
+  cursor?: string;
   acceptHeader?: string;
-  fromEnd?: boolean;
 }
 
 function constructAcceptString(input?: any): string {
@@ -151,11 +158,14 @@ function constructAcceptString(input?: any): string {
 }
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
-  constructor(options?: GithubHttpOptions) {
-    super(PLATFORM_TYPE_GITHUB, options);
+  constructor(
+    hostType: string = PLATFORM_TYPE_GITHUB,
+    options?: GithubHttpOptions
+  ) {
+    super(hostType, options);
   }
 
-  protected async request<T>(
+  protected override async request<T>(
     url: string | URL,
     options?: GithubInternalOptions & GithubHttpOptions,
     okToRetry = true
@@ -240,9 +250,20 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const path = 'graphql';
 
+    const { paginate, count = 100, cursor = null } = options;
+    let { variables } = options;
+    if (paginate) {
+      variables = {
+        ...variables,
+        count,
+        cursor,
+      };
+    }
+    const body = variables ? { query, variables } : { query };
+
     const opts: HttpPostOptions = {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
-      body: { query },
+      body,
       headers: { accept: options?.acceptHeader },
     };
 
@@ -258,7 +279,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       if (err instanceof ExternalHostError) {
         const gotError = err.err as GotLegacyError;
         const statusCode = gotError?.statusCode;
-        const count = options.count;
         if (
           count &&
           count > 10 &&
@@ -276,13 +296,11 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   }
 
   async queryRepoField<T = Record<string, unknown>>(
-    queryOrig: string,
+    query: string,
     fieldName: string,
     options: GraphqlOptions = {}
   ): Promise<T[]> {
     const result: T[] = [];
-
-    const regex = new RegExp(`(\\W)${fieldName}(\\s*)\\(`);
 
     const { paginate = true } = options;
     let count = options.count || 100;
@@ -291,13 +309,12 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     let isIterating = true;
     while (isIterating) {
-      let query = queryOrig;
-      if (paginate) {
-        let replacement = `$1${fieldName}$2(first: ${Math.min(count, limit)}`;
-        replacement += cursor ? `, after: "${cursor}", ` : ', ';
-        query = query.replace(regex, replacement);
-      }
-      const gqlRes = await this.queryRepo<T>(query, { ...options, count });
+      const gqlRes = await this.queryRepo<T>(query, {
+        ...options,
+        count: Math.min(count, limit),
+        cursor,
+        paginate,
+      });
       if (gqlRes?.[fieldName]) {
         const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
         result.push(...nodes);

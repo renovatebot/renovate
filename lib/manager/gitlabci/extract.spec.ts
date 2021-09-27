@@ -1,20 +1,20 @@
-import { getName, logger } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { logger } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
 const config: ExtractConfig = {};
 
-const adminConfig: RepoAdminConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig = { localDir: '' };
 
-describe(getName(), () => {
+describe('manager/gitlabci/extract', () => {
   beforeEach(() => {
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
   });
 
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
 
   describe('extractAllPackageFiles()', () => {
@@ -64,7 +64,7 @@ describe(getName(), () => {
           deps.push(d);
         });
       });
-      expect(deps).toHaveLength(7);
+      expect(deps).toHaveLength(8);
 
       expect(deps.some((dep) => dep.currentValue.includes("'"))).toBe(false);
     });

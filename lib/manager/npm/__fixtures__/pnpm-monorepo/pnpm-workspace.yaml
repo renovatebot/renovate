@@ -1,0 +1,6 @@
+packages:
+  # all packages in subdirs of packages/
+  - 'nested-packages/**'
+  - 'non-nested-packages/*'
+  - 'solo-package'
+  - 'solo-package-trailing-slash/'

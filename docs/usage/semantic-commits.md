@@ -12,10 +12,11 @@ Renovate only detects Angular-style conventional commits, it ignores all other c
 
 When Renovate finds Angular-style commits, Renovate will create commit messages and PR titles that look like this:
 
-- chore(deps): update eslint to v4.2.0
-- fix(deps): update express to v4.16.2
+- chore(deps): update eslint to v7.30.0
+- fix(deps): update express to v4.17.1
 
-Renovate uses `chore` by default, but uses `fix` for updates to your production dependencies in your `package.json` file.
+Renovate uses the `chore` prefix by default.
+When you extend `config:base`, Renovate still defaults to `chore`, but will use the `fix` prefix for npm production dependencies (`devDependencies` still use `chore`).
 
 ## Manually enabling or disabling semantic commits
 

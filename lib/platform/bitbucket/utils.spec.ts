@@ -6,14 +6,9 @@ const range = (count: number) => [...Array(count).keys()];
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe('accumulateValues()', () => {
+describe('platform/bitbucket/utils', () => {
   beforeEach(() => {
-    httpMock.setup();
     setBaseUrl(baseUrl);
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   it('paginates', async () => {

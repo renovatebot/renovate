@@ -1,4 +1,4 @@
-import { fs, getName, loadFixture } from '../../../test/util';
+import { fs, loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -10,7 +10,7 @@ const requirements4 = loadFixture('composer4.json');
 const requirements5 = loadFixture('composer5.json');
 const requirements5Lock = loadFixture('composer5.lock');
 
-describe(getName(), () => {
+describe('manager/composer/extract', () => {
   describe('extractPackageFile()', () => {
     let packageFile;
     beforeEach(() => {
@@ -25,6 +25,7 @@ describe(getName(), () => {
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
+      expect(res.deps).toHaveLength(32);
     });
     it('extracts registryUrls', async () => {
       const res = await extractPackageFile(requirements2, packageFile);
@@ -51,6 +52,7 @@ describe(getName(), () => {
       fs.readLocalFile.mockResolvedValue('some content');
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
+      expect(res.deps).toHaveLength(32);
     });
   });
 });

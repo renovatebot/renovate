@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import * as hostRules from '../../util/host-rules';
-import { id as datasource } from '.';
+import { PypiDatasource } from '.';
 
 const res1: any = loadFixture('azure-cli-monitor.json');
 const res2: any = loadFixture('azure-cli-monitor-updated.json');
@@ -14,21 +14,20 @@ const dataRequiresPythonResponse = loadFixture(
 const mixedHyphensResponse = loadFixture('versions-html-mixed-hyphens.html');
 
 const baseUrl = 'https://pypi.org/pypi';
+const datasource = PypiDatasource.id;
 
-describe(getName(), () => {
+describe('datasource/pypi/index', () => {
   describe('getReleases', () => {
     const OLD_ENV = process.env;
 
     beforeEach(() => {
       process.env = { ...OLD_ENV };
       delete process.env.PIP_INDEX_URL;
-      httpMock.setup();
       jest.resetAllMocks();
     });
 
     afterEach(() => {
       process.env = OLD_ENV;
-      httpMock.reset();
     });
 
     it('returns null for empty result', async () => {
@@ -82,7 +81,7 @@ describe(getName(), () => {
     });
 
     it('sets private if authorization privided', async () => {
-      hostRules.add({ matchHost: 'customprivate.pypi.net', token: 'abc123' });
+      hostRules.add({ matchHost: 'customprivate.pypi.net', token: '123test' });
       httpMock
         .scope('https://customprivate.pypi.net/foo')
         .get('/azure-cli-monitor/json')
@@ -259,7 +258,7 @@ describe(getName(), () => {
     it('sets private simple if authorization provided', async () => {
       hostRules.add({
         matchHost: 'some.private.registry.org',
-        token: 'abc123',
+        token: '123test',
       });
       httpMock
         .scope('https://some.private.registry.org/+simple/')

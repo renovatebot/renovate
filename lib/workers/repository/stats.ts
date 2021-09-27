@@ -20,8 +20,17 @@ export function printRequestStats(): void {
   });
   const allRequests: string[] = [];
   const requestHosts: Record<string, RequestStats[]> = {};
+  const rawUrls: Record<string, number> = {};
   for (const httpRequest of httpRequests) {
     const { method, url, duration, queueDuration } = httpRequest;
+    const [baseUrl] = url.split('?');
+    // put method last for better sorting
+    const urlKey = `${baseUrl} (${method.toUpperCase()})`;
+    if (rawUrls[urlKey]) {
+      rawUrls[urlKey] += 1;
+    } else {
+      rawUrls[urlKey] = 1;
+    }
     allRequests.push(
       `${method.toUpperCase()} ${url} ${duration} ${queueDuration}`
     );
@@ -29,26 +38,32 @@ export function printRequestStats(): void {
     requestHosts[hostname] = requestHosts[hostname] || [];
     requestHosts[hostname].push(httpRequest);
   }
+  const urls: Record<string, number> = {};
+  // Sort urls for easier reading
+  for (const url of Object.keys(rawUrls).sort()) {
+    urls[url] = rawUrls[url];
+  }
   logger.trace({ allRequests, requestHosts }, 'full stats');
-  const hostStats: string[] = [];
+  type HostStats = {
+    requestCount: number;
+    requestAvgMs: number;
+    queueAvgMs: number;
+  };
+  const hostStats: Record<string, HostStats> = {};
   let totalRequests = 0;
   for (const [hostname, requests] of Object.entries(requestHosts)) {
-    const hostRequests = requests.length;
-    totalRequests += hostRequests;
+    const requestCount = requests.length;
+    totalRequests += requestCount;
     const requestSum = requests
       .map(({ duration }) => duration)
       .reduce((a, b) => a + b, 0);
-    const requestAvg = Math.round(requestSum / hostRequests);
+    const requestAvgMs = Math.round(requestSum / requestCount);
 
     const queueSum = requests
       .map(({ queueDuration }) => queueDuration)
       .reduce((a, b) => a + b, 0);
-    const queueAvg = Math.round(queueSum / hostRequests);
-    const requestCount =
-      `${hostRequests} ` + (hostRequests > 1 ? 'requests' : 'request');
-    hostStats.push(
-      `${hostname}, ${requestCount}, ${requestAvg}ms request average, ${queueAvg}ms queue average`
-    );
+    const queueAvgMs = Math.round(queueSum / requestCount);
+    hostStats[hostname] = { requestCount, requestAvgMs, queueAvgMs };
   }
-  logger.debug({ hostStats, totalRequests }, 'http statistics');
+  logger.debug({ urls, hostStats, totalRequests }, 'http statistics');
 }

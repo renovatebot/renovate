@@ -2,6 +2,29 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import {
+  MergeConfidence,
+  isActiveConfidenceLevel,
+} from '../../util/merge-confidence';
+
+export async function resolveBranchStatus(
+  branchName: string,
+  ignoreTests = false
+): Promise<BranchStatus> {
+  logger.debug(
+    `resolveBranchStatus(branchName=${branchName}, ignoreTests=${ignoreTests})`
+  );
+
+  if (ignoreTests) {
+    logger.debug('Ignore tests. Return green');
+    return BranchStatus.green;
+  }
+
+  const status = await platform.getBranchStatus(branchName);
+  logger.debug(`Branch status ${status}`);
+
+  return status;
+}
 
 async function setStatusCheck(
   branchName: string,
@@ -47,6 +70,29 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     context,
     description,
     config.stabilityStatus,
+    config.productLinks.documentation
+  );
+}
+
+export type ConfidenceConfig = RenovateConfig & {
+  confidenceStatus?: BranchStatus;
+  minimumConfidence?: MergeConfidence;
+};
+
+export async function setConfidence(config: ConfidenceConfig): Promise<void> {
+  if (!isActiveConfidenceLevel(config.minimumConfidence)) {
+    return;
+  }
+  const context = `renovate/merge-confidence`;
+  const description =
+    config.confidenceStatus === BranchStatus.green
+      ? 'Updates have met Merge Confidence requirement'
+      : 'Updates have not met Merge Confidence requirement';
+  await setStatusCheck(
+    config.branchName,
+    context,
+    description,
+    config.confidenceStatus,
     config.productLinks.documentation
   );
 }

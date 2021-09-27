@@ -1,4 +1,4 @@
-import { defaultConfig, getName, loadFixture } from '../../../test/util';
+import { defaultConfig, loadFixture } from '../../../test/util';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
 import type { BranchUpgradeConfig } from '../types';
@@ -8,7 +8,7 @@ const sampleHtml = loadFixture('sample.html', `../../manager/html`);
 
 jest.mock('../../util/fs');
 
-describe(getName(), () => {
+describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;
@@ -48,6 +48,7 @@ describe(getName(), () => {
       upgrade.newDigest = 'some-digest';
       upgrade.depIndex = 0;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles a double attempt', async () => {
@@ -61,6 +62,7 @@ describe(getName(), () => {
       upgrade.newValue = '7.1.1';
       upgrade.depIndex = 1;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles already updated', async () => {
@@ -81,6 +83,7 @@ describe(getName(), () => {
         srcAlreadyUpdated,
         reuseExistingBranch
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns existing content if replaceString mismatch', async () => {
@@ -99,6 +102,7 @@ describe(getName(), () => {
         'wrong source',
         reuseExistingBranch
       );
+      // FIXME: explicit assert condition
       expect(res).toEqual('wrong source');
     });
     it('updates version and integrity', async () => {
@@ -116,6 +120,7 @@ describe(getName(), () => {
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('updates with autoReplaceNewString', async () => {
@@ -135,6 +140,7 @@ describe(getName(), () => {
       upgrade.autoReplaceStringTemplate =
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('fails with oldversion in depname', async () => {

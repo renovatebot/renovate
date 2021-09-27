@@ -8,6 +8,7 @@ import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import * as presets from '../../../config/presets';
+import { applySecretsToConfig } from '../../../config/secrets';
 import { RenovateConfig } from '../../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -15,16 +16,30 @@ import {
 } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import type { RepoFileConfig } from './types';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
+  const cache = getCache();
+  let { configFileName } = cache;
+  if (configFileName) {
+    let configFileParsed = await platform.getJsonFile(configFileName);
+    if (configFileParsed) {
+      if (configFileName === 'package.json') {
+        configFileParsed = configFileParsed.renovate;
+      }
+      return { configFileName, configFileParsed };
+    }
+    logger.debug('Existing config file no longer exists');
+  }
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
-    for (const configFileName of configFileNames) {
-      if (configFileName === 'package.json') {
+    for (const fileName of configFileNames) {
+      if (fileName === 'package.json') {
         try {
           const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
           if (pJson.renovate) {
@@ -34,17 +49,18 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         } catch (err) {
           // Do nothing
         }
-      } else if (fileList.includes(configFileName)) {
-        return configFileName;
+      } else if (fileList.includes(fileName)) {
+        return fileName;
       }
     }
     return null;
   }
-  const configFileName = await detectConfigFile();
+  configFileName = await detectConfigFile();
   if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
   }
+  cache.configFileName = configFileName;
   logger.debug(`Found ${configFileName} config file`);
   let configFileParsed;
   if (configFileName === 'package.json') {
@@ -170,23 +186,28 @@ export async function mergeRenovateConfig(
     throw error;
   }
   if (migratedConfig.warnings) {
-    returnConfig.warnings = returnConfig.warnings.concat(
-      migratedConfig.warnings
-    );
+    returnConfig.warnings = [
+      ...(returnConfig.warnings || []),
+      ...migratedConfig.warnings,
+    ];
   }
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
   // Decrypt before resolving in case we need npm authentication for any presets
-  const decryptedConfig = decryptConfig(migratedConfig);
+  const decryptedConfig = await decryptConfig(
+    migratedConfig,
+    config.repository
+  );
   // istanbul ignore if
   if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
-  let resolvedConfig = decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig, config)
+  let resolvedConfig = await decryptConfig(
+    await presets.resolveConfigPresets(decryptedConfig, config),
+    config.repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
   const migrationResult = migrateConfig(resolvedConfig);
@@ -202,6 +223,10 @@ export async function mergeRenovateConfig(
     );
     npmApi.setNpmrc(resolvedConfig.npmrc);
   }
+  resolvedConfig = applySecretsToConfig(
+    resolvedConfig,
+    mergeChildConfig(config.secrets || {}, resolvedConfig.secrets || {})
+  );
   // istanbul ignore if
   if (resolvedConfig.hostRules) {
     logger.debug('Setting hostRules from config');

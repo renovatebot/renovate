@@ -24,6 +24,8 @@ const validMatchFields = [
   'registryUrl',
 ];
 
+const mergeFields = ['registryUrls', ...validMatchFields];
+
 function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
   let matchResult;
@@ -38,6 +40,7 @@ function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
 
 function createDependency(
   matchResult: RegExpMatchArray,
+  combinedGroups: Record<string, string>,
   config: CustomExtractConfig,
   dep?: PackageDependency
 ): PackageDependency {
@@ -65,7 +68,11 @@ function createDependency(
     const fieldTemplate = `${field}Template`;
     if (config[fieldTemplate]) {
       try {
-        const compiled = template.compile(config[fieldTemplate], groups, false);
+        const compiled = template.compile(
+          config[fieldTemplate],
+          combinedGroups ?? groups,
+          false
+        );
         updateDependency(field, compiled);
       } catch (err) {
         logger.warn(
@@ -85,7 +92,7 @@ function createDependency(
 function mergeDependency(deps: PackageDependency[]): PackageDependency {
   const result: PackageDependency = {};
   deps.forEach((dep) => {
-    validMatchFields.forEach((field) => {
+    mergeFields.forEach((field) => {
       if (dep[field]) {
         result[field] = dep[field];
         // save the line replaceString of the section which contains the current Value for a speed up lookup during the replace phase
@@ -106,7 +113,29 @@ function handleAny(
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
-    .map((matchResult) => createDependency(matchResult, config));
+    .map((matchResult) => createDependency(matchResult, null, config));
+}
+
+function mergeGroups(
+  mergedGroup: Record<string, string>,
+  secondGroup: Record<string, string>
+): Record<string, string> {
+  const resultGroup = {};
+
+  Object.keys(mergedGroup)
+    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
+    .forEach(
+      // eslint-disable-next-line no-return-assign
+      (key) => (resultGroup[key] = mergedGroup[key])
+    );
+  Object.keys(secondGroup)
+    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
+    .forEach((key) => {
+      if (secondGroup[key] && secondGroup[key] !== '') {
+        resultGroup[key] = secondGroup[key];
+      }
+    });
+  return resultGroup;
 }
 
 function handleCombination(
@@ -114,10 +143,27 @@ function handleCombination(
   packageFile: string,
   config: CustomExtractConfig
 ): PackageDependency[] {
-  const dep = handleAny(content, packageFile, config).reduce(
-    (mergedDep, currentDep) => mergeDependency([mergedDep, currentDep]),
-    {}
-  ); // merge fields of dependencies
+  const matches = config.matchStrings
+    .map((matchString) => regEx(matchString, 'g'))
+    .flatMap((regex) => regexMatchAll(regex, content)); // match all regex to content, get all matches, reduce to single array
+
+  if (!matches.length) {
+    return [];
+  }
+
+  const combinedGroup = matches
+    .map((match) => match.groups)
+    .reduce((mergedGroup, currentGroup) =>
+      mergeGroups(mergedGroup, currentGroup)
+    );
+
+  // TODO: this seems to be buggy behavior, needs to be checked #11387
+  const dep = matches
+    .map((match) => createDependency(match, combinedGroup, config))
+    .reduce(
+      (mergedDep, currentDep) => mergeDependency([mergedDep, currentDep]),
+      {}
+    ); // merge fields of dependencies
   return [dep];
 }
 
@@ -137,7 +183,7 @@ function handleRecursive(
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     // if we have a depName and a currentValue with have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
-      return createDependency(match, config);
+      return createDependency(match, null, config);
     }
     return handleRecursive(match[0], packageFile, config, index + 1);
   });

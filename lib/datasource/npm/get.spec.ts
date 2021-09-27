@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as hostRules from '../../util/host-rules';
 import { getDependency, resetMemCache } from './get';
@@ -11,16 +10,11 @@ function getPath(s = ''): string {
   return `${prePath}/@myco%2Ftest`;
 }
 
-describe(getName(), () => {
+describe('datasource/npm/get', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetMemCache();
-    httpMock.setup();
     hostRules.clear();
-  });
-
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('has bearer auth', () => {
@@ -158,14 +152,14 @@ describe(getName(), () => {
     const npmrc = ``;
     hostRules.add({
       matchHost: 'https://registry.npmjs.org',
-      token: 'XXX',
+      token: 'abc',
       authType: 'Basic',
     });
 
     httpMock
       .scope('https://registry.npmjs.org', {
         reqheaders: {
-          authorization: 'Basic XXX',
+          authorization: 'Basic abc',
         },
       })
       .get('/renovate')
@@ -235,5 +229,160 @@ describe(getName(), () => {
     expect(await getDependency('npm-error-402')).toBeNull();
 
     expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('massages non-compliant repository urls', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+
+    const dep = await getDependency('@neutrinojs/react');
+
+    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep.sourceDirectory).toBe('packages/react');
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": Object {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br",
+            "authorization": "Bearer XXX",
+            "host": "test.org",
+            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
+  });
+
+  it('handles mixed sourceUrls in releases', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/vue')
+      .reply(200, {
+        name: 'vue',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/vuejs/vue.git',
+        },
+        versions: {
+          '2.0.0': {
+            repository: {
+              type: 'git',
+              url: 'https://github.com/vuejs/vue.git',
+            },
+          },
+          '3.0.0': {
+            repository: {
+              type: 'git',
+              url: 'https://github.com/vuejs/vue-next.git',
+            },
+          },
+        },
+        'dist-tags': { latest: '2.0.0' },
+      });
+
+    const dep = await getDependency('vue');
+
+    expect(dep.sourceUrl).toBe('https://github.com/vuejs/vue.git');
+    expect(dep.releases[0].sourceUrl).toBeUndefined();
+    expect(dep.releases[1].sourceUrl).toEqual(
+      'https://github.com/vuejs/vue-next.git'
+    );
+  });
+
+  it('does not override sourceDirectory', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+          directory: 'packages/foo',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+
+    const dep = await getDependency('@neutrinojs/react');
+
+    expect(dep.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep.sourceDirectory).toBe('packages/foo');
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": Object {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br",
+            "authorization": "Bearer XXX",
+            "host": "test.org",
+            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
+  });
+
+  it('does not massage non-github non-compliant repository urls', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+
+    const dep = await getDependency('@neutrinojs/react');
+
+    expect(dep.sourceUrl).toBe(
+      'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react'
+    );
+    expect(dep.sourceDirectory).toBeUndefined();
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": Object {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br",
+            "authorization": "Bearer XXX",
+            "host": "test.org",
+            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
   });
 });

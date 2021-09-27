@@ -1,33 +1,39 @@
-import nock from 'nock';
 import { getPkgReleases } from '..';
-import { getName, loadFixture } from '../../../test/util';
+import * as httpMock from '../../../test/http-mock';
+import { loadFixture } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-plugin/util';
-import * as sbtPlugin from '.';
+import * as sbtPackage from '.';
 
 const mavenIndexHtml = loadFixture(`maven-index.html`);
 const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
 
-describe(getName(), () => {
+describe('datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
     expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
   });
+
   it('parses sbt index directory', () => {
     expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
   });
 
   describe('getPkgReleases', () => {
     beforeEach(() => {
-      nock.disableNetConnect();
-      nock('https://failed_repo').get('/maven/org/scalatest/').reply(404, null);
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://failed_repo')
+        .get('/maven/org/scalatest/')
+        .reply(404, null);
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/com/example/')
         .reply(200, '<a href="empty/">empty_2.12/</a>\n');
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/com/example/empty/')
         .reply(200, '');
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/')
         .times(3)
         .reply(
@@ -40,22 +46,28 @@ describe(getName(), () => {
             '<a href="scalatest-flatspec_2.12/">scalatest-flatspec_2.12</a>' +
             '<a href="scalatest-matchers-core_2.12/">scalatest-matchers-core_2.12</a>'
         );
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest/')
         .reply(200, "<a href='1.2.0/'>1.2.0/</a>");
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest_2.12/')
         .reply(200, "<a href='1.2.3/'>4.5.6/</a>");
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest-app_2.12/')
         .reply(200, "<a href='6.5.4/'>3.2.1/</a>");
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest-flatspec_2.12/')
         .reply(200, "<a href='6.5.4/'>3.2.1/</a>");
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest-matchers-core_2.12/')
         .reply(200, "<a href='6.5.4/'>3.2.1/</a>");
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get(
           '/maven2/org/scalatest/scalatest-app_2.12/6.5.4/scalatest-app_2.12-6.5.4.pom'
         )
@@ -68,7 +80,8 @@ describe(getName(), () => {
             '</scm>' +
             '</project>'
         );
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get(
           '/maven2/org/scalatest/scalatest-flatspec_2.12/6.5.4/scalatest-flatspec_2.12-6.5.4.pom'
         )
@@ -80,7 +93,8 @@ describe(getName(), () => {
             '</scm>' +
             '</project>'
         );
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get(
           '/maven2/org/scalatest/scalatest-matchers-core_2.12/6.5.4/scalatest-matchers-core_2.12-6.5.4.pom'
         )
@@ -91,10 +105,12 @@ describe(getName(), () => {
             '</project>'
         );
 
-      nock('https://dl.bintray.com')
+      httpMock
+        .scope('https://dl.bintray.com')
         .get('/sbt/sbt-plugin-releases/com.github.gseitz/')
         .reply(200, '');
-      nock('https://dl.bintray.com')
+      httpMock
+        .scope('https://dl.bintray.com')
         .get('/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
         .reply(
           200,
@@ -106,7 +122,8 @@ describe(getName(), () => {
             '</body>\n' +
             '</html>'
         );
-      nock('https://dl.bintray.com')
+      httpMock
+        .scope('https://dl.bintray.com')
         .get(
           '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/'
         )
@@ -121,7 +138,8 @@ describe(getName(), () => {
             '</body>\n' +
             '</html>\n'
         );
-      nock('https://dl.bintray.com')
+      httpMock
+        .scope('https://dl.bintray.com')
         .get(
           '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/'
         )
@@ -138,35 +156,36 @@ describe(getName(), () => {
         );
     });
 
-    afterEach(() => {
-      nock.enableNetConnect();
-    });
+    // TODO: fix mocks
+    afterEach(() => httpMock.clear(false));
 
     it('returns null in case of errors', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toBeNull();
     });
+
     it('returns null if there is no version', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'com.example:empty',
           registryUrls: [],
         })
       ).toBeNull();
     });
+
     it('fetches releases from Maven', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven', MAVEN_REPO],
         })
@@ -175,10 +194,13 @@ describe(getName(), () => {
         registryUrl: 'https://repo.maven.apache.org/maven2',
         releases: [{ version: '1.2.0' }, { version: '1.2.3' }],
       });
+    });
+
+    it('fetches releases from Maven 2', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest_2.12',
           registryUrls: [],
         })
@@ -193,7 +215,7 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest-app_2.12',
           registryUrls: [],
         })
@@ -207,7 +229,7 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest-flatspec_2.12',
           registryUrls: [],
         })
@@ -220,7 +242,7 @@ describe(getName(), () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,
-          datasource: sbtPlugin.id,
+          datasource: sbtPackage.id,
           depName: 'org.scalatest:scalatest-matchers-core_2.12',
           registryUrls: [],
         })

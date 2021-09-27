@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, getName } from '../../test/util';
+import { RenovateConfig, getConfig } from '../../test/util';
 import { migrateAndValidate } from './migrate-validate';
 
 let config: RenovateConfig;
@@ -7,16 +7,23 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(), () => {
+describe('config/migrate-validate', () => {
   describe('migrateAndValidate()', () => {
     it('handles empty', async () => {
       const res = await migrateAndValidate(config, {});
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        errors: [],
+        warnings: [],
+      });
     });
     it('handles migration', async () => {
       const input: RenovateConfig = { automerge: 'none' as any };
       const res = await migrateAndValidate(config, input);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerge: false,
+        errors: [],
+        warnings: [],
+      });
     });
     it('handles invalid', async () => {
       const input: RenovateConfig = { foo: 'none' };

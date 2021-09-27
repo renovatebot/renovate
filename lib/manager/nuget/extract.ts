@@ -1,10 +1,11 @@
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { hasKey } from '../../util/object';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest } from './types';
 import { getConfiguredRegistries } from './util';
 
@@ -71,7 +72,7 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
 
-  const { localDir } = getAdminConfig();
+  const { localDir } = getGlobalConfig();
   const registries = await getConfiguredRegistries(packageFile, localDir);
   const registryUrls = registries
     ? registries.map((registry) => registry.url)
@@ -110,6 +111,10 @@ export async function extractPackageFile(
     }
 
     return { deps };
+  }
+
+  if (packageFile.endsWith('global.json')) {
+    return extractMsbuildGlobalManifest(content, packageFile);
   }
 
   let deps: PackageDependency[] = [];

@@ -7,6 +7,8 @@ export interface Config {
 
 export interface DigestConfig extends Config {
   registryUrl?: string;
+  currentValue?: string;
+  currentDigest?: string;
 }
 
 export interface ReleasesConfigBase {
@@ -42,6 +44,8 @@ export interface Release {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;
+  sourceUrl?: string;
+  sourceDirectory?: string;
 }
 
 export interface ReleaseResult {

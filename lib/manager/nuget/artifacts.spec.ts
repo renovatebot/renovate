@@ -2,10 +2,8 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
@@ -33,7 +31,7 @@ const getRandomString: jest.Mock<typeof _getRandomString> =
   _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
@@ -41,23 +39,22 @@ const adminConfig: RepoAdminConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-describe('updateArtifacts', () => {
-  beforeEach(async () => {
+describe('manager/nuget/artifacts', () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
     getDefaultRegistries.mockReturnValue([] as any);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.ensureCacheDir.mockImplementation((dirName: string) =>
-      Promise.resolve(dirName)
+      Promise.resolve(`others/${dirName}`)
     );
     getRandomString.mockReturnValue('not-so-random' as any);
-    await setExecConfig(adminConfig as never);
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
     docker.resetPrefetchedImages();
   });
 
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
 
   it('aborts if no lock file found', async () => {
@@ -66,7 +63,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['foo', 'bar'],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -81,7 +78,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['foo', 'bar'],
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -96,7 +93,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -111,7 +108,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'otherfile.props',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -153,8 +150,7 @@ describe('updateArtifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -162,7 +158,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -170,6 +166,7 @@ describe('updateArtifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -177,12 +174,9 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          binarySource: BinarySource.Global,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -193,10 +187,11 @@ describe('updateArtifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+    // FIXME: explicit assert condition
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -228,7 +223,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })
@@ -250,7 +245,7 @@ describe('updateArtifacts', () => {
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
-        updatedDeps: ['dep'],
+        updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       })

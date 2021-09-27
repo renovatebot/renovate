@@ -3,8 +3,8 @@ import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import { getOptions } from './definitions';
 import { migrateConfig } from './migration';
+import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
@@ -35,6 +35,7 @@ const ignoredNodes = [
   'isVulnerabilityAlert',
   'copyLocalLibs', // deprecated - functionality is now enabled by default
   'prBody', // deprecated
+  'minimumConfidence', // undocumented feature flag
 ];
 
 function isManagerPath(parentPath: string): boolean {
@@ -77,8 +78,6 @@ function getDeprecationMessage(option: string): string {
     branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
-    yarnrc:
-      'Use of `yarnrc` in config is deprecated. Please commit it to your repository instead.',
   };
   return deprecatedOptions[option];
 }
@@ -387,6 +386,8 @@ export async function validateConfig(
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',
+                'currentValueTemplate',
+                'extractVersionTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
@@ -514,7 +515,9 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
                 });
               }
-            } else if (key === 'customEnvVariables') {
+            } else if (
+              ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)
+            ) {
               const res = validatePlainObject(val);
               if (res !== true) {
                 errors.push({

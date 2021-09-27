@@ -22,7 +22,7 @@ export async function confirmIfDepUpdated(
     pinDigests,
   } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
-  let newUpgrade;
+  let newUpgrade: PackageDependency;
   try {
     const newExtract = await extractPackageFile(
       newContent,

@@ -10,6 +10,7 @@ import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -22,7 +23,6 @@ import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
 } from './host-rules';
-import { getGemHome } from './utils';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
@@ -101,7 +101,10 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundle lock';
     } else {
-      cmd = `bundle lock --update ${updatedDeps.map(quote).join(' ')}`;
+      cmd = `bundle lock --update ${updatedDeps
+        .map((dep) => dep.depName)
+        .map(quote)
+        .join(' ')}`;
     }
 
     let bundlerVersion = '';
@@ -122,7 +125,7 @@ export async function updateArtifacts(
     ];
 
     const bundlerHostRules = findAllAuthenticatable({
-      hostType: 'bundler',
+      hostType: 'rubygems',
     });
 
     const bundlerHostRulesVariables = bundlerHostRules.reduce(
@@ -173,7 +176,7 @@ export async function updateArtifacts(
       cwdFile: packageFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,
-        GEM_HOME: await getGemHome(config),
+        GEM_HOME: await ensureCacheDir('bundler'),
       },
       docker: {
         image: 'ruby',

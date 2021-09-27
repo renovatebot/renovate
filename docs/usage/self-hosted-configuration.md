@@ -28,7 +28,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option).
+The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
 
 ```json
 {
@@ -126,10 +126,6 @@ e.g.
 }
 ```
 
-## composerIgnorePlatformReqs
-
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.s
-
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
@@ -138,7 +134,7 @@ This configuration will be applied after all other environment variables so that
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
+If this is set to `myprefix_` the final container created from `renovate/node` image would be named `myprefix_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
 
 Note that dangling containers will not be removed until Renovate is run with the same prefix again.
 
@@ -209,14 +205,6 @@ This should be set to a Personal Access Token (GitHub only) when `forkMode` is s
 Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
-## gitAuthor
-
-You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
-
-**Note** We strongly recommend that the Git author email you use is unique to Renovate.
-Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
-
 ## gitNoVerify
 
 Controls when Renovate passes the `--no-verify` flag to `git`.
@@ -238,6 +226,17 @@ Before the first commit in a repository, Renovate will:
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
 
+## gitUrl
+
+Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
+Currently works for GitLab only.
+
+Possible values:
+
+- `default`: use HTTPS URLs provided by the platform for Git
+- `ssh`: use SSH URLs provided by the platform for Git
+- `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -246,6 +245,24 @@ If left as default (null), a random short ID will be selected.
 ## logFile
 
 ## logFileLevel
+
+## migratePresets
+
+Use this if you have repositories that extend from a particular preset, which has now been renamed or removed.
+This is handy if you have a large number of repositories that all extend from a particular preset which you want to rename, without the hassle of manually updating every repository individually.
+Use an empty string to indicate that the preset should be ignored rather than replaced.
+
+Example:
+
+```js
+modules.exports = {
+  migratePresets: {
+    '@company': 'local>org/renovate-config',
+  },
+};
+```
+
+In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
 
 ## onboarding
 
@@ -307,18 +324,94 @@ This private key is used to decrypt config files.
 The corresponding public key can be used to create encrypted values for config files.
 If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://renovatebot.com/encrypt>.
 
-To create the key pair with OpenSSL use the following commands:
+To create the key pair with GPG use the following commands:
 
-- `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
-- `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
+- `gpg --full-generate-key` and follow the prompts to generate a key. Name and email are not important to Renovate, and do not configure a passphrase. Use a 4096bit key.
+
+<details><summary>key generation log</summary>
+
+```
+❯ gpg --full-generate-key
+gpg (GnuPG) 2.2.24; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+  (14) Existing key from card
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0)
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: Renovate Bot
+Email address: renovate@whitesourcesoftware.com
+Comment:
+You selected this USER-ID:
+    "Renovate Bot <renovate@whitesourcesoftware.com>"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+
+gpg: key 0649CC3899F22A66 marked as ultimately trusted
+gpg: revocation certificate stored as '/Users/rhys/.gnupg/openpgp-revocs.d/794B820F34B34A8DF32AADB20649CC3899F22A66.rev'
+public and secret key created and signed.
+
+pub   rsa4096 2021-09-10 [SC]
+      794B820F34B34A8DF32AADB20649CEXAMPLEONLY
+uid                      Renovate Bot <renovate@whitesourcesoftware.com>
+sub   rsa4096 2021-09-10 [E]
+```
+
+</details>
+
+- Copy the key ID from the output (`794B820F34B34A8DF32AADB20649CEXAMPLEONLY` in the above example) or run `gpg --list-secret-keys` if you forgot to take a copy
+- Run `gpg --armor --export-secret-keys YOUR_NEW_KEY_ID > renovate-private-key.asc` to generate an armored (text-based) private key file
+- Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
+
+The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
+The public key can be used to replace the existing key in <https://renovatebot.com/encrypt> for your own use.
+
+Any encrypted secrets using GPG must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
+The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
+Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
+
+Note: simple public key encryption was previously used to encrypt secrets, but this approach has now been deprecated and no longer documented.
+
+## privateKeyOld
+
+Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
+Decryption with this key will be attempted after `privateKey`.
+
+If you are migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
+Doing so will mean that Renovate will first attempt to decrypt using the GPG key but fall back to the legacy key and try that next.
+
+You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
 
 ## privateKeyPath
 
-Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
+Used as an alternative to `privateKey`, if you want the key to be read from disk instead.
+
+## privateKeyPathOld
+
+Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
 ## productLinks
 
-Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
+Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
 ## redisUrl
 
@@ -381,7 +474,7 @@ It could then be used in a repository config or preset like so:
 }
 ```
 
-Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
+Secret names must start with an upper or lower case character and can contain only characters, digits, or underscores.
 
 ## skipInstalls
 
@@ -392,3 +485,15 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 ## token
 
 ## username
+
+Mandatory if a GitHub app token is in use using the CLI.
+
+## writeDiscoveredRepos
+
+Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+
+Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
+
+```json
+["myOrg/myRepo", "myOrg/anotherRepo"]
+```

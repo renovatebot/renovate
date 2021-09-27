@@ -1,4 +1,4 @@
-import { getConfig, getName, git, mocked, partial } from '../../../test/util';
+import { getConfig, git, mocked, partial } from '../../../test/util';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { BranchConfig } from '../types';
@@ -9,7 +9,7 @@ jest.mock('../../util/git');
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
-describe(getName(), () => {
+describe('workers/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
     let config: BranchConfig;
     let pr: Pr;
@@ -29,6 +29,7 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
@@ -37,6 +38,7 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(false);
       const res = await prAutomerge.checkAutoMerge(pr, config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
@@ -47,6 +49,7 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.ensureComment.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
@@ -59,6 +62,7 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.ensureComment.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
@@ -68,6 +72,7 @@ describe(getName(), () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
@@ -75,6 +80,7 @@ describe(getName(), () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       const res = await prAutomerge.checkAutoMerge(pr, config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
@@ -82,6 +88,7 @@ describe(getName(), () => {
       config.automerge = true;
       pr.canMerge = undefined;
       const res = await prAutomerge.checkAutoMerge(pr, config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
@@ -89,6 +96,7 @@ describe(getName(), () => {
       config.automerge = true;
       pr.isConflicted = true;
       const res = await prAutomerge.checkAutoMerge(pr, config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });

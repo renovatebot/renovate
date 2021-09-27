@@ -206,6 +206,53 @@ module.exports = {
 };
 ```
 
+#### Google Container Registry
+
+Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
+
+Access to the GCR uses Bearer token based authentication.
+This token can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
+
+The token expires after 60 minutes so you cannot store it in a variable for subsequent builds (like you can with `RENOVATE_TOKEN`).
+
+When running Renovate in this context the Google access token must be retrieved and injected into the `hostRules` configuration just before Renovate is started.
+
+_This documentation gives **a few hints** on **a possible way** to achieve this end result._
+
+The basic approach is that you create a custom image and then run Renovate as one of the stages of your project.
+To make this run independent of any user you should use a [`Project Access Token`](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) (with Scopes: `api`, `read_api` and `write_repository`) for the project and use this as the `RENOVATE_TOKEN` variable for Gitlab CI.
+See also the [renovate-runner repository on GitLab](https://gitlab.com/renovate-bot/renovate-runner) where `.gitlab-ci.yml` configuration examples can be found.
+
+To get access to the token a custom Renovate Docker image is needed that includes the Google Cloud SDK.
+The Dockerfile to create such an image can look like this:
+
+```Dockerfile
+FROM renovate/renovate:27.19.2
+# Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
+# under "Installation" for "Debian/Ubuntu"
+RUN ...
+```
+
+For Renovate to access the Google Container Registry (GCR) it needs the current Google Access Token.
+The configuration fragment to do that looks something like this:
+
+```js
+hostRules: [
+  {
+    matchHost: 'eu.gcr.io',
+    token: 'MyReallySecretTokenThatExpiresAfter60Minutes',
+  },
+];
+```
+
+One way to provide the short-lived Google Access Token to Renovate is by generating these settings into a `config.js` file from within the `.gitlab-ci.yml` right before starting Renovate:
+
+```yaml
+script:
+  - 'echo "module.exports = { hostRules: [ { matchHost: ''eu.gcr.io'', token: ''"$(gcloud auth print-access-token)"'' } ] };" > config.js'
+  - renovate $RENOVATE_EXTRA_FLAGS
+```
+
 #### ChartMuseum
 
 Maybe you're running your own ChartMuseum server to host your private Helm Charts.

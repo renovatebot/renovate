@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
-import * as datasourceHelm from '../../datasource/helm';
+import { loadAll } from 'js-yaml';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -18,7 +18,7 @@ export function extractPackageFile(
   let docs: Doc[];
   const aliases: Record<string, string> = {};
   try {
-    docs = yaml.safeLoadAll(content, null, { json: true });
+    docs = loadAll(content, null, { json: true });
   } catch (err) {
     logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
     return null;
@@ -39,12 +39,19 @@ export function extractPackageFile(
       let depName = dep.chart;
       let repoName = null;
 
+      if (!is.string(dep.chart)) {
+        return {
+          depName: dep.name,
+          skipReason: SkipReason.InvalidName,
+        };
+      }
+
       // If starts with ./ is for sure a local path
       if (dep.chart.startsWith('./')) {
         return {
           depName,
-          skipReason: 'local-chart',
-        } as PackageDependency;
+          skipReason: SkipReason.LocalChart,
+        };
       }
 
       if (dep.chart.includes('/')) {
@@ -88,5 +95,5 @@ export function extractPackageFile(
     return null;
   }
 
-  return { deps, datasource: datasourceHelm.id } as PackageFile;
+  return { deps, datasource: HelmDatasource.id } as PackageFile;
 }

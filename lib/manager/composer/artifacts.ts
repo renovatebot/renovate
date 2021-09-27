@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import upath from 'upath';
-import { getAdminConfig } from '../../config/admin';
+import { getGlobalConfig } from '../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -15,7 +14,7 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
-  ensureDir,
+  ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
   localPathExists,
@@ -26,7 +25,12 @@ import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson } from './types';
-import { composerVersioningId, getConstraint } from './utils';
+import {
+  composerVersioningId,
+  extractContraints,
+  getComposerConstraint,
+  getPhpConstraint,
+} from './utils';
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
@@ -59,10 +63,13 @@ function getAuthJson(): string | null {
   hostRules
     .findAll({ hostType: datasourcePackagist.id })
     ?.forEach((hostRule) => {
-      const { resolvedHost, username, password } = hostRule;
+      const { resolvedHost, username, password, token } = hostRule;
       if (resolvedHost && username && password) {
         authJson['http-basic'] = authJson['http-basic'] || {};
         authJson['http-basic'][resolvedHost] = { username, password };
+      } else if (resolvedHost && token) {
+        authJson.bearer = authJson.bearer || {};
+        authJson.bearer[resolvedHost] = token;
       }
     });
 
@@ -77,15 +84,8 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const { allowScripts, cacheDir: adminCacheDir } = getAdminConfig();
-  const cacheDir =
-    process.env.COMPOSER_CACHE_DIR ||
-    upath.join(adminCacheDir, './others/composer');
-  await ensureDir(cacheDir);
-  logger.debug(`Using composer cache ${cacheDir}`);
-
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
     return null;
@@ -96,19 +96,33 @@ export async function updateArtifacts({
   await ensureLocalDir(vendorDir);
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+
+    const constraints = {
+      ...extractContraints(
+        JSON.parse(newPackageFileContent),
+        JSON.parse(existingLockFileContent)
+      ),
+      ...config.constraints,
+    };
+
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
 
+    const preCommands: string[] = [
+      `install-tool composer ${await getComposerConstraint(constraints)}`,
+    ];
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
-        COMPOSER_CACHE_DIR: cacheDir,
+        COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
       },
       docker: {
-        image: 'composer',
-        tagConstraint: getConstraint(config),
+        preCommands,
+        image: 'php',
+        tagConstraint: getPhpConstraint(constraints),
         tagScheme: composerVersioningId,
       },
     };
@@ -118,15 +132,22 @@ export async function updateArtifacts({
       args = 'install';
     } else {
       args =
-        ('update ' + updatedDeps.map(quote).join(' ')).trim() +
-        ' --with-dependencies';
+        (
+          'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
+        ).trim() + ' --with-dependencies';
     }
     if (config.composerIgnorePlatformReqs) {
-      args += ' --ignore-platform-reqs';
+      if (config.composerIgnorePlatformReqs.length === 0) {
+        args += ' --ignore-platform-reqs';
+      } else {
+        config.composerIgnorePlatformReqs.forEach((req) => {
+          args += ' --ignore-platform-req ' + quote(req);
+        });
+      }
     }
     args += ' --no-ansi --no-interaction';
-    if (!allowScripts || config.ignoreScripts) {
-      args += ' --no-scripts --no-autoloader';
+    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
+      args += ' --no-scripts --no-autoloader --no-plugins';
     }
     logger.debug({ cmd, args }, 'composer command');
     await exec(`${cmd} ${args}`, execOptions);

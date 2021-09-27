@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName, mocked } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
@@ -12,14 +12,11 @@ const hostRules = mocked(_hostRules);
 const giteaApiHost = gitea.Endpoint;
 const basePath = '/repos/some/repo/contents';
 
-describe(getName(), () => {
+describe('config/presets/gitea/index', () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });
     setBaseUrl(giteaApiHost);
   });
-
-  afterEach(() => httpMock.reset());
 
   describe('fetchJSONFile()', () => {
     it('returns JSON', async () => {
@@ -35,7 +32,7 @@ describe(getName(), () => {
         'some-filename.json',
         giteaApiHost
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

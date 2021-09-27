@@ -1,16 +1,17 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
+import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { find } from '../../util/host-rules';
 import { isValid } from '../../versioning/semver';
 import type {
+  PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
@@ -32,10 +33,11 @@ function getPreCommands(): string[] | null {
 }
 
 function getUpdateImportPathCmds(
-  updatedDeps: string[],
+  updatedDeps: PackageDependency[],
   { constraints, newMajor }: UpdateArtifactsConfig
 ): string[] {
   const updateImportCommands = updatedDeps
+    .map((dep) => dep.depName)
     .filter((x) => !x.startsWith('gopkg.in'))
     .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
 
@@ -92,9 +94,6 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
-  const goPath = await ensureCacheDir('./others/go', 'GOPATH');
-  logger.debug(`Using GOPATH: ${goPath}`);
-
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
@@ -120,19 +119,18 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
-        GOPATH: goPath,
+        GOPATH: await ensureCacheDir('go'),
         GOPROXY: process.env.GOPROXY,
         GOPRIVATE: process.env.GOPRIVATE,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
-        CGO_ENABLED: config.binarySource === BinarySource.Docker ? '0' : null,
+        CGO_ENABLED: getGlobalConfig().binarySource === 'docker' ? '0' : null,
       },
       docker: {
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
-        volumes: [goPath],
         preCommands: getPreCommands(),
       },
     };

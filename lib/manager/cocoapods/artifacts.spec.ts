@@ -3,11 +3,9 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
-import { setExecConfig } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
 import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git';
 import type { UpdateArtifactsConfig } from '../types';
@@ -29,18 +27,17 @@ delete process.env.CP_HOME_DIR;
 
 const config: UpdateArtifactsConfig = {};
 
-const adminConfig: RepoAdminConfig = {
+const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
 };
 
-describe('.updateArtifacts()', () => {
-  beforeEach(async () => {
+describe('manager/cocoapods/artifacts', () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
-    await setExecConfig(adminConfig as never);
-    setAdminConfig(adminConfig);
+    setGlobalConfig(adminConfig);
 
     datasource.getPkgReleases.mockResolvedValue({
       releases: [
@@ -54,14 +51,14 @@ describe('.updateArtifacts()', () => {
     });
   });
   afterEach(() => {
-    setAdminConfig();
+    setGlobalConfig();
   });
   it('returns null if no Podfile.lock found', async () => {
     const execSnapshots = mockExecAll(exec);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
@@ -82,14 +79,14 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null for invalid local directory', async () => {
     const execSnapshots = mockExecAll(exec);
-    setAdminConfig({
+    setGlobalConfig({
       localDir: '',
     });
 
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config: {},
       })
@@ -118,7 +115,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
@@ -127,7 +124,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Podfile', async () => {
     const execSnapshots = mockExecAll(exec);
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Old Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
@@ -136,16 +133,16 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([{ file: { contents: 'New Podfile' } }]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Podfile and Pods files', async () => {
     const execSnapshots = mockExecAll(exec);
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Old Manifest.lock' as any);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     fs.readFile.mockResolvedValueOnce('Pods manifest' as any);
@@ -157,11 +154,16 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([
+      { file: { name: 'Podfile.lock' } },
+      { file: { name: 'Pods/Manifest.lock' } },
+      { file: { name: 'Pods/New' } },
+      { file: { name: '|delete|' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches write error', async () => {
@@ -173,12 +175,14 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
-    ).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'Podfile.lock', stderr: 'not found' } },
+    ]);
+    expect(execSnapshots).toBeEmpty();
   });
   it('returns pod exec error', async () => {
     const execSnapshots = mockExecAll(exec, new Error('exec exception'));
@@ -188,17 +192,19 @@ describe('.updateArtifacts()', () => {
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
-        updatedDeps: ['foo'],
+        updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'Podfile.lock', stderr: 'exec exception' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('dynamically selects Docker image tag', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
 
@@ -210,16 +216,20 @@ describe('.updateArtifacts()', () => {
 
     await updateArtifacts({
       packageFileName: 'Podfile',
-      updatedDeps: ['foo'],
+      updatedDeps: [{ depName: 'foo' }],
       newPackageFileContent: '',
       config,
     });
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot([
+      { cmd: 'docker pull renovate/cocoapods:1.2.4' },
+      {},
+      {},
+    ]);
   });
   it('falls back to the `latest` Docker image tag', async () => {
     const execSnapshots = mockExecAll(exec);
 
-    await setExecConfig({ ...adminConfig, binarySource: BinarySource.Docker });
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -234,10 +244,14 @@ describe('.updateArtifacts()', () => {
 
     await updateArtifacts({
       packageFileName: 'Podfile',
-      updatedDeps: ['foo'],
+      updatedDeps: [{ depName: 'foo' }],
       newPackageFileContent: '',
       config,
     });
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot([
+      { cmd: 'docker pull renovate/cocoapods:latest' },
+      {},
+      {},
+    ]);
   });
 });

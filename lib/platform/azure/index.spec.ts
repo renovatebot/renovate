@@ -5,7 +5,6 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { getName } from '../../../test/util';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -13,7 +12,7 @@ import * as _hostRules from '../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
 
-describe(getName(), () => {
+describe('platform/azure/index', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
@@ -475,17 +474,7 @@ describe(getName(), () => {
       expect(res).toBeNull();
     });
   });
-  describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
-    it('return success if requiredStatusChecks null', async () => {
-      await initRepo('some/repo');
-      const res = await azure.getBranchStatus('somebranch', null);
-      expect(res).toEqual(BranchStatus.green);
-    });
-    it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some/repo');
-      const res = await azure.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BranchStatus.red);
-    });
+  describe('getBranchStatus(branchName, ignoreTests)', () => {
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -495,7 +484,7 @@ describe(getName(), () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
     it('should pass through failed', async () => {
@@ -507,7 +496,7 @@ describe(getName(), () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
     });
     it('should pass through pending', async () => {
@@ -519,7 +508,7 @@ describe(getName(), () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
     it('should fall back to yellow if no statuses returned', async () => {
@@ -531,7 +520,7 @@ describe(getName(), () => {
             getStatuses: jest.fn(() => []),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
   });
@@ -1080,7 +1069,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(updatePullRequestMock).toHaveBeenCalledWith(
         {
@@ -1118,7 +1110,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
       expect(res).toBe(false);
     });
 
@@ -1138,8 +1133,14 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      await azure.mergePr(1234, 'test-branch-1');
-      await azure.mergePr(5678, 'test-branch-2');
+      await azure.mergePr({
+        branchName: 'test-branch-1',
+        id: 1234,
+      });
+      await azure.mergePr({
+        branchName: 'test-branch-2',
+        id: 5678,
+      });
 
       expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
     });
@@ -1167,7 +1168,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
       expect(res).toBe(true);
@@ -1197,7 +1201,10 @@ describe(getName(), () => {
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
-      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+      });
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(
         expectedNumRetries + 1

@@ -31,6 +31,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -213,15 +214,13 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url: gitUrl,
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
       cloneSubmodules,
     });
 
     config.mergeMethod = 'merge';
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
-      isFork: !!info.parent,
+      isFork: !!info.origin,
     };
 
     return repoConfig;
@@ -397,18 +396,9 @@ async function getStatus(
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
+  branchName: string
 ): Promise<BranchStatus> {
-  logger.debug(
-    `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
-  );
-
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
+  logger.debug(`getBranchStatus(${branchName})`);
 
   if (!git.branchExists(branchName)) {
     logger.debug('Branch does not exist - cannot fetch status');
@@ -962,10 +952,10 @@ export async function updatePr({
 }
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp261
-export async function mergePr(
-  prNo: number,
-  branchName: string
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: prNo,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // Used for "automerge" feature
   try {
@@ -990,8 +980,6 @@ export async function mergePr(
   }
 
   logger.debug({ pr: prNo }, 'PR merged');
-  // Delete branch
-  await deleteBranch(branchName);
   return true;
 }
 

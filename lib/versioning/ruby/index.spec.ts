@@ -1,7 +1,7 @@
 import type { RangeStrategy } from '../../types';
 import { api as semverRuby } from '.';
 
-describe('semverRuby', () => {
+describe('versioning/ruby/index', () => {
   describe('.equals', () => {
     it('returns true when versions are equal', () => {
       expect(semverRuby.equals('1.0.0', '1')).toBe(true);
@@ -435,6 +435,7 @@ describe('semverRuby', () => {
     });
 
     it('does not error', () => {
+      // FIXME: explicit assert condition
       expect(
         semverRuby.getNewValue({
           currentValue: '>= 3.2, < 5.0',
@@ -548,6 +549,36 @@ describe('semverRuby', () => {
               newVersion,
             })
           ).toEqual(expected);
+        }
+      );
+    });
+
+    it('falls back to "replace" from "auto" and "widen" strategies', () => {
+      [
+        ['< 1.2.5', '< 1.0.3', 'auto', '1.0.3', '1.2.4'],
+        ['< 1.2.5', '< 1.0.3', 'widen', '1.0.3', '1.2.4'],
+      ].forEach(
+        ([
+          expected,
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        ]) => {
+          const res = semverRuby.getNewValue({
+            currentValue,
+            rangeStrategy: rangeStrategy as RangeStrategy,
+            currentVersion,
+            newVersion,
+          });
+          const fallbackRes = semverRuby.getNewValue({
+            currentValue,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          });
+          expect(res).toEqual(expected);
+          expect(res).toEqual(fallbackRes);
         }
       );
     });

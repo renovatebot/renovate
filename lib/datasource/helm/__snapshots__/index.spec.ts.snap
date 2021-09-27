@@ -6,7 +6,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/subdir/index.yaml",
@@ -20,7 +20,6 @@ Object {
   "registryUrl": "https://example-repository.com",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2019-02-13T00:56:01.476Z",
       "version": "1.0.0",
     },
     Object {
@@ -138,7 +137,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",
@@ -152,7 +151,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",
@@ -166,7 +165,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",
@@ -180,7 +179,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",
@@ -194,7 +193,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",
@@ -208,7 +207,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",
@@ -222,7 +221,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",
@@ -236,7 +235,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",
@@ -252,7 +251,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate, br",
       "host": "example-repository.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://example-repository.com/index.yaml",

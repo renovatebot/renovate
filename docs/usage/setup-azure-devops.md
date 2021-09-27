@@ -81,7 +81,7 @@ For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure Dev
 
 ### Yarn users
 
-To do a succesfull `yarn install` you need to match the URL of the registry fully.
+To do a successful `yarn install` you need to match the URL of the registry fully.
 Use the `matchHost` config option to specify the full path to the registry.
 
 ```javascript
@@ -114,7 +114,7 @@ always-auth=true
 
 ### Add renovate.json file
 
-Additionally, you can create a `renovate.json` file which holds the Renovate configuration, in the root of the repo.
+Additionally, you can create a `renovate.json` file (which holds the Renovate configuration) in the root of the repository you want to update.
 [Read more about the Renovate configuration options](https://docs.renovatebot.com/configuration-options/)
 
 ### Using a single pipeline to update multiple repositories

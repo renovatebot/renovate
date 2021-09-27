@@ -46,7 +46,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
@@ -56,7 +56,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/",
@@ -66,7 +66,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/1.2.1/",
@@ -76,7 +76,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/1.2.0/",
@@ -86,7 +86,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/0.11.1/",
@@ -101,7 +101,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/foo/bar/",
@@ -113,23 +113,6 @@ exports[`datasource/galaxy-collection/index getReleases returns null for empty l
 
 exports[`datasource/galaxy-collection/index getReleases returns null for null lookupName  1`] = `Array []`;
 
-exports[`datasource/galaxy-collection/index getReleases returns null for remote host error 1`] = `[Error: external-host-error]`;
-
-exports[`datasource/galaxy-collection/index getReleases returns null for remote host error 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://galaxy.ansible.com/api/v2/collections/foo/bar/",
-  },
-]
-`;
-
 exports[`datasource/galaxy-collection/index getReleases returns null for unexpected data at base 1`] = `
 Array [
   Object {
@@ -137,7 +120,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
@@ -152,7 +135,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
@@ -162,7 +145,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/",
@@ -177,7 +160,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/foo/bar/",
@@ -214,7 +197,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
@@ -224,7 +207,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/",
@@ -234,7 +217,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/1.2.1/",
@@ -244,7 +227,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/1.2.0/",
@@ -254,10 +237,50 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "galaxy.ansible.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/0.11.1/",
+  },
+]
+`;
+
+exports[`datasource/galaxy-collection/index getReleases throws error for remote host versions error 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "galaxy.ansible.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "galaxy.ansible.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/",
+  },
+]
+`;
+
+exports[`datasource/galaxy-collection/index getReleases throws for remote host error 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "galaxy.ansible.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://galaxy.ansible.com/api/v2/collections/foo/bar/",
   },
 ]
 `;

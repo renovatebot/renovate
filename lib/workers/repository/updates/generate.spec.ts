@@ -1,4 +1,4 @@
-import { defaultConfig, getName, partial } from '../../../../test/util';
+import { defaultConfig, partial } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import * as datasourceNpm from '../../../datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
@@ -8,7 +8,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe(getName(), () => {
+describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade', () => {
       const branch = [
@@ -38,6 +38,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileUpdate', () => {
@@ -54,6 +55,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('does not group same upgrades', () => {
@@ -385,6 +387,7 @@ describe(getName(), () => {
         }),
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res.prTitle).toMatchSnapshot();
     });
     it('handles @types specially', () => {
@@ -426,6 +429,7 @@ describe(getName(), () => {
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
+      // FIXME: explicit assert condition
       expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles @types specially (reversed)', () => {
@@ -460,6 +464,7 @@ describe(getName(), () => {
           group: {},
         },
       ];
+      // FIXME: explicit assert condition
       expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles upgrades', () => {
@@ -508,6 +513,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res.prTitle).toMatchSnapshot();
     });
     it('sorts upgrades, without position first', () => {
@@ -553,18 +559,18 @@ describe(getName(), () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          pendingChecks: ['check'],
+          pendingChecks: true,
         },
         {
           depName: 'some-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          pendingChecks: ['check'],
+          pendingChecks: true,
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.pendingChecks).toHaveLength(1);
+      expect(res.pendingChecks).toBe(true);
       expect(res.upgrades).toHaveLength(2);
     });
     it('filters pendingChecks', () => {
@@ -574,7 +580,7 @@ describe(getName(), () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          pendingChecks: ['check'],
+          pendingChecks: true,
         },
         {
           depName: 'some-dep',

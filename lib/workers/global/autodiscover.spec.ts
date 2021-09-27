@@ -1,4 +1,3 @@
-import { getName } from '../../../test/util';
 import type { RenovateConfig } from '../../config/types';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import * as platform from '../../platform';
@@ -13,14 +12,14 @@ jest.unmock('../../platform');
 const hostRules = _hostRules;
 const ghApi: jest.Mocked<typeof _ghApi> = _ghApi as never;
 
-describe(getName(), () => {
+describe('workers/global/autodiscover', () => {
   let config: RenovateConfig;
   beforeEach(async () => {
     jest.resetAllMocks();
     config = {};
     await platform.initPlatform({
       platform: PLATFORM_TYPE_GITHUB,
-      token: 'abc123',
+      token: '123test',
       endpoint: 'endpoint',
     });
   });

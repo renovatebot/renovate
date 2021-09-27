@@ -391,6 +391,21 @@ Array [
 ]
 `;
 
+exports[`manager/cargo/extract extractPackageFile() extracts original package name of renamed dependencies 1`] = `
+Array [
+  Object {
+    "currentValue": "0.4.0",
+    "datasource": "crate",
+    "depName": "boolector-solver",
+    "depType": "dependencies",
+    "lookupName": "boolector",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+  },
+]
+`;
+
 exports[`manager/cargo/extract extractPackageFile() extracts platform specific dependencies 1`] = `
 Array [
   Object {

@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { logger } from '../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
@@ -6,8 +6,9 @@ import { defaultConfig, extractPackageFile } from '.';
 const dockerfileContent = loadFixture(`Dockerfile`);
 const ansibleYamlContent = loadFixture(`ansible.yml`);
 const exampleJsonContent = loadFixture(`example.json`);
+const exampleGitlabCiYml = loadFixture(`gitlab-ci.yml`);
 
-describe(getName(), () => {
+describe('manager/regex/index', () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
       pinDigests: false,
@@ -103,6 +104,7 @@ describe(getName(), () => {
       'Dockerfile',
       config
     );
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
   });
   it('extracts and applies a registryUrlTemplate', async () => {
@@ -136,6 +138,7 @@ describe(getName(), () => {
       'Dockerfile',
       config
     );
+    // FIXME: explicit assert condition
     expect(res).toMatchSnapshot();
     expect(logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-gradle' },
@@ -199,6 +202,58 @@ describe(getName(), () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
   });
+  it('extracts with combination strategy and registry url', async () => {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
+      matchStrings: [
+        'CHART_VERSION: (?<currentValue>.*?)\n',
+        'CHART_REPOSITORY_URL: "(?<registryUrl>.*?)"',
+        'CHART_NAME: "(?<depName>.*?)"',
+      ],
+      datasourceTemplate: 'helm',
+    };
+    const res = await extractPackageFile(
+      exampleGitlabCiYml,
+      '.gitlab-ci.yml',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+  });
+
+  it('extracts with combination strategy and templates', async () => {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
+      matchStrings: [
+        'CHART_REPOSITORY_URL: "(?<registryUrl>.*)\\/(?<depName>[a-z]+)\\/"',
+        'CHART_VERSION: (?<currentValue>.*?)\n',
+      ],
+      datasourceTemplate: 'helm',
+      depNameTemplate: 'helm_repo/{{{ depName }}}',
+    };
+    const res = await extractPackageFile(
+      exampleGitlabCiYml,
+      '.gitlab-ci.yml',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+  });
+
+  it('extracts with combination strategy and empty file', async () => {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
+      matchStrings: [
+        'CHART_REPOSITORY_URL: "(?<registryUrl>.*)\\/(?<depName>[a-z]+)\\/"',
+        'CHART_VERSION: (?<currentValue>.*?)\n',
+      ],
+      datasourceTemplate: 'helm',
+      depNameTemplate: 'helm_repo/{{{ depName }}}',
+    };
+    const res = await extractPackageFile('', '.gitlab-ci.yml', config);
+    expect(res).toBeNull();
+  });
+
   it('extracts with recursive strategy and single match', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [

@@ -1,6 +1,6 @@
-import nock from 'nock';
 import { getPkgReleases } from '..';
-import { getName, loadFixture } from '../../../test/util';
+import * as httpMock from '../../../test/http-mock';
+import { loadFixture } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from './util';
@@ -9,19 +9,23 @@ import * as sbtPlugin from '.';
 const mavenIndexHtml = loadFixture(`maven-index.html`);
 const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
 
-describe(getName(), () => {
+describe('datasource/sbt-plugin/index', () => {
   it('parses Maven index directory', () => {
     expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
   });
+
   it('parses sbt index directory', () => {
     expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
   });
 
   describe('getPkgReleases', () => {
     beforeEach(() => {
-      nock.disableNetConnect();
-      nock('https://failed_repo').get('/maven/org/scalatest/').reply(404, null);
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://failed_repo')
+        .get('/maven/org/scalatest/')
+        .reply(404, null);
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/')
         .reply(
           200,
@@ -30,17 +34,21 @@ describe(getName(), () => {
             "<a href='scalatest_sjs2.12/'>scalatest_2.12/</a>" +
             "<a href='scalatest_native2.12/'>scalatest_2.12/</a>"
         );
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest/')
         .reply(200, "<a href='1.2.0/'>1.2.0/</a>");
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/org/scalatest/scalatest_2.12/')
         .reply(200, "<a href='1.2.3/'>4.5.6/</a>");
 
-      nock('https://dl.bintray.com')
+      httpMock
+        .scope('https://dl.bintray.com')
         .get('/sbt/sbt-plugin-releases/com.github.gseitz/')
         .reply(200, '');
-      nock('https://dl.bintray.com')
+      httpMock
+        .scope('https://dl.bintray.com')
         .get('/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
         .reply(
           200,
@@ -52,7 +60,8 @@ describe(getName(), () => {
             '</body>\n' +
             '</html>'
         );
-      nock('https://dl.bintray.com')
+      httpMock
+        .scope('https://dl.bintray.com')
         .get(
           '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/'
         )
@@ -67,7 +76,8 @@ describe(getName(), () => {
             '</body>\n' +
             '</html>\n'
         );
-      nock('https://dl.bintray.com')
+      httpMock
+        .scope('https://dl.bintray.com')
         .get(
           '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/'
         )
@@ -83,7 +93,8 @@ describe(getName(), () => {
             '</html>\n'
         );
 
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/io/get-coursier/')
         .reply(
           200,
@@ -92,7 +103,8 @@ describe(getName(), () => {
             '<a href="sbt-coursier_2.12_1.0.0-M5/">sbt-coursier_2.12_1.0.0-M5/</a>\n' +
             '<a href="sbt-coursier_2.12_1.0.0-M6/">sbt-coursier_2.12_1.0.0-M6/</a>\n'
         );
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get('/maven2/io/get-coursier/sbt-coursier_2.12_1.0/')
         .reply(
           200,
@@ -101,7 +113,8 @@ describe(getName(), () => {
             '<a href="2.0.0-RC6-2/">2.0.0-RC6-2/</a>\n' +
             '<a href="2.0.0-RC6-6/">2.0.0-RC6-6/</a>\n'
         );
-      nock('https://repo.maven.apache.org')
+      httpMock
+        .scope('https://repo.maven.apache.org')
         .get(
           '/maven2/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-6/sbt-coursier-2.0.0-RC6-6.pom'
         )
@@ -116,9 +129,8 @@ describe(getName(), () => {
         );
     });
 
-    afterEach(() => {
-      nock.enableNetConnect();
-    });
+    // TODO: fix mocks
+    afterEach(() => httpMock.clear(false));
 
     it('returns null in case of errors', async () => {
       expect(
@@ -138,6 +150,7 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('fetches sbt plugins', async () => {
       expect(
         await getPkgReleases({
@@ -152,6 +165,8 @@ describe(getName(), () => {
         registryUrl: 'https://dl.bintray.com/sbt/sbt-plugin-releases',
         releases: [{ version: '0.5.5' }],
       });
+    });
+    it('fetches sbt plugins 2', async () => {
       expect(
         await getPkgReleases({
           versioning: mavenVersioning.id,

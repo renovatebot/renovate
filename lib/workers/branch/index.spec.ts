@@ -1,13 +1,7 @@
 import * as _fs from 'fs-extra';
-import {
-  defaultConfig,
-  getName,
-  git,
-  mocked,
-  platform,
-} from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
-import type { RepoAdminConfig } from '../../config/types';
+import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -17,6 +11,7 @@ import type { WriteExistingFilesResult } from '../../manager/npm/post-update/typ
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
+import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
@@ -24,7 +19,7 @@ import type { EnsurePrResult } from '../pr';
 import * as _prAutomerge from '../pr/automerge';
 import type { Pr } from '../repository/onboarding/branch/check';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import { PrResult } from '../types';
+import { BranchResult } from '../types';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
@@ -44,6 +39,7 @@ jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../pr/automerge');
 jest.mock('../../util/exec');
+jest.mock('../../util/merge-confidence');
 jest.mock('../../util/sanitize');
 jest.mock('../../util/git');
 jest.mock('fs-extra');
@@ -56,6 +52,7 @@ const reuse = mocked(_reuse);
 const npmPostExtract = mocked(_npmPostExtract);
 const automerge = mocked(_automerge);
 const commit = mocked(_commit);
+const mergeConfidence = mocked(_mergeConfidence);
 const prAutomerge = mocked(_prAutomerge);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
@@ -63,9 +60,9 @@ const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
 const limits = mocked(_limits);
 
-const adminConfig: RepoAdminConfig = { localDir: '', cacheDir: '' };
+const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
-describe(getName(), () => {
+describe('workers/branch/index', () => {
   describe('processBranch', () => {
     const updatedPackageFiles: PackageFilesResult = {
       updatedPackageFiles: [],
@@ -85,11 +82,10 @@ describe(getName(), () => {
         upgrades: [{ depName: 'some-dep-name' }],
       } as BranchConfig;
       schedule.isScheduledNow.mockReturnValue(true);
-      commit.commitFilesToBranch.mockResolvedValue('abc123');
+      commit.commitFilesToBranch.mockResolvedValue('123test');
 
       platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
-        prResult: PrResult.Created,
         pr: {
           title: '',
           sourceBranch: '',
@@ -97,7 +93,7 @@ describe(getName(), () => {
           body: '',
         },
       });
-      setAdminConfig(adminConfig);
+      setGlobalConfig(adminConfig);
       sanitize.sanitize.mockImplementation((input) => input);
     });
     afterEach(() => {
@@ -105,11 +101,12 @@ describe(getName(), () => {
       platform.ensureCommentRemoval.mockClear();
       commit.commitFilesToBranch.mockClear();
       jest.resetAllMocks();
-      setAdminConfig();
+      setGlobalConfig();
     });
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips branch if not scheduled and not updating out of schedule', async () => {
@@ -117,6 +114,7 @@ describe(getName(), () => {
       config.updateNotScheduled = false;
       git.branchExists.mockReturnValue(true);
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips branch for fresh release with stabilityDays', async () => {
@@ -141,6 +139,7 @@ describe(getName(), () => {
 
       git.branchExists.mockReturnValue(false);
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips branch if not stabilityDays not met', async () => {
@@ -153,8 +152,40 @@ describe(getName(), () => {
         },
       ];
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
+
+    it('skips branch if minimumConfidence not met', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.prCreation = 'not-pending';
+      (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
+        {
+          minimumConfidence: 'high',
+        },
+      ];
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(false);
+      const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
+      expect(res).toMatchSnapshot();
+    });
+
+    it('processes branch if minimumConfidence is met', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.prCreation = 'not-pending';
+      (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
+        {
+          minimumConfidence: 'high',
+        },
+      ];
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(true);
+      const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
+      expect(res).toMatchSnapshot();
+    });
+
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
@@ -228,6 +259,7 @@ describe(getName(), () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips branch if edited PR found', async () => {
@@ -239,6 +271,7 @@ describe(getName(), () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips branch if target branch changed', async () => {
@@ -251,28 +284,32 @@ describe(getName(), () => {
       git.isBranchModified.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips branch if branch edited and no PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('continues branch if branch edited and but PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValueOnce('abc123');
-      platform.findPr.mockResolvedValueOnce({ sha: 'abc123' } as any);
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValueOnce('abc123');
+      git.getBranchCommit.mockReturnValueOnce('123test');
       platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
       const res = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('returns if branch creation limit exceeded', async () => {
@@ -285,6 +322,7 @@ describe(getName(), () => {
       });
       limits.isLimitReached.mockReturnValueOnce(true);
       limits.isLimitReached.mockReturnValueOnce(false);
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
     it('returns if pr creation limit exceeded and branch exists', async () => {
@@ -297,9 +335,10 @@ describe(getName(), () => {
       });
       git.branchExists.mockReturnValue(true);
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.LimitReached,
+        prBlockedBy: 'RateLimited',
       });
       limits.isLimitReached.mockReturnValue(false);
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
     it('returns if commit limit exceeded', async () => {
@@ -313,6 +352,7 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(false);
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
     it('returns if no work', async () => {
@@ -325,6 +365,7 @@ describe(getName(), () => {
       });
       git.branchExists.mockReturnValue(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 
@@ -336,7 +377,8 @@ describe(getName(), () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-      config.pendingChecks = ['stabilityDays'];
+      config.pendingChecks = true;
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 
@@ -368,7 +410,7 @@ describe(getName(), () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({
         ...config,
-        requiredStatusChecks: null,
+        ignoreTests: true,
       });
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -385,7 +427,7 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      setAdminConfig({ ...adminConfig, dryRun: true });
+      setGlobalConfig({ ...adminConfig, dryRun: true });
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -403,8 +445,9 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.AwaitingApproval,
+        prBlockedBy: 'NeedsApproval',
       });
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
     it('returns if branch exists but pending', async () => {
@@ -420,8 +463,63 @@ describe(getName(), () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.AwaitingNotPending,
+        prBlockedBy: 'AwaitingTests',
       });
+      // FIXME: explicit assert condition
+      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+    });
+    it('returns if branch automerge is pending', async () => {
+      expect.assertions(1);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('no automerge');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prBlockedBy: 'BranchAutomerge',
+      });
+      // FIXME: explicit assert condition
+      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+    });
+    it('returns if PR creation failed', async () => {
+      expect.assertions(1);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prBlockedBy: 'Error',
+      });
+      // FIXME: explicit assert condition
+      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+    });
+    it('handles unknown PrBlockedBy', async () => {
+      expect.assertions(1);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prBlockedBy: 'whoops' as any,
+      });
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
     it('returns if branch exists but updated', async () => {
@@ -433,10 +531,11 @@ describe(getName(), () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
+      // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
           ...config,
-          requiredStatusChecks: null,
+          ignoreTests: true,
           prCreation: 'not-pending',
         })
       ).toMatchSnapshot();
@@ -455,7 +554,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -476,7 +574,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
@@ -501,7 +598,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -522,7 +618,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -544,7 +639,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -566,7 +660,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -587,7 +680,6 @@ describe(getName(), () => {
       git.branchExists.mockReturnValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
@@ -602,6 +694,7 @@ describe(getName(), () => {
         throw new Error('some error');
       });
       const processBranchResult = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(processBranchResult).toMatchSnapshot();
     });
     it('throws and swallows branch errors', async () => {
@@ -613,6 +706,7 @@ describe(getName(), () => {
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
       const processBranchResult = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(processBranchResult).toMatchSnapshot();
     });
     it('swallows pr errors', async () => {
@@ -629,6 +723,7 @@ describe(getName(), () => {
         throw new Error('some error');
       });
       const processBranchResult = await branchWorker.processBranch(config);
+      // FIXME: explicit assert condition
       expect(processBranchResult).toMatchSnapshot();
     });
 
@@ -637,7 +732,8 @@ describe(getName(), () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
       } as Pr);
-      setAdminConfig({ ...adminConfig, dryRun: true });
+      setGlobalConfig({ ...adminConfig, dryRun: true });
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 
@@ -647,7 +743,8 @@ describe(getName(), () => {
         state: PrState.Open,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      setAdminConfig({ ...adminConfig, dryRun: true });
+      setGlobalConfig({ ...adminConfig, dryRun: true });
+      // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
 
@@ -669,7 +766,8 @@ describe(getName(), () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setAdminConfig({ ...adminConfig, dryRun: true });
+      setGlobalConfig({ ...adminConfig, dryRun: true });
+      // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -698,11 +796,11 @@ describe(getName(), () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.Created,
         pr: {},
       } as EnsurePrResult);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setAdminConfig({ ...adminConfig, dryRun: true });
+      setGlobalConfig({ ...adminConfig, dryRun: true });
+      // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -729,6 +827,7 @@ describe(getName(), () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -776,7 +875,7 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      setAdminConfig({
+      setGlobalConfig({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
@@ -804,10 +903,8 @@ describe(getName(), () => {
         ],
       });
 
+      // FIXME: explicit assert condition
       expect(result).toMatchSnapshot();
-      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
-        cwd: '/localDir',
-      });
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
       );
@@ -856,7 +953,7 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      setAdminConfig({
+      setGlobalConfig({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
@@ -925,7 +1022,7 @@ describe(getName(), () => {
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setAdminConfig({
+      setGlobalConfig({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
@@ -952,6 +1049,7 @@ describe(getName(), () => {
         ],
       });
 
+      // FIXME: explicit assert condition
       expect(result).toMatchSnapshot();
       expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
         cwd: '/localDir',
@@ -1005,7 +1103,7 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      setAdminConfig({
+      setGlobalConfig({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
@@ -1059,6 +1157,7 @@ describe(getName(), () => {
 
       const result = await branchWorker.processBranch(inconfig);
 
+      // FIXME: explicit assert condition
       expect(result).toMatchSnapshot();
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
@@ -1139,7 +1238,7 @@ describe(getName(), () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      setAdminConfig({
+      setGlobalConfig({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
         allowPostUpgradeCommandTemplating: true,
@@ -1192,6 +1291,7 @@ describe(getName(), () => {
       };
 
       const result = await branchWorker.processBranch(inconfig);
+      // FIXME: explicit assert condition
       expect(result).toMatchSnapshot();
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
@@ -1204,6 +1304,21 @@ describe(getName(), () => {
           ).contents as Buffer
         ).toString()
       ).toBe('modified file content');
+    });
+    it('returns when rebaseWhen=never', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({ ...config, rebaseWhen: 'never' })
+      ).toMatchObject({ result: BranchResult.NoWork });
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
   });
 });
