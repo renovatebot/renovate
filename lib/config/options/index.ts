@@ -745,13 +745,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'azureAutoComplete',
-    description:
-      'If set to true, Azure DevOps PRs will be set to auto-complete after all (if any) branch policies have been met.',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'azureWorkItemId',
     description:
       'The id of an existing work item on Azure Boards to link to each PR.',
@@ -1306,8 +1299,8 @@ const options: RenovateOptions[] = [
     name: 'automergeType',
     description: 'How to automerge, if enabled.',
     type: 'string',
-    allowedValues: ['branch', 'pr', 'pr-comment'],
-    default: 'pr',
+    allowedValues: ['branch', 'pr', 'pr-comment', 'platform-automerge'],
+    default: 'platform-automerge',
   },
   {
     name: 'automergeStrategy',
@@ -1901,12 +1894,6 @@ const options: RenovateOptions[] = [
     description: 'Enable or disable Unicode emoji.',
     type: 'boolean',
     default: true,
-  },
-  {
-    name: 'gitLabAutomerge',
-    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging MRs.`,
-    type: 'boolean',
-    default: false,
   },
   {
     name: 'gitLabIgnoreApprovals',

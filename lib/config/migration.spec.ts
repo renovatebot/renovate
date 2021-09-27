@@ -783,4 +783,42 @@ describe('config/migration', () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
   });
+  it('migrates azureAutoComplete', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
+
+    expect(migrate({ azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automergeType: 'platform-automerge' },
+    });
+
+    expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, automergeType: 'platform-automerge' },
+    });
+
+    expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, automergeType: 'platform-automerge' },
+    });
+  });
+  it('migrates gitLabAutomerge', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
+
+    expect(migrate({ gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automergeType: 'platform-automerge' },
+    });
+
+    expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, automergeType: 'platform-automerge' },
+    });
+
+    expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, automergeType: 'platform-automerge' },
+    });
+  });
 });
