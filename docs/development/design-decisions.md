@@ -7,9 +7,6 @@ This file documents the design choices as well as configuration options.
 The Renovate repository/package is intended to be used as a CLI-based application.
 It should not be used downstream as a library, because it lacks a stable API.
 
-Right now we do not have a stable API.
-The API and documentation would need a major overhaul each time we refactor our code.
-
 End users should only depend on the CLI or on the official hosted app.
 The Renovate npm package should only be used as a CLI tool.
 
