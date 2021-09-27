@@ -62,11 +62,12 @@ export async function extractAllDependencies(
   if (is.nonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
       if (
-        !(enabledManager in extractResults) ||
-        extractResults[enabledManager].length === 0
+        !(enabledManager in extractions) ||
+        extractions[enabledManager].length === 0
       ) {
         logger.warn(
-          { manager: enabledManager }, `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
+          { manager: enabledManager },
+          `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
         );
       }
     }
