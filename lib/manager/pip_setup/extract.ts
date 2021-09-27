@@ -1,6 +1,5 @@
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
-import { lang, query as q } from '@renovatebot/parser-utils';
-import { StringValueToken } from '../../../../parser-utils/lib/lexer/types';
+import { lang, lexer, query as q } from '@renovatebot/parser-utils';
 import { PypiDatasource } from '../../datasource/pypi';
 import { SkipReason } from '../../types';
 import { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -29,7 +28,7 @@ const depPattern = [
 
 const extractRegex = new RegExp(depPattern);
 
-function handler(ctx: Context, token: StringValueToken): Context {
+function handler(ctx: Context, token: lexer.StringValueToken): Context {
   const depStr = token.value;
   const match = extractRegex.exec(depStr);
   if (match) {
