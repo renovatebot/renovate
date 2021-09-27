@@ -4,7 +4,7 @@ Learn how to troubleshoot problems with Renovate, where to find the logging outp
 
 ## Getting the logs
 
-Renovate logs the most recent jobs.
+Renovate's debug-level logs are usually enough to help troubleshoot most problems.
 Where you can find the logs depends on how you're running Renovate.
 
 ### GitHub Hosted app
@@ -18,19 +18,22 @@ The text you're looking for is:
 Click on the blue text "here" to go to the WhiteSource Renovate Dashboard.
 Sign in with your GitHub or GitLab account.
 Once you're logged in, you can see the logs for the Renovate jobs on your repository.
+You should have access to any repository which you have write access to and which has Renovate installed.
 
-Renovate only keeps the logs for the last 3 days.
+Renovate only makes logs for the last 3 days available.
 
 When you've clicked on a recent job, you'll be able to select a debug level that you care about.
 For a full overview, make sure you select the DEBUG log level.
 
-### Selfhosted
+### Self-hosted
 
-TODO: Explain log directory structure. Will probably be different depending on self-hosted platform...
+The easiest way to gather logs from Renovate for any platform is to use the default logging to `stdout`/console.
+By default, Renovate will log in a human-readable format at `INFO` level.
 
-TODO: Explain how long logs are kept by default on differnet platforms.
+For troubleshooting it's recommended to increase logging to `DEBUG` level by adding `LOG_LEVEL=debug` to your environment variables before invoking Renovate.
 
-TODO: Explain how to toggle log level: <https://docs.renovatebot.com/examples/self-hosting/#about-the-log-level-numbers>
+If your Renovate logs are being processed by a log service before you access them, you may find it better to have Renovate output logs in JSON format instead so that they can be reliably parsed and filtered.
+This can be achieved by adding `LOG_FORMAT=json` to your environment variables before invoking Renovate.
 
 ## Log debug levels
 
@@ -43,24 +46,22 @@ From least severe to most severe:
 - ERROR
 - FATAL
 
-As you can probably imagine, the stuff that's really going wrong will likely have a level of WARN or higher.
+To check for problems, look for `WARN` or `ERROR` logs (level 40 or 50 if in JSON format).
+To troubleshoot further, you usually need to look at `DEBUG` logs.
 
-TODO: What do the Renovate maintainers recommend as debug level?
-
-## Relevant part of the logs
-
-Please locate the relevant parts of the logs before asking for help or posting a bug report.
-Do not expect the Renovate maintainers to read through the full logs when trying to help you, as that takes a lot of time on our part.
+## Resolving problems using logs
 
 We recommend you follow this process:
 
-1. Read the _whole_ log output, to get a feel for all the steps that Renovate is taking
-1. Select - or search for - a higher debug level, like WARN, ERROR or FATAL
-1. Comparing the log output from a "bad" job to the log output from a known good job
+1. Try to narrow in on the problem area e.g. by looking for relevant branches or WARN or ERROR messages
+1. Find all relevant DEBUG or INFO messages from before and after the problem occurred
 1. Copy/paste the relevant parts of the logs into your discussion post or bug report
-
-## Getting help
 
 If you cannot fix the problem yourself after reading the logs, and reading - or searching through - our documentation, search the [renovatebot/renovate discussion](https://github.com/renovatebot/renovate/discussions) forum to see if somebody has asked a similar or related question.
 
 If none of these steps have helped you, then create a new discussion post to get help from the Renovate maintainers.
+
+Please locate the relevant parts of the logs as described earlier before asking for help or posting a bug report.
+Do not expect the Renovate maintainers to read through the full logs when trying to help you, as that takes a lot of time on our part.
+If later it turns out that the full logs are necessary, you will be asked for them then.
+
