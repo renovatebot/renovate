@@ -12,7 +12,7 @@ export class JSONWriter {
   }
 
   public write(json: unknown, newLineAtTheEnd = true): string {
-    let content = JSON.stringify(json, null, this.indentaion);
+    let content = JSON.stringify(json, null, this.indentation);
 
     if (newLineAtTheEnd) {
       content = content.concat('\n');
@@ -21,7 +21,7 @@ export class JSONWriter {
     return content;
   }
 
-  private get indentaion(): string | number {
+  private get indentation(): string | number {
     if (this.indentationType === IndentationType.Tab) {
       return '\t';
     }
