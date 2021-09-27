@@ -56,5 +56,21 @@ export async function extractAllDependencies(
     }
   }
   logger.debug(`Found ${fileCount} package file(s)`);
+
+  // If enabledManagers is non-empty, check that each of them has at least one extraction.
+  // If not, log a warning to indicate possible misconfiguration.
+  if (config.enabledManagers && is.nonEmptyArray(config.enabledManagers)) {
+    for (const enabledManager of config.enabledManagers) {
+      if (
+        !(enabledManager in extractResults) ||
+        extractResults[enabledManager].length === 0
+      ) {
+        logger.warn(
+          `Manager ${enabledManager} is listed in enabledManagers config key, but found no packages for it; consider removing it from enabledManagers`
+        );
+      }
+    }
+  }
+
   return extractions;
 }

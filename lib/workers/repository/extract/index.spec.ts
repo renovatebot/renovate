@@ -29,6 +29,13 @@ describe('workers/repository/extract/index', () => {
       // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
+
+    it('warns if zero packages found for a enabled manager', async () => {
+      config.enabledManagers = ['npm'];
+      managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
+      await expect(extractAllDependencies(config)).resolves.not.toThrow();
+    });
+
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
