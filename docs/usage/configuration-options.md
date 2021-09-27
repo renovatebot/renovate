@@ -1171,7 +1171,7 @@ We recommend that you use the `strict` mode, and enable the `dependencyDashboard
 
 ## java
 
-Use this configuration option for shared config across all java projects (Gradle and Maven).
+Use this configuration option for shared config across all Java projects (Gradle and Maven).
 
 ## js
 
