@@ -196,7 +196,7 @@ The only platform that supports `automergeStrategy` is Bitbucket Cloud.
 
 This setting is only applicable if you opt in to configure `automerge` to `true` for any of your dependencies.
 
-### pr
+#### pr
 
 Automerging defaults to merging Pull Requests by Renovate itself.
 
@@ -206,7 +206,7 @@ If Renovate is scheduled for hourly runs on the repository but commits are made 
 
 Note: if you have no tests but still want Renovate to automerge, you need to add `"ignoreTests": true` to your configuration.
 
-### platform-automerge
+#### platform-automerge
 
 With `platform-automerge`, you can speed up the automerge process by using platform automerge facilities.
 Setting this will configure PRs to be merged after all (if any) branch policies have been met.
@@ -217,7 +217,7 @@ You can also configure this using `packageRules` if you want to use it selective
 **Caution for GitLab < 12.7**: when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
-### branch
+#### branch
 
 If you prefer that Renovate more silently automerge _without_ Pull Requests at all, you can configure `"automergeType": "branch"`. In this case Renovate will:
 
@@ -226,7 +226,7 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 - Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
 - As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 24 hours)
 
-### pr-comment
+#### pr-comment
 
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
