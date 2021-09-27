@@ -627,7 +627,7 @@ describe('workers/pr/index', () => {
     });
 
     it('should trigger GitLab automerge when configured', async () => {
-      config.gitLabAutomerge = true;
+      config.usePlatformAutomerge = true;
       config.gitLabIgnoreApprovals = true;
       config.automergeType = 'platform-automerge';
       config.automerge = true;
