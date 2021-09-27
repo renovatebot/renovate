@@ -42,7 +42,7 @@ export function extractPackageFile(
       includes = [doc.include];
     }
     for (const includeObj of includes) {
-      if (includeObj.file && includeObj.project) {
+      if (includeObj?.file && includeObj.project) {
         const dep = extractDepFromIncludeFile(includeObj);
         if (config.endpoint) {
           dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
