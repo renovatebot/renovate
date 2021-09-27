@@ -2,12 +2,12 @@
 
 This file documents the design choices as well as configuration options.
 
-## Intended usage by end-users
+## Intended use by end-users
 
 Renovate is intended to be used as an app.
 It should not be used as a library, because it lacks a stable API.
 
-We do not want to create a stable API, or document our existing API.
+Right now we do not have a stable API.
 The API and documentation would need a major overhaul each time we refactor our code.
 
 End users should only depend on the CLI or on the official hosted app.
