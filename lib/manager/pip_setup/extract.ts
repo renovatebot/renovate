@@ -28,40 +28,31 @@ const depPattern = [
 
 const extractRegex = new RegExp(depPattern);
 
-function handler(ctx: Context, token: lexer.StringValueToken): Context {
+function depStringHandler(
+  ctx: Context,
+  token: lexer.StringValueToken
+): Context {
   const depStr = token.value;
   const match = extractRegex.exec(depStr);
-  if (match) {
-    const { depName, currentValue } = match.groups ?? {};
-    if (depName) {
-      const dep: PackageDependency<ManagerData> = {
-        depName,
-        currentValue,
-        managerData: {
-          lineNumber: token.line - 1,
-        },
-        datasource: PypiDatasource.id,
-      };
+  const { depName, currentValue } = match.groups;
 
-      return {
-        ...ctx,
-        deps: [...ctx.deps, dep],
-      };
-    }
-  }
+  const dep: PackageDependency<ManagerData> = {
+    depName,
+    currentValue,
+    managerData: {
+      lineNumber: token.line - 1,
+    },
+    datasource: PypiDatasource.id,
+  };
 
-  return ctx;
+  return { ...ctx, deps: [...ctx.deps, dep] };
 }
 
-function skipHandler(ctx: Context): Context {
+function depSkipHandler(ctx: Context): Context {
   const dep = ctx.deps[ctx.deps.length - 1];
-  if (dep) {
-    const deps = ctx.deps.slice(0, -1);
-    deps.push({ ...dep, skipReason: SkipReason.Ignored });
-    return { ...ctx, deps };
-  }
-
-  return ctx;
+  const deps = ctx.deps.slice(0, -1);
+  deps.push({ ...dep, skipReason: SkipReason.Ignored });
+  return { ...ctx, deps };
 }
 
 const incompleteDepString = q
@@ -69,11 +60,11 @@ const incompleteDepString = q
   .op(/^\+|\*$/);
 
 const depString = q
-  .str<Context>(new RegExp(cleanupNamedGroups(depPattern)), handler)
+  .str<Context>(new RegExp(cleanupNamedGroups(depPattern)), depStringHandler)
   .opt(
     q
       .opt(q.op<Context>(','))
-      .comment(/^#\s*renovate\s*:\s*ignore\s*$/, skipHandler)
+      .comment(/^#\s*renovate\s*:\s*ignore\s*$/, depSkipHandler)
   );
 
 const query = q.alt(incompleteDepString, depString);
