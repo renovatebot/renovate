@@ -215,7 +215,6 @@ Currently available for Azure and GitLab.
 You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
 **Caution for GitLab < 12.7**: when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
-
 This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
 ### branch
