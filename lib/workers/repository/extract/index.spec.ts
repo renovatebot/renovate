@@ -30,17 +30,9 @@ describe('workers/repository/extract/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('warns if no package files found for a enabled manager', async () => {
+    it('warns if no packages found for a enabled manager', async () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      await expect(extractAllDependencies(config)).resolves.not.toThrow();
-    });
-
-    it('warns if zero packages found for a enabled manager', async () => {
-      config.enabledManagers = ['composer'];
-      managerFiles.getManagerPackageFiles.mockResolvedValue([
-        { composer: { packageFile: 'composer.json', deps: [] } },
-      ] as never);
       await expect(extractAllDependencies(config)).resolves.not.toThrow();
     });
 
