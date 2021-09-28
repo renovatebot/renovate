@@ -32,7 +32,7 @@ describe('workers/repository/extract/index', () => {
 
     it('warns if no packages found for a enabled manager', async () => {
       config.enabledManagers = ['npm'];
-      managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
+      managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       await expect(extractAllDependencies(config)).resolves.not.toThrow();
     });
 
