@@ -735,7 +735,7 @@ export async function updatePr({
     );
 
     // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
-    let activeReviewers: Array<any> = new Array();
+    const activeReviewers: UserResponse[] = [];
 
     // Validate that each previous PR reviewer account is still active
     for (let reviewer of pr.reviewers) {
