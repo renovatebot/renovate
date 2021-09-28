@@ -41,6 +41,7 @@ export interface UserPass {
 }
 
 export interface AuthJson {
+  bearer?: Record<string, string>;
   'github-oauth'?: Record<string, string>;
   'gitlab-token'?: Record<string, string>;
   'gitlab-domains'?: string[];
