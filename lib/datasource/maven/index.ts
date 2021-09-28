@@ -175,23 +175,18 @@ async function filterMissingArtifacts(
           await createUrlForDependencyPom(version, dependency, repoUrl)
         );
 
-        return [
-          version,
-          artifactUrl ? await isHttpResourceExists(artifactUrl) : null,
-        ];
+        return [version, await isHttpResourceExists(artifactUrl)];
       },
       { concurrency: 5 }
     );
 
-    artifactsInfo = results
-      .filter(([_, artifactUrl]) => Boolean(artifactUrl))
-      .reduce(
-        (acc, [key, value]) => ({
-          ...acc,
-          [key]: value,
-        }),
-        {}
-      );
+    artifactsInfo = results.reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: value,
+      }),
+      {}
+    );
 
     // Retry earlier for status other than 404
     const cacheTTL = Object.values(artifactsInfo).some((x) => x === null)
