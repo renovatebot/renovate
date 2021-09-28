@@ -195,15 +195,19 @@ export async function mergeRenovateConfig(
   delete migratedConfig.warnings;
   logger.debug({ config: migratedConfig }, 'migrated config');
   // Decrypt before resolving in case we need npm authentication for any presets
-  const decryptedConfig = decryptConfig(migratedConfig);
+  const decryptedConfig = await decryptConfig(
+    migratedConfig,
+    config.repository
+  );
   // istanbul ignore if
   if (is.string(decryptedConfig.npmrc)) {
     logger.debug('Found npmrc in decrypted config - setting');
     npmApi.setNpmrc(decryptedConfig.npmrc);
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
-  let resolvedConfig = decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig, config)
+  let resolvedConfig = await decryptConfig(
+    await presets.resolveConfigPresets(decryptedConfig, config),
+    config.repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
   const migrationResult = migrateConfig(resolvedConfig);
