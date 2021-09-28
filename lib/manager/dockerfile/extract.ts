@@ -9,18 +9,24 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
     // Check if the variable contains default value, and if so return
     // it as a valid dependency
-    const variableRegex = /^\$\{(.+):-(.+):(.+)@sha256:(.+)\}$/i;
+    const variableRegex =
+      /^\$\{(?<varname>\w[\w\d-_]*):-(?<depName>\w[\w\d\-/]*)(:(?<tag>[\w\d.]+))?(@sha256:(?<digest>[\w\d]+))?\}$/i;
     const match = variableRegex.exec(currentFrom);
     if (match) {
-      const depName = match[2];
-      const currentValue = match[3];
-      const currentDigest = match[4];
       const dep = {
-        depName,
-        currentValue,
-        currentDigest,
+        depName: match.groups.depName,
+        currentValue: match.groups?.tag,
+        currentDigest: match.groups?.digest,
         datasource: 'docker',
       };
+
+      if (!dep.currentValue) {
+        delete dep.currentValue;
+      }
+
+      if (!dep.currentDigest) {
+        delete dep.currentDigest;
+      }
 
       return dep;
     }
