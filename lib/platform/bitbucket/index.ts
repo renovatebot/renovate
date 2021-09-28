@@ -729,37 +729,44 @@ export async function updatePr({
       }
     );
   } catch (err) /* istanbul ignore next */ {
-    logger.warn(
-      { err },
-      'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
-    );
+    if (
+      err.statusCode === 400 &&
+      err.body?.error?.message.includes('reviewers: Malformed reviewers list')
+    ) {
+      logger.warn(
+        { err },
+        'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
+      );
 
-    // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
-    const activeReviewers: UserResponse[] = [];
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+      const activeReviewers: UserResponse[] = [];
 
-    // Validate that each previous PR reviewer account is still active
-    for (let reviewer of pr.reviewers) {
-      let reviewerUser = (
-        await bitbucketHttp.getJson<UserResponse>(
-          `/2.0/users/${reviewer.account_id}`
-        )
-      ).body;
+      // Validate that each previous PR reviewer account is still active
+      for (let reviewer of pr.reviewers) {
+        let reviewerUser = (
+          await bitbucketHttp.getJson<UserResponse>(
+            `/2.0/users/${reviewer.account_id}`
+          )
+        ).body;
 
-      if (reviewerUser.account_status === 'active') {
-        activeReviewers.push(reviewer);
+        if (reviewerUser.account_status === 'active') {
+          activeReviewers.push(reviewer);
+        }
       }
+
+      await bitbucketHttp.putJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+        {
+          body: {
+            title,
+            description: sanitize(description),
+            reviewers: activeReviewers,
+          },
+        }
+      );
+    } else {
+      logger.debug({ err }, 'Unknown error updating Bitbucket pull request');
     }
-
-    await bitbucketHttp.putJson(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-      {
-        body: {
-          title,
-          description: sanitize(description),
-          reviewers: activeReviewers,
-        },
-      }
-    );
   }
 
   if (state === PrState.Closed && pr) {
