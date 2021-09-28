@@ -30,7 +30,12 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody, mergeBodyTransformer, UserResponse } from './utils';
+import {
+  PrResponse,
+  RepoInfoBody,
+  mergeBodyTransformer,
+  UserResponse,
+} from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -724,23 +729,26 @@ export async function updatePr({
       }
     );
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'PR contains inactive reviewer accounts.  Will try setting only active reviewers');
+    logger.warn(
+      { err },
+      'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
+    );
 
     // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
     let activeReviewers: Array<any> = new Array();
 
     // Validate that each previous PR reviewer account is still active
-    pr.reviewers.forEach(async (reviewer, index) => {
+    for (let reviewer of pr.reviewers) {
       let reviewerUser = (
         await bitbucketHttp.getJson<UserResponse>(
           `/2.0/users/${reviewer.account_id}`
         )
       ).body;
 
-      if (reviewerUser.account_status === "active") {
+      if (reviewerUser.account_status === 'active') {
         activeReviewers.push(reviewer);
       }
-    });
+    }
 
     await bitbucketHttp.putJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
@@ -753,9 +761,6 @@ export async function updatePr({
       }
     );
   }
-
-
-
 
   if (state === PrState.Closed && pr) {
     await bitbucketHttp.postJson(
