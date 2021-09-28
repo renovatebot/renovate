@@ -765,7 +765,7 @@ export async function updatePr({
         }
       );
     } else {
-      logger.debug({ err }, 'Unknown error updating Bitbucket pull request');
+      throw err;
     }
   }
 
