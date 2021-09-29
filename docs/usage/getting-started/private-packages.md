@@ -180,6 +180,8 @@ You can add an `.npmrc` authentication line to your Renovate config under the fi
 ```
 
 If configured like this, Renovate will use this to authenticate with npm and will ignore any `.npmrc` files(s) it finds checked into the repository.
+If you wish for the values in your `config.npmrc` to be _merged_ (prepended) with any values found in repos then also set `config.npmrcMerge=true`.
+This merge approach is similar to how `npm` itself behaves if `.npmrc` is found in both the user home directory as well as a project.
 
 #### Add npmToken to Renovate config
 
@@ -240,8 +242,6 @@ The end-result looks like this:
 }
 ```
 
-However be aware that if your `.npmrc` is too big to encrypt then the above command will fail.
-
 #### Automatically authenticate for npm package stored in private GitHub npm repository
 
 ```json
@@ -263,7 +263,35 @@ However be aware that if your `.npmrc` is too big to encrypt then the above comm
 
 Renovate doesn't support reading `npmRegistries` and `npmScopes` from `.yarnrc.yml`, so `hostRules` (or `npmToken`) and `npmrc` should be configured like above.
 Renovate updates `npmRegistries` in `.yarnrc.yml` with resolved `hostRules` before running Yarn.
-For Renovate to overwrite existing `npmRegistries` entry, the key should match the `matchHost` without the protocol (`http:` or `https:`) and with the trailing slash.
+For Renovate to overwrite existing `npmRegistries` entry, the key should match the `matchHost` minus the protocol (`http:` or `https:`) plus the trailing slash.
+
+For example, the Renovate configuration:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://npm.pkg.github.com/",
+      "hostType": "npm",
+      "encrypted": {
+        "token": "<Encrypted PAT Token>"
+      }
+    }
+  ]
+}
+```
+
+will update `.yarnrc.yml` as following:
+
+```yaml
+npmRegistries:
+  //npm.pkg.github.com/:
+    npmAuthToken: <Decrypted PAT Token>
+  //npm.pkg.github.com:
+    # this will not be overwritten and may conflict
+  https://npm.pkg.github.com/:
+    # this will not be overwritten and may conflict
+```
 
 ### nuget
 

@@ -468,6 +468,13 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'privateKeyPathOld',
+    description: 'Path to the Server-side old private key.',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'encrypted',
     description:
       'A configuration object containing configuration encrypted with project key.',
@@ -581,6 +588,14 @@ const options: RenovateOptions[] = [
     description: 'String copy of npmrc file. Use \\n instead of line breaks.',
     stage: 'branch',
     type: 'string',
+  },
+  {
+    name: 'npmrcMerge',
+    description:
+      'Whether to merge config.npmrc with repo .npmrc content if both are found.',
+    stage: 'branch',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'npmToken',
@@ -2043,6 +2058,13 @@ const options: RenovateOptions[] = [
     default: 'default',
     stage: 'repository',
     globalOnly: true,
+  },
+  {
+    name: 'writeDiscoveredRepos',
+    description: 'Writes discovered repositories to a JSON file and then exit.',
+    type: 'string',
+    globalOnly: true,
+    env: false,
   },
 ];
 

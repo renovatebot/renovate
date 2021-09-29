@@ -31,6 +31,11 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
       "hostType": "packagist",
       "username": "<your-username>",
       "password": "<your-password>"
+    },
+    {
+      "matchHost": "bearer-auth.for.vendor.com",
+      "hostType": "packagist",
+      "token": "abcdef0123456789"
     }
   ]
 }
@@ -49,8 +54,15 @@ You may encrypt your `password` only, but you can encrypt your `username` as wel
       "matchHost": "some.vendor.com",
       "hostType": "packagist",
       "encrypted": {
-        "username": "<your-encrypted-password",
-        "password": "<your-encrypted-password"
+        "username": "<your-encrypted-password>",
+        "password": "<your-encrypted-password>"
+      }
+    },
+    {
+      "matchHost": "bearer-auth.for.vendor.com",
+      "hostType": "packagist",
+      "encrypted": {
+        "token": "<your-encrypted-token>"
       }
     }
   ]
