@@ -49,7 +49,7 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath: string,
   endpoint = Endpoint,
-  packageTag = null
+  packageTag?: string
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,

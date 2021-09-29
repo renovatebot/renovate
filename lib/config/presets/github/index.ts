@@ -17,7 +17,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag: string
+  packageTag?: string
 ): Promise<Preset> {
   let ref = '';
   if (is.nonEmptyString(packageTag)) {
@@ -53,7 +53,7 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath: string,
   endpoint = Endpoint,
-  packageTag: string = null
+  packageTag?: string
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
