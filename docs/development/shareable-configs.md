@@ -50,20 +50,38 @@ If you use a non-scoped config, you must use a preset name!
 In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
 An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
-| name                               | example use                | preset    | resolves as                          | filename       | tag            |
-| ---------------------------------- | -------------------------- | --------- | ------------------------------------ | -------------- | -------------- |
-| GitHub default                     | `github>abc/foo`           | `default` | `https://github.com/abc/foo`         | `default.json` | Default branch |
-| GitHub with preset name            | `github>abc/foo:xyz`       | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`     | Default branch |
-| GitHub default with a tag          | `github>abc/foo#1.5.4`     | `default` | `https://github.com/abc/foo`         | `default.json` | `1.5.4`        |
-| GitHub with preset name with a tag | `github>abc/foo:xyz#1.5.4` | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`     | `1.5.4`        |
-| GitLab default                     | `gitlab>abc/foo`           | `default` | `https://gitlab.com/abc/foo`         | `default.json` | Default branch |
-| GitLab with preset name            | `gitlab>abc/foo:xyz`       | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`     | Default branch |
-| GitLab default with a tag          | `gitlab>abc/foo#1.5.4`     | `default` | `https://gitlab.com/abc/foo`         | `default.json` | `1.5.4`        |
-| GitLab with preset name with a tag | `gitlab>abc/foo:xyz#1.5.4` | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`     | `1.5.4`        |
-| Gitea default                      | `gitea>abc/foo`            | `default` | `https://gitea.com/abc/foo`          | `default.json` | Default branch |
-| Gitea with preset name             | `gitea>abc/foo:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`     | Default branch |
-| Gitea default with a tag           | `gitea>abc/foo#1.5.4`      | `default` | `https://gitea.com/abc/foo`          | `default.json` | `1.5.4`        |
-| Gitea with preset name with a tag  | `gitea>abc/foo:xyz#1.5.4`  | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`     | `1.5.4`        |
-| Local default                      | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json` | Default branch |
-| Local default with a tag           | `local>abc/foo#1.5.4`      | `default` | `https://github.company.com/abc/foo` | `default.json` | `1.5.4`        |
-| Local with preset name with a tag  | `local>abc/foo:xyz#1.5.4`  | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`     | `1.5.4`        |
+#### GitHub
+
+| name                               | example use                | preset    | resolves as                  | filename       | tag            |
+| ---------------------------------- | -------------------------- | --------- | ---------------------------- | -------------- | -------------- |
+| GitHub default                     | `github>abc/foo`           | `default` | `https://github.com/abc/foo` | `default.json` | Default branch |
+| GitHub with preset name            | `github>abc/foo:xyz`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json`     | Default branch |
+| GitHub default with a tag          | `github>abc/foo#1.5.4`     | `default` | `https://github.com/abc/foo` | `default.json` | `1.5.4`        |
+| GitHub with preset name with a tag | `github>abc/foo:xyz#1.5.4` | `xyz`     | `https://github.com/abc/foo` | `xyz.json`     | `1.5.4`        |
+
+#### GitLab
+
+| name                               | example use                | preset    | resolves as                  | filename       | tag            |
+| ---------------------------------- | -------------------------- | --------- | ---------------------------- | -------------- | -------------- |
+| GitLab default                     | `gitlab>abc/foo`           | `default` | `https://gitlab.com/abc/foo` | `default.json` | Default branch |
+| GitLab with preset name            | `gitlab>abc/foo:xyz`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`     | Default branch |
+| GitLab default with a tag          | `gitlab>abc/foo#1.5.4`     | `default` | `https://gitlab.com/abc/foo` | `default.json` | `1.5.4`        |
+| GitLab with preset name with a tag | `gitlab>abc/foo:xyz#1.5.4` | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`     | `1.5.4`        |
+
+#### Gitea
+
+| name                              | example use               | preset    | resolves as                 | filename       | tag            |
+| --------------------------------- | ------------------------- | --------- | --------------------------- | -------------- | -------------- |
+| Gitea default                     | `gitea>abc/foo`           | `default` | `https://gitea.com/abc/foo` | `default.json` | Default branch |
+| Gitea with preset name            | `gitea>abc/foo:xyz`       | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`     | Default branch |
+| Gitea default with a tag          | `gitea>abc/foo#1.5.4`     | `default` | `https://gitea.com/abc/foo` | `default.json` | `1.5.4`        |
+| Gitea with preset name with a tag | `gitea>abc/foo:xyz#1.5.4` | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`     | `1.5.4`        |
+
+#### Self-hosted git
+
+| name                              | example use                     | preset    | resolves as                          | filename        | tag            |
+| --------------------------------- | ------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
+| Local default                     | `local>abc/foo`                 | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
+| Local with preset path            | `local>abc/foo//path/xyz`       | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
+| Local default with a tag          | `local>abc/foo#1.2.5`           | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.5.`       |
+| Local with preset path with a tag | `local>abc/foo//path/xyz#1.2.5` | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.5.`       |
