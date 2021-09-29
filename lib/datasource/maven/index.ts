@@ -101,7 +101,14 @@ function isSnapshotVersion(version: string): boolean {
   return false;
 }
 
-function extractSnapshotVersion(metadata: XmlDocument): string {
+function extractSnapshotVersion(metadata: XmlDocument): string | null {
+  // Parse the maven-metadata.xml for the snapshot version and determine
+  // the fixed version of the latest deployed snapshot.
+  // The metadata descriptor can be found at
+  // https://maven.apache.org/ref/3.3.3/maven-repository-metadata/repository-metadata.html
+  //
+  // Basically, we need to replace -SNAPSHOT with the artifact timestanp & build number,
+  // so for example 1.0.0-SNAPSHOT will become 1.0.0-<timestamp>-<buildNumber>
   const version = metadata
     .descendantWithPath('version')
     ?.val?.replace('-SNAPSHOT', '');
@@ -110,6 +117,8 @@ function extractSnapshotVersion(metadata: XmlDocument): string {
   const timestamp = snapshot?.childNamed('timestamp')?.val;
   const build = snapshot?.childNamed('buildNumber')?.val;
 
+  // If we weren't able to parse out the required 3 version elements,
+  // return null because we can't determine the fixed version of the latest snapshot.
   if (!version || !timestamp || !build) {
     return null;
   }
@@ -121,6 +130,8 @@ async function getSnapshotFullVersion(
   dependency: MavenDependency,
   repoUrl: string
 ): Promise<string | null> {
+  // To determine what actual files are available for the snapshot, first we have to fetch and parse
+  // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
   const metadataUrl = getMavenUrl(
     dependency,
     repoUrl,
@@ -141,12 +152,15 @@ async function createUrlForDependencyPom(
   repoUrl: string
 ): Promise<string> {
   if (isSnapshotVersion(version)) {
+    // By default, Maven snapshots are deployed to the repository with fixed file names.
+    // Resolve the full, actual pom file name for the version.
     const fullVersion = await getSnapshotFullVersion(
       version,
       dependency,
       repoUrl
     );
 
+    // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
     if (fullVersion !== null) {
       return `${version}/${dependency.name}-${fullVersion}.pom`;
     }
@@ -165,16 +179,21 @@ async function filterMissingArtifacts(
   let artifactsInfo: ArtifactsInfo | null =
     await packageCache.get<ArtifactsInfo>(cacheNamespace, cacheKey);
 
+  // If the cache contains any artifacts that we were previously unable to determine if they exist,
+  // retry the existence checks on them.
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
+    // For each version, determine if there is a POM file available for it
     const results: ArtifactInfoResult[] = await pMap(
       versions,
       async (version): Promise<ArtifactInfoResult | null> => {
+        // Create the URL that the POM file should be available at
         const artifactUrl = getMavenUrl(
           dependency,
           repoUrl,
           await createUrlForDependencyPom(version, dependency, repoUrl)
         );
 
+        // Return an ArtifactInfoResult that maps the version to the result of the check if the POM file exists in the repo
         return [version, await isHttpResourceExists(artifactUrl)];
       },
       { concurrency: 5 }
@@ -196,6 +215,7 @@ async function filterMissingArtifacts(
     await packageCache.set(cacheNamespace, cacheKey, artifactsInfo, cacheTTL);
   }
 
+  // Create releases for every version that exists in the repository
   return versions
     .filter((v) => artifactsInfo[v])
     .map((version) => {
