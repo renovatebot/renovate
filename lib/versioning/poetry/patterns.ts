@@ -11,7 +11,7 @@ export const VERSION_PATTERN = new RegExp(
       'v?',
       '(?:',
         '(?:(?<epoch>[0-9]+)!)?',           // epoch
-        '(?<release>[0-9]+(?:\\.[0-9]+)*)', // release segment
+        '(?<release>[0-9]+(?:\\.[0-9]+){0,2})', // release segment
         '(?<pre>',                          // pre-release
           '[-_.]?',
           '(?<pre_l>(a|b|c|rc|alpha|beta|pre|preview))',

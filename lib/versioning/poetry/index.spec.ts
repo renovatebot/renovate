@@ -98,6 +98,13 @@ describe('versioning/poetry/index', () => {
     });
   });
 
+  describe('isVersion(input)', () => {
+    it('should return false for irregular version', () => {
+      expect(versioning.isVersion('17.b4.0')).toBeFalsy();
+      expect(versioning.isVersion('0.98.5.1')).toBeFalsy();
+    });
+  });
+
   describe('isValid(input)', () => {
     it('should support zero-padded version numbers allowed by PEP440', () => {
       expect(versioning.isValid('17.04.0')).toBeTruthy();
@@ -105,6 +112,7 @@ describe('versioning/poetry/index', () => {
 
     it('should return false for irregular version', () => {
       expect(versioning.isValid('17.b4.0')).toBeFalsy();
+      expect(versioning.isValid('0.98.5.1')).toBeFalsy();
     });
     it('should support simple semver', () => {
       expect(versioning.isValid('1.2.3')).toBeTruthy();
