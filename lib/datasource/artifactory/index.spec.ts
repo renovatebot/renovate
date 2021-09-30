@@ -18,7 +18,7 @@ const fixtureReleasesAsFolders = loadFixture('releases-as-folders.html');
 const fixtureReleasesAsFiles = loadFixture('releases-as-files.html');
 
 function getPath(folder: string): string {
-  return '/' + folder;
+  return `/${folder}`;
 }
 
 describe('datasource/artifactory/index', () => {
