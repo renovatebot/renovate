@@ -34,7 +34,8 @@ Renovate will only automerge a branch when it is up-to-date with the target bran
 Therefore, Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time.
 
 The limitation to only merge one branch per run is because Renovate's dependency and branch state is based on what was present in the base branch at the start of the run.
-If a branch is merged into the base branch during Renovate's run - including by other users - it means that remaining Renovate branches may have Git conflicts. It also means that Renovate's knowledge about dependencies in the base branch is now invalid and other branches may need changing as a result of the merge.
+If a branch is merged into the base branch during Renovate's run - including by other users - it means that remaining Renovate branches may have Git conflicts.
+It also means that Renovate's knowledge about dependencies in the base branch is now invalid and other branches may need changing as a result of the merge.
 
 The limitation to only automerge branches which are up-to-date is a decision due to this example:
 - Two dependencies are in use: `a@1.0.0` and `b@1.0.0`
