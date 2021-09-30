@@ -23,6 +23,7 @@ Additionally, the Renovate admin may have put the bot on its own schedule, or th
 For scheduled action to take place, both these need to happen:
 - The bot needs to run against your repository
 - The current time needs to fall within your repository's configured schedule
+
 For the GitHub hosted app, all active repositories will be enqueued hourly by default, but it's often the case that not every repository gets processed every hour.
 For this reason, it's best to allow for a minimum 2-3 hours schedule window per run, if you want a high chance that the bot will have run on your repo at least once while the schedule is active.
 
