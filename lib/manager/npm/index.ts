@@ -1,6 +1,7 @@
 import { LANGUAGE_JAVASCRIPT } from '../../constants/languages';
 import * as npmVersioning from '../../versioning/npm';
 
+export { detectGlobalConfig } from './detect';
 export { extractAllPackageFiles } from './extract';
 export {
   bumpPackageVersion,
