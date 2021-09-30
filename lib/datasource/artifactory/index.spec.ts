@@ -14,6 +14,8 @@ const testConfig = {
   registryUrls: [testRegistryUrl],
   depName: testLookupName,
 };
+const fixtureReleasesAsFolders = loadFixture('releases-as-folders.html');
+const fixtureReleasesAsFiles = loadFixture('releases-as-files.html');
 
 function getPath(folder: string): string {
   return '/' + folder;
@@ -29,7 +31,7 @@ describe('datasource/artifactory/index', () => {
       httpMock
         .scope(testRegistryUrl)
         .get(getPath(testLookupName))
-        .reply(200, loadFixture('releases-as-folders.html'));
+        .reply(200, fixtureReleasesAsFolders);
       const res = await getPkgReleases({
         ...testConfig,
         datasource,
@@ -45,7 +47,7 @@ describe('datasource/artifactory/index', () => {
       httpMock
         .scope(testRegistryUrl)
         .get(getPath(testLookupName))
-        .reply(200, loadFixture('releases-as-files.html'));
+        .reply(200, fixtureReleasesAsFiles);
       const res = await getPkgReleases({
         ...testConfig,
         datasource,
@@ -65,7 +67,7 @@ describe('datasource/artifactory/index', () => {
       httpMock
         .scope(testRegistryUrl)
         .get(getPath(testLookupName))
-        .reply(200, loadFixture('releases-as-files.html'));
+        .reply(200, fixtureReleasesAsFiles);
       httpMock
         .scope(secondRegistryUrl)
         .get(getPath(testLookupName))
