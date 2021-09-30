@@ -5,14 +5,10 @@ Learn about the limitations of Renovate bot.
 ## Introduction
 
 Renovate, like any computer program has limitations.
-It's good to remember that Renovate takes time to process your repository.
-Processing time scales with repository size and complexity.
-This means that a simple repository with just one `package.json` file with 3 dependencies in it will be done faster than a big monorepo with 20 `package.json` files with lots of dependencies.
+Sometimes these are functionality limitations - perhaps something is impossible or too complex to do, or we simply haven't implemented it yet.
+At other times it may be a "performance" limitation, because jobs neither start nor complete instantly, even if the user may start with that expectation.
 
-Do not panic if Renovate doesn't react immediately when you click on a checkbox to rebase your branch, or create a branch.
-
-It's usually a good idea to wait 2 hours before starting troubleshooting.
-Read our [guide on troubleshooting](https://docs.renovatebot.com/troubleshooting/) if you're having problems.
+This document attempts to list out the most commonly seen limitations and describe whether they're permanent and if there's any plans to improving the situation.
 
 ## Time/schedule based limitations
 
