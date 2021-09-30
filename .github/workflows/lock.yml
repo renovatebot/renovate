@@ -12,6 +12,10 @@ permissions:
   issues: write
   pull-requests: write
 
+# Ensure only one lock action can run at a time
+concurrency:
+  group: lock
+
 jobs:
   lock:
     runs-on: ubuntu-latest
@@ -20,5 +24,5 @@ jobs:
         if: github.repository == 'renovatebot/renovate'
         with:
           github-token: ${{ github.token }}
-          issue-lock-inactive-days: 30
-          pr-lock-inactive-days: 30
+          issue-inactive-days: 30
+          pr-inactive-days: 30
