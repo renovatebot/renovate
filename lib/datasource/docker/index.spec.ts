@@ -201,11 +201,12 @@ describe('datasource/docker/index', () => {
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .head('/library/some-dep/manifests/some-tag', undefined, {
-          reqheaders: {
-            authorization: 'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk',
-          },
-        })
+
+        .head('/library/some-dep/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+        )
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-dep' },
@@ -237,9 +238,8 @@ describe('datasource/docker/index', () => {
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .head('/node/manifests/some-tag', undefined, {
-          reqheaders: { authorization: 'Basic abc' },
-        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic test_token')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       mockEcrAuthResolve({
@@ -270,9 +270,8 @@ describe('datasource/docker/index', () => {
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .head('/node/manifests/some-tag', undefined, {
-          reqheaders: { authorization: 'Basic abc' },
-        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic test_token')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       hostRules.find.mockReturnValue({
@@ -310,9 +309,8 @@ describe('datasource/docker/index', () => {
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .head('/node/manifests/some-tag', undefined, {
-          reqheaders: { authorization: 'Basic abc' },
-        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic test')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       mockEcrAuthResolve({
