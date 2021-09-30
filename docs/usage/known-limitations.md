@@ -14,20 +14,30 @@ Do not panic if Renovate doesn't react immediately when you click on a checkbox 
 It's usually a good idea to wait 2 hours before starting troubleshooting.
 Read our [guide on troubleshooting](https://docs.renovatebot.com/troubleshooting/) if you're having problems.
 
-## Time based limitations
+## Time/schedule based limitations
 
-Renovate can only run as often/long as the admin has set it to.
-For the GitHub hosted app, this means that Renovate will do a run each hour by default.
+When a user configures a schedule in their repo config, they may think that this schedule "controls" when Renovate runs.
+In actuality, Renovate may be running frequently, but just skipping updates to the repo if the configured schedule is not met.
+Additionally, the Renovate admin may have put the bot on its own schedule, or the job queue may be too long, so Renovate doesn't even get a chance to run on your repository during a certain scheduled time window.
 
-Renovate will also only process the repository in the schedule that is set for it.
+For scheduled action to take place, both these need to happen:
+- The bot needs to run against your repository
+- The current time needs to fall within your repository's configured schedule
+For the GitHub hosted app, all active repositories will be enqueued hourly by default, but it's often the case that not every repository gets processed every hour.
+For this reason, it's best to allow for a minimum 2-3 hours schedule window per run, if you want a high chance that the bot will have run on your repo at least once while the schedule is active.
 
 ## Automerge limitations
 
-Renovate can only merge one branch per run.
-Renovate can only automerge when the update branch is up-to-date with the target branch.
-Renovate connot automerge if you or others keep committing to the target branch.
+Renovate automerges at most one branch per run.
+Renovate will only automerge a branch when it is up-to-date with the target branch.
+Therefore, Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time.
 
-What all this means is that generally, Renovate will only automerge one update at a time.
+The limitation to only merge one branch per run is because Renovate's dependency and branch state is based on what was present in the base branch at the start of the run.
+If a branch is merged into the base branch during Renovate's run - including by other users - it means that remaining Renovate branches may have git conflicts. It also means that Renovate's knowledge about dependencies in the base branch is now invalid and other branches may need changing as a result of the merge.
 
-This limitation is because we want Renovate to be up-to-date with the target branch before automerging.
-This prevents problems when a change on the target branch renders the update incompatible.
+The limitation to only automerge branches which are up-to-date is a decision due to this example:
+- Two dependencies are in use: `a@1.0.0` and `b@1.0.0`
+- PRs exist for `a@2.0.0` and `b@2.0.0` and both pass tests
+- The PR for `a@2.0.0` is automerged
+- The PR for `b@2.0.0` remains open, does not have conflicts, and has all tests passing
+- However, `a@2.0.0` and `b@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch
