@@ -6,17 +6,49 @@ import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
-  if (currentFrom.includes('$')) {
-    // Check if the variable contains default value, and if so return
-    // it as a valid dependency
-    const variableRegex =
-      /^\$\{(?<varname>\w[\w\d-_]*):-(?<depName>\w[\w\d\-/]*)(:(?<tag>[\w\d.]+))?(@sha256:(?<digest>[\w\d]+))?\}$/i;
-    const match = variableRegex.exec(currentFrom);
-    if (match) {
+  // Check if we have a variable in format of "${VARIABLE:-<image>:<defaultVal>@<digest>}"
+  // If so, remove everything except the image, defaultVal and digest.
+  let isVariable = false;
+  let hasDefaultValue = false;
+  let cleanedCurrentFrom: string = currentFrom;
+  if (currentFrom.startsWith('${') && currentFrom.endsWith('}')) {
+    isVariable = true;
+
+    if (
+      currentFrom.match(/\$/g).length === 1 && // Ensure it has exactly one '$' to avoid the cases we don't support
+      currentFrom.indexOf('-') !== -1 // Ensure it has the default value
+    ) {
+      hasDefaultValue = true;
+      cleanedCurrentFrom = currentFrom.substr(2, currentFrom.length - 3);
+      cleanedCurrentFrom = cleanedCurrentFrom.substr(
+        cleanedCurrentFrom.indexOf('-') + 1
+      );
+    }
+  }
+
+  const [currentDepTag, currentDigest] = cleanedCurrentFrom.split('@');
+  const depTagSplit = currentDepTag.split(':');
+  let depName: string;
+  let currentValue: string;
+  if (
+    depTagSplit.length === 1 ||
+    depTagSplit[depTagSplit.length - 1].includes('/')
+  ) {
+    depName = currentDepTag;
+  } else {
+    currentValue = depTagSplit.pop();
+    depName = depTagSplit.join(':');
+  }
+
+  if (isVariable) {
+    if (hasDefaultValue) {
+      // If we have the variable and it contains the default value, we need to return
+      // it as a valid dependency
+
       const dep = {
-        depName: match.groups.depName,
-        currentValue: match.groups?.tag,
-        currentDigest: match.groups?.digest,
+        depName,
+        currentValue,
+        currentDigest,
         datasource: 'docker',
       };
 
@@ -35,19 +67,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
       skipReason: SkipReason.ContainsVariable,
     };
   }
-  const [currentDepTag, currentDigest] = currentFrom.split('@');
-  const depTagSplit = currentDepTag.split(':');
-  let depName: string;
-  let currentValue: string;
-  if (
-    depTagSplit.length === 1 ||
-    depTagSplit[depTagSplit.length - 1].includes('/')
-  ) {
-    depName = currentDepTag;
-  } else {
-    currentValue = depTagSplit.pop();
-    depName = depTagSplit.join(':');
-  }
+
   const dep: PackageDependency = {
     depName,
     currentValue,

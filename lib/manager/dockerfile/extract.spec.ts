@@ -291,7 +291,7 @@ describe('manager/dockerfile/extract', () => {
       expect(res).toMatchInlineSnapshot(`
 Object {
   "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentDigest": "abcd",
+  "currentDigest": "sha256:abcd",
   "currentValue": "5.0.0",
   "datasource": "docker",
   "depName": "redis",
@@ -316,7 +316,7 @@ Object {
       expect(res3).toMatchInlineSnapshot(`
 Object {
   "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentDigest": "abcd",
+  "currentDigest": "sha256:abcd",
   "datasource": "docker",
   "depName": "redis",
   "replaceString": "\${REDIS_IMAGE:-redis@sha256:abcd}",

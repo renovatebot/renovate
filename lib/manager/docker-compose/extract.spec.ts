@@ -38,7 +38,7 @@ describe('manager/docker-compose/extract', () => {
         Array [
           Object {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-            "currentDigest": "abcd",
+            "currentDigest": "sha256:abcd",
             "currentValue": "5.0.0",
             "datasource": "docker",
             "depName": "redis",
