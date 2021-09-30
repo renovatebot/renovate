@@ -263,6 +263,46 @@ describe('datasource/docker/index', () => {
       });
     });
 
+    it('passes session token to ECR client', async () => {
+      httpMock
+        .scope(amazonUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/node/manifests/some-tag', undefined, {
+          reqheaders: { authorization: 'Basic abc' },
+        })
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({
+        username: 'some-username',
+        password: 'some-password',
+        token: 'some-session-token',
+      });
+
+      mockEcrAuthResolve({
+        authorizationData: [{ authorizationToken: 'test_token' }],
+      });
+
+      await getDigest(
+        {
+          datasource: 'docker',
+          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
+        'some-tag'
+      );
+
+      expect(AWS.ECR).toHaveBeenCalledWith({
+        credentials: {
+          accessKeyId: 'some-username',
+          secretAccessKey: 'some-password',
+          sessionToken: 'some-session-token',
+        },
+        region: 'us-east-1',
+      });
+    });
+
     it('supports ECR authentication', async () => {
       httpMock
         .scope(amazonUrl)
