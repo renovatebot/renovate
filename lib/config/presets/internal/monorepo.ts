@@ -32,6 +32,7 @@ const repoGroups = {
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
+  'dnd-kit': 'https://github.com/clauderic/dnd-kit',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
