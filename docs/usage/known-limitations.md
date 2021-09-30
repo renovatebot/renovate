@@ -17,6 +17,7 @@ In actuality, Renovate may be running frequently, but just skipping updates to t
 Additionally, the Renovate admin may have put the bot on its own schedule, or the job queue may be too long, so Renovate doesn't even get a chance to run on your repository during a certain scheduled time window.
 
 For scheduled action to take place, both these need to happen:
+
 - The bot needs to run against your repository
 - The current time needs to fall within your repository's configured schedule
 
@@ -34,6 +35,7 @@ If a branch is merged into the base branch during Renovate's run - including by 
 It also means that Renovate's knowledge about dependencies in the base branch is now invalid and other branches may need changing as a result of the merge.
 
 The limitation to only automerge branches which are up-to-date is a decision due to this example:
+
 - Two dependencies are in use: `a@1.0.0` and `b@1.0.0`
 - PRs exist for `a@2.0.0` and `b@2.0.0` and both pass tests
 - The PR for `a@2.0.0` is automerged
