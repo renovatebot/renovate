@@ -102,6 +102,9 @@ Object {
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "foo",
   "enabled": true,
+  "enabledManagers": Array [
+    "npm",
+  ],
   "exposeAllEnv": true,
   "extends": Array [
     ":automergeBranch",

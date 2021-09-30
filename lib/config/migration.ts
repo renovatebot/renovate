@@ -97,6 +97,11 @@ export function migrateConfig(
         } else if (val !== 'enabled' && val !== 'disabled') {
           migratedConfig.semanticCommits = 'auto';
         }
+      } else if (key === 'enabledManagers' && is.array(val)) {
+        // Replace yarn with npm, since yarn actually uses npm as package manager
+        migratedConfig.enabledManagers = migratedConfig.enabledManagers.map(
+          (element) => (element === 'yarn' ? 'npm' : element)
+        );
       } else if (parentKey === 'hostRules' && key === 'platform') {
         migratedConfig.hostType = val;
         delete migratedConfig.platform;
@@ -525,6 +530,7 @@ export function migrateConfig(
           migratedConfig.composerIgnorePlatformReqs = null;
         }
       }
+
       const migratedTemplates = {
         fromVersion: 'currentVersion',
         newValueMajor: 'newMajor',
