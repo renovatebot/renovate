@@ -85,5 +85,5 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | --------------------------------- | ------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
 | Local default                     | `local>abc/foo`                 | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
 | Local with preset path            | `local>abc/foo//path/xyz`       | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
-| Local default with a tag          | `local>abc/foo#1.2.5`           | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.5.`       |
-| Local with preset path with a tag | `local>abc/foo//path/xyz#1.2.5` | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.5.`       |
+| Local default with a tag          | `local>abc/foo#1.5.4`           | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.5.4`        |
+| Local with preset path with a tag | `local>abc/foo//path/xyz#1.5.4` | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
