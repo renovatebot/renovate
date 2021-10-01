@@ -8,6 +8,14 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'detectGlobalManagerConfig',
+    description:
+      'If true, Renovate will attempt to read global manager config from the file system.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'allowPostUpgradeCommandTemplating',
     description: 'If true allow templating for post-upgrade commands.',
     type: 'boolean',
