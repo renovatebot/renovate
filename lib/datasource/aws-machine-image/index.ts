@@ -4,11 +4,18 @@ import * as amazonMachineImageVersioning from '../../versioning/aws-machine-imag
 import { Datasource } from '../datasource';
 import { GetReleasesConfig, ReleaseResult } from '../types';
 
-export const defaultVersioning = amazonMachineImageVersioning.id;
 export class AwsMachineImageDataSource extends Datasource {
-  static readonly id = 'amazon-machine-image';
+  static readonly id = 'aws-machine-image';
 
   override readonly defaultVersioning = amazonMachineImageVersioning.id;
+
+  override readonly defaultConfig = {
+    commitMessageTopic:
+      'AWS Machine Image ({{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}})',
+    commitMessageExtra: 'to {{{newVersion}}}',
+    branchTopic:
+      'ami/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}',
+  };
 
   readonly ec2: EC2Client;
 

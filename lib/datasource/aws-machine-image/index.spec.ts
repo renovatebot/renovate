@@ -126,7 +126,7 @@ describe('datasource/aws-machine-image/index', () => {
       });
       console.log(res);
       expect(res).toMatchSnapshot();
-      //expect(res.releases).toHaveLength(3);
+      expect(res.releases).toHaveLength(1);
       expect(ec2Mock.calls()).toMatchSnapshot();
     });
   });
