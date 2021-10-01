@@ -1,6 +1,6 @@
 import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
-import * as authHeader from 'auth-header';
+import { parse } from 'auth-header';
 import hasha from 'hasha';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -78,7 +78,7 @@ export async function getAuthHeaders(
       return null;
     }
 
-    const authenticateHeader = authHeader.parse(
+    const authenticateHeader = parse(
       apiCheckResponse.headers['www-authenticate']
     );
 
