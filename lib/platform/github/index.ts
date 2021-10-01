@@ -23,7 +23,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash, parseUrl } from '../../util/url';
+import { ensureTrailingSlash } from '../../util/url';
 import type {
   AggregatedVulnerabilities,
   BranchStatusConfig,
@@ -115,12 +115,6 @@ export async function initPlatform({
     renovateUsername,
   };
 
-  // Generic github hostRule that per default all datasources using github api are enabled
-  const genericGithubHostRule = {
-    matchHost: parseUrl(defaults.endpoint).hostname,
-    token,
-  };
-  hostRules.add(genericGithubHostRule);
   return platformConfig;
 }
 
@@ -297,6 +291,7 @@ export async function initRepo({
           {
             token: forkToken || opts.token,
             paginate: true,
+            pageLimit: 100,
           }
         )
       ).body.map((r) => r.full_name);
@@ -804,20 +799,9 @@ async function getStatus(
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks: any[] | undefined
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);

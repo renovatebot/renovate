@@ -331,19 +331,9 @@ export async function getBranchStatusCheck(
 }
 
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks: string[]
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   const statuses = await getStatusCheck(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
@@ -688,11 +678,7 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace('<summary>', '**')
-    .replace('</summary>', '**')
-    .replace('<details>', '')
-    .replace('</details>', '');
+    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
 }
 
 /* istanbul ignore next */

@@ -4,6 +4,7 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { getGlobalConfig } from './global';
+import { applyMigrations } from './migrations';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
@@ -57,6 +58,7 @@ export function migrateConfig(
       'peerDependencies',
     ];
     const { migratePresets } = getGlobalConfig();
+    applyMigrations(config, migratedConfig);
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
         delete migratedConfig[key];
@@ -493,16 +495,18 @@ export function migrateConfig(
           delete migratedConfig.node;
         }
       } else if (is.array(val)) {
-        const newArray = [];
-        for (const item of migratedConfig[key] as unknown[]) {
-          if (is.object(item) && !is.array(item)) {
-            const arrMigrate = migrateConfig(item as RenovateConfig, key);
-            newArray.push(arrMigrate.migratedConfig);
-          } else {
-            newArray.push(item);
+        if (is.array(migratedConfig?.[key])) {
+          const newArray = [];
+          for (const item of migratedConfig[key] as unknown[]) {
+            if (is.object(item) && !is.array(item)) {
+              const arrMigrate = migrateConfig(item as RenovateConfig, key);
+              newArray.push(arrMigrate.migratedConfig);
+            } else {
+              newArray.push(item);
+            }
           }
+          migratedConfig[key] = newArray;
         }
-        migratedConfig[key] = newArray;
       } else if (key === 'compatibility' && is.object(val)) {
         migratedConfig.constraints = migratedConfig.compatibility;
         delete migratedConfig.compatibility;

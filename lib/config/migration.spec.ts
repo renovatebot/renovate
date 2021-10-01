@@ -688,9 +688,9 @@ describe('config/migration', () => {
   it('it migrates hostRules fields', () => {
     const config: RenovateConfig = {
       hostRules: [
-        { baseUrl: 'https://some.domain.com', token: 'abc123' },
-        { domainName: 'domain.com', token: 'abc123' },
-        { hostName: 'some.domain.com', token: 'abc123' },
+        { baseUrl: 'https://some.domain.com', token: '123test' },
+        { domainName: 'domain.com', token: '123test' },
+        { hostName: 'some.domain.com', token: '123test' },
       ],
     } as any;
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -700,9 +700,9 @@ describe('config/migration', () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toEqual({
       hostRules: [
-        { matchHost: 'https://some.domain.com', token: 'abc123' },
-        { matchHost: 'domain.com', token: 'abc123' },
-        { matchHost: 'some.domain.com', token: 'abc123' },
+        { matchHost: 'https://some.domain.com', token: '123test' },
+        { matchHost: 'domain.com', token: '123test' },
+        { matchHost: 'some.domain.com', token: '123test' },
       ],
     });
   });
@@ -772,5 +772,16 @@ describe('config/migration', () => {
     );
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
+  });
+  it('migrates empty requiredStatusChecks', () => {
+    const config: RenovateConfig = {
+      requiredStatusChecks: [],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
   });
 });

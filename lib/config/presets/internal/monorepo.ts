@@ -12,6 +12,9 @@ const repoGroups = {
     'https://github.com/arcus-azure/arcus.backgroundjobs',
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
+  'algoliasearch-client-javascript':
+    'https://github.com/algolia/algoliasearch-client-javascript',
+  'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
   'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',
   'apollo-server': 'https://github.com/apollographql/apollo-server',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
@@ -29,6 +32,7 @@ const repoGroups = {
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
+  'dnd-kit': 'https://github.com/clauderic/dnd-kit',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -120,6 +124,7 @@ const repoGroups = {
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   'material-ui': 'https://github.com/mui-org/material-ui',
+  mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
   nest: 'https://github.com/nestjs/nest',
   neutrino: [
