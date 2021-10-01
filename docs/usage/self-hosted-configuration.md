@@ -130,6 +130,15 @@ e.g.
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
+## detectGlobalManagerConfig
+
+The purpose of this capability is to allow a bot admin to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
+
+This feature is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
+
+Currently this capability is supported for the `npm` manager only - specifically the `~/.npmrc` file.
+If found, it will be imported into `config.npmrc` with `config.npmrcMerge` will be set to `true`.
+
 ## dockerChildPrefix
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.

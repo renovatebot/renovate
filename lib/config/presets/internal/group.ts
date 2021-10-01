@@ -266,6 +266,7 @@ const staticGroups = {
       {
         groupName: 'spring boot',
         matchPackagePrefixes: ['org.springframework.boot:'],
+        matchPackageNames: ['org.springframework.boot'],
       },
     ],
   },

@@ -757,7 +757,7 @@ export async function commitFiles({
     }
 
     const pushOptions: TaskOptions = {
-      '--force': null,
+      '--force-with-lease': null,
       '-u': null,
     };
     if (getNoVerify().includes(GitNoVerifyOption.Push)) {
