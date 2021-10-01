@@ -1,7 +1,7 @@
 import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
+import { parse } from 'auth-header';
 import hasha from 'hasha';
-import wwwAuthenticate from 'www-authenticate';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
@@ -80,7 +80,7 @@ export async function getAuthHeaders(
       return null;
     }
 
-    const authenticateHeader = new wwwAuthenticate.parsers.WWW_Authenticate(
+    const authenticateHeader = parse(
       apiCheckResponse.headers['www-authenticate']
     );
 
@@ -127,7 +127,9 @@ export async function getAuthHeaders(
     // * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
     if (
       authenticateHeader.scheme.toUpperCase() !== 'BEARER' ||
-      parseUrl(authenticateHeader.parms.realm) == null
+      !is.string(authenticateHeader.params.realm) ||
+      !is.string(authenticateHeader.params.service) ||
+      parseUrl(authenticateHeader.params.realm) === null
     ) {
       logger.trace(
         { registryHost, dockerRepository, authenticateHeader },
@@ -136,7 +138,7 @@ export async function getAuthHeaders(
       return opts.headers;
     }
 
-    const authUrl = `${authenticateHeader.parms.realm}?service=${authenticateHeader.parms.service}&scope=repository:${dockerRepository}:pull`;
+    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=repository:${dockerRepository}:pull`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
