@@ -332,7 +332,7 @@ describe('manager/gomod/artifacts', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -358,7 +358,7 @@ describe('manager/gomod/artifacts', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
