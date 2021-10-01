@@ -33,8 +33,10 @@ async function getECRAuthToken(
     config.credentials = {
       accessKeyId: opts.username,
       secretAccessKey: opts.password,
+      ...(opts.token && { sessionToken: opts.token }),
     };
   }
+
   const ecr = new ECR(config);
   try {
     const data = await ecr.getAuthorizationToken({});
