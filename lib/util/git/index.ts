@@ -10,6 +10,7 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
+import { simpleGitConfig } from '../../config/simple-git';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -185,7 +186,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = getGlobalConfig();
-  git = Git(localDir);
+  git = Git(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }

@@ -2,6 +2,7 @@ import hasha from 'hasha';
 import Git from 'simple-git';
 import { join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
+import { simpleGitConfig } from '../../config/simple-git';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
@@ -159,7 +160,7 @@ async function fetchRegistryInfo(
       clonePath = join(privateCacheDir(), cacheDirFromUrl(url));
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
 
-      const git = Git();
+      const git = Git(simpleGitConfig());
       const clonePromise = git.clone(registryUrl, clonePath, {
         '--depth': 1,
       });
