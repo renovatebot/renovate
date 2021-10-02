@@ -728,7 +728,7 @@ export async function updatePr({
         },
       }
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     if (
       err.statusCode === 400 &&
       err.body?.error?.message.includes('reviewers: Malformed reviewers list')
