@@ -60,7 +60,7 @@ Some major platform features are not supported at all by Renovate.
 
 ### Troubleshoot Renovate
 
-If you have problems with Renovate, or need to know where Renovate keeps the logging output then read our [troubleshooting documentation](https://docs.renovatebot.com/getting-started/troubleshooting/).
+If you have problems with Renovate, or need to know where Renovate keeps the logging output then read our [troubleshooting documentation](https://docs.renovatebot.com/troubleshooting/).
 
 ### Tell Renovate to ask for approval before creating a Pull Request
 
