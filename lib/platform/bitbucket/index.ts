@@ -33,8 +33,8 @@ import * as utils from './utils';
 import {
   PrResponse,
   RepoInfoBody,
-  mergeBodyTransformer,
   UserResponse,
+  mergeBodyTransformer,
 } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
@@ -743,7 +743,7 @@ export async function updatePr({
 
       // Validate that each previous PR reviewer account is still active
       for (let reviewer of pr.reviewers) {
-        let reviewerUser = (
+        const reviewerUser = (
           await bitbucketHttp.getJson<UserResponse>(
             `/2.0/users/${reviewer.account_id}`
           )
