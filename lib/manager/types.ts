@@ -41,6 +41,7 @@ export interface UpdateArtifactsConfig {
   composerIgnorePlatformReqs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
+  installBeforeUpdate?: boolean;
   ignoreScripts?: boolean;
   updateType?: UpdateType;
   newValue?: string;

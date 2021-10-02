@@ -76,6 +76,26 @@ function getAuthJson(): string | null {
   return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
+function getComposerArguments(config): string {
+  let args = '';
+  if (config.composerIgnorePlatformReqs) {
+    if (config.composerIgnorePlatformReqs.length === 0) {
+      args += ' --ignore-platform-reqs';
+    } else {
+      config.composerIgnorePlatformReqs.forEach((req) => {
+        args += ' --ignore-platform-req ' + quote(req);
+      });
+    }
+  }
+
+  args += ' --no-ansi --no-interaction';
+  if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
+    args += ' --no-scripts --no-autoloader --no-plugins';
+  }
+
+  return args;
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -126,6 +146,15 @@ export async function updateArtifacts({
         tagScheme: composerVersioningId,
       },
     };
+
+    const commands: string[] = [];
+    if (!config.isLockFileMaintenance && config.installBeforeUpdate) {
+      const preCmd = 'composer';
+      const preArgs = 'install' + getComposerArguments(config);
+      logger.debug({ preCmd, preArgs }, 'composer pre-update command');
+      commands.push(`${preCmd} ${preArgs}`);
+    }
+
     const cmd = 'composer';
     let args: string;
     if (config.isLockFileMaintenance) {
@@ -136,21 +165,11 @@ export async function updateArtifacts({
           'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
         ).trim() + ' --with-dependencies';
     }
-    if (config.composerIgnorePlatformReqs) {
-      if (config.composerIgnorePlatformReqs.length === 0) {
-        args += ' --ignore-platform-reqs';
-      } else {
-        config.composerIgnorePlatformReqs.forEach((req) => {
-          args += ' --ignore-platform-req ' + quote(req);
-        });
-      }
-    }
-    args += ' --no-ansi --no-interaction';
-    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
-      args += ' --no-scripts --no-autoloader --no-plugins';
-    }
+    args += getComposerArguments(config);
     logger.debug({ cmd, args }, 'composer command');
-    await exec(`${cmd} ${args}`, execOptions);
+    commands.push(`${cmd} ${args}`);
+
+    await exec(commands, execOptions);
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;

@@ -311,6 +311,13 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
   },
+  {
+    name: 'installBeforeUpdate',
+    description:
+      'Set to true to first install the dependencies before running the update task.',
+    type: 'boolean',
+    default: false,
+  },
   // Log options
   {
     name: 'logFile',
