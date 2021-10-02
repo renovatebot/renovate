@@ -2,6 +2,7 @@ import * as defaultsParser from '../../../../config/defaults';
 import { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
+import { detectAllGlobalConfig } from '../../../../manager';
 import { ensureDir, getSubDirectory, readFile } from '../../../../util/fs';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
@@ -72,6 +73,13 @@ export async function parseConfigs(
   logger.debug({ config: cliConfig }, 'CLI config');
   logger.debug({ config: envConfig }, 'Env config');
   logger.debug({ config: combinedConfig }, 'Combined config');
+
+  if (config.detectGlobalManagerConfig) {
+    logger.debug('Detecting global manager config');
+    const globalManagerConfig = await detectAllGlobalConfig();
+    logger.debug({ config: globalManagerConfig }, 'Global manager config');
+    config = mergeChildConfig(config, globalManagerConfig);
+  }
 
   // Get global config
   logger.trace({ config }, 'Full config');
