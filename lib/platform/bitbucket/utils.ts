@@ -220,5 +220,4 @@ export interface PrReviewer {
   display_name: string;
   account_id: string;
   nickname: string;
-  account_status: string;
 }
