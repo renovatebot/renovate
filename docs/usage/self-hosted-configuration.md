@@ -11,6 +11,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowCustomCrateRegistries
 
+## allowPlugins
+
 ## allowPostUpgradeCommandTemplating
 
 Set to true to allow templating of dependency level post-upgrade commands.

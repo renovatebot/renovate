@@ -539,6 +539,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowPlugins',
+    description:
+      'Configure this to true if repositories are allowed to run install plugins.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'allowScripts',
     description:
       'Configure this to true if repositories are allowed to run install scripts.',
@@ -551,6 +559,13 @@ const options: RenovateOptions[] = [
     description:
       'Configure this to true if custom crate registries are allowed.',
     globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'ignorePlugins',
+    description:
+      'Configure this to true if allowPlugins=true but you wish to skip running plugins when updating lock files.',
     type: 'boolean',
     default: false,
   },

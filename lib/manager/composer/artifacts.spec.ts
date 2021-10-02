@@ -29,6 +29,7 @@ const config: UpdateArtifactsConfig = {
 };
 
 const adminConfig: RepoGlobalConfig = {
+  allowPlugins: false,
   allowScripts: false,
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
@@ -83,7 +84,7 @@ describe('manager/composer/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValue(repoStatus);
-    setGlobalConfig({ ...adminConfig, allowScripts: true });
+    setGlobalConfig({ ...adminConfig, allowScripts: true, allowPlugins: true });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -392,5 +393,42 @@ describe('manager/composer/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
     expect(execSnapshots).toHaveLength(2);
+  });
+
+  it('does not disable plugins when configured globally', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValue(repoStatus);
+    setGlobalConfig({ ...adminConfig, allowPlugins: true });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('disable plugins when configured locally', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValue(repoStatus);
+    setGlobalConfig({ ...adminConfig, allowPlugins: true });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          ignorePlugins: true,
+        },
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
 });

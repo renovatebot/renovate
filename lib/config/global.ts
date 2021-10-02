@@ -5,6 +5,7 @@ let repoGlobalConfig: RepoGlobalConfig = {};
 // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
 const repoGlobalOptions = [
   'allowCustomCrateRegistries',
+  'allowPlugins',
   'allowPostUpgradeCommandTemplating',
   'allowScripts',
   'allowedPostUpgradeCommands',

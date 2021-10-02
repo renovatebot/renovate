@@ -42,6 +42,7 @@ export interface UpdateArtifactsConfig {
   currentValue?: string;
   postUpdateOptions?: string[];
   installBeforeUpdate?: boolean;
+  ignorePlugins?: boolean;
   ignoreScripts?: boolean;
   updateType?: UpdateType;
   newValue?: string;
