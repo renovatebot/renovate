@@ -1,10 +1,10 @@
-import { KnownProps, parseSync } from 'editorconfig';
+import { KnownProps, parse } from 'editorconfig';
 import type { CodeFormat } from './code-format';
 import { IndentationType } from './indentation-type';
 
 export class EditorConfig {
-  public static getCodeFormat(fileName: string): CodeFormat {
-    const knownProps = parseSync(fileName);
+  public static async getCodeFormat(fileName: string): Promise<CodeFormat> {
+    const knownProps = await parse(fileName);
 
     return {
       indentationSize: EditorConfig.getIndentationSize(knownProps),

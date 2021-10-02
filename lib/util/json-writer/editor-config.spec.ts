@@ -15,40 +15,44 @@ describe('util/json-writer/editor-config', () => {
     mock.restore();
   });
 
-  it('should handle empty .editorconfig file', () => {
+  it('should handle empty .editorconfig file', async () => {
+    expect.assertions(2);
     mock({
       '.editorconfig': '',
     });
-    const format = EditorConfig.getCodeFormat(defaultConfigFile);
+    const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationSize).toBeUndefined();
     expect(format.indentationType).toBeUndefined();
   });
 
-  it('should handle global config from .editorconfig', () => {
+  it('should handle global config from .editorconfig', async () => {
+    expect.assertions(2);
     mock({
       '.editorconfig': GLOBAL_EDITOR_CONFIG,
     });
-    const format = EditorConfig.getCodeFormat(defaultConfigFile);
+    const format = await EditorConfig.getCodeFormat(defaultConfigFile);
     expect(format.indentationSize).toBe(6);
     expect(format.indentationType).toBe(IndentationType.Space);
   });
 
-  it('should not handle non json config from .editorconfig', () => {
+  it('should not handle non json config from .editorconfig', async () => {
+    expect.assertions(2);
     mock({
       '.editorconfig': NON_JSON_FILES_EDITOR_CONFIG,
     });
-    const format = EditorConfig.getCodeFormat(defaultConfigFile);
+    const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationSize).toBeUndefined();
     expect(format.indentationType).toBeUndefined();
   });
 
-  it('should handle json config from .editorconfig', () => {
+  it('should handle json config from .editorconfig', async () => {
+    expect.assertions(2);
     mock({
       '.editorconfig': JSON_FILES_EDITOR_CONFIG,
     });
-    const format = EditorConfig.getCodeFormat(defaultConfigFile);
+    const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationType).toBe(IndentationType.Tab);
   });

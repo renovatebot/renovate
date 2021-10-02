@@ -76,7 +76,7 @@ async function getOnboardingConfigContents(
   config: RenovateConfig,
   fileName: string
 ): Promise<string> {
-  const codeFormat = EditorConfig.getCodeFormat(fileName);
+  const codeFormat = await EditorConfig.getCodeFormat(fileName);
   const jsonWriter = new JSONWriter(codeFormat);
   const onboardingConfig = await getOnboardingConfig(config);
   return jsonWriter.write(onboardingConfig);
