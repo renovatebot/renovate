@@ -743,7 +743,7 @@ export async function updatePr({
       const activeReviewers: PrReviewer[] = [];
 
       // Validate that each previous PR reviewer account is still active
-      for (let reviewer of pr.reviewers) {
+      for (const reviewer of pr.reviewers) {
         const reviewerUser = (
           await bitbucketHttp.getJson<UserResponse>(
             `/2.0/users/${reviewer.account_id}`
