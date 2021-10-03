@@ -127,6 +127,7 @@ const repoGroups = {
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
   nest: 'https://github.com/nestjs/nest',
+  netty: 'https://github.com/netty/netty',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
     'https://github.com/mozilla-neutrino/neutrino-dev',
