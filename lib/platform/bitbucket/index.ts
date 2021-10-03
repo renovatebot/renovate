@@ -32,6 +32,7 @@ import * as comments from './comments';
 import * as utils from './utils';
 import {
   PrResponse,
+  PrReviewer,
   RepoInfoBody,
   UserResponse,
   mergeBodyTransformer,
@@ -739,7 +740,7 @@ export async function updatePr({
       );
 
       // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
-      const activeReviewers: UserResponse[] = [];
+      const activeReviewers: PrReviewer[] = [];
 
       // Validate that each previous PR reviewer account is still active
       for (let reviewer of pr.reviewers) {
