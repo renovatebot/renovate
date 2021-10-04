@@ -20,6 +20,7 @@ export interface ExtractConfig {
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
+  npmrcMerge?: boolean;
   skipInstalls?: boolean;
   updateInternalDeps?: boolean;
   deepExtract?: boolean;
@@ -100,6 +101,7 @@ export interface Package<T> extends ManagerData<T> {
   repo?: string;
   target?: string;
   versioning?: string;
+  dataType?: string;
 
   // npm manager
   bumpVersion?: ReleaseType | string;
@@ -135,6 +137,7 @@ export interface LookupUpdate {
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+  newValue?: string;
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
   currentDigestShort?: string;
