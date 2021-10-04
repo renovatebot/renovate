@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
+import { cache } from '../../util/cache/package/decorator';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
 import { GetReleasesConfig, ReleaseResult } from '../types';
@@ -9,12 +10,33 @@ export class AwsMachineImageDataSource extends Datasource {
 
   override readonly defaultVersioning = amazonMachineImageVersioning.id;
 
+  override readonly caching = true;
+
   override readonly defaultConfig = {
+    pinDigest: true,
     commitMessageTopic:
-      'AWS Machine Image ({{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}})',
-    commitMessageExtra: 'to {{{newVersion}}}',
+      'AWS Machine Image {{{depName}}} in ({{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}})',
+    commitMessageExtra: '\nto {{{newVersion}}}',
     branchTopic:
-      'ami/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}',
+      'ami/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}#{{{depName}}}',
+    prBodyNotes:
+      'The new aws machine image was looked up via the aws api with the following filter:\n```yaml\n{{{stringToPrettyJSON lookupName}}}\n```',
+    prBodyColumns: ['Change', 'Image'],
+    prBodyDefinitions: {
+      Image: '```{{{newDigest}}}```',
+    },
+    digest: {
+      commitMessageAction: 'Set',
+      commitMessageTopic:
+        'AWS Machine Image Name {{{depName}}} in ({{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}})',
+      commitMessageExtra: '\nto {{{newDigest}}}',
+      branchTopic:
+        'amidigest/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}#{{{depName}}}',
+      prBodyColumns: ['Image'],
+      prBodyDefinitions: {
+        Image: '```{{{newDigest}}}```',
+      },
+    },
   };
 
   readonly ec2: EC2Client;
@@ -27,39 +49,49 @@ export class AwsMachineImageDataSource extends Datasource {
     this.now = Date.now();
   }
 
+  override async getDigest(
+    { lookupName: serializedAmiFilter }: GetReleasesConfig,
+    newValue?: string
+  ): Promise<string | null> {
+    const cmd = new DescribeImagesCommand({
+      ImageIds: [newValue],
+      Filters: JSON.parse(serializedAmiFilter),
+    });
+    const matchingImages = await this.ec2.send(cmd);
+    const latestImage = matchingImages.Images?.sort(
+      (image1, image2) =>
+        Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
+    ).pop();
+    const digest = latestImage.Name;
+    return digest;
+  }
+
+  @cache({
+    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      `${registryUrl}:${lookupName}`,
+  })
   async getReleases({
     lookupName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // eslint-disable-next-line no-console
-    console.log(serializedAmiFilter);
-    const amiFilters = JSON.parse(serializedAmiFilter);
     const cmd = new DescribeImagesCommand({
-      Filters: amiFilters,
+      Filters: JSON.parse(serializedAmiFilter),
     });
     const matchingImages = await this.ec2.send(cmd);
-    const sortedImages = matchingImages.Images?.sort(
+    const latestImage = matchingImages.Images?.sort(
       (image1, image2) =>
         Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
-    );
-
-    const latestImage = sortedImages.pop();
-
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(amiFilters, null, 2));
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(sortedImages, null, 2));
-
-    const ret = {
+    ).pop();
+    return {
       releases: [
         {
           version: latestImage.ImageId,
           releaseTimestamp: latestImage.CreationDate,
           isDeprecated:
             (Date.parse(latestImage.DeprecationTime) ?? this.now) < this.now,
+          newDigest: latestImage.Name,
         },
       ],
     };
-    console.log(JSON.stringify(ret, null, 2));
-    return ret;
   }
 }

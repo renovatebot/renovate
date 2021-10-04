@@ -9,12 +9,10 @@ export const supportsRanges = false;
 const parse = (version: string): any => ({ release: [parseInt(version, 10)] });
 
 function compare(version1: string, version2: string): number {
-  console.log(`Comparing ${version1} to ${version2}`);
   return 1;
 }
 
 function isValid(input: string): string | boolean | null {
-  console.log('IS VALID');
   return typeof input === 'string' && /^ami-[a-z0-9]{17}$/.test(input);
 }
 

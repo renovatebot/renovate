@@ -1,0 +1,91 @@
+This datasource returns the latest [aws machine image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the aws api (valid credentials required).
+
+Because there is no general lookupName, you have to use the [describe images filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-ec2/interfaces/describeimagescommandinput.html#filters) as minified json as a lookupName.
+
+Example:
+
+```yaml
+# Getting the latest official eks image from aws (account '602401143452' for eu-central-1) for eks 1.21 (name matches 'amazon-eks-node-1.21-*') would look as a describe images filter like:
+
+[
+    {
+        "Name": "owner-id",
+        "Values": [
+            "602401143452"
+        ]
+    },
+    {
+        "Name": "name",
+        "Values": [
+            "amazon-eks-node-1.21-*"
+        ]
+    }
+]
+
+# in order to use it with this datasource, you have to minify it:
+
+[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
+```
+
+At the moment, this datasource has no "manager". You should use the regex manager for this - an example how a regex manager could look like:
+
+```javascript
+module.exports = {
+  regexManagers: [
+    {
+      fileMatch: ['.*'],
+      matchStrings: [
+        '._amiFilter=(?<lookupName>._?)\n(._currentImageName=(?<currentDigest>._?)\n)?(._\n)?._?(?<depName>[a-zA-Z0-9-_:]_)[ ]_?[:|=][ ]_?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?._',
+      ],
+      datasourceTemplate: 'aws-machine-image',
+      versioningTemplate: 'aws-machine-image',
+    },
+  ],
+};
+```
+
+This would match every file, and would recognize the following lines
+
+```yaml
+# With am name mentioned in the comments
+# amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
+# currentImageName=unknown
+my_ami1: ami-02ce3d9008cab69cb
+# Only ami, no name mentioned
+# amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
+# currentImageName=unknown
+my_ami2: ami-0083e9407e275acf2
+```
+
+```typescript
+const myConfigObject = {
+  // With am name mentioned in the comments
+  // amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
+  // currentImageName=unknown
+  my_ami1: 'ami-02ce3d9008cab69cb',
+};
+
+/**
+ * Only ami, no ami name mentioned
+ * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
+ * currentImageName=unknown
+ */
+const my_ami2 = 'ami-0083e9407e275acf2';
+```
+
+```hcl
+resource "aws_instance" "web" {
+
+    # Only ami, no name mentioned
+    # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
+    # currentImageName=unknown
+    ami = "ami-0083e9407e275acf2"
+
+    count = 2
+    source_dest_check = false
+
+    connection {
+        user = "root"
+    }
+}
+```

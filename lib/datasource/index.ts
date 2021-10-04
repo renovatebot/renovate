@@ -221,7 +221,6 @@ async function fetchReleases(
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult = null;
   const registryStrategy = datasource.registryStrategy || 'hunt';
-  console.log('IM FETCHING :::');
   try {
     if (is.nonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
