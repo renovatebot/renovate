@@ -16,7 +16,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
     if (
       currentFrom.match(/\$/g).length === 1 && // Ensure it has exactly one '$' to avoid the cases we don't support
-      currentFrom.indexOf('-') !== -1 // Ensure it has the default value
+      currentFrom.indexOf(':-') !== -1 // Ensure it has the default value
     ) {
       hasDefaultValue = true;
       cleanedCurrentFrom = currentFrom.substr(2, currentFrom.length - 3);
