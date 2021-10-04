@@ -220,6 +220,11 @@ export interface UpdateLockedConfig {
   newVersion?: string;
 }
 
+export interface GlobalManagerConfig {
+  npmrc?: string;
+  npmrcMerge?: boolean;
+}
+
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
   language?: string;
@@ -230,6 +235,8 @@ export interface ManagerApi {
     currentValue: string,
     bumpVersion: ReleaseType | string
   ): Result<BumpPackageVersionResult>;
+
+  detectGlobalConfig?(): Result<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,
