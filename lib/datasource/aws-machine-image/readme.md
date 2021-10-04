@@ -27,7 +27,11 @@ Example:
 [{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
 ```
 
-At the moment, this datasource has no "manager". You should use the regex manager for this - an example how a regex manager could look like:
+At the moment, this datasource has no "manager". You have to use the regex manager for this.
+
+**Usage Example**
+
+An example how a regex manager could look like:
 
 ```javascript
 module.exports = {
