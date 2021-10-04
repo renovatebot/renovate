@@ -1,11 +1,11 @@
-This datasource returns the latest [aws machine image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the aws api (valid credentials required).
+This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API (valid credentials required).
 
-Because there is no general lookupName, you have to use the [describe images filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-ec2/interfaces/describeimagescommandinput.html#filters) as minified json as a lookupName.
+Because there is no general lookupName, you have to use the [describe images filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-ec2/interfaces/describeimagescommandinput.html#filters) as minified JSON as a lookupName.
 
 Example:
 
 ```yaml
-# Getting the latest official eks image from aws (account '602401143452' for eu-central-1) for eks 1.21 (name matches 'amazon-eks-node-1.21-*') would look as a describe images filter like:
+# Getting the latest official EKS image from AWS (account '602401143452' for eu-central-1) for EKS 1.21 (name matches 'amazon-eks-node-1.21-*') would look as a describe images filter like:
 
 [
     {
@@ -27,7 +27,8 @@ Example:
 [{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
 ```
 
-At the moment, this datasource has no "manager". You have to use the regex manager for this.
+At the moment, this datasource has no "manager".
+You have to use the regex manager for this.
 
 **Usage Example**
 
@@ -48,7 +49,7 @@ module.exports = {
 };
 ```
 
-This would match every file, and would recognize the following lines
+This would match every file, and would recognize the following lines:
 
 ```yaml
 # With am name mentioned in the comments
