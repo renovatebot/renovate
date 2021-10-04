@@ -9,22 +9,44 @@ export const supportsRanges = false;
 
 const { is: isStable } = stable;
 
+function sortVersions(a: string, b: string): boolean {
+  return semver.compare(semver.coerce(a), semver.coerce(b));
+}
+
+function getMajor(a: string, loose: boolean): string {
+  return semver.major(semver.coerce(a), loose);
+}
+
+function getMinor(a: string, loose: boolean): string {
+  return semver.minor(semver.coerce(a), loose);
+}
+
+function getPatch(a: string, loose: boolean): string {
+  return semver.patch(a, loose);
+}
+
+function matches(version: string, range: string, options: any): boolean {
+  return semver.satisfies(semver.coerce(version), range, options);
+}
+
+function equals(a: string, b: string, loose: boolean) {
+  return semver.eq(semver.coerce(a), semver.coerce(b), loose);
+}
+
+function isValid(version: string, options: any) {
+  return semver.valid(semver.coerce(version), version, options);
+}
+
 const {
-  compare: sortVersions,
   maxSatisfying: getSatisfyingVersion,
   minSatisfying: minSatisfyingVersion,
-  major: getMajor,
-  minor: getMinor,
-  patch: getPatch,
-  satisfies: matches,
-  valid,
   ltr: isLessThanRange,
   gt: isGreaterThan,
-  eq: equals,
+  valid,
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): string => valid(input);
+export const isVersion = (input: string): string => isValid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 
@@ -40,9 +62,9 @@ export const api: VersioningApi = {
   isCompatible: isVersion,
   isGreaterThan,
   isLessThanRange,
-  isSingleVersion: isVersion,
+  isSingleVersion: valid,
   isStable,
-  isValid: isVersion,
+  isValid,
   isVersion,
   matches,
   getSatisfyingVersion,
