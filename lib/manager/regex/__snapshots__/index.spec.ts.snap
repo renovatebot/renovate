@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/regex/index extract dependency with regex which includes meta escapes 1`] = `
+Object {
+  "datasourceTemplate": "docker",
+  "deps": Array [
+    Object {
+      "currentValue": "1.18-alpine",
+      "datasource": "docker",
+      "depName": "old.registry.com/myorg/nginx-unprivileged",
+      "replaceString": "image: old.registry.com/myorg/nginx-unprivileged:1.18-alpine",
+    },
+  ],
+  "matchStrings": Array [
+    "^\\\\s*image:\\\\s+(?<depName>[^\\\\s:]*):(?<currentValue>[^\\\\s]+)\\\\s*$",
+  ],
+}
+`;
+
 exports[`manager/regex/index extracts and applies a registryUrlTemplate 1`] = `
 Object {
   "deps": Array [

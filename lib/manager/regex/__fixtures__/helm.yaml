@@ -1,0 +1,7 @@
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: old.registry.com/myorg/nginx-unprivileged:1.18-alpine
+# Sets the imagePullPolicy of the service deployment
+imagePullPolicy: IfNotPresent
+# If defined, the given secret name will be configured as a pull secret
+imagePullSecret:
+

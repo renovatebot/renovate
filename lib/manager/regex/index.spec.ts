@@ -7,6 +7,7 @@ const dockerfileContent = loadFixture(`Dockerfile`);
 const ansibleYamlContent = loadFixture(`ansible.yml`);
 const exampleJsonContent = loadFixture(`example.json`);
 const exampleGitlabCiYml = loadFixture(`gitlab-ci.yml`);
+const replaceYaml = loadFixture(`helm.yaml`);
 
 describe('manager/regex/index', () => {
   it('has default config', () => {
@@ -14,6 +15,24 @@ describe('manager/regex/index', () => {
       pinDigests: false,
     });
   });
+
+  it('extract dependency with regex which includes meta escapes', async () => {
+    const config = {
+      matchStrings: [
+        '^\\s*image:\\s+(?<depName>[^\\s:]*):(?<currentValue>[^\\s]+)\\s*$',
+      ],
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      replaceYaml,
+      'value_base.yaml',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).not.toBeNull();
+    expect(res.deps).toHaveLength(1);
+  });
+
   it('extracts multiple dependencies', async () => {
     const config = {
       matchStrings: [

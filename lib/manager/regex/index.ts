@@ -111,7 +111,7 @@ function handleAny(
   config: CustomExtractConfig
 ): PackageDependency[] {
   return config.matchStrings
-    .map((matchString) => regEx(matchString, 'g'))
+    .map((matchString) => regEx(matchString, 'gm'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
     .map((matchResult) => createDependency(matchResult, null, config));
 }
