@@ -15,7 +15,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     isVariable = true;
 
     if (
-      currentFrom.match(/\$/g).length === 1 && // Ensure it has exactly one '$' to avoid the cases we don't support
+      currentFrom.split('$').length === 2 && // Ensure it has exactly one '$' to avoid the cases we don't support
       currentFrom.indexOf(':-') !== -1 // Ensure it has the default value
     ) {
       hasDefaultValue = true;
