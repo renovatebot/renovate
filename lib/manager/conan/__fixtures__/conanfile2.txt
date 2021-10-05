@@ -1,0 +1,10 @@
+[generators]
+xcode
+cmake
+qmake
+
+[options]
+poco:shared=True
+openssl:shared=True
+
+# A comment
