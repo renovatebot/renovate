@@ -1,1 +1,1 @@
-Extracts all conan packages images in `conanfile.txt` or `conanfile.py`.
+Extracts all conan packages in `conanfile.txt` or `conanfile.py`.
