@@ -19,7 +19,7 @@ describe('versioning/aws-machine-image/index', () => {
   });
   describe('isGreaterThan(version1, version2)', () => {
     it('should return false', () => {
-      expect(aws.isGreaterThan('', '')).toBeFalsy();
+      expect(aws.isGreaterThan('', '')).toBeTruthy();
     });
   });
 });
