@@ -16,4 +16,4 @@ Renovate supports upgrading dependencies in `conanfile.txt` files.
 
 ## Enabling Conan Updating
 
-Renovate updates Conan by default.
+Renovate updates Conan packages by default.
