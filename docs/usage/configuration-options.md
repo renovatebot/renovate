@@ -2165,8 +2165,9 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 ### autoReplaceStringTemplate
 
-Allows overwriting how the matched string is replaced. This allows for some migration strategies. E.g. moving from one
-Docker image repository to another one.
+Allows overwriting how the matched string is replaced.
+This allows for some migration strategies.
+E.g. moving from one Docker image repository to another one.
 
 helm-values.yaml:
 
