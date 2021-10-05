@@ -4,7 +4,13 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
-import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO, TokenType } from './common';
+import {
+  GOOGLE_REPO,
+  GRADLE_PLUGIN_PORTAL_REPO,
+  JCENTER_REPO,
+  MAVEN_REPO,
+  TokenType,
+} from './common';
 import { tokenize } from './tokenizer';
 import type {
   MatchConfig,
@@ -141,21 +147,21 @@ function processDepInterpolation({
   if (interpolationResult && isDependencyString(interpolationResult)) {
     const dep = parseDependencyString(interpolationResult);
     if (dep) {
-      const lastChild = token.children[token.children.length - 1];
-      const lastChildValue = lastChild?.value;
-      const variable = variables[lastChildValue];
-      if (
-        lastChild?.type === TokenType.Variable &&
-        variable &&
-        variable?.value === dep.currentValue
-      ) {
-        dep.managerData = {
-          fileReplacePosition: variable.fileReplacePosition,
-          packageFile: variable.packageFile,
-        };
-        dep.groupName = variable.key;
-        return { deps: [dep] };
-      }
+      token.children.forEach((child) => {
+        const variable = variables[child.value];
+        if (
+          child?.type === TokenType.Variable &&
+          variable &&
+          variable?.value === dep.currentValue
+        ) {
+          dep.managerData = {
+            fileReplacePosition: variable.fileReplacePosition,
+            packageFile: variable.packageFile,
+          };
+          dep.groupName = variable.key;
+        }
+      });
+      return { deps: [dep] };
     }
   }
   return null;
@@ -215,6 +221,7 @@ function processPredefinedRegistryUrl({
     mavenCentral: MAVEN_REPO,
     jcenter: JCENTER_REPO,
     google: GOOGLE_REPO,
+    gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
   return { urls: [registryUrl] };
 }
@@ -273,6 +280,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // 'foo.bar:baz:1.2.3'
+    // 'foo.bar:baz:1.2.3@ext'
     matchers: [
       {
         matchType: TokenType.String,
@@ -283,6 +291,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // "foo.bar:baz:${bazVersion}"
+    // "foo.bar:baz:${bazVersion}@ext"
     matchers: [
       {
         matchType: TokenType.StringInterpolation,
@@ -328,7 +337,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     matchers: [
       {
         matchType: TokenType.Word,
-        matchValue: ['mavenCentral', 'jcenter', 'google'],
+        matchValue: ['mavenCentral', 'jcenter', 'google', 'gradlePluginPortal'],
         tokenMapKey: 'registryName',
       },
       { matchType: TokenType.LeftParen },

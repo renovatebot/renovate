@@ -11,12 +11,14 @@ import type {
   PackageFile,
 } from '../../types';
 import type { GradleManagerData } from '../types';
+import { parseCatalog } from './extract/catalog';
 import { parseGradle, parseProps } from './parser';
 import type { PackageVariables, VariableRegistry } from './types';
 import {
   getVars,
   isGradleFile,
   isPropsFile,
+  isTOMLFile,
   reorderFiles,
   toAbsolutePath,
 } from './utils';
@@ -64,6 +66,9 @@ export async function extractAllPackageFiles(
         const { vars, deps } = parseProps(content, packageFile);
         updateVars(vars);
         extractedDeps.push(...deps);
+      } else if (isTOMLFile(packageFile)) {
+        const updatesFromCatalog = parseCatalog(packageFile, content);
+        extractedDeps.push(...updatesFromCatalog);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
@@ -80,9 +85,9 @@ export async function extractAllPackageFiles(
         updateVars(gradleVars);
         extractedDeps.push(...deps);
       }
-    } catch (e) {
+    } catch (err) {
       logger.warn(
-        { config, packageFile },
+        { err, config, packageFile },
         `Failed to process Gradle file: ${packageFile}`
       );
     }
@@ -93,20 +98,25 @@ export async function extractAllPackageFiles(
   }
 
   elevateFileReplacePositionField(extractedDeps).forEach((dep) => {
-    const key = dep.managerData.packageFile;
-    const pkgFile: PackageFile = packageFilesByName[key];
-    const { deps } = pkgFile;
-    deps.push({
-      ...dep,
-      registryUrls: [
-        ...new Set([
-          ...defaultRegistryUrls,
-          ...(dep.registryUrls || []),
-          ...registryUrls,
-        ]),
-      ],
-    });
-    packageFilesByName[key] = pkgFile;
+    const key = dep.managerData?.packageFile;
+    // istanbul ignore else
+    if (key) {
+      const pkgFile: PackageFile = packageFilesByName[key];
+      const { deps } = pkgFile;
+      deps.push({
+        ...dep,
+        registryUrls: [
+          ...new Set([
+            ...defaultRegistryUrls,
+            ...(dep.registryUrls || []),
+            ...registryUrls,
+          ]),
+        ],
+      });
+      packageFilesByName[key] = pkgFile;
+    } else {
+      logger.warn({ dep }, `Failed to process Gradle dependency`);
+    }
   });
 
   return Object.values(packageFilesByName);

@@ -15,6 +15,7 @@ import type { RangeStrategy } from '../types';
 import managers from './api';
 import type {
   ExtractConfig,
+  GlobalManagerConfig,
   ManagerApi,
   PackageFile,
   RangeConfig,
@@ -46,6 +47,18 @@ export function get<T extends keyof ManagerApi>(
 export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
 export const getManagers = (): Map<string, ManagerApi> => managers;
+
+export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
+  let config: GlobalManagerConfig = {};
+  for (const managerName of managerList) {
+    const manager = managers.get(managerName);
+    if (manager.detectGlobalConfig) {
+      // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
+      config = { ...config, ...(await manager.detectGlobalConfig()) };
+    }
+  }
+  return config;
+}
 
 export async function extractAllPackageFiles(
   manager: string,

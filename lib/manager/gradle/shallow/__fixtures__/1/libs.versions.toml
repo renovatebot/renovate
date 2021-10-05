@@ -1,0 +1,17 @@
+[versions]
+detekt = "1.17.0"
+kotest = "4.6.0"
+publish-on-central = "0.5.0"
+
+[libraries]
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+mockito = { group = "org.mockito", name = "mockito-core", version = "3.10.0" }
+
+[bundles]
+kotest = [ "kotest-runner-junit5", "kotest-assertions-core-jvm" ]
+
+[plugins]
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+publish-on-central = { id = "org.danilopianini.publish-on-central", version.ref = "publish-on-central" }
