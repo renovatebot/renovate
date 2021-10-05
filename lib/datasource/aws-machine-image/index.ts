@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { cache } from '../../util/cache/package/decorator';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
-import { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export class AwsMachineImageDataSource extends Datasource {
   static readonly id = 'aws-machine-image';
