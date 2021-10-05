@@ -49,7 +49,8 @@ export function splitImageParts(currentFrom: string): PackageDependency {
         depName,
         currentValue,
         currentDigest,
-        datasource: 'docker',
+        datasource: datasourceDocker.id,
+        replaceString: cleanedCurrentFrom,
       };
 
       if (!dep.currentValue) {
@@ -89,7 +90,9 @@ export function getDep(
   }
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
-    dep.replaceString = currentFrom;
+    if (!dep.replaceString) {
+      dep.replaceString = currentFrom;
+    }
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }

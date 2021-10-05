@@ -42,7 +42,7 @@ describe('manager/docker-compose/extract', () => {
             "currentValue": "5.0.0",
             "datasource": "docker",
             "depName": "redis",
-            "replaceString": "\${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}",
+            "replaceString": "redis:5.0.0@sha256:abcd",
           },
         ]
       `);
