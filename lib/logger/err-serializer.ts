@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 // eslint-disable-next-line import/no-cycle
 import { regEx } from '../util/regex';
+// eslint-disable-next-line import/no-cycle
 import prepareError from './utils';
 
 Error.stackTraceLimit = 20;

@@ -1,11 +1,15 @@
 import is from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import * as shortid from 'shortid';
+// eslint-disable-next-line import/no-cycle
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
+// eslint-disable-next-line import/no-cycle
 import errSerializer from './err-serializer';
+// eslint-disable-next-line import/no-cycle
 import { RenovateStream } from './pretty-stdout';
 import type { BunyanRecord, Logger } from './types';
+// eslint-disable-next-line import/no-cycle
 import { ProblemStream, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT || shortid.generate();
