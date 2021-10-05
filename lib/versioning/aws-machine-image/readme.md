@@ -1,3 +1,3 @@
-Renovate's aws machine image versioning is a kind of hack to support ami updates.
+Renovate's AWS Machine Image versioning is a kind of hack to support Amazon Machine Images (AMI) updates.
 
-At the moment every ami that matches the regex `^ami-[a-z0-9]{17}$` is considered as a valid "releases"
+At the moment every AMI that matches the regex `^ami-[a-z0-9]{17}$` is considered a valid "release".
