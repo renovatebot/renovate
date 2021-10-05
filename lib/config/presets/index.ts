@@ -38,7 +38,7 @@ const presetSources: Record<string, PresetApi> = {
 const nonScopedPresetWithSubdirRegex =
   /^(?<packageName>[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-.]+?))?$/;
 const gitPresetRegex =
-  /^(?<packageName>[\w\-./]+?)(?::(?<presetName>[\w\-./]+?))?(?:#(?<packageTag>[\w\-.]+?))?$/;
+  /^(?<packageName>[\w\-.\/]+)(?::(?<presetPath>[\w-.\/]+\/))?(?::?(?<presetName>[\w\-.]+))?(?:#(?<packageTag>[\w\-.]+?))?$/;
 
 export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
@@ -155,7 +155,12 @@ export function parsePreset(input: string): ParsedPreset {
     [, packageName, presetPath, presetName, packageTag] =
       nonScopedPresetWithSubdirRegex.exec(str);
   } else {
-    [, packageName, presetName, packageTag] = gitPresetRegex.exec(str);
+    [, packageName, presetPath, presetName, packageTag] =
+      gitPresetRegex.exec(str);
+
+    if (is.nonEmptyString(presetPath) && presetPath.endsWith('/')) {
+      presetPath = presetPath.slice(0, -1);
+    }
 
     if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;
