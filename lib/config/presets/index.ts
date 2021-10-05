@@ -38,7 +38,7 @@ const presetSources: Record<string, PresetApi> = {
 const nonScopedPresetWithSubdirRegex =
   /^(?<packageName>[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-.]+?))?$/;
 const gitPresetRegex =
-  /^(?<packageName>[\w\-.\/]+)(?::(?<presetPath>[\w-.\/]+\/))?(?::?(?<presetName>[\w\-.]+))?(?:#(?<packageTag>[\w\-.]+?))?$/;
+  /^(?<packageName>[\w\-./]+)(?::(?<presetPath>[\w-./]+\/))?(?::?(?<presetName>[\w\-.]+))?(?:#(?<packageTag>[\w\-.]+?))?$/;
 
 export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
