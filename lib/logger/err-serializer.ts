@@ -1,4 +1,6 @@
 import is from '@sindresorhus/is';
+// eslint-disable-next-line import/no-cycle
+import { regEx } from '../util/regex';
 import prepareError from './utils';
 
 Error.stackTraceLimit = 20;
@@ -12,7 +14,7 @@ export default function errSerializer(err: Error): any {
     const val = response[field];
     if (is.string(val)) {
       response[field] = val.replace(
-        /https:\/\/[^@]*?@/g,
+        regEx(/https:\/\/[^@]*?@/g),
         'https://**redacted**@'
       );
     }

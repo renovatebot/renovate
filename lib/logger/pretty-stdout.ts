@@ -5,6 +5,8 @@ import { Stream } from 'stream';
 import * as util from 'util';
 import chalk from 'chalk';
 import stringify from 'json-stringify-pretty-compact';
+// eslint-disable-next-line import/no-cycle
+import { regEx } from '../util/regex';
 import type { BunyanRecord } from './types';
 
 const bunyanFields = [
@@ -37,7 +39,7 @@ const levels: Record<number, string> = {
 
 export function indent(str: string, leading = false): string {
   const prefix = leading ? '       ' : '';
-  return prefix + str.split(/\r?\n/).join('\n       ');
+  return prefix + str.split(regEx(/\r?\n/)).join('\n       ');
 }
 
 export function getMeta(rec: BunyanRecord): string {

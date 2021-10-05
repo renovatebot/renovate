@@ -2,6 +2,7 @@ import pMap from 'p-map';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
+import { regEx } from '../../util/regex';
 import { parseUrl } from '../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
@@ -23,7 +24,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     'https://releases.hashicorp.com',
   ];
 
-  static repositoryRegex = /^hashicorp\/(?<lookupName>\S+)$/;
+  static repositoryRegex = regEx(/^hashicorp\/(?<lookupName>\S+)$/);
 
   constructor() {
     super(TerraformProviderDatasource.id);

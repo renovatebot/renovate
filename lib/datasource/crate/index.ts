@@ -8,6 +8,7 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { privateCacheDir, readFile } from '../../util/fs';
 import { Http } from '../../util/http';
+import { regEx } from '../../util/regex';
 import * as cargoVersioning from '../../versioning/cargo';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { CrateRecord, RegistryFlavor, RegistryInfo } from './types';
@@ -92,7 +93,7 @@ function getDependencyUrl(info: RegistryInfo, lookupName: string): string {
  * clone the repository.
  */
 function cacheDirFromUrl(url: URL): string {
-  const proto = url.protocol.replace(/:$/, '');
+  const proto = url.protocol.replace(regEx(/:$/), '');
   const host = url.hostname;
   const hash = hasha(url.pathname, {
     algorithm: 'sha256',

@@ -1,5 +1,6 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
@@ -58,7 +59,7 @@ export async function getPackageReleases(
   if (artifactSubdirs) {
     const releases: string[] = [];
     const parseReleases = (content: string): string[] =>
-      parseIndexDir(content, (x) => !/^\.+$/.test(x));
+      parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
     for (const searchSubdir of artifactSubdirs) {
       const { body: content } = await downloadHttpProtocol(
         ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
@@ -123,10 +124,10 @@ export async function getUrls(
         const sourceUrl = pomXml.valueWithPath('scm.url');
         if (sourceUrl) {
           result.sourceUrl = sourceUrl
-            .replace(/^scm:/, '')
-            .replace(/^git:/, '')
-            .replace(/^git@github.com:/, 'https://github.com/')
-            .replace(/\.git$/, '');
+            .replace(regEx(/^scm:/), '')
+            .replace(regEx(/^git:/), '')
+            .replace(regEx(/^git@github.com:/), 'https://github.com/')
+            .replace(regEx(/\.git$/), '');
         }
 
         return result;

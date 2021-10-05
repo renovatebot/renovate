@@ -1,9 +1,13 @@
+import { regEx } from '../../util/regex';
 import type { HelmRelease } from './types';
 
-const chartRepo = /charts?|helm|helm-charts/i;
-const githubUrl =
-  /^(?<url>https:\/\/github\.com\/[^/]+\/(?<repo>[^/]+))(?:\/|$)/;
-const githubRelease = /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//;
+const chartRepo = regEx(/charts?|helm|helm-charts/i);
+const githubUrl = regEx(
+  /^(?<url>https:\/\/github\.com\/[^/]+\/(?<repo>[^/]+))(?:\/|$)/
+);
+const githubRelease = regEx(
+  /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//
+);
 
 export function findSourceUrl(release: HelmRelease): string {
   // it's a github release :)

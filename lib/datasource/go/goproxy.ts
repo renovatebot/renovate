@@ -121,7 +121,7 @@ export function parseNoproxy(
  * @see https://golang.org/ref/mod#goproxy-protocol
  */
 export function encodeCase(input: string): string {
-  return input.replace(/([A-Z])/g, (x) => `!${x.toLowerCase()}`);
+  return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
 }
 
 export async function listVersions(
@@ -131,7 +131,7 @@ export async function listVersions(
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/list`;
   const { body } = await http.get(url);
   return body
-    .split(/\s+/)
+    .split(regEx(/\s+/))
     .filter(Boolean)
     .filter((x) => x.indexOf('+') === -1);
 }

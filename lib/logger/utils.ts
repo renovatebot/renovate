@@ -3,6 +3,8 @@ import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { clone } from '../util/clone';
 import { HttpError } from '../util/http/types';
+// eslint-disable-next-line import/no-cycle
+import { regEx } from '../util/regex';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -160,7 +162,10 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
       const result =
         streamConfig.type === 'raw'
           ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(/\n?$/, '\n');
+          : JSON.stringify(raw, bunyan.safeCycles()).replace(
+              regEx(/\n?$/),
+              '\n'
+            );
       stream.write(result, enc, cb);
     };
 

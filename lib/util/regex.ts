@@ -16,12 +16,12 @@ try {
   RegEx = RegExp;
 }
 
-export function regEx(pattern: string, flags?: string): RegExp {
+export function regEx(pattern: string | RegExp, flags?: string): RegExp {
   try {
     return new RegEx(pattern, flags);
   } catch (err) {
     const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = pattern;
+    error.validationSource = pattern.toString();
     error.validationError = `Invalid regular expression: ${pattern}`;
     throw error;
   }
