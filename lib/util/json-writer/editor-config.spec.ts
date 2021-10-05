@@ -48,7 +48,7 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should handle json config from .editorconfig', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
     mock({
       '.editorconfig': JSON_FILES_EDITOR_CONFIG,
     });
