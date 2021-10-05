@@ -197,7 +197,7 @@ If you are using the main npmjs registry then you can configure just the `npmTok
 
 If you don't want all users of the repository to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Go to <https://renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
+Go to <https://app.renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
 
 Paste the encrypted result inside an `encrypted` object like this:
 
@@ -229,7 +229,7 @@ Renovate will then use the following logic:
 
 #### Encrypted entire .npmrc file into config
 
-Copy the entire `.npmrc`, replace newlines with `\n` characters , and then try encrypting it at <https://renovatebot.com/encrypt>.
+Copy the entire `.npmrc`, replace newlines with `\n` characters , and then try encrypting it at <https://app.renovatebot.com/encrypt>.
 
 You will then get an encrypted string that you can substitute into your `renovate.json` instead.
 The end-result looks like this:
