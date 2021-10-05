@@ -53,17 +53,21 @@ export class AwsMachineImageDataSource extends Datasource {
     { lookupName: serializedAmiFilter }: GetReleasesConfig,
     newValue?: string
   ): Promise<string | null> {
-    const cmd = new DescribeImagesCommand({
-      ImageIds: [newValue],
-      Filters: JSON.parse(serializedAmiFilter),
-    });
-    const matchingImages = await this.ec2.send(cmd);
-    const latestImage = matchingImages.Images?.sort(
-      (image1, image2) =>
-        Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
-    ).pop();
-    const digest = latestImage.Name;
-    return digest;
+    if (newValue) {
+      const cmd = new DescribeImagesCommand({
+        ImageIds: [newValue],
+        Filters: JSON.parse(serializedAmiFilter),
+      });
+      const matchingImages = await this.ec2.send(cmd);
+      const latestImage = matchingImages.Images?.sort(
+        (image1, image2) =>
+          Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
+      ).pop();
+      const digest = latestImage.Name;
+      return digest;
+    }
+    return (await this.getReleases({ lookupName: serializedAmiFilter }))
+      .releases[0].newDigest;
   }
 
   @cache({
