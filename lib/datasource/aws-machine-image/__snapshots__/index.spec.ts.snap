@@ -242,9 +242,6 @@ Array [
               ],
             },
           ],
-          "ImageIds": Array [
-            undefined,
-          ],
         },
         "middlewareStack": Object {
           "add": [Function],
@@ -279,9 +276,6 @@ Array [
             ],
           },
         ],
-        "ImageIds": Array [
-          undefined,
-        ],
       },
       "middlewareStack": Object {
         "add": [Function],
@@ -310,9 +304,6 @@ Array [
               "amazon-eks-node-1.21-*",
             ],
           },
-        ],
-        "ImageIds": Array [
-          undefined,
         ],
       },
       "middlewareStack": Object {
