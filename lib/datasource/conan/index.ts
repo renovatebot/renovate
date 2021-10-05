@@ -11,7 +11,7 @@ import type {
 
 export const id = 'conan';
 export const customRegistrySupport = true;
-export const defaultRegistryUrls = ['https://conan.bintray.com/'];
+export const defaultRegistryUrls = ['https://center.conan.io/'];
 export const defaultVersioning = loose.id;
 export const registryStrategy = 'merge';
 export const caching = false;
