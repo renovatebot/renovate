@@ -150,6 +150,7 @@ export interface CustomManager {
   datasourceTemplate?: string;
   lookupNameTemplate?: string;
   versioningTemplate?: string;
+  autoReplaceStringTemplate?: string;
 }
 
 // TODO: Proper typings
