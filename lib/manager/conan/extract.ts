@@ -73,8 +73,6 @@ export default function extractPackageFile(
     deps = deps.concat(dependencies);
   }
 
-  // logger.warn(deps)
-
   if (!deps.length) {
     return null;
   }
