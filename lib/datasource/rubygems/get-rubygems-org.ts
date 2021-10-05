@@ -16,10 +16,8 @@ export function resetCache(): void {
 }
 
 export class RubyGemsOrgDatasource extends Datasource {
-  static readonly id = 'rubygemsorg';
-
-  constructor() {
-    super(RubyGemsOrgDatasource.id);
+  constructor(override readonly id: string) {
+    super(id);
   }
 
   async getReleases({

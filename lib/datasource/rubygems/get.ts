@@ -16,10 +16,8 @@ const VERSIONS_PATH = '/api/v1/versions';
 const DEPENDENCIES_PATH = '/api/v1/dependencies';
 
 export class InternalRubyGemsDatasource extends Datasource {
-  static readonly id = 'internalrubygems';
-
-  constructor() {
-    super(InternalRubyGemsDatasource.id);
+  constructor(override readonly id: string) {
+    super(id);
   }
 
   private knownFallbackHosts = ['rubygems.pkg.github.com', 'gitlab.com'];

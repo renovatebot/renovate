@@ -10,8 +10,12 @@ export class RubyGemsDatasource extends Datasource {
 
   constructor() {
     super(RubyGemsDatasource.id);
-    this.rubyGemsOrgDatasource = new RubyGemsOrgDatasource();
-    this.internalRubyGemsDatasource = new InternalRubyGemsDatasource();
+    this.rubyGemsOrgDatasource = new RubyGemsOrgDatasource(
+      RubyGemsDatasource.id
+    );
+    this.internalRubyGemsDatasource = new InternalRubyGemsDatasource(
+      RubyGemsDatasource.id
+    );
   }
 
   override readonly defaultRegistryUrls = ['https://rubygems.org'];
