@@ -2,6 +2,7 @@ export { MAVEN_REPO } from '../../../datasource/maven/common';
 
 export const JCENTER_REPO = 'https://jcenter.bintray.com/';
 export const GOOGLE_REPO = 'https://dl.google.com/android/maven2/';
+export const GRADLE_PLUGIN_PORTAL_REPO = 'https://plugins.gradle.org/m2/';
 
 // TODO: convert to types
 export enum TokenType {
