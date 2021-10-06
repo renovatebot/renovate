@@ -1,4 +1,4 @@
-import * as datasourceConan from '../../datasource/conan';
+import { ConanDatasource } from '../../datasource/conan';
 import { logger } from '../../logger';
 import * as loose from '../../versioning/loose';
 import type { PackageDependency, PackageFile } from '../types';
@@ -10,7 +10,6 @@ const regex = new RegExp(
 export default function extractPackageFile(
   content: string
 ): PackageFile | null {
-  // conanfile.py
   const sections = content
     .split('def ')
     .map((section) => {
@@ -37,13 +36,13 @@ export default function extractPackageFile(
           regex.lastIndex = 0;
           const matches = regex.exec(line.trim());
           if (matches) {
-            // logger.info(line.trim())
-            // logger.info(matches[0])
             const depName = matches.groups.name;
             const currentValue = matches.groups.version.trim();
             let currentDigest = ' ';
+            let replaceString = `${depName}/${currentValue}`;
             if (matches.groups.userChannel) {
               currentDigest = matches.groups.userChannel;
+              replaceString = `${depName}/${currentValue}${currentDigest}`;
             }
 
             logger.debug(
@@ -57,9 +56,11 @@ export default function extractPackageFile(
                 depName,
                 currentValue,
                 currentDigest,
-                datasource: datasourceConan.id,
+                datasource: ConanDatasource.id,
                 versioning: loose.id,
-                replaceString: `${depName}/${currentValue}${currentDigest}`,
+                replaceString,
+                autoReplaceStringTemplate:
+                  '{{depName}}/{{newValue}}{{#if newDigest}}{{newDigest}}{{/if}}',
               };
               return dep;
             }

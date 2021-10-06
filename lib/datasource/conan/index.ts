@@ -1,117 +1,133 @@
 import { logger } from '../../logger';
-import { Http } from '../../util/http';
+import { cache } from '../../util/cache/package/decorator';
 import { ensureTrailingSlash } from '../../util/url';
 import * as loose from '../../versioning/loose';
+import { Datasource } from '../datasource';
 import type {
   DigestConfig,
   GetReleasesConfig,
   Release,
   ReleaseResult,
 } from '../types';
+import { ConanJSON, datasource, defaultRegistryUrl } from './common';
 
-export const id = 'conan';
-export const customRegistrySupport = true;
-export const defaultRegistryUrls = ['https://center.conan.io/'];
-export const defaultVersioning = loose.id;
-export const registryStrategy = 'merge';
-export const caching = false;
+export class ConanDatasource extends Datasource {
+  static readonly id = datasource;
 
-const http = new Http(id);
+  override readonly customRegistrySupport = true;
 
-const searchAPIString = 'v2/conans/search?q=';
+  override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-export type ConanJSON = {
-  results?: Record<string, string>;
-};
+  override readonly caching = true;
 
-export async function lookupConanPackage(
-  packageName: string,
-  hostUrl: string
-): Promise<ReleaseResult | null> {
-  logger.trace({ packageName, hostUrl }, 'Looking up conan api dependency');
-  try {
-    const url = ensureTrailingSlash(hostUrl);
-    const lookupUrl = `${url}${searchAPIString}${packageName}`;
+  override readonly registryStrategy = 'merge';
 
-    logger.trace({ lookupUrl }, 'conan api got lookup');
-    const rep = await http.getJson<ConanJSON>(lookupUrl);
-    const versions = rep?.body;
-    if (!versions) {
-      logger.trace({ packageName }, 'conan package not found');
-      return null;
-    }
-    logger.trace({ lookupUrl }, 'Got conan api result');
-    const dep: ReleaseResult = { releases: [] };
+  override readonly defaultVersioning = loose.id;
 
-    for (const resultString of Object.values(versions.results)) {
-      const fromMatches = resultString.matchAll(
-        /^(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)?/gim
-      );
-      for (const fromMatch of fromMatches) {
-        if (fromMatch.groups.version && fromMatch.groups.userChannel) {
-          logger.debug(
-            `Found a conan package ${fromMatch.groups.name} ${fromMatch.groups.version} ${fromMatch.groups.userChannel}`
-          );
-          const version = fromMatch.groups.version;
-          let newDigest = fromMatch.groups.userChannel;
-          if (newDigest === '@_/_') {
-            newDigest = ' ';
+  constructor() {
+    super(ConanDatasource.id);
+  }
+
+  public async lookupConanPackage(
+    packageName: string,
+    hostUrl: string
+  ): Promise<ReleaseResult | null> {
+    logger.trace({ packageName, hostUrl }, 'Looking up conan api dependency');
+    try {
+      const url = ensureTrailingSlash(hostUrl);
+      const lookupUrl = `${url}v2/conans/search?q=${packageName}`;
+
+      logger.trace({ lookupUrl }, 'conan api got lookup');
+      const rep = await this.http.getJson<ConanJSON>(lookupUrl);
+      const versions = rep?.body;
+      if (!versions) {
+        logger.trace({ packageName }, 'conan package not found');
+        return null;
+      }
+      logger.trace({ lookupUrl }, 'Got conan api result');
+      const dep: ReleaseResult = { releases: [] };
+
+      for (const resultString of Object.values(versions.results)) {
+        const fromMatches = resultString.matchAll(
+          /^(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)?/gim
+        );
+        for (const fromMatch of fromMatches) {
+          if (fromMatch.groups.version && fromMatch.groups.userChannel) {
+            logger.debug(
+              `Found a conan package ${fromMatch.groups.name} ${fromMatch.groups.version} ${fromMatch.groups.userChannel}`
+            );
+            const version = fromMatch.groups.version;
+            let newDigest = fromMatch.groups.userChannel;
+            if (newDigest === '@_/_') {
+              newDigest = ' ';
+            }
+            const result: Release = {
+              version,
+              newDigest,
+            };
+            dep.releases.push(result);
           }
-          const result: Release = {
-            version,
-            newDigest,
-          };
-          dep.releases.push(result);
         }
       }
+      return dep;
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
     }
-    return dep;
-  } catch (err) {
-    if (err.statusCode !== 404) {
-      throw err;
-    }
-  }
-  return null;
-}
-
-export async function getDigest(
-  { lookupName, currentDigest, registryUrl }: DigestConfig,
-  newValue?: string
-): Promise<string | null> {
-  const newLookup = `${lookupName}/${newValue}`;
-
-  const digests: string[] = [];
-  const fullDep: ReleaseResult = await lookupConanPackage(
-    newLookup,
-    registryUrl
-  );
-
-  if (fullDep) {
-    // extract digests
-    for (const release of fullDep.releases) {
-      digests.push(release.newDigest);
-    }
-  }
-
-  if (digests.length === 0) {
     return null;
   }
 
-  // favor existing digest
-  if (digests.includes(currentDigest)) {
-    return currentDigest;
+  @cache({
+    namespace: `datasource-${datasource}`,
+    key: ({ registryUrl, lookupName }: DigestConfig) =>
+      `${registryUrl}:${lookupName}digest`,
+  })
+  override async getDigest(
+    { lookupName, currentDigest, registryUrl }: DigestConfig,
+    newValue?: string
+  ): Promise<string | null> {
+    const newLookup = `${lookupName}/${newValue}`;
+
+    const digests: string[] = [];
+    const fullDep: ReleaseResult = await this.lookupConanPackage(
+      newLookup,
+      registryUrl
+    );
+
+    if (fullDep) {
+      // extract digests
+      for (const release of fullDep.releases) {
+        digests.push(release.newDigest);
+      }
+    }
+
+    if (digests.length === 0) {
+      return null;
+    }
+
+    // favor existing digest
+    if (digests.includes(currentDigest)) {
+      return currentDigest;
+    }
+
+    return digests[0];
   }
 
-  return '';
-}
-
-export async function getReleases({
-  lookupName,
-  registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const dependency: ReleaseResult = await lookupConanPackage(
+  @cache({
+    namespace: `datasource-${datasource}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      `${registryUrl}:${lookupName}release`,
+  })
+  async getReleases({
+    registryUrl,
     lookupName,
-    registryUrl
-  );
-  return dependency;
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const result: ReleaseResult = await this.lookupConanPackage(
+      lookupName,
+      registryUrl
+    );
+
+    return result.releases.length ? result : null;
+  }
 }

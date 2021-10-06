@@ -1,22 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/conan/index getDigest handles bad registries 1`] = `null`;
-
-exports[`datasource/conan/index getDigest handles bad registries 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "fake.bintray.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://fake.bintray.com/v2/conans/search?q=poco/fakeversion",
-  },
-]
-`;
-
 exports[`datasource/conan/index getDigest handles bad return 1`] = `null`;
 
 exports[`datasource/conan/index getDigest handles bad return 2`] = `
@@ -25,20 +8,35 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "host": "conan.bintray.com",
+      "host": "center.conan.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://conan.bintray.com/v2/conans/search?q=fakepackage",
+    "url": "https://center.conan.io/v2/conans/search?q=fakepackage/fakeversion",
+  },
+]
+`;
+
+exports[`datasource/conan/index getDigest handles malformed packages 1`] = `" "`;
+
+exports[`datasource/conan/index getDigest handles malformed packages 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "center.conan.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://center.conan.io/v2/conans/search?q=bad/fakeversion",
   },
 ]
 `;
 
 exports[`datasource/conan/index getDigest handles matched packages 1`] = `"@conan/test"`;
 
-exports[`datasource/conan/index getDigest handles missing packages 1`] = `null`;
-
-exports[`datasource/conan/index getDigest handles unmatched packages 1`] = `""`;
+exports[`datasource/conan/index getDigest handles unmatched packages 1`] = `"@conan/stable"`;
 
 exports[`datasource/conan/index getReleases handles bad registries 1`] = `null`;
 
@@ -65,11 +63,38 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "host": "conan.bintray.com",
+      "host": "center.conan.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://conan.bintray.com/v2/conans/search?q=fakepackage",
+    "url": "https://center.conan.io/v2/conans/search?q=fakepackage",
+  },
+]
+`;
+
+exports[`datasource/conan/index getReleases handles malformed packages 1`] = `
+Object {
+  "registryUrl": "https://center.conan.io",
+  "releases": Array [
+    Object {
+      "newDigest": " ",
+      "version": "1.9.3",
+    },
+  ],
+}
+`;
+
+exports[`datasource/conan/index getReleases handles malformed packages 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "center.conan.io",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://center.conan.io/v2/conans/search?q=bad",
   },
 ]
 `;
@@ -80,18 +105,52 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "host": "conan.bintray.com",
+      "host": "center.conan.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://conan.bintray.com/v2/conans/search?q=fakepackage",
+    "url": "https://center.conan.io/v2/conans/search?q=fakepackage",
+  },
+]
+`;
+
+exports[`datasource/conan/index getReleases handles missing slash on registries 1`] = `null`;
+
+exports[`datasource/conan/index getReleases handles missing slash on registries 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "fake.bintray.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://fake.bintray.com/v2/conans/search?q=poco",
+  },
+]
+`;
+
+exports[`datasource/conan/index getReleases handles non 404 errors 1`] = `null`;
+
+exports[`datasource/conan/index getReleases handles non 404 errors 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "fake.bintray.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://fake.bintray.com/v2/conans/search?q=poco",
   },
 ]
 `;
 
 exports[`datasource/conan/index getReleases processes real versioned data 1`] = `
 Object {
-  "registryUrl": "https://conan.bintray.com",
+  "registryUrl": "https://center.conan.io",
   "releases": Array [
     Object {
       "newDigest": " ",
@@ -123,58 +182,11 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "host": "conan.bintray.com",
+      "host": "center.conan.io",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://conan.bintray.com/v2/conans/search?q=poco",
-  },
-]
-`;
-
-exports[`datasource/conan/index lookupConanPackage handles malformed packages 1`] = `
-Object {
-  "releases": Array [
-    Object {
-      "newDigest": " ",
-      "version": "1.9.3",
-    },
-  ],
-}
-`;
-
-exports[`datasource/conan/index lookupConanPackage handles missing slash on registries 1`] = `
-Object {
-  "releases": Array [],
-}
-`;
-
-exports[`datasource/conan/index lookupConanPackage handles missing slash on registries 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "fake.bintray.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://fake.bintray.com/v2/conans/search?q=poco",
-  },
-]
-`;
-
-exports[`datasource/conan/index lookupConanPackage handles non 404 errors 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "fake.bintray.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://fake.bintray.com/v2/conans/search?q=poco",
+    "url": "https://center.conan.io/v2/conans/search?q=poco",
   },
 ]
 `;
