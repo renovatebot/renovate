@@ -205,7 +205,7 @@ export async function initRepo({
     });
     // istanbul ignore if
     if (!repo) {
-      throw new Error(REPOSITORY_NOT_FOUND);
+      throw new RepositoryError(REPOSITORY_NOT_FOUND, repository);
     }
     // istanbul ignore if
     if (!repo.defaultBranchRef?.name) {
@@ -216,13 +216,13 @@ export async function initRepo({
         { repository, this_repository: repo.nameWithOwner },
         'Repository has been renamed'
       );
-      throw new Error(REPOSITORY_RENAMED);
+      throw new RepositoryError(REPOSITORY_RENAMED, repository);
     }
     if (repo.isArchived) {
       logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new Error(REPOSITORY_ARCHIVED);
+      throw new RepositoryError(REPOSITORY_ARCHIVED, repository);
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
@@ -249,13 +249,13 @@ export async function initRepo({
       throw err;
     }
     if (err.statusCode === 403) {
-      throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
+      throw new RepositoryError(REPOSITORY_ACCESS_FORBIDDEN, repository);
     }
     if (err.statusCode === 404) {
-      throw new Error(REPOSITORY_NOT_FOUND);
+      throw new RepositoryError(REPOSITORY_NOT_FOUND, repository);
     }
     if (err.message.startsWith('Repository access blocked')) {
-      throw new Error(REPOSITORY_BLOCKED);
+      throw new RepositoryError(REPOSITORY_BLOCKED, repository);
     }
     if (err.message === REPOSITORY_FORKED) {
       throw err;
@@ -264,7 +264,7 @@ export async function initRepo({
       throw err;
     }
     if (err.message === 'Response code 451 (Unavailable for Legal Reasons)') {
-      throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
+      throw new RepositoryError(REPOSITORY_ACCESS_FORBIDDEN, repository);
     }
     logger.debug({ err }, 'Unknown GitHub initRepo error');
     throw err;

@@ -248,19 +248,19 @@ const platform: Platform = {
       logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new Error(REPOSITORY_ARCHIVED);
+      throw new RepositoryError(REPOSITORY_ARCHIVED, repository);
     }
     if (repo.mirror) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
       );
-      throw new Error(REPOSITORY_MIRRORED);
+      throw new RepositoryError(REPOSITORY_MIRRORED, repository);
     }
     if (!repo.permissions.pull || !repo.permissions.push) {
       logger.debug(
         'Repository does not permit pull and push - throwing error to abort renovation'
       );
-      throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
+      throw new RepositoryError(REPOSITORY_ACCESS_FORBIDDEN, repository);
     }
     if (repo.empty) {
       logger.debug('Repository is empty - throwing error to abort renovation');

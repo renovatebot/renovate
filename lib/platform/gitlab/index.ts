@@ -245,25 +245,25 @@ export async function initRepo({
       logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new Error(REPOSITORY_ARCHIVED);
+      throw new RepositoryError(REPOSITORY_ARCHIVED, config.repository);
     }
     if (res.body.mirror) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
       );
-      throw new Error(REPOSITORY_MIRRORED);
+      throw new RepositoryError(REPOSITORY_MIRRORED, config.repository);
     }
     if (res.body.repository_access_level === 'disabled') {
       logger.debug(
         'Repository portion of project is disabled - throwing error to abort renovation'
       );
-      throw new Error(REPOSITORY_DISABLED);
+      throw new RepositoryError(REPOSITORY_DISABLED, config.repository);
     }
     if (res.body.merge_requests_access_level === 'disabled') {
       logger.debug(
         'MRs are disabled for the project - throwing error to abort renovation'
       );
-      throw new Error(REPOSITORY_DISABLED);
+      throw new RepositoryError(REPOSITORY_DISABLED, config.repository);
     }
     if (res.body.default_branch === null || res.body.empty_repo) {
       throw new RepositoryError(REPOSITORY_EMPTY, config.repository);
