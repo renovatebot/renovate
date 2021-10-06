@@ -39,6 +39,7 @@ export interface GhRestPr extends GhPr {
   created_at: string;
   closed_at: string;
   user?: { login?: string };
+  node_id: string;
 }
 
 export interface GhGraphQlPr extends GhPr {

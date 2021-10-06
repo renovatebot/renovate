@@ -19,6 +19,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
@@ -36,6 +37,7 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
   RepoParams,
@@ -45,6 +47,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import {
   closedPrsQuery,
+  enableAutoMergeMutation,
   getIssuesQuery,
   openPrsQuery,
   repoInfoQuery,
@@ -1374,6 +1377,35 @@ export async function ensureCommentRemoval({
 
 // Pull Request
 
+async function tryPrAutomerge(
+  pullRequestId: string,
+  platformOptions: PlatformPrOptions
+): Promise<void> {
+  const cacheNamespace = 'skip-github-automerge';
+  const skipAutoMerge = await packageCache.get<boolean>(
+    cacheNamespace,
+    pullRequestId
+  );
+  if (skipAutoMerge) {
+    return;
+  }
+
+  try {
+    const variables = { pullRequestId };
+    const queryOptions = { variables };
+    const res = await githubApi.queryRepo<{ pullRequest: { number: number } }>(
+      enableAutoMergeMutation,
+      queryOptions,
+      'enablePullRequestAutoMerge'
+    );
+    if (!res?.pullRequest) {
+      await packageCache.set(cacheNamespace, pullRequestId, true, 60);
+    }
+  } catch (err) {
+    await packageCache.set(cacheNamespace, pullRequestId, true, 60);
+  }
+}
+
 // Creates PR and returns PR number
 export async function createPr({
   sourceBranch,
@@ -1382,6 +1414,7 @@ export async function createPr({
   prBody: rawBody,
   labels,
   draftPR = false,
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = targetBranch;
@@ -1420,6 +1453,7 @@ export async function createPr({
   pr.sourceBranch = sourceBranch;
   pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
+  await tryPrAutomerge(pr.node_id, platformOptions);
   return pr;
 }
 
@@ -1428,6 +1462,7 @@ export async function updatePr({
   prTitle: title,
   prBody: rawBody,
   state,
+  platformOptions,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
@@ -1457,6 +1492,8 @@ export async function updatePr({
     }
     logger.warn({ err }, 'Error updating PR');
   }
+
+  // await tryPrAutomerge(???, platformOptions);
 }
 
 export async function mergePr({

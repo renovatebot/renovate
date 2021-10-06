@@ -244,7 +244,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
   public async queryRepo<T = unknown>(
     query: string,
-    options: GraphqlOptions = {}
+    options: GraphqlOptions = {},
+    field = 'repository'
   ): Promise<T> {
     let result = null;
 
@@ -274,7 +275,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         'graphql',
         opts
       );
-      result = res?.body?.data?.repository;
+      result = res?.body?.data?.[field];
     } catch (err) {
       if (err instanceof ExternalHostError) {
         const gotError = err.err as GotLegacyError;
