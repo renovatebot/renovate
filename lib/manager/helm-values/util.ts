@@ -34,6 +34,6 @@ export function matchesHelmValuesDockerHeuristic(
 export function matchesHelmValuesInlineImage(
   parentKey: string,
   data: unknown
-): boolean {
+): data is string {
   return parentKeyRe.test(parentKey) && data && typeof data === 'string';
 }
