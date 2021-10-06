@@ -43,7 +43,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   if (isVariable) {
     if (hasDefaultValue) {
       // If we have the variable and it contains the default value, we need to return
-      // it as a valid dependency
+      // it as a valid dependency.
 
       const dep = {
         depName,
