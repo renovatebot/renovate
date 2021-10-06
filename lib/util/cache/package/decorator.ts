@@ -76,7 +76,8 @@ interface CacheParameters {
   key: string | HashFunction;
 
   /**
-   *
+   * A function that returns true if a result is cacheable
+   * Used to prevent caching of private, sensitive, results
    */
   cacheable?: BooleanFunction;
 
