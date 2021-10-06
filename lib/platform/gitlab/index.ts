@@ -18,6 +18,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
+import { RepositoryError } from '../../util/errors';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
@@ -52,7 +53,6 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
-import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
 
 let config: {
   repository: string;

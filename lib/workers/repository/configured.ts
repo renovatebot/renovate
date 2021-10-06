@@ -3,7 +3,7 @@ import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
 } from '../../constants/error-messages';
-import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
+import { RepositoryError } from '../../util/errors';
 
 export function checkIfConfigured(config: RenovateConfig): void {
   if (config.enabled === false) {

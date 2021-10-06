@@ -19,6 +19,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { RepositoryError } from '../../util/errors';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
@@ -63,7 +64,6 @@ import {
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
-import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
 
 const githubApi = new githubHttp.GithubHttp();
 

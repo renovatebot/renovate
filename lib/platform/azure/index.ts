@@ -12,7 +12,7 @@ import { PlatformId } from '../../constants';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
-import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
+import { RepositoryError } from '../../util/errors';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';

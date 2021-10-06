@@ -12,6 +12,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { GitProtocol } from '../../types/git';
 import type { FileData } from '../../types/platform/bitbucket-server';
+import { RepositoryError } from '../../util/errors';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
@@ -49,7 +50,6 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
-import { RepositoryError } from '../../types/semantic-errors/RepositoryError';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
