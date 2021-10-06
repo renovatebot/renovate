@@ -337,8 +337,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somefile/somepreset',
-        presetPath: undefined,
+        presetName: 'somepreset',
+        presetPath: 'somefile',
         presetSource: 'github',
       });
     });
@@ -350,8 +350,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somefile/somepreset/somesubpreset',
-        presetPath: undefined,
+        presetName: 'somesubpreset',
+        presetPath: 'somefile/somepreset',
         presetSource: 'github',
       });
     });
