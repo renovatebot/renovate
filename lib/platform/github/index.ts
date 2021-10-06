@@ -209,7 +209,7 @@ export async function initRepo({
     }
     // istanbul ignore if
     if (!repo.defaultBranchRef?.name) {
-      throw new RepositoryError(repository, REPOSITORY_EMPTY);
+      throw new RepositoryError(REPOSITORY_EMPTY, repository);
     }
     if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(

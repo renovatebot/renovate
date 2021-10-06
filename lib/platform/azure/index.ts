@@ -151,7 +151,7 @@ export async function initRepo({
   // istanbul ignore if
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
-    throw new RepositoryError(repository, REPOSITORY_EMPTY);
+    throw new RepositoryError(REPOSITORY_EMPTY, repository);
   }
   config.repoId = repo.id;
   config.project = repo.project.name;

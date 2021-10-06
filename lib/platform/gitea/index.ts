@@ -264,7 +264,7 @@ const platform: Platform = {
     }
     if (repo.empty) {
       logger.debug('Repository is empty - throwing error to abort renovation');
-      throw new RepositoryError(repository, REPOSITORY_EMPTY);
+      throw new RepositoryError(REPOSITORY_EMPTY, repository);
     }
 
     if (repo.allow_rebase) {

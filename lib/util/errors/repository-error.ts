@@ -1,7 +1,7 @@
 export class RepositoryError extends Error {
   private readonly repositoryName?: string;
 
-  public constructor(repositoryName?: string, message?: string) {
+  public constructor(message?: string, repositoryName?: string) {
     super(message);
     this.repositoryName = repositoryName;
   }

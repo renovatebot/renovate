@@ -7,9 +7,9 @@ import { RepositoryError } from '../../util/errors';
 
 export function checkIfConfigured(config: RenovateConfig): void {
   if (config.enabled === false) {
-    throw new RepositoryError(config.repository, REPOSITORY_DISABLED_BY_CONFIG);
+    throw new RepositoryError(REPOSITORY_DISABLED_BY_CONFIG, config.repository);
   }
   if (config.isFork && !config.includeForks) {
-    throw new RepositoryError(config.repository, REPOSITORY_FORKED);
+    throw new RepositoryError(REPOSITORY_FORKED, config.repository);
   }
 }
