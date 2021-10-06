@@ -1,12 +1,12 @@
 import * as httpMock from '../../../test/http-mock';
+import { PlatformId } from '../../constants';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
 
 hostRules.add({
-  hostType: PLATFORM_TYPE_GITLAB,
+  hostType: PlatformId.Gitlab,
   token: '123test',
 });
 
@@ -22,7 +22,7 @@ describe('util/http/gitlab', () => {
     delete process.env.GITLAB_IGNORE_REPO_URL;
 
     hostRules.add({
-      hostType: PLATFORM_TYPE_GITLAB,
+      hostType: PlatformId.Gitlab,
       token: 'abc123',
     });
   });
@@ -79,7 +79,7 @@ describe('util/http/gitlab', () => {
 
   it('supports different datasources', async () => {
     const gitlabApiDatasource = new GitlabHttp(GitlabReleasesDatasource.id);
-    hostRules.add({ hostType: PLATFORM_TYPE_GITLAB, token: 'abc' });
+    hostRules.add({ hostType: PlatformId.Gitlab, token: 'abc' });
     hostRules.add({
       hostType: GitlabReleasesDatasource.id,
       token: 'def',

@@ -2,6 +2,7 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import { DateTime } from 'luxon';
+import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -15,7 +16,6 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -70,7 +70,7 @@ const githubApi = new githubHttp.GithubHttp();
 let config: LocalRepoConfig = {} as any;
 
 const defaults = {
-  hostType: PLATFORM_TYPE_GITHUB,
+  hostType: PlatformId.Github,
   endpoint: 'https://api.github.com/',
 };
 
@@ -189,7 +189,7 @@ export async function initRepo({
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: PLATFORM_TYPE_GITHUB,
+    hostType: PlatformId.Github,
     url: defaults.endpoint,
   });
   config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
@@ -666,7 +666,7 @@ export async function getPrList(): Promise<Pr[]> {
       ).body;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
-      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+      throw new ExternalHostError(err, PlatformId.Github);
     }
     config.prList = prList
       .filter(
@@ -1276,7 +1276,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
-      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+      throw new ExternalHostError(err, PlatformId.Github);
     }
     throw err;
   }
