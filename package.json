@@ -199,7 +199,7 @@
     "re2": "1.16.0"
   },
   "devDependencies": {
-    "@actions/core": "1.5.0",
+    "@actions/core": "1.6.0",
     "@jest/globals": "27.2.3",
     "@jest/reporters": "27.2.3",
     "@jest/test-result": "27.2.3",
@@ -248,7 +248,7 @@
     "eslint-config-prettier": "8.3.0",
     "eslint-formatter-gha": "1.2.0",
     "eslint-plugin-import": "2.24.2",
-    "eslint-plugin-jest": "24.4.2",
+    "eslint-plugin-jest": "24.5.0",
     "eslint-plugin-promise": "5.1.0",
     "glob": "7.2.0",
     "graphql": "15.6.0",
