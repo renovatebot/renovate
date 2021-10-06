@@ -1,6 +1,6 @@
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getPkgReleases, getDigest } from '..';
+import { getDigest, getPkgReleases } from '..';
 import { AwsMachineImageDataSource } from '.';
 
 const datasource = AwsMachineImageDataSource.id;
