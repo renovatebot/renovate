@@ -11,9 +11,6 @@ describe('versioning/semver/index', () => {
     it('should support semver with dash', () => {
       expect(semver.isValid('1.2.3-foo')).toBeTruthy();
     });
-    it('should support coerced version', () => {
-      expect(semver.isValid('v2')).toBe('2.0.0');
-    });
     it('should reject semver without dash', () => {
       expect(semver.isValid('1.2.3foo')).toBeFalsy();
     });
