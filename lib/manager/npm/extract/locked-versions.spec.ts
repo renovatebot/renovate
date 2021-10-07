@@ -44,6 +44,11 @@ describe('manager/npm/extract/locked-versions', () => {
               depName: 'yarn',
               currentValue: `^${yarnVersion}`,
             },
+            {
+              depType: 'packageManager',
+              depName: 'yarn',
+              currentValue: `${yarnVersion}`,
+            },
           ],
         },
       ];

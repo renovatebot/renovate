@@ -400,6 +400,20 @@ describe('manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot();
     });
+
+    it('extracts packageManager', async () => {
+      const pJson = {
+        packageManager: 'yarn@3.0.0',
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      // FIXME: explicit assert condition
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('.postExtract()', () => {
     it('runs', async () => {

@@ -160,6 +160,7 @@ export async function extractPackageFile(
     engines: 'engine',
     volta: 'volta',
     resolutions: 'resolutions',
+    packageManager: 'packageManager',
   };
 
   const constraints: Record<string, any> = {};
@@ -179,7 +180,7 @@ export async function extractPackageFile(
       return dep;
     }
     dep.currentValue = input.trim();
-    if (depType === 'engines') {
+    if (depType === 'engines' || depType === 'packageManager') {
       if (depName === 'node') {
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
@@ -321,10 +322,15 @@ export async function extractPackageFile(
   }
 
   for (const depType of Object.keys(depTypes)) {
-    if (packageJson[depType]) {
+    let dependencies = packageJson[depType];
+    if (dependencies) {
       try {
+        if (depType === 'packageManager') {
+          const match = dependencies.match(/^(?!_)(.+)@(.+)$/);
+          dependencies = { [match[1]]: match[2] };
+        }
         for (const [key, val] of Object.entries(
-          packageJson[depType] as NpmPackageDependency
+          dependencies as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
           let dep: PackageDependency = {
