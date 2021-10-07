@@ -60,23 +60,19 @@ export async function getReleaseNotesMd(
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
   const tree = (
-    await http.getJson<GitlabTreeNode[]>(`${apiPrefix}tree?per_page=100`, {
-      paginate: true,
-    })
+    await http.getJson<GitlabTreeNode[]>(
+      `${apiPrefix}tree?per_page=100${
+        sourceDirectory ? `&path=${sourceDirectory}` : ''
+      }`,
+      {
+        paginate: true,
+      }
+    )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
   let files: GitlabTreeNode[] = [];
-  if (sourceDirectory?.length) {
-    files = allFiles
-      .filter((f) => f.path.startsWith(sourceDirectory))
-      .filter((f) =>
-        changelogFilenameRegex.test(
-          f.path.replace(ensureTrailingSlash(sourceDirectory), '')
-        )
-      );
-  }
   if (!files.length) {
-    files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
+    files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
   }
   if (!files.length) {
     logger.trace('no changelog file found');
