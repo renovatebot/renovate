@@ -18,7 +18,7 @@ export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
-const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
+const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/'); // TODO
 
 async function resolvePluginReleases(
   rootUrl: string,
