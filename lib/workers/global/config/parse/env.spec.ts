@@ -32,6 +32,13 @@ describe('workers/global/config/parse/env', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'a' };
       expect(env.getConfig(envParam).token).toBe('a');
     });
+    it('supports custom prefixes', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        ENV_PREFIX: 'FOOBAR_',
+        FOOBAR_TOKEN: 'a',
+      };
+      expect(env.getConfig(envParam).token).toBe('a');
+    });
     it('supports json', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_LOCK_FILE_MAINTENANCE: '{}',
@@ -181,6 +188,22 @@ describe('workers/global/config/parse/env', () => {
       const config = env.getConfig(envParam);
       expect(config.enabled).toBe(false);
       expect(config.token).toBe('a');
+    });
+
+    it('renames migrated variables', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_GIT_LAB_AUTOMERGE: 'true',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.platformAutomerge).toBe(true);
+    });
+
+    it('renames migrated config keys', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG: '{"azureAutoComplete":true}',
+      };
+      const config = env.getConfig(envParam);
+      expect(config.platformAutomerge).toBe(true);
     });
   });
   describe('.getEnvName(definition)', () => {

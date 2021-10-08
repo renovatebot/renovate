@@ -8,13 +8,6 @@ import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
 
 // istanbul ignore if
-if (process.env.ENV_PREFIX) {
-  for (const [key, val] of Object.entries(process.env)) {
-    if (key.startsWith(process.env.ENV_PREFIX)) {
-      process.env[key.replace(process.env.ENV_PREFIX, 'RENOVATE_')] = val;
-    }
-  }
-}
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
@@ -32,16 +25,27 @@ const renameKeys = {
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
 };
 
-for (const [from, to] of Object.entries(renameKeys)) {
-  const fromKey = getEnvName({ name: from });
-  const toKey = getEnvName({ name: to });
-  if (process.env[fromKey]) {
-    process.env[toKey] = process.env[fromKey];
-    delete process.env[fromKey];
-  }
-}
+export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
+  const env = { ...inputEnv };
 
-export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
+  if (env.ENV_PREFIX) {
+    for (const [key, val] of Object.entries(env)) {
+      if (key.startsWith(env.ENV_PREFIX)) {
+        env[key.replace(env.ENV_PREFIX, 'RENOVATE_')] = val;
+        delete env[key];
+      }
+    }
+  }
+
+  for (const [from, to] of Object.entries(renameKeys)) {
+    const fromKey = getEnvName({ name: from });
+    const toKey = getEnvName({ name: to });
+    if (env[fromKey]) {
+      env[toKey] = env[fromKey];
+      delete env[fromKey];
+    }
+  }
+
   const options = getOptions();
 
   let config: AllConfig = {};
