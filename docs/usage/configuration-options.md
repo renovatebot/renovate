@@ -1671,7 +1671,7 @@ If you have enabled `automerge` and set `automergeType=pr` in the Renovate confi
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
 This option is available for Azure and GitLab.
-It reverts to Renovate-based automerge if the platform-specific automerge is not available.
+It reverts to Renovate-based automerge if the platform-native automerge is not available.
 
 Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
 
