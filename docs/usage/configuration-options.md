@@ -1667,15 +1667,16 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 ## platformAutomerge
 
-If you set `automerge` enabled and `automergeType=pr` in the Renovate config, this option will speed up the automerge process by using platform's own automerge functionality.
-This option will configure PRs to be merged after all (if any) branch policies have been met.
-Currently available for Azure and GitLab.
-It falls back to Renovate-based automerge if platform-specific one is unavailable.
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, you can enable `platformAutomerge` to speed up automerges by using the platform's native automerge functionality.
 
-Though this option is enabled by default, you can configure this using `packageRules` if you want to use it selectively (e.g. per-package).
+`platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
+This option is available for Azure and GitLab.
+It reverts to Renovate-based automerge if the platform-specific automerge is not available.
 
-**Caution for GitLab < 12.7**: when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
-This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
+Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
+
+**Caution for GitLab < 12.7**: when `platformAutomerge` is enabled MRs with failing pipelines might get merged anyway.
+This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for more details.
 
 ## postUpdateOptions
 
