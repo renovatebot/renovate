@@ -27,6 +27,20 @@ export function getEnvName(option: Partial<RenovateOptions>): string {
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }
 
+const renameKeys = {
+  azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
+  gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
+};
+
+for (const [from, to] of Object.entries(renameKeys)) {
+  const fromKey = getEnvName({ name: from });
+  const toKey = getEnvName({ name: to });
+  if (process.env[fromKey]) {
+    process.env[toKey] = process.env[fromKey];
+    delete process.env[fromKey];
+  }
+}
+
 export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   const options = getOptions();
 
@@ -35,6 +49,12 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   if (env.RENOVATE_CONFIG) {
     try {
       config = JSON.parse(env.RENOVATE_CONFIG);
+      for (const [from, to] of Object.entries(renameKeys)) {
+        if (config[from] !== undefined) {
+          config[to] = config[from];
+        }
+        delete config[from];
+      }
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
     } catch (err) /* istanbul ignore next */ {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
@@ -69,7 +89,10 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
               );
             }
           } catch (err) {
-            logger.debug({ val: env[envName], envName }, 'Could not parse CLI');
+            logger.debug(
+              { val: env[envName], envName },
+              'Could not parse environment variable'
+            );
           }
         } else {
           const coerce = coersions[option.type];
