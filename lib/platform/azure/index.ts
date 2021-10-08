@@ -388,7 +388,7 @@ export async function createPr({
     },
     config.repoId
   );
-  if (platformOptions?.azureAutoComplete) {
+  if (platformOptions?.platformAutomerge) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {

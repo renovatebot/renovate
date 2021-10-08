@@ -219,12 +219,6 @@ Setting this to `true` will automatically approve the PRs in Azure DevOps.
 
 You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
-## azureAutoComplete
-
-Setting this to `true` will configure PRs in Azure DevOps to auto-complete after all (if any) branch policies have been met.
-
-You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
-
 ## azureWorkItemId
 
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items).
@@ -755,12 +749,6 @@ Example:
   "gitIgnoredAuthors": ["some-bot@example.org"]
 }
 ```
-
-## gitLabAutomerge
-
-If you enabled `automerge` in the Renovate config, you can speed up the automerge process by using GitLab's own automerge function.
-Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
-This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
 ## gitLabIgnoreApprovals
 
@@ -1676,6 +1664,18 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 ## pinDigests
 
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
+
+## platformAutomerge
+
+If you set `automerge` enabled and `automergeType=pr` in the Renovate config, this option will speed up the automerge process by using platform's own automerge functionality.
+This option will configure PRs to be merged after all (if any) branch policies have been met.
+Currently available for Azure and GitLab.
+It falls back to Renovate-based automerge if platform-specific one is unavailable.
+
+Though this option is enabled by default, you can configure this using `packageRules` if you want to use it selectively (e.g. per-package).
+
+**Caution for GitLab < 12.7**: when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
+This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
 
 ## postUpdateOptions
 
