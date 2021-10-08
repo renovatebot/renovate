@@ -2163,6 +2163,10 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### allowMigrations
+
+Allows a dependency to be different during validation and extraction, or missing entirely.
+
 ### autoReplaceStringTemplate
 
 Allows overwriting how the matched string is replaced.
@@ -2184,11 +2188,12 @@ regex definition:
     {
       "fileMatch": ["values.yaml$"],
       "matchStrings": [
-        "image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)"
+        "image:\\s+my\\.old\\.registry\\/aRepository\\/andImage:(?<currentValue>[^\\s]+)"
       ],
       "depNameTemplate": "my.new.registry/aRepository/andImage",
       "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
-      "datasourceTemplate": "docker"
+      "datasourceTemplate": "docker",
+      "allowMigrations": true
     }
   ]
 }

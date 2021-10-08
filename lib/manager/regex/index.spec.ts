@@ -348,4 +348,25 @@ describe('manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res).toBeNull();
   });
+
+  it('extracts migration', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        'image:\\s+docker\\.io\\/library\\/nginx:(?<currentValue>[^\\s]+)',
+      ],
+      depNameTemplate: 'docker.io/nginxinc/nginx-unprivileged',
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'loose',
+      autoReplaceStringTemplate: 'image: {{{depName}}}:{{{newValue}}}',
+      allowMigrations: true,
+    };
+    const res = await extractPackageFile(
+      'image: docker.io/library/nginx:1.18-alpine',
+      'example.yaml',
+      config
+    );
+    expect(res).not.toBeNull();
+    expect(res.deps).toHaveLength(1);
+    expect(res).toMatchSnapshot();
+  });
 });

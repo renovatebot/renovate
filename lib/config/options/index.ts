@@ -2026,6 +2026,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'allowMigrations',
+    description:
+      'Optional allows dependency to be missing after update. Valid only within a `regexManagers` object.',
+    type: 'boolean',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+    default: false,
+  },
+  {
     name: 'fetchReleaseNotes',
     description: 'Allow to disable release notes fetching.',
     type: 'boolean',

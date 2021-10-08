@@ -27,6 +27,7 @@ export interface ExtractConfig {
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
+  allowMigrations?: boolean;
   autoReplaceStringTemplate?: string;
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
@@ -70,6 +71,7 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
+  allowMigrations?: boolean;
   autoReplaceStringTemplate?: string;
   hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;

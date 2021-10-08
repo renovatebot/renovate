@@ -31,6 +31,13 @@ export async function confirmIfDepUpdated(
     );
     // istanbul ignore if
     if (!newExtract) {
+      if (upgrade.allowMigrations) {
+        logger.debug(
+          { manager, packageFile },
+          'Migrations allowed. Skipping validation'
+        );
+        return true;
+      }
       logger.debug({ manager, packageFile }, 'Could not extract package file');
       return false;
     }

@@ -79,6 +79,28 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts migration 1`] = `
+Object {
+  "allowMigrations": true,
+  "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+  "datasourceTemplate": "docker",
+  "depNameTemplate": "docker.io/nginxinc/nginx-unprivileged",
+  "deps": Array [
+    Object {
+      "currentValue": "1.18-alpine",
+      "datasource": "docker",
+      "depName": "docker.io/nginxinc/nginx-unprivileged",
+      "replaceString": "image: docker.io/library/nginx:1.18-alpine",
+      "versioning": "loose",
+    },
+  ],
+  "matchStrings": Array [
+    "image:\\\\s+docker\\\\.io\\\\/library\\\\/nginx:(?<currentValue>[^\\\\s]+)",
+  ],
+  "versioningTemplate": "loose",
+}
+`;
+
 exports[`manager/regex/index extracts multiple dependencies 1`] = `
 Object {
   "deps": Array [

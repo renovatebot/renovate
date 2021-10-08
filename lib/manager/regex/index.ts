@@ -211,7 +211,10 @@ export function extractPackageFile(
   // filter all null values
   deps = deps.filter(Boolean);
   if (deps.length) {
-    const res: PackageFile = { deps, matchStrings: config.matchStrings };
+    const res: PackageFile = {
+      deps,
+      matchStrings: config.matchStrings,
+    };
     if (config.matchStringsStrategy) {
       res.matchStringsStrategy = config.matchStringsStrategy;
     }
@@ -223,6 +226,9 @@ export function extractPackageFile(
     }
     if (config.autoReplaceStringTemplate) {
       res.autoReplaceStringTemplate = config.autoReplaceStringTemplate;
+    }
+    if (config.allowMigrations) {
+      res.allowMigrations = config.allowMigrations;
     }
     return res;
   }

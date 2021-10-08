@@ -151,6 +151,7 @@ export interface CustomManager {
   lookupNameTemplate?: string;
   versioningTemplate?: string;
   autoReplaceStringTemplate?: string;
+  allowMigrations?: boolean;
 }
 
 // TODO: Proper typings
