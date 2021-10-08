@@ -30,7 +30,13 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody, mergeBodyTransformer } from './utils';
+import {
+  PrResponse,
+  PrReviewer,
+  RepoInfoBody,
+  UserResponse,
+  mergeBodyTransformer,
+} from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -712,16 +718,57 @@ export async function updatePr({
     )
   ).body;
 
-  await bitbucketHttp.putJson(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        reviewers: pr.reviewers,
-      },
+  try {
+    await bitbucketHttp.putJson(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      {
+        body: {
+          title,
+          description: sanitize(description),
+          reviewers: pr.reviewers,
+        },
+      }
+    );
+  } catch (err) {
+    if (
+      err.statusCode === 400 &&
+      err.body?.error?.message.includes('reviewers: Malformed reviewers list')
+    ) {
+      logger.warn(
+        { err },
+        'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
+      );
+
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+      const activeReviewers: PrReviewer[] = [];
+
+      // Validate that each previous PR reviewer account is still active
+      for (const reviewer of pr.reviewers) {
+        const reviewerUser = (
+          await bitbucketHttp.getJson<UserResponse>(
+            `/2.0/users/${reviewer.account_id}`
+          )
+        ).body;
+
+        if (reviewerUser.account_status === 'active') {
+          activeReviewers.push(reviewer);
+        }
+      }
+
+      await bitbucketHttp.putJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+        {
+          body: {
+            title,
+            description: sanitize(description),
+            reviewers: activeReviewers,
+          },
+        }
+      );
+    } else {
+      throw err;
     }
-  );
+  }
 
   if (state === PrState.Closed && pr) {
     await bitbucketHttp.postJson(
