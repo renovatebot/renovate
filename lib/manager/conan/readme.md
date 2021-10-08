@@ -1,8 +1,3 @@
----
-title: Conan
-description: Conan support in Renovate
----
-
 # Automated dependency updates for Conan
 
 Renovate supports upgrading dependencies in `conanfile.txt` or `conanfile.py` files.
