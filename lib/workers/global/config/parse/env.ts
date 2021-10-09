@@ -7,8 +7,6 @@ import { getDatasourceList } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
 
-// istanbul ignore if
-
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {
     return '';
@@ -25,17 +23,25 @@ const renameKeys = {
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
 };
 
-export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
-  const env = { ...inputEnv };
-
-  if (env.ENV_PREFIX) {
-    for (const [key, val] of Object.entries(env)) {
-      if (key.startsWith(env.ENV_PREFIX)) {
-        env[key.replace(env.ENV_PREFIX, 'RENOVATE_')] = val;
-        delete env[key];
+function normalizePrefixes(
+  env: NodeJS.ProcessEnv,
+  prefix: string | undefined
+): NodeJS.ProcessEnv {
+  const result = { ...env };
+  if (prefix) {
+    for (const [key, val] of Object.entries(result)) {
+      if (key.startsWith(prefix)) {
+        const newKey = key.replace(prefix, 'RENOVATE_');
+        result[newKey] = val;
+        delete result[key];
       }
     }
   }
+  return result;
+}
+
+export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
+  const env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
 
   for (const [from, to] of Object.entries(renameKeys)) {
     const fromKey = getEnvName({ name: from });
