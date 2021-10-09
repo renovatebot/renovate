@@ -296,13 +296,6 @@ describe('workers/global/config/parse/env', () => {
         const config = env.getConfig(envParam);
         expect(config.platformAutomerge).toBe(true);
       });
-      it('renames migrated config keys', () => {
-        const envParam: NodeJS.ProcessEnv = {
-          RENOVATE_CONFIG: '{"azureAutoComplete":true}',
-        };
-        const config = env.getConfig(envParam);
-        expect(config.platformAutomerge).toBe(true);
-      });
     });
   });
   describe('.getEnvName(definition)', () => {

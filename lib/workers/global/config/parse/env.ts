@@ -53,17 +53,6 @@ function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
-function renameConfigKeys(config: AllConfig): AllConfig {
-  const result = { ...config };
-  for (const [from, to] of Object.entries(renameKeys)) {
-    if (config[from] !== undefined) {
-      result[to] = config[from];
-    }
-    delete result[from];
-  }
-  return result;
-}
-
 export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
@@ -76,7 +65,6 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   if (env.RENOVATE_CONFIG) {
     try {
       config = JSON.parse(env.RENOVATE_CONFIG);
-      config = renameConfigKeys(config);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
