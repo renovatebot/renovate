@@ -27,6 +27,7 @@ env:
 
 jobs:
   test:
+    name: ${{ format('test ({0})', matrix.os) }}
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
