@@ -1,6 +1,9 @@
 import type { RenovateOptions } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
+import { logger } from '../../../../logger';
 import * as env from './env';
+
+process.exit = jest.fn() as never;
 
 describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {
@@ -32,11 +35,52 @@ describe('workers/global/config/parse/env', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'a' };
       expect(env.getConfig(envParam).token).toBe('a');
     });
+    it('supports custom prefixes', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        ENV_PREFIX: 'FOOBAR_',
+        FOOBAR_TOKEN: 'abc',
+      };
+      const res = env.getConfig(envParam);
+      expect(res).toMatchObject({ token: 'abc' });
+    });
     it('supports json', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_LOCK_FILE_MAINTENANCE: '{}',
       };
       expect(env.getConfig(envParam).lockFileMaintenance).toEqual({});
+    });
+    it('supports arrays of objects', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_HOST_RULES: JSON.stringify([{ foo: 'bar' }]),
+      };
+      const res = env.getConfig(envParam);
+      expect(res).toMatchObject({ hostRules: [{ foo: 'bar' }] });
+    });
+    it('skips misconfigured arrays', () => {
+      const envName = 'RENOVATE_HOST_RULES';
+      const val = JSON.stringify('foobar');
+      const envParam: NodeJS.ProcessEnv = { [envName]: val };
+
+      const res = env.getConfig(envParam);
+
+      expect(res).toEqual({ hostRules: [] });
+      expect(logger.debug).toHaveBeenLastCalledWith(
+        { val, envName },
+        'Could not parse object array'
+      );
+    });
+    it('skips garbage array values', () => {
+      const envName = 'RENOVATE_HOST_RULES';
+      const val = '!@#';
+      const envParam: NodeJS.ProcessEnv = { [envName]: val };
+
+      const res = env.getConfig(envParam);
+
+      expect(res).toEqual({ hostRules: [] });
+      expect(logger.debug).toHaveBeenLastCalledWith(
+        { val, envName },
+        'Could not parse environment variable'
+      );
     });
     it('supports GitHub token', () => {
       const envParam: NodeJS.ProcessEnv = {
@@ -181,6 +225,11 @@ describe('workers/global/config/parse/env', () => {
       const config = env.getConfig(envParam);
       expect(config.enabled).toBe(false);
       expect(config.token).toBe('a');
+    });
+    it('crashes on malformed RENOVATE_CONFIG', () => {
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG: '!@#' };
+      env.getConfig(envParam);
+      expect(process.exit).toHaveBeenCalledWith(1);
     });
   });
   describe('.getEnvName(definition)', () => {
