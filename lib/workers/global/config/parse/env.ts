@@ -40,17 +40,34 @@ const renameKeys = {
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
 };
 
-export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
-  const env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
-
+function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const result = { ...env };
   for (const [from, to] of Object.entries(renameKeys)) {
     const fromKey = getEnvName({ name: from });
     const toKey = getEnvName({ name: to });
     if (env[fromKey]) {
-      env[toKey] = env[fromKey];
-      delete env[fromKey];
+      result[toKey] = env[fromKey];
+      delete result[fromKey];
     }
   }
+  return result;
+}
+
+function renameConfigKeys(config: AllConfig): AllConfig {
+  const result = { ...config };
+  for (const [from, to] of Object.entries(renameKeys)) {
+    if (config[from] !== undefined) {
+      result[to] = config[from];
+    }
+    delete result[from];
+  }
+  return result;
+}
+
+export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
+  let env = inputEnv;
+  env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  env = renameEnvKeys(env);
 
   const options = getOptions();
 
@@ -59,12 +76,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   if (env.RENOVATE_CONFIG) {
     try {
       config = JSON.parse(env.RENOVATE_CONFIG);
-      for (const [from, to] of Object.entries(renameKeys)) {
-        if (config[from] !== undefined) {
-          config[to] = config[from];
-        }
-        delete config[from];
-      }
+      config = renameConfigKeys(config);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
