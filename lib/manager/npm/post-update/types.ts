@@ -19,7 +19,6 @@ export interface ArtifactError {
 export interface UpdatedArtifacts {
   name: string;
   contents: string | Buffer;
-  mode?: string | number;
 }
 
 export interface WriteExistingFilesResult {
