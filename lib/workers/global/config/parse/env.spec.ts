@@ -84,15 +84,17 @@ describe('workers/global/config/parse/env', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_TOKEN: 'github.com token',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        token: 'github.com token',
+      });
     });
     it('supports GitHub custom endpoint', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        endpoint: 'a ghe endpoint',
+      });
     });
     it('supports GitHub custom endpoint and github.com', () => {
       const envParam: NodeJS.ProcessEnv = {
@@ -100,24 +102,37 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        endpoint: 'a ghe endpoint',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: 'a github.com token',
+          },
+        ],
+        token: 'a ghe token',
+      });
     });
     it('supports GitHub custom endpoint and gitlab.com', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        endpoint: 'a ghe endpoint',
+        token: 'a ghe token',
+      });
     });
     it('supports GitLab token', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: PlatformId.Gitlab,
         RENOVATE_TOKEN: 'a gitlab.com token',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        platform: 'gitlab',
+        token: 'a gitlab.com token',
+      });
     });
     it('supports GitLab custom endpoint', () => {
       const envParam: NodeJS.ProcessEnv = {
@@ -125,8 +140,11 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_TOKEN: 'a gitlab token',
         RENOVATE_ENDPOINT: 'a gitlab endpoint',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        endpoint: 'a gitlab endpoint',
+        platform: 'gitlab',
+        token: 'a gitlab token',
+      });
     });
     it('supports Azure DevOps', () => {
       const envParam: NodeJS.ProcessEnv = {
@@ -134,23 +152,34 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_TOKEN: 'an Azure DevOps token',
         RENOVATE_ENDPOINT: 'an Azure DevOps endpoint',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        endpoint: 'an Azure DevOps endpoint',
+        platform: 'azure',
+        token: 'an Azure DevOps token',
+      });
     });
     it('supports docker username/password', () => {
       const envParam: NodeJS.ProcessEnv = {
         DOCKER_USERNAME: 'some-username',
         DOCKER_PASSWORD: 'some-password',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        hostRules: [
+          {
+            hostType: 'docker',
+            password: 'some-password',
+            username: 'some-username',
+          },
+        ],
+      });
     });
     it('supports password-only', () => {
       const envParam: NodeJS.ProcessEnv = {
         NPM_PASSWORD: 'some-password',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        hostRules: [{ hostType: 'npm', password: 'some-password' }],
+      });
     });
     it('supports domain and host names with case insensitivity', () => {
       const envParam: NodeJS.ProcessEnv = {
@@ -158,8 +187,12 @@ describe('workers/global/config/parse/env', () => {
         pypi_my_CUSTOM_HOST_passWORD: 'some-password',
       };
       const res = env.getConfig(envParam);
-      expect(res).toMatchSnapshot();
-      expect(res.hostRules).toHaveLength(2);
+      expect(res).toMatchSnapshot({
+        hostRules: [
+          { matchHost: 'github.com', token: 'some-token' },
+          { matchHost: 'my.custom.host', password: 'some-password' },
+        ],
+      });
     });
     it('regression test for #10937', () => {
       const envParam: NodeJS.ProcessEnv = {
@@ -167,21 +200,24 @@ describe('workers/global/config/parse/env', () => {
         GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_PASSWORD: 'some-password',
       };
       const res = env.getConfig(envParam);
-      expect(res.hostRules).toMatchObject([
-        {
-          hostType: 'git-tags',
-          matchHost: 'gitlab.example-domain.net',
-          password: 'some-password',
-          username: 'some-user',
-        },
-      ]);
+      expect(res).toMatchObject({
+        hostRules: [
+          {
+            hostType: 'git-tags',
+            matchHost: 'gitlab.example-domain.net',
+            password: 'some-password',
+            username: 'some-user',
+          },
+        ],
+      });
     });
     it('supports datasource env token', () => {
       const envParam: NodeJS.ProcessEnv = {
         PYPI_TOKEN: 'some-token',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        hostRules: [{ hostType: 'pypi', token: 'some-token' }],
+      });
     });
     it('rejects incomplete datasource env token', () => {
       const envParam: NodeJS.ProcessEnv = {
@@ -202,8 +238,12 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        platform: 'bitbucket',
+        endpoint: 'a bitbucket endpoint',
+        username: 'some-username',
+        password: 'app-password',
+      });
     });
     it('supports Bitbucket username/password', () => {
       const envParam: NodeJS.ProcessEnv = {
@@ -212,8 +252,13 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
       };
-      // FIXME: explicit assert condition
-      expect(env.getConfig(envParam)).toMatchSnapshot();
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        endpoint: 'a bitbucket endpoint',
+        hostRules: [],
+        password: 'app-password',
+        platform: 'bitbucket',
+        username: 'some-username',
+      });
     });
     it('merges full config from env', () => {
       const envParam: NodeJS.ProcessEnv = {
