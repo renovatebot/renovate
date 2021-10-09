@@ -7,22 +7,6 @@ import { getDatasourceList } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
 
-export function getEnvName(option: Partial<RenovateOptions>): string {
-  if (option.env === false) {
-    return '';
-  }
-  if (option.env) {
-    return option.env;
-  }
-  const nameWithUnderscores = option.name.replace(/([A-Z])/g, '_$1');
-  return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
-}
-
-const renameKeys = {
-  azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
-  gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
-};
-
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
   prefix: string | undefined
@@ -39,6 +23,22 @@ function normalizePrefixes(
   }
   return result;
 }
+
+export function getEnvName(option: Partial<RenovateOptions>): string {
+  if (option.env === false) {
+    return '';
+  }
+  if (option.env) {
+    return option.env;
+  }
+  const nameWithUnderscores = option.name.replace(/([A-Z])/g, '_$1');
+  return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
+}
+
+const renameKeys = {
+  azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
+  gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
+};
 
 export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   const env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
@@ -66,7 +66,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
         delete config[from];
       }
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);
     }
@@ -86,7 +86,6 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     if (option.env !== false) {
       const envName = getEnvName(option);
       if (env[envName]) {
-        // istanbul ignore if
         if (option.type === 'array' && option.subType === 'object') {
           try {
             const parsed = JSON.parse(env[envName]);
