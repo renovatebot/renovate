@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - file-mode
+      - v25
 
   workflow_dispatch:
     inputs:
@@ -143,4 +143,51 @@ jobs:
       - name: Type check
         run: yarn type-check
 
-  
+  release:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    # release shouldn't need more than 5 min
+    timeout-minutes: 15
+
+    steps:
+      # full checkout for semantic-release
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
+
+      - name: Check dry run
+        run: |
+          if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          elif [[ "${{github.ref}}" == "refs/heads/${{env.DEFAULT_BRANCH}}" ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          elif [[ "${{github.ref}}" =~ ^refs/heads/v[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          fi
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: semantic-release
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
+          npx semantic-release --dry-run ${{env.DRY_RUN}}
+          git checkout -- .npmrc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
