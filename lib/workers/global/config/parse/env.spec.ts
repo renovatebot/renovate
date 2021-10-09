@@ -3,8 +3,6 @@ import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
 import * as env from './env';
 
-process.exit = jest.fn() as never;
-
 describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
@@ -226,10 +224,24 @@ describe('workers/global/config/parse/env', () => {
       expect(config.enabled).toBe(false);
       expect(config.token).toBe('a');
     });
-    it('crashes on malformed RENOVATE_CONFIG', () => {
-      const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG: '!@#' };
-      env.getConfig(envParam);
-      expect(process.exit).toHaveBeenCalledWith(1);
+    describe('malformed RENOVATE_CONFIG', () => {
+      let processExit;
+
+      beforeAll(() => {
+        processExit = jest
+          .spyOn(process, 'exit')
+          .mockImplementation((() => {}) as never);
+      });
+
+      afterAll(() => {
+        processExit.mockRestore();
+      });
+
+      it('crashes', () => {
+        const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG: '!@#' };
+        env.getConfig(envParam);
+        expect(processExit).toHaveBeenCalledWith(1);
+      });
     });
   });
   describe('.getEnvName(definition)', () => {
