@@ -24,8 +24,8 @@ export function getConfig(input: string[]): AllConfig {
           .replace('"platform":"', '"hostType":"')
           .replace('"endpoint":"', '"matchHost":"')
           .replace('"host":"', '"matchHost":"')
-          .replace('--azure-auto-complete=', '--platform-automerge=') // migrate: azureAutoComplete
-          .replace('--git-lab-automerge=', '--platform-automerge=') // migrate: gitLabAutomerge
+          .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
+          .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
