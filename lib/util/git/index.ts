@@ -653,6 +653,11 @@ export interface File {
    * file contents
    */
   contents: string | Buffer;
+
+  /**
+   * file mode
+   */
+  mode?: fs.Mode;
 }
 
 export type CommitFilesConfig = {
@@ -698,7 +703,8 @@ export async function commitFiles({
           ignoredFiles.push(fileName);
         }
       } else {
-        if (await isDirectory(join(localDir, fileName))) {
+        const path = join(localDir, fileName);
+        if (await isDirectory(path)) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
         } else {
@@ -709,7 +715,10 @@ export async function commitFiles({
           } else {
             contents = file.contents;
           }
-          await fs.outputFile(join(localDir, fileName), contents);
+          await fs.outputFile(path, contents);
+          if (file.mode) {
+            await fs.chmod(path, file.mode);
+          }
         }
         try {
           await git.add(fileName);
