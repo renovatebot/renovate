@@ -61,4 +61,20 @@ describe('manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+
+  it('uses the new version if packageManager is updated', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
+      {
+        depType: 'packageManager',
+        depName: 'pnpm',
+        newValue: '6.16.1',
+      },
+    ]);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+    // TODO: check docker preCommands
+  });
 });
