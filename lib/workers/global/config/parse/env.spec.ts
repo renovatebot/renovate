@@ -270,7 +270,7 @@ describe('workers/global/config/parse/env', () => {
       expect(config.token).toBe('a');
     });
     describe('malformed RENOVATE_CONFIG', () => {
-      let processExit;
+      let processExit: jest.SpyInstance<never, [code?: number]>;
 
       beforeAll(() => {
         processExit = jest
