@@ -412,23 +412,6 @@ describe('util/git/index', () => {
         expect.objectContaining({ '--no-verify': null })
       );
     });
-
-    it('creates file with specified mode', async () => {
-      const file = {
-        name: 'some-executable',
-        contents: 'some new-contents',
-        mode: 0o755,
-      };
-      const commit = await git.commitFiles({
-        branchName: 'renovate/past_branch',
-        files: [file],
-        message: 'Create something',
-      });
-      const { mode } = await fs.stat(tmpDir.path + '/some-executable');
-      expect(commit).not.toBeNull();
-      // eslint-disable-next-line no-bitwise
-      expect(mode & 0o777).toBe(0o755);
-    });
   });
 
   describe('getCommitMessages()', () => {
