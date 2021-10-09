@@ -633,7 +633,7 @@ describe('workers/pr/index', () => {
       await prWorker.ensurePr(config);
       const args = platform.createPr.mock.calls[0];
       expect(args[0].platformOptions).toMatchObject({
-        platformAutomerge: true,
+        usePlatformAutomerge: true,
         gitLabIgnoreApprovals: true,
       });
     });

@@ -116,10 +116,11 @@ export async function addAssigneesReviewers(
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
 ): PlatformPrOptions {
-  const usePlatformAutomerge =
+  const usePlatformAutomerge = Boolean(
     config.automerge &&
-    config.automergeType === 'pr' &&
-    config.usePlatformAutomerge;
+      config.automergeType === 'pr' &&
+      config.usePlatformAutomerge
+  );
 
   return {
     azureAutoApprove: config.azureAutoApprove,
