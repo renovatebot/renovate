@@ -146,6 +146,11 @@ export async function generateLockFile(
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
+    if (yarnUpdate && !isYarn1) {
+      logger.debug('Updating Yarn binary');
+      commands.push(`yarn set version ${yarnUpdate.newValue}`);
+    }
+
     // This command updates the lock file based on package.json
     commands.push(`yarn install${cmdOptions}`);
 

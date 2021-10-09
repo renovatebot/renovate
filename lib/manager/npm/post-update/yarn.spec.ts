@@ -206,6 +206,41 @@ describe('manager/npm/post-update/yarn', () => {
     }
   );
 
+  it.each([
+    ['1.22.0', '^1.10.0'],
+    ['2.1.0', '>= 2.0.0'],
+  ])(
+    'performs yarn binary update using yarn v%s',
+    async (yarnVersion, yarnCompatibility) => {
+      const execSnapshots = mockExecAll(exec, {
+        stdout: yarnVersion,
+        stderr: '',
+      });
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) => resolve(null));
+        }
+        return new Promise<string>((resolve) =>
+          resolve('package-lock-contents')
+        );
+      });
+      const config = {
+        constraints: {
+          yarn: yarnCompatibility,
+        },
+      };
+      const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+        {
+          depName: 'yarn',
+          depType: 'packageManager',
+          newValue: '3.0.1',
+        },
+      ]);
+      expect(res.lockFile).toEqual('package-lock-contents');
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    }
+  );
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec, {
       stdout: '1.9.4',
