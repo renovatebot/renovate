@@ -4,7 +4,7 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { getGlobalConfig } from './global';
-import { applyMigrations } from './migrations';
+import { MigrationsRunner } from './migrations';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
@@ -20,7 +20,6 @@ const options = getOptions();
 let optionTypes: Record<string, RenovateOptions['type']>;
 
 const removedOptions = [
-  'maintainYarnLock',
   'yarnCacheFolder',
   'yarnMaintenanceBranchName',
   'yarnMaintenanceCommitMessage',
@@ -49,7 +48,8 @@ export function migrateConfig(
         optionTypes[option.name] = option.type;
       });
     }
-    const migratedConfig = clone(config) as MigratedRenovateConfig;
+    const newConfig = MigrationsRunner.runAllMigrations(config);
+    const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',
       'devDependencies',
@@ -58,7 +58,6 @@ export function migrateConfig(
       'peerDependencies',
     ];
     const { migratePresets } = getGlobalConfig();
-    applyMigrations(config, migratedConfig);
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
         delete migratedConfig[key];
@@ -179,8 +178,6 @@ export function migrateConfig(
         migratedConfig[key] = val.replace(/{{baseDir}}/g, '{{packageFileDir}}');
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(/{{depNameShort}}/g, '{{depName}}');
-      } else if (key === 'gitFs') {
-        delete migratedConfig.gitFs;
       } else if (key === 'rebaseStalePrs') {
         delete migratedConfig.rebaseStalePrs;
         if (!migratedConfig.rebaseWhen) {
@@ -199,9 +196,6 @@ export function migrateConfig(
         if (val === false) {
           migratedConfig.rebaseWhen = 'never';
         }
-      } else if (key === 'exposeEnv') {
-        migratedConfig.exposeAllEnv = val;
-        delete migratedConfig.exposeEnv;
       } else if (key === 'trustLevel') {
         delete migratedConfig.trustLevel;
         if (val === 'high') {
@@ -319,9 +313,6 @@ export function migrateConfig(
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'separatePatchReleases') {
-        delete migratedConfig.separatePatchReleases;
-        migratedConfig.separateMinorPatch = val;
       } else if (key === 'automergePatch') {
         migratedConfig.patch = migratedConfig.patch || {};
         migratedConfig.patch.automerge = val == true; // eslint-disable-line eqeqeq

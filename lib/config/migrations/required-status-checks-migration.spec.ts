@@ -1,20 +1,14 @@
+import type { RenovateConfig } from '../types';
 import { RequiredStatusChecksMigration } from './required-status-checks-migration';
 
 describe('config/migrations/required-status-checks-migration', () => {
   it('should migrate requiredStatusChecks=null to ignoreTests=true', () => {
-    const originalConfig: any = {
+    const originalConfig: Partial<RenovateConfig> = {
       requiredStatusChecks: null,
     };
-    const migratedConfig: any = {
-      requiredStatusChecks: null,
-    };
-    const migration = new RequiredStatusChecksMigration(
-      originalConfig,
-      migratedConfig
-    );
+    const migration = new RequiredStatusChecksMigration();
+    const migratedConfig = migration.run(originalConfig);
 
-    expect(migratedConfig.requiredStatusChecks).toBeNull();
-    migration.migrate();
     expect(migratedConfig.requiredStatusChecks).toBeUndefined();
     expect(migratedConfig.ignoreTests).toBeTrue();
   });
