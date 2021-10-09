@@ -652,7 +652,7 @@ describe('platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { platformAutomerge: true },
+        platformOptions: { usePlatformAutomerge: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
