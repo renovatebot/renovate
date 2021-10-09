@@ -413,7 +413,7 @@ describe('util/git/index', () => {
       );
     });
 
-    it('creates file with specified mode', async () => {
+    it('creates file with the executable bit', async () => {
       const file = {
         name: 'some-executable',
         contents: 'some new-contents',
