@@ -58,7 +58,10 @@ export class ConanDatasource extends Datasource {
             );
             const version = fromMatch.groups.version;
             let newDigest = fromMatch.groups.userChannel;
+            // conan uses @_/_ as a place holder for no userChannel
             if (newDigest === '@_/_') {
+              // set to a value that won't cause this dependency to be thrown out by
+              // lib/workers/repository/process/lookup/index.ts line: 333
               newDigest = ' ';
             }
             const result: Release = {

@@ -21,7 +21,7 @@ describe('manager/conan/extract', () => {
     });
     it('extracts multiple image lines from conanfile.py', () => {
       const res = extractPackageFile(conanfile3);
-      expect(res.deps).toHaveLength(12);
+      expect(res.deps).toHaveLength(15);
     });
   });
 });
