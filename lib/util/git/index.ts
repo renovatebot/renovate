@@ -10,7 +10,6 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
-import { simpleGitConfig } from '../../config/simple-git';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -25,7 +24,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { parseGitAuthor } from './author';
-import { GitNoVerifyOption, getNoVerify } from './config';
+import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
 export { GitNoVerifyOption, setNoVerify } from './config';

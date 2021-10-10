@@ -1,6 +1,6 @@
-import { simpleGitConfig } from './simple-git';
+import { simpleGitConfig } from './config';
 
-describe('config/simple-git', () => {
+describe('util/git/config', () => {
   it('uses "close" events, ignores "exit" events from child processes', () => {
     expect(simpleGitConfig()).toEqual({
       completion: { onClose: true, onExit: false },

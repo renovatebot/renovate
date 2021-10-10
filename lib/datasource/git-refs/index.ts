@@ -1,6 +1,6 @@
 import simpleGit from 'simple-git';
-import { simpleGitConfig } from '../../config/simple-git';
 import * as packageCache from '../../util/cache/package';
+import { simpleGitConfig } from '../../util/git/config';
 import { getRemoteUrlWithToken } from '../../util/git/url';
 import * as semver from '../../versioning/semver';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
