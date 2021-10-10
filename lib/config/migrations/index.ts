@@ -1,1 +1,1 @@
-export * from './migrations-runner';
+export { MigrationsService } from './migrations-service';

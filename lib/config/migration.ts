@@ -4,7 +4,7 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { getGlobalConfig } from './global';
-import { MigrationsRunner } from './migrations';
+import { MigrationsService } from './migrations';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
@@ -48,7 +48,7 @@ export function migrateConfig(
         optionTypes[option.name] = option.type;
       });
     }
-    const newConfig = MigrationsRunner.runAllMigrations(config);
+    const newConfig = MigrationsService.run(config);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',

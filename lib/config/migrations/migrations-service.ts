@@ -4,7 +4,7 @@ import { ReplacePropertyMigration } from './base/replace-property-migration';
 import type { Migration } from './migration';
 import { RequiredStatusChecksMigration } from './required-status-checks-migration';
 
-export class MigrationsRunner {
+export class MigrationsService {
   private static readonly migrations: ReadonlyArray<Migration> = [
     new DeprecatePropertyMigration('maintainYarnLock'),
     new DeprecatePropertyMigration('gitFs'),
@@ -13,10 +13,10 @@ export class MigrationsRunner {
     new RequiredStatusChecksMigration(),
   ];
 
-  static runAllMigrations(originalConfig: RenovateConfig): RenovateConfig {
+  static run(originalConfig: RenovateConfig): RenovateConfig {
     let config = originalConfig;
 
-    for (const migration of MigrationsRunner.migrations) {
+    for (const migration of MigrationsService.migrations) {
       config = migration.run(config);
     }
 
