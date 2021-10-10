@@ -841,6 +841,20 @@ export async function commitFiles({
       logger.error({ err }, 'Error committing files.');
       return null;
     }
+    if (err.message.includes('[rejected] (stale info)')) {
+      logger.info(
+        'Branch update was rejected because local copy is not up-to-date.'
+      );
+      return null;
+    }
+    if (err.message.includes('denying non-fast-forward')) {
+      logger.debug({ err }, 'Permission denied to update branch');
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = branchName;
+      error.validationError = 'Force push denied';
+      error.validationMessage = `Renovate is unable to update branch(es) due to force pushes being disallowed.`;
+      throw error;
+    }
     logger.debug({ err }, 'Unknown error committing files');
     // We don't know why this happened, so this will cause bubble up to a branch error
     throw err;
