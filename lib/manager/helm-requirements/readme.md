@@ -12,7 +12,7 @@ module.exports = {
   hostRules: [
     {
       matchHost: 'your.host.io',
-      hostType: 'TODO: it should have a hostType to not collide with default host rules'
+      hostType: 'helm'
       username: '<your-username>',
       password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
     },
