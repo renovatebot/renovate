@@ -178,12 +178,12 @@ export function migrateConfig(
         }
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
-          regEx(/{{baseDir}}/g),
+          regEx(/{{baseDir}}/g), // TODO #12071
           '{{packageFileDir}}'
         );
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(
-          regEx(/{{depNameShort}}/g),
+          regEx(/{{depNameShort}}/g), // TODO #12071
           '{{depName}}'
         );
       } else if (key === 'gitFs') {
@@ -394,7 +394,7 @@ export function migrateConfig(
           ) {
             const parsedSchedule = later.parse.text(
               // We need to massage short hours first before we can parse it
-              schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2')
+              schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2') // TODO #12071
             ).schedules[0];
             // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
             if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
@@ -403,7 +403,7 @@ export function migrateConfig(
                 .replace(
                   regEx(
                     /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
-                  ),
+                  ), // TODO #12071
                   '$1$2 $3 $7'
                 )
                 .trim();
@@ -412,7 +412,7 @@ export function migrateConfig(
                   .replace(
                     regEx(
                       /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
-                    ),
+                    ), // TODO #12071
                     '$1$4 $5 $7'
                   )
                   .trim()
@@ -439,10 +439,10 @@ export function migrateConfig(
           if (
             regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/).test(
               schedules[i]
-            )
+            ) // TODO #12071
           ) {
             schedules[i] = schedules[i].replace(
-              regEx(/every ([a-z]*day)$/),
+              regEx(/every ([a-z]*day)$/), // TODO #12071
               'on $1'
             );
           }
@@ -556,7 +556,7 @@ export function migrateConfig(
       if (is.string(migratedConfig[key])) {
         for (const [from, to] of Object.entries(migratedTemplates)) {
           migratedConfig[key] = (migratedConfig[key] as string).replace(
-            regEx(from, 'g'),
+            regEx(from, 'g'), // TODO #12071
             to
           );
         }

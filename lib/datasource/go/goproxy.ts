@@ -34,9 +34,9 @@ export function parseGoproxy(
   }
 
   let result: GoproxyItem[] = input
-    .split(/([^,|]*(?:,|\|))/) // TODO
+    .split(/([^,|]*(?:,|\|))/) // TODO: #12070
     .filter(Boolean)
-    .map((s) => s.split(/(?=,|\|)/)) // TODO
+    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12070
     .map(([url, separator]) => ({
       url,
       fallback:
@@ -62,7 +62,7 @@ export function parseGoproxy(
 const lexer = moo.states({
   main: {
     separator: {
-      match: /\s*?,\s*?/, // TODO
+      match: /\s*?,\s*?/, // TODO #12070
       value: (_: string) => '|',
     },
     asterisk: {
@@ -78,16 +78,16 @@ const lexer = moo.states({
       push: 'characterRange',
       value: (_: string) => '[',
     },
-    char: /[^*?\\[\n]/, // TODO
+    char: /[^*?\\[\n]/, // TODO #12070
     escapedChar: {
-      match: /\\./, // TODO
+      match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
     },
   },
   characterRange: {
-    char: /[^\\\]\n]/, // TODO
+    char: /[^\\\]\n]/, // TODO #12070
     escapedChar: {
-      match: /\\./, // TODO
+      match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
     },
     characterRangeEnd: {

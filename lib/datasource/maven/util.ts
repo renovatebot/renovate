@@ -120,7 +120,7 @@ export async function isHttpResourceExists(
 }
 
 function containsPlaceholder(str: string): boolean {
-  return /\${.*?}/g.test(str);
+  return /\${.*?}/g.test(str); // TODO #12070
 }
 
 export function getMavenUrl(
@@ -165,7 +165,7 @@ export async function downloadMavenXml(
 
 export function getDependencyParts(lookupName: string): MavenDependency {
   const [group, name] = lookupName.split(':');
-  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
+  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`; // TODO #12070
   return {
     display: lookupName,
     group,
@@ -198,11 +198,11 @@ export async function getDependencyInfo(
   const sourceUrl = pomContent.valueWithPath('scm.url');
   if (sourceUrl && !containsPlaceholder(sourceUrl)) {
     result.sourceUrl = sourceUrl
-      .replace(/^scm:/, '')
-      .replace(/^git:/, '')
-      .replace(/^git@github.com:/, 'https://github.com/')
-      .replace(/^git@github.com\//, 'https://github.com/')
-      .replace(/\.git$/, '');
+      .replace(/^scm:/, '') // TODO #12070
+      .replace(/^git:/, '') // TODO #12070
+      .replace(/^git@github.com:/, 'https://github.com/') // TODO #12070
+      .replace(/^git@github.com\//, 'https://github.com/') // TODO #12070
+      .replace(/\.git$/, ''); // TODO #12070
 
     if (result.sourceUrl.startsWith('//')) {
       // most likely the result of us stripping scm:, git: etc
@@ -219,7 +219,7 @@ export async function getDependencyInfo(
       'groupId',
       'artifactId',
       'version',
-    ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+    ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, '')); // TODO #12070
     if (parentGroupId && parentArtifactId && parentVersion) {
       const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
       const parentDependency = getDependencyParts(parentDisplayId);

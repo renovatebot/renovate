@@ -253,7 +253,7 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
-              const tzRe = regEx(/^:timezone\((.+)\)$/);
+              const tzRe = regEx(/^:timezone\((.+)\)$/); // TODO #12071
               for (const subval of val) {
                 if (is.string(subval)) {
                   if (
@@ -479,7 +479,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !regEx(/p.*Rules\[\d+\]$/).test(parentPath) && // Inside a packageRule
+              !regEx(/p.*Rules\[\d+\]$/).test(parentPath) && // Inside a packageRule  // TODO #12071
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({

@@ -177,7 +177,7 @@ export class PypiDatasource extends Datasource {
     for (const prefix of srcPrefixes) {
       const suffix = '.tar.gz';
       if (text.startsWith(prefix) && text.endsWith(suffix)) {
-        return text.replace(prefix, '').replace(regEx(/\.tar\.gz$/), '');
+        return text.replace(prefix, '').replace(regEx(/\.tar\.gz$/), ''); // TODO #12071
       }
     }
 

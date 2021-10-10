@@ -157,7 +157,7 @@ export async function getReleases({
   const dependency = getDependencyParts(lookupName);
   let releases: Release[] = null;
   const repoForVersions = {};
-  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO
+  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12070
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
   const metadataVersions = await getVersionsFromMetadata(dependency, repoUrl);
   if (metadataVersions) {

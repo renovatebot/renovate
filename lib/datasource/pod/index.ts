@@ -137,6 +137,7 @@ async function getReleasesFromCDN(
       const line = lines[idx];
       const [name, ...versions] = line.split('/');
       if (name === lookupName.replace(regEx(/\/.*$/), '')) {
+        // TODO #12071
         const releases = versions.map((version) => ({ version }));
         return { releases };
       }
