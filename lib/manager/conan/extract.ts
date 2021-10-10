@@ -1,41 +1,45 @@
 import { ConanDatasource } from '../../datasource/conan';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import * as loose from '../../versioning/loose';
 import type { PackageDependency, PackageFile } from '../types';
 
-const regex = new RegExp(
-  /(?<name>[a-z\-_0-9]+)\/(?<version>[^@\n{*"']+)(?<userChannel>@\S+\/[^\n.{*"' ]+)?/gm
+const regex = regEx(
+  `(?<name>[a-z-_0-9]+)\/(?<version>[^@\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+\/[^\n.{*"' ]+)?`
 );
 
 export default function extractPackageFile(
   content: string
 ): PackageFile | null {
+  // only process sections where requirements are defined
   const sections = content
-    .split('def ')
-    .map((section) => {
-      // only process sections where requirements are defined
-      if (
-        section.includes('python_requires') ||
-        section.includes('build_require') ||
-        section.includes('require')
-      ) {
-        return section;
-      }
-      return null;
-    })
+    .split(/def |\n\[/)
+    .filter(
+      (part) =>
+        part.includes('python_requires') ||
+        part.includes('build_require') ||
+        part.includes('require')
+    )
     .filter(Boolean);
 
   let deps = [];
   for (const section of sections) {
+    let depType = 'requires';
+    if (section.includes('python_requires')) {
+      depType = 'python_requires';
+    } else if (section.includes('build_require')) {
+      depType = 'build_requires';
+    }
     const dependencies = section
       .split('\n')
+      .filter((line) => line.length !== 0)
       .map((rawline) => {
-        let dep: PackageDependency = {};
+        // don't process after a comment
         const line = rawline.split('#')[0].split('//')[0];
         if (line) {
-          regex.lastIndex = 0;
           const matches = regex.exec(line.trim());
           if (matches) {
+            let dep: PackageDependency = {};
             const depName = matches.groups.name;
             const currentValue = matches.groups.version.trim();
             let currentDigest = ' ';
@@ -46,7 +50,7 @@ export default function extractPackageFile(
             }
 
             logger.debug(
-              `Found a conan package ${depName} ${currentValue} ${currentDigest}`
+              `Found a conan package ${depName} ${currentValue} ${currentDigest} ${depType}`
             );
 
             // ignore packages with set ranges, conan will handle this on the project side
@@ -59,6 +63,7 @@ export default function extractPackageFile(
                 datasource: ConanDatasource.id,
                 versioning: loose.id,
                 replaceString,
+                depType,
                 autoReplaceStringTemplate:
                   '{{depName}}/{{newValue}}{{#if newDigest}}{{newDigest}}{{/if}}',
               };
