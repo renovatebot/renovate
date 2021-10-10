@@ -9,6 +9,7 @@ import Git, {
   TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -721,7 +722,10 @@ export async function commitFiles({
           });
         }
         try {
-          await git.add(fileName);
+          // istanbul ignore next
+          const addParams =
+            fileName === configFileNames[0] ? ['-f', fileName] : fileName;
+          await git.add(addParams);
           if (file.executable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
