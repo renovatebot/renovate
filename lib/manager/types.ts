@@ -27,6 +27,7 @@ export interface ExtractConfig {
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
+  autoReplaceStringTemplate?: string;
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   depNameTemplate?: string;
@@ -69,6 +70,7 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
+  autoReplaceStringTemplate?: string;
   hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;
   datasource?: string;

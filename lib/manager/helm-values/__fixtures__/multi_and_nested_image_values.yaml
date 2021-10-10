@@ -1,4 +1,6 @@
 ---
+inline_image: docker.io/library/nginx:1.18-alpine
+
 api:
   image:
     image:
