@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import * as gitTags from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -12,8 +13,8 @@ function createDependency(
 
   if (
     source == null ||
-    typeof source.repoURL !== 'string' ||
-    typeof source.targetRevision !== 'string'
+    !is.nonEmptyString(source.repoURL) ||
+    !is.nonEmptyString(source.targetRevision)
   ) {
     return null;
   }
