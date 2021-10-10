@@ -1675,9 +1675,6 @@ It reverts to Renovate-based automerge if the platform-native automerge is not a
 
 Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
 
-**Caution for GitLab < 12.7**: when `platformAutomerge` is enabled MRs with failing pipelines might get merged anyway.
-This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for more details.
-
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates.
