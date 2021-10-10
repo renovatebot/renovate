@@ -10,7 +10,11 @@ function createDependency(
 ): PackageDependency {
   const source = definition.spec?.source;
 
-  if (source == null) {
+  if (
+    source == null ||
+    typeof source.repoURL !== 'string' ||
+    typeof source.targetRevision !== 'string'
+  ) {
     return null;
   }
 
