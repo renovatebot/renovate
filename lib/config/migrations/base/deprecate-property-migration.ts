@@ -1,5 +1,5 @@
+import type { Migration } from '../../../types/migrations';
 import type { RenovateConfig } from '../../types';
-import type { Migration } from '../migration';
 
 export class DeprecatePropertyMigration implements Migration {
   private readonly deprecatedPropertyName: string;
