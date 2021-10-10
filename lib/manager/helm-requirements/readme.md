@@ -4,8 +4,6 @@ If your Helm charts make use of Aliases then you will need to configure an `alia
 
 If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
 
-## ChartMuseum
-
 Maybe you're running your own ChartMuseum server to host your private Helm Charts.
 This is how you connect to a private Helm repository:
 
