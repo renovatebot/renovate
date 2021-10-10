@@ -42,7 +42,7 @@ jobs:
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
-            "os": "macos-11",
+            "os": "macos-latest",
             "node-version": 14,
             "python-version": 3.9,
             "java-version": 11
