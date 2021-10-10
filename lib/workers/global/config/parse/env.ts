@@ -2,18 +2,26 @@ import is from '@sindresorhus/is';
 
 import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
-import { PLATFORM_TYPE_GITHUB } from '../../../../constants/platforms';
+import { PlatformId } from '../../../../constants';
 import { getDatasourceList } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
 
-// istanbul ignore if
-if (process.env.ENV_PREFIX) {
-  for (const [key, val] of Object.entries(process.env)) {
-    if (key.startsWith(process.env.ENV_PREFIX)) {
-      process.env[key.replace(process.env.ENV_PREFIX, 'RENOVATE_')] = val;
+function normalizePrefixes(
+  env: NodeJS.ProcessEnv,
+  prefix: string | undefined
+): NodeJS.ProcessEnv {
+  const result = { ...env };
+  if (prefix) {
+    for (const [key, val] of Object.entries(result)) {
+      if (key.startsWith(prefix)) {
+        const newKey = key.replace(prefix, 'RENOVATE_');
+        result[newKey] = val;
+        delete result[key];
+      }
     }
   }
+  return result;
 }
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
@@ -27,7 +35,9 @@ export function getEnvName(option: Partial<RenovateOptions>): string {
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }
 
-export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
+export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
+  const env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+
   const options = getOptions();
 
   let config: AllConfig = {};
@@ -36,7 +46,7 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
     try {
       config = JSON.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);
     }
@@ -56,7 +66,6 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
     if (option.env !== false) {
       const envName = getEnvName(option);
       if (env[envName]) {
-        // istanbul ignore if
         if (option.type === 'array' && option.subType === 'object') {
           try {
             const parsed = JSON.parse(env[envName]);
@@ -69,7 +78,10 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
               );
             }
           } catch (err) {
-            logger.debug({ val: env[envName], envName }, 'Could not parse CLI');
+            logger.debug(
+              { val: env[envName], envName },
+              'Could not parse environment variable'
+            );
           }
         } else {
           const coerce = coersions[option.type];
@@ -82,7 +94,7 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   if (env.GITHUB_COM_TOKEN) {
     logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
     config.hostRules.push({
-      hostType: PLATFORM_TYPE_GITHUB,
+      hostType: PlatformId.Github,
       matchHost: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });

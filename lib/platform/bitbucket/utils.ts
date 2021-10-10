@@ -190,7 +190,7 @@ export interface PrResponse {
       name: string;
     };
   };
-  reviewers: Array<any>;
+  reviewers: Array<PrReviewer>;
   created_on: string;
 }
 
@@ -207,4 +207,17 @@ export function prInfo(pr: PrResponse): Pr {
       : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
+}
+
+export interface UserResponse {
+  display_name: string;
+  account_id: string;
+  nickname: string;
+  account_status: string;
+}
+
+export interface PrReviewer {
+  display_name: string;
+  account_id: string;
+  nickname: string;
 }

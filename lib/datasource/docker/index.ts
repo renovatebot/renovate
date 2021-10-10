@@ -24,7 +24,6 @@ import {
 import { getTagsQuayRegistry } from './quay';
 
 // TODO: add got typings when available (#9646)
-// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
 
 export { id };
 export const customRegistrySupport = true;

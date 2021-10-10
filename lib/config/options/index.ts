@@ -1,4 +1,4 @@
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { getManagers } from '../../manager';
 import { getPlatformList } from '../../platform';
 import { getVersioningList } from '../../versioning';
@@ -7,6 +7,14 @@ import * as pep440Versioning from '../../versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
+  {
+    name: 'detectGlobalManagerConfig',
+    description:
+      'If true, Renovate will attempt to read global manager config from the file system.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
   {
     name: 'allowPostUpgradeCommandTemplating',
     description: 'If true allow templating for post-upgrade commands.',
@@ -551,7 +559,7 @@ const options: RenovateOptions[] = [
     description: 'Platform type of repository.',
     type: 'string',
     allowedValues: getPlatformList(),
-    default: PLATFORM_TYPE_GITHUB,
+    default: PlatformId.Github,
     globalOnly: true,
   },
   {
@@ -2001,6 +2009,15 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extractVersionTemplate',
+    description:
+      'Optional extractVersion for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'autoReplaceStringTemplate',
     description:
       'Optional extractVersion for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',

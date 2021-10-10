@@ -653,6 +653,11 @@ export interface File {
    * file contents
    */
   contents: string | Buffer;
+
+  /**
+   * the executable bit
+   */
+  executable?: boolean;
 }
 
 export type CommitFilesConfig = {
@@ -709,10 +714,17 @@ export async function commitFiles({
           } else {
             contents = file.contents;
           }
-          await fs.outputFile(join(localDir, fileName), contents);
+          // some file systems including Windows don't support the mode
+          // so the index should be manually updated after adding the file
+          await fs.outputFile(join(localDir, fileName), contents, {
+            mode: file.executable ? 0o777 : 0o666,
+          });
         }
         try {
           await git.add(fileName);
+          if (file.executable) {
+            await git.raw(['update-index', '--chmod=+x', fileName]);
+          }
           addedModifiedFiles.push(fileName);
         } catch (err) /* istanbul ignore next */ {
           if (
@@ -757,7 +769,7 @@ export async function commitFiles({
     }
 
     const pushOptions: TaskOptions = {
-      '--force': null,
+      '--force-with-lease': null,
       '-u': null,
     };
     if (getNoVerify().includes(GitNoVerifyOption.Push)) {
