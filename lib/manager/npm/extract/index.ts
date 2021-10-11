@@ -7,6 +7,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -326,8 +327,12 @@ export async function extractPackageFile(
     if (dependencies) {
       try {
         if (depType === 'packageManager') {
-          const match = dependencies.match(/^(?!_)(.+)@(.+)$/);
-          dependencies = { [match[1]]: match[2] };
+          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(dependencies);
+          // istanbul ignore next
+          if (!match) {
+            break;
+          }
+          dependencies = { [match.groups.name]: match.groups.range };
         }
         for (const [key, val] of Object.entries(
           dependencies as NpmPackageDependency
