@@ -12,7 +12,11 @@ export class ReplacePropertyMigration implements Migration {
   }
 
   run(config: RenovateConfig): RenovateConfig {
-    return this.replaceProperty(config, config[this.deprecatedPropertyName]);
+    return this.replaceProperty(config, this.getNewValue(config));
+  }
+
+  protected getNewValue(config: RenovateConfig): unknown {
+    return config[this.deprecatedPropertyName];
   }
 
   protected replaceProperty(

@@ -317,9 +317,6 @@ export function migrateConfig(
         migratedConfig.patch = migratedConfig.patch || {};
         migratedConfig.patch.automerge = val == true; // eslint-disable-line eqeqeq
         delete migratedConfig[key];
-      } else if (key === 'ignoreNodeModules') {
-        delete migratedConfig.ignoreNodeModules;
-        migratedConfig.ignorePaths = val ? ['node_modules/'] : [];
       } else if (
         key === 'automerge' &&
         is.string(val) &&
