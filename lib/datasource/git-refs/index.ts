@@ -1,5 +1,6 @@
 import simpleGit from 'simple-git';
 import * as packageCache from '../../util/cache/package';
+import { simpleGitConfig } from '../../util/git/config';
 import { getRemoteUrlWithToken } from '../../util/git/url';
 import * as semver from '../../versioning/semver';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -17,7 +18,7 @@ export async function getRawRefs(
   { lookupName }: GetReleasesConfig,
   hostType: string
 ): Promise<RawRefs[] | null> {
-  const git = simpleGit();
+  const git = simpleGit(simpleGitConfig());
   const cacheNamespace = 'git-raw-refs';
 
   const cachedResult = await packageCache.get<RawRefs[]>(

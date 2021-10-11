@@ -19,6 +19,7 @@ export interface ArtifactError {
 export interface UpdatedArtifacts {
   name: string;
   contents: string | Buffer;
+  executable?: boolean;
 }
 
 export interface WriteExistingFilesResult {

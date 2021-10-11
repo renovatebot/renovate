@@ -54,10 +54,13 @@ Some major platform features are not supported at all by Renovate.
 | --------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jira issues                             | BitBucket              | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                                                                                |
 | Merge trains                            | GitLab                 | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                                                                                |
-| Cloning repo over SSH selfhosted        | None                   | [#5406](https://github.com/renovatebot/renovate/issues/5406)                                                                                                                                                                                                |
 | Configurable merge strategy and message | Only BitBucket for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10868](https://github.com/renovatebot/renovate/issues/10868) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
 
 ## What if I need to .. ?
+
+### Troubleshoot Renovate
+
+If you have problems with Renovate, or need to know where Renovate keeps the logging output then read our [troubleshooting documentation](https://docs.renovatebot.com/troubleshooting/).
 
 ### Tell Renovate to ask for approval before creating a Pull Request
 

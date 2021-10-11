@@ -3,6 +3,8 @@ import { readFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 
 jest.mock('../../../../datasource/npm');
+jest.mock('../../../../util/fs');
+
 try {
   jest.mock('../../config.js');
 } catch (err) {
@@ -36,7 +38,7 @@ describe('workers/global/config/parse/index', () => {
       defaultArgv = defaultArgv.concat([
         '--token=abc',
         '--pr-footer=custom',
-        '--log-context=abc123',
+        '--log-context=123test',
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
@@ -45,7 +47,7 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
         ['prFooter', 'custom'],
-        ['logContext', 'abc123'],
+        ['logContext', '123test'],
       ]);
     });
 
@@ -81,11 +83,16 @@ describe('workers/global/config/parse/index', () => {
     });
     it('reads private key from file', async () => {
       const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
+      const privateKeyPathOld = upath.join(
+        __dirname,
+        '__fixtures__/private.pem'
+      );
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,
         RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
+        RENOVATE_PRIVATE_KEY_PATH_OLD: privateKeyPathOld,
       };
-      const expected = await readFile(privateKeyPath);
+      const expected = await readFile(privateKeyPath, 'utf8');
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       expect(parsedConfig).toContainEntries([['privateKey', expected]]);
@@ -112,6 +119,11 @@ describe('workers/global/config/parse/index', () => {
       ]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
+    });
+    it('parses global manager config', async () => {
+      defaultArgv = defaultArgv.concat(['--detect-global-manager-config=true']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.npmrc).toBeNull();
     });
   });
 });

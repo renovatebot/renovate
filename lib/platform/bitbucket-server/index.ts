@@ -2,12 +2,12 @@ import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import type { PartialDeep } from 'type-fest';
+import { PlatformId } from '../../constants';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { GitProtocol } from '../../types/git';
@@ -68,7 +68,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
+  hostType: PlatformId.BitbucketServer,
 };
 
 /* istanbul ignore next */
@@ -396,18 +396,9 @@ async function getStatus(
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
+  branchName: string
 ): Promise<BranchStatus> {
-  logger.debug(
-    `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
-  );
-
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
+  logger.debug(`getBranchStatus(${branchName})`);
 
   if (!git.branchExists(branchName)) {
     logger.debug('Branch does not exist - cannot fetch status');

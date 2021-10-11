@@ -2,6 +2,7 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import { DateTime } from 'luxon';
+import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -15,7 +16,6 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -23,7 +23,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
-import { ensureTrailingSlash, parseUrl } from '../../util/url';
+import { ensureTrailingSlash } from '../../util/url';
 import type {
   AggregatedVulnerabilities,
   BranchStatusConfig,
@@ -69,7 +69,7 @@ const githubApi = new githubHttp.GithubHttp();
 let config: LocalRepoConfig = {} as any;
 
 const defaults = {
-  hostType: PLATFORM_TYPE_GITHUB,
+  hostType: PlatformId.Github,
   endpoint: 'https://api.github.com/',
 };
 
@@ -115,12 +115,6 @@ export async function initPlatform({
     renovateUsername,
   };
 
-  // Generic github hostRule that per default all datasources using github api are enabled
-  const genericGithubHostRule = {
-    matchHost: parseUrl(defaults.endpoint).hostname,
-    token,
-  };
-  hostRules.add(genericGithubHostRule);
   return platformConfig;
 }
 
@@ -194,7 +188,7 @@ export async function initRepo({
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
-    hostType: PLATFORM_TYPE_GITHUB,
+    hostType: PlatformId.Github,
     url: defaults.endpoint,
   });
   config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
@@ -297,6 +291,7 @@ export async function initRepo({
           {
             token: forkToken || opts.token,
             paginate: true,
+            pageLimit: 100,
           }
         )
       ).body.map((r) => r.full_name);
@@ -670,7 +665,7 @@ export async function getPrList(): Promise<Pr[]> {
       ).body;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
-      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+      throw new ExternalHostError(err, PlatformId.Github);
     }
     config.prList = prList
       .filter(
@@ -804,20 +799,9 @@ async function getStatus(
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks: any[] | undefined
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
@@ -1291,7 +1275,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
-      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+      throw new ExternalHostError(err, PlatformId.Github);
     }
     throw err;
   }

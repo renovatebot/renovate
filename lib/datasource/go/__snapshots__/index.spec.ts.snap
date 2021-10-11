@@ -689,6 +689,46 @@ Array [
 ]
 `;
 
+exports[`datasource/go/index getReleases support gitlab subgroups 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v2.0.0",
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/group/subgroup/repo",
+}
+`;
+
+exports[`datasource/go/index getReleases support gitlab subgroups 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/group/subgroup/repo?go-get=1",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/group%2Fsubgroup%2Frepo/repository/tags?per_page=100",
+  },
+]
+`;
+
 exports[`datasource/go/index getReleases support self hosted gitlab private repositories 1`] = `
 Object {
   "releases": Array [

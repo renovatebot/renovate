@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import pAll from 'p-all';
 import { lt } from 'semver';
+import { PlatformId } from '../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -15,7 +16,6 @@ import {
   REPOSITORY_NOT_FOUND,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -66,7 +66,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: PLATFORM_TYPE_GITLAB,
+  hostType: PlatformId.Gitlab,
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };
@@ -370,25 +370,23 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    return BranchStatus.green;
-  }
-  if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
 
   if (!git.branchExists(branchName)) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
   const branchStatuses = await getStatus(branchName);
+  // istanbul ignore if
+  if (!is.array(branchStatuses)) {
+    logger.warn(
+      { branchName, branchStatuses },
+      'Empty or unexpected branch statuses'
+    );
+    return BranchStatus.yellow;
+  }
   logger.debug(`Got res with ${branchStatuses.length} results`);
   // ignore all skipped jobs
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
@@ -502,7 +500,7 @@ async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
-  if (platformOptions?.gitLabAutomerge) {
+  if (platformOptions?.usePlatformAutomerge) {
     try {
       if (platformOptions?.gitLabIgnoreApprovals) {
         await ignoreApprovals(pr);
@@ -606,7 +604,7 @@ export async function getPr(iid: number): Promise<Pr> {
     pr.canMerge = false;
     pr.isConflicted = true;
   } else if (pr.state === PrState.Open) {
-    const branchStatus = await getBranchStatus(pr.sourceBranch, []);
+    const branchStatus = await getBranchStatus(pr.sourceBranch);
     if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
     }

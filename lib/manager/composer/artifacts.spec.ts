@@ -3,10 +3,7 @@ import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
-import {
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import * as _datasource from '../../datasource';
 import * as datasourcePackagist from '../../datasource/packagist';
 import * as docker from '../../util/exec/docker';
@@ -97,12 +94,12 @@ describe('manager/composer/artifacts', () => {
 
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PLATFORM_TYPE_GITHUB,
+      hostType: PlatformId.Github,
       matchHost: 'api.github.com',
       token: 'github-token',
     });
     hostRules.add({
-      hostType: PLATFORM_TYPE_GITLAB,
+      hostType: PlatformId.Gitlab,
       matchHost: 'gitlab.com',
       token: 'gitlab-token',
     });
@@ -122,6 +119,11 @@ describe('manager/composer/artifacts', () => {
       hostType: datasourcePackagist.id,
       username: 'some-other-username',
       password: 'some-other-password',
+    });
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      matchHost: 'https://packages-bearer.example.com/',
+      token: 'abcdef0123456789',
     });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
