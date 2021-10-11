@@ -1,7 +1,7 @@
-import type { RenovateConfig } from '../types';
+import type { RenovateConfig } from '../../types';
 import { RequiredStatusChecksMigration } from './required-status-checks-migration';
 
-describe('config/migrations/required-status-checks-migration', () => {
+describe('config/migrations/custom/required-status-checks-migration', () => {
   it('should migrate requiredStatusChecks=null to ignoreTests=true', () => {
     const originalConfig: Partial<RenovateConfig> = {
       requiredStatusChecks: null,

@@ -2,8 +2,9 @@ import type { Migration } from '../../types/migrations';
 import type { RenovateConfig } from '../types';
 import { DeprecatePropertyMigration } from './base/deprecate-property-migration';
 import { ReplacePropertyMigration } from './base/replace-property-migration';
-import { IgnoreNodeModulesMigration } from './ignore-node-modules-migration';
-import { RequiredStatusChecksMigration } from './required-status-checks-migration';
+import { BinarySourceMigration } from './custom/binary-source-migration';
+import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
+import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 
 export class MigrationsService {
   static readonly deprecatedProperties: ReadonlySet<string> = new Set([
@@ -30,12 +31,13 @@ export class MigrationsService {
   ]);
 
   private static readonly customMigrations: ReadonlyArray<Migration> = [
-    new RequiredStatusChecksMigration(),
+    new BinarySourceMigration(),
     new IgnoreNodeModulesMigration(),
+    new RequiredStatusChecksMigration(),
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
-    const migrations: Migration[] = [...MigrationsService.customMigrations];
+    const migrations = [...MigrationsService.customMigrations];
     let config = originalConfig;
 
     for (const property of MigrationsService.deprecatedProperties) {

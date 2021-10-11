@@ -1,5 +1,5 @@
-import type { RenovateConfig } from '../types';
-import { ReplacePropertyMigration } from './base/replace-property-migration';
+import type { RenovateConfig } from '../../types';
+import { ReplacePropertyMigration } from '../base/replace-property-migration';
 
 export class IgnoreNodeModulesMigration extends ReplacePropertyMigration {
   constructor() {

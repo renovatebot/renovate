@@ -487,8 +487,6 @@ export function migrateConfig(
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
         }
-      } else if (key === 'binarySource' && val === 'auto') {
-        migratedConfig.binarySource = 'global';
       } else if (key === 'composerIgnorePlatformReqs') {
         if (val === true) {
           migratedConfig.composerIgnorePlatformReqs = [];
