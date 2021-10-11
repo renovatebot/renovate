@@ -12,9 +12,9 @@ handlebars.registerHelper('replace', (find, replace, context) =>
 );
 
 // istanbul ignore next
-handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
-  return arg1 == arg2 ? options.fn(this) : options.inverse(this);
-});
+handlebars.registerHelper('ifEquals', (arg1, arg2, options) =>
+  arg1 === arg2 ? options.fn(this) : options.inverse(this)
+);
 
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
