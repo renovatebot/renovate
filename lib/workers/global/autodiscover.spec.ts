@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '../../config/types';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import * as platform from '../../platform';
 import * as _ghApi from '../../platform/github';
 import * as _hostRules from '../../util/host-rules';
@@ -18,7 +18,7 @@ describe('workers/global/autodiscover', () => {
     jest.resetAllMocks();
     config = {};
     await platform.initPlatform({
-      platform: PLATFORM_TYPE_GITHUB,
+      platform: PlatformId.Github,
       token: '123test',
       endpoint: 'endpoint',
     });
@@ -28,7 +28,7 @@ describe('workers/global/autodiscover', () => {
   });
   it('autodiscovers github but empty', async () => {
     config.autodiscover = true;
-    config.platform = PLATFORM_TYPE_GITHUB;
+    config.platform = PlatformId.Github;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
@@ -38,7 +38,7 @@ describe('workers/global/autodiscover', () => {
   });
   it('autodiscovers github repos', async () => {
     config.autodiscover = true;
-    config.platform = PLATFORM_TYPE_GITHUB;
+    config.platform = PlatformId.Github;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
@@ -49,7 +49,7 @@ describe('workers/global/autodiscover', () => {
   it('filters autodiscovered github repos', async () => {
     config.autodiscover = true;
     config.autodiscoverFilter = 'project/re*';
-    config.platform = PLATFORM_TYPE_GITHUB;
+    config.platform = PlatformId.Github;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
