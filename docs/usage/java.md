@@ -14,9 +14,13 @@ Renovate detects versions that are specified in a string `'group:artifact:versio
 
 ### Gradle File Support
 
-Renovate can update `build.gradle`/`build.gradle.kts` files in the root of the repository.
-It also updates any `*.gradle`/`*.gradle.kts` files in a subdirectory as multi-project configurations.
-Renovate also tries to find updates for dependencies whose version is defined in a `*.properties` file, and scans for `*.versions.toml` files and for `*.toml` files inside the `gradle` folder to keep [catalogs](https://docs.gradle.org/current/userguide/platforms.html) up to date.
+Renovate can update:
+
+- `build.gradle`/`build.gradle.kts` files in the root of the repository
+- `*.gradle`/`*.gradle.kts` files in a subdirectory as multi-project configurations
+- dependencies whose version is defined in a `*.properties` file
+- `*.versions.toml` files in any directory or `*.toml` files inside the `gradle`
+  directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
 
 Renovate does not support:
 

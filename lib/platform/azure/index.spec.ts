@@ -474,17 +474,7 @@ describe('platform/azure/index', () => {
       expect(res).toBeNull();
     });
   });
-  describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
-    it('return success if requiredStatusChecks null', async () => {
-      await initRepo('some/repo');
-      const res = await azure.getBranchStatus('somebranch', null);
-      expect(res).toEqual(BranchStatus.green);
-    });
-    it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some/repo');
-      const res = await azure.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BranchStatus.red);
-    });
+  describe('getBranchStatus(branchName, ignoreTests)', () => {
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
@@ -494,7 +484,7 @@ describe('platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
     });
     it('should pass through failed', async () => {
@@ -506,7 +496,7 @@ describe('platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
     });
     it('should pass through pending', async () => {
@@ -518,7 +508,7 @@ describe('platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
     it('should fall back to yellow if no statuses returned', async () => {
@@ -530,7 +520,7 @@ describe('platform/azure/index', () => {
             getStatuses: jest.fn(() => []),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch', []);
+      const res = await azure.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
     });
   });
@@ -662,7 +652,7 @@ describe('platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { azureAutoComplete: true },
+        platformOptions: { usePlatformAutomerge: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
@@ -984,8 +974,10 @@ describe('platform/azure/index', () => {
   describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
       const input =
-        '<details>https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(azure.massageMarkdown(input)).toMatchSnapshot();
+        '\n---\n\n - [ ] <!-- rebase-check --> rebase\nplus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(azure.massageMarkdown(input)).toMatchInlineSnapshot(
+        `"plus also [a link](https://github.com/foo/bar/issues/5)"`
+      );
     });
   });
 

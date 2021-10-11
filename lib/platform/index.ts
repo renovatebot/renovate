@@ -56,7 +56,6 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    hostType: returnConfig.platform,
     matchHost: URL.parse(returnConfig.endpoint).hostname,
   };
   ['token', 'username', 'password'].forEach((field) => {
@@ -66,7 +65,11 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     }
   });
   returnConfig.hostRules = returnConfig.hostRules || [];
-  returnConfig.hostRules.push(platformRule);
-  hostRules.add(platformRule);
+  const typedPlatformRule = {
+    ...platformRule,
+    hostType: returnConfig.platform,
+  };
+  returnConfig.hostRules.push(typedPlatformRule);
+  hostRules.add(typedPlatformRule);
   return returnConfig;
 }

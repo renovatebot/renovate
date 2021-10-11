@@ -2,11 +2,11 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   enableRenovate: {
-    description: 'Enable renovate',
+    description: 'Enable Renovate',
     enabled: true,
   },
   disableRenovate: {
-    description: 'Disable renovate',
+    description: 'Disable Renovate',
     enabled: false,
   },
   disableMajorUpdates: {
@@ -33,6 +33,12 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  enablePreCommit: {
+    description: 'Enable the pre-commit manager',
+    'pre-commit': {
+      enabled: true,
+    },
+  },
   ignoreModulesAndTests: {
     description:
       'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories',
@@ -54,12 +60,12 @@ export const presets: Record<string, Preset> = {
   },
   pinVersions: {
     description:
-      'Use version pinning (maintain a single version only and not semver ranges)',
+      'Use version pinning (maintain a single version only and not SemVer ranges)',
     rangeStrategy: 'pin',
   },
   preserveSemverRanges: {
     description:
-      'Preserve (but continue to upgrade) any existing semver ranges',
+      'Preserve (but continue to upgrade) any existing SemVer ranges',
     rangeStrategy: 'replace',
   },
   pinAllExceptPeerDependencies: {
@@ -96,7 +102,7 @@ export const presets: Record<string, Preset> = {
   },
   pinOnlyDevDependencies: {
     description:
-      'Pin dependency versions for <code>devDependencies</code> and retain semver ranges for others',
+      'Pin dependency versions for <code>devDependencies</code> and retain SemVer ranges for others',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -176,7 +182,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   disableDigestUpdates: {
-    description: 'Disable digest and git hash updates',
+    description: 'Disable digest and Git hash updates',
     digest: {
       enabled: false,
     },
@@ -236,11 +242,11 @@ export const presets: Record<string, Preset> = {
     prHourlyLimit: 4,
   },
   prConcurrentLimitNone: {
-    description: 'Remove limit for open PRs',
+    description: 'Remove limit for open PRs at any time',
     prConcurrentLimit: 0,
   },
   prConcurrentLimit10: {
-    description: 'Limit to maximum 10 open PRs',
+    description: 'Limit to maximum 10 open PRs at any time',
     prConcurrentLimit: 10,
   },
   prConcurrentLimit20: {
@@ -310,11 +316,11 @@ export const presets: Record<string, Preset> = {
   },
   automergeRequireAllStatusChecks: {
     description: 'Require all status checks to pass before any automerging',
-    requiredStatusChecks: [],
+    ignoreTests: false,
   },
   skipStatusChecks: {
     description: 'Skip status checks and automerge right away',
-    requiredStatusChecks: null,
+    ignoreTests: true,
   },
   maintainLockFilesDisabled: {
     description:
@@ -324,7 +330,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   pinDigestsDisabled: {
-    description: 'Disable pinning of docker dependency digests',
+    description: 'Disable pinning of Docker dependency digests',
     pinDigests: false,
   },
   maintainLockFilesWeekly: {
@@ -402,11 +408,12 @@ export const presets: Record<string, Preset> = {
     },
   },
   gitSignOff: {
-    description: 'Append git Signed-off-by signature to git commits.',
+    description:
+      'Append Git <code>Signed-off-by:</code> signature to Git commits.',
     commitBody: 'Signed-off-by: {{{gitAuthor}}}',
   },
   npm: {
-    description: 'Keep package.json npm dependencies updated',
+    description: 'Keep <code>package.json</code> npm dependencies updated',
     npm: {
       enabled: true,
     },
@@ -511,7 +518,7 @@ export const presets: Record<string, Preset> = {
   },
   widenPeerDependencies: {
     description:
-      'Always widen peerDependencies semver ranges when updating, instead of replacing',
+      'Always widen peerDependencies SemVer ranges when updating, instead of replacing',
     packageRules: [
       {
         matchDepTypes: ['peerDependencies'],
