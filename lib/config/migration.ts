@@ -528,6 +528,11 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.composerIgnorePlatformReqs = null;
         }
+      } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
+        if (migratedConfig[key] !== undefined) {
+          migratedConfig.platformAutomerge = migratedConfig[key];
+        }
+        delete migratedConfig[key];
       }
       const migratedTemplates = {
         fromVersion: 'currentVersion',

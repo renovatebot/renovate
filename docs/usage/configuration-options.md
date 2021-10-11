@@ -219,12 +219,6 @@ Setting this to `true` will automatically approve the PRs in Azure DevOps.
 
 You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
-## azureAutoComplete
-
-Setting this to `true` will configure PRs in Azure DevOps to auto-complete after all (if any) branch policies have been met.
-
-You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
-
 ## azureWorkItemId
 
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items).
@@ -756,12 +750,6 @@ Example:
 }
 ```
 
-## gitLabAutomerge
-
-If you enabled `automerge` in the Renovate config, you can speed up the automerge process by using GitLab's own automerge function.
-Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
-This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
-
 ## gitLabIgnoreApprovals
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
@@ -1171,7 +1159,7 @@ We recommend that you use the `strict` mode, and enable the `dependencyDashboard
 
 ## java
 
-Use this configuration option for shared config across all java projects (Gradle and Maven).
+Use this configuration option for shared config across all Java projects (Gradle and Maven).
 
 ## js
 
@@ -1677,6 +1665,16 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
 
+## platformAutomerge
+
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then `platformAutomerge` is enabled by default to speed up merging via the platform's native automerge functionality.
+
+`platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
+This option is available for Azure and GitLab.
+It falls back to Renovate-based automerge if the platform-native automerge is not available.
+
+Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
+
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates.
@@ -2162,6 +2160,44 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
+
+### autoReplaceStringTemplate
+
+Allows overwriting how the matched string is replaced.
+This allows for some migration strategies.
+E.g. moving from one Docker image repository to another one.
+
+helm-values.yaml:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.old.registry/aRepository/andImage:1.18-alpine
+```
+
+regex definition:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["values.yaml$"],
+      "matchStrings": [
+        "image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)"
+      ],
+      "depNameTemplate": "my.new.registry/aRepository/andImage",
+      "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+This will lead to following update where `1.21-alpine` is the newest version of `my.new.registry/aRepository/andImage`:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.new.registry/aRepository/andImage:1.21-alpine
+```
 
 ## registryUrls
 
