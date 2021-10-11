@@ -1611,6 +1611,160 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket/index updatePr() removes inactive reviewers when updating pr 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "account_id": "456",
+          "display_name": "Jane Smith",
+          "uuid": "{90b6646d-1724-4a64-9fd9-539515fe94e9}",
+        },
+        Object {
+          "account_id": "123",
+          "display_name": "Bob Smith",
+          "uuid": "{d2238482-2e9f-48b3-8630-de22ccb9e42f}",
+        },
+      ],
+      "title": "title",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "245",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/users/456",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/users/123",
+  },
+  Object {
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "account_id": "456",
+          "display_name": "Jane Smith",
+          "uuid": "{90b6646d-1724-4a64-9fd9-539515fe94e9}",
+        },
+      ],
+      "title": "title",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "149",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error not due to inactive reviewers 1`] = `"Response code 400 (Bad Request)"`;
+
+exports[`platform/bitbucket/index updatePr() rethrows exception when PR update error not due to inactive reviewers 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "display_name": "Jane Smith",
+          "uuid": "{90b6646d-1724-4a64-9fd9-539515fe94e9}",
+        },
+      ],
+      "title": "title",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "130",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+]
+`;
+
 exports[`platform/bitbucket/index updatePr() throws an error on failure to get current list of reviewers 1`] = `"Response code 500 (Internal Server Error)"`;
 
 exports[`platform/bitbucket/index updatePr() throws an error on failure to get current list of reviewers 2`] = `

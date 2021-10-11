@@ -366,7 +366,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100&path=packages/foo",
   },
   Object {
     "headers": Object {

@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
+import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
@@ -55,15 +55,15 @@ function handleGotError(
       err.code === 'ECONNRESET')
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (err.name === 'ParseError') {
     logger.debug({ err }, '');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (
     err.statusCode === 403 &&
@@ -100,7 +100,7 @@ function handleGotError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+      throw new ExternalHostError(err, PlatformId.Github);
     }
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
@@ -120,7 +120,7 @@ function handleGotError(
       throw err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (
     err.statusCode === 410 &&
@@ -159,7 +159,7 @@ function constructAcceptString(input?: any): string {
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   constructor(
-    hostType: string = PLATFORM_TYPE_GITHUB,
+    hostType: string = PlatformId.Github,
     options?: GithubHttpOptions
   ) {
     super(hostType, options);
