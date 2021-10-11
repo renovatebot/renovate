@@ -7,6 +7,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { privateCacheDir, readFile } from '../../util/fs';
+import { simpleGitConfig } from '../../util/git/config';
 import { Http } from '../../util/http';
 import * as cargoVersioning from '../../versioning/cargo';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -159,7 +160,7 @@ async function fetchRegistryInfo(
       clonePath = join(privateCacheDir(), cacheDirFromUrl(url));
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
 
-      const git = Git();
+      const git = Git(simpleGitConfig());
       const clonePromise = git.clone(registryUrl, clonePath, {
         '--depth': 1,
       });
