@@ -3,7 +3,7 @@ import stable from 'semver-stable';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'semver-coerced';
-export const displayName = 'Coerced Semantic';
+export const displayName = 'Coerced Semantic Versioning';
 export const urls = ['https://semver.org/'];
 export const supportsRanges = false;
 
