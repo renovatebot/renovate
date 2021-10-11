@@ -25,7 +25,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { parseGitAuthor } from './author';
-import { GitNoVerifyOption, getNoVerify } from './config';
+import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
 export { GitNoVerifyOption, setNoVerify } from './config';
@@ -186,7 +186,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = getGlobalConfig();
-  git = Git(localDir);
+  git = Git(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
