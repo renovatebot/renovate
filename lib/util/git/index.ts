@@ -9,6 +9,7 @@ import Git, {
   TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -721,7 +722,10 @@ export async function commitFiles({
           });
         }
         try {
-          await git.add(fileName);
+          // istanbul ignore next
+          const addParams =
+            fileName === configFileNames[0] ? ['-f', fileName] : fileName;
+          await git.add(addParams);
           if (file.executable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
@@ -839,6 +843,20 @@ export async function commitFiles({
     if (err.message.includes('remote: error: cannot lock ref')) {
       logger.error({ err }, 'Error committing files.');
       return null;
+    }
+    if (err.message.includes('[rejected] (stale info)')) {
+      logger.info(
+        'Branch update was rejected because local copy is not up-to-date.'
+      );
+      return null;
+    }
+    if (err.message.includes('denying non-fast-forward')) {
+      logger.debug({ err }, 'Permission denied to update branch');
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = branchName;
+      error.validationError = 'Force push denied';
+      error.validationMessage = `Renovate is unable to update branch(es) due to force pushes being disallowed.`;
+      throw error;
     }
     logger.debug({ err }, 'Unknown error committing files');
     // We don't know why this happened, so this will cause bubble up to a branch error
