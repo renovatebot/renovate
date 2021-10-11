@@ -78,11 +78,10 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   azureAutoApprove?: boolean;
-  azureAutoComplete?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
-  gitLabAutomerge?: boolean;
   gitLabIgnoreApprovals?: boolean;
+  usePlatformAutomerge?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
