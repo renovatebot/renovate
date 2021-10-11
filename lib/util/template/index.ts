@@ -11,6 +11,11 @@ handlebars.registerHelper('replace', (find, replace, context) =>
   context.replace(new RegExp(find, 'g'), replace)
 );
 
+// istanbul ignore next
+handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
+  return arg1 == arg2 ? options.fn(this) : options.inverse(this);
+});
+
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',
