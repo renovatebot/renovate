@@ -850,7 +850,10 @@ export async function commitFiles({
       );
       return null;
     }
-    if (err.message.includes('denying non-fast-forward')) {
+    if (
+      err.message.includes('denying non-fast-forward') ||
+      err.message.includes('GH003: Sorry, force-pushing')
+    ) {
       logger.debug({ err }, 'Permission denied to update branch');
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = branchName;
