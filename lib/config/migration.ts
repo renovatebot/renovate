@@ -19,22 +19,6 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 
-const removedOptions = [
-  'yarnCacheFolder',
-  'yarnMaintenanceBranchName',
-  'yarnMaintenanceCommitMessage',
-  'yarnMaintenancePrTitle',
-  'yarnMaintenancePrBody',
-  'groupBranchName',
-  'groupBranchName',
-  'groupCommitMessage',
-  'groupPrTitle',
-  'groupPrBody',
-  'statusCheckVerify',
-  'lazyGrouping',
-  'supportPolicy',
-];
-
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
@@ -59,9 +43,7 @@ export function migrateConfig(
     ];
     const { migratePresets } = getGlobalConfig();
     for (const [key, val] of Object.entries(config)) {
-      if (removedOptions.includes(key)) {
-        delete migratedConfig[key];
-      } else if (key === 'pathRules') {
+      if (key === 'pathRules') {
         if (is.array(val)) {
           migratedConfig.packageRules = is.array(migratedConfig.packageRules)
             ? migratedConfig.packageRules
@@ -304,9 +286,6 @@ export function migrateConfig(
         migratedConfig.major = migratedConfig.major || {};
         migratedConfig.major.automerge = val == true; // eslint-disable-line eqeqeq
         delete migratedConfig[key];
-      } else if (key === 'multipleMajorPrs') {
-        delete migratedConfig.multipleMajorPrs;
-        migratedConfig.separateMultipleMajor = val;
       } else if (key === 'renovateFork' && is.boolean(val)) {
         delete migratedConfig.renovateFork;
         migratedConfig.includeForks = val;
