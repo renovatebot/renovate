@@ -69,6 +69,14 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     ...platformRule,
     hostType: returnConfig.platform,
   };
+  if (returnConfig.platform == 'github') {
+    const githubRawPlatformRule = {
+      ...platformRule,
+      matchHost: 'https://raw.githubusercontent.com',
+    };
+    returnConfig.hostRules.push(githubRawPlatformRule);
+    hostRules.add(githubRawPlatformRule);
+  }
   returnConfig.hostRules.push(typedPlatformRule);
   hostRules.add(typedPlatformRule);
   return returnConfig;
