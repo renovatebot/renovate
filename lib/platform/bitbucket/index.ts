@@ -1,8 +1,8 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
+import { PlatformId } from '../../constants';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -30,7 +30,13 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody, mergeBodyTransformer } from './utils';
+import {
+  PrResponse,
+  PrReviewer,
+  RepoInfoBody,
+  UserResponse,
+  mergeBodyTransformer,
+} from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -127,7 +133,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: PLATFORM_TYPE_BITBUCKET,
+    hostType: PlatformId.Bitbucket,
     url: defaults.endpoint,
   });
   config = {
@@ -328,20 +334,9 @@ async function getStatus(
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[]
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
@@ -723,16 +718,57 @@ export async function updatePr({
     )
   ).body;
 
-  await bitbucketHttp.putJson(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        reviewers: pr.reviewers,
-      },
+  try {
+    await bitbucketHttp.putJson(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      {
+        body: {
+          title,
+          description: sanitize(description),
+          reviewers: pr.reviewers,
+        },
+      }
+    );
+  } catch (err) {
+    if (
+      err.statusCode === 400 &&
+      err.body?.error?.message.includes('reviewers: Malformed reviewers list')
+    ) {
+      logger.warn(
+        { err },
+        'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
+      );
+
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+      const activeReviewers: PrReviewer[] = [];
+
+      // Validate that each previous PR reviewer account is still active
+      for (const reviewer of pr.reviewers) {
+        const reviewerUser = (
+          await bitbucketHttp.getJson<UserResponse>(
+            `/2.0/users/${reviewer.account_id}`
+          )
+        ).body;
+
+        if (reviewerUser.account_status === 'active') {
+          activeReviewers.push(reviewer);
+        }
+      }
+
+      await bitbucketHttp.putJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+        {
+          body: {
+            title,
+            description: sanitize(description),
+            reviewers: activeReviewers,
+          },
+        }
+      );
+    } else {
+      throw err;
     }
-  );
+  }
 
   if (state === PrState.Closed && pr) {
     await bitbucketHttp.postJson(

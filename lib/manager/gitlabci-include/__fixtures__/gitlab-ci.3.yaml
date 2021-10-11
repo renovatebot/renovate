@@ -1,0 +1,5 @@
+include:
+
+script:
+- !reference [.setup, script]
+- !reference [arbitrary job name with space and no starting dot, nested1, nested2, nested3]

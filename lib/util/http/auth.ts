@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
-import { NormalizedOptions } from 'got';
-import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
-import { GITHUB_API_USING_HOST_TYPES } from '../../types';
-import { GITLAB_API_USING_HOST_TYPES } from '../../types/platform/gitlab';
-import { GotOptions } from './types';
+import type { NormalizedOptions } from 'got';
+import {
+  GITHUB_API_USING_HOST_TYPES,
+  GITLAB_API_USING_HOST_TYPES,
+  PlatformId,
+} from '../../constants';
+import type { GotOptions } from './types';
 
 export function applyAuthorization(inOptions: GotOptions): GotOptions {
   const options: GotOptions = { ...inOptions };
@@ -13,7 +15,7 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
   }
 
   if (options.token) {
-    if (options.hostType === PLATFORM_TYPE_GITEA) {
+    if (options.hostType === PlatformId.Gitea) {
       options.headers.authorization = `token ${options.token}`;
     } else if (GITHUB_API_USING_HOST_TYPES.includes(options.hostType)) {
       options.headers.authorization = `token ${options.token}`;

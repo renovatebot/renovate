@@ -601,6 +601,12 @@ Object {
         "monorepo:opentelemetry-js",
       ],
       "groupName": "opentelemetry-js monorepo",
+      "matchUpdateTypes": Array [
+        "digest",
+        "patch",
+        "minor",
+        "major",
+      ],
     },
   ],
 }
@@ -643,7 +649,7 @@ Object {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toEqual({
         description: [
-          'Use version pinning (maintain a single version only and not semver ranges)',
+          'Use version pinning (maintain a single version only and not SemVer ranges)',
         ],
         rangeStrategy: 'pin',
       });
