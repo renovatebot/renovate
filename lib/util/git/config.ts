@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { SimpleGitOptions } from 'simple-git';
 
 export const enum GitNoVerifyOption {
   Commit = 'commit',
@@ -20,4 +21,13 @@ export function setNoVerify(value: GitNoVerifyOption[]): void {
 
 export function getNoVerify(): GitNoVerifyOption[] {
   return noVerify;
+}
+
+export function simpleGitConfig(): Partial<SimpleGitOptions> {
+  return {
+    completion: {
+      onClose: true,
+      onExit: false,
+    },
+  };
 }
