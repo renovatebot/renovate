@@ -58,6 +58,7 @@ import {
   BranchProtection,
   CombinedBranchStatus,
   Comment,
+  GhAutomergeResponse,
   GhBranchStatus,
   GhGraphQlPr,
   GhRepo,
@@ -1381,28 +1382,31 @@ async function tryPrAutomerge(
   pullRequestId: string,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
-  const cacheNamespace = 'skip-github-automerge';
-  const skipAutoMerge = await packageCache.get<boolean>(
-    cacheNamespace,
-    pullRequestId
-  );
-  if (skipAutoMerge) {
+  if (!platformOptions.usePlatformAutomerge) {
+    return;
+  }
+
+  const cacheNs = 'skip-github-automerge';
+  const cacheKey = pullRequestId;
+  const cacheTimeoutMinutes = 60;
+  const skipAutomerge = await packageCache.get<boolean>(cacheNs, pullRequestId);
+  if (skipAutomerge) {
     return;
   }
 
   try {
     const variables = { pullRequestId };
     const queryOptions = { variables };
-    const res = await githubApi.queryRepo<{ pullRequest: { number: number } }>(
+    const res = await githubApi.queryRepo<GhAutomergeResponse>(
       enableAutoMergeMutation,
       queryOptions,
       'enablePullRequestAutoMerge'
     );
     if (!res?.pullRequest) {
-      await packageCache.set(cacheNamespace, pullRequestId, true, 60);
+      await packageCache.set(cacheNs, cacheKey, true, cacheTimeoutMinutes);
     }
   } catch (err) {
-    await packageCache.set(cacheNamespace, pullRequestId, true, 60);
+    await packageCache.set(cacheNs, cacheKey, true, cacheTimeoutMinutes);
   }
 }
 

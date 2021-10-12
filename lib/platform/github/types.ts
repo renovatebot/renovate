@@ -94,3 +94,7 @@ export interface GhRepo {
     };
   };
 }
+
+export interface GhAutomergeResponse {
+  pullRequest: { number: number };
+}
