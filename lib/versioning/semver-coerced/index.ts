@@ -1,5 +1,6 @@
 import semver, { SemVer } from 'semver';
 import stable from 'semver-stable';
+import { regEx } from '../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'semver-coerced';
@@ -37,13 +38,47 @@ function isValid(version: string): string | boolean | null {
   return semver.valid(semver.coerce(version));
 }
 
-const {
-  maxSatisfying: getSatisfyingVersion,
-  minSatisfying: minSatisfyingVersion,
-  ltr: isLessThanRange,
-  gt: isGreaterThan,
-  valid,
-} = semver;
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  const coercedVersions = versions.map((version) => {
+    const coercedVersion = semver.coerce(version);
+    return coercedVersion ? coercedVersion.version : null;
+  });
+  return semver.maxSatisfying(coercedVersions, range);
+}
+
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  const coercedVersions = versions.map((version) => {
+    const coercedVersion = semver.coerce(version);
+    return coercedVersion ? coercedVersion.version : null;
+  });
+  return semver.minSatisfying(coercedVersions, range);
+}
+
+function isLessThanRange(version: string, range: string): boolean {
+  return semver.ltr(semver.coerce(version), range);
+}
+
+function isGreaterThan(version: string, other: string): boolean {
+  return semver.gt(semver.coerce(version), semver.coerce(other));
+}
+
+const startsWithNumberRegex = regEx(`^\\d`);
+
+function isSingleVersion(version: string): string | boolean | null {
+  // Since coercion accepts ranges as well as versions, we have to manually
+  // check that the version string starts with either 'v' or a digit.
+  if (!version.startsWith('v') && !startsWithNumberRegex.exec(version)) {
+    return null;
+  }
+
+  return semver.valid(semver.coerce(version));
+}
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
 export const isVersion = (input: string): string | boolean => isValid(input);
@@ -62,7 +97,7 @@ export const api: VersioningApi = {
   isCompatible: isVersion,
   isGreaterThan,
   isLessThanRange,
-  isSingleVersion: valid,
+  isSingleVersion,
   isStable,
   isValid,
   isVersion,

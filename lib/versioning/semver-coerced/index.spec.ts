@@ -92,7 +92,7 @@ describe('versioning/semver-coerced/index', () => {
     });
 
     it('returns false when not version', () => {
-      expect(semverCoerced.isSingleVersion('1.x')).toBeFalsy();
+      expect(semverCoerced.isSingleVersion('~1.0')).toBeFalsy();
     });
   });
 
@@ -161,6 +161,10 @@ describe('versioning/semver-coerced/index', () => {
       expect(semverCoerced.matches('1.0.0', '1.0.0 || 1.0.1')).toBeTruthy();
     });
 
+    it('should return true with non-strict version in range', () => {
+      expect(semverCoerced.matches('v1.0', '1.0.0 || 1.0.1')).toBeTruthy();
+    });
+
     it('should return false when version is not in range', () => {
       expect(semverCoerced.matches('1.2.3', '1.4.1 || 1.4.2')).toBeFalsy();
     });
@@ -172,12 +176,24 @@ describe('versioning/semver-coerced/index', () => {
         semverCoerced.getSatisfyingVersion(['1.0.0', '1.0.4'], '^1.0')
       ).toEqual('1.0.4');
     });
+
+    it('should support coercion', () => {
+      expect(
+        semverCoerced.getSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0')
+      ).toEqual('1.0.4');
+    });
   });
 
   describe('.minSatisfyingVersion(versions, range)', () => {
     it('should return min satisfying version in range', () => {
       expect(
         semverCoerced.minSatisfyingVersion(['1.0.0', '1.0.4'], '^1.0')
+      ).toEqual('1.0.0');
+    });
+
+    it('should support coercion', () => {
+      expect(
+        semverCoerced.minSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0')
       ).toEqual('1.0.0');
     });
   });
@@ -206,6 +222,10 @@ describe('versioning/semver-coerced/index', () => {
 
     it('should return 1 for a > b', () => {
       expect(semverCoerced.sortVersions('1.0.1', '1.0.0')).toEqual(1);
+    });
+
+    it('should return zero for equal non-strict versions', () => {
+      expect(semverCoerced.sortVersions('v1.0', '1.x')).toEqual(0);
     });
   });
 });
