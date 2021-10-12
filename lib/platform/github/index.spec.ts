@@ -7,7 +7,7 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as _git from '../../util/git';
-import type { Platform } from '../types';
+import type { CreatePRConfig, Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -1864,6 +1864,78 @@ describe('platform/github/index', () => {
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    describe('automerge', () => {
+      const createdPrResp = {
+        number: 123,
+        node_id: 'abcd',
+        head: { repo: { full_name: 'some/repo' } },
+      };
+
+      const graphqlAutomergeResp = {
+        data: {
+          enablePullRequestAutoMerge: {
+            pullRequest: {
+              number: 123,
+            },
+          },
+        },
+      };
+
+      const prConfig: CreatePRConfig = {
+        sourceBranch: 'some-branch',
+        targetBranch: 'dev',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        platformOptions: { usePlatformAutomerge: true },
+      };
+
+      const mockScope = async (): Promise<httpMock.Scope> => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope
+          .post('/repos/some/repo/pulls')
+          .reply(200, createdPrResp)
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, []);
+        await github.initRepo({
+          repository: 'some/repo',
+          token: 'token',
+        } as any);
+        return scope;
+      };
+
+      it('should set automatic merge', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr(prConfig);
+
+        expect(pr).toMatchSnapshot({ number: 123 });
+        expect(httpMock.getTrace()).toMatchSnapshot([
+          { method: 'POST', url: 'https://api.github.com/graphql' },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/pulls',
+          },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
+          },
+          {
+            graphql: {
+              mutation: {
+                __vars: { $pullRequestId: 'ID!' },
+                enablePullRequestAutoMerge: {},
+              },
+              variables: { pullRequestId: 'abcd' },
+            },
+            method: 'POST',
+            url: 'https://api.github.com/graphql',
+          },
+        ]);
+      });
     });
   });
   describe('getPr(prNo)', () => {

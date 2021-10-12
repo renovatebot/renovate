@@ -1381,8 +1381,8 @@ export async function ensureCommentRemoval({
 async function tryPrAutomerge(
   pullRequestId: string,
   platformOptions: PlatformPrOptions
-): Promise<void> {
-  if (!platformOptions.usePlatformAutomerge) {
+): Promise<boolean> {
+  if (!platformOptions?.usePlatformAutomerge) {
     return;
   }
 
