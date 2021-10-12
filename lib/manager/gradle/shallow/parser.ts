@@ -1,6 +1,7 @@
 import * as url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
@@ -147,20 +148,23 @@ function processDepInterpolation({
   if (interpolationResult && isDependencyString(interpolationResult)) {
     const dep = parseDependencyString(interpolationResult);
     if (dep) {
+      let packageFile: string;
+      let fileReplacePosition: number;
       token.children.forEach((child) => {
         const variable = variables[child.value];
-        if (
-          child?.type === TokenType.Variable &&
-          variable &&
-          variable?.value === dep.currentValue
-        ) {
-          dep.managerData = {
-            fileReplacePosition: variable.fileReplacePosition,
-            packageFile: variable.packageFile,
-          };
-          dep.groupName = variable.key;
+        if (child?.type === TokenType.Variable && variable) {
+          packageFile = variable.packageFile;
+          fileReplacePosition = variable.fileReplacePosition;
+          if (variable?.value === dep.currentValue) {
+            dep.managerData = { fileReplacePosition, packageFile };
+            dep.groupName = variable.key;
+          }
         }
       });
+      if (!dep.managerData) {
+        dep.managerData = { fileReplacePosition, packageFile };
+        dep.skipReason = SkipReason.ContainsVariable;
+      }
       return { deps: [dep] };
     }
   }
