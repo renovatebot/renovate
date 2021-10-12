@@ -1962,14 +1962,13 @@
   resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-2.0.4.tgz#f7b5a86ccd843c0ccaddfaedd9ee1081bc1cde3b"
   integrity sha512-l3xuhmyF2kBldy15SeY6d6HbK2BacEcSK1qTF1ISPtPHr29JH0C1fndz9ExXLKpGl0J6pZi+dGp1i5xesMt60Q==
 
-"@types/markdown-it@12.2.1":
-  version "12.2.1"
-  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-12.2.1.tgz#ca36e1edce6f15a770f3e99e68622d1d2e2f0c65"
-  integrity sha512-iij+ilRX/vxtUPCREjn74xzHo/RorHJDwOsJ6X+TgKw7zSvazhVXnDfwlTnyLOMdiVUjtRYU4CrcUZ7Aci4PmQ==
+"@types/markdown-it@12.2.2":
+  version "12.2.2"
+  resolved "https://registry.yarnpkg.com/@types/markdown-it/-/markdown-it-12.2.2.tgz#b451a2a6645c45138143ac1183351574c3b7ccbd"
+  integrity sha512-mgqTMVcbwAMUs15tS13VtxBCSqP/sXDkMqBhIdGofOywDzzlOj2Y38PFi1pD+PKJDzk5OdN1RJkRx7GPJf+Twg==
   dependencies:
     "@types/linkify-it" "*"
     "@types/mdurl" "*"
-    highlight.js "^10.7.2"
 
 "@types/markdown-table@2.0.0":
   version "2.0.0"
@@ -4917,11 +4916,6 @@ he@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
-
-highlight.js@^10.7.2:
-  version "10.7.3"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.7.3.tgz#697272e3991356e40c3cac566a74eef681756531"
-  integrity sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==
 
 hook-std@^2.0.0:
   version "2.0.0"
