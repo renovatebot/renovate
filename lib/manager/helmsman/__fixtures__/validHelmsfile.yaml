@@ -1,0 +1,78 @@
+namespaces:
+  redis-operator:
+  strimzi:
+  monitoring:
+
+helmRepos:
+  ot-helm: "https://ot-container-kit.github.io/helm-charts/"
+  strimzi: "https://strimzi.io/charts/"
+  open-telemetry: "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  grafana: "https://grafana.github.io/helm-charts"
+  prometheus-community: https://prometheus-community.github.io/helm-charts
+
+apps:
+# valid apps
+  kube-prometheus:
+    enabled: true
+    namespace: monitoring
+    chart: prometheus-community/kube-prometheus-stack
+    version: 19.0.3
+    valuesFiles:
+      -  ./kube-prometheus/values.yaml
+    priority: -90
+  loki:
+    enabled: true
+    namespace: monitoring
+    chart: grafana/loki
+    version: 2.6.0
+    priority: -85
+  tempo:
+    enabled: true
+    namespace: monitoring
+    chart: grafana/tempo
+    version: 0.7.7
+    priority: -80
+  otlp-collector:
+    enabled: true
+    namespace: monitoring
+    chart: open-telemetry/opentelemetry-collector
+    version: 0.6.0
+    valuesFile: ./otlp-collector/values.yaml
+    priority: -75
+  strimzi-operator:
+    enabled: true
+    namespace: strimzi
+    chart: strimzi/strimzi-kafka-operator
+    version: 0.25.0
+
+# missing version
+  strimzi-operator-missing-version:
+    enabled: true
+    namespace: strimzi
+    chart: strimzi/strimzi-kafka-operator
+
+# malformed  chart
+  loki-no-registry-ref:
+    enabled: true
+    namespace: monitoring
+    chart: /loki
+    version: 2.6.0
+  tempo-no-registry-ref:
+    enabled: true
+    namespace: monitoring
+    chart: tempo
+    version: 0.7.7
+  kube-prometheus-no-lookup-name:
+    enabled: true
+    namespace: monitoring
+    chart: prometheus-community/
+    version: 19.0.3
+    valuesFiles:
+      -  ./kube-prometheus/values.yaml
+    priority: -90
+  otlp-collector-no-chart:
+    enabled: true
+    namespace: monitoring
+    version: 0.6.0
+    valuesFile: ./otlp-collector/values.yaml
+    priority: -75
