@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { sign } from 'crypto';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 import upath from 'upath';
@@ -68,6 +69,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     configFileParsed = JSON.parse(
       await readLocalFile('package.json', 'utf8')
     ).renovate;
+    if (is.string(configFileParsed)) {
+      logger.debug('Massaging string renovate config to extends array');
+      configFileParsed = { extends: [configFileParsed] };
+    }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
