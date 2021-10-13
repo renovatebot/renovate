@@ -4,6 +4,7 @@ import upath from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import * as datasourceGitRefs from '../../datasource/git-refs';
 import { logger } from '../../logger';
+import { simpleGitConfig } from '../../util/git/config';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
 import type { ExtractConfig, PackageFile } from '../types';
 import { GitModule } from './types';
@@ -14,7 +15,7 @@ async function getUrl(
   submoduleName: string
 ): Promise<string> {
   const path = (
-    await Git().raw([
+    await Git(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,

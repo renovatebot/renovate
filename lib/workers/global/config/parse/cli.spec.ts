@@ -103,11 +103,18 @@ describe('workers/global/config/parse/cli', () => {
         hostRules: [],
       });
     });
-    it('migrates --endpoints', () => {
-      argv.push(`--endpoints=`);
-      expect(cli.getConfig(argv)).toEqual({
-        hostRules: [],
-      });
+    test.each`
+      arg                              | config
+      ${'--endpoints='}                | ${{ hostRules: [] }}
+      ${'--azure-auto-complete=false'} | ${{ platformAutomerge: false }}
+      ${'--azure-auto-complete=true'}  | ${{ platformAutomerge: true }}
+      ${'--azure-auto-complete'}       | ${{ platformAutomerge: true }}
+      ${'--git-lab-automerge=false'}   | ${{ platformAutomerge: false }}
+      ${'--git-lab-automerge=true'}    | ${{ platformAutomerge: true }}
+      ${'--git-lab-automerge'}         | ${{ platformAutomerge: true }}
+    `('"$arg" -> $config', ({ arg, config }) => {
+      argv.push(arg);
+      expect(cli.getConfig(argv)).toMatchObject(config);
     });
     it('parses json object correctly when empty', () => {
       argv.push(`--onboarding-config=`);

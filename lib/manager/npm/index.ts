@@ -17,6 +17,12 @@ export const defaultConfig = {
   fileMatch: ['(^|/)package.json$'],
   rollbackPrs: true,
   versioning: npmVersioning.id,
+  digest: {
+    prBodyDefinitions: {
+      Change:
+        '{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}',
+    },
+  },
   prBodyDefinitions: {
     Change:
       "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
