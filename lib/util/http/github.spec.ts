@@ -353,7 +353,7 @@ describe('util/http/github', () => {
         .scope('https://ghe.mycompany.com')
         .post('/api/graphql')
         .reply(200, { data: { repository } });
-      await githubApi.queryRepo(graphqlQuery);
+      await githubApi.requestGraphql(graphqlQuery);
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
@@ -432,7 +432,7 @@ describe('util/http/github', () => {
         .post('/graphql')
         .reply(200, { data: { repository } });
 
-      const { data } = await githubApi.queryRepo(graphqlQuery);
+      const { data } = await githubApi.requestGraphql(graphqlQuery);
       expect(httpMock.getTrace()).toHaveLength(1);
       expect(data).toStrictEqual({ repository });
     });

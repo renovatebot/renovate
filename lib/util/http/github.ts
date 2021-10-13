@@ -244,7 +244,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     return result;
   }
 
-  public async queryRepo<T = unknown>(
+  public async requestGraphql<T = unknown>(
     query: string,
     options: GraphqlOptions = {}
   ): Promise<GithubGraphqlResponse<T>> {
@@ -311,7 +311,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     let isIterating = true;
     while (isIterating) {
-      const res = await this.queryRepo<GithubGraphqlRepoData<T>>(query, {
+      const res = await this.requestGraphql<GithubGraphqlRepoData<T>>(query, {
         ...options,
         count: Math.min(count, limit),
         cursor,

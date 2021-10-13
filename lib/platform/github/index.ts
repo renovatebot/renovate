@@ -200,7 +200,7 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
-    const res = await githubApi.queryRepo<GhRepo>(repoInfoQuery, {
+    const res = await githubApi.requestGraphql<GhRepo>(repoInfoQuery, {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
@@ -1398,7 +1398,7 @@ async function tryPrAutomerge(
   try {
     const variables = { pullRequestId: prNodeId };
     const queryOptions = { variables };
-    const { errors } = await githubApi.queryRepo<GhAutomergeResponse>(
+    const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
       queryOptions
     );
