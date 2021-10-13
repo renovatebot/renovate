@@ -1906,38 +1906,50 @@ describe('platform/github/index', () => {
         return scope;
       };
 
+      const graphqlGetRepo = {
+        method: 'POST',
+        url: 'https://api.github.com/graphql',
+        graphql: { query: { repository: {} } },
+      };
+
+      const restCreatePr = {
+        method: 'POST',
+        url: 'https://api.github.com/repos/some/repo/pulls',
+      };
+
+      const restAddLabels = {
+        method: 'POST',
+        url: 'https://api.github.com/repos/some/repo/issues/123/labels',
+      };
+
+      const graphqlAutomerge = {
+        method: 'POST',
+        url: 'https://api.github.com/graphql',
+        graphql: {
+          mutation: {
+            __vars: { $pullRequestId: 'ID!' },
+            enablePullRequestAutoMerge: {},
+          },
+          variables: { pullRequestId: 'abcd' },
+        },
+      };
+
       it('should set automatic merge', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeResp);
 
         const pr = await github.createPr(prConfig);
 
-        expect(pr).toMatchSnapshot({ number: 123 });
-        expect(httpMock.getTrace()).toMatchSnapshot([
-          { method: 'POST', url: 'https://api.github.com/graphql' },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/pulls',
-          },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
-          },
-          {
-            graphql: {
-              mutation: {
-                __vars: { $pullRequestId: 'ID!' },
-                enablePullRequestAutoMerge: {},
-              },
-              variables: { pullRequestId: 'abcd' },
-            },
-            method: 'POST',
-            url: 'https://api.github.com/graphql',
-          },
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          graphqlAutomerge,
         ]);
       });
 
-      it('should stop trying after GraphQL errors', async () => {
+      it('should stop trying after GraphQL error', async () => {
         const scope = await mockScope();
         scope
           .post('/graphql')
@@ -1954,34 +1966,12 @@ describe('platform/github/index', () => {
         await github.createPr(prConfig);
 
         expect(httpMock.getTrace()).toMatchObject([
-          { method: 'POST', url: 'https://api.github.com/graphql' },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/pulls',
-          },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
-          },
-          {
-            graphql: {
-              mutation: {
-                __vars: { $pullRequestId: 'ID!' },
-                enablePullRequestAutoMerge: {},
-              },
-              variables: { pullRequestId: 'abcd' },
-            },
-            method: 'POST',
-            url: 'https://api.github.com/graphql',
-          },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/pulls',
-          },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
-          },
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          graphqlAutomerge,
+          restCreatePr,
+          restAddLabels,
         ]);
       });
 
@@ -2001,45 +1991,13 @@ describe('platform/github/index', () => {
         await github.createPr(prConfig);
 
         expect(httpMock.getTrace()).toMatchObject([
-          { method: 'POST', url: 'https://api.github.com/graphql' },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/pulls',
-          },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
-          },
-          {
-            graphql: {
-              mutation: {
-                __vars: { $pullRequestId: 'ID!' },
-                enablePullRequestAutoMerge: {},
-              },
-              variables: { pullRequestId: 'abcd' },
-            },
-            method: 'POST',
-            url: 'https://api.github.com/graphql',
-          },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/pulls',
-          },
-          {
-            method: 'POST',
-            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
-          },
-          {
-            graphql: {
-              mutation: {
-                __vars: { $pullRequestId: 'ID!' },
-                enablePullRequestAutoMerge: {},
-              },
-              variables: { pullRequestId: 'abcd' },
-            },
-            method: 'POST',
-            url: 'https://api.github.com/graphql',
-          },
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          graphqlAutomerge,
+          restCreatePr,
+          restAddLabels,
+          graphqlAutomerge,
         ]);
       });
     });
