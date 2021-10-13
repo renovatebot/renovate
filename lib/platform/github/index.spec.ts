@@ -1936,6 +1936,112 @@ describe('platform/github/index', () => {
           },
         ]);
       });
+
+      it('should stop trying after GraphQL errors', async () => {
+        const scope = await mockScope();
+        scope
+          .post('/graphql')
+          .reply(200, {
+            ...graphqlAutomergeResp,
+            errors: [{ message: 'foobar' }],
+          })
+          .post('/repos/some/repo/pulls')
+          .reply(200, createdPrResp)
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, []);
+
+        await github.createPr(prConfig);
+        await github.createPr(prConfig);
+
+        expect(httpMock.getTrace()).toMatchObject([
+          { method: 'POST', url: 'https://api.github.com/graphql' },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/pulls',
+          },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
+          },
+          {
+            graphql: {
+              mutation: {
+                __vars: { $pullRequestId: 'ID!' },
+                enablePullRequestAutoMerge: {},
+              },
+              variables: { pullRequestId: 'abcd' },
+            },
+            method: 'POST',
+            url: 'https://api.github.com/graphql',
+          },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/pulls',
+          },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
+          },
+        ]);
+      });
+
+      it('should keep trying after HTTP error', async () => {
+        const scope = await mockScope();
+        scope
+          .post('/graphql')
+          .reply(500)
+          .post('/repos/some/repo/pulls')
+          .reply(200, createdPrResp)
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, [])
+          .post('/graphql')
+          .reply(200, graphqlAutomergeResp);
+
+        await github.createPr(prConfig);
+        await github.createPr(prConfig);
+
+        expect(httpMock.getTrace()).toMatchObject([
+          { method: 'POST', url: 'https://api.github.com/graphql' },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/pulls',
+          },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
+          },
+          {
+            graphql: {
+              mutation: {
+                __vars: { $pullRequestId: 'ID!' },
+                enablePullRequestAutoMerge: {},
+              },
+              variables: { pullRequestId: 'abcd' },
+            },
+            method: 'POST',
+            url: 'https://api.github.com/graphql',
+          },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/pulls',
+          },
+          {
+            method: 'POST',
+            url: 'https://api.github.com/repos/some/repo/issues/123/labels',
+          },
+          {
+            graphql: {
+              mutation: {
+                __vars: { $pullRequestId: 'ID!' },
+                enablePullRequestAutoMerge: {},
+              },
+              variables: { pullRequestId: 'abcd' },
+            },
+            method: 'POST',
+            url: 'https://api.github.com/graphql',
+          },
+        ]);
+      });
     });
   });
   describe('getPr(prNo)', () => {

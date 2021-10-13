@@ -270,21 +270,6 @@ Array [
 ]
 `;
 
-exports[`platform/github/index createPr() automerge skips if cache skip key set for PR 1`] = `
-Object {
-  "displayNumber": "Pull Request #123",
-  "head": Object {
-    "repo": Object {
-      "full_name": "some/repo",
-    },
-  },
-  "node_id": "abcd",
-  "number": 123,
-  "sourceBranch": "some-branch",
-  "sourceRepo": "some/repo",
-}
-`;
-
 exports[`platform/github/index createPr() should create a draftPR if set in the settings 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
