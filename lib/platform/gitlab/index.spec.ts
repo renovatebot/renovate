@@ -1,6 +1,7 @@
 // TODO fix mocks
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/http-mock';
+import * as _globalConfig from '../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -21,6 +22,7 @@ describe('platform/gitlab/index', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
+  let globalConfig: jest.Mocked<typeof _globalConfig>;
 
   beforeEach(async () => {
     // reset module
@@ -30,6 +32,9 @@ describe('platform/gitlab/index', () => {
     jest.mock('../../logger');
     logger = (await import('../../logger')).logger as never;
     jest.mock('../../util/host-rules');
+    jest.mock('../../config/global');
+    globalConfig = require('../../config/global');
+    globalConfig.getGlobalConfig.mockReturnValue({});
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
     jest.mock('../../util/git');
@@ -165,6 +170,19 @@ describe('platform/gitlab/index', () => {
         ]);
       const repos = await gitlab.getRepos();
       expect(repos).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should request with reporter level in dry run', async () => {
+      globalConfig.getGlobalConfig.mockReturnValueOnce({
+        dryRun: true,
+      });
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=20'
+        )
+        .reply(200, []);
+      await gitlab.getRepos();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import pAll from 'p-all';
 import { lt } from 'semver';
+import { getGlobalConfig } from '../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -71,6 +72,16 @@ const defaults = {
   version: '0.0.0',
 };
 
+const enum AcessLevel {
+  None = 0,
+  Minimal = 5,
+  Guest = 10,
+  Reporter = 20,
+  Developer = 30,
+  Maintainer = 40,
+  Owner = 50,
+}
+
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
@@ -134,8 +145,11 @@ export async function initPlatform({
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
+  const minAccessLevel = getGlobalConfig().dryRun
+    ? AcessLevel.Reporter
+    : AcessLevel.Developer;
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
+    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=${minAccessLevel}`;
     const res = await gitlabApi.getJson<RepoResponse[]>(url, {
       paginate: true,
     });
