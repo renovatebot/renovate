@@ -6,7 +6,6 @@ import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
 import { cache } from '../../util/cache/package/decorator';
 import { privateCacheDir, readFile } from '../../util/fs';
-import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { simpleGitConfig } from '../../util/git/config';
 import * as cargoVersioning from '../../versioning/cargo';
@@ -103,20 +102,7 @@ export class CrateDatasource extends Datasource {
       );
       return readFile(path, 'utf8');
     }
-
-/**
- * Given a Git URL, computes a semi-human-readable name for a folder in which to
- * clone the repository.
- */
-function cacheDirFromUrl(url: URL): string {
-  const proto = url.protocol.replace(regEx(/:$/), '');
-  const host = url.hostname;
-  const hash = hasha(url.pathname, {
-    algorithm: 'sha256',
-  }).substr(0, 7);
-
-  return `crate-registry-${proto}-${host}-${hash}`;
-}
+    
     if (info.flavor === RegistryFlavor.CratesIo) {
       const crateUrl =
         CrateDatasource.CRATES_IO_BASE_URL +
