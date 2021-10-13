@@ -1,5 +1,7 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
+import { HttpError } from '../../util/http/types';
 import { ensureTrailingSlash } from '../../util/url';
 import * as loose from '../../versioning/loose';
 import { Datasource } from '../datasource';
@@ -8,8 +10,6 @@ import { ConanJSON, datasource, defaultRegistryUrl } from './common';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
-
-  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
@@ -36,38 +36,35 @@ export class ConanDatasource extends Datasource {
       logger.trace({ lookupUrl }, 'conan api got lookup');
       const rep = await this.http.getJson<ConanJSON>(lookupUrl);
       const versions = rep?.body;
-      if (!versions) {
-        logger.trace({ packageName }, 'conan package not found');
-        return null;
-      }
-      logger.trace({ lookupUrl }, 'Got conan api result');
-      const dep: ReleaseResult = { releases: [] };
-
-      for (const resultString of Object.values(versions.results)) {
-        const fromMatches = resultString.matchAll(
-          /^(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)?/gim
-        );
-        for (const fromMatch of fromMatches) {
-          if (fromMatch.groups.version && fromMatch.groups.userChannel) {
-            const version = fromMatch.groups.version;
-            // conan uses @_/_ as a place holder for no userChannel
-            if (
-              fromMatch.groups.userChannel === userAndChannel ||
-              (fromMatch.groups.userChannel === '@_/_' && !userAndChannel)
-            ) {
-              const result: Release = {
-                version,
-              };
-              dep.releases.push(result);
+      if (versions) {
+        logger.trace({ lookupUrl }, 'Got conan api result');
+        const dep: ReleaseResult = { releases: [] };
+  
+        for (const resultString of Object.values(versions.results)) {
+          const fromMatches = resultString.matchAll(
+            /^(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)?/gim
+          );
+          for (const fromMatch of fromMatches) {
+            if (fromMatch.groups.version && fromMatch.groups.userChannel) {
+              const version = fromMatch.groups.version;
+              // conan uses @_/_ as a place holder for no userChannel
+              if (
+                fromMatch.groups.userChannel === userAndChannel ||
+                (fromMatch.groups.userChannel === '@_/_' && !userAndChannel)
+              ) {
+                const result: Release = {
+                  version,
+                };
+                dep.releases.push(result);
+              }
             }
           }
         }
+        return dep;
       }
-      return dep;
+
     } catch (err) {
-      if (err.statusCode !== 404) {
-        throw err;
-      }
+      this.handleGenericErrors(err);
     }
     return null;
   }
