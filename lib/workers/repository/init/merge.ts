@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { sign } from 'crypto';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 import upath from 'upath';
