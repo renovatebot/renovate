@@ -16,10 +16,10 @@ TODO: Gatsby has the concept of first-touch maintenance. They assign core member
 
 ## Triaging bug reports workflow
 
-Take the following steps on a incoming bug report:
+Take the following steps on an incoming bug report:
 
-1. Determine if this is a valid issue at all, close obvious spam.
-1. If poster is asking a configuration question, convert to discussion.
+1. Determine if this is a valid issue at all, close and optionally delete obvious spam.
+1. If poster is asking a configuration question, or has not made a convincing case that it's really a bug, then convert to discussion, add either a response or at least a note that it's been converted, and issue can be deleted by an admin.
 1. Check what version of Renovate is used, if not on current major version then apply the `retry latest version` label.
 1. Determine if this is a duplicate of a open issue, if duplicate: link to earlier issue, apply `duplicate` label and close the issue.
 1. Check if the _relevant_ logs are provided. If not apply the `logs:problem` label.
@@ -28,7 +28,7 @@ Take the following steps on a incoming bug report:
 
 ## Triaging feature requests workflow
 
-Take the following steps on a incoming feature request:
+Take the following steps on an incoming feature request:
 
 1. Determine if this is a valid feature request at all, close obvious spam.
 1. If poster is asking a configuration question, convert to discussion.
