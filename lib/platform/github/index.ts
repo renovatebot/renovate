@@ -196,12 +196,15 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
-    repo = await githubApi.queryRepo<GhRepo>(repoInfoQuery, {
+    const res = await githubApi.requestGraphql<{
+      repository: GhRepo;
+    }>(repoInfoQuery, {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
       },
     });
+    repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
