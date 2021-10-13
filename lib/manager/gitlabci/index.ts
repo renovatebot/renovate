@@ -1,7 +1,7 @@
-import { LANGUAGE_DOCKER } from '../../constants/languages';
+import { ProgrammingLanguage } from '../../constants';
 import { extractAllPackageFiles, extractPackageFile } from './extract';
 
-const language = LANGUAGE_DOCKER;
+const language = ProgrammingLanguage.Docker;
 
 export { extractAllPackageFiles, extractPackageFile, language };
 
