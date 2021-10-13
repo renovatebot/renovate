@@ -42,46 +42,36 @@ export default function extractPackageFile(
       if (sanitizedLine) {
         depType = setDepType(sanitizedLine, depType);
         // extract all dependencies from each line
-        const lines = sanitizedLine.split(',');
+        const lines = sanitizedLine.split(/("|'),/);
         for (const line of lines) {
-          // In the case of complex ranges don't misread the userChannel as a dependency
-          // ex: curl/[~1.2.3, loose=False, include_prerelease=True]@test/dev will split
-          // down into include_prerelease=True]@test/dev.  This should not return test as a dependency
-          if (!line.includes(']@')) {
-            const matches = regex.exec(line.trim());
-            if (matches) {
-              let dep: PackageDependency = {};
-              const depName = matches.groups.name;
-              const currentValue = matches.groups.version.trim();
-              // set to a value that won't cause this dependency to be thrown out by
-              // lib/workers/repository/process/lookup/index.ts line: 333
-              let currentDigest = ' ';
-              let replaceString = `${depName}/${currentValue}`;
-              if (matches.groups.userChannel) {
-                currentDigest = matches.groups.userChannel;
-                replaceString = `${depName}/${currentValue}${currentDigest}`;
-              }
+          const matches = regex.exec(line.trim());
+          if (matches) {
+            let dep: PackageDependency = {};
+            const depName = matches.groups.name;
+            const currentValue = matches.groups.version.trim();
+            const userAndChannel = matches.groups.userChannel;
+            let replaceString = `${depName}/${currentValue}`;
 
-              // ignore packages with set ranges since conan does not use a lockfile, conan will handle this during installation
-              if (!currentValue.includes('[')) {
-                logger.trace(
-                  `Found a conan package ${depName} ${currentValue} ${currentDigest} ${depType}`
-                );
-                dep = {
-                  ...dep,
-                  depName,
-                  currentValue,
-                  currentDigest,
-                  datasource: ConanDatasource.id,
-                  versioning: loose.id,
-                  replaceString,
-                  depType,
-                  autoReplaceStringTemplate:
-                    '{{depName}}/{{newValue}}{{#if newDigest}}{{newDigest}}{{/if}}',
-                };
-                deps.push(dep);
-              }
+            if (matches.groups.userChannel) {
+              replaceString = `${depName}/${currentValue}${userAndChannel}`;
             }
+
+            logger.trace(
+              `Found a conan package: ${depName}, ${currentValue}, ${userAndChannel}, ${depType}.`
+            );
+            dep = {
+              ...dep,
+              depName,
+              currentValue,
+              userAndChannel,
+              datasource: ConanDatasource.id,
+              versioning: loose.id,
+              replaceString,
+              depType,
+              autoReplaceStringTemplate:
+                '{{depName}}/{{newValue}}{{#if userAndChannel}}{{userAndChannel}}{{/if}}',
+            };
+            deps.push(dep);
           }
         }
       }

@@ -1,43 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/conan/index getDigest handles bad return 1`] = `null`;
-
-exports[`datasource/conan/index getDigest handles bad return 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "center.conan.io",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://center.conan.io/v2/conans/search?q=fakepackage/fakeversion",
-  },
-]
-`;
-
-exports[`datasource/conan/index getDigest handles malformed packages 1`] = `" "`;
-
-exports[`datasource/conan/index getDigest handles malformed packages 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "center.conan.io",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://center.conan.io/v2/conans/search?q=bad/fakeversion",
-  },
-]
-`;
-
-exports[`datasource/conan/index getDigest handles matched packages 1`] = `"@conan/test"`;
-
-exports[`datasource/conan/index getDigest handles unmatched packages 1`] = `"@conan/stable"`;
-
 exports[`datasource/conan/index getReleases handles bad registries 1`] = `null`;
 
 exports[`datasource/conan/index getReleases handles bad registries 2`] = `
@@ -77,7 +39,6 @@ Object {
   "registryUrl": "https://center.conan.io",
   "releases": Array [
     Object {
-      "newDigest": " ",
       "version": "1.9.3",
     },
   ],
@@ -153,23 +114,18 @@ Object {
   "registryUrl": "https://center.conan.io",
   "releases": Array [
     Object {
-      "newDigest": " ",
       "version": "1.8.1",
     },
     Object {
-      "newDigest": " ",
       "version": "1.9.3",
     },
     Object {
-      "newDigest": " ",
       "version": "1.9.4",
     },
     Object {
-      "newDigest": " ",
       "version": "1.10.0",
     },
     Object {
-      "newDigest": " ",
       "version": "1.10.1",
     },
   ],

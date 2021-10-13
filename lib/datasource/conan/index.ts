@@ -3,12 +3,7 @@ import { cache } from '../../util/cache/package/decorator';
 import { ensureTrailingSlash } from '../../util/url';
 import * as loose from '../../versioning/loose';
 import { Datasource } from '../datasource';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { ConanJSON, datasource, defaultRegistryUrl } from './common';
 
 export class ConanDatasource extends Datasource {
@@ -30,7 +25,8 @@ export class ConanDatasource extends Datasource {
 
   private async lookupConanPackage(
     packageName: string,
-    hostUrl: string
+    hostUrl: string,
+    userAndChannel: string
   ): Promise<ReleaseResult | null> {
     logger.trace({ packageName, hostUrl }, 'Looking up conan api dependency');
     try {
@@ -53,22 +49,17 @@ export class ConanDatasource extends Datasource {
         );
         for (const fromMatch of fromMatches) {
           if (fromMatch.groups.version && fromMatch.groups.userChannel) {
-            logger.debug(
-              `Found a conan package ${fromMatch.groups.name} ${fromMatch.groups.version} ${fromMatch.groups.userChannel}`
-            );
             const version = fromMatch.groups.version;
-            let newDigest = fromMatch.groups.userChannel;
             // conan uses @_/_ as a place holder for no userChannel
-            if (newDigest === '@_/_') {
-              // set to a value that won't cause this dependency to be thrown out by
-              // lib/workers/repository/process/lookup/index.ts line: 333
-              newDigest = ' ';
+            if (
+              fromMatch.groups.userChannel === userAndChannel ||
+              (fromMatch.groups.userChannel === '@_/_' && !userAndChannel)
+            ) {
+              const result: Release = {
+                version,
+              };
+              dep.releases.push(result);
             }
-            const result: Release = {
-              version,
-              newDigest,
-            };
-            dep.releases.push(result);
           }
         }
       }
@@ -83,52 +74,18 @@ export class ConanDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    key: ({ registryUrl, lookupName }: DigestConfig) =>
-      `${registryUrl}:${lookupName}digest`,
-  })
-  override async getDigest(
-    { lookupName, currentDigest, registryUrl }: DigestConfig,
-    newValue?: string
-  ): Promise<string | null> {
-    const newLookup = `${lookupName}/${newValue}`;
-
-    const digests: string[] = [];
-    const fullDep: ReleaseResult = await this.lookupConanPackage(
-      newLookup,
-      registryUrl
-    );
-
-    if (fullDep) {
-      // extract digests
-      for (const release of fullDep.releases) {
-        digests.push(release.newDigest);
-      }
-    }
-
-    if (digests.length === 0) {
-      return null;
-    }
-
-    // favor existing digest
-    if (digests.includes(currentDigest)) {
-      return currentDigest;
-    }
-
-    return digests[0];
-  }
-
-  @cache({
-    namespace: `datasource-${datasource}`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
       `${registryUrl}:${lookupName}release`,
   })
   async getReleases({
     registryUrl,
     lookupName,
+    userAndChannel,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const result: ReleaseResult = await this.lookupConanPackage(
       lookupName,
-      registryUrl
+      registryUrl,
+      userAndChannel
     );
 
     return result.releases.length ? result : null;

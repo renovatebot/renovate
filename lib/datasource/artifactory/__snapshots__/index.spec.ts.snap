@@ -5,19 +5,19 @@ Object {
   "registryUrl": "https://jfrog.company.com/artifactory",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2021-07-22T01:08:00.000Z",
+      "releaseTimestamp": "2021-07-21T20:08:00.000Z",
       "version": "1.0.0",
     },
     Object {
-      "releaseTimestamp": "2021-08-24T01:03:00.000Z",
+      "releaseTimestamp": "2021-08-23T20:03:00.000Z",
       "version": "1.0.1",
     },
     Object {
-      "releaseTimestamp": "2021-07-22T01:09:00.000Z",
+      "releaseTimestamp": "2021-07-21T20:09:00.000Z",
       "version": "1.0.2",
     },
     Object {
-      "releaseTimestamp": "2021-02-06T15:54:00.000Z",
+      "releaseTimestamp": "2021-02-06T09:54:00.000Z",
       "version": "1.0.3",
     },
   ],
@@ -29,19 +29,19 @@ Object {
   "registryUrl": "https://jfrog.company.com/artifactory",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2021-07-22T01:08:00.000Z",
+      "releaseTimestamp": "2021-07-21T20:08:00.000Z",
       "version": "1.0.0",
     },
     Object {
-      "releaseTimestamp": "2021-08-24T01:03:00.000Z",
+      "releaseTimestamp": "2021-08-23T20:03:00.000Z",
       "version": "1.0.1",
     },
     Object {
-      "releaseTimestamp": "2021-07-22T01:09:00.000Z",
+      "releaseTimestamp": "2021-07-21T20:09:00.000Z",
       "version": "1.0.2",
     },
     Object {
-      "releaseTimestamp": "2021-02-06T15:54:00.000Z",
+      "releaseTimestamp": "2021-02-06T09:54:00.000Z",
       "version": "1.0.3",
     },
   ],
@@ -53,22 +53,22 @@ Object {
   "releases": Array [
     Object {
       "registryUrl": "https://jfrog.company.com/artifactory",
-      "releaseTimestamp": "2021-07-22T01:08:00.000Z",
+      "releaseTimestamp": "2021-07-21T20:08:00.000Z",
       "version": "1.0.0",
     },
     Object {
       "registryUrl": "https://jfrog.company.com/artifactory",
-      "releaseTimestamp": "2021-08-24T01:03:00.000Z",
+      "releaseTimestamp": "2021-08-23T20:03:00.000Z",
       "version": "1.0.1",
     },
     Object {
       "registryUrl": "https://jfrog.company.com/artifactory",
-      "releaseTimestamp": "2021-07-22T01:09:00.000Z",
+      "releaseTimestamp": "2021-07-21T20:09:00.000Z",
       "version": "1.0.2",
     },
     Object {
       "registryUrl": "https://jfrog.company.com/artifactory",
-      "releaseTimestamp": "2021-02-06T15:54:00.000Z",
+      "releaseTimestamp": "2021-02-06T09:54:00.000Z",
       "version": "1.0.3",
     },
     Object {

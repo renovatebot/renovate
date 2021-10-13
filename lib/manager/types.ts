@@ -117,6 +117,7 @@ export interface Package<T> extends ManagerData<T> {
   currentRawValue?: string;
   major?: { enabled?: boolean };
   prettyDepType?: any;
+  userAndChannel?: string;
 }
 
 export interface LookupUpdate {
