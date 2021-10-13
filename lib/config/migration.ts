@@ -65,13 +65,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (key === 'gomodTidy') {
-        if (val) {
-          migratedConfig.postUpdateOptions =
-            migratedConfig.postUpdateOptions || [];
-          migratedConfig.postUpdateOptions.push('gomodTidy');
-        }
-        delete migratedConfig.gomodTidy;
       } else if (key === 'semanticCommits') {
         if (val === true) {
           migratedConfig.semanticCommits = 'enabled';
