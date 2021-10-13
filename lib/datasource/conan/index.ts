@@ -28,7 +28,7 @@ export class ConanDatasource extends Datasource {
     super(ConanDatasource.id);
   }
 
-  public async lookupConanPackage(
+  private async lookupConanPackage(
     packageName: string,
     hostUrl: string
   ): Promise<ReleaseResult | null> {
