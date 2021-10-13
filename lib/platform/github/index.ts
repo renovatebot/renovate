@@ -19,7 +19,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../../util/cache/package';
+import { getCache } from '../../util/cache/repository';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
@@ -1382,15 +1382,14 @@ async function tryPrAutomerge(
   pullRequestId: string,
   platformOptions: PlatformPrOptions
 ): Promise<boolean> {
+  const repoCache = getCache();
   if (!platformOptions?.usePlatformAutomerge) {
+    delete repoCache.skipAutomerge;
     return;
   }
 
-  const cacheNs = 'skip-github-automerge';
-  const cacheKey = pullRequestId;
-  const cacheTimeoutMinutes = 60;
-  const skipAutomerge = await packageCache.get<boolean>(cacheNs, pullRequestId);
-  if (skipAutomerge) {
+  if (repoCache.skipAutomerge) {
+    logger.trace('GitHub automerge: skipping');
     return;
   }
 
@@ -1403,10 +1402,11 @@ async function tryPrAutomerge(
       'enablePullRequestAutoMerge'
     );
     if (!res?.pullRequest) {
-      await packageCache.set(cacheNs, cacheKey, true, cacheTimeoutMinutes);
+      logger.debug('GitHub automerge: GraphQL API error');
+      repoCache.skipAutomerge = true;
     }
   } catch (err) {
-    await packageCache.set(cacheNs, cacheKey, true, cacheTimeoutMinutes);
+    logger.debug({ err }, 'GitHub automerge: request error');
   }
 }
 

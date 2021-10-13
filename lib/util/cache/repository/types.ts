@@ -39,4 +39,5 @@ export interface Cache {
   revision?: number;
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
+  skipAutomerge?: true;
 }
