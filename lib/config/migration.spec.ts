@@ -1,4 +1,4 @@
-import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
 import { setGlobalConfig } from './global';
 import * as configMigration from './migration';
@@ -20,7 +20,7 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
-        platform: PLATFORM_TYPE_GITHUB,
+        platform: PlatformId.Github,
         hostRules: [
           {
             platform: 'docker',
@@ -782,5 +782,55 @@ describe('config/migration', () => {
     );
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
+  });
+
+  it('migrates azureAutoComplete', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
+
+    expect(migrate({ azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: true },
+    });
+
+    expect(migrate({ azureAutoComplete: false })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: false },
+    });
+
+    expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, platformAutomerge: true },
+    });
+
+    expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, platformAutomerge: true },
+    });
+  });
+
+  it('migrates gitLabAutomerge', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
+
+    expect(migrate({ gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: true },
+    });
+
+    expect(migrate({ gitLabAutomerge: false })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: false },
+    });
+
+    expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, platformAutomerge: true },
+    });
+
+    expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, platformAutomerge: true },
+    });
   });
 });

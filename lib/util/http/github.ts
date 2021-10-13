@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
+import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
@@ -30,10 +30,12 @@ export interface GithubHttpOptions extends InternalHttpOptions {
   token?: string;
 }
 
+interface GithubGraphqlRepoData<T = unknown> {
+  repository?: T;
+}
+
 interface GithubGraphqlResponse<T = unknown> {
-  data?: {
-    repository?: T;
-  };
+  data?: T;
   errors?: { message: string; locations: unknown }[];
 }
 
@@ -55,15 +57,15 @@ function handleGotError(
       err.code === 'ECONNRESET')
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (err.name === 'ParseError') {
     logger.debug({ err }, '');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (
     err.statusCode === 403 &&
@@ -100,7 +102,7 @@ function handleGotError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+      throw new ExternalHostError(err, PlatformId.Github);
     }
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
@@ -120,7 +122,7 @@ function handleGotError(
       throw err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (
     err.statusCode === 410 &&
@@ -159,7 +161,7 @@ function constructAcceptString(input?: any): string {
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   constructor(
-    hostType: string = PLATFORM_TYPE_GITHUB,
+    hostType: string = PlatformId.Github,
     options?: GithubHttpOptions
   ) {
     super(hostType, options);
@@ -242,10 +244,10 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     return result;
   }
 
-  public async queryRepo<T = unknown>(
+  public async requestGraphql<T = unknown>(
     query: string,
     options: GraphqlOptions = {}
-  ): Promise<T> {
+  ): Promise<GithubGraphqlResponse<T>> {
     let result = null;
 
     const path = 'graphql';
@@ -274,7 +276,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         'graphql',
         opts
       );
-      result = res?.body?.data?.repository;
+      result = res?.body;
     } catch (err) {
       if (err instanceof ExternalHostError) {
         const gotError = err.err as GotLegacyError;
@@ -309,14 +311,15 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     let isIterating = true;
     while (isIterating) {
-      const gqlRes = await this.queryRepo<T>(query, {
+      const res = await this.requestGraphql<GithubGraphqlRepoData<T>>(query, {
         ...options,
         count: Math.min(count, limit),
         cursor,
         paginate,
       });
-      if (gqlRes?.[fieldName]) {
-        const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
+      const fieldData = res?.data?.repository?.[fieldName];
+      if (fieldData) {
+        const { nodes = [], edges = [], pageInfo } = fieldData;
         result.push(...nodes);
         result.push(...edges);
 
@@ -335,7 +338,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error({ gqlRes }, 'Error fetching GraphQL nodes');
+          logger.error({ res }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }

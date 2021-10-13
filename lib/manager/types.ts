@@ -4,6 +4,7 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../config/types';
+import type { ProgrammingLanguage } from '../constants';
 import type { RangeStrategy, SkipReason } from '../types';
 import type { File } from '../util/git';
 
@@ -27,6 +28,7 @@ export interface ExtractConfig {
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
+  autoReplaceStringTemplate?: string;
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   depNameTemplate?: string;
@@ -71,6 +73,7 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
+  autoReplaceStringTemplate?: string;
   hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;
   datasource?: string;
@@ -229,7 +232,7 @@ export interface GlobalManagerConfig {
 
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
-  language?: string;
+  language?: ProgrammingLanguage;
   supportsLockFileMaintenance?: boolean;
 
   bumpPackageVersion?(

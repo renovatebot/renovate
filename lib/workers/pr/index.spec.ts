@@ -1,5 +1,5 @@
 import { getConfig, git, mocked, partial, platform } from '../../../test/util';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import type { Pr } from '../../platform/types';
 import { BranchStatus } from '../../types';
 import * as _limits from '../global/limits';
@@ -621,19 +621,19 @@ describe('workers/pr/index', () => {
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       config.prCreation = 'not-pending';
       config.artifactErrors = [{}];
-      config.platform = PLATFORM_TYPE_GITLAB;
+      config.platform = PlatformId.Gitlab;
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
 
     it('should trigger GitLab automerge when configured', async () => {
-      config.gitLabAutomerge = true;
+      config.usePlatformAutomerge = true;
       config.gitLabIgnoreApprovals = true;
       config.automerge = true;
       await prWorker.ensurePr(config);
       const args = platform.createPr.mock.calls[0];
       expect(args[0].platformOptions).toMatchObject({
-        gitLabAutomerge: true,
+        usePlatformAutomerge: true,
         gitLabIgnoreApprovals: true,
       });
     });

@@ -31,6 +31,7 @@ const repoGroups = {
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
+  deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'dnd-kit': 'https://github.com/clauderic/dnd-kit',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
@@ -119,6 +120,7 @@ const repoGroups = {
     'https://github.com/loopbackio/loopback-next',
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
+  mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
     'https://github.com/material-components/material-components-web',
@@ -127,6 +129,7 @@ const repoGroups = {
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
   nest: 'https://github.com/nestjs/nest',
+  netty: 'https://github.com/netty/netty',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
     'https://github.com/mozilla-neutrino/neutrino-dev',

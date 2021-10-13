@@ -1,4 +1,4 @@
-import { LANGUAGE_JAVA } from '../../constants/languages';
+import { ProgrammingLanguage } from '../../constants';
 import * as gradleVersioning from '../../versioning/gradle';
 import type {
   ExtractConfig,
@@ -26,7 +26,7 @@ export function updateDependency(
     : shallow.updateDependency(params);
 }
 
-export const language = LANGUAGE_JAVA;
+export const language = ProgrammingLanguage.Java;
 
 export const defaultConfig = {
   fileMatch: [
