@@ -1,14 +1,14 @@
 import type { RenovateConfig } from '../../types';
-import { ReplacePropertyMigration } from '../base/replace-property-migration';
+import { AbstractMigration } from '../base/abstract-migration';
 
-export class BinarySourceMigration extends ReplacePropertyMigration {
-  constructor() {
-    super('binarySource', 'binarySource');
+export class BinarySourceMigration extends AbstractMigration {
+  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
+    super('binarySource', originalConfig, migratedConfig);
   }
 
-  protected override getNewValue(config: RenovateConfig): string | unknown {
-    return config[this.deprecatedPropertyName] === 'auto'
-      ? 'global'
-      : config[this.deprecatedPropertyName];
+  override run(): void {
+    if (this.originalConfig.binarySource === 'auto') {
+      this.migratedConfig.binarySource = 'global';
+    }
   }
 }

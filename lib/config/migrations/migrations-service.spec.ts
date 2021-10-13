@@ -3,7 +3,7 @@ import { MigrationsService } from './migrations-service';
 
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {
-    for (const property of MigrationsService.deprecatedProperties) {
+    for (const property of MigrationsService.removedProperties) {
       const originalConfig: Partial<RenovateConfig> = {
         [property]: 'test',
       };

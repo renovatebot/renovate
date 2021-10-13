@@ -1,13 +1,14 @@
 import type { Migration } from '../../types/migrations';
 import type { RenovateConfig } from '../types';
-import { DeprecatePropertyMigration } from './base/deprecate-property-migration';
-import { ReplacePropertyMigration } from './base/replace-property-migration';
+import { RemovePropertyMigration } from './base/remove-property-migration';
+import { RenamePropertyMigration } from './base/rename-property-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
+import { TrustLevelMigration } from './custom/trust-level-migration';
 
 export class MigrationsService {
-  static readonly deprecatedProperties: ReadonlySet<string> = new Set([
+  static readonly removedProperties: ReadonlySet<string> = new Set([
     'gitFs',
     'groupBranchName',
     'groupCommitMessage',
@@ -30,18 +31,36 @@ export class MigrationsService {
     ['multipleMajorPrs', 'separateMultipleMajor'],
   ]);
 
-  private static readonly customMigrations: ReadonlyArray<Migration> = [
-    new BinarySourceMigration(),
-    new IgnoreNodeModulesMigration(),
-    new RequiredStatusChecksMigration(),
-  ];
-
   static run(originalConfig: RenovateConfig): RenovateConfig {
-    const migrations = [...MigrationsService.customMigrations];
-    let config = originalConfig;
+    const migratedConfig: RenovateConfig = {};
+    const migrations = MigrationsService.getMigrations(
+      originalConfig,
+      migratedConfig
+    );
 
-    for (const property of MigrationsService.deprecatedProperties) {
-      migrations.push(new DeprecatePropertyMigration(property));
+    for (const [key, value] of Object.entries(originalConfig)) {
+      migratedConfig[key] = value;
+      const migration = migrations.find((item) => item.propertyName === key);
+      migration?.run();
+    }
+
+    return migratedConfig;
+  }
+
+  private static getMigrations(
+    originalConfig: RenovateConfig,
+    migratedConfig: RenovateConfig
+  ): Migration[] {
+    const migrations: Migration[] = [];
+
+    for (const propertyName of MigrationsService.removedProperties) {
+      migrations.push(
+        new RemovePropertyMigration(
+          propertyName,
+          originalConfig,
+          migratedConfig
+        )
+      );
     }
 
     for (const [
@@ -49,14 +68,24 @@ export class MigrationsService {
       newPropertyName,
     ] of MigrationsService.renamedProperties.entries()) {
       migrations.push(
-        new ReplacePropertyMigration(oldPropertyName, newPropertyName)
+        new RenamePropertyMigration(
+          oldPropertyName,
+          newPropertyName,
+          originalConfig,
+          migratedConfig
+        )
       );
     }
 
-    for (const migration of migrations) {
-      config = migration.run(config);
-    }
+    migrations.push(new BinarySourceMigration(originalConfig, migratedConfig));
+    migrations.push(
+      new IgnoreNodeModulesMigration(originalConfig, migratedConfig)
+    );
+    migrations.push(
+      new RequiredStatusChecksMigration(originalConfig, migratedConfig)
+    );
+    migrations.push(new TrustLevelMigration(originalConfig, migratedConfig));
 
-    return config;
+    return migrations;
   }
 }

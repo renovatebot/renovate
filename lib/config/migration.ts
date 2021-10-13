@@ -178,13 +178,6 @@ export function migrateConfig(
         if (val === false) {
           migratedConfig.rebaseWhen = 'never';
         }
-      } else if (key === 'trustLevel') {
-        delete migratedConfig.trustLevel;
-        if (val === 'high') {
-          migratedConfig.allowCustomCrateRegistries ??= true;
-          migratedConfig.allowScripts ??= true;
-          migratedConfig.exposeAllEnv ??= true;
-        }
       } else if (key === 'ignoreNpmrcFile') {
         delete migratedConfig.ignoreNpmrcFile;
         if (!is.string(migratedConfig.npmrc)) {

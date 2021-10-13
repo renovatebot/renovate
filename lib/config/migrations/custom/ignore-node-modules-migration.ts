@@ -1,12 +1,16 @@
 import type { RenovateConfig } from '../../types';
-import { ReplacePropertyMigration } from '../base/replace-property-migration';
+import { AbstractMigration } from '../base/abstract-migration';
 
-export class IgnoreNodeModulesMigration extends ReplacePropertyMigration {
-  constructor() {
-    super('ignoreNodeModules', 'ignorePaths');
+export class IgnoreNodeModulesMigration extends AbstractMigration {
+  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
+    super('ignoreNodeModules', originalConfig, migratedConfig);
   }
 
-  protected override getNewValue(config: RenovateConfig): string[] {
-    return config[this.deprecatedPropertyName] ? ['node_modules/'] : [];
+  override run(): void {
+    this.delete(this.propertyName);
+
+    this.migratedConfig.ignorePaths = this.originalConfig.ignoreNodeModules
+      ? ['node_modules/']
+      : [];
   }
 }

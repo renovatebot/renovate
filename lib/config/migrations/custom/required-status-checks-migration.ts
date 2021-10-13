@@ -1,15 +1,16 @@
 import type { RenovateConfig } from '../../types';
-import { ReplacePropertyMigration } from '../base/replace-property-migration';
+import { AbstractMigration } from '../base/abstract-migration';
 
-export class RequiredStatusChecksMigration extends ReplacePropertyMigration {
-  constructor() {
-    super('requiredStatusChecks', 'ignoreTests');
+export class RequiredStatusChecksMigration extends AbstractMigration {
+  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
+    super('requiredStatusChecks', originalConfig, migratedConfig);
   }
 
-  override run(config: RenovateConfig): RenovateConfig {
-    return this.replaceProperty(
-      config,
-      config.requiredStatusChecks === null ? true : undefined
-    );
+  override run(): void {
+    this.delete(this.propertyName);
+
+    if (this.originalConfig.requiredStatusChecks === null) {
+      this.migratedConfig.ignoreTests = true;
+    }
   }
 }

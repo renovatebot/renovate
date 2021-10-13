@@ -6,8 +6,14 @@ describe('config/migrations/custom/required-status-checks-migration', () => {
     const originalConfig: Partial<RenovateConfig> = {
       requiredStatusChecks: null,
     };
-    const migration = new RequiredStatusChecksMigration();
-    const migratedConfig = migration.run(originalConfig);
+    const migratedConfig: Partial<RenovateConfig> = {
+      requiredStatusChecks: null,
+    };
+    const migration = new RequiredStatusChecksMigration(
+      originalConfig,
+      migratedConfig
+    );
+    migration.run();
 
     expect(migratedConfig.requiredStatusChecks).toBeUndefined();
     expect(migratedConfig.ignoreTests).toBeTrue();
