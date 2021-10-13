@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import * as gitTags from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -10,7 +11,11 @@ function createDependency(
 ): PackageDependency {
   const source = definition.spec?.source;
 
-  if (source == null) {
+  if (
+    source == null ||
+    !is.nonEmptyString(source.repoURL) ||
+    !is.nonEmptyString(source.targetRevision)
+  ) {
     return null;
   }
 
