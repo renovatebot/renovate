@@ -1,5 +1,5 @@
 import { parse } from '@iarna/toml';
-import * as datasourceCrate from '../../datasource/crate';
+import { CrateDatasource } from '../../datasource/crate';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../util/fs';
@@ -70,7 +70,7 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as any,
       managerData: { nestedVersion },
-      datasource: datasourceCrate.id,
+      datasource: CrateDatasource.id,
     };
     if (registryUrls) {
       dep.registryUrls = registryUrls;
