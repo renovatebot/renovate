@@ -4,17 +4,11 @@
 
 Triage is basically filtering the issues/discussions, and categorizing them with the proper labels.
 
-TODO: Question, do we want to use `priority-5-triage` to mean "figure out if issue is valid at all", or just "we don't yet know what the priority should be"?
+## Triage workflows
 
-TODO: I've been thinking about adding a `waiting-for-response` type label, that means that we're waiting on somebody to respond to us. If it takes way too long to respond, we can ping again or close the issue. Gatsby has a `status: needs more info` label when they need more information from the issue poster. We might benefit from such a label too.
+The general triage workflow is similar for bug reports and feature requests, but there are some small differences which are documented below.
 
-TODO: Gatsby has a `status: needs core review` to get the core maintainers attention. This could be a less noisy way to grab your attention in case I cannot triage the issue myself.
-
-TODO: Maybe add `status: needs core review` to all feature requests, I don't feel qualified to pick a priority level on incoming feature requests, so they are stuck on `priority-5-triage` until a member of the core Renovate team can take a look. Might as well label it `status: needs core review` so that the core team can filter new/old stuff that needs their attention.
-
-TODO: Gatsby has the concept of first-touch maintenance. They assign core members of the team to do this first-touch triage on a regular basis. Not sure if this would work for Renovate, as the core team is not that big, and it would add overhead/management.
-
-## Triaging bug reports workflow
+### Triaging bug reports workflow
 
 Take the following steps on an incoming bug report:
 
@@ -23,18 +17,20 @@ Take the following steps on an incoming bug report:
 1. Check what version of Renovate is used, if not on current major version then ask the reporter to retry with the latest version of Renovate and report their findings.
 1. Determine if this is a duplicate of a open issue, if duplicate: link to earlier issue, apply `duplicate` label and close the issue.
 1. Check if the _relevant_ logs are provided. If not apply the `logs:problem` label.
+1. If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
 1. If it's an easy issue for somebody new to Renovate to help us with apply the `good first issue` label.
 1. If the issue is hard to fix without outside help apply the `help wanted` label.
 
-## Triaging feature requests workflow
+### Triaging feature requests workflow
 
 Take the following steps on an incoming feature request:
 
-1. Determine if this is a valid feature request at all, close obvious spam.
-1. If poster is asking a configuration question, convert to discussion.
+1. Determine if this is a valid feature request at all, close and optionally delete obvious spam.
+1. If poster is asking a configuration question, or has not made a convincing case that it's really a feature request, then convert to discussion, add either a response or at least a note that it's been converted, and issue can be deleted by an admin.
 1. Determine if this is a duplicate of a open issue, if duplicate: link to earlier issue, apply `duplicate` label and close the issue.
 1. Make a best-effort judgement if this is a reasonable feature to put into Renovate. If in doubt, let the core maintainers decide.
 1. Make a initial judgement of the priority, and add the appropriate priority label.
+1. If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
 1. If it's an easy feature for somebody new to Renovate to help us with apply the `good first issue` label.
 1. If the feature is hard to start work on without outside help apply the `help wanted` label.
 
