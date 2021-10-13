@@ -101,7 +101,7 @@ export class CrateDatasource extends Datasource {
       );
       return readFile(path, 'utf8');
     }
-    
+
     if (info.flavor === RegistryFlavor.CratesIo) {
       const crateUrl =
         CrateDatasource.CRATES_IO_BASE_URL +
@@ -143,7 +143,7 @@ export class CrateDatasource extends Datasource {
    * clone the repository.
    */
   private static cacheDirFromUrl(url: URL): string {
-    const proto = url.protocol.replace(/:$/, '');  // TODO #12070
+    const proto = url.protocol.replace(/:$/, ''); // TODO #12070
     const host = url.hostname;
     const hash = hasha(url.pathname, {
       algorithm: 'sha256',
