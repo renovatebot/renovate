@@ -1,8 +1,9 @@
 import { AdoptiumJavaDatasource } from './adoptium-java';
+import { ArtifactoryDatasource } from './artifactory';
 import { BitBucketTagsDatasource } from './bitbucket-tags';
 import { CdnJsDatasource } from './cdnjs';
 import { ClojureDatasource } from './clojure';
-import * as crate from './crate';
+import { CrateDatasource } from './crate';
 import { DartDatasource } from './dart';
 import * as docker from './docker';
 import { GalaxyDatasource } from './galaxy';
@@ -40,10 +41,11 @@ const api = new Map<string, DatasourceApi>();
 export default api;
 
 api.set(AdoptiumJavaDatasource.id, new AdoptiumJavaDatasource());
+api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set('bitbucket-tags', new BitBucketTagsDatasource());
 api.set('cdnjs', new CdnJsDatasource());
 api.set('clojure', new ClojureDatasource());
-api.set('crate', crate);
+api.set('crate', new CrateDatasource());
 api.set('dart', new DartDatasource());
 api.set('docker', docker);
 api.set('galaxy', new GalaxyDatasource());

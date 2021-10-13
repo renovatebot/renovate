@@ -4,6 +4,7 @@ import delay from 'delay';
 import pAll from 'p-all';
 import { lt } from 'semver';
 import { getGlobalConfig } from '../../config/global';
+import { PlatformId } from '../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -16,7 +17,6 @@ import {
   REPOSITORY_NOT_FOUND,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -67,7 +67,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: PLATFORM_TYPE_GITLAB,
+  hostType: PlatformId.Gitlab,
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };
@@ -514,7 +514,7 @@ async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
-  if (platformOptions?.gitLabAutomerge) {
+  if (platformOptions?.usePlatformAutomerge) {
     try {
       if (platformOptions?.gitLabIgnoreApprovals) {
         await ignoreApprovals(pr);

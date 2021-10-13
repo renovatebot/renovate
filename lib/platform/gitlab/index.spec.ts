@@ -1432,8 +1432,7 @@ describe('platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: [],
         platformOptions: {
-          azureAutoComplete: false,
-          gitLabAutomerge: true,
+          usePlatformAutomerge: true,
         },
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1540,8 +1539,7 @@ describe('platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: [],
         platformOptions: {
-          azureAutoComplete: false,
-          gitLabAutomerge: true,
+          usePlatformAutomerge: true,
           gitLabIgnoreApprovals: true,
         },
       });
@@ -1583,8 +1581,7 @@ describe('platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: [],
         platformOptions: {
-          azureAutoComplete: false,
-          gitLabAutomerge: true,
+          usePlatformAutomerge: true,
           gitLabIgnoreApprovals: true,
         },
       });
@@ -1626,8 +1623,7 @@ describe('platform/gitlab/index', () => {
         prBody: 'the-body',
         labels: [],
         platformOptions: {
-          azureAutoComplete: false,
-          gitLabAutomerge: true,
+          usePlatformAutomerge: true,
           gitLabIgnoreApprovals: true,
         },
       });

@@ -9,6 +9,12 @@ import { ClojureDatasource } from '.';
 const baseUrl = 'https://clojars.org/repo';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';
 
+interface SnapshotOpts {
+  version: string;
+  jarStatus?: number;
+  meta?: string;
+}
+
 interface MockOpts {
   dep?: string;
   base?: string;
@@ -16,6 +22,7 @@ interface MockOpts {
   pom?: string | null;
   latest?: string;
   jars?: Record<string, number> | null;
+  snapshots?: SnapshotOpts[] | null;
 }
 
 function mockGenericPackage(opts: MockOpts = {}) {
@@ -41,6 +48,29 @@ function mockGenericPackage(opts: MockOpts = {}) {
           '2.0.0': 200,
         }
       : opts.jars;
+  const snapshots =
+    opts.snapshots === undefined
+      ? [
+          {
+            version: '1.0.3-SNAPSHOT',
+            meta: loadFixture(
+              'metadata-snapshot-version.xml',
+              upath.join('..', 'maven')
+            ),
+            jarStatus: 200,
+          },
+          {
+            version: '1.0.4-SNAPSHOT',
+            meta: loadFixture(
+              'metadata-snapshot-version-invalid.xml',
+              upath.join('..', 'maven')
+            ),
+          },
+          {
+            version: '1.0.5-SNAPSHOT',
+          },
+        ]
+      : opts.snapshots;
 
   const scope = httpMock.scope(base);
 
@@ -67,6 +97,45 @@ function mockGenericPackage(opts: MockOpts = {}) {
       scope
         .head(`/${packagePath}/${version}/${artifact}-${version}.pom`)
         .reply(status, '', { 'Last-Modified': timestamp });
+    });
+  }
+
+  if (snapshots) {
+    snapshots.forEach((snapshot) => {
+      if (snapshot.meta) {
+        scope
+          .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
+          .reply(200, snapshot.meta);
+      } else {
+        scope
+          .get(`/${packagePath}/${snapshot.version}/maven-metadata.xml`)
+          .reply(404, '');
+      }
+
+      if (snapshot.jarStatus) {
+        const [major, minor, patch] = snapshot.version
+          .replace('-SNAPSHOT', '')
+          .split('.')
+          .map((x) => parseInt(x, 10))
+          .map((x) => (x < 10 ? `0${x}` : `${x}`));
+        const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
+        scope
+          .head(
+            `/${packagePath}/${
+              snapshot.version
+            }/${artifact}-${snapshot.version.replace(
+              '-SNAPSHOT',
+              ''
+            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+          )
+          .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp });
+      } else {
+        scope
+          .head(
+            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
+          )
+          .reply(404, '');
+      }
     });
   }
 }
@@ -109,6 +178,7 @@ describe('datasource/clojure/index', () => {
       meta: loadFixture('metadata-extra.xml', upath.join('..', 'maven')),
       latest: '3.0.0',
       jars: { '3.0.0': 200 },
+      snapshots: [],
     });
 
     const { releases } = await get(
@@ -119,6 +189,7 @@ describe('datasource/clojure/index', () => {
 
     expect(releases).toMatchObject([
       { version: '1.0.0' },
+      { version: '1.0.3-SNAPSHOT' },
       { version: '2.0.0' },
       { version: '3.0.0' },
     ]);
