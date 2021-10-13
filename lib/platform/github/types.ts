@@ -96,5 +96,7 @@ export interface GhRepo {
 }
 
 export interface GhAutomergeResponse {
-  pullRequest: { number: number };
+  enablePullRequestAutoMerge: {
+    pullRequest: { number: number };
+  };
 }

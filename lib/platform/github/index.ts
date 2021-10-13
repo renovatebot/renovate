@@ -200,12 +200,13 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
-    repo = await githubApi.queryRepo<GhRepo>(repoInfoQuery, {
+    const res = await githubApi.queryRepo<GhRepo>(repoInfoQuery, {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
       },
     });
+    repo = res?.data;
     // istanbul ignore if
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
@@ -1379,7 +1380,8 @@ export async function ensureCommentRemoval({
 // Pull Request
 
 async function tryPrAutomerge(
-  pullRequestId: string,
+  prNumber: number,
+  prNodeId: string,
   platformOptions: PlatformPrOptions
 ): Promise<boolean> {
   const repoCache = getCache();
@@ -1389,24 +1391,29 @@ async function tryPrAutomerge(
   }
 
   if (repoCache.skipAutomerge) {
-    logger.trace('GitHub automerge: skipping');
+    logger.trace({ prNumber, prNodeId }, 'GitHub automerge: skipping');
     return;
   }
 
   try {
-    const variables = { pullRequestId };
+    const variables = { pullRequestId: prNodeId };
     const queryOptions = { variables };
-    const res = await githubApi.queryRepo<GhAutomergeResponse>(
+    const { errors } = await githubApi.queryRepo<GhAutomergeResponse>(
       enableAutoMergeMutation,
-      queryOptions,
-      'enablePullRequestAutoMerge'
+      queryOptions
     );
-    if (!res?.pullRequest) {
-      logger.debug('GitHub automerge: GraphQL API error');
+    if (errors) {
+      logger.debug(
+        { prNumber, prNodeId, errors },
+        'GitHub automerge: GraphQL API error'
+      );
       repoCache.skipAutomerge = true;
     }
-  } catch (err) {
-    logger.debug({ err }, 'GitHub automerge: request error');
+  } catch (error) {
+    logger.debug(
+      { prNumber, prNodeId, error },
+      'GitHub automerge: request error'
+    );
   }
 }
 
@@ -1457,7 +1464,7 @@ export async function createPr({
   pr.sourceBranch = sourceBranch;
   pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
-  await tryPrAutomerge(pr.node_id, platformOptions);
+  await tryPrAutomerge(pr.number, pr.node_id, platformOptions);
   return pr;
 }
 

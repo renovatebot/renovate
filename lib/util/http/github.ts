@@ -30,10 +30,12 @@ export interface GithubHttpOptions extends InternalHttpOptions {
   token?: string;
 }
 
+interface GithubGraphqlRepoData<T = unknown> {
+  repository?: T;
+}
+
 interface GithubGraphqlResponse<T = unknown> {
-  data?: {
-    repository?: T;
-  };
+  data?: T;
   errors?: { message: string; locations: unknown }[];
 }
 
@@ -244,9 +246,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
   public async queryRepo<T = unknown>(
     query: string,
-    options: GraphqlOptions = {},
-    field = 'repository'
-  ): Promise<T> {
+    options: GraphqlOptions = {}
+  ): Promise<GithubGraphqlResponse<T>> {
     let result = null;
 
     const path = 'graphql';
@@ -275,7 +276,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         'graphql',
         opts
       );
-      result = res?.body?.data?.[field];
+      result = res?.body;
     } catch (err) {
       if (err instanceof ExternalHostError) {
         const gotError = err.err as GotLegacyError;
@@ -310,14 +311,15 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     let isIterating = true;
     while (isIterating) {
-      const gqlRes = await this.queryRepo<T>(query, {
+      const res = await this.queryRepo<GithubGraphqlRepoData<T>>(query, {
         ...options,
         count: Math.min(count, limit),
         cursor,
         paginate,
       });
-      if (gqlRes?.[fieldName]) {
-        const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
+      const fieldData = res?.data?.repository?.[fieldName];
+      if (fieldData) {
+        const { nodes = [], edges = [], pageInfo } = fieldData;
         result.push(...nodes);
         result.push(...edges);
 
@@ -336,7 +338,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error({ gqlRes }, 'Error fetching GraphQL nodes');
+          logger.error({ res }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }

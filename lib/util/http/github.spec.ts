@@ -432,9 +432,9 @@ describe('util/http/github', () => {
         .post('/graphql')
         .reply(200, { data: { repository } });
 
-      const result = await githubApi.queryRepo(graphqlQuery);
+      const { data } = await githubApi.queryRepo(graphqlQuery);
       expect(httpMock.getTrace()).toHaveLength(1);
-      expect(result).toStrictEqual(repository);
+      expect(data).toStrictEqual({ repository });
     });
     it('queryRepoField', async () => {
       httpMock
