@@ -262,9 +262,6 @@ export function migrateConfig(
           }
         }
         delete migratedConfig.unpublishSafe;
-      } else if (key === 'versionScheme') {
-        migratedConfig.versioning = val;
-        delete migratedConfig.versionScheme;
       } else if (
         key === 'automergeType' &&
         is.string(val) &&
@@ -322,9 +319,6 @@ export function migrateConfig(
           migratedConfig.packages
         );
         delete migratedConfig.packages;
-      } else if (key === 'excludedPackageNames') {
-        migratedConfig.excludePackageNames = val;
-        delete migratedConfig.excludedPackageNames;
       } else if (key === 'packageName') {
         migratedConfig.packageNames = [val];
         delete migratedConfig.packageName;

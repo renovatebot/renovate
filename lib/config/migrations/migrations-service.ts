@@ -29,6 +29,8 @@ export class MigrationsService {
     ['exposeEnv', 'exposeAllEnv'],
     ['separatePatchReleases', 'separateMinorPatch'],
     ['multipleMajorPrs', 'separateMultipleMajor'],
+    ['excludedPackageNames', 'excludePackageNames'],
+    ['versionScheme', 'versioning'],
   ]);
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

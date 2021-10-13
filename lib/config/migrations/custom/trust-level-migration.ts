@@ -10,9 +10,12 @@ export class TrustLevelMigration extends AbstractMigration {
     this.delete(this.propertyName);
 
     if (this.originalConfig.trustLevel === 'high') {
-      this.migratedConfig.allowCustomCrateRegistries ??= true;
-      this.migratedConfig.allowScripts ??= true;
-      this.migratedConfig.exposeAllEnv ??= true;
+      this.migratedConfig.allowCustomCrateRegistries =
+        this.originalConfig.allowCustomCrateRegistries ?? true;
+      this.migratedConfig.allowScripts =
+        this.originalConfig.allowScripts ?? true;
+      this.migratedConfig.exposeAllEnv =
+        this.originalConfig.exposeAllEnv ?? true;
     }
   }
 }
