@@ -27,4 +27,19 @@ describe('config/migrations/migrations-service', () => {
       expect(migratedConfig[newPropertyName]).toBe('test');
     }
   });
+
+  it('should save original order of properties', () => {
+    const originalConfig: Partial<RenovateConfig> = {
+      exposeEnv: true,
+      versionScheme: 'test',
+      excludedPackageNames: ['test'],
+    };
+    const migratedConfig = MigrationsService.run(originalConfig);
+
+    const mappedProperties = Object.keys(originalConfig).map((property) =>
+      MigrationsService.renamedProperties.get(property)
+    );
+
+    expect(mappedProperties).toEqual(Object.keys(migratedConfig));
+  });
 });
