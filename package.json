@@ -217,7 +217,7 @@
     "@types/git-url-parse": "9.0.1",
     "@types/github-url-from-git": "1.5.1",
     "@types/global-agent": "2.1.1",
-    "@types/ini": "1.3.30",
+    "@types/ini": "1.3.31",
     "@types/jest": "27.0.2",
     "@types/js-yaml": "4.0.3",
     "@types/json-dup-key-validator": "1.0.0",
