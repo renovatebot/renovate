@@ -51,6 +51,7 @@ export interface RenovateSharedConfig {
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
+  stopRebasingLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   repository?: string;

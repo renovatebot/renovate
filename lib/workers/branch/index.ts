@@ -32,6 +32,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../util/merge-confidence';
+import { regEx } from '../../util/regex';
 import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -57,6 +58,8 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
 }
 
 const rebasingRegex = /\*\*Rebasing\*\*: .*/;
+
+const prRebaseCheckRegex = regEx(`- [x] <!-- rebase-check -->`);
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
@@ -474,6 +477,33 @@ export async function processBranch(
       };
     }
 
+    if (branchExists && branchPr && config.rebaseRequested) {
+      const stopRebasingLabel = branchPr.labels?.includes(
+        config.stopRebasingLabel
+      );
+
+      if (stopRebasingLabel) {
+        config.prRebaseChecked = branchPr.body?.includes(
+          `- [x] <!-- rebase-check -->`
+        );
+
+        if (!config.prRebaseChecked) {
+          logger.info(
+            'Branch rebasing is skipped because stopRebasingLabel presents in config'
+          );
+          return {
+            branchExists: true,
+            prNo: branchPr?.number,
+            result: BranchResult.Done,
+          };
+        }
+
+        logger.debug(
+          'Branch will be rebased if necessary despite of stopRebasingLabel since PR rebase checkbox is checked in PR body'
+        );
+      }
+    }
+
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
     if (branchExists || !config.requiredStatusChecks) {
       const mergeStatus = await tryBranchAutomerge(config);
@@ -505,6 +535,26 @@ export async function processBranch(
         logger.debug({ mergeStatus }, 'Branch automerge not possible');
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
+      }
+
+      if (branchPr && config.prRebaseChecked) {
+        const newBody =
+          branchPr.body?.replace(
+            prRebaseCheckRegex,
+            '- [ ] <!-- rebase-check -->'
+          ) +
+          '\nThe rebase checkbox was unchecked because of stopRebasingLabel setting in your configuration';
+
+        logger.debug(
+          'Updating existing PR to indicate that further rebasing is turned off'
+        );
+
+        await platform.updatePr({
+          number: branchPr.number,
+          prTitle: branchPr.title,
+          prBody: newBody,
+          platformOptions: getPlatformPrOptions(config),
+        });
       }
     }
   } catch (err) /* istanbul ignore next */ {

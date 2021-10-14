@@ -2337,6 +2337,11 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 <!-- markdownlint-enable MD001 -->
 
+## stopRebasingLabel
+
+On supported platforms it is possible to add a label to a PR to request Renovate stop rebasing the PR branch after the first rebase.
+By default this label is `"stop-rebasing"` however you can configure it to anything you want by changing this `stopRebasingLabel` field.
+
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.

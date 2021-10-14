@@ -1198,6 +1198,12 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
+    name: 'stopRebasingLabel',
+    description: 'Label to use to request the bot to stop rebasing a PR.',
+    type: 'string',
+    default: 'stop-rebasing',
+  },
+  {
     name: 'stabilityDays',
     description:
       'Number of days required before a new release is considered to be stabilized.',
