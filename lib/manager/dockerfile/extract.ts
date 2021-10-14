@@ -11,7 +11,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   let isVariable = false;
   let hasDefaultValue = false;
   let cleanedCurrentFrom: string = currentFrom;
-  if (currentFrom.startsWith('${') && currentFrom.endsWith('}')) {
+  if (currentFrom.startsWith(variableOpen) && currentFrom.endsWith(variableClose)) {
     isVariable = true;
 
     if (
@@ -19,9 +19,9 @@ export function splitImageParts(currentFrom: string): PackageDependency {
       currentFrom.indexOf(':-') !== -1 // Ensure it has the default value
     ) {
       hasDefaultValue = true;
-      cleanedCurrentFrom = currentFrom.substr(2, currentFrom.length - 3);
+      cleanedCurrentFrom = currentFrom.substr(variableOpen.length, currentFrom.length - (variableClose.length + 2));
       cleanedCurrentFrom = cleanedCurrentFrom.substr(
-        cleanedCurrentFrom.indexOf('-') + 1
+        cleanedCurrentFrom.indexOf(variableSplit) + variableSplit.length
       );
     }
   }
