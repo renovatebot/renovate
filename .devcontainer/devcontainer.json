@@ -9,5 +9,11 @@
     "esbenp.prettier-vscode",
     "orta.vscode-jest"
   ],
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined",
+    "--privileged"
+  ],
   "postCreateCommand": "yarn install"
 }
