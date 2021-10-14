@@ -5,23 +5,34 @@ import { SkipReason } from '../../types';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
+const variableOpen = '${';
+const variableClose = '}';
+const variableDefaultValueSplit = ':-';
+
 export function splitImageParts(currentFrom: string): PackageDependency {
   // Check if we have a variable in format of "${VARIABLE:-<image>:<defaultVal>@<digest>}"
   // If so, remove everything except the image, defaultVal and digest.
   let isVariable = false;
   let hasDefaultValue = false;
   let cleanedCurrentFrom: string = currentFrom;
-  if (currentFrom.startsWith(variableOpen) && currentFrom.endsWith(variableClose)) {
+  if (
+    currentFrom.startsWith(variableOpen) &&
+    currentFrom.endsWith(variableClose)
+  ) {
     isVariable = true;
 
     if (
       currentFrom.split('$').length === 2 && // Ensure it has exactly one '$' to avoid the cases we don't support
-      currentFrom.indexOf(variableSplit) !== -1 // Ensure it has the default value
+      currentFrom.indexOf(variableDefaultValueSplit) !== -1 // Ensure it has the default value
     ) {
       hasDefaultValue = true;
-      cleanedCurrentFrom = currentFrom.substr(variableOpen.length, currentFrom.length - (variableClose.length + 2));
+      cleanedCurrentFrom = currentFrom.substr(
+        variableOpen.length,
+        currentFrom.length - (variableClose.length + 2)
+      );
       cleanedCurrentFrom = cleanedCurrentFrom.substr(
-        cleanedCurrentFrom.indexOf(variableSplit) + variableSplit.length
+        cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
+          variableDefaultValueSplit.length
       );
     }
   }
