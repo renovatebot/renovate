@@ -223,7 +223,7 @@
     "@types/json-dup-key-validator": "1.0.0",
     "@types/linkify-markdown": "1.0.1",
     "@types/luxon": "2.0.4",
-    "@types/markdown-it": "12.2.2",
+    "@types/markdown-it": "12.2.3",
     "@types/markdown-table": "2.0.0",
     "@types/moo": "0.5.5",
     "@types/nock": "10.0.3",
