@@ -3,11 +3,12 @@ import { loadAll } from 'js-yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { Doc } from './types';
 
 const isValidChartName = (name: string): boolean =>
-  !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
+  !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
 
 export function extractPackageFile(
   content: string,

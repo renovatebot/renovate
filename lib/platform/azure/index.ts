@@ -14,6 +14,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
@@ -678,7 +679,7 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
 }
 
 /* istanbul ignore next */

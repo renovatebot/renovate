@@ -1,8 +1,9 @@
 import moo from 'moo';
+import { regEx } from '../../../util/regex';
 import { TokenType } from './common';
 import type { StringInterpolation, Token } from './types';
 
-const escapedCharRegex = /\\['"bfnrt\\]/;
+const escapedCharRegex = /\\['"bfnrt\\]/; // TODO #12070
 const escapedChars = {
   [TokenType.EscapedChar]: {
     match: escapedCharRegex,
@@ -23,17 +24,17 @@ const escapedChars = {
 const lexer = moo.states({
   // Top-level Groovy lexemes
   main: {
-    [TokenType.LineComment]: { match: /\/\/.*?$/ },
-    [TokenType.MultiComment]: { match: /\/\*[^]*?\*\//, lineBreaks: true },
-    [TokenType.Newline]: { match: /\r?\n/, lineBreaks: true },
-    [TokenType.Space]: { match: /[ \t\r]+/ },
+    [TokenType.LineComment]: { match: /\/\/.*?$/ }, // TODO #12070
+    [TokenType.MultiComment]: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12070
+    [TokenType.Newline]: { match: /\r?\n/, lineBreaks: true }, // TODO #12070
+    [TokenType.Space]: { match: /[ \t\r]+/ }, // TODO #12070
     [TokenType.Semicolon]: ';',
     [TokenType.Colon]: ':',
     [TokenType.Dot]: '.',
     [TokenType.Comma]: ',',
-    [TokenType.Operator]: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/,
+    [TokenType.Operator]: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/, // TODO #12070
     [TokenType.Assignment]: '=',
-    [TokenType.Word]: { match: /[a-zA-Z$_][a-zA-Z0-9$_]+/ },
+    [TokenType.Word]: { match: /[a-zA-Z$_][a-zA-Z0-9$_]+/ }, // TODO #12070
     [TokenType.LeftParen]: { match: '(' },
     [TokenType.RightParen]: { match: ')' },
     [TokenType.LeftBracket]: { match: '[' },
@@ -85,12 +86,12 @@ const lexer = moo.states({
     variable: {
       // Supported: ${foo}, $foo, ${ foo.bar.baz }, $foo.bar.baz
       match:
-        /\${\s*[a-zA-Z_][a-zA-Z0-9_]*(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*/,
+        /\${\s*[a-zA-Z_][a-zA-Z0-9_]*(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*/, // TODO #12070
       value: (x: string): string =>
-        x.replace(/^\${?\s*/, '').replace(/\s*}$/, ''),
+        x.replace(regEx(/^\${?\s*/), '').replace(regEx(/\s*}$/), ''),
     },
     [TokenType.IgnoredInterpolationStart]: {
-      match: /\${/,
+      match: /\${/, // TODO #12070
       push: TokenType.IgnoredInterpolationStart,
     },
     [TokenType.Chars]: moo.fallback,

@@ -8,6 +8,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import type {
   BranchStatusConfig,
@@ -173,7 +174,7 @@ export async function initRepo({
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
-  const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
+  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)[1];
 
   const url = git.getUrl({
     protocol: 'https',
@@ -286,7 +287,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 }
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(/#/g, '%23') : input;
+  input ? input.replace(regEx(/#/g), '%23') : input;
 
 interface BranchResponse {
   target: {
@@ -462,10 +463,10 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(/<\/?summary>/g, '**')
-    .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/');
 }
 
 export async function ensureIssue({

@@ -2,6 +2,7 @@ import { validRange } from 'semver';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -12,7 +13,7 @@ function getDep(
 ): PackageDependency {
   const [, , currentValue] = match;
   let [, depName] = match;
-  depName = depName.replace(/"/g, '');
+  depName = depName.replace(regEx(/"/g), '');
   const dep: PackageDependency = {
     managerData: {
       lineNumber,
@@ -26,7 +27,7 @@ function getDep(
   } else {
     dep.skipReason = SkipReason.UnsupportedVersion;
   }
-  const digestMatch = /v0\.0.0-\d{14}-([a-f0-9]{12})/.exec(currentValue);
+  const digestMatch = regEx(/v0\.0.0-\d{14}-([a-f0-9]{12})/).exec(currentValue);
   if (digestMatch) {
     [, dep.currentDigest] = digestMatch;
     dep.digestOneAndOnly = true;
@@ -45,13 +46,14 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (line.startsWith('go ') && validRange(line.replace('go ', ''))) {
         constraints.go = line.replace('go ', '^');
       }
-      const replaceMatch =
-        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/.exec(line);
+      const replaceMatch = regEx(
+        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
+      ).exec(line); // TODO #12071
       if (replaceMatch) {
         const dep = getDep(lineNumber, replaceMatch, 'replace');
         deps.push(dep);
       }
-      const requireMatch = /^require\s+([^\s]+)\s+([^\s]+)/.exec(line);
+      const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line); // TODO #12071
       if (requireMatch && !line.endsWith('// indirect')) {
         logger.trace({ lineNumber }, `require line: "${line}"`);
         const dep = getDep(lineNumber, requireMatch, 'require');
@@ -62,7 +64,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         do {
           lineNumber += 1;
           line = lines[lineNumber];
-          const multiMatch = /^\s+([^\s]+)\s+([^\s]+)/.exec(line);
+          const multiMatch = regEx(/^\s+([^\s]+)\s+([^\s]+)/).exec(line); // TODO #12071
           logger.trace(`reqLine: "${line}"`);
           if (multiMatch && !line.endsWith('// indirect')) {
             logger.trace({ lineNumber }, `require line: "${line}"`);

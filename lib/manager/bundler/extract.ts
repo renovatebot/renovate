@@ -23,6 +23,7 @@ export async function extractPackageFile(
       sourceMatch =
         sourceMatch ||
         regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`).exec(
+          // TODO #12071
           line
         );
     }
@@ -33,13 +34,13 @@ export async function extractPackageFile(
     for (const delimiter of delimiters) {
       rubyMatch =
         rubyMatch ||
-        regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`).exec(line);
+        regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`).exec(line); // TODO #12071
     }
     if (rubyMatch) {
       res.constraints = { ruby: rubyMatch[1] };
     }
     const gemMatchRegex =
-      /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/;
+      /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/; // TODO #12070 #12071
     const gemMatch = gemMatchRegex.exec(line);
     if (gemMatch) {
       const dep: PackageDependency = {
@@ -48,7 +49,7 @@ export async function extractPackageFile(
       };
       if (gemMatch.groups.currentValue) {
         const currentValue = gemMatch.groups.currentValue;
-        dep.currentValue = /\s*,\s*/.test(currentValue)
+        dep.currentValue = regEx(/\s*,\s*/).test(currentValue) // TODO #12071
           ? currentValue
           : currentValue.slice(1, -1);
       } else {
@@ -59,12 +60,12 @@ export async function extractPackageFile(
       }
       res.deps.push(dep);
     }
-    const groupMatch = /^group\s+(.*?)\s+do/.exec(line);
+    const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line); // TODO #12071
     if (groupMatch) {
       const depTypes = groupMatch[1]
         .split(',')
         .map((group) => group.trim())
-        .map((group) => group.replace(/^:/, ''));
+        .map((group) => group.replace(regEx(/^:/), '')); // TODO #12071
       const groupLineNumber = lineNumber;
       let groupContent = '';
       let groupLine = '';
@@ -72,7 +73,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         groupLine = lines[lineNumber];
         if (groupLine !== 'end') {
-          groupContent += (groupLine || '').replace(/^ {2}/, '') + '\n';
+          groupContent += (groupLine || '').replace(regEx(/^ {2}/), '') + '\n'; // TODO #12071
         }
       }
       const groupRes = await extractPackageFile(groupContent);
@@ -91,7 +92,7 @@ export async function extractPackageFile(
     }
     for (const delimiter of delimiters) {
       const sourceBlockMatch = regEx(
-        `^source\\s+${delimiter}(.*?)${delimiter}\\s+do`
+        `^source\\s+${delimiter}(.*?)${delimiter}\\s+do` // TODO #12071
       ).exec(line);
       if (sourceBlockMatch) {
         const repositoryUrl = sourceBlockMatch[1];
@@ -107,7 +108,7 @@ export async function extractPackageFile(
             sourceLine = 'end';
           }
           if (sourceLine !== 'end') {
-            sourceContent += sourceLine.replace(/^ {2}/, '') + '\n';
+            sourceContent += sourceLine.replace(regEx(/^ {2}/), '') + '\n'; // TODO #12071
           }
         }
         const sourceRes = await extractPackageFile(sourceContent);
@@ -125,7 +126,7 @@ export async function extractPackageFile(
         }
       }
     }
-    const platformsMatch = /^platforms\s+(.*?)\s+do/.test(line);
+    const platformsMatch = regEx(/^platforms\s+(.*?)\s+do/).test(line); // TODO #12071
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -134,7 +135,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         platformsLine = lines[lineNumber];
         if (platformsLine !== 'end') {
-          platformsContent += platformsLine.replace(/^ {2}/, '') + '\n';
+          platformsContent += platformsLine.replace(regEx(/^ {2}/), '') + '\n'; // TODO #12071
         }
       }
       const platformsRes = await extractPackageFile(platformsContent);
@@ -151,7 +152,7 @@ export async function extractPackageFile(
         );
       }
     }
-    const ifMatch = /^if\s+(.*?)/.test(line);
+    const ifMatch = regEx(/^if\s+(.*?)/).test(line); // TODO #12071
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';
@@ -160,7 +161,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         ifLine = lines[lineNumber];
         if (ifLine !== 'end') {
-          ifContent += ifLine.replace(/^ {2}/, '') + '\n';
+          ifContent += ifLine.replace(regEx(/^ {2}/), '') + '\n'; // TODO #12071
         }
       }
       const ifRes = await extractPackageFile(ifContent);
@@ -194,7 +195,9 @@ export async function extractPackageFile(
           dep.lockedVersion = lockedDepValue;
         }
       }
-      const bundledWith = /\nBUNDLED WITH\n\s+(.*?)(\n|$)/.exec(lockContent);
+      const bundledWith = regEx(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/).exec(
+        lockContent
+      );
       if (bundledWith) {
         res.constraints = res.constraints || {};
         res.constraints.bundler = bundledWith[1];

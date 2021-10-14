@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { TerragruntDependencyTypes } from './common';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
@@ -8,7 +9,7 @@ import {
   getTerragruntDependencyType,
 } from './util';
 
-const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+{\s*$/;
+const dependencyBlockExtractionRegex = regEx(/^\s*(?<type>[a-z_]+)\s+{\s*$/);
 const contentCheckList = ['terraform {'];
 
 export function extractPackageFile(content: string): PackageFile | null {

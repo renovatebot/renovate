@@ -7,6 +7,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function cargoUpdate(
@@ -39,7 +40,7 @@ async function cargoUpdate(
     // by the outer try { } catch {} and processed normally.
     const msgStart = 'error: There are multiple';
     if (err.code === 101 && err.stderr.startsWith(msgStart)) {
-      cmd = cmd.replace(/ --package.*/, '');
+      cmd = cmd.replace(regEx(/ --package.*/), '');
       await exec(cmd, execOptions);
     } else {
       throw err; // this is caught below

@@ -105,7 +105,7 @@ export async function detectPnpmWorkspaces(
       packageFilters !== null &&
       matchesAnyPattern(
         packageFile,
-        packageFilters.map((filter) => filter.replace(/\/?$/, '/package.json'))
+        packageFilters.map((filter) => filter.replace(/\/?$/, '/package.json')) // TODO #12070 #12071
       );
     if (isPackageInWorkspace) {
       p.pnpmShrinkwrap = lockFilePath;

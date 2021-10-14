@@ -20,7 +20,7 @@ export function bumpPackageVersion(
     }
     logger.debug({ newChartVersion });
     bumpedContent = content.replace(
-      /^(version:\s*).*$/m,
+      /^(version:\s*).*$/m, // TODO #12070
       `$1${newChartVersion}`
     );
     if (bumpedContent === content) {

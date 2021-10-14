@@ -1,8 +1,10 @@
 import { CdnJsDatasource } from '../../datasource/cdnjs';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 
-export const cloudflareUrlRegex =
-  /\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/(?<depName>[^/]+?)\/(?<currentValue>[^/]+?)\/(?<asset>[-/_.a-zA-Z0-9]+)/;
+export const cloudflareUrlRegex = regEx(
+  /\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/(?<depName>[^/]+?)\/(?<currentValue>[^/]+?)\/(?<asset>[-/_.a-zA-Z0-9]+)/
+);
 
 export function extractPackageFile(content: string): PackageFile {
   const deps: PackageDependency[] = [];

@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractCollections } from './collections';
 import { extractCollectionsMetaDataFile } from './collections-metadata';
@@ -26,7 +27,7 @@ export default function extractPackageFile(
   fileName: string
 ): PackageFile | null {
   logger.trace('ansible-galaxy.extractPackageFile()');
-  const galaxyFileNameRegEx = /galaxy\.ya?ml$/;
+  const galaxyFileNameRegEx = regEx(/galaxy\.ya?ml$/);
   const deps: PackageDependency[] = [];
   const lines = content.split('\n');
 
@@ -44,10 +45,12 @@ export default function extractPackageFile(
       };
       // find role and collection block
       lines.forEach((line, index) => {
-        if (/^collections:/.exec(line)) {
+        if (regEx(/^collections:/).exec(line)) {
+          // TODO #12071
           positions.collections = index;
         }
-        if (/^roles:/.exec(line)) {
+        if (regEx(/^roles:/).exec(line)) {
+          // TODO #12071
           positions.roles = index;
         }
       });

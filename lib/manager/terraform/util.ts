@@ -1,12 +1,15 @@
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
 import type { ProviderLock } from './lockfile/types';
 
-export const keyValueExtractionRegex =
-  /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/;
-export const resourceTypeExtractionRegex =
-  /^\s*resource\s+"(?<type>[^\s]+)"\s+"(?<name>[^"]+)"\s*{/;
+export const keyValueExtractionRegex = regEx(
+  /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/
+);
+export const resourceTypeExtractionRegex = regEx(
+  /^\s*resource\s+"(?<type>[^\s]+)"\s+"(?<name>[^"]+)"\s*{/
+);
 
 export function getTerraformDependencyType(
   value: string
@@ -40,7 +43,7 @@ export function checkFileContainsDependency(
   return checkList.some((check) => content.includes(check));
 }
 
-const pathStringRegex = /(.|..)?(\/[^/])+/;
+const pathStringRegex = regEx(/(.|..)?(\/[^/])+/);
 export function checkIfStringIsPath(path: string): boolean {
   const match = pathStringRegex.exec(path);
   return !!match;

@@ -3,11 +3,12 @@ import * as datasourceJenkins from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
+import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 import type { JenkinsPlugin, JenkinsPlugins } from './types';
 
-const YamlExtension = /\.ya?ml$/;
+const YamlExtension = regEx(/\.ya?ml$/);
 
 function getDependency(plugin: JenkinsPlugin): PackageDependency {
   const dep: PackageDependency = {
@@ -70,8 +71,9 @@ function extractYaml(content: string): PackageDependency[] {
 
 function extractText(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  const regex =
-    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/;
+  const regex = regEx(
+    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/
+  );
 
   for (const line of content.split('\n')) {
     const match = regex.exec(line);

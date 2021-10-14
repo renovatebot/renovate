@@ -20,6 +20,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import type {
@@ -784,7 +785,7 @@ export async function ensureCommentRemoval({
 // Pull Request
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(/#/g, '%23') : input;
+  input ? input.replace(regEx(/#/g), '%23') : input;
 
 export async function createPr({
   sourceBranch,
@@ -991,10 +992,10 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(/<\/?summary>/g, '**')
-    .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(new RegExp('<!--.*?-->', 'g'), '');
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
+    .replace(regEx('<!--.*?-->', 'g'), '');
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

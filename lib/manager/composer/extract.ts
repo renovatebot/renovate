@@ -4,6 +4,7 @@ import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import { api as semverComposer } from '../../versioning/composer';
 import type { PackageDependency, PackageFile } from '../types';
 import type {
@@ -21,7 +22,7 @@ import type {
  * See https://github.com/composer/composer/blob/750a92b4b7aecda0e5b2f9b963f1cb1421900675/src/Composer/Repository/ComposerRepository.php#L815
  */
 function transformRegUrl(url: string): string {
-  return url.replace(/(\/packages\.json)$/, '');
+  return url.replace(regEx(/(\/packages\.json)$/), ''); // TODO #12071
 }
 
 /**
@@ -94,7 +95,7 @@ export async function extractPackageFile(
   const res: PackageFile = { deps: [] };
 
   // handle lockfile
-  const lockfilePath = fileName.replace(/\.json$/, '.lock');
+  const lockfilePath = fileName.replace(regEx(/\.json$/), '.lock');
   const lockContents = await readLocalFile(lockfilePath, 'utf8');
   let lockParsed: ComposerLock;
   if (lockContents) {
@@ -163,7 +164,7 @@ export async function extractPackageFile(
               (item) => item.name === dep.depName
             );
             if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
-              dep.lockedVersion = lockedDep.version.replace(/^v/i, '');
+              dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), ''); // TODO #12071
             }
           }
           deps.push(dep);

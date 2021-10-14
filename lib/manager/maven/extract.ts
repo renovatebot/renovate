@@ -6,6 +6,7 @@ import { MAVEN_REPO } from '../../datasource/maven/common';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
@@ -33,7 +34,7 @@ export function parsePom(raw: string): XmlDocument | null {
 }
 
 function containsPlaceholder(str: string): boolean {
-  return /\${.*?}/g.test(str);
+  return regEx(/\${.*?}/g).test(str);
 }
 
 function depFromNode(node: XmlElement): PackageDependency | null {
@@ -95,7 +96,7 @@ function applyProps(
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
   const replaceAll = (str: string): string =>
-    str.replace(/\${.*?}/g, (substr) => {
+    str.replace(regEx(/\${.*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       const propValue = props[propKey];
       return propValue ? propValue.val : substr;
@@ -107,19 +108,22 @@ function applyProps(
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = null;
   let groupName = null;
-  const currentValue = dep.currentValue.replace(/^\${.*?}$/, (substr) => {
-    const propKey = substr.slice(2, -1).trim();
-    const propValue = props[propKey];
-    if (propValue) {
-      if (!groupName) {
-        groupName = propKey;
+  const currentValue = dep.currentValue.replace(
+    regEx(/^\${.*?}$/),
+    (substr) => {
+      const propKey = substr.slice(2, -1).trim();
+      const propValue = props[propKey];
+      if (propValue) {
+        if (!groupName) {
+          groupName = propKey;
+        }
+        fileReplacePosition = propValue.fileReplacePosition;
+        propSource = propValue.packageFile;
+        return propValue.val;
       }
-      fileReplacePosition = propValue.fileReplacePosition;
-      propSource = propValue.packageFile;
-      return propValue.val;
+      return substr;
     }
-    return substr;
-  });
+  );
 
   const result: PackageDependency = {
     ...dep,

@@ -1,16 +1,18 @@
 import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
-const dockerRe = /^\s+uses: docker:\/\/([^"]+)\s*$/;
-const actionRe =
-  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/;
+const dockerRe = regEx(/^\s+uses: docker:\/\/([^"]+)\s*$/);
+const actionRe = regEx(
+  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/
+);
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
-const shaRe = /^[a-z0-9]{40}|[a-z0-9]{64}$/;
+const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');

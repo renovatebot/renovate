@@ -1,6 +1,7 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -13,16 +14,21 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (let lineNumber = 1; lineNumber <= lines.length; lineNumber += 1) {
       const lineIdx = lineNumber - 1;
       const line = lines[lineIdx];
-      const pluginsSection = /^(?<pluginsIndent>\s*)(-?\s*)plugins:/.exec(line);
+      const pluginsSection = regEx(
+        /^(?<pluginsIndent>\s*)(-?\s*)plugins:/
+      ).exec(line); // TODO #12071
       if (pluginsSection) {
         logger.trace(`Matched plugins on line ${lineNumber}`);
         isPluginsSection = true;
         pluginsIndent = pluginsSection.groups.pluginsIndent;
       } else if (isPluginsSection) {
         logger.debug(`serviceImageLine: "${line}"`);
-        const { currentIndent } = /^(?<currentIndent>\s*)/.exec(line).groups;
-        const depLineMatch =
-          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/.exec(line);
+        const { currentIndent } = regEx(/^(?<currentIndent>\s*)/).exec(
+          line
+        ).groups; // TODO #12071
+        const depLineMatch = regEx(
+          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/
+        ).exec(line); // TODO #12071
         if (currentIndent.length <= pluginsIndent.length) {
           isPluginsSection = false;
           pluginsIndent = '';

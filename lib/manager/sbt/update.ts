@@ -1,5 +1,6 @@
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { BumpPackageVersionResult } from '../types';
 
 export function bumpPackageVersion(
@@ -18,7 +19,7 @@ export function bumpPackageVersion(
     return { bumpedContent };
   }
   bumpedContent = content.replace(
-    /^(version\s*:=\s*).*$/m,
+    regEx(/^(version\s*:=\s*).*$/m),
     `$1"${bumpedVersion}"`
   );
 
