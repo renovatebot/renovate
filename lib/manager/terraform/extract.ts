@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { TerraformDependencyTypes } from './common';
@@ -111,7 +112,9 @@ export async function extractPackageFile(
     const lockFileContent = await readLockFile(lockFilePath);
     if (lockFileContent) {
       const extractedLocks = extractLocks(lockFileContent);
-      locks.push(...extractedLocks);
+      if (is.nonEmptyArray(extractedLocks)) {
+        locks.push(...extractedLocks);
+      }
     }
   }
 
