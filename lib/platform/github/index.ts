@@ -1430,10 +1430,7 @@ async function tryPrAutomerge(
         const now = DateTime.local();
         repoCache.lastPlatformAutomergeFailure = now.toISO();
       } else {
-        logger.debug(
-          { prNumber, errors },
-          `GitHub automerge unknown error: retry after 24 hours`
-        );
+        logger.debug({ prNumber, errors }, 'GitHub automerge unknown error');
       }
     }
   } catch (err) {
