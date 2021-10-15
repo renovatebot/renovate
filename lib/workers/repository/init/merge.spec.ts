@@ -58,6 +58,25 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toMatchSnapshot();
       expect(await detectRepoFileConfig()).toMatchSnapshot();
     });
+    it('massages package.json renovate string', async () => {
+      git.getFileList.mockResolvedValue(['package.json']);
+      const pJson = JSON.stringify({
+        name: 'something',
+        renovate: 'github>renovatebot/renovate',
+      });
+      fs.readLocalFile.mockResolvedValue(pJson);
+      platform.getJsonFile.mockResolvedValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toMatchInlineSnapshot(`
+        Object {
+          "configFileName": "package.json",
+          "configFileParsed": Object {
+            "extends": Array [
+              "github>renovatebot/renovate",
+            ],
+          },
+        }
+      `);
+    });
     it('returns error if cannot parse', async () => {
       git.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
       fs.readLocalFile.mockResolvedValue('cannot parse');
