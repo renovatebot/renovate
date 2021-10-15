@@ -1149,13 +1149,6 @@ If you wish for Renovate to process only select paths in the repository, use `in
 Alternatively, if you need to just _exclude_ certain paths in the repository then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
 
-## installBeforeUpdate
-
-Set this to `true` if you want to trigger a dependency installation before running an update command.
-This improves the update results in one of the installed dependencies influences the update process, such as the Symfony Flex plugin when using Composer.
-
-Applicable for Composer only for now.
-
 ## internalChecksFilter
 
 This setting determines whether Renovate controls when and how filtering of internal checks are performed, particularly when multiple versions of the same update type are available.

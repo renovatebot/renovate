@@ -147,7 +147,7 @@ export async function updateArtifacts({
       existingLockFile['packages-dev']?.some((p) => p.name === 'symfony/flex');
 
     const commands: string[] = [];
-    if (hasSymfonyFlex || config.installBeforeUpdate) {
+    if (hasSymfonyFlex) {
       const preCmd = 'composer';
       const preArgs = 'install' + getComposerArguments(config);
       logger.debug({ preCmd, preArgs }, 'composer pre-update command');
