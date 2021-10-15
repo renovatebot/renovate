@@ -1399,7 +1399,6 @@ async function tryPrAutomerge(
       logger.trace({ prNumber, prNodeId }, 'GitHub automerge: skipping');
       return;
     }
-    delete repoCache.lastPlatformAutomergeFailure;
   }
 
   try {
