@@ -1423,7 +1423,7 @@ async function tryPrAutomerge(
       if (disabledByPlatform) {
         logger.debug(
           { prNumber },
-          'GitHub automerge is not enabled in repository settings, will retry after 24 hours'
+          'GitHub automerge is not enabled for this repository'
         );
 
         const now = DateTime.local();
