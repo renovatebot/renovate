@@ -74,6 +74,7 @@ export interface GlobalOnlyConfig {
   autodiscoverFilter?: string;
   baseDir?: string;
   cacheDir?: string;
+  detectHostRulesFromEnv?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
