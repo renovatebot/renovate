@@ -1889,7 +1889,13 @@ describe('platform/github/index', () => {
 
       const graphqlAutomergeErrorResp = {
         ...graphqlAutomergeResp,
-        errors: [{ message: 'foobar' }],
+        errors: [
+          {
+            type: 'UNPROCESSABLE',
+            message:
+              'Pull request is not in the correct state to enable auto-merge',
+          },
+        ],
       };
 
       const prConfig: CreatePRConfig = {

@@ -1410,15 +1410,34 @@ async function tryPrAutomerge(
       queryOptions
     );
     if (errors) {
-      logger.debug(
-        { prNumber, prNodeId, errors },
-        'GitHub automerge: GraphQL API error'
+      const disabledByPlatform = errors.find(
+        ({ type, message }) =>
+          type === 'UNPROCESSABLE' &&
+          message ===
+            'Pull request is not in the correct state to enable auto-merge'
       );
+
+      // istanbul ignore else
+      if (disabledByPlatform) {
+        logger.debug(
+          { prNumber, prNodeId },
+          'GitHub automerge is not enabled in repository settings, will retry after 24 hours'
+        );
+      } else {
+        logger.debug(
+          { prNumber, prNodeId, errors },
+          `GitHub automerge unknown error: retry after 24 hours`
+        );
+      }
+
       const now = DateTime.local();
       repoCache.lastPlatformAutomergeFailure = now.toISO();
     }
   } catch (err) {
-    logger.warn({ prNumber, prNodeId, err }, 'GitHub automerge: request error');
+    logger.warn(
+      { prNumber, prNodeId, err },
+      'GitHub automerge: HTTP request error'
+    );
   }
 }
 
