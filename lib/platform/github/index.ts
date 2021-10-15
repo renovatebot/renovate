@@ -1396,7 +1396,7 @@ async function tryPrAutomerge(
     const lastFailedAt = DateTime.fromISO(lastPlatformAutomergeFailure);
     const now = DateTime.local();
     if (now < lastFailedAt.plus({ hours: 24 })) {
-      logger.trace({ prNumber, prNodeId }, 'GitHub automerge: skipping');
+      logger.debug({ prNumber }, 'GitHub-native automerge: skipping attempt due to earlier failure');
       return;
     }
   }
