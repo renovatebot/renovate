@@ -754,7 +754,7 @@ Example:
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`.
+This option works only when `automerge=true`, `automergeType=pr` and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
 
 ## golang
