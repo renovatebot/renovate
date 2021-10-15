@@ -1422,15 +1422,15 @@ async function tryPrAutomerge(
           { prNumber, prNodeId },
           'GitHub automerge is not enabled in repository settings, will retry after 24 hours'
         );
+
+        const now = DateTime.local();
+        repoCache.lastPlatformAutomergeFailure = now.toISO();
       } else {
         logger.debug(
           { prNumber, prNodeId, errors },
           `GitHub automerge unknown error: retry after 24 hours`
         );
       }
-
-      const now = DateTime.local();
-      repoCache.lastPlatformAutomergeFailure = now.toISO();
     }
   } catch (err) {
     logger.warn(
