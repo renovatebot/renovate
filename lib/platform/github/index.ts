@@ -1396,7 +1396,7 @@ async function tryPrAutomerge(
     const lastFailedAt = DateTime.fromISO(lastPlatformAutomergeFailure);
     const now = DateTime.local();
     if (now < lastFailedAt.plus({ hours: 24 })) {
-      logger.trace({ prNumber, prNodeId }, 'GitHub automerge: skipping');
+      logger.trace({ prNumber }, 'GitHub automerge: skipping');
       return;
     }
   }
@@ -1419,7 +1419,7 @@ async function tryPrAutomerge(
       // istanbul ignore else
       if (disabledByPlatform) {
         logger.debug(
-          { prNumber, prNodeId },
+          { prNumber },
           'GitHub automerge is not enabled in repository settings, will retry after 24 hours'
         );
 
@@ -1427,16 +1427,13 @@ async function tryPrAutomerge(
         repoCache.lastPlatformAutomergeFailure = now.toISO();
       } else {
         logger.debug(
-          { prNumber, prNodeId, errors },
+          { prNumber, errors },
           `GitHub automerge unknown error: retry after 24 hours`
         );
       }
     }
   } catch (err) {
-    logger.warn(
-      { prNumber, prNodeId, err },
-      'GitHub automerge: HTTP request error'
-    );
+    logger.warn({ prNumber, err }, 'GitHub automerge: HTTP request error');
   }
 }
 
