@@ -28,8 +28,9 @@ export function extractTerraformProvider(
       terraformDependencyType: TerraformDependencyTypes.provider,
     },
   };
-  let braceCounter = 0;
+  let braceCounter: number;
   do {
+    braceCounter = 0;
     // istanbul ignore if
     if (lineNumber > lines.length - 1) {
       logger.debug(`Malformed Terraform file detected.`);
