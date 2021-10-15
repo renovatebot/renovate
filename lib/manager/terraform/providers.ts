@@ -28,16 +28,15 @@ export function extractTerraformProvider(
       terraformDependencyType: TerraformDependencyTypes.provider,
     },
   };
-  let braceCounter: number;
+  let braceCounter = 0;
   do {
-    braceCounter = 0;
     // istanbul ignore if
     if (lineNumber > lines.length - 1) {
       logger.debug(`Malformed Terraform file detected.`);
     }
 
     const line = lines[lineNumber];
-    if (line) {
+    if (is.string(line)) {
       // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
       const openBrackets = (line.match(/\{/g) || []).length;
       const closedBrackets = (line.match(/\}/g) || []).length;
@@ -55,6 +54,9 @@ export function extractTerraformProvider(
           }
         }
       }
+    } else {
+      // stop - something went wrong
+      braceCounter = 0;
     }
     lineNumber += 1;
   } while (braceCounter !== 0);
