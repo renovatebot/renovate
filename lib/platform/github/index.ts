@@ -1394,7 +1394,8 @@ async function tryPrAutomerge(
   const { lastPlatformAutomergeFailure } = repoCache;
   if (lastPlatformAutomergeFailure) {
     const lastFailedAt = DateTime.fromISO(lastPlatformAutomergeFailure);
-    if (DateTime.local() < lastFailedAt.plus({ hours: 24 })) {
+    const now = DateTime.local();
+    if (now < lastFailedAt.plus({ hours: 24 })) {
       logger.trace({ prNumber, prNodeId }, 'GitHub automerge: skipping');
       return;
     }
@@ -1413,13 +1414,11 @@ async function tryPrAutomerge(
         { prNumber, prNodeId, errors },
         'GitHub automerge: GraphQL API error'
       );
-      repoCache.lastPlatformAutomergeFailure = DateTime.local().toISO();
+      const now = DateTime.local();
+      repoCache.lastPlatformAutomergeFailure = now.toISO();
     }
   } catch (err) {
-    logger.debug(
-      { prNumber, prNodeId, err },
-      'GitHub automerge: request error'
-    );
+    logger.warn({ prNumber, prNodeId, err }, 'GitHub automerge: request error');
   }
 }
 
