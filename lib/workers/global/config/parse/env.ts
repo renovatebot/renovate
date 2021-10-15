@@ -4,7 +4,6 @@ import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
-import { hostRulesFromEnv } from './host-rules-from-env';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -118,8 +117,6 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
       token: env.GITHUB_COM_TOKEN,
     });
   }
-
-  config.hostRules = [...config.hostRules, ...hostRulesFromEnv(env)];
 
   // These env vars are deprecated and deleted to make sure they're not used
   const unsupportedEnv = [
