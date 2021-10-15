@@ -1508,8 +1508,6 @@ export async function updatePr({
     }
     logger.warn({ err }, 'Error updating PR');
   }
-
-  // await tryPrAutomerge(???, platformOptions);
 }
 
 export async function mergePr({
