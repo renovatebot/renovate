@@ -36,6 +36,7 @@ export function extractTerraformProvider(
     }
 
     const line = lines[lineNumber];
+    // istanbul ignore next
     if (is.string(line)) {
       // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
       const openBrackets = (line.match(/\{/g) || []).length;
