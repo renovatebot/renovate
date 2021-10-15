@@ -130,7 +130,7 @@ describe('workers/global/config/parse/index', () => {
     });
 
     it('parses host rules from env', async () => {
-      defaultArgv = defaultArgv.concat(['--detect-host-rules-from-env=false']);
+      defaultArgv = defaultArgv.concat(['--detect-host-rules-from-env=true']);
       hostRulesFromEnv.mockReturnValueOnce([{ matchHost: 'example.org' }]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.hostRules).toContainEqual({ matchHost: 'example.org' });
