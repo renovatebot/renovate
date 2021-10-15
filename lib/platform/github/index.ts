@@ -1402,6 +1402,7 @@ async function tryPrAutomerge(
       );
       return;
     }
+    delete repoCache.lastPlatformAutomergeFailure;
   }
 
   try {
