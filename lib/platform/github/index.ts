@@ -1616,3 +1616,9 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   }
   return alerts;
 }
+
+export function commitFiles(
+  _config: git.CommitFilesConfig
+): Promise<git.CommitSha | null> {
+  return null;
+}
