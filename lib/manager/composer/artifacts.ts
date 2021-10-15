@@ -20,7 +20,7 @@ import {
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { AuthJson } from './types';
+import type { AuthJson, ComposerLock } from './types';
 import {
   composerVersioningId,
   extractContraints,
@@ -117,11 +117,9 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
+    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
     const constraints = {
-      ...extractContraints(
-        JSON.parse(newPackageFileContent),
-        JSON.parse(existingLockFileContent)
-      ),
+      ...extractContraints(JSON.parse(newPackageFileContent), existingLockFile),
       ...config.constraints,
     };
 
@@ -143,8 +141,13 @@ export async function updateArtifacts({
       },
     };
 
+    // Determine whether Symfony Flex has been installed
+    const hasSymfonyFlex =
+      existingLockFile.packages?.some((p) => p.name === 'symfony/flex') ||
+      existingLockFile['packages-dev']?.some((p) => p.name === 'symfony/flex');
+
     const commands: string[] = [];
-    if (!config.isLockFileMaintenance && config.installBeforeUpdate) {
+    if (hasSymfonyFlex || config.installBeforeUpdate) {
       const preCmd = 'composer';
       const preArgs = 'install' + getComposerArguments(config);
       logger.debug({ preCmd, preArgs }, 'composer pre-update command');
