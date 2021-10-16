@@ -4,20 +4,4 @@ If your Helm charts make use of Aliases then you will need to configure an `alia
 
 If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
 
-Maybe you're running your own ChartMuseum server to host your private Helm Charts.
-This is how you connect to a private Helm repository:
-
-```js
-module.exports = {
-  hostRules: [
-    {
-      matchHost: 'your.host.io',
-      hostType: 'helm'
-      username: '<your-username>',
-      password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
-    },
-  ],
-};
-```
-
-If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`).
+To learn how to use Helm with private packages, read [private package support, Package Manager Credentials for Artifact Updating, helm](https://docs.renovatebot.com/getting-started/private-packages/#helm).
