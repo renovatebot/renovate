@@ -393,6 +393,30 @@ describe('manager/composer/artifacts', () => {
     expect(execSnapshots).toHaveLength(2);
   });
 
+  it('installs before running the update when symfony flex is installed as dev', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      '{"packages-dev":[{"name":"symfony/flex","version":"1.17.1"}]}'
+    );
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{ }');
+    git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(2);
+  });
+
   it('does not disable plugins when configured globally', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
