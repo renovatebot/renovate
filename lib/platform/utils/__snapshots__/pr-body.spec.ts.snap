@@ -35,7 +35,7 @@ exports[`platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 
 ##### Features
 
--   **docker:** AWS ECR authentication support ([#&#8203;4497](https://
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](htt
 
 </details>
 
