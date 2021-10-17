@@ -1,5 +1,5 @@
-import type { Migration } from '../../../types/migrations';
 import type { RenovateConfig } from '../../types';
+import type { Migration } from '../types';
 
 export abstract class AbstractMigration implements Migration {
   readonly propertyName: string;

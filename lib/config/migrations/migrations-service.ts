@@ -1,4 +1,3 @@
-import type { Migration } from '../../types/migrations';
 import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
@@ -7,6 +6,7 @@ import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
+import type { Migration } from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
