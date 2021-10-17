@@ -15,6 +15,7 @@
     "create-json-schema": "node -r ts-node/register/transpile-only -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node --inspect-brk -r ts-node/register/transpile-only  -- lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
+    "doc-fence-check": "node tools/check-fenced-code.mjs",
     "eslint": "eslint --ext .js,.mjs,.ts lib/ test/ tools/",
     "eslint-fix": "eslint --ext .js,.mjs,.ts --fix lib/ test/ tools/",
     "generate": "run-s generate:*",
