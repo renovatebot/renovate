@@ -180,12 +180,14 @@ Set the configuration option `labels` to an array of labels to use.
 e.g.
 
 ```json
-"packageRules": [
-  {
-    "matchPackageNames": ["abc"],
-    "assignees": ["importantreviewer"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["abc"],
+      "assignees": ["importantreviewer"]
+    }
+  ]
+}
 ```
 
 ### Apply a rule, but only for packages starting with `abc`
@@ -193,12 +195,14 @@ e.g.
 Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns` and a regex:
 
 ```json
-"packageRules": [
-  {
-    "matchPackagePatterns": "^abc",
-    "assignees": ["importantreviewer"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": "^abc",
+      "assignees": ["importantreviewer"]
+    }
+  ]
+}
 ```
 
 ### Group all packages starting with `abc` together in one PR
@@ -206,12 +210,14 @@ Do the same as above, but instead of using `matchPackageNames`, use `matchPackag
 As above, but apply a `groupName`:
 
 ```json
-"packageRules": [
-  {
-    "matchPackagePatterns": "^abc",
-    "groupName": ["abc packages"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": "^abc",
+      "groupName": ["abc packages"]
+    }
+  ]
+}
 ```
 
 ### Change the default values for branch name, commit message, PR title or PR description

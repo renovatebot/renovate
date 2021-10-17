@@ -126,11 +126,13 @@ If you wish to override Docker settings for one particular type of manager, use 
 For example, to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would use this:
 
 ```json
+{
   "docker-compose": {
     "digest": {
       "enabled": false
     }
   }
+}
 ```
 
 The following configuration options are applicable to Docker:
