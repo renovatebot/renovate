@@ -3,10 +3,10 @@ import { BinarySourceMigration } from './binary-source-migration';
 
 describe('config/migrations/custom/binary-source-migration', () => {
   it('should migrate "auto" to "global"', () => {
-    const originalConfig: Partial<RenovateConfig> = {
+    const originalConfig: RenovateConfig = {
       binarySource: 'auto',
     };
-    const migratedConfig: Partial<RenovateConfig> = {};
+    const migratedConfig: RenovateConfig = {};
     const migration = new BinarySourceMigration(originalConfig, migratedConfig);
     migration.run();
 

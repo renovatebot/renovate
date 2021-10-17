@@ -4,7 +4,7 @@ import { MigrationsService } from './migrations-service';
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {
     for (const property of MigrationsService.removedProperties) {
-      const originalConfig: Partial<RenovateConfig> = {
+      const originalConfig: RenovateConfig = {
         [property]: 'test',
       };
 
@@ -18,7 +18,7 @@ describe('config/migrations/migrations-service', () => {
       oldPropertyName,
       newPropertyName,
     ] of MigrationsService.renamedProperties.entries()) {
-      const originalConfig: Partial<RenovateConfig> = {
+      const originalConfig: RenovateConfig = {
         [oldPropertyName]: 'test',
       };
 
@@ -29,7 +29,7 @@ describe('config/migrations/migrations-service', () => {
   });
 
   it('should save original order of properties', () => {
-    const originalConfig: Partial<RenovateConfig> = {
+    const originalConfig: RenovateConfig = {
       exposeEnv: true,
       versionScheme: 'test',
       excludedPackageNames: ['test'],

@@ -3,10 +3,10 @@ import { RequiredStatusChecksMigration } from './required-status-checks-migratio
 
 describe('config/migrations/custom/required-status-checks-migration', () => {
   it('should migrate requiredStatusChecks=null to ignoreTests=true', () => {
-    const originalConfig: Partial<RenovateConfig> = {
+    const originalConfig: RenovateConfig = {
       requiredStatusChecks: null,
     };
-    const migratedConfig: Partial<RenovateConfig> = {
+    const migratedConfig: RenovateConfig = {
       requiredStatusChecks: null,
     };
     const migration = new RequiredStatusChecksMigration(

@@ -3,10 +3,10 @@ import { IgnoreNodeModulesMigration } from './ignore-node-modules-migration';
 
 describe('config/migrations/custom/ignore-node-modules-migration', () => {
   it('should migrate to ignorePaths', () => {
-    const originalConfig: Partial<RenovateConfig> = {
+    const originalConfig: RenovateConfig = {
       ignoreNodeModules: true,
     };
-    const migratedConfig: Partial<RenovateConfig> = {};
+    const migratedConfig: RenovateConfig = {};
     const migration = new IgnoreNodeModulesMigration(
       originalConfig,
       migratedConfig

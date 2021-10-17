@@ -3,10 +3,10 @@ import { TrustLevelMigration } from './trust-level-migration';
 
 describe('config/migrations/custom/trust-level-migration', () => {
   it('should handle hight level', () => {
-    const originalConfig: Partial<RenovateConfig> = {
+    const originalConfig: RenovateConfig = {
       trustLevel: 'high',
     };
-    const migratedConfig: Partial<RenovateConfig> = {};
+    const migratedConfig: RenovateConfig = {};
     const migration = new TrustLevelMigration(originalConfig, migratedConfig);
     migration.run();
 
@@ -16,13 +16,13 @@ describe('config/migrations/custom/trust-level-migration', () => {
   });
 
   it('should not rewrite provided properties', () => {
-    const originalConfig: Partial<RenovateConfig> = {
+    const originalConfig: RenovateConfig = {
       allowCustomCrateRegistries: false,
       allowScripts: false,
       exposeAllEnv: false,
       trustLevel: 'high',
     };
-    const migratedConfig: Partial<RenovateConfig> = {};
+    const migratedConfig: RenovateConfig = {};
     const migration = new TrustLevelMigration(originalConfig, migratedConfig);
     migration.run();
 
