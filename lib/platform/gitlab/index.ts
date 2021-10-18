@@ -875,7 +875,7 @@ export async function ensureIssue({
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { title, description, labels: labels ?? issue.labels },
+            body: { title, description, labels: (labels ?? issue.labels).join(',') },
           }
         );
         return 'updated';
@@ -885,7 +885,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels: labels || [],
+          labels: (labels || []).join(','),
         },
       });
       logger.info('Issue created');
