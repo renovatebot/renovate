@@ -87,9 +87,9 @@ This makes it suitable for augmenting a preset or base list without displacing t
 ## aliases
 
 The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements` manager only.
+Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
 
-`helm-requirements` includes this default alias:
+The above managers include this default alias:
 
 ```json
 {
