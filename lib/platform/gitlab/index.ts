@@ -561,7 +561,7 @@ export async function createPr({
         remove_source_branch: true,
         title,
         description,
-        labels: labels.join(','),
+        labels: (labels || []).join(','),
         squash: config.squash,
       },
     }
