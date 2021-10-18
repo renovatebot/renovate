@@ -1494,7 +1494,6 @@ export async function updatePr({
   prTitle: title,
   prBody: rawBody,
   state,
-  platformOptions,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
