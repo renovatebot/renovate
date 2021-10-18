@@ -442,6 +442,32 @@ export async function processBranch(
       };
     }
     config.forceCommit = forcedManually || branchPr?.isConflicted;
+
+    const stopRebasingLabelPresents = branchPr?.labels?.includes(
+      config.stopRebasingLabel
+    );
+
+    const prRebaseChecked = branchPr?.body?.includes(
+      `- [x] <!-- rebase-check -->`
+    );
+
+    if (branchExists && stopRebasingLabelPresents) {
+      if (!prRebaseChecked) {
+        logger.info(
+          'Branch rebasing is skipped because stopRebasingLabel presents in config'
+        );
+        return {
+          branchExists: true,
+          prNo: branchPr?.number,
+          result: BranchResult.NoWork,
+        };
+      }
+
+      logger.debug(
+        'Branch will be rebased if necessary despite of stopRebasingLabel since Rebase checkbox is checked in PR body'
+      );
+    }
+
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
@@ -462,6 +488,26 @@ export async function processBranch(
     await setStability(config);
     await setConfidence(config);
 
+    if (branchExists && stopRebasingLabelPresents && prRebaseChecked) {
+      const newBody =
+        branchPr.body?.replace(
+          prRebaseCheckRegex,
+          '- [ ] <!-- rebase-check -->'
+        ) +
+        '\nThe rebase checkbox was unchecked because of stopRebasingLabel setting in your configuration';
+
+      logger.debug(
+        'Updating existing PR to indicate that further rebasing is turned off'
+      );
+
+      await platform.updatePr({
+        number: branchPr.number,
+        prTitle: branchPr.title,
+        prBody: newBody,
+        platformOptions: getPlatformPrOptions(config),
+      });
+    }
+
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
       !dependencyDashboardCheck &&
@@ -475,33 +521,6 @@ export async function processBranch(
         prNo: branchPr?.number,
         result: BranchResult.Pending,
       };
-    }
-
-    if (branchExists && branchPr && config.rebaseRequested) {
-      const stopRebasingLabel = branchPr.labels?.includes(
-        config.stopRebasingLabel
-      );
-
-      if (stopRebasingLabel) {
-        config.prRebaseChecked = branchPr.body?.includes(
-          `- [x] <!-- rebase-check -->`
-        );
-
-        if (!config.prRebaseChecked) {
-          logger.info(
-            'Branch rebasing is skipped because stopRebasingLabel presents in config'
-          );
-          return {
-            branchExists: true,
-            prNo: branchPr?.number,
-            result: BranchResult.Done,
-          };
-        }
-
-        logger.debug(
-          'Branch will be rebased if necessary despite of stopRebasingLabel since PR rebase checkbox is checked in PR body'
-        );
-      }
     }
 
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
@@ -535,26 +554,6 @@ export async function processBranch(
         logger.debug({ mergeStatus }, 'Branch automerge not possible');
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
-      }
-
-      if (branchPr && config.prRebaseChecked) {
-        const newBody =
-          branchPr.body?.replace(
-            prRebaseCheckRegex,
-            '- [ ] <!-- rebase-check -->'
-          ) +
-          '\nThe rebase checkbox was unchecked because of stopRebasingLabel setting in your configuration';
-
-        logger.debug(
-          'Updating existing PR to indicate that further rebasing is turned off'
-        );
-
-        await platform.updatePr({
-          number: branchPr.number,
-          prTitle: branchPr.title,
-          prBody: newBody,
-          platformOptions: getPlatformPrOptions(config),
-        });
       }
     }
   } catch (err) /* istanbul ignore next */ {
