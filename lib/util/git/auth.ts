@@ -26,16 +26,15 @@ export function getGitAuthenticatedEnvironmentVariables(
 
   const gitUrlWithToken = getHttpUrl(gitUrl, encodeURIComponent(token));
 
-  // create a shallow copy of the environmentVariables so we don't modify the input parameter object
-  const returnEnvironmentVariables = { ...environmentVariables };
-
-  // prettier-ignore
-  returnEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] = `url.${gitUrlWithToken}.insteadOf`;
-  // prettier-ignore
-  returnEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] = gitUrl;
-
-  gitConfigCount += 1;
-  returnEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
+  // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
+  // add the two new config key and value to the returnEnvironmentVariables object
+  // increase the CONFIG_COUNT by one and add it to the object
+  const returnEnvironmentVariables = {
+    ...environmentVariables,
+    [`GIT_CONFIG_KEY_${gitConfigCount}`]: `url.${gitUrlWithToken}.insteadOf`,
+    [`GIT_CONFIG_VALUE_${gitConfigCount}`]: gitUrl,
+    GIT_CONFIG_COUNT: (gitConfigCount + 1).toString(),
+  };
 
   return returnEnvironmentVariables;
 }
