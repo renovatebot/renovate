@@ -43,9 +43,8 @@ export function extractTerraformProvider(
     if (is.string(line)) {
       // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
       const openBrackets = (line.match(/\{/g) || []).length; // TODO #12071 #12070
-    const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12071 #12070
+      const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12071 #12070
       braceCounter = braceCounter + openBrackets - closedBrackets;
-
 
       // only update fields inside the root block
       if (braceCounter === 1) {
