@@ -1,0 +1,14 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: |
+      yarn install
+      yarn build
+
+vscode:
+  extensions:
+    - editorconfig.editorconfig
+    - dbaeumer.vscode-eslint
+    - github.vscode-pull-request-github
+    - esbenp.prettier-vscode
