@@ -10,7 +10,6 @@ import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
-  deleteLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
@@ -103,10 +102,6 @@ export async function updateArtifacts({
       ...config.constraints,
     };
 
-    if (config.isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
-
     const preCommands: string[] = [
       `install-tool composer ${await getComposerConstraint(constraints)}`,
     ];
@@ -127,7 +122,7 @@ export async function updateArtifacts({
     const cmd = 'composer';
     let args: string;
     if (config.isLockFileMaintenance) {
-      args = 'install';
+      args = 'update';
     } else {
       args =
         (
@@ -167,7 +162,7 @@ export async function updateArtifacts({
       return res;
     }
 
-    logger.debug(`Commiting vendor files in ${vendorDir}`);
+    logger.debug(`Committing vendor files in ${vendorDir}`);
     for (const f of [...status.modified, ...status.not_added]) {
       if (f.startsWith(vendorDir)) {
         res.push({

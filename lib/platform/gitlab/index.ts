@@ -501,7 +501,7 @@ async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
-  if (platformOptions?.gitLabAutomerge) {
+  if (platformOptions?.usePlatformAutomerge) {
     try {
       if (platformOptions?.gitLabIgnoreApprovals) {
         await ignoreApprovals(pr);
@@ -562,7 +562,7 @@ export async function createPr({
         remove_source_branch: true,
         title,
         description,
-        labels: is.array(labels) ? labels.join(',') : null,
+        labels: (labels || []).join(','),
         squash: config.squash,
       },
     }
@@ -876,7 +876,11 @@ export async function ensureIssue({
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { title, description, labels: labels ?? issue.labels },
+            body: {
+              title,
+              description,
+              labels: (labels || issue.labels || []).join(','),
+            },
           }
         );
         return 'updated';
@@ -886,7 +890,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels: labels || [],
+          labels: (labels || []).join(','),
         },
       });
       logger.info('Issue created');
@@ -1004,7 +1008,9 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
     const pr = await getPr(issueNo);
-    const labels = (pr.labels || []).filter((l: string) => l !== label).join();
+    const labels = (pr.labels || [])
+      .filter((l: string) => l !== label)
+      .join(',');
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${issueNo}`,
       {

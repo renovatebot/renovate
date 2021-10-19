@@ -1716,7 +1716,7 @@ describe('platform/bitbucket-server/index', () => {
         it('sanitizes HTML comments in the body', () => {
           const prBody = bitbucket.massageMarkdown(`---
 
-- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box
+- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
 - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
 ---

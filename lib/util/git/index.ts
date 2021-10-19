@@ -9,6 +9,7 @@ import Git, {
   TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -24,7 +25,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { parseGitAuthor } from './author';
-import { GitNoVerifyOption, getNoVerify } from './config';
+import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
 export { GitNoVerifyOption, setNoVerify } from './config';
@@ -185,7 +186,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = getGlobalConfig();
-  git = Git(localDir);
+  git = Git(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -721,7 +722,10 @@ export async function commitFiles({
           });
         }
         try {
-          await git.add(fileName);
+          // istanbul ignore next
+          const addParams =
+            fileName === configFileNames[0] ? ['-f', fileName] : fileName;
+          await git.add(addParams);
           if (file.executable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
@@ -846,7 +850,10 @@ export async function commitFiles({
       );
       return null;
     }
-    if (err.message.includes('denying non-fast-forward')) {
+    if (
+      err.message.includes('denying non-fast-forward') ||
+      err.message.includes('GH003: Sorry, force-pushing')
+    ) {
       logger.debug({ err }, 'Permission denied to update branch');
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = branchName;

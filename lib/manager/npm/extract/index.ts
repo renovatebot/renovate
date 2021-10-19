@@ -101,7 +101,7 @@ export async function extractPackageFile(
     if (is.string(config.npmrc) && !config.npmrcMerge) {
       logger.debug(
         { npmrcFileName },
-        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=force'
+        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
     } else {
       npmrc = config.npmrc || '';
