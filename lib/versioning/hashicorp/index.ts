@@ -48,12 +48,12 @@ function getNewValue({
       } else {
         replaceValue = `$1${npm.getMinor(newVersion)}$3`;
       }
-      return currentValue.replace(/(~>\s*0\.)(\d+)(.*)$/, replaceValue);  // TODO #12070
+      return currentValue.replace(/(~>\s*0\.)(\d+)(.*)$/, replaceValue); // TODO #12070
     }
     // handle special ~> 1.2 case
     if (regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
       return currentValue.replace(
-       /(~>\s*)\d+\.\d+$/, // TODO #12070
+        /(~>\s*)\d+\.\d+$/, // TODO #12070
         `$1${npm.getMajor(newVersion)}.0`
       );
     }

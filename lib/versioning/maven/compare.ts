@@ -1,4 +1,4 @@
-import { regEx } from "../../util/regex";
+import { regEx } from '../../util/regex';
 
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';

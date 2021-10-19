@@ -164,7 +164,7 @@ export function isLessThanRange(input: string, range: string): boolean {
       .split(',')
       .map((x) =>
         x
-          .replace(regEx(/\s*/g), '')  // TODO #12071
+          .replace(regEx(/\s*/g), '') // TODO #12071
           .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/)) // TODO #12071
           .slice(1)
       )

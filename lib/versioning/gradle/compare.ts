@@ -1,4 +1,4 @@
-import { regEx } from "../../util/regex";
+import { regEx } from '../../util/regex';
 
 export enum TokenType {
   Number = 1,
@@ -243,8 +243,9 @@ export function parsePrefixRange(input: string): PrefixRange | null {
   return null;
 }
 
-const mavenBasedRangeRegex =
-  regEx(/^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/);
+const mavenBasedRangeRegex = regEx(
+  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/
+);
 
 export function parseMavenBasedRange(input: string): MavenBasedRange | null {
   if (!input) {

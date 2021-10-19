@@ -148,7 +148,8 @@ interface GraphqlOptions {
 
 function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
-  const acceptStrings = typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
+  const acceptStrings =
+    typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
   if (
     !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
     acceptStrings.length < 2

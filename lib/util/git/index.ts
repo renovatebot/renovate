@@ -453,7 +453,7 @@ export async function getFileList(): Promise<string[]> {
     .split('\n')
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(regEx(/\t/)).pop())  // TODO #12071
+    .map((line) => line.split(regEx(/\t/)).pop()) // TODO #12071
     .filter((file: string) =>
       submodules.every((submodule: string) => !file.startsWith(submodule))
     );

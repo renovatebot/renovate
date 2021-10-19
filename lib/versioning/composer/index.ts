@@ -71,9 +71,15 @@ function composer2npm(input: string): string {
   let output = versionId;
 
   // ~4 to ^4 and ~4.1 to ^4.1
-  output = output.replace(regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g), '^$1');
+  output = output.replace(
+    regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
+    '^$1'
+  );
   // ~0.4 to >=0.4 <1
-  output = output.replace(regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g), '>=$1 <1');
+  output = output.replace(
+    regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
+    '>=$1 <1'
+  );
 
   return output + stability;
 }
