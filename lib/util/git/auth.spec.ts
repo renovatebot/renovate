@@ -1,8 +1,9 @@
 import { getGitAuthenticatedEnvironmentVariables } from './auth';
 
-jest.mock('../host-rules');
-
 describe('util/git/auth', () => {
+  afterEach(() => {
+    delete process.env.GIT_CONFIG_COUNT;
+  });
   describe('getGitAuthenticatedEnvironmentVariables()', () => {
     it('returns url with token', () => {
       expect(
@@ -57,7 +58,6 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_1: 'https://github.com/',
         GIT_CONFIG_COUNT: '2',
       });
-      delete process.env.GIT_CONFIG_COUNT;
     });
 
     it('returns url with token and already existing GIT_CONFIG_COUNT from environment', () => {
@@ -72,7 +72,6 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_1: 'https://github.com/',
         GIT_CONFIG_COUNT: '2',
       });
-      delete process.env.GIT_CONFIG_COUNT;
     });
 
     it('returns url with token and passthrough existing variables', () => {
@@ -102,7 +101,6 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_0: 'https://github.com/',
         GIT_CONFIG_COUNT: '1',
       });
-      delete process.env.GIT_CONFIG_COUNT;
     });
   });
 });

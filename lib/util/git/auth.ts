@@ -26,6 +26,7 @@ export function getGitAuthenticatedEnvironmentVariables(
 
   const gitUrlWithToken = getHttpUrl(gitUrl, encodeURIComponent(token));
 
+  // create a shallow copy of the environmentVariables so we don't modify the input parameter object
   const returnEnvironmentVariables = { ...environmentVariables };
 
   // prettier-ignore
