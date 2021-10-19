@@ -45,6 +45,8 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import {
   closedPrsQuery,
+  commitFilesMutation,
+  createBranchMutation,
   getIssuesQuery,
   openPrsQuery,
   repoInfoQuery,
@@ -209,6 +211,7 @@ export async function initRepo({
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
+    config.repositoryId = repo.repositoryId;
     // istanbul ignore if
     if (!repo.defaultBranchRef?.name) {
       throw new Error(REPOSITORY_EMPTY);
@@ -228,6 +231,7 @@ export async function initRepo({
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
+    config.defaultBranchOid = repo.defaultBranchRef?.target?.oid;
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
@@ -1617,8 +1621,48 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return alerts;
 }
 
-export function commitFiles(
-  _config: git.CommitFilesConfig
-): Promise<git.CommitSha | null> {
-  return null;
+export async function commitFiles({
+  branchName,
+  files,
+  message,
+}: git.CommitFilesConfig): Promise<git.CommitSha | null> {
+  const additions = files.map(({ name: path, contents }) => ({
+    path,
+    contents: Buffer.from(contents).toString('base64'),
+  }));
+  const fileChanges = { additions };
+
+  let result = null;
+  try {
+    const oid = config.defaultBranchOid;
+
+    const branchParams = {
+      repositoryId: config.repositoryId,
+      branchName: `refs/heads/${branchName}`,
+      oid,
+    };
+
+    await githubApi.requestGraphql(createBranchMutation, {
+      variables: branchParams,
+    });
+
+    const commitParams = {
+      repo: config.repository,
+      branchName,
+      fileChanges,
+      message,
+      oid,
+    };
+
+    const res = await githubApi.requestGraphql<{
+      createCommitOnBranch: { commit: { oid: string } };
+    }>(commitFilesMutation, {
+      variables: commitParams,
+    });
+    result = res.data?.createCommitOnBranch?.commit?.oid;
+  } catch (err) {
+    logger.debug({ err });
+  }
+
+  return result;
 }

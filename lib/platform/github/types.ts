@@ -67,6 +67,7 @@ export interface LocalRepoConfig {
   issueList: any[] | null;
   mergeMethod: string;
   defaultBranch: string;
+  defaultBranchOid: string;
   repositoryOwner: string;
   repository: string | null;
   isGhe: boolean;
@@ -74,6 +75,7 @@ export interface LocalRepoConfig {
   productLinks: any;
   ignorePrAuthor: boolean;
   branchPrs: Pr[];
+  repositoryId: string;
 }
 
 export type BranchProtection = any;
@@ -92,4 +94,5 @@ export interface GhRepo {
       oid: string;
     };
   };
+  repositoryId: string;
 }

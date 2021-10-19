@@ -139,7 +139,7 @@ function handleGotError(
 }
 
 interface GraphqlOptions {
-  variables?: Record<string, string | number | null>;
+  variables?: Record<string, string | number | null | Record<string, unknown>>;
   paginate?: boolean;
   count?: number;
   limit?: number;
