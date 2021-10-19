@@ -11,6 +11,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -147,7 +148,7 @@ interface GraphqlOptions {
 
 function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
-  const acceptStrings = typeof input === 'string' ? input.split(/\s*,\s*/) : [];
+  const acceptStrings = typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
   if (
     !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
     acceptStrings.length < 2

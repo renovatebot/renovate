@@ -1,4 +1,5 @@
 import urlJoin from 'url-join';
+import { regEx } from './regex';
 
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
@@ -14,11 +15,11 @@ export function ensurePathPrefix(url: string, prefix: string): string {
 }
 
 export function ensureTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '/');
+  return url.replace(/\/?$/, '/'); // TODO #12070 add tests for this one
 }
 
 export function trimTrailingSlash(url: string): string {
-  return url.replace(/\/+$/, '');
+  return url.replace(regEx(/\/+$/), '');
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {

@@ -20,6 +20,8 @@ export function regEx(pattern: string | RegExp, flags?: string): RegExp {
   try {
     return new RegEx(pattern, flags);
   } catch (err) {
+    // eslint-disable-next-line
+    console.log(err);
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = pattern.toString();
     error.validationError = `Invalid regular expression: ${pattern.toString()}`;
@@ -28,11 +30,11 @@ export function regEx(pattern: string | RegExp, flags?: string): RegExp {
 }
 
 export function escapeRegExp(input: string): string {
-  return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string
 }
 
-const configValStart = /^!?\//;
-const configValEnd = /\/$/;
+const configValStart = regEx(/^!?\//);
+const configValEnd = regEx(/\/$/);
 
 export function isConfigRegex(input: unknown): input is string {
   return (

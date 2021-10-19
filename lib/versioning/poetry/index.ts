@@ -1,5 +1,6 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -24,7 +25,7 @@ function getVersionParts(input: string): [string, string] {
 }
 
 function padZeroes(input: string): string {
-  if (/[~^*]/.test(input)) {
+  if (regEx(/[~^*]/).test(input)) {
     // ignore ranges
     return input;
   }
@@ -65,7 +66,7 @@ function npm2poetry(input: string): string {
       res.splice(i, 2, newValue);
     }
   }
-  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
+  return res.join(', ').replace(regEx(/\s*,?\s*\|\|\s*,?\s*/), ' || ');
 }
 
 const equals = (a: string, b: string): boolean => {

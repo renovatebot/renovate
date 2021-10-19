@@ -1,3 +1,5 @@
+import { regEx } from "../../util/regex";
+
 export enum TokenType {
   Number = 1,
   String,
@@ -20,11 +22,11 @@ function iterateChars(str: string, cb: (p: string, n: string) => void): void {
 }
 
 function isSeparator(char: string): boolean {
-  return /^[-._+]$/i.test(char);
+  return regEx(/^[-._+]$/i).test(char);
 }
 
 function isDigit(char: string): boolean {
-  return /^\d$/.test(char);
+  return regEx(/^\d$/).test(char);
 }
 
 function isLetter(char: string): boolean {
@@ -48,7 +50,7 @@ export function tokenize(versionStr: string): Token[] | null {
     }
     if (result) {
       const val = currentVal;
-      if (/^\d+$/.test(val)) {
+      if (regEx(/^\d+$/).test(val)) {
         result.push({
           type: TokenType.Number,
           val: parseInt(val, 10),
@@ -191,11 +193,11 @@ export function isVersion(input: string): boolean {
     return false;
   }
 
-  if (!/^[-._+a-zA-Z0-9]+$/i.test(input)) {
+  if (!regEx(/^[-._+a-zA-Z0-9]+$/i).test(input)) {
     return false;
   }
 
-  if (/^latest\.?/i.test(input)) {
+  if (regEx(/^latest\.?/i).test(input)) {
     return false;
   }
 
@@ -231,9 +233,9 @@ export function parsePrefixRange(input: string): PrefixRange | null {
     return { tokens: [] };
   }
 
-  const postfixRegex = /[-._]\+$/;
+  const postfixRegex = regEx(/[-._]\+$/);
   if (postfixRegex.test(input)) {
-    const prefixValue = input.replace(/[-._]\+$/, '');
+    const prefixValue = input.replace(regEx(/[-._]\+$/), '');
     const tokens = tokenize(prefixValue);
     return tokens ? { tokens } : null;
   }
@@ -242,7 +244,7 @@ export function parsePrefixRange(input: string): PrefixRange | null {
 }
 
 const mavenBasedRangeRegex =
-  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/;
+  regEx(/^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/);
 
 export function parseMavenBasedRange(input: string): MavenBasedRange | null {
   if (!input) {

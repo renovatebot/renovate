@@ -1,13 +1,14 @@
 import GitUrlParse from 'git-url-parse';
 import { logger } from '../../logger';
 import * as hostRules from '../host-rules';
+import { regEx } from '../regex';
 
 export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = GitUrlParse(url);
 
   parsedUrl.token = token;
 
-  const protocol = /^https?$/.exec(parsedUrl.protocol)
+  const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
     ? parsedUrl.protocol
     : 'https';
   return parsedUrl.toString(protocol);
