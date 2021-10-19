@@ -1,12 +1,14 @@
+import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
-import { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { HelmsmanDocument } from './types';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<lookupName>[^/]*)$');
 
-function createDep(key: string, doc: any): PackageDependency {
+function createDep(key: string, doc: HelmsmanDocument): PackageDependency {
   const dep: PackageDependency = {
     depName: key,
   };
@@ -27,14 +29,14 @@ function createDep(key: string, doc: any): PackageDependency {
     return dep;
   }
 
-  if (!regexResult.groups.lookupName) {
+  if (!is.nonEmptyString(regexResult.groups.lookupName)) {
     dep.skipReason = SkipReason.InvalidName;
     return dep;
   }
   dep.lookupName = regexResult.groups.lookupName;
 
   const registryUrl = doc.helmRepos[regexResult.groups.registryRef];
-  if (!registryUrl) {
+  if (!is.nonEmptyString(registryUrl)) {
     dep.skipReason = SkipReason.NoRepository;
     return dep;
   }
@@ -54,13 +56,15 @@ export function extractPackageFile(
       json: true,
     });
     if (!(doc?.helmRepos && doc.apps)) {
-      logger.debug({}, 'Missing helmRepos and/or apps keys');
+      logger.debug({ fileName }, 'Missing helmRepos and/or apps keys');
       return null;
     }
 
-    const deps = Object.keys(doc.apps).map((key) => createDep(key, doc));
+    const deps = Object.keys(doc.apps)
+      .map((key) => createDep(key, doc))
+      .filter(Boolean); // filter null values
 
-    if (deps.filter(Boolean).length === 0) {
+    if (deps.length === 0) {
       return null;
     }
 

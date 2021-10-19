@@ -6,10 +6,6 @@ const otherYamlFile = loadFixture('empty.yaml');
 
 describe('manager/helmsman/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null if empty', () => {
       const content = ``;
       const fileName = 'desired_state.yaml';
