@@ -2,8 +2,10 @@ The `helmsman` manager is currently limited and does not support the full featur
 
 ### Non-configured fileMatch
 
-The `helmsman` manager has an empty array for default `fileMatch`, meaning it won't match any files ever by default.
-You can "activate" the manager by specifying a `fileMatch` pattern such as:
+By default the `helmsman` manager has an empty array for its `fileMatch` configuration option.
+This means that `helmsman` won't search for any files, and you won't get any updates from the manager.
+
+To enable the `helmsman` manager, provide a valid `fileMatch` yourself, for example:
 
 ```json
 {
@@ -15,5 +17,5 @@ You can "activate" the manager by specifying a `fileMatch` pattern such as:
 
 ### File format
 
-Currently, state files have to be in the `yaml` format.
-The `toml` format is not supported.
+Currently, state files must be in the `.yaml` format.
+The `.toml` format is not supported.
