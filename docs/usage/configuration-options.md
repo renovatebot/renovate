@@ -1669,8 +1669,8 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then `platformAutomerge` is enabled by default to speed up merging via the platform's native automerge functionality.
 
-Renovate tries platform-native automerge only at the moment of PR creation.
-Any PR that is being updated will be automerged by Renovate.
+Renovate tries platform-native automerge only when it initially creates the PR.
+Any PR that is being updated will be automerged with the Renovate-based automerge.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
 This option is available for Azure, GitHub and GitLab.
