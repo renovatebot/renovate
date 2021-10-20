@@ -19,6 +19,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getCache } from '../../util/cache/repository';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
@@ -36,6 +37,7 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
   RepoParams,
@@ -45,6 +47,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import {
   closedPrsQuery,
+  enableAutoMergeMutation,
   getIssuesQuery,
   openPrsQuery,
   repoInfoQuery,
@@ -55,6 +58,7 @@ import {
   BranchProtection,
   CombinedBranchStatus,
   Comment,
+  GhAutomergeResponse,
   GhBranchStatus,
   GhGraphQlPr,
   GhRepo,
@@ -1377,6 +1381,63 @@ export async function ensureCommentRemoval({
 
 // Pull Request
 
+async function tryPrAutomerge(
+  prNumber: number,
+  prNodeId: string,
+  platformOptions: PlatformPrOptions
+): Promise<boolean> {
+  if (!platformOptions?.usePlatformAutomerge) {
+    return;
+  }
+
+  const repoCache = getCache();
+  const { lastPlatformAutomergeFailure } = repoCache;
+  if (lastPlatformAutomergeFailure) {
+    const lastFailedAt = DateTime.fromISO(lastPlatformAutomergeFailure);
+    const now = DateTime.local();
+    if (now < lastFailedAt.plus({ hours: 24 })) {
+      logger.debug(
+        { prNumber },
+        'GitHub-native automerge: skipping attempt due to earlier failure'
+      );
+      return;
+    }
+    delete repoCache.lastPlatformAutomergeFailure;
+  }
+
+  try {
+    const variables = { pullRequestId: prNodeId };
+    const queryOptions = { variables };
+    const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
+      enableAutoMergeMutation,
+      queryOptions
+    );
+    if (errors) {
+      const disabledByPlatform = errors.find(
+        ({ type, message }) =>
+          type === 'UNPROCESSABLE' &&
+          message ===
+            'Pull request is not in the correct state to enable auto-merge'
+      );
+
+      // istanbul ignore else
+      if (disabledByPlatform) {
+        logger.debug(
+          { prNumber },
+          'GitHub automerge is not enabled for this repository'
+        );
+
+        const now = DateTime.local();
+        repoCache.lastPlatformAutomergeFailure = now.toISO();
+      } else {
+        logger.debug({ prNumber, errors }, 'GitHub automerge unknown error');
+      }
+    }
+  } catch (err) {
+    logger.warn({ prNumber, err }, 'GitHub automerge: HTTP request error');
+  }
+}
+
 // Creates PR and returns PR number
 export async function createPr({
   sourceBranch,
@@ -1385,6 +1446,7 @@ export async function createPr({
   prBody: rawBody,
   labels,
   draftPR = false,
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = targetBranch;
@@ -1423,6 +1485,7 @@ export async function createPr({
   pr.sourceBranch = sourceBranch;
   pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
+  await tryPrAutomerge(pr.number, pr.node_id, platformOptions);
   return pr;
 }
 
