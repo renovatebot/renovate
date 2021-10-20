@@ -68,6 +68,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     configFileParsed = JSON.parse(
       await readLocalFile('package.json', 'utf8')
     ).renovate;
+    if (is.string(configFileParsed)) {
+      logger.debug('Massaging string renovate config to extends array');
+      configFileParsed = { extends: [configFileParsed] };
+    }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');

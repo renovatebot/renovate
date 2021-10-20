@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import * as semver from '../../versioning/semver';
 import * as gitRefs from '../git-refs';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -22,7 +23,9 @@ export async function getReleases({
       newDigest: ref.hash,
     }));
 
-  const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
+  const sourceUrl = lookupName
+    .replace(regEx(/\.git$/), '')
+    .replace(regEx(/\/$/), '');
 
   const result: ReleaseResult = {
     sourceUrl,

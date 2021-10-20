@@ -1,5 +1,6 @@
 import hasha from 'hasha';
 import * as packageCache from '../../util/cache/package';
+import { regEx } from '../../util/regex';
 import { cacheNamespace, http } from './common';
 import type { DigestAsset, GithubRelease, GithubReleaseAsset } from './types';
 
@@ -13,7 +14,7 @@ async function findDigestFile(
   for (const asset of smallAssets) {
     const res = await http.get(asset.browser_download_url);
     for (const line of res.body.split('\n')) {
-      const [lineDigest, lineFn] = line.split(/\s+/, 2);
+      const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2); // TODO #12071
       if (lineDigest === digest) {
         return {
           assetName: asset.name,
@@ -114,8 +115,8 @@ export async function mapDigestAssetToRelease(
   digestAsset: DigestAsset,
   release: GithubRelease
 ): Promise<string | null> {
-  const current = digestAsset.currentVersion.replace(/^v/, '');
-  const next = release.tag_name.replace(/^v/, '');
+  const current = digestAsset.currentVersion.replace(regEx(/^v/), '');
+  const next = release.tag_name.replace(regEx(/^v/), '');
   const releaseChecksumAssetName = digestAsset.assetName.replace(current, next);
   const releaseAsset = release.assets.find(
     (a: GithubReleaseAsset) => a.name === releaseChecksumAssetName
@@ -127,7 +128,7 @@ export async function mapDigestAssetToRelease(
     const releaseFilename = digestAsset.digestedFileName.replace(current, next);
     const res = await http.get(releaseAsset.browser_download_url);
     for (const line of res.body.split('\n')) {
-      const [lineDigest, lineFn] = line.split(/\s+/, 2);
+      const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
       if (lineFn === releaseFilename) {
         return lineDigest;
       }
