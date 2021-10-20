@@ -87,9 +87,9 @@ This makes it suitable for augmenting a preset or base list without displacing t
 ## aliases
 
 The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements` manager only.
+Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
 
-`helm-requirements` includes this default alias:
+The above managers include this default alias:
 
 ```json
 {
@@ -754,7 +754,7 @@ Example:
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`.
+This option works only when `automerge=true`, `automergeType=pr` and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
 
 ## golang
@@ -1669,8 +1669,11 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then `platformAutomerge` is enabled by default to speed up merging via the platform's native automerge functionality.
 
+Renovate tries platform-native automerge only when it initially creates the PR.
+Any PR that is being updated will be automerged with the Renovate-based automerge.
+
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure and GitLab.
+This option is available for Azure, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).

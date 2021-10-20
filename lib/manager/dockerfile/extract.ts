@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -32,7 +33,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   return dep;
 }
 
-const quayRegex = /^quay\.io(?::[1-9][0-9]{0,4})?/i;
+const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 
 export function getDep(
   currentFrom: string,
@@ -89,7 +90,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const stageNames: string[] = [];
 
   const fromMatches = content.matchAll(
-    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\S+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim
+    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\S+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim // TODO #12070
   );
 
   for (const fromMatch of fromMatches) {
@@ -116,7 +117,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   const copyFromMatches = content.matchAll(
-    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|[ \t]--[a-z]+=\w+?)*[ \t]--from=(?<image>\S+)/gim
+    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|[ \t]--[a-z]+=\w+?)*[ \t]--from=(?<image>\S+)/gim // TODO #12070
   );
 
   for (const copyFromMatch of copyFromMatches) {

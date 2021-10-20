@@ -1,5 +1,6 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
@@ -13,7 +14,7 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
-const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
+const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/'); // TODO #12070
 
 export async function getArtifactSubdirs(
   searchRoot: string,
@@ -58,7 +59,7 @@ export async function getPackageReleases(
   if (artifactSubdirs) {
     const releases: string[] = [];
     const parseReleases = (content: string): string[] =>
-      parseIndexDir(content, (x) => !/^\.+$/.test(x));
+      parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
     for (const searchSubdir of artifactSubdirs) {
       const { body: content } = await downloadHttpProtocol(
         ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
@@ -123,10 +124,10 @@ export async function getUrls(
         const sourceUrl = pomXml.valueWithPath('scm.url');
         if (sourceUrl) {
           result.sourceUrl = sourceUrl
-            .replace(/^scm:/, '')
-            .replace(/^git:/, '')
-            .replace(/^git@github.com:/, 'https://github.com/')
-            .replace(/\.git$/, '');
+            .replace(regEx(/^scm:/), '') // TODO #12071
+            .replace(regEx(/^git:/), '') // TODO #12071
+            .replace(regEx(/^git@github.com:/), 'https://github.com/') // TODO #12071
+            .replace(regEx(/\.git$/), ''); // TODO #12071
         }
 
         return result;
