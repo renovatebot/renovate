@@ -23,6 +23,7 @@ import {
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import * as lerna from './lerna';
@@ -340,8 +341,8 @@ async function updateYarnOffline(
       if (mirrorLine) {
         const mirrorPath = mirrorLine
           .split(' ')[1]
-          .replace(/"/g, '')
-          .replace(/\/?$/, '/');
+          .replace(regEx(/"/g), '')
+          .replace(regEx(/\/?$/), '/');
         resolvedPaths.push(upath.join(lockFileDir, mirrorPath));
       }
     }
@@ -536,7 +537,7 @@ export async function getAdditionalFiles(
         logger.debug(`${npmLock} needs updating`);
         updatedArtifacts.push({
           name: npmLock,
-          contents: res.lockFile.replace(new RegExp(`${token}`, 'g'), ''),
+          contents: res.lockFile.replace(regEx(`${token}`, 'g'), ''),
         });
       }
     }

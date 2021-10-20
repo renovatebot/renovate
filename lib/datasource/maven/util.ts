@@ -4,6 +4,7 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
+import { regEx } from '../../util/regex';
 
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
@@ -120,7 +121,7 @@ export async function isHttpResourceExists(
 }
 
 function containsPlaceholder(str: string): boolean {
-  return /\${.*?}/g.test(str);
+  return regEx(/\${.*?}/g).test(str);
 }
 
 export function getMavenUrl(
@@ -165,7 +166,7 @@ export async function downloadMavenXml(
 
 export function getDependencyParts(lookupName: string): MavenDependency {
   const [group, name] = lookupName.split(':');
-  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
+  const dependencyUrl = `${group.replace(regEx(/\./g), '/')}/${name}`;
   return {
     display: lookupName,
     group,
@@ -198,11 +199,11 @@ export async function getDependencyInfo(
   const sourceUrl = pomContent.valueWithPath('scm.url');
   if (sourceUrl && !containsPlaceholder(sourceUrl)) {
     result.sourceUrl = sourceUrl
-      .replace(/^scm:/, '')
-      .replace(/^git:/, '')
-      .replace(/^git@github.com:/, 'https://github.com/')
-      .replace(/^git@github.com\//, 'https://github.com/')
-      .replace(/\.git$/, '');
+      .replace(regEx(/^scm:/), '')
+      .replace(regEx(/^git:/), '')
+      .replace(regEx(/^git@github.com:/), 'https://github.com/')
+      .replace(regEx(/^git@github.com\//), 'https://github.com/')
+      .replace(regEx(/\.git$/), '');
 
     if (result.sourceUrl.startsWith('//')) {
       // most likely the result of us stripping scm:, git: etc

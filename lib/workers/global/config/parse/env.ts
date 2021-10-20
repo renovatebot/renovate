@@ -35,8 +35,28 @@ export function getEnvName(option: Partial<RenovateOptions>): string {
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }
 
+const renameKeys = {
+  azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
+  gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
+};
+
+function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const [from, to] of Object.entries(renameKeys)) {
+    const fromKey = getEnvName({ name: from });
+    const toKey = getEnvName({ name: to });
+    if (env[fromKey]) {
+      result[toKey] = env[fromKey];
+      delete result[fromKey];
+    }
+  }
+  return result;
+}
+
 export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
-  const env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  let env = inputEnv;
+  env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  env = renameEnvKeys(env);
 
   const options = getOptions();
 
