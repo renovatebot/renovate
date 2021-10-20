@@ -1,13 +1,14 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
+import { PlatformId } from '../../constants';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import type {
   BranchStatusConfig,
@@ -30,7 +31,13 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
-import { PrResponse, RepoInfoBody, mergeBodyTransformer } from './utils';
+import {
+  PrResponse,
+  PrReviewer,
+  RepoInfoBody,
+  UserResponse,
+  mergeBodyTransformer,
+} from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -127,7 +134,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: PLATFORM_TYPE_BITBUCKET,
+    hostType: PlatformId.Bitbucket,
     url: defaults.endpoint,
   });
   config = {
@@ -167,7 +174,7 @@ export async function initRepo({
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
-  const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
+  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)[1];
 
   const url = git.getUrl({
     protocol: 'https',
@@ -280,7 +287,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 }
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(/#/g, '%23') : input;
+  input ? input.replace(regEx(/#/g), '%23') : input;
 
 interface BranchResponse {
   target: {
@@ -456,10 +463,10 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(/<\/?summary>/g, '**')
-    .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/');
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/');
 }
 
 export async function ensureIssue({
@@ -712,16 +719,57 @@ export async function updatePr({
     )
   ).body;
 
-  await bitbucketHttp.putJson(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        reviewers: pr.reviewers,
-      },
+  try {
+    await bitbucketHttp.putJson(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      {
+        body: {
+          title,
+          description: sanitize(description),
+          reviewers: pr.reviewers,
+        },
+      }
+    );
+  } catch (err) {
+    if (
+      err.statusCode === 400 &&
+      err.body?.error?.message.includes('reviewers: Malformed reviewers list')
+    ) {
+      logger.warn(
+        { err },
+        'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
+      );
+
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+      const activeReviewers: PrReviewer[] = [];
+
+      // Validate that each previous PR reviewer account is still active
+      for (const reviewer of pr.reviewers) {
+        const reviewerUser = (
+          await bitbucketHttp.getJson<UserResponse>(
+            `/2.0/users/${reviewer.account_id}`
+          )
+        ).body;
+
+        if (reviewerUser.account_status === 'active') {
+          activeReviewers.push(reviewer);
+        }
+      }
+
+      await bitbucketHttp.putJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+        {
+          body: {
+            title,
+            description: sanitize(description),
+            reviewers: activeReviewers,
+          },
+        }
+      );
+    } else {
+      throw err;
     }
-  );
+  }
 
   if (state === PrState.Closed && pr) {
     await bitbucketHttp.postJson(

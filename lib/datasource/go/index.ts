@@ -1,5 +1,5 @@
 import URL from 'url';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
@@ -16,9 +16,12 @@ export { id } from './common';
 
 export const customRegistrySupport = false;
 
-const gitlabHttpsRegExp =
-  /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)[/]?$/;
-const gitlabRegExp = /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)[/]?$/;
+const gitlabHttpsRegExp = regEx(
+  /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)[/]?$/
+);
+const gitlabRegExp = regEx(
+  /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)[/]?$/
+);
 const bitbucket = new BitBucketTagsDatasource();
 
 async function getDatasource(goModule: string): Promise<DataSource | null> {
@@ -67,7 +70,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
         datasource: github.id,
         lookupName: goSourceUrl
           .replace('https://github.com/', '')
-          .replace(/\/$/, ''),
+          .replace(regEx(/\/$/), ''),
       };
     }
     const gitlabUrl =
@@ -92,7 +95,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     }
 
     const opts = hostRules.find({
-      hostType: PLATFORM_TYPE_GITLAB,
+      hostType: PlatformId.Gitlab,
       url: goSourceUrl,
     });
     if (opts.token) {
@@ -129,7 +132,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
 
       // split the go module from the URL: host/go/module -> go/module
       const lookupName = trimTrailingSlash(parsedUrl.pathname)
-        .replace(/\.git$/, '')
+        .replace(regEx(/\.git$/), '')
         .split('/')
         .slice(-2)
         .join('/');
@@ -210,7 +213,7 @@ export async function getReleases(
    * and that tag should be used instead of just va.b.c, although for compatibility
    * the old behaviour stays the same.
    */
-  const nameParts = lookupName.replace(/\/v\d+$/, '').split('/');
+  const nameParts = lookupName.replace(regEx(/\/v\d+$/), '').split('/');
   logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
 
   // If it has more than 3 parts it's a submodule or subgroup (gitlab only)

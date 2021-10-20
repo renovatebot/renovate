@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import type { HttpError } from '../../util/http/types';
+import { regEx } from '../../util/regex';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';
@@ -103,7 +104,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     } else {
       registry = registryUrl;
     }
-    if (!/^https?:\/\//.test(registry)) {
+    if (!regEx(/^https?:\/\//).test(registry)) {
       registry = `https://${registry}`;
     }
     const repository = split.join('/');

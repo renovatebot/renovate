@@ -8,12 +8,13 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import delay from 'delay';
+import { PlatformId } from '../../constants';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
-import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
@@ -73,7 +74,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PLATFORM_TYPE_AZURE,
+  hostType: PlatformId.Azure,
 };
 
 export function initPlatform({
@@ -388,7 +389,7 @@ export async function createPr({
     },
     config.repoId
   );
-  if (platformOptions?.azureAutoComplete) {
+  if (platformOptions?.usePlatformAutomerge) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -678,7 +679,7 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
 }
 
 /* istanbul ignore next */

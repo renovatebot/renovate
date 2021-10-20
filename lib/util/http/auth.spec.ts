@@ -1,10 +1,6 @@
 import { NormalizedOptions } from 'got';
 import { partial } from '../../../test/util';
-import {
-  PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { GotOptions } from './types';
 
@@ -33,7 +29,7 @@ describe('util/http/auth', () => {
     it('gitea password', () => {
       const opts: GotOptions = {
         headers: {},
-        hostType: PLATFORM_TYPE_GITEA,
+        hostType: PlatformId.Gitea,
         password: 'XXXX',
       };
 
@@ -54,7 +50,7 @@ describe('util/http/auth', () => {
       const opts: GotOptions = {
         headers: {},
         token: 'XXXX',
-        hostType: PLATFORM_TYPE_GITEA,
+        hostType: PlatformId.Gitea,
       };
 
       applyAuthorization(opts);
@@ -74,7 +70,7 @@ describe('util/http/auth', () => {
       const opts: GotOptions = {
         headers: {},
         token: 'XXX',
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
       };
 
       applyAuthorization(opts);
@@ -112,7 +108,7 @@ describe('util/http/auth', () => {
         headers: {},
         // Personal Access Token is exactly 20 characters long
         token: '0123456789012345test',
-        hostType: PLATFORM_TYPE_GITLAB,
+        hostType: PlatformId.Gitlab,
       };
 
       applyAuthorization(opts);
@@ -133,7 +129,7 @@ describe('util/http/auth', () => {
         headers: {},
         token:
           'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test',
-        hostType: PLATFORM_TYPE_GITLAB,
+        hostType: PlatformId.Gitlab,
       };
 
       applyAuthorization(opts);

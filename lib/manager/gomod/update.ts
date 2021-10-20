@@ -1,10 +1,11 @@
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
 function getDepNameWithNoVersion(depName: string): string {
   let depNameNoVersion = depName.split('/').slice(0, 3).join('/');
   if (depNameNoVersion.startsWith('gopkg.in')) {
-    depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
+    depNameNoVersion = depNameNoVersion.replace(regEx(/\.v\d+$/), '');
   }
   return depNameNoVersion;
 }
@@ -31,14 +32,14 @@ export function updateDependency({
     }
     let updateLineExp: RegExp;
     if (depType === 'replace') {
-      updateLineExp = new RegExp(
+      updateLineExp = regEx(
         /^(replace\s+[^\s]+[\s]+[=][>]+\s+)([^\s]+\s+)([^\s]+)/
       );
     } else if (depType === 'require') {
       if (upgrade.managerData.multiLine) {
-        updateLineExp = new RegExp(/^(\s+[^\s]+)(\s+)([^\s]+)/);
+        updateLineExp = regEx(/^(\s+[^\s]+)(\s+)([^\s]+)/);
       } else {
-        updateLineExp = new RegExp(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
+        updateLineExp = regEx(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
       }
     }
     if (updateLineExp && !updateLineExp.test(lineToChange)) {
@@ -86,7 +87,7 @@ export function updateDependency({
           // Replace version
           const [oldV] = upgrade.currentValue.split('.');
           newLine = newLine.replace(
-            new RegExp(`/${oldV}(\\s+)`),
+            regEx(`/${oldV}(\\s+)`),
             `/v${upgrade.newMajor}$1`
           );
         }

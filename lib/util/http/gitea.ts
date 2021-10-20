@@ -1,4 +1,4 @@
-import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { resolveBaseUrl } from '../url';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -30,7 +30,7 @@ function resolveUrl(path: string, base: string): URL {
 
 export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
   constructor(options?: HttpOptions) {
-    super(PLATFORM_TYPE_GITEA, options);
+    super(PlatformId.Gitea, options);
   }
 
   protected override async request<T>(
