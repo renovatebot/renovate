@@ -2,6 +2,7 @@ import simpleGit from 'simple-git';
 import * as packageCache from '../../util/cache/package';
 import { simpleGitConfig } from '../../util/git/config';
 import { getRemoteUrlWithToken } from '../../util/git/url';
+import { regEx } from '../../util/regex';
 import * as semver from '../../versioning/semver';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { RawRefs } from './types';
@@ -38,8 +39,8 @@ export async function getRawRefs(
     return null;
   }
 
-  const refMatch = /(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/;
-  const headMatch = /(?<hash>.*?)\s+HEAD/;
+  const refMatch = regEx(/(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/);
+  const headMatch = regEx(/(?<hash>.*?)\s+HEAD/);
 
   const refs = lsRemote
     .trim()
@@ -83,7 +84,9 @@ export async function getReleases({
 
   const uniqueRefs = [...new Set(refs)];
 
-  const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
+  const sourceUrl = lookupName
+    .replace(regEx(/\.git$/), '')
+    .replace(regEx(/\/$/), '');
 
   const result: ReleaseResult = {
     sourceUrl,

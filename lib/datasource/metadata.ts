@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import * as hostRules from '../util/host-rules';
+import { regEx } from '../util/regex';
 import { validateUrl } from '../util/url';
 import type { ReleaseResult } from './types';
 
@@ -109,7 +110,7 @@ const manualSourceUrls = {
 function massageGithubUrl(url: string): string {
   return url
     .replace('http:', 'https:')
-    .replace(/^git:\/?\/?/, 'https://')
+    .replace(regEx(/^git:\/?\/?/), 'https://')
     .replace('www.github.com', 'github.com')
     .split('/')
     .slice(0, 5)
@@ -119,9 +120,9 @@ function massageGithubUrl(url: string): string {
 function massageGitlabUrl(url: string): string {
   return url
     .replace('http:', 'https:')
-    .replace(/^git:\/?\/?/, 'https://')
-    .replace(/\/tree\/.*$/i, '')
-    .replace(/\/$/i, '')
+    .replace(regEx(/^git:\/?\/?/), 'https://')
+    .replace(regEx(/\/tree\/.*$/i), '')
+    .replace(regEx(/\/$/i), '')
     .replace('.git', '');
 }
 
