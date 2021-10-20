@@ -159,9 +159,17 @@ export async function updateArtifacts({
       }
     }
 
-    const isGoModTidyRequired =
-      config.postUpdateOptions?.includes('gomodTidy') ||
+    const mustSkipGoModTidy =
+      !config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
+    if (mustSkipGoModTidy) {
+      logger.debug({ cmd, args }, 'go mod tidy command skipped');
+    }
+
+    const isGoModTidyRequired =
+      !mustSkipGoModTidy &&
+      (config.postUpdateOptions?.includes('gomodTidy') ||
+        (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy';
       logger.debug({ cmd, args }, 'go mod tidy command included');
