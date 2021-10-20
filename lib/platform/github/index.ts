@@ -23,6 +23,7 @@ import { getCache } from '../../util/cache/repository';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
@@ -78,7 +79,7 @@ const defaults = {
 };
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(/#/g, '%23') : input;
+  input ? input.replace(regEx(/#/g), '%23') : input;
 
 export async function initPlatform({
   endpoint,
@@ -768,7 +769,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
       return null;
     }
     try {
-      const title = autoclosedPr.title.replace(/ - autoclosed$/, '');
+      const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
       await githubApi.patchJson(`repos/${config.repository}/pulls/${number}`, {
         body: {
           state: 'open',
@@ -1181,7 +1182,7 @@ export async function addReviewers(
   const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
     .filter((e) => e.startsWith('team:'))
-    .map((e) => e.replace(/^team:/, ''));
+    .map((e) => e.replace(regEx(/^team:/), '')); // TODO #12071
   try {
     await githubApi.postJson(
       `repos/${
@@ -1623,9 +1624,12 @@ export function massageMarkdown(input: string): string {
   }
   const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with renovatebot redirector
-    .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
-    .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
-    .replace(/]: https:\/\/github\.com\//g, ']: https://togithub.com/');
+    .replace(
+      regEx(/href="https?:\/\/github.com\//g),
+      'href="https://togithub.com/'
+    )
+    .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
+    .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/');
   return smartTruncate(massagedInput, 60000);
 }
 

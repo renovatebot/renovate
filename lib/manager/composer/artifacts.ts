@@ -19,6 +19,7 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson } from './types';
 import {
@@ -80,7 +81,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const lockFileName = packageFileName.replace(/\.json$/, '.lock');
+  const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
