@@ -5,6 +5,7 @@ import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export const packagePattern =
@@ -12,7 +13,10 @@ export const packagePattern =
 const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
 const rangePattern: string = RANGE_PATTERN;
-const specifierPartPattern = `\\s*${rangePattern.replace(/\?<\w+>/g, '?:')}`;
+const specifierPartPattern = `\\s*${rangePattern.replace(
+  regEx(/\?<\w+>/g),
+  '?:'
+)}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
@@ -49,7 +53,7 @@ export function extractPackageFile(
   }
   registryUrls = registryUrls.concat(extraUrls);
 
-  const regex = new RegExp(`^${dependencyPattern}$`, 'g');
+  const regex = regEx(`^${dependencyPattern}$`, 'g');
   const deps = content
     .split('\n')
     .map((rawline) => {
@@ -84,15 +88,18 @@ export function extractPackageFile(
   if (registryUrls.length > 0) {
     res.registryUrls = registryUrls.map((url) => {
       // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
-      const cleaned = url.replace(/^"/, '').replace(/"$/, '');
+      const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), ''); // TODO #12071
       if (!getGlobalConfig().exposeAllEnv) {
         return cleaned;
       }
       // interpolate any environment variables
       return cleaned.replace(
-        /(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g,
+        regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g), // TODO #12071
         (match) => {
-          const envvar = match.substring(1).replace(/^{/, '').replace(/}$/, '');
+          const envvar = match
+            .substring(1)
+            .replace(regEx(/^{/), '')
+            .replace(regEx(/}$/), ''); // TODO #12071
           const sub = process.env[envvar];
           return sub || match;
         }
