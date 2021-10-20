@@ -34,9 +34,9 @@ export function parseGoproxy(
   }
 
   let result: GoproxyItem[] = input
-    .split(/([^,|]*(?:,|\|))/)
+    .split(/([^,|]*(?:,|\|))/) // TODO: #12070
     .filter(Boolean)
-    .map((s) => s.split(/(?=,|\|)/))
+    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12070
     .map(([url, separator]) => ({
       url,
       fallback:
@@ -62,7 +62,7 @@ export function parseGoproxy(
 const lexer = moo.states({
   main: {
     separator: {
-      match: /\s*?,\s*?/,
+      match: /\s*?,\s*?/, // TODO #12070
       value: (_: string) => '|',
     },
     asterisk: {
@@ -78,16 +78,16 @@ const lexer = moo.states({
       push: 'characterRange',
       value: (_: string) => '[',
     },
-    char: /[^*?\\[\n]/,
+    char: /[^*?\\[\n]/, // TODO #12070
     escapedChar: {
-      match: /\\./,
+      match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
     },
   },
   characterRange: {
-    char: /[^\\\]\n]/,
+    char: /[^\\\]\n]/, // TODO #12070
     escapedChar: {
-      match: /\\./,
+      match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
     },
     characterRangeEnd: {
@@ -121,7 +121,7 @@ export function parseNoproxy(
  * @see https://golang.org/ref/mod#goproxy-protocol
  */
 export function encodeCase(input: string): string {
-  return input.replace(/([A-Z])/g, (x) => `!${x.toLowerCase()}`);
+  return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
 }
 
 export async function listVersions(
@@ -131,7 +131,7 @@ export async function listVersions(
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/list`;
   const { body } = await http.get(url);
   return body
-    .split(/\s+/)
+    .split(regEx(/\s+/))
     .filter(Boolean)
     .filter((x) => x.indexOf('+') === -1);
 }

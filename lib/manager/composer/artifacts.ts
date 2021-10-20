@@ -10,7 +10,6 @@ import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
-  deleteLocalFile,
   ensureCacheDir,
   ensureLocalDir,
   getSiblingFileName,
@@ -20,6 +19,7 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson } from './types';
 import {
@@ -81,7 +81,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const lockFileName = packageFileName.replace(/\.json$/, '.lock');
+  const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
@@ -101,10 +101,6 @@ export async function updateArtifacts({
       ),
       ...config.constraints,
     };
-
-    if (config.isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
 
     const preCommands: string[] = [
       `install-tool composer ${await getComposerConstraint(constraints)}`,
@@ -126,7 +122,7 @@ export async function updateArtifacts({
     const cmd = 'composer';
     let args: string;
     if (config.isLockFileMaintenance) {
-      args = 'install';
+      args = 'update';
     } else {
       args =
         (
@@ -166,7 +162,7 @@ export async function updateArtifacts({
       return res;
     }
 
-    logger.debug(`Commiting vendor files in ${vendorDir}`);
+    logger.debug(`Committing vendor files in ${vendorDir}`);
     for (const f of [...status.modified, ...status.not_added]) {
       if (f.startsWith(vendorDir)) {
         res.push({

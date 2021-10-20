@@ -35,7 +35,7 @@ describe('workers/repository/extract/index', () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect(await extractAllDependencies(config)).toEqual({});
-      expect(logger.warn).toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalled();
     });
 
     it('checks custom managers', async () => {
