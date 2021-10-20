@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import moo from 'moo';
 import pAll from 'p-all';
 import { logger } from '../../logger';
+import * as packageCache from '../../util/cache/package';
 import { regEx } from '../../util/regex';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GoproxyFallback, http } from './common';
@@ -128,12 +129,25 @@ export async function listVersions(
   baseUrl: string,
   lookupName: string
 ): Promise<string[]> {
+  const cacheNamespaces = 'datasource-go-proxy-list-versions';
+  const cacheKey = lookupName;
+  const cachedResult = await packageCache.get<string[]>(
+    cacheNamespaces,
+    cacheKey
+  );
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/list`;
   const { body } = await http.get(url);
-  return body
+  const result = body
     .split(regEx(/\s+/))
     .filter(Boolean)
     .filter((x) => x.indexOf('+') === -1);
+
+  await packageCache.set(cacheNamespaces, cacheKey, result, 60);
+  return result;
 }
 
 export async function versionInfo(
@@ -141,6 +155,16 @@ export async function versionInfo(
   lookupName: string,
   version: string
 ): Promise<Release> {
+  const cacheNamespaces = 'datasource-go-proxy-version-info';
+  const cacheKey = lookupName;
+  const cachedResult = await packageCache.get<Release>(
+    cacheNamespaces,
+    cacheKey
+  );
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/${version}.info`;
   const res = await http.getJson<VersionInfo>(url);
 
@@ -152,6 +176,7 @@ export async function versionInfo(
     result.releaseTimestamp = res.body.Time;
   }
 
+  await packageCache.set(cacheNamespaces, cacheKey, result, 24 * 60);
   return result;
 }
 
