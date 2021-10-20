@@ -1433,6 +1433,8 @@ async function tryPrAutomerge(
       } else {
         logger.debug({ prNumber, errors }, 'GitHub automerge unknown error');
       }
+    } else {
+      logger.debug('GitHub-native PR automerge enabled');
     }
   } catch (err) {
     logger.warn({ prNumber, err }, 'GitHub automerge: HTTP request error');
