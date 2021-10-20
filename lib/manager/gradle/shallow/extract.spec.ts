@@ -1,5 +1,6 @@
 import { extractAllPackageFiles } from '..';
 import { fs, loadFixture } from '../../../../test/util';
+import { SkipReason } from '../../../types';
 import type { ExtractConfig } from '../../types';
 
 jest.mock('../../../util/fs');
@@ -104,6 +105,34 @@ describe('manager/gradle/shallow/extract', () => {
         datasource: 'maven',
         deps: [],
         packageFile: 'settings.gradle',
+      },
+    ]);
+  });
+
+  it('skips versions composed from multiple variables', async () => {
+    mockFs({
+      'build.gradle':
+        'foo = "1"; bar = "2"; baz = "3"; "foo:bar:$foo.$bar.$baz"',
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'build.gradle',
+        deps: [
+          {
+            depName: 'foo:bar',
+            currentValue: '1.2.3',
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            skipReason: SkipReason.ContainsVariable,
+            managerData: {
+              packageFile: 'build.gradle',
+            },
+          },
+        ],
       },
     ]);
   });

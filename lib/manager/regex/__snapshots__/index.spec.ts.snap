@@ -41,6 +41,25 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts dependency with autoReplaceStringTemplate 1`] = `
+Object {
+  "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+  "datasourceTemplate": "docker",
+  "depNameTemplate": "my.new.registry/aRepository/andImage",
+  "deps": Array [
+    Object {
+      "currentValue": "1.18-alpine",
+      "datasource": "docker",
+      "depName": "my.new.registry/aRepository/andImage",
+      "replaceString": "image: my.old.registry/aRepository/andImage:1.18-alpine",
+    },
+  ],
+  "matchStrings": Array [
+    "image:\\\\s+(?<depName>my\\\\.old\\\\.registry\\\\/aRepository\\\\/andImage):(?<currentValue>[^\\\\s]+)",
+  ],
+}
+`;
+
 exports[`manager/regex/index extracts extractVersion 1`] = `
 Object {
   "deps": Array [

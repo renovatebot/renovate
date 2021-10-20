@@ -2,11 +2,13 @@ import { HexDatasource } from '../../datasource/hex';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { findLocalSiblingOrParent, localPathExists } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 
-const depSectionRegExp = /defp\s+deps.*do/g;
-const depMatchRegExp =
-  /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
+const depSectionRegExp = regEx(/defp\s+deps.*do/g);
+const depMatchRegExp = regEx(
+  /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm
+);
 
 export async function extractPackageFile(
   content: string,

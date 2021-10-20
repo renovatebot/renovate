@@ -1,5 +1,6 @@
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
+import { regEx } from '../../util/regex';
 import { joinUrlParts } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabTag } from './types';
@@ -22,7 +23,7 @@ export async function getReleases({
   registryUrl,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const depHost = registryUrl.replace(/\/api\/v4$/, '');
+  const depHost = registryUrl.replace(regEx(/\/api\/v4$/), '');
 
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,

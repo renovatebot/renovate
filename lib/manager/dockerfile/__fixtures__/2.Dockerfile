@@ -7,7 +7,7 @@ FROM image2:1.0.0@sha256:abcdef \
 # FROM image3
 
 FROM\
-    --platform=linux \
+    --platform=$arg \
 	# comment1
 	 image4
 
