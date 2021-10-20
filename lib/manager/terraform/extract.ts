@@ -1,4 +1,6 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { TerraformDependencyTypes } from './common';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
@@ -25,8 +27,9 @@ import {
   getTerraformDependencyType,
 } from './util';
 
-const dependencyBlockExtractionRegex =
-  /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
+const dependencyBlockExtractionRegex = regEx(
+  /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/
+);
 const contentCheckList = [
   'module "',
   'provider "',
@@ -111,7 +114,9 @@ export async function extractPackageFile(
     const lockFileContent = await readLockFile(lockFilePath);
     if (lockFileContent) {
       const extractedLocks = extractLocks(lockFileContent);
-      locks.push(...extractedLocks);
+      if (is.nonEmptyArray(extractedLocks)) {
+        locks.push(...extractedLocks);
+      }
     }
   }
 

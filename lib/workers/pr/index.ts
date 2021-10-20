@@ -119,7 +119,7 @@ export function getPlatformPrOptions(
   const usePlatformAutomerge = Boolean(
     config.automerge &&
       config.automergeType === 'pr' &&
-      config.usePlatformAutomerge
+      config.platformAutomerge
   );
 
   return {

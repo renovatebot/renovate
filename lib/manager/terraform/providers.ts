@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
 import type { ProviderLock } from './lockfile/types';
@@ -12,8 +13,9 @@ import {
   massageProviderLookupName,
 } from './util';
 
-export const sourceExtractionRegex =
-  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
+export const sourceExtractionRegex = regEx(
+  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
+);
 
 export function extractTerraformProvider(
   startingLine: number,
@@ -36,10 +38,12 @@ export function extractTerraformProvider(
     }
 
     const line = lines[lineNumber];
-    if (line) {
+
+    // istanbul ignore next
+    if (is.string(line)) {
       // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-      const openBrackets = (line.match(/\{/g) || []).length;
-      const closedBrackets = (line.match(/\}/g) || []).length;
+      const openBrackets = (line.match(/\{/g) || []).length; // TODO #12071 #12070
+      const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12071 #12070
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       // only update fields inside the root block
@@ -54,6 +58,9 @@ export function extractTerraformProvider(
           }
         }
       }
+    } else {
+      // stop - something went wrong
+      braceCounter = 0;
     }
     lineNumber += 1;
   } while (braceCounter !== 0);

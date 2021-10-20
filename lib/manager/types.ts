@@ -4,6 +4,7 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../config/types';
+import type { ProgrammingLanguage } from '../constants';
 import type { RangeStrategy, SkipReason } from '../types';
 import type { File } from '../util/git';
 
@@ -229,7 +230,7 @@ export interface GlobalManagerConfig {
 
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
-  language?: string;
+  language?: ProgrammingLanguage;
   supportsLockFileMaintenance?: boolean;
 
   bumpPackageVersion?(

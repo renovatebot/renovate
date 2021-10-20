@@ -9,6 +9,7 @@ import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { find } from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -48,10 +49,10 @@ function getUpdateImportPathCmds(
     if (gomodModCompatibility) {
       if (
         gomodModCompatibility.startsWith('v') &&
-        isValid(gomodModCompatibility.replace(/^v/, ''))
+        isValid(gomodModCompatibility.replace(regEx(/^v/), ''))
       ) {
         installMarwanModArgs = installMarwanModArgs.replace(
-          /@latest$/,
+          regEx(/@latest$/),
           `@${gomodModCompatibility}`
         );
       } else {
@@ -76,7 +77,7 @@ function useModcacherw(goVersion: string): boolean {
     return true;
   }
 
-  const [, majorPart, minorPart] = /(\d+)\.(\d+)/.exec(goVersion) ?? [];
+  const [, majorPart, minorPart] = regEx(/(\d+)\.(\d+)/).exec(goVersion) ?? [];
   const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
 
   return (
@@ -94,7 +95,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
-  const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
+  const sumFileName = goModFileName.replace(regEx(/\.mod$/), '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
     logger.debug('No go.sum found');
@@ -107,7 +108,7 @@ export async function updateArtifacts({
 
   try {
     const massagedGoMod = newGoModContent.replace(
-      /\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
+      regEx(/\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g),
       '\n// renovate-replace $1'
     );
     if (massagedGoMod !== newGoModContent) {
@@ -245,7 +246,7 @@ export async function updateArtifacts({
 
     const finalGoModContent = (
       await readLocalFile(goModFileName, 'utf8')
-    ).replace(/\/\/ renovate-replace /g, '');
+    ).replace(regEx(/\/\/ renovate-replace /g), '');
     if (finalGoModContent !== newGoModContent) {
       logger.debug('Found updated go.mod after go.sum update');
       res.push({

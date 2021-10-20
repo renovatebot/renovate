@@ -13,6 +13,7 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -88,7 +89,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
-  if (!/(?:cs|vb|fs)proj$/i.test(packageFileName)) {
+  if (!regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)) {
     // This could be implemented in the future if necessary.
     // It's not that easy though because the questions which
     // project file to restore how to determine which lock files
