@@ -155,6 +155,7 @@ describe('config/migration', () => {
           },
         ],
         raiseDeprecationWarnings: false,
+        enabledManagers: ['yarn'],
       } as any;
       const parentConfig = { ...defaultConfig, semanticCommits: 'disabled' };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
