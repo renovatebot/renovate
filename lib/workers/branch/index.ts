@@ -497,7 +497,7 @@ export async function processBranch(
       if (newBody.indexOf('stopRebasingLabel') === -1) {
         // Append the description line
         newBody = newBody.replace(
-          'check this box',
+          'click this box',
           emojify(
             'check this box.\n\n :memo: **Note**: The rebase/retry checkbox was unchecked because of `stopRebasingLabel` setting in your configuration'
           )

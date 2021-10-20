@@ -14,5 +14,5 @@ export async function getControls(config: BranchConfig): Promise<string> {
         )
       : '';
 
-  return `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box.${warning}${rebaseBoxUncheckedWarning}\n\n`;
+  return `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.${warning}${rebaseBoxUncheckedWarning}\n\n`;
 }

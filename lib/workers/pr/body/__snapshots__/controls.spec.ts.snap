@@ -15,7 +15,7 @@ exports[`workers/pr/body/controls getControls when the branch is  modified has t
 
 ---
 
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box. ⚠ **Warning**: custom changes will be lost.
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox. ⚠ **Warning**: custom changes will be lost.
 
  📝 **Note**: The rebase/retry checkbox was unchecked because of \`stopRebasingLabel\` setting in your configuration
 
@@ -37,7 +37,7 @@ exports[`workers/pr/body/controls getControls when the branch is  not modified h
 
 ---
 
- - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box.
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
 
  📝 **Note**: The rebase/retry checkbox was unchecked because of \`stopRebasingLabel\` setting in your configuration
 
