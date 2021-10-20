@@ -121,7 +121,7 @@ Array [
 exports[`manager/composer/artifacts installs before running the update when symfony flex is installed 1`] = `
 Array [
   Object {
-    "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
