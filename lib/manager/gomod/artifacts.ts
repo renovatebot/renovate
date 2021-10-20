@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
@@ -8,6 +7,7 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
+import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
 import { find } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { isValid } from '../../versioning/semver';
@@ -18,19 +18,22 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-function getPreCommands(): string[] | null {
+function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
+  let environmentVariables: NodeJS.ProcessEnv = {};
+
   const credentials = find({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
-  let preCommands = null;
+
   if (credentials?.token) {
-    const token = quote(credentials.token);
-    preCommands = [
-      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
-    ];
+    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+      'https://github.com/',
+      credentials.token
+    );
   }
-  return preCommands;
+
+  return environmentVariables;
 }
 
 function getUpdateImportPathCmds(
@@ -127,12 +130,12 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: getGlobalConfig().binarySource === 'docker' ? '0' : null,
+        ...getGitEnvironmentVariables(),
       },
       docker: {
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
-        preCommands: getPreCommands(),
       },
     };
 
@@ -156,9 +159,17 @@ export async function updateArtifacts({
       }
     }
 
-    const isGoModTidyRequired =
-      config.postUpdateOptions?.includes('gomodTidy') ||
+    const mustSkipGoModTidy =
+      !config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
+    if (mustSkipGoModTidy) {
+      logger.debug({ cmd, args }, 'go mod tidy command skipped');
+    }
+
+    const isGoModTidyRequired =
+      !mustSkipGoModTidy &&
+      (config.postUpdateOptions?.includes('gomodTidy') ||
+        (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy';
       logger.debug({ cmd, args }, 'go mod tidy command included');
