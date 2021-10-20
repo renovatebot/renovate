@@ -135,6 +135,7 @@ export async function listVersions(
     cacheNamespaces,
     cacheKey
   );
+  // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
@@ -161,6 +162,7 @@ export async function versionInfo(
     cacheNamespaces,
     cacheKey
   );
+  // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
