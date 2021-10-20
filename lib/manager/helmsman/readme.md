@@ -1,4 +1,4 @@
-The `helmsman` manager is currently limited and does not support the full feature set of [Helmsman](https://github.com/Praqma/helmsman), please consult the documented limitations below.
+The `helmsman` manager is currently limited and does not support the full feature set of [Helmsman](https://github.com/Praqma/helmsman), read about the limitations below.
 
 ### Non-configured fileMatch
 
