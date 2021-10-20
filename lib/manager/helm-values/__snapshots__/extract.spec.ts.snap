@@ -4,6 +4,14 @@ exports[`manager/helm-values/extract extractPackageFile() extracts from complex 
 Object {
   "deps": Array [
     Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.18-alpine",
+      "datasource": "docker",
+      "depName": "docker.io/library/nginx",
+      "replaceString": "docker.io/library/nginx:1.18-alpine",
+    },
+    Object {
       "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "11.6.0-debian-9-r0",

@@ -87,9 +87,9 @@ This makes it suitable for augmenting a preset or base list without displacing t
 ## aliases
 
 The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements` manager only.
+Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
 
-`helm-requirements` includes this default alias:
+The above managers include this default alias:
 
 ```json
 {
@@ -201,7 +201,7 @@ In that case Renovate first creates a branch and associated Pull Request, and th
 If by the next run the PR is already behind the base branch it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
 If Renovate is scheduled for hourly runs on the repository but commits are made every 15 minutes to the main branch, then an automerge like this will keep getting deferred with every rebase.
 
-Note: if you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
+Note: if you have no tests but still want Renovate to automerge, you need to add `"ignoreTests": true` to your configuration.
 
 If you prefer that Renovate more silently automerge _without_ Pull Requests at all, you can configure `"automergeType": "branch"`. In this case Renovate will:
 
@@ -216,12 +216,6 @@ If you're not already using `bors-ng` or similar, don't worry about this option.
 ## azureAutoApprove
 
 Setting this to `true` will automatically approve the PRs in Azure DevOps.
-
-You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
-
-## azureAutoComplete
-
-Setting this to `true` will configure PRs in Azure DevOps to auto-complete after all (if any) branch policies have been met.
 
 You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
@@ -248,10 +242,11 @@ Configuring this to `true` means that Renovate will detect and apply the default
 
 ## branchConcurrentLimit
 
-By default, Renovate won't enforce any concurrent branch limits. If you want the same limit for both concurrent branches
-and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
-However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (
-e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
+By default, Renovate won't enforce any concurrent branch limits.
+The `config:base` preset that many extend from limits the amount of concurrent branches to 20, but in most cases we would recommend lower values such as 5 or 10.
+
+If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
+However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
 
 This limit is enforced on a per-repository basis.
 
@@ -262,6 +257,15 @@ Example config:
   "branchConcurrentLimit": 3
 }
 ```
+
+Warning: Leaving PRs/branches as unlimited or as a high number increases the time it takes for Renovate to process a repository.
+If you find that Renovate is too slow when rebasing out-of-date branches, decrease the `branchConcurrentLimit`.
+
+If you have too many concurrent branches which rebase themselves each run, Renovate can take a lot of time to rebase.
+Solutions:
+
+- Decrease the concurrent branch limit (note: this won't go and delete any existing, so won't have an effect until you either merge or close existing ones manually)
+- Remove automerge and/or automatic rebasing (set `rebaseWhen` to `conflicted`). However if you have branch protection saying PRs must be up to date then it's not ideal to remove automatic rebasing
 
 ## branchName
 
@@ -603,7 +607,10 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
+See [Private module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
+
+Note: encrypted secrets must have at least an org/group scope, and optionally a repository scope.
+This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
 
 ## excludeCommitPaths
 
@@ -743,17 +750,11 @@ Example:
 }
 ```
 
-## gitLabAutomerge
-
-If you enabled `automerge` in the Renovate config, you can speed up the automerge process by using GitLab's own automerge function.
-Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
-This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
-
 ## gitLabIgnoreApprovals
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`.
+This option works only when `automerge=true`, `automergeType=pr` and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
 
 ## golang
@@ -1075,8 +1076,18 @@ The above is the same as if you wrote this package rule:
 
 ## ignorePaths
 
-Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering.
-For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
+Renovate will extract dependencies from every file it finds in a repository, unless that file is explicitly ignored.
+With this setting you can selectively ignore package files that would normally be "autodiscovered" and updated by Renovate.
+
+For instance if you have a project with an `"examples/"` directory you wish to ignore:
+
+```json
+{
+  "ignorePaths": ["**/examples/**"]
+}
+```
+
+Useful to know: Renovate's default ignore is `node_modules` and `bower_components` only, however if you are extending the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
 ## ignorePrAuthor
 
@@ -1102,6 +1113,14 @@ It would take the entire `"config:base"` preset - which contains a lot of sub-pr
 ## ignoreScripts
 
 Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
+
+## ignoreTests
+
+Currently Renovate's default behavior is to only automerge if every status check has succeeded.
+
+Setting this option to `true` means that Renovate will ignore _all_ status checks.
+You can set this if you don't have any status checks but still want Renovate to automerge PRs.
+Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
 
 ## ignoreUnstable
 
@@ -1140,7 +1159,7 @@ We recommend that you use the `strict` mode, and enable the `dependencyDashboard
 
 ## java
 
-Use this configuration option for shared config across all java projects (Gradle and Maven).
+Use this configuration option for shared config across all Java projects (Gradle and Maven).
 
 ## js
 
@@ -1210,6 +1229,15 @@ Typically you would encrypt it and put it inside the `encrypted` object.
 ## npmrc
 
 See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
+
+## npmrcMerge
+
+This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
+In some situations you need the ability to force override `.npmrc` contents in a repo (`npmMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmMerge=true`).
+A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
+
+If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and therefore its values ignored.
+If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
 
 ## packageRules
 
@@ -1637,6 +1665,19 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
 
+## platformAutomerge
+
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then `platformAutomerge` is enabled by default to speed up merging via the platform's native automerge functionality.
+
+Renovate tries platform-native automerge only when it initially creates the PR.
+Any PR that is being updated will be automerged with the Renovate-based automerge.
+
+`platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
+This option is available for Azure, GitHub and GitLab.
+It falls back to Renovate-based automerge if the platform-native automerge is not available.
+
+Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
+
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates.
@@ -1852,7 +1893,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
 
 Renovate's `"auto"` strategy works like this for npm:
 
@@ -2123,6 +2164,44 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### autoReplaceStringTemplate
+
+Allows overwriting how the matched string is replaced.
+This allows for some migration strategies.
+E.g. moving from one Docker image repository to another one.
+
+helm-values.yaml:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.old.registry/aRepository/andImage:1.18-alpine
+```
+
+regex definition:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["values.yaml$"],
+      "matchStrings": [
+        "image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)"
+      ],
+      "depNameTemplate": "my.new.registry/aRepository/andImage",
+      "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+This will lead to following update where `1.21-alpine` is the newest version of `my.new.registry/aRepository/andImage`:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.new.registry/aRepository/andImage:1.21-alpine
+```
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
@@ -2140,17 +2219,6 @@ In case there is a need to configure them manually, it can be done using this `r
 ```
 
 The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
-
-## requiredStatusChecks
-
-Currently Renovate's default behavior is to only automerge if every status check has succeeded.
-
-Setting this option to `null` means that Renovate will ignore _all_ status checks.
-You can set this if you don't have any status checks but still want Renovate to automerge PRs.
-Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
-
-In future, this might be configurable to allow certain status checks to be ignored/required.
-See [issue 1853 at the Renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
 
 ## respectLatest
 

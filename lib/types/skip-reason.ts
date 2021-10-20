@@ -34,6 +34,7 @@ export enum SkipReason {
   UnknownVersion = 'unknown-version',
   UnknownVolta = 'unknown-volta',
   UnsupportedChartType = 'unsupported-chart-type',
+  UnsupportedDatasource = 'unsupported-datasource',
   UnsupportedRemote = 'unsupported-remote',
   UnsupportedUrl = 'unsupported-url',
   UnsupportedVersion = 'unsupported-version',

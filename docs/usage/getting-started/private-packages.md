@@ -180,6 +180,8 @@ You can add an `.npmrc` authentication line to your Renovate config under the fi
 ```
 
 If configured like this, Renovate will use this to authenticate with npm and will ignore any `.npmrc` files(s) it finds checked into the repository.
+If you wish for the values in your `config.npmrc` to be _merged_ (prepended) with any values found in repos then also set `config.npmrcMerge=true`.
+This merge approach is similar to how `npm` itself behaves if `.npmrc` is found in both the user home directory as well as a project.
 
 #### Add npmToken to Renovate config
 
@@ -195,7 +197,7 @@ If you are using the main npmjs registry then you can configure just the `npmTok
 
 If you don't want all users of the repository to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Go to <https://renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
+Go to <https://app.renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
 
 Paste the encrypted result inside an `encrypted` object like this:
 
@@ -227,7 +229,7 @@ Renovate will then use the following logic:
 
 #### Encrypted entire .npmrc file into config
 
-Copy the entire `.npmrc`, replace newlines with `\n` characters , and then try encrypting it at <https://renovatebot.com/encrypt>.
+Copy the entire `.npmrc`, replace newlines with `\n` characters , and then try encrypting it at <https://app.renovatebot.com/encrypt>.
 
 You will then get an encrypted string that you can substitute into your `renovate.json` instead.
 The end-result looks like this:
@@ -239,8 +241,6 @@ The end-result looks like this:
   }
 }
 ```
-
-However be aware that if your `.npmrc` is too big to encrypt then the above command will fail.
 
 #### Automatically authenticate for npm package stored in private GitHub npm repository
 
@@ -257,6 +257,40 @@ However be aware that if your `.npmrc` is too big to encrypt then the above comm
   ],
   "npmrc": "@organizationName:registry=https://npm.pkg.github.com/"
 }
+```
+
+#### Yarn 2+
+
+Renovate doesn't support reading `npmRegistries` and `npmScopes` from `.yarnrc.yml`, so `hostRules` (or `npmToken`) and `npmrc` should be configured like above.
+Renovate updates `npmRegistries` in `.yarnrc.yml` with resolved `hostRules` before running Yarn.
+For Renovate to overwrite existing `npmRegistries` entry, the key should match the `matchHost` minus the protocol (`http:` or `https:`) plus the trailing slash.
+
+For example, the Renovate configuration:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://npm.pkg.github.com/",
+      "hostType": "npm",
+      "encrypted": {
+        "token": "<Encrypted PAT Token>"
+      }
+    }
+  ]
+}
+```
+
+will update `.yarnrc.yml` as following:
+
+```yaml
+npmRegistries:
+  //npm.pkg.github.com/:
+    npmAuthToken: <Decrypted PAT Token>
+  //npm.pkg.github.com:
+    # this will not be overwritten and may conflict
+  https://npm.pkg.github.com/:
+    # this will not be overwritten and may conflict
 ```
 
 ### nuget

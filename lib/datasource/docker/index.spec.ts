@@ -201,11 +201,12 @@ describe('datasource/docker/index', () => {
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .head('/library/some-dep/manifests/some-tag', undefined, {
-          reqheaders: {
-            authorization: 'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk',
-          },
-        })
+
+        .head('/library/some-dep/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+        )
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-dep' },
@@ -237,13 +238,12 @@ describe('datasource/docker/index', () => {
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .head('/node/manifests/some-tag', undefined, {
-          reqheaders: { authorization: 'Basic abc' },
-        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic test_token')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'abcdef' }],
+        authorizationData: [{ authorizationToken: 'test_token' }],
       });
 
       await getDigest(
@@ -263,6 +263,45 @@ describe('datasource/docker/index', () => {
       });
     });
 
+    it('passes session token to ECR client', async () => {
+      httpMock
+        .scope(amazonUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic test_token')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({
+        username: 'some-username',
+        password: 'some-password',
+        token: 'some-session-token',
+      });
+
+      mockEcrAuthResolve({
+        authorizationData: [{ authorizationToken: 'test_token' }],
+      });
+
+      await getDigest(
+        {
+          datasource: 'docker',
+          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
+        'some-tag'
+      );
+
+      expect(AWS.ECR).toHaveBeenCalledWith({
+        credentials: {
+          accessKeyId: 'some-username',
+          secretAccessKey: 'some-password',
+          sessionToken: 'some-session-token',
+        },
+        region: 'us-east-1',
+      });
+    });
+
     it('supports ECR authentication', async () => {
       httpMock
         .scope(amazonUrl)
@@ -270,13 +309,12 @@ describe('datasource/docker/index', () => {
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
-        .head('/node/manifests/some-tag', undefined, {
-          reqheaders: { authorization: 'Basic abc' },
-        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic test')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'abc' }],
+        authorizationData: [{ authorizationToken: 'test' }],
       });
 
       const res = await getDigest(
@@ -353,7 +391,7 @@ describe('datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-other-dep:pull'
         )
-        .reply(200, { access_token: 'some-token' });
+        .reply(200, { access_token: 'test' });
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-other-dep' },
         '8.0.0-alpine'
@@ -528,7 +566,7 @@ describe('datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/node:pull'
         )
-        .reply(200, { token: 'some-token ' });
+        .reply(200, { token: 'test' });
       const res = await getPkgReleases({
         datasource: id,
         depName: 'node',
@@ -556,7 +594,7 @@ describe('datasource/docker/index', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/node:pull'
         )
-        .reply(200, { token: 'some-token ' });
+        .reply(200, { token: 'test' });
       const res = await getPkgReleases({
         datasource: id,
         depName: 'docker.io/node',

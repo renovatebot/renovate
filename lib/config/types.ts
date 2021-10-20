@@ -38,11 +38,13 @@ export interface RenovateSharedConfig {
   includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
+  ignoreTests?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
   hashedBranchLength?: number;
   npmrc?: string;
+  npmrcMerge?: boolean;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
@@ -56,7 +58,6 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
-  requiredStatusChecks?: string[];
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string;
@@ -81,6 +82,7 @@ export interface GlobalOnlyConfig {
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
+  privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }
@@ -100,7 +102,8 @@ export interface RepoGlobalConfig {
   dryRun?: boolean;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
-  privateKey?: string | Buffer;
+  privateKey?: string;
+  privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
 }
@@ -148,6 +151,7 @@ export interface CustomManager {
   datasourceTemplate?: string;
   lookupNameTemplate?: string;
   versioningTemplate?: string;
+  autoReplaceStringTemplate?: string;
 }
 
 // TODO: Proper typings

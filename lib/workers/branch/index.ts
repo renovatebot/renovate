@@ -36,6 +36,7 @@ import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../types';
+import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
@@ -482,6 +483,7 @@ export async function processBranch(
       logger.info({ commitSha }, `Branch ${action}`);
     }
     // Set branch statuses
+    await setArtifactErrorStatus(config);
     await setStability(config);
     await setConfidence(config);
 
@@ -518,11 +520,13 @@ export async function processBranch(
     }
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
+    // but do not break when there are artifact errors
     if (
+      !config.artifactErrors?.length &&
       !dependencyDashboardCheck &&
       !config.rebaseRequested &&
       commitSha &&
-      (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
+      config.prCreation !== 'immediate'
     ) {
       logger.debug({ commitSha }, `Branch status pending`);
       return {
@@ -533,7 +537,7 @@ export async function processBranch(
     }
 
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    if (branchExists || !config.requiredStatusChecks) {
+    if (branchExists || config.ignoreTests) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
@@ -724,29 +728,6 @@ export async function processBranch(
               number: pr.number,
               topic: artifactErrorTopic,
               content,
-            });
-          }
-        }
-        const context = `renovate/artifacts`;
-        const description = 'Artifact file update failure';
-        const state = BranchStatus.red;
-        const existingState = await platform.getBranchStatusCheck(
-          config.branchName,
-          context
-        );
-        // Check if state needs setting
-        if (existingState !== state) {
-          logger.debug(`Updating status check state to failed`);
-          if (getGlobalConfig().dryRun) {
-            logger.info(
-              'DRY-RUN: Would set branch status in ' + config.branchName
-            );
-          } else {
-            await platform.setBranchStatus({
-              branchName: config.branchName,
-              context,
-              description,
-              state,
             });
           }
         }

@@ -4,6 +4,7 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../config/types';
+import type { ProgrammingLanguage } from '../constants';
 import type { RangeStrategy, SkipReason } from '../types';
 import type { File } from '../util/git';
 
@@ -20,12 +21,14 @@ export interface ExtractConfig {
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
+  npmrcMerge?: boolean;
   skipInstalls?: boolean;
   updateInternalDeps?: boolean;
   deepExtract?: boolean;
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
+  autoReplaceStringTemplate?: string;
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   depNameTemplate?: string;
@@ -68,6 +71,7 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
+  autoReplaceStringTemplate?: string;
   hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;
   datasource?: string;
@@ -100,6 +104,7 @@ export interface Package<T> extends ManagerData<T> {
   repo?: string;
   target?: string;
   versioning?: string;
+  dataType?: string;
 
   // npm manager
   bumpVersion?: ReleaseType | string;
@@ -135,6 +140,7 @@ export interface LookupUpdate {
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+  newValue?: string;
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
   currentDigestShort?: string;
@@ -217,9 +223,14 @@ export interface UpdateLockedConfig {
   newVersion?: string;
 }
 
+export interface GlobalManagerConfig {
+  npmrc?: string;
+  npmrcMerge?: boolean;
+}
+
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
-  language?: string;
+  language?: ProgrammingLanguage;
   supportsLockFileMaintenance?: boolean;
 
   bumpPackageVersion?(
@@ -227,6 +238,8 @@ export interface ManagerApi {
     currentValue: string,
     bumpVersion: ReleaseType | string
   ): Result<BumpPackageVersionResult>;
+
+  detectGlobalConfig?(): Result<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,

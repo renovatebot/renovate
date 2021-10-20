@@ -6,7 +6,7 @@ description: Renovate's support for ESLint-like shareable configs
 # Shareable Config Presets
 
 Renovate's "config presets" are a convenient way to distribute config for reuse across multiple repositories.
-It is similar in design to `eslint`'s shareable configs, and can be used for whole repository configs and for individual rules.
+It is similar in design to ESLint's shareable configs, and can be used for whole repository configs and for individual rules.
 They are defined using the `extends` array within config and may also be nested.
 
 In short:
@@ -33,7 +33,7 @@ Renovate's configuration is self-documenting, because you can fill in the `"desc
 
 ## Implementation Approach
 
-In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an `eslint` config.
+In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an ESLint config.
 
 ## Preset Hosting
 

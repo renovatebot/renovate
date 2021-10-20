@@ -1,6 +1,9 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import type { PackageDependency, PackageFile } from '../types';
+import { regEx } from '../../util/regex';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { TerraformDependencyTypes } from './common';
+import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
 import {
   analyzeTerraformProvider,
@@ -24,8 +27,9 @@ import {
   getTerraformDependencyType,
 } from './util';
 
-const dependencyBlockExtractionRegex =
-  /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
+const dependencyBlockExtractionRegex = regEx(
+  /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/
+);
 const contentCheckList = [
   'module "',
   'provider "',
@@ -34,7 +38,11 @@ const contentCheckList = [
   ' "docker_image" ',
 ];
 
-export function extractPackageFile(content: string): PackageFile | null {
+export async function extractPackageFile(
+  content: string,
+  fileName: string,
+  config: ExtractConfig
+): Promise<PackageFile | null> {
   logger.trace({ content }, 'terraform.extractPackageFile()');
   if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
@@ -99,13 +107,26 @@ export function extractPackageFile(content: string): PackageFile | null {
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting terraform plugins');
   }
+
+  const locks = [];
+  const lockFilePath = findLockFile(fileName);
+  if (lockFilePath) {
+    const lockFileContent = await readLockFile(lockFilePath);
+    if (lockFileContent) {
+      const extractedLocks = extractLocks(lockFileContent);
+      if (is.nonEmptyArray(extractedLocks)) {
+        locks.push(...extractedLocks);
+      }
+    }
+  }
+
   deps.forEach((dep) => {
     switch (dep.managerData.terraformDependencyType) {
       case TerraformDependencyTypes.required_providers:
-        analyzeTerraformRequiredProvider(dep);
+        analyzeTerraformRequiredProvider(dep, locks);
         break;
       case TerraformDependencyTypes.provider:
-        analyzeTerraformProvider(dep);
+        analyzeTerraformProvider(dep, locks);
         break;
       case TerraformDependencyTypes.module:
         analyseTerraformModule(dep);

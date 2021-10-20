@@ -4,6 +4,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { hasKey } from '../../util/object';
+import { regEx } from '../../util/regex';
 import { ensurePathPrefix } from '../../util/url';
 import {
   api as dockerVersioning,
@@ -24,7 +25,6 @@ import {
 import { getTagsQuayRegistry } from './quay';
 
 // TODO: add got typings when available (#9646)
-// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header (#9645)
 
 export { id };
 export const customRegistrySupport = true;
@@ -104,7 +104,7 @@ async function getTags(
       return cachedResult;
     }
 
-    const isQuay = /^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i.test(
+    const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
       registryHost
     );
     let tags: string[] | null;

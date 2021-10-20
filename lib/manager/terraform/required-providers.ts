@@ -1,10 +1,12 @@
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
+import type { ProviderLock } from './lockfile/types';
 import { analyzeTerraformProvider } from './providers';
 import type { ExtractionResult } from './types';
 import { keyValueExtractionRegex } from './util';
 
-export const providerBlockExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+{/;
+export const providerBlockExtractionRegex = regEx(/^\s*(?<key>[^\s]+)\s+=\s+{/);
 
 function extractBlock(
   lineNum: number,
@@ -72,9 +74,12 @@ export function extractTerraformRequiredProviders(
   return { lineNumber, dependencies: deps };
 }
 
-export function analyzeTerraformRequiredProvider(dep: PackageDependency): void {
+export function analyzeTerraformRequiredProvider(
+  dep: PackageDependency,
+  locks: ProviderLock[]
+): void {
   /* eslint-disable no-param-reassign */
-  analyzeTerraformProvider(dep);
+  analyzeTerraformProvider(dep, locks);
   dep.depType = `required_provider`;
   /* eslint-enable no-param-reassign */
 }
