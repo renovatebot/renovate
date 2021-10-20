@@ -22,6 +22,7 @@ import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
 import type {
@@ -150,7 +151,7 @@ export async function getRepos(): Promise<string[]> {
 }
 
 function urlEscape(str: string): string {
-  return str ? str.replace(/\//g, '%2F') : str;
+  return str ? str.replace(regEx(/\//g), '%2F') : str;
 }
 
 export async function getRawFile(
@@ -669,9 +670,9 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
 
 export function massageMarkdown(input: string): string {
   let desc = input
-    .replace(/Pull Request/g, 'Merge Request')
-    .replace(/PR/g, 'MR')
-    .replace(/\]\(\.\.\/pull\//g, '](!');
+    .replace(regEx(/Pull Request/g), 'Merge Request')
+    .replace(regEx(/PR/g), 'MR')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
 
   if (lt(defaults.version, '13.4.0')) {
     logger.debug(
@@ -1073,7 +1074,9 @@ export async function ensureComment({
 }: EnsureCommentConfig): Promise<boolean> {
   const sanitizedContent = sanitize(content);
   const massagedTopic = topic
-    ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
+    ? topic
+        .replace(regEx(/Pull Request/g), 'Merge Request')
+        .replace(regEx(/PR/g), 'MR')
     : topic;
   const comments = await getComments(number);
   let body: string;
@@ -1082,7 +1085,9 @@ export async function ensureComment({
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
-    body = body.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR');
+    body = body
+      .replace(regEx(/Pull Request/g), 'Merge Request')
+      .replace(regEx(/PR/g), 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
         commentId = comment.id;
