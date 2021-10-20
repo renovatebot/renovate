@@ -32,7 +32,6 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../util/merge-confidence';
-import { regEx } from '../../util/regex';
 import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -58,8 +57,6 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
 }
 
 const rebasingRegex = /\*\*Rebasing\*\*: .*/;
-
-const prRebaseCheckRegex = regEx(`- [x] <!-- rebase-check -->`);
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
@@ -489,12 +486,21 @@ export async function processBranch(
     await setConfidence(config);
 
     if (branchExists && stopRebasingLabelPresents && prRebaseChecked) {
-      const newBody =
-        branchPr.body?.replace(
-          prRebaseCheckRegex,
-          '- [ ] <!-- rebase-check -->'
-        ) +
-        '\nThe rebase checkbox was unchecked because of stopRebasingLabel setting in your configuration';
+      // Uncheck the Rebase checkbox
+      let newBody = branchPr.body?.replace(
+        '- [x] <!-- rebase-check -->',
+        '- [ ] <!-- rebase-check -->'
+      );
+
+      if (newBody.indexOf('stopRebasingLabel') === -1) {
+        // Append the description line
+        newBody = newBody.replace(
+          'check this box',
+          emojify(
+            'check this box.\n\n :memo: **Note**: The rebase/retry checkbox was unchecked because of `stopRebasingLabel` setting in your configuration'
+          )
+        );
+      }
 
       logger.debug(
         'Updating existing PR to indicate that further rebasing is turned off'
@@ -506,6 +512,9 @@ export async function processBranch(
         prBody: newBody,
         platformOptions: getPlatformPrOptions(config),
       });
+
+      // This flag may be used by ensurePr to generate the correct PR body
+      config.prRebaseBoxUnchecked = true;
     }
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet

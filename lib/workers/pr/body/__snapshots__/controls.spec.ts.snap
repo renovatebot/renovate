@@ -10,12 +10,36 @@ exports[`workers/pr/body/controls getControls when the branch is  modified has t
 "
 `;
 
+exports[`workers/pr/body/controls getControls when the branch is  modified has the correct contents when rebase/retry checkbox unchecked 1`] = `
+"
+
+---
+
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box. ⚠ **Warning**: custom changes will be lost.
+
+ 📝 **Note**: The rebase/retry checkbox was unchecked because of \`stopRebasingLabel\` setting in your configuration
+
+"
+`;
+
 exports[`workers/pr/body/controls getControls when the branch is  not modified has the correct contents 1`] = `
 "
 
 ---
 
  - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box.
+
+"
+`;
+
+exports[`workers/pr/body/controls getControls when the branch is  not modified has the correct contents when rebase/retry checkbox unchecked 1`] = `
+"
+
+---
+
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box.
+
+ 📝 **Note**: The rebase/retry checkbox was unchecked because of \`stopRebasingLabel\` setting in your configuration
 
 "
 `;

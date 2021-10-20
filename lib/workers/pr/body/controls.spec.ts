@@ -26,6 +26,14 @@ describe('workers/pr/body/controls', () => {
             branchConfig.branchName
           );
         });
+        it('has the correct contents when rebase/retry checkbox unchecked', async () => {
+          branchConfig.prRebaseBoxUnchecked = true;
+          expect(await getControls(branchConfig)).toMatchSnapshot();
+          expect(git.isBranchModified).toHaveBeenCalledTimes(1);
+          expect(git.isBranchModified).toHaveBeenCalledWith(
+            branchConfig.branchName
+          );
+        });
       });
     });
   });
