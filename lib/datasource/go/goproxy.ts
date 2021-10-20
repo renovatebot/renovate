@@ -182,6 +182,8 @@ export async function getReleases(
     return cachedResult;
   }
 
+  let result: ReleaseResult | null = null;
+
   for (const { url, fallback } of proxyList) {
     try {
       const versions = await listVersions(url, lookupName);
@@ -195,9 +197,8 @@ export async function getReleases(
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        const result = { releases };
-        await packageCache.set(cacheNamespaces, cacheKey, result, cacheMinutes);
-        return result;
+        result = { releases };
+        break;
       }
     } catch (err) {
       const statusCode = err?.response?.statusCode;
@@ -215,6 +216,6 @@ export async function getReleases(
     }
   }
 
-  await packageCache.set(cacheNamespaces, cacheKey, null, cacheMinutes);
-  return null;
+  await packageCache.set(cacheNamespaces, cacheKey, result, cacheMinutes);
+  return result;
 }
