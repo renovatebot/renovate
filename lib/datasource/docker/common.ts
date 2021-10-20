@@ -10,6 +10,7 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions, HttpResponse } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
+import { regEx } from '../../util/regex';
 import {
   ensureTrailingSlash,
   parseUrl,
@@ -20,7 +21,7 @@ import { MediaType, RegistryRepository } from './types';
 export const id = 'docker';
 export const http = new Http(id);
 
-export const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
+export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
 const DOCKER_HUB = 'https://index.docker.io';
 export const defaultRegistryUrls = [DOCKER_HUB];
 
@@ -210,11 +211,11 @@ export function getRegistryRepository(
 ): RegistryRepository {
   if (registryUrl !== DOCKER_HUB) {
     const registryEndingWithSlash = ensureTrailingSlash(
-      registryUrl.replace(/^https?:\/\//, '')
+      registryUrl.replace(regEx(/^https?:\/\//), '')
     );
     if (lookupName.startsWith(registryEndingWithSlash)) {
       let registryHost = trimTrailingSlash(registryUrl);
-      if (!/^https?:\/\//.test(registryHost)) {
+      if (!regEx(/^https?:\/\//).test(registryHost)) {
         registryHost = `https://${registryHost}`;
       }
       let dockerRepository = lookupName.replace(registryEndingWithSlash, '');
@@ -244,7 +245,7 @@ export function getRegistryRepository(
   if (registryHost === 'docker.io') {
     registryHost = 'index.docker.io';
   }
-  if (!/^https?:\/\//.exec(registryHost)) {
+  if (!regEx(/^https?:\/\//).exec(registryHost)) {
     registryHost = `https://${registryHost}`;
   }
   const opts = hostRules.find({ hostType: id, url: registryHost });

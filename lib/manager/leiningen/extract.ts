@@ -1,15 +1,16 @@
 import { ClojureDatasource } from '../../datasource/clojure';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ExtractContext, ExtractedVariables } from './types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
-  const regex = new RegExp(`:${kwName}(?=\\s)`);
+  const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12070
   const keyOffset = str.search(regex);
   if (keyOffset < 0) {
     return null;
   }
   const withSpaces = str.slice(keyOffset + kwName.length + 1);
-  const valueOffset = withSpaces.search(/[^\s]/);
+  const valueOffset = withSpaces.search(regEx(/[^\s]/));
   if (valueOffset < 0) {
     return null;
   }
@@ -35,16 +36,16 @@ export function extractFromVectors(
   let artifactId = '';
   let version = '';
 
-  const isSpace = (ch: string): boolean => ch && /[\s,]/.test(ch);
+  const isSpace = (ch: string): boolean => ch && regEx(/[\s,]/).test(ch);
 
   const cleanStrLiteral = (s: string): string =>
-    s.replace(/^"/, '').replace(/"$/, '');
+    s.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
 
   const yieldDep = (): void => {
     if (artifactId && version) {
       const depName = expandDepName(cleanStrLiteral(artifactId));
       if (version.startsWith('~')) {
-        const currentValue = vars[version.replace(/^~\s*/, '')];
+        const currentValue = vars[version.replace(regEx(/^~\s*/), '')];
         if (currentValue) {
           result.push({
             ...ctx,
@@ -102,7 +103,7 @@ function extractLeinRepos(content: string): string[] {
   const result = [];
 
   const repoContent = trimAtKey(
-    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments
+    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12070
     'repositories'
   );
 
@@ -122,16 +123,19 @@ function extractLeinRepos(content: string): string[] {
       }
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
-    const matches = repoSectionContent.match(/"https?:\/\/[^"]*"/g) || [];
-    const urls = matches.map((x) => x.replace(/^"/, '').replace(/"$/, ''));
+    const matches = repoSectionContent.match(/"https?:\/\/[^"]*"/g) || []; // TODO #12070
+    const urls = matches.map((x) =>
+      x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
+    ); // TODO #12071
     urls.forEach((url) => result.push(url));
   }
 
   return result;
 }
 
-const defRegex =
-  /^[\s,]*\([\s,]*def[\s,]+(?<varName>[-+*=<>.!?#$%&_|a-zA-Z][-+*=<>.!?#$%&_|a-zA-Z0-9']+)[\s,]*"(?<stringValue>[^"]*)"[\s,]*\)[\s,]*$/;
+const defRegex = regEx(
+  /^[\s,]*\([\s,]*def[\s,]+(?<varName>[-+*=<>.!?#$%&_|a-zA-Z][-+*=<>.!?#$%&_|a-zA-Z0-9']+)[\s,]*"(?<stringValue>[^"]*)"[\s,]*\)[\s,]*$/
+);
 
 export function extractVariables(content: string): ExtractedVariables {
   const result: ExtractedVariables = {};
