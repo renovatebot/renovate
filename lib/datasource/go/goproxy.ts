@@ -129,26 +129,12 @@ export async function listVersions(
   baseUrl: string,
   lookupName: string
 ): Promise<string[]> {
-  const cacheNamespaces = 'datasource-go-proxy-list-versions';
-  const cacheKey = lookupName;
-  const cachedResult = await packageCache.get<string[]>(
-    cacheNamespaces,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/list`;
   const { body } = await http.get(url);
-  const result = body
+  return body
     .split(regEx(/\s+/))
     .filter(Boolean)
     .filter((x) => x.indexOf('+') === -1);
-
-  await packageCache.set(cacheNamespaces, cacheKey, result, 60);
-  return result;
 }
 
 export async function versionInfo(
@@ -156,17 +142,6 @@ export async function versionInfo(
   lookupName: string,
   version: string
 ): Promise<Release> {
-  const cacheNamespaces = 'datasource-go-proxy-version-info';
-  const cacheKey = lookupName;
-  const cachedResult = await packageCache.get<Release>(
-    cacheNamespaces,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/${version}.info`;
   const res = await http.getJson<VersionInfo>(url);
 
@@ -178,7 +153,6 @@ export async function versionInfo(
     result.releaseTimestamp = res.body.Time;
   }
 
-  await packageCache.set(cacheNamespaces, cacheKey, result, 24 * 60);
   return result;
 }
 
@@ -193,7 +167,20 @@ export async function getReleases(
     return null;
   }
 
-  const proxyList = parseGoproxy();
+  const goproxy = process.env.GOPROXY;
+  const proxyList = parseGoproxy(goproxy);
+
+  const cacheNamespaces = 'datasource-go-proxy';
+  const cacheKey = `${lookupName}@@${goproxy}`;
+  const cacheMinutes = 60;
+  const cachedResult = await packageCache.get<ReleaseResult | null>(
+    cacheNamespaces,
+    cacheKey
+  );
+  // istanbul ignore if
+  if (cachedResult || cachedResult === null) {
+    return cachedResult;
+  }
 
   for (const { url, fallback } of proxyList) {
     try {
@@ -208,7 +195,9 @@ export async function getReleases(
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        return { releases };
+        const result = { releases };
+        await packageCache.set(cacheNamespaces, cacheKey, result, cacheMinutes);
+        return result;
       }
     } catch (err) {
       const statusCode = err?.response?.statusCode;
@@ -226,5 +215,6 @@ export async function getReleases(
     }
   }
 
+  await packageCache.set(cacheNamespaces, cacheKey, null, cacheMinutes);
   return null;
 }
