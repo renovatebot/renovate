@@ -2746,7 +2746,7 @@ exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown()
 exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown() sanitizes HTML comments in the body 1`] = `
 "---
 
-- [ ] If you want to rebase/retry this PR, check this box
+- [ ] If you want to rebase/retry this PR, click this checkbox
 - [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
 
 ---
@@ -7121,7 +7121,7 @@ exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() re
 exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() sanitizes HTML comments in the body 1`] = `
 "---
 
-- [ ] If you want to rebase/retry this PR, check this box
+- [ ] If you want to rebase/retry this PR, click this checkbox
 - [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
 
 ---
