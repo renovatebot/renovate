@@ -4,12 +4,14 @@ import { getGlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { HostRule } from '../../types/host-rules';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
-import { find } from '../../util/host-rules';
+import { find, findAll } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
+import { parseUrl } from '../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -18,9 +20,34 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
+/**
+ * get extra host rules for other git-based Go Module hosts
+ * @returns Array of potential host rules
+ */
+function getGoGitHostRules(): HostRule[] {
+  let hostRules: HostRule[] = [];
+
+  // add all host rules for GitHub
+  hostRules = hostRules.concat(
+    findAll({
+      hostType: PlatformId.Github,
+    })
+  );
+
+  // add all host rules for GitLab
+  hostRules = hostRules.concat(
+    findAll({
+      hostType: PlatformId.Gitlab,
+    })
+  );
+
+  return hostRules;
+}
+
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
+  // hard-coded logic to use authentication for github.com based on the credentials for api.github.com
   const credentials = find({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
@@ -33,6 +60,28 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     );
   }
 
+  // get extra host rules for other git-based Go Module hosts
+  const hostRules = getGoGitHostRules();
+
+  // for each hostRule we add additional authentication variables to the environmentVariables
+  for (const hostRule of hostRules) {
+    if (hostRule?.token && hostRule?.matchHost) {
+      const httpUrl =
+        parseUrl(hostRule.matchHost) ||
+        parseUrl(`https://${hostRule.matchHost}`);
+      if (httpUrl?.protocol?.startsWith('http')) {
+        environmentVariables = getGitAuthenticatedEnvironmentVariables(
+          httpUrl.toString(),
+          hostRule.token,
+          environmentVariables
+        );
+      } else {
+        logger.warn(
+          `Could not parse registryUrl ${hostRule.matchHost} or not using http(s). Ignoring`
+        );
+      }
+    }
+  }
   return environmentVariables;
 }
 

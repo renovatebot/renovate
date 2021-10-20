@@ -210,6 +210,188 @@ describe('manager/gomod/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
+  it('supports docker mode with 2 credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'github.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('supports docker mode with multiple credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.findAll.mockReturnValueOnce([]);
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('supports docker mode with multiple credentials for different paths', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.findAll.mockReturnValueOnce([]);
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token-repo1',
+        matchHost: 'https://gitlab.enterprise.com/repo1',
+      },
+      {
+        token: 'some-enterprise-token-repo2',
+        matchHost: 'https://gitlab.enterprise.com/repo2',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('supports docker mode with weird credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token-// &&5übken',
+    });
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('supports docker mode and ignores non http credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        token: 'some-token',
+        matchHost: 'ssh://github.enterprise.com',
+      },
+    ]);
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        token: 'some-gitlab-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('supports docker mode with many credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        token: 'some-token',
+        matchHost: 'api.github.com',
+      },
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'github.enterprise.com',
+      },
+    ]);
+    hostRules.findAll.mockReturnValueOnce([
+      {
+        token: 'some-gitlab-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('supports docker mode with goModTidy', async () => {
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({});
