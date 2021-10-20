@@ -38,7 +38,7 @@ function getHostOpts(url: string): HttpOptions {
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-  const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
+  const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json'); // TODO #12070
   const opts = getHostOpts(url);
   const res = (await http.getJson<PackageMeta>(url, opts)).body;
   const meta: RegistryMeta = {
@@ -124,7 +124,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
       dep.sourceUrl = release.source.url;
     }
     return {
-      version: version.replace(/^v/, ''),
+      version: version.replace(/^v/, ''), // TODO #12070
       gitRef: version,
       releaseTimestamp: release.time,
     };

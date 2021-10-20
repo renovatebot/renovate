@@ -246,7 +246,7 @@ export async function initRepo({
       logger.debug('Could not find allowed merge methods for repo');
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug('Caught initRepo error');
+    logger.debug({ err }, 'Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
       err.message === REPOSITORY_RENAMED ||
