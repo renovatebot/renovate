@@ -114,7 +114,6 @@ describe('util/git/index', () => {
       await git.initRepo({
         cloneSubmodules: true,
         url: base.path,
-        fullClone: true,
       });
       await git.syncGit();
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
@@ -559,6 +558,7 @@ describe('util/git/index', () => {
         extraCloneOpts: {
           '-c': 'extra.clone.config=test-extra-config-value',
         },
+        fullClone: true,
       });
       git.getBranchCommit(defaultBranch);
       await git.syncGit();
