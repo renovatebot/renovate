@@ -131,10 +131,10 @@ async function isDirectory(dir: string): Promise<boolean> {
 }
 
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
-  // see https://stackoverflow.com/a/44750379/1438522
+  // see https://stackoverflow.com/a/62352647/3005034
   try {
-    const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
-    return res.replace('refs/remotes/origin/', '').trim();
+    const res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+    return res.replace('origin/', '').trim();
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (
