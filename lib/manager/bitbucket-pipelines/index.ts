@@ -3,5 +3,5 @@ import { extractPackageFile } from './extract';
 export { extractPackageFile };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.bitbucket-pipelines\\.yaml$'],
+  fileMatch: ['(^|/)\\.?bitbucket-pipelines\\.ya?ml$'],
 };
