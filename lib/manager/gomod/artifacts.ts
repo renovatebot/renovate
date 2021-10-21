@@ -10,7 +10,7 @@ import { getRepoStatus } from '../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
 import { find, getAll } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { parseUrl } from '../../util/url';
+import { createURLFromHostOrURL, validateUrl } from '../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -68,10 +68,8 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   // for each hostRule we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
     if (hostRule?.token && hostRule?.matchHost) {
-      const httpUrl =
-        parseUrl(hostRule.matchHost) ||
-        parseUrl(`https://${hostRule.matchHost}`);
-      if (httpUrl?.protocol?.startsWith('http')) {
+      const httpUrl = createURLFromHostOrURL(hostRule.matchHost);
+      if (validateUrl(httpUrl?.toString())) {
         logger.debug(
           `Adding Git authentication for Go Module retrieval for ${httpUrl.toString()} using token auth.`
         );
