@@ -2,7 +2,7 @@ import semver from 'semver';
 import shell from 'shelljs';
 import simpleGit from 'simple-git';
 
-const GIT_MINIMUM_VERSION = '2.1.0';
+const GIT_MINIMUM_VERSION = '2.33.0';
 const git = simpleGit();
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
