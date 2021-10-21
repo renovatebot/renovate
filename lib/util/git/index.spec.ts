@@ -114,6 +114,7 @@ describe('util/git/index', () => {
       await git.initRepo({
         cloneSubmodules: true,
         url: base.path,
+        fullClone: true,
       });
       await git.syncGit();
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
