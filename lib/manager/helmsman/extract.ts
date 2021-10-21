@@ -52,9 +52,9 @@ export function extractPackageFile(
 ): PackageFile | null {
   try {
     // TODO: fix me (#9610)
-    const doc: any = load(content, {
+    const doc = load(content, {
       json: true,
-    });
+    }) as HelmsmanDocument;
     if (!(doc?.helmRepos && doc.apps)) {
       logger.debug({ fileName }, 'Missing helmRepos and/or apps keys');
       return null;
