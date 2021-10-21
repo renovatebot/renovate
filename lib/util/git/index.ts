@@ -21,6 +21,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { platform } from '../../platform';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
@@ -763,7 +764,7 @@ export async function commitFiles({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    const commit = commitRes?.commit || 'unknown';
+    let commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
@@ -772,28 +773,41 @@ export async function commitFiles({
       return null;
     }
 
-    const pushOptions: TaskOptions = {
-      '--force-with-lease': null,
-      '-u': null,
-    };
-    if (getNoVerify().includes(GitNoVerifyOption.Push)) {
-      pushOptions['--no-verify'] = null;
+    if (platform.commitFiles) {
+      const filteredFiles = files.filter(
+        ({ name }) => !ignoredFiles.includes(name)
+      );
+
+      commit = await platform.commitFiles({
+        branchName,
+        files: filteredFiles,
+        message,
+      });
+    } else {
+      const pushOptions: TaskOptions = {
+        '--force-with-lease': null,
+        '-u': null,
+      };
+      if (getNoVerify().includes(GitNoVerifyOption.Push)) {
+        pushOptions['--no-verify'] = null;
+      }
+
+      const pushRes = await git.push(
+        'origin',
+        `${branchName}:${branchName}`,
+        pushOptions
+      );
+      delete pushRes.repo;
+      logger.debug({ result: pushRes }, 'git push');
+      // Fetch it after create
+      const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+      await git.fetch(['origin', ref, '--force']);
+      config.branchCommits[branchName] = (
+        await git.revparse([branchName])
+      ).trim();
+      config.branchIsModified[branchName] = false;
     }
 
-    const pushRes = await git.push(
-      'origin',
-      `${branchName}:${branchName}`,
-      pushOptions
-    );
-    delete pushRes.repo;
-    logger.debug({ result: pushRes }, 'git push');
-    // Fetch it after create
-    const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await git.fetch(['origin', ref, '--force']);
-    config.branchCommits[branchName] = (
-      await git.revparse([branchName])
-    ).trim();
-    config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
     return commit;
   } catch (err) /* istanbul ignore next */ {

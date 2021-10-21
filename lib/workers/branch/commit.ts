@@ -3,7 +3,6 @@ import minimatch from 'minimatch';
 import { getGlobalConfig } from '../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { commitFiles } from '../../util/git';
 import { sanitize } from '../../util/sanitize';
 import type { BranchConfig } from '../types';
@@ -45,15 +44,11 @@ export function commitFilesToBranch(
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
 
-  const commitConfig = {
+  // API will know whether to create new branch or not
+  return commitFiles({
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage,
     force: !!config.forceCommit,
-  };
-
-  // API will know whether to create new branch or not
-  return platform.commitFiles
-    ? platform.commitFiles(commitConfig)
-    : commitFiles(commitConfig);
+  });
 }

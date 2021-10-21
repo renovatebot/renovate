@@ -83,6 +83,7 @@ export async function initPlatform({
   token,
   username,
   gitAuthor,
+  platformCommit,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
@@ -105,9 +106,14 @@ export async function initPlatform({
   let discoveredGitAuthor: string;
   if (!gitAuthor) {
     userDetails = await getUserDetails(defaults.endpoint, token);
-    const userEmail = await getUserEmail(defaults.endpoint, token);
-    if (userEmail) {
-      discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
+    if (platformCommit) {
+      const userEmail = `${userDetails.id}+${userDetails.username}@users.noreply.github.com`;
+      discoveredGitAuthor = `${userDetails.username} <${userEmail}>`;
+    } else {
+      const userEmail = await getUserEmail(defaults.endpoint, token);
+      if (userEmail) {
+        discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
+      }
     }
   }
   logger.debug('Authenticated as GitHub user: ' + renovateUsername);
@@ -1621,7 +1627,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return alerts;
 }
 
-export async function commitFiles({
+export async function pushFiles({
   branchName,
   files,
   message,

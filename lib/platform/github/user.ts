@@ -6,6 +6,7 @@ const githubApi = new githubHttp.GithubHttp();
 export interface UserDetails {
   username: string;
   name: string;
+  id: number;
 }
 
 let userDetails: UserDetails;
@@ -19,7 +20,7 @@ export async function getUserDetails(
   }
   try {
     const userData = (
-      await githubApi.getJson<{ login: string; name: string }>(
+      await githubApi.getJson<{ login: string; name: string; id: number }>(
         endpoint + 'user',
         {
           token,
@@ -29,6 +30,7 @@ export async function getUserDetails(
     userDetails = {
       username: userData.login,
       name: userData.name,
+      id: userData.id,
     };
     return userDetails;
   } catch (err) {
