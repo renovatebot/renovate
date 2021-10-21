@@ -1,4 +1,4 @@
-# Please
+# Behavior
 
 If you've been referred to this document, it's because someone you're interacting with wants you to follow one or more of the following:
 
