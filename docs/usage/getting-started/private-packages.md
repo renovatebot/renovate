@@ -123,8 +123,28 @@ Any `hostRules` with `hostType=packagist` are also included.
 
 ### gomod
 
-If a `github.com` token is found in `hostRules`, then it is written out to local git config prior to running `go` commands.
-The command run is `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`.
+If a `github.com` token is found in `hostRules`, then it is written out to local [GIT*CONFIG*](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT) variables prior to running `go` commands.
+The environment variables used are: `GIT_CONFIG_KEY_0=url.https://${token}@github.com/.insteadOf GIT_CONFIG_VALUE_0=https://github.com/ GIT_CONFIG_COUNT=1`.
+
+### helm
+
+Maybe you're running your own ChartMuseum server to host your private Helm Charts.
+This is how you connect to a private Helm repository:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'your.host.io',
+      hostType: 'helm'
+      username: '<your-username>',
+      password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
+    },
+  ],
+};
+```
+
+If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`).
 
 ### npm
 

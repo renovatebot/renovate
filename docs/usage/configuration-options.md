@@ -755,7 +755,7 @@ Example:
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true`, `automergeType=pr` and `platformAutomerge=true`.
-Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
+Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## golang
 
@@ -1669,15 +1669,18 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then `platformAutomerge` is enabled by default to speed up merging via the platform's native automerge functionality.
 
+Renovate tries platform-native automerge only when it initially creates the PR.
+Any PR that is being updated will be automerged with the Renovate-based automerge.
+
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure and GitLab.
+This option is available for Azure, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
 
 ## postUpdateOptions
 
-- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates.
+- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates

@@ -8,6 +8,7 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
 import type { UrlParsedResult } from './types';
@@ -50,7 +51,7 @@ function parseUrl(urlString: string): UrlParsedResult | null {
 
 const lexer = moo.states({
   main: {
-    lineComment: { match: /#.*?$/ },
+    lineComment: { match: /#.*?$/ }, // TODO #12070
     leftParen: { match: '(' },
     rightParen: { match: ')' },
     longDoubleQuoted: {
@@ -178,48 +179,48 @@ export function extractPackageFile(
     let digest: string;
     let repository: string;
     let registry: string;
-    let match = /name\s*=\s*"([^"]+)"/.exec(def);
+    let match = regEx(/name\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, depName] = match;
     }
-    match = /digest\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/digest\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, digest] = match;
     }
-    match = /registry\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/registry\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, registry] = match;
     }
-    match = /repository\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/repository\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, repository] = match;
     }
-    match = /remote\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/remote\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, remote] = match;
     }
-    match = /tag\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/tag\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, currentValue] = match;
     }
-    match = /url\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/url\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, url] = match;
     }
-    match = /urls\s*=\s*\[\s*"([^\]]+)",?\s*\]/.exec(def);
+    match = regEx(/urls\s*=\s*\[\s*"([^\]]+)",?\s*\]/).exec(def);
     if (match) {
-      const urls = match[1].replace(/\s/g, '').split('","');
+      const urls = match[1].replace(regEx(/\s/g), '').split('","');
       url = urls.find(parseUrl);
     }
-    match = /commit\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/commit\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, commit] = match;
     }
-    match = /sha256\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/sha256\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, sha256] = match;
     }
-    match = /importpath\s*=\s*"([^"]+)"/.exec(def);
+    match = regEx(/importpath\s*=\s*"([^"]+)"/).exec(def);
     if (match) {
       [, importpath] = match;
     }
@@ -256,10 +257,9 @@ export function extractPackageFile(
       dep.datasource = datasourceGo.id;
       dep.lookupName = importpath;
       if (remote) {
-        const remoteMatch =
-          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/.exec(
-            remote
-          );
+        const remoteMatch = regEx(
+          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/
+        ).exec(remote);
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.lookupName = remote.replace('https://', '');
         } else {
@@ -282,7 +282,7 @@ export function extractPackageFile(
       const parsedUrl = parseUrl(url);
       dep.depName = depName;
       dep.repo = parsedUrl.repo;
-      if (/^[a-f0-9]{40}$/i.test(parsedUrl.currentValue)) {
+      if (regEx(/^[a-f0-9]{40}$/i).test(parsedUrl.currentValue)) {
         dep.currentDigest = parsedUrl.currentValue;
       } else {
         dep.currentValue = parsedUrl.currentValue;

@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/helmsman/extract extractPackageFile() extract deps 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "19.0.3",
+      "depName": "kube-prometheus",
+      "lookupName": "kube-prometheus-stack",
+      "registryUrls": Array [
+        "https://prometheus-community.github.io/helm-charts",
+      ],
+    },
+    Object {
+      "currentValue": "2.6.0",
+      "depName": "loki",
+      "lookupName": "loki",
+      "registryUrls": Array [
+        "https://grafana.github.io/helm-charts",
+      ],
+    },
+    Object {
+      "currentValue": "0.7.7",
+      "depName": "tempo",
+      "lookupName": "tempo",
+      "registryUrls": Array [
+        "https://grafana.github.io/helm-charts",
+      ],
+    },
+    Object {
+      "currentValue": "0.6.0",
+      "depName": "otlp-collector",
+      "lookupName": "opentelemetry-collector",
+      "registryUrls": Array [
+        "https://open-telemetry.github.io/opentelemetry-helm-charts",
+      ],
+    },
+    Object {
+      "currentValue": "0.25.0",
+      "depName": "strimzi-operator",
+      "lookupName": "strimzi-kafka-operator",
+      "registryUrls": Array [
+        "https://strimzi.io/charts/",
+      ],
+    },
+    Object {
+      "depName": "strimzi-operator-missing-version",
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "2.6.0",
+      "depName": "loki-no-registry-ref",
+      "lookupName": "loki",
+      "skipReason": "no-repository",
+    },
+    Object {
+      "currentValue": "0.7.7",
+      "depName": "tempo-no-registry-ref",
+      "skipReason": "invalid-url",
+    },
+    Object {
+      "currentValue": "19.0.3",
+      "depName": "kube-prometheus-no-lookup-name",
+      "skipReason": "invalid-name",
+    },
+    Object {
+      "currentValue": "0.6.0",
+      "depName": "otlp-collector-no-chart",
+      "skipReason": "invalid-url",
+    },
+  ],
+}
+`;
