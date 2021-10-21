@@ -13,7 +13,6 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   // Check if we have a variable in format of "${VARIABLE:-<image>:<defaultVal>@<digest>}"
   // If so, remove everything except the image, defaultVal and digest.
   let isVariable = false;
-  let hasDefaultValue = false;
   let cleanedCurrentFrom: string = currentFrom;
   if (
     currentFrom.startsWith(variableOpen) &&
@@ -25,7 +24,6 @@ export function splitImageParts(currentFrom: string): PackageDependency {
       currentFrom.split('$').length === 2 && // Ensure it has exactly one '$' to avoid the cases we don't support
       currentFrom.indexOf(variableDefaultValueSplit) !== -1 // Ensure it has the default value
     ) {
-      hasDefaultValue = true;
       cleanedCurrentFrom = currentFrom.substr(
         variableOpen.length,
         currentFrom.length - (variableClose.length + 2)
@@ -34,6 +32,10 @@ export function splitImageParts(currentFrom: string): PackageDependency {
         cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
           variableDefaultValueSplit.length
       );
+    } else {
+      return {
+        skipReason: SkipReason.ContainsVariable,
+      };
     }
   }
 
@@ -52,32 +54,26 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   }
 
   if (isVariable) {
-    if (hasDefaultValue) {
-      // If we have the variable and it contains the default value, we need to return
-      // it as a valid dependency.
+    // If we have the variable and it contains the default value, we need to return
+    // it as a valid dependency.
 
-      const dep = {
-        depName,
-        currentValue,
-        currentDigest,
-        datasource: datasourceDocker.id,
-        replaceString: cleanedCurrentFrom,
-      };
+    const dep = {
+      depName,
+      currentValue,
+      currentDigest,
+      datasource: datasourceDocker.id,
+      replaceString: cleanedCurrentFrom,
+    };
 
-      if (!dep.currentValue) {
-        delete dep.currentValue;
-      }
-
-      if (!dep.currentDigest) {
-        delete dep.currentDigest;
-      }
-
-      return dep;
+    if (!dep.currentValue) {
+      delete dep.currentValue;
     }
 
-    return {
-      skipReason: SkipReason.ContainsVariable,
-    };
+    if (!dep.currentDigest) {
+      delete dep.currentDigest;
+    }
+
+    return dep;
   }
 
   const dep: PackageDependency = {
