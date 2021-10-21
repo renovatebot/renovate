@@ -4,12 +4,11 @@ import { getGlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { HostRule } from '../../types/host-rules';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
-import { find, findAll } from '../../util/host-rules';
+import { find, getAll } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { parseUrl } from '../../util/url';
 import { isValid } from '../../versioning/semver';
@@ -24,6 +23,7 @@ import type {
  * get extra host rules for other git-based Go Module hosts
  * @returns Array of potential host rules
  */
+/*
 function getGoGitHostRules(): HostRule[] {
   let hostRules: HostRule[] = [];
 
@@ -43,6 +43,7 @@ function getGoGitHostRules(): HostRule[] {
 
   return hostRules;
 }
+*/
 
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
@@ -61,7 +62,8 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   }
 
   // get extra host rules for other git-based Go Module hosts
-  const hostRules = getGoGitHostRules();
+  // if none is returned, use an empty array
+  const hostRules = getAll() || [];
 
   // for each hostRule we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
@@ -70,6 +72,9 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
         parseUrl(hostRule.matchHost) ||
         parseUrl(`https://${hostRule.matchHost}`);
       if (httpUrl?.protocol?.startsWith('http')) {
+        logger.debug(
+          `Adding Git authentication for Go Module retrieval for ${httpUrl.toString()} using token auth.`
+        );
         environmentVariables = getGitAuthenticatedEnvironmentVariables(
           httpUrl.toString(),
           hostRule.token,

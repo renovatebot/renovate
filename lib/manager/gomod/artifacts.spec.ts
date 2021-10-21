@@ -216,7 +216,7 @@ describe('manager/gomod/artifacts', () => {
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
-    hostRules.findAll.mockReturnValueOnce([
+    hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
@@ -242,8 +242,7 @@ describe('manager/gomod/artifacts', () => {
 
   it('supports docker mode with multiple credentials', async () => {
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
-    hostRules.findAll.mockReturnValueOnce([]);
-    hostRules.findAll.mockReturnValueOnce([
+    hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-enterprise-token',
         matchHost: 'gitlab.enterprise.com',
@@ -269,8 +268,7 @@ describe('manager/gomod/artifacts', () => {
 
   it('supports docker mode with multiple credentials for different paths', async () => {
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
-    hostRules.findAll.mockReturnValueOnce([]);
-    hostRules.findAll.mockReturnValueOnce([
+    hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-enterprise-token-repo1',
         matchHost: 'https://gitlab.enterprise.com/repo1',
@@ -323,13 +321,11 @@ describe('manager/gomod/artifacts', () => {
 
   it('supports docker mode and ignores non http credentials', async () => {
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
-    hostRules.findAll.mockReturnValueOnce([
+    hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-token',
         matchHost: 'ssh://github.enterprise.com',
       },
-    ]);
-    hostRules.findAll.mockReturnValueOnce([
       {
         token: 'some-gitlab-token',
         matchHost: 'gitlab.enterprise.com',
@@ -358,7 +354,7 @@ describe('manager/gomod/artifacts', () => {
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
-    hostRules.findAll.mockReturnValueOnce([
+    hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-token',
         matchHost: 'api.github.com',
@@ -367,8 +363,6 @@ describe('manager/gomod/artifacts', () => {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
       },
-    ]);
-    hostRules.findAll.mockReturnValueOnce([
       {
         token: 'some-gitlab-token',
         matchHost: 'gitlab.enterprise.com',

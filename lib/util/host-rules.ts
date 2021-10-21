@@ -142,6 +142,13 @@ export function findAll({ hostType }: { hostType: string }): HostRule[] {
   return hostRules.filter((rule) => rule.hostType === hostType);
 }
 
+/**
+ * @returns all known host rules without any filtering
+ */
+export function getAll(): HostRule[] {
+  return hostRules;
+}
+
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
