@@ -47,7 +47,7 @@ function isLessThanRange(version: string, range: string): boolean {
   );
 }
 
-function isValid(input: string): string | boolean {
+export function isValid(input: string): string | boolean {
   return npm.isValid(poetry2npm(input));
 }
 

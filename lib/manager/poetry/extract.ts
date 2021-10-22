@@ -72,9 +72,9 @@ function extractFromSection(
     }
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (pep440Versioning.api.isValid(dep.currentValue)) {
+    } else if (pep440Versioning.isValid(dep.currentValue)) {
       dep.versioning = pep440Versioning.id;
-    } else if (poetryVersioning.api.isValid(dep.currentValue)) {
+    } else if (poetryVersioning.isValid(dep.currentValue)) {
       dep.versioning = poetryVersioning.id;
     } else {
       dep.skipReason = SkipReason.UnknownVersion;
