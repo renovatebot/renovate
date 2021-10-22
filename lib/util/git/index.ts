@@ -46,6 +46,7 @@ interface StorageConfig {
   url: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
+  fullClone?: boolean;
 }
 
 interface LocalConfig extends StorageConfig {
@@ -315,8 +316,13 @@ export async function syncGit(): Promise<void> {
     await fs.emptyDir(localDir);
     const cloneStart = Date.now();
     try {
-      // blobless clone
-      const opts = ['--filter=blob:none'];
+      const opts = [];
+      if (config.fullClone) {
+        logger.debug('Performing full clone');
+      } else {
+        logger.debug('Performing blobless clone');
+        opts.push('--filter=blob:none');
+      }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
