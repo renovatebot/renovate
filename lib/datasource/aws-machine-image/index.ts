@@ -14,10 +14,6 @@ export class AwsMachineImageDataSource extends Datasource {
   override readonly defaultConfig = {
     // Because amis don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
     commitMessageExtra: 'to {{{newVersion}}}',
-    branchTopic:
-      'ami/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}#{{{depName}}}',
-    prBodyNotes:
-      'The new aws machine image was looked up via the aws api with the following filter:\n```yaml\n{{{stringToPrettyJSON lookupName}}}\n```',
     prBodyColumns: ['Change', 'Image'],
     prBodyDefinitions: {
       Image: '```{{{newDigest}}}```',
@@ -25,8 +21,6 @@ export class AwsMachineImageDataSource extends Datasource {
     digest: {
       // Because newDigestShort will allways be 'amazon-' we override to print the name of the ami
       commitMessageExtra: 'to {{{newDigest}}}',
-      branchTopic:
-        'amidigest/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}#{{{depName}}}',
       prBodyColumns: ['Image'],
       prBodyDefinitions: {
         Image: '```{{{newDigest}}}```',
