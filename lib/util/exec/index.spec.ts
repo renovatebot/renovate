@@ -490,6 +490,44 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Docker global extra commands',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+        },
+        processEnv,
+        inCmd,
+        inOpts: {
+          docker: {
+            image,
+            preCommands: ['preCommand1', 'preCommand2', null],
+            postCommands: ['postCommand1', undefined, 'postCommand2'],
+          },
+        },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "globalPreCommand1 && globalPreCommand2 & preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: {
+          dockerPreCommands: ['globalPreCommand1', 'globalPreCommand2'],
+        },
+      },
+    ],
+
+    [
       'Docker commands are nullable',
       {
         processEnv,

@@ -297,6 +297,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'dockerPreCommands',
+    description:
+      'Add custom commands that should be executed in each side car container before the actual command is run.',
+    type: 'array',
+    default: [],
+    admin: true,
+  },
+  {
     name: 'dockerUser',
     description:
       'Specify UID and GID for Docker-based binaries when binarySource=docker is used.',

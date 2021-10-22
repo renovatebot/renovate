@@ -12,6 +12,7 @@ const repoGlobalOptions = [
   'customEnvVariables',
   'dockerChildPrefix',
   'dockerImagePrefix',
+  'dockerPreCommands',
   'dockerUser',
   'dryRun',
   'exposeAllEnv',

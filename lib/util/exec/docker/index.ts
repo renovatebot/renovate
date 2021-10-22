@@ -203,6 +203,7 @@ export async function generateDockerCommand(
     dockerUser,
     dockerChildPrefix,
     dockerImagePrefix,
+    dockerPreCommands,
   } = getGlobalConfig();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image, dockerChildPrefix);
@@ -248,6 +249,7 @@ export async function generateDockerCommand(
   result.push(taggedImage);
 
   const bashCommand = [
+    ...prepareCommands(dockerPreCommands),
     ...prepareCommands(preCommands),
     ...commands,
     ...prepareCommands(postCommands),

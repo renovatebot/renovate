@@ -153,7 +153,7 @@ By default Renovate pulls the sidecar Docker containers from `docker.io/renovate
 You can use the `dockerImagePrefix` option to override this default.
 
 Say you want to pull your images from `ghcr.io/renovatebot` instead of `docker.io/renovate`.
-You would use put this in your configuration file:
+You would use this in your configuration file:
 
 ```json
 {
@@ -162,6 +162,35 @@ You would use put this in your configuration file:
 ```
 
 If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
+
+## dockerMapDotfiles
+
+This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files.
+Currently applicable to `.npmrc` only.
+
+```json
+{
+  "dockerMapDotfiles": true
+}
+```
+
+## dockerPreCommands
+
+If needed you can use the `dockerPreCommands` option to add custom bash commands that will be executed in each side car container before the actual command runs.
+
+Say you want to add authentication to your GitHub Enterprise server for all commands in the docker container so that a `git fetch` o.s. is authenticated.
+You would use this in your configuration file:
+
+```json
+{
+  "dockerPreCommands": [
+    "git config --global url.\"https://{{secrets.token}}@git.corp.com/\".insteadOf \"https://git.corp.com/\"`"
+  ]
+}
+```
+
+If Renovate executes the side car container it will set up the authentication with the given command above.
+This is especially useful for golang repositories that use `go mod tidy` and require additional authentication.
 
 ## dockerUser
 
