@@ -53,8 +53,6 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   return dep;
 }
 
-const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
-
 export function getDep(
   currentFrom: string,
   specifyReplaceString = true
