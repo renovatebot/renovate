@@ -649,7 +649,7 @@ Object {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toEqual({
         description: [
-          'Use version pinning (maintain a single version only and not semver ranges)',
+          'Use version pinning (maintain a single version only and not SemVer ranges)',
         ],
         rangeStrategy: 'pin',
       });

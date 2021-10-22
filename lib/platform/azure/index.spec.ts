@@ -652,7 +652,7 @@ describe('platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { azureAutoComplete: true },
+        platformOptions: { usePlatformAutomerge: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
@@ -974,8 +974,10 @@ describe('platform/azure/index', () => {
   describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
       const input =
-        '<details>https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(azure.massageMarkdown(input)).toMatchSnapshot();
+        '\n---\n\n - [ ] <!-- rebase-check --> rebase\nplus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(azure.massageMarkdown(input)).toMatchInlineSnapshot(
+        `"plus also [a link](https://github.com/foo/bar/issues/5)"`
+      );
     });
   });
 

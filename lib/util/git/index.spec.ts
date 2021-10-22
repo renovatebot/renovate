@@ -412,6 +412,24 @@ describe('util/git/index', () => {
         expect.objectContaining({ '--no-verify': null })
       );
     });
+
+    it('creates file with the executable bit', async () => {
+      const file = {
+        name: 'some-executable',
+        contents: 'some new-contents',
+        executable: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/past_branch',
+        files: [file],
+        message: 'Create something',
+      });
+      expect(commit).not.toBeNull();
+
+      const repo = Git(tmpDir.path);
+      const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
+      expect(result).toStartWith('100755');
+    });
   });
 
   describe('getCommitMessages()', () => {
@@ -540,6 +558,7 @@ describe('util/git/index', () => {
         extraCloneOpts: {
           '-c': 'extra.clone.config=test-extra-config-value',
         },
+        fullClone: true,
       });
       git.getBranchCommit(defaultBranch);
       await git.syncGit();

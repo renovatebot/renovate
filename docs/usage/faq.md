@@ -58,6 +58,10 @@ Some major platform features are not supported at all by Renovate.
 
 ## What if I need to .. ?
 
+### Troubleshoot Renovate
+
+If you have problems with Renovate, or need to know where Renovate keeps the logging output then read our [troubleshooting documentation](https://docs.renovatebot.com/troubleshooting/).
+
 ### Tell Renovate to ask for approval before creating a Pull Request
 
 The default behavior is that Renovate creates a pull request right away whenever there's an update.

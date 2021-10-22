@@ -1,10 +1,11 @@
 import moo from 'moo';
-import { LANGUAGE_DOT_NET } from '../../constants/languages';
+import { ProgrammingLanguage } from '../../constants';
 import { id as datasource } from '../../datasource/nuget';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../types';
 
-export const language = LANGUAGE_DOT_NET;
+export const language = ProgrammingLanguage.NET;
 
 export const defaultConfig = {
   fileMatch: ['\\.cake$'],
@@ -12,13 +13,13 @@ export const defaultConfig = {
 
 const lexer = moo.states({
   main: {
-    lineComment: { match: /\/\/.*?$/ },
-    multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true },
+    lineComment: { match: /\/\/.*?$/ }, // TODO #12070
+    multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12070
     dependency: {
-      match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/,
+      match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/, // TODO #12070
     },
     dependencyQuoted: {
-      match: /^#(?:addin|tool|module|load|l)\s+"(?:nuget|dotnet):[^"]+"\s*$/,
+      match: /^#(?:addin|tool|module|load|l)\s+"(?:nuget|dotnet):[^"]+"\s*$/, // TODO #12070
       value: (s: string) => s.trim().slice(1, -1),
     },
     unknown: moo.fallback,
@@ -27,7 +28,7 @@ const lexer = moo.states({
 
 function parseDependencyLine(line: string): PackageDependency | null {
   try {
-    let url = line.replace(/^[^:]*:/, '');
+    let url = line.replace(regEx(/^[^:]*:/), '');
     const isEmptyHost = url.startsWith('?');
     url = isEmptyHost ? `http://localhost/${url}` : url;
 

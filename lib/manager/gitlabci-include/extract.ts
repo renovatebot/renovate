@@ -3,6 +3,7 @@ import { load } from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
@@ -42,10 +43,12 @@ export function extractPackageFile(
       includes = [doc.include];
     }
     for (const includeObj of includes) {
-      if (includeObj.file && includeObj.project) {
+      if (includeObj?.file && includeObj.project) {
         const dep = extractDepFromIncludeFile(includeObj);
         if (config.endpoint) {
-          dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
+          dep.registryUrls = [
+            config.endpoint.replace(regEx(/\/api\/v4\/?/), ''),
+          ]; // TODO #12071
         }
         deps.push(dep);
       }

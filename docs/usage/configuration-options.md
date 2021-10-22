@@ -87,9 +87,9 @@ This makes it suitable for augmenting a preset or base list without displacing t
 ## aliases
 
 The `aliases` object is used for configuring registry aliases.
-Currently it is needed/supported for the `helm-requirements` manager only.
+Currently it is needed/supported for the `helm-requirements`, `helmv3` and `helmfile` managers only.
 
-`helm-requirements` includes this default alias:
+The above managers include this default alias:
 
 ```json
 {
@@ -219,12 +219,6 @@ Setting this to `true` will automatically approve the PRs in Azure DevOps.
 
 You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
-## azureAutoComplete
-
-Setting this to `true` will configure PRs in Azure DevOps to auto-complete after all (if any) branch policies have been met.
-
-You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
-
 ## azureWorkItemId
 
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items).
@@ -248,10 +242,11 @@ Configuring this to `true` means that Renovate will detect and apply the default
 
 ## branchConcurrentLimit
 
-By default, Renovate won't enforce any concurrent branch limits. If you want the same limit for both concurrent branches
-and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
-However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (
-e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
+By default, Renovate won't enforce any concurrent branch limits.
+The `config:base` preset that many extend from limits the amount of concurrent branches to 20, but in most cases we would recommend lower values such as 5 or 10.
+
+If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
+However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
 
 This limit is enforced on a per-repository basis.
 
@@ -262,6 +257,15 @@ Example config:
   "branchConcurrentLimit": 3
 }
 ```
+
+Warning: Leaving PRs/branches as unlimited or as a high number increases the time it takes for Renovate to process a repository.
+If you find that Renovate is too slow when rebasing out-of-date branches, decrease the `branchConcurrentLimit`.
+
+If you have too many concurrent branches which rebase themselves each run, Renovate can take a lot of time to rebase.
+Solutions:
+
+- Decrease the concurrent branch limit (note: this won't go and delete any existing, so won't have an effect until you either merge or close existing ones manually)
+- Remove automerge and/or automatic rebasing (set `rebaseWhen` to `conflicted`). However if you have branch protection saying PRs must be up to date then it's not ideal to remove automatic rebasing
 
 ## branchName
 
@@ -746,18 +750,12 @@ Example:
 }
 ```
 
-## gitLabAutomerge
-
-If you enabled `automerge` in the Renovate config, you can speed up the automerge process by using GitLab's own automerge function.
-Caution (fixed in GitLab >= 12.7): when this option is enabled it is possible due to a bug in GitLab that MRs with failing pipelines might still get merged.
-This is caused by a race condition in GitLab's Merge Request API - [read the corresponding issue](https://gitlab.com/gitlab-org/gitlab/issues/26293) for details.
-
 ## gitLabIgnoreApprovals
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` and `gitLabAutomerge=true`.
-Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
+This option works only when `automerge=true`, `automergeType=pr` and `platformAutomerge=true`.
+Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## golang
 
@@ -1161,7 +1159,7 @@ We recommend that you use the `strict` mode, and enable the `dependencyDashboard
 
 ## java
 
-Use this configuration option for shared config across all java projects (Gradle and Maven).
+Use this configuration option for shared config across all Java projects (Gradle and Maven).
 
 ## js
 
@@ -1667,9 +1665,22 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
 
+## platformAutomerge
+
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then `platformAutomerge` is enabled by default to speed up merging via the platform's native automerge functionality.
+
+Renovate tries platform-native automerge only when it initially creates the PR.
+Any PR that is being updated will be automerged with the Renovate-based automerge.
+
+`platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
+This option is available for Azure, GitHub and GitLab.
+It falls back to Renovate-based automerge if the platform-native automerge is not available.
+
+Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
+
 ## postUpdateOptions
 
-- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates.
+- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
@@ -2153,6 +2164,44 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### autoReplaceStringTemplate
+
+Allows overwriting how the matched string is replaced.
+This allows for some migration strategies.
+E.g. moving from one Docker image repository to another one.
+
+helm-values.yaml:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.old.registry/aRepository/andImage:1.18-alpine
+```
+
+regex definition:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["values.yaml$"],
+      "matchStrings": [
+        "image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)"
+      ],
+      "depNameTemplate": "my.new.registry/aRepository/andImage",
+      "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+This will lead to following update where `1.21-alpine` is the newest version of `my.new.registry/aRepository/andImage`:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.new.registry/aRepository/andImage:1.21-alpine
+```
+
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
@@ -2418,7 +2467,7 @@ By exposing `versioning` to config, you can override the default versioning for 
 We do not recommend overriding the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
 Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
-Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, any leading parts are sorted alphanumerically.
+Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, all trailing parts are used for alphanumeric sorting.
 
 ## vulnerabilityAlerts
 

@@ -1,7 +1,7 @@
 import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
+import { parse } from 'auth-header';
 import hasha from 'hasha';
-import wwwAuthenticate from 'www-authenticate';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
@@ -10,6 +10,7 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions, HttpResponse } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
+import { regEx } from '../../util/regex';
 import {
   ensureTrailingSlash,
   parseUrl,
@@ -20,7 +21,7 @@ import { MediaType, RegistryRepository } from './types';
 export const id = 'docker';
 export const http = new Http(id);
 
-export const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
+export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
 const DOCKER_HUB = 'https://index.docker.io';
 export const defaultRegistryUrls = [DOCKER_HUB];
 
@@ -33,8 +34,10 @@ async function getECRAuthToken(
     config.credentials = {
       accessKeyId: opts.username,
       secretAccessKey: opts.password,
+      ...(opts.token && { sessionToken: opts.token }),
     };
   }
+
   const ecr = new ECR(config);
   try {
     const data = await ecr.getAuthorizationToken({});
@@ -78,7 +81,7 @@ export async function getAuthHeaders(
       return null;
     }
 
-    const authenticateHeader = new wwwAuthenticate.parsers.WWW_Authenticate(
+    const authenticateHeader = parse(
       apiCheckResponse.headers['www-authenticate']
     );
 
@@ -125,7 +128,9 @@ export async function getAuthHeaders(
     // * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
     if (
       authenticateHeader.scheme.toUpperCase() !== 'BEARER' ||
-      parseUrl(authenticateHeader.parms.realm) == null
+      !is.string(authenticateHeader.params.realm) ||
+      !is.string(authenticateHeader.params.service) ||
+      parseUrl(authenticateHeader.params.realm) === null
     ) {
       logger.trace(
         { registryHost, dockerRepository, authenticateHeader },
@@ -134,7 +139,7 @@ export async function getAuthHeaders(
       return opts.headers;
     }
 
-    const authUrl = `${authenticateHeader.parms.realm}?service=${authenticateHeader.parms.service}&scope=repository:${dockerRepository}:pull`;
+    const authUrl = `${authenticateHeader.params.realm}?service=${authenticateHeader.params.service}&scope=repository:${dockerRepository}:pull`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
@@ -206,11 +211,11 @@ export function getRegistryRepository(
 ): RegistryRepository {
   if (registryUrl !== DOCKER_HUB) {
     const registryEndingWithSlash = ensureTrailingSlash(
-      registryUrl.replace(/^https?:\/\//, '')
+      registryUrl.replace(regEx(/^https?:\/\//), '')
     );
     if (lookupName.startsWith(registryEndingWithSlash)) {
       let registryHost = trimTrailingSlash(registryUrl);
-      if (!/^https?:\/\//.test(registryHost)) {
+      if (!regEx(/^https?:\/\//).test(registryHost)) {
         registryHost = `https://${registryHost}`;
       }
       let dockerRepository = lookupName.replace(registryEndingWithSlash, '');
@@ -240,7 +245,7 @@ export function getRegistryRepository(
   if (registryHost === 'docker.io') {
     registryHost = 'index.docker.io';
   }
-  if (!/^https?:\/\//.exec(registryHost)) {
+  if (!regEx(/^https?:\/\//).exec(registryHost)) {
     registryHost = `https://${registryHost}`;
   }
   const opts = hostRules.find({ hostType: id, url: registryHost });
