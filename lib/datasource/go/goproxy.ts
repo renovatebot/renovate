@@ -156,15 +156,28 @@ export async function versionInfo(
   return result;
 }
 
+export interface GoProxyResult {
+  proxyUsed: boolean;
+  result?: ReleaseResult | null;
+}
+
 export async function getReleases(
   config: GetReleasesConfig
-): Promise<ReleaseResult | null> {
+): Promise<GoProxyResult> {
+  const result: GoProxyResult = {
+    proxyUsed: false,
+  };
+
+  if (!process.env.GOPROXY) {
+    return result;
+  }
+
   const { lookupName } = config;
 
   const noproxy = parseNoproxy();
   if (noproxy?.test(lookupName)) {
     logger.debug(`Skipping ${lookupName} via GONOPROXY match`);
-    return null;
+    return result;
   }
 
   const goproxy = process.env.GOPROXY;
@@ -173,19 +186,18 @@ export async function getReleases(
   const cacheNamespaces = 'datasource-go-proxy';
   const cacheKey = `${lookupName}@@${goproxy}`;
   const cacheMinutes = 60;
-  const cachedResult = await packageCache.get<ReleaseResult | null>(
+  const cachedResult = await packageCache.get<GoProxyResult>(
     cacheNamespaces,
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult || cachedResult === null) {
-    return cachedResult;
+  if (cachedResult) {
+    return result;
   }
-
-  let result: ReleaseResult | null = null;
 
   for (const { url, fallback } of proxyList) {
     try {
+      result.proxyUsed = true;
       const versions = await listVersions(url, lookupName);
       const queue = versions.map((version) => async (): Promise<Release> => {
         try {
@@ -197,7 +209,7 @@ export async function getReleases(
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        result = { releases };
+        result.result = { releases };
         break;
       }
     } catch (err) {

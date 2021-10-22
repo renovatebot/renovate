@@ -168,9 +168,9 @@ export async function getReleases(
   let res: ReleaseResult = null;
 
   logger.trace(`goproxy.getReleases(${lookupName})`);
-  res = await goproxy.getReleases(config);
-  if (res) {
-    return res;
+  const goProxyResult = await goproxy.getReleases(config);
+  if (goProxyResult.proxyUsed) {
+    return goProxyResult.result;
   }
 
   logger.trace(`go.getReleases(${lookupName})`);
