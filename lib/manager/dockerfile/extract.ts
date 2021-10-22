@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { regEx } from '../../util/regex';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 

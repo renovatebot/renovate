@@ -13,18 +13,19 @@ describe('manager/dockerfile/extract', () => {
 
     it('handles naked dep', () => {
       const res = extractPackageFile('FROM node\n').deps;
-      expect(res).toMatchSnapshot([
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: undefined,
-          datasource: 'docker',
-          depName: 'node',
-          depType: 'final',
-          replaceString: 'node',
-        },
-      ]);
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "node",
+            "depType": "final",
+            "replaceString": "node",
+          },
+        ]
+      `);
     });
 
     it('is case insensitive', () => {
@@ -410,7 +411,19 @@ describe('manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=frontend /usr/bin/node /usr/bin/node\n'
       ).deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "6.12.3",
+            "datasource": "docker",
+            "depName": "node",
+            "depType": "final",
+            "replaceString": "node:6.12.3",
+          },
+        ]
+      `);
       expect(res).toHaveLength(1);
     });
 
@@ -418,7 +431,19 @@ describe('manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=0 /usr/bin/node /usr/bin/node\n'
       ).deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "6.12.3",
+            "datasource": "docker",
+            "depName": "node",
+            "depType": "final",
+            "replaceString": "node:6.12.3",
+          },
+        ]
+      `);
       expect(res).toHaveLength(1);
     });
 
@@ -426,7 +451,37 @@ describe('manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.7.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD ["./app"]\n'
       ).deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "8.15.1-alpine",
+            "datasource": "docker",
+            "depName": "node",
+            "depType": "stage",
+            "replaceString": "node:8.15.1-alpine",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "1.7.3",
+            "datasource": "docker",
+            "depName": "golang",
+            "depType": "stage",
+            "replaceString": "golang:1.7.3",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "latest",
+            "datasource": "docker",
+            "depName": "alpine",
+            "depType": "final",
+            "replaceString": "alpine:latest",
+          },
+        ]
+      `);
       const passed = [
         res[2].depType === 'final',
         res[1].depType === 'stage',
@@ -437,50 +492,173 @@ describe('manager/dockerfile/extract', () => {
 
     it('extracts images on adjacent lines', () => {
       const res = extractPackageFile(d1).deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+            "currentValue": "8.11.3-alpine",
+            "datasource": "docker",
+            "depName": "node",
+            "depType": "stage",
+            "replaceString": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "1.1.1",
+            "datasource": "docker",
+            "depName": "buildkite/puppeteer",
+            "depType": "final",
+            "replaceString": "buildkite/puppeteer:1.1.1",
+          },
+        ]
+      `);
       expect(res).toHaveLength(2);
     });
 
     it('extracts images from all sorts of (maybe multiline) FROM and COPY --from statements', () => {
       const res = extractPackageFile(d2).deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "image1",
+            "depType": "stage",
+            "replaceString": "image1",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": "sha256:abcdef",
+            "currentValue": "1.0.0",
+            "datasource": "docker",
+            "depName": "image2",
+            "depType": "stage",
+            "replaceString": "image2:1.0.0@sha256:abcdef",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "image4",
+            "depType": "stage",
+            "replaceString": "image4",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "image5",
+            "depType": "stage",
+            "replaceString": "image5",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "image6",
+            "depType": "stage",
+            "replaceString": "image6",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": "sha256:abcdef",
+            "currentValue": "1.0.0",
+            "datasource": "docker",
+            "depName": "image7",
+            "depType": "stage",
+            "replaceString": "image7:1.0.0@sha256:abcdef",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "image11",
+            "depType": "stage",
+            "replaceString": "image11",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "image12",
+            "depType": "stage",
+            "replaceString": "image12",
+          },
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "image13",
+            "depType": "final",
+            "replaceString": "image13",
+          },
+        ]
+      `);
       expect(res).toHaveLength(9);
     });
 
     it('handles calico/node', () => {
       const res = extractPackageFile('FROM calico/node\n').deps;
-      expect(res).toMatchSnapshot([
-        {
-          datasource: 'docker',
-          depName: 'calico/node',
-          replaceString: 'calico/node',
-        },
-      ]);
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": undefined,
+            "datasource": "docker",
+            "depName": "calico/node",
+            "depType": "final",
+            "replaceString": "calico/node",
+          },
+        ]
+      `);
     });
 
     it('handles ubuntu', () => {
       const res = extractPackageFile('FROM ubuntu:18.04\n').deps;
-      expect(res).toMatchSnapshot([
-        {
-          currentValue: '18.04',
-          depName: 'ubuntu',
-          versioning: 'ubuntu',
-        },
-      ]);
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "18.04",
+            "datasource": "docker",
+            "depName": "ubuntu",
+            "depType": "final",
+            "replaceString": "ubuntu:18.04",
+            "versioning": "ubuntu",
+          },
+        ]
+      `);
     });
 
     it('handles prefixes', () => {
       const res = extractPackageFile('FROM amd64/ubuntu:18.04\n').deps;
-      expect(res).toMatchSnapshot([
-        {
-          currentValue: '18.04',
-          depName: 'ubuntu',
-          lookupName: 'amd64/ubuntu',
-          versioning: 'ubuntu',
-          autoReplaceStringTemplate:
-            '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-        },
-      ]);
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "18.04",
+            "datasource": "docker",
+            "depName": "ubuntu",
+            "depType": "final",
+            "lookupName": "amd64/ubuntu",
+            "replaceString": "amd64/ubuntu:18.04",
+            "versioning": "ubuntu",
+          },
+        ]
+      `);
     });
   });
   describe('getDep()', () => {
