@@ -12,7 +12,7 @@ export class AwsMachineImageDataSource extends Datasource {
   override readonly caching = true;
 
   override readonly defaultConfig = {
-    // Because amis don't follow any versioning scheme, we overwrite commitMessageExtra to remove the 'v'
+    // Because amis don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
     commitMessageExtra: 'to {{{newVersion}}}',
     branchTopic:
       'ami/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}#{{{depName}}}',
@@ -23,7 +23,7 @@ export class AwsMachineImageDataSource extends Datasource {
       Image: '```{{{newDigest}}}```',
     },
     digest: {
-      //   'AWS Machine Image Name {{{depName}}} in ({{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}})',
+      // Because newDigestShort will allways be 'amazon-' we override to print the name of the ami
       commitMessageExtra: 'to {{{newDigest}}}',
       branchTopic:
         'amidigest/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}#{{{depName}}}',
