@@ -46,11 +46,9 @@ export function poetry2semver(
     return null;
   }
   // trim leading zeros from valid numbers
-  const releaseParts = (match?.groups?.release || '')
+  const releaseParts = match.groups.release
     .split('.')
-    .map((segment) =>
-      Number.isNaN(parseInt(segment, 10)) ? segment : parseInt(segment, 10)
-    );
+    .map((segment) => parseInt(segment, 10));
   while (padRelease && releaseParts.length < 3) {
     releaseParts.push(0);
   }
