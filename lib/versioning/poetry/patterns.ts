@@ -1,3 +1,5 @@
+import { regEx } from '../../util/regex';
+
 /**
  * regex used by poetry.core.version.Version to parse union of SemVer
  * (with a subset of pre/post/dev tags) and PEP440
@@ -5,7 +7,7 @@
  */
 
 // prettier-ignore
-export const VERSION_PATTERN = new RegExp(
+export const VERSION_PATTERN = regEx(
     [
       '^',
       'v?',
@@ -40,4 +42,6 @@ export const VERSION_PATTERN = new RegExp(
     ].join('')
   );
 
-export const RANGE_COMPARATOR_PATTERN = /(\s*(?:\^|~|[><!]?=|[><]|\|\|)\s*)/;
+export const RANGE_COMPARATOR_PATTERN = regEx(
+  /(\s*(?:\^|~|[><!]?=|[><]|\|\|)\s*)/
+);
