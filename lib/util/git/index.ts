@@ -46,6 +46,7 @@ interface StorageConfig {
   url: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
+  fullClone?: boolean;
 }
 
 interface LocalConfig extends StorageConfig {
@@ -131,10 +132,10 @@ async function isDirectory(dir: string): Promise<boolean> {
 }
 
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
-  // see https://stackoverflow.com/a/44750379/1438522
+  // see https://stackoverflow.com/a/62352647/3005034
   try {
-    const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
-    return res.replace('refs/remotes/origin/', '').trim();
+    const res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+    return res.replace('origin/', '').trim();
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (
@@ -315,8 +316,13 @@ export async function syncGit(): Promise<void> {
     await fs.emptyDir(localDir);
     const cloneStart = Date.now();
     try {
-      // blobless clone
-      const opts = ['--filter=blob:none'];
+      const opts = [];
+      if (config.fullClone) {
+        logger.debug('Performing full clone');
+      } else {
+        logger.debug('Performing blobless clone');
+        opts.push('--filter=blob:none');
+      }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)

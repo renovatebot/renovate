@@ -7,13 +7,12 @@ import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline } from './types';
 import { replaceReferenceTags } from './utils';
 
-const commentsRe = /^\s*#/;
-const whitespaceRe = /^(?<whitespace>\s*)/;
+const commentsRe = /^\s*#/; // TODO #12070
+const whitespaceRe = /^(?<whitespace>\s*)/; // TODO #12070
 const imageRe =
-  /^(?<whitespace>\s*)image:(?:\s+['"]?(?<image>[^\s'"]+)['"]?)?\s*$/;
-const nameRe = /^\s*name:\s+['"]?(?<depName>[^\s'"]+)['"]?\s*$/;
-const serviceRe = /^\s*-\s*(?:name:\s+)?['"]?(?<depName>[^\s'"]+)['"]?\s*$/;
-
+  /^(?<whitespace>\s*)image:(?:\s+['"]?(?<image>[^\s'"]+)['"]?)?\s*$/; // TODO #12070
+const nameRe = /^\s*name:\s+['"]?(?<depName>[^\s'"]+)['"]?\s*$/; // TODO #12070
+const serviceRe = /^\s*-\s*(?:name:\s+)?['"]?(?<depName>[^\s'"]+)['"]?\s*$/; // TODO #12070
 function skipCommentLines(
   lines: string[],
   lineNumber: number
@@ -62,7 +61,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
         }
       }
-      const services = /^\s*services:\s*$/.test(line);
+      const services = /^\s*services:\s*$/.test(line); // TODO #12071  #12070
       if (services) {
         logger.trace(`Matched services on line ${lineNumber}`);
         let foundImage: boolean;
@@ -121,7 +120,7 @@ export async function extractAllPackageFiles(
     if (is.array(doc?.include)) {
       for (const includeObj of doc.include) {
         if (is.string(includeObj.local)) {
-          const fileObj = includeObj.local.replace(/^\//, '');
+          const fileObj = includeObj.local.replace(/^\//, ''); // TODO #12071 #12070
           if (!seen.has(fileObj)) {
             seen.add(fileObj);
             filesToExamine.push(fileObj);
@@ -129,7 +128,7 @@ export async function extractAllPackageFiles(
         }
       }
     } else if (is.string(doc?.include)) {
-      const fileObj = doc.include.replace(/^\//, '');
+      const fileObj = doc.include.replace(/^\//, ''); // TODO #12071  #12070
       if (!seen.has(fileObj)) {
         seen.add(fileObj);
         filesToExamine.push(fileObj);

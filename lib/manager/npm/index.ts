@@ -1,4 +1,4 @@
-import { LANGUAGE_JAVASCRIPT } from '../../constants/languages';
+import { ProgrammingLanguage } from '../../constants';
 import * as npmVersioning from '../../versioning/npm';
 
 export { detectGlobalConfig } from './detect';
@@ -10,7 +10,7 @@ export {
 } from './update';
 export { getRangeStrategy } from './range';
 
-export const language = LANGUAGE_JAVASCRIPT;
+export const language = ProgrammingLanguage.JavaScript;
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
