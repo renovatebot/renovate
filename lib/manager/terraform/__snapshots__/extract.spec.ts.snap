@@ -381,7 +381,7 @@ Object {
       "registryUrls": Array [
         "https://repo.mycompany.com:8080",
       ],
-      "replaceString": "repo.mycompany.com:8080/foo-service:v1",
+      "replaceString": "foo-service:v1",
     },
     Object {
       "skipReason": "invalid-dependency-specification",

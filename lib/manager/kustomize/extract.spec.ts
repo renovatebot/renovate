@@ -160,7 +160,7 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
-        depName: 'quay.io/repo/image',
+        depName: 'repo/image',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -174,7 +174,7 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
-        depName: 'localhost:5000/repo/image',
+        depName: 'repo/image',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -188,7 +188,7 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         replaceString: 'v1.0.0',
         datasource: datasourceDocker.id,
-        depName: 'localhost:5000/repo/image/service',
+        depName: 'image/service',
       };
       const pkg = extractImage({
         name: sample.depName,
