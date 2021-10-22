@@ -2,11 +2,12 @@ import simpleGit from 'simple-git';
 import { cache } from '../../util/cache/package/decorator';
 import { simpleGitConfig } from '../../util/git/config';
 import { getRemoteUrlWithToken } from '../../util/git/url';
+import { regEx } from '../../util/regex';
 import type { GetReleasesConfig } from '../types';
 import type { RawRefs } from './types';
 
-const refMatch = /(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/;
-const headMatch = /(?<hash>.*?)\s+HEAD/;
+const refMatch = regEx(/(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/);
+const headMatch = regEx(/(?<hash>.*?)\s+HEAD/);
 
 // TODO: extract to a separate directory structure (#10532)
 export class GitDatasource {
