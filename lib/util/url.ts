@@ -69,6 +69,7 @@ export function parseUrl(url: string): URL | null {
     return null;
   }
 }
+
 /**
  * Tries to create an URL object from either a full URL string or a hostname
  * @param url either the full url or a hostname

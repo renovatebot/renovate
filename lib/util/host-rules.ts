@@ -143,10 +143,10 @@ export function findAll({ hostType }: { hostType: string }): HostRule[] {
 }
 
 /**
- * @returns all known host rules without any filtering
+ * @returns a deep copy of all known host rules without any filtering
  */
 export function getAll(): HostRule[] {
-  return hostRules;
+  return clone(hostRules);
 }
 
 export function clear(): void {
