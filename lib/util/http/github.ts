@@ -30,11 +30,17 @@ export interface GithubHttpOptions extends InternalHttpOptions {
   token?: string;
 }
 
+interface GithubGraphqlRepoData<T = unknown> {
+  repository?: T;
+}
+
 interface GithubGraphqlResponse<T = unknown> {
-  data?: {
-    repository?: T;
-  };
-  errors?: { message: string; locations: unknown }[];
+  data?: T;
+  errors?: {
+    type?: string;
+    message: string;
+    locations: unknown;
+  }[];
 }
 
 function handleGotError(
@@ -242,10 +248,10 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     return result;
   }
 
-  public async queryRepo<T = unknown>(
+  public async requestGraphql<T = unknown>(
     query: string,
     options: GraphqlOptions = {}
-  ): Promise<T> {
+  ): Promise<GithubGraphqlResponse<T>> {
     let result = null;
 
     const path = 'graphql';
@@ -274,7 +280,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         'graphql',
         opts
       );
-      result = res?.body?.data?.repository;
+      result = res?.body;
     } catch (err) {
       if (err instanceof ExternalHostError) {
         const gotError = err.err as GotLegacyError;
@@ -309,14 +315,15 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     let isIterating = true;
     while (isIterating) {
-      const gqlRes = await this.queryRepo<T>(query, {
+      const res = await this.requestGraphql<GithubGraphqlRepoData<T>>(query, {
         ...options,
         count: Math.min(count, limit),
         cursor,
         paginate,
       });
-      if (gqlRes?.[fieldName]) {
-        const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
+      const fieldData = res?.data?.repository?.[fieldName];
+      if (fieldData) {
+        const { nodes = [], edges = [], pageInfo } = fieldData;
         result.push(...nodes);
         result.push(...edges);
 
@@ -335,7 +342,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error({ gqlRes }, 'Error fetching GraphQL nodes');
+          logger.error({ res }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }

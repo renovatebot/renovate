@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import * as openpgp from 'openpgp';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
+import { regEx } from '../util/regex';
 import { add } from '../util/sanitize';
 import { getGlobalConfig } from './global';
 import type { RenovateConfig } from './types';
@@ -18,7 +19,7 @@ export async function tryDecryptPgp(
   try {
     const pk = await openpgp.readPrivateKey({
       // prettier-ignore
-      armoredKey: privateKey.replace(/\n[ \t]+/g, '\n'), // little massage to help a common problem
+      armoredKey: privateKey.replace(regEx(/\n[ \t]+/g), '\n'), // little massage to help a common problem
     });
     const startBlock = '-----BEGIN PGP MESSAGE-----\n\n';
     const endBlock = '\n-----END PGP MESSAGE-----';
@@ -95,7 +96,7 @@ export async function tryDecrypt(
         const { o: org, r: repo, v: value } = decryptedObj;
         if (is.nonEmptyString(value)) {
           if (is.nonEmptyString(org)) {
-            const orgName = org.replace(/\/$/, ''); // Strip trailing slash
+            const orgName = org.replace(regEx(/\/$/), ''); // Strip trailing slash
             if (is.nonEmptyString(repo)) {
               const scopedRepository = `${orgName}/${repo}`;
               if (scopedRepository === repository) {
@@ -171,7 +172,7 @@ export async function decryptConfig(
           }
           logger.debug(`Decrypted ${eKey}`);
           if (eKey === 'npmToken') {
-            const token = decryptedStr.replace(/\n$/, '');
+            const token = decryptedStr.replace(regEx(/\n$/), ''); // TODO #12071
             add(token);
             logger.debug(
               { decryptedToken: maskToken(token) },
@@ -182,13 +183,13 @@ export async function decryptConfig(
               if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
                 logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
                 decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  /\${NPM_TOKEN}/g,
+                  regEx(/\${NPM_TOKEN}/g),
                   token
                 );
               } else {
                 logger.debug('Appending _authToken= to end of existing npmrc');
                 decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  /\n?$/,
+                  regEx(/\n?$/), // TODO #12071
                   `\n_authToken=${token}\n`
                 );
               }

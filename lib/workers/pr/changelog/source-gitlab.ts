@@ -36,6 +36,7 @@ export async function getChangeLogJSON({
   releases,
   depName,
   manager,
+  sourceDirectory,
 }: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
@@ -134,6 +135,7 @@ export async function getChangeLogJSON({
       repository,
       sourceUrl,
       depName,
+      sourceDirectory,
     },
     versions: changelogReleases,
   };
