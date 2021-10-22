@@ -422,6 +422,15 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+    it('parses local Bitbucket user repo', () => {
+      expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
+        packageName: '~john_doe/repo',
+        params: undefined,
+        presetName: 'somefile',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
     it('returns default package name with params', () => {
       expect(presets.parsePreset(':group(packages/eslint, eslint)')).toEqual({
         packageName: 'default',
