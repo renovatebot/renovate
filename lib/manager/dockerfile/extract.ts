@@ -94,17 +94,6 @@ export function getDep(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  // Don't display quay.io ports
-  if (quayRegex.test(dep.depName)) {
-    const depName = dep.depName.replace(quayRegex, 'quay.io');
-    if (depName !== dep.depName) {
-      dep.lookupName = dep.depName;
-      dep.depName = depName;
-      dep.autoReplaceStringTemplate =
-        '{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
-    }
-  }
-
   return dep;
 }
 
