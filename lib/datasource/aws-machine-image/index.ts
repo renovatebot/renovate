@@ -12,10 +12,8 @@ export class AwsMachineImageDataSource extends Datasource {
   override readonly caching = true;
 
   override readonly defaultConfig = {
-    pinDigest: true,
-    commitMessageTopic:
-      'AWS Machine Image {{{depName}}} in ({{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}})',
-    commitMessageExtra: '\nto {{{newVersion}}}',
+    // Because amis don't follow any versioning scheme, we overwrite commitMessageExtra to remove the 'v'
+    commitMessageExtra: 'to {{{newVersion}}}',
     branchTopic:
       'ami/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}#{{{depName}}}',
     prBodyNotes:
@@ -25,10 +23,8 @@ export class AwsMachineImageDataSource extends Datasource {
       Image: '```{{{newDigest}}}```',
     },
     digest: {
-      commitMessageAction: 'Set',
-      commitMessageTopic:
-        'AWS Machine Image Name {{{depName}}} in ({{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}})',
-      commitMessageExtra: '\nto {{{newDigest}}}',
+      //   'AWS Machine Image Name {{{depName}}} in ({{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}})',
+      commitMessageExtra: 'to {{{newDigest}}}',
       branchTopic:
         'amidigest/{{#if packageFileDir}}{{{packageFileDir}}}/{{/if}}{{{packageFile}}}#{{{depName}}}',
       prBodyColumns: ['Image'],
