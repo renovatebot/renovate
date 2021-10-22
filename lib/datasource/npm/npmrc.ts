@@ -7,6 +7,7 @@ import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
+import { regEx } from '../../util/regex';
 import { add } from '../../util/sanitize';
 import type { Npmrc, PackageResolution } from './types';
 
@@ -23,7 +24,7 @@ function envReplace(value: any, env = process.env): any {
     return value;
   }
 
-  const ENV_EXPR = /(\\*)\$\{([^}]+)\}/g;
+  const ENV_EXPR = regEx(/(\\*)\$\{([^}]+)\}/g);
 
   return value.replace(ENV_EXPR, (match, esc, envVarName) => {
     if (env[envVarName] === undefined) {
@@ -34,7 +35,7 @@ function envReplace(value: any, env = process.env): any {
   });
 }
 
-const envRe = /(\\*)\$\{([^}]+)\}/;
+const envRe = regEx(/(\\*)\$\{([^}]+)\}/);
 // TODO: better add to host rules (#9588)
 function sanitize(key: string, val: string): void {
   if (!val || envRe.test(val)) {
@@ -59,7 +60,7 @@ export function setNpmrc(input?: string): void {
     const existingNpmrc = npmrc;
     npmrcRaw = input;
     logger.debug('Setting npmrc');
-    npmrc = ini.parse(input.replace(/\\n/g, '\n'));
+    npmrc = ini.parse(input.replace(regEx(/\\n/g), '\n'));
     const { exposeAllEnv } = getGlobalConfig();
     for (const [key, val] of Object.entries(npmrc)) {
       if (!exposeAllEnv) {
@@ -103,7 +104,7 @@ export function resolvePackage(packageName: string): PackageResolution {
   }
   const packageUrl = url.resolve(
     registryUrl,
-    encodeURIComponent(packageName).replace(/^%40/, '@')
+    encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
   );
   const headers: OutgoingHttpHeaders = {};
   let authInfo = registryAuthToken(registryUrl, { npmrc, recursive: true });
@@ -111,7 +112,8 @@ export function resolvePackage(packageName: string): PackageResolution {
     !authInfo &&
     npmrc &&
     npmrc._authToken &&
-    registryUrl.replace(/\/?$/, '/') === npmrc.registry?.replace(/\/?$/, '/')
+    registryUrl.replace(regEx(/\/?$/), '/') ===
+      npmrc.registry?.replace(/\/?$/, '/') // TODO #12070
   ) {
     authInfo = { type: 'Bearer', token: npmrc._authToken };
   }

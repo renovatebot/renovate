@@ -112,7 +112,6 @@ export class CrateDatasource extends Datasource {
         this.handleGenericErrors(err);
       }
     }
-
     throw new Error(`unsupported crate registry flavor: ${info.flavor}`);
   }
 
@@ -144,7 +143,7 @@ export class CrateDatasource extends Datasource {
    * clone the repository.
    */
   private static cacheDirFromUrl(url: URL): string {
-    const proto = url.protocol.replace(/:$/, '');
+    const proto = url.protocol.replace(/:$/, ''); // TODO #12070
     const host = url.hostname;
     const hash = hasha(url.pathname, {
       algorithm: 'sha256',

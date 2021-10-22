@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { PackageFile } from '../types';
 import type { DockerComposeConfig } from './types';
@@ -56,7 +57,7 @@ export function extractPackageFile(
     return null;
   }
   try {
-    const lineMapper = new LineMapper(content, /^\s*image:/);
+    const lineMapper = new LineMapper(content, regEx(/^\s*image:/));
 
     // docker-compose v1 places the services at the top level,
     // docker-compose v2+ places the services within a 'services' key
