@@ -119,10 +119,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     });
   }
 
-  const hostRules = hostRulesFromEnv(env);
-  if (hostRules) {
-    config.hostRules = [...config.hostRules, ...hostRules];
-  }
+  config.hostRules = [...config.hostRules, ...hostRulesFromEnv(env)];
 
   // These env vars are deprecated and deleted to make sure they're not used
   const unsupportedEnv = [
