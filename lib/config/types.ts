@@ -130,6 +130,7 @@ export type PostUpgradeTasks = {
   commands?: string[];
   fileFilters?: string[];
   executionMode: ExecutionMode;
+  timeout?: number;
 };
 
 type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =

@@ -73,6 +73,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'timeout',
+    description:
+      'Timeout (in milliseconds) for execute single post-upgrade command.',
+    type: 'integer',
+    parent: 'postUpgradeTasks',
+    default: 15 * 60 * 1000,
+    cli: false,
+  },
+  {
     name: 'onboardingBranch',
     description:
       'Change this value in order to override the default onboarding branch name.',

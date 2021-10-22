@@ -1703,7 +1703,7 @@ e.g.
 }
 ```
 
-The `postUpgradeTasks` configuration consists of three fields:
+The `postUpgradeTasks` configuration consists of four fields:
 
 ### commands
 
@@ -1717,6 +1717,10 @@ A list of glob-style matchers that determine which files will be included in the
 
 Defaults to `update`, but can also be set to `branch`. This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask
 will be executed for every dependency on the branch. If set to `branch` the postUpgradeTask is executed for the whole branch.
+
+### timeout
+
+Timeout (in milliseconds) for execute single post-upgrade command. Defaults to 15 mins.
 
 ## prBodyColumns
 
