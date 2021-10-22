@@ -1698,7 +1698,8 @@ e.g.
   "postUpgradeTasks": {
     "commands": ["tslint --fix"],
     "fileFilters": ["yarn.lock", "**/*.js"],
-    "executionMode": "update"
+    "executionMode": "update",
+    "executionTimeout": 20 * 60 * 1000
   }
 }
 ```

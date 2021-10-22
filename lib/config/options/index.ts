@@ -73,7 +73,7 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'timeout',
+    name: 'executionTimeout',
     description:
       'Timeout (in milliseconds) for execute single post-upgrade command.',
     type: 'integer',
