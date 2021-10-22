@@ -163,17 +163,6 @@ You would use this in your configuration file:
 
 If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
 
-## dockerMapDotfiles
-
-This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files.
-Currently applicable to `.npmrc` only.
-
-```json
-{
-  "dockerMapDotfiles": true
-}
-```
-
 ## dockerPreCommands
 
 If needed you can use the `dockerPreCommands` option to add custom bash commands that will be executed in each side car container before the actual command runs.
