@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import shell from 'shelljs';
 import upath from 'upath';
+import { regEx } from '../lib/util/regex';
 
 shell.echo('generating imports');
 const newFiles = new Set();
@@ -73,7 +74,7 @@ async function generateData() {
   /** @type {string[]} */
   const contentMapAssignments = [];
   for (const file of files) {
-    const key = file.replace(/\\/g, '/');
+    const key = file.replace(regEx(/\\/g), '/'); // TODO #12071
 
     const rawFileContent = await fs.readFile(file, 'utf8');
     const value = JSON.stringify(rawFileContent);

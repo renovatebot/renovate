@@ -6,6 +6,7 @@ import { PlatformId } from '../../../../constants';
 import { getDatasourceList } from '../../../../datasource';
 import { logger } from '../../../../logger';
 import type { HostRule } from '../../../../types';
+import { regEx } from '../../../../util/regex';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -31,7 +32,7 @@ export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env) {
     return option.env;
   }
-  const nameWithUnderscores = option.name.replace(/([A-Z])/g, '_$1');
+  const nameWithUnderscores = option.name.replace(regEx(/([A-Z])/g), '_$1');
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }
 
@@ -57,7 +58,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   const coersions = {
     boolean: (val: string): boolean => val === 'true',
     array: (val: string): string[] => val.split(',').map((el) => el.trim()),
-    string: (val: string): string => val.replace(/\\n/g, '\n'),
+    string: (val: string): string => val.replace(regEx(/\\n/g), '\n'),
     object: (val: string): any => JSON.parse(val),
     integer: parseInt,
   };
@@ -113,7 +114,10 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
       continue; // eslint-disable-line no-continue
     }
     // Double underscore __ is used in place of hyphen -
-    const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
+    const splitEnv = envName
+      .toLowerCase()
+      .replace(regEx(/__/g), '-')
+      .split('_'); // TODO #12071
     const hostType = splitEnv.shift();
     if (datasources.has(hostType)) {
       const suffix = splitEnv.pop();
