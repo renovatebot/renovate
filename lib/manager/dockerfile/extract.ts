@@ -20,23 +20,25 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   ) {
     isVariable = true;
 
+    // If the variable contains exactly one $ and has the default value, we consider it as a valid dependency;
+    // otherwise skip it.
     if (
-      currentFrom.split('$').length === 2 && // Ensure it has exactly one '$' to avoid the cases we don't support
-      currentFrom.indexOf(variableDefaultValueSplit) !== -1 // Ensure it has the default value
+      currentFrom.split('$').length !== 2 ||
+      currentFrom.indexOf(variableDefaultValueSplit) === -1
     ) {
-      cleanedCurrentFrom = currentFrom.substr(
-        variableOpen.length,
-        currentFrom.length - (variableClose.length + 2)
-      );
-      cleanedCurrentFrom = cleanedCurrentFrom.substr(
-        cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
-          variableDefaultValueSplit.length
-      );
-    } else {
       return {
         skipReason: SkipReason.ContainsVariable,
       };
     }
+
+    cleanedCurrentFrom = currentFrom.substr(
+      variableOpen.length,
+      currentFrom.length - (variableClose.length + 2)
+    );
+    cleanedCurrentFrom = cleanedCurrentFrom.substr(
+      cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
+        variableDefaultValueSplit.length
+    );
   }
 
   const [currentDepTag, currentDigest] = cleanedCurrentFrom.split('@');
