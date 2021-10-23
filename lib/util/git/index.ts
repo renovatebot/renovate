@@ -9,6 +9,7 @@ import Git, {
   TaskOptions,
 } from 'simple-git';
 import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
@@ -25,7 +26,7 @@ import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { GitNoVerifyOption, getNoVerify } from './config';
+import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
 
 export { GitNoVerifyOption, setNoVerify } from './config';
@@ -46,6 +47,7 @@ interface StorageConfig {
   url: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
+  fullClone?: boolean;
 }
 
 interface LocalConfig extends StorageConfig {
@@ -131,10 +133,10 @@ async function isDirectory(dir: string): Promise<boolean> {
 }
 
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
-  // see https://stackoverflow.com/a/44750379/1438522
+  // see https://stackoverflow.com/a/62352647/3005034
   try {
-    const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
-    return res.replace('refs/remotes/origin/', '').trim();
+    const res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+    return res.replace('origin/', '').trim();
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (
@@ -186,7 +188,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = getGlobalConfig();
-  git = Git(localDir);
+  git = Git(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -315,8 +317,13 @@ export async function syncGit(): Promise<void> {
     await fs.emptyDir(localDir);
     const cloneStart = Date.now();
     try {
-      // blobless clone
-      const opts = ['--filter=blob:none'];
+      const opts = [];
+      if (config.fullClone) {
+        logger.debug('Performing full clone');
+      } else {
+        logger.debug('Performing blobless clone');
+        opts.push('--filter=blob:none');
+      }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
@@ -722,7 +729,10 @@ export async function commitFiles({
           });
         }
         try {
-          await git.add(fileName);
+          // istanbul ignore next
+          const addParams =
+            fileName === configFileNames[0] ? ['-f', fileName] : fileName;
+          await git.add(addParams);
           if (file.executable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
@@ -847,7 +857,10 @@ export async function commitFiles({
       );
       return null;
     }
-    if (err.message.includes('denying non-fast-forward')) {
+    if (
+      err.message.includes('denying non-fast-forward') ||
+      err.message.includes('GH003: Sorry, force-pushing')
+    ) {
       logger.debug({ err }, 'Permission denied to update branch');
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = branchName;

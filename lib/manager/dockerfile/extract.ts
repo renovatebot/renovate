@@ -90,7 +90,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const stageNames: string[] = [];
 
   const fromMatches = content.matchAll(
-    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\w+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim // TODO #12070
+    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\S+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim // TODO #12070
   );
 
   for (const fromMatch of fromMatches) {

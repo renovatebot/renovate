@@ -43,19 +43,29 @@ export function extractTerraformProvider(
     const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12071 #12070
     braceCounter = braceCounter + openBrackets - closedBrackets;
 
-    // only update fields inside the root block
-    if (braceCounter === 1) {
-      const kvMatch = keyValueExtractionRegex.exec(line);
-      if (kvMatch) {
-        if (kvMatch.groups.key === 'version') {
-          dep.currentValue = kvMatch.groups.value;
-        } else if (kvMatch.groups.key === 'source') {
-          dep.managerData.source = kvMatch.groups.value;
-          dep.managerData.sourceLine = lineNumber;
+    // istanbul ignore next
+    if (is.string(line)) {
+      // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
+      const openBrackets = (line.match(/\{/g) || []).length; // TODO #12071 #12070
+      const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12071 #12070
+      braceCounter = braceCounter + openBrackets - closedBrackets;
+
+      // only update fields inside the root block
+      if (braceCounter === 1) {
+        const kvMatch = keyValueExtractionRegex.exec(line);
+        if (kvMatch) {
+          if (kvMatch.groups.key === 'version') {
+            dep.currentValue = kvMatch.groups.value;
+          } else if (kvMatch.groups.key === 'source') {
+            dep.managerData.source = kvMatch.groups.value;
+            dep.managerData.sourceLine = lineNumber;
+          }
         }
       }
+    } else {
+      // stop - something went wrong
+      braceCounter = 0;
     }
-
     lineNumber += 1;
   } while (braceCounter !== 0);
   deps.push(dep);

@@ -288,6 +288,15 @@ describe('workers/global/config/parse/env', () => {
         expect(processExit).toHaveBeenCalledWith(1);
       });
     });
+    describe('migrations', () => {
+      it('renames migrated variables', () => {
+        const envParam: NodeJS.ProcessEnv = {
+          RENOVATE_GIT_LAB_AUTOMERGE: 'true',
+        };
+        const config = env.getConfig(envParam);
+        expect(config.platformAutomerge).toBe(true);
+      });
+    });
   });
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {
