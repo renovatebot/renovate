@@ -121,7 +121,7 @@ function mergeGroups(
   secondGroup: Record<string, string>,
   onlyValidMatchFields = true
 ): Record<string, string> {
-  const resultGroup = {};
+  const resultGroup = Object.create(null);
 
   Object.keys(mergedGroup)
     .filter((key) => !onlyValidMatchFields || validMatchFields.includes(key)) // prevent prototype pollution
