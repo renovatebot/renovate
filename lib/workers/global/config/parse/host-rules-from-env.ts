@@ -1,6 +1,6 @@
 import { getDatasourceList } from '../../../../datasource';
 import { logger } from '../../../../logger';
-import { HostRule } from '../../../../types';
+import type { HostRule } from '../../../../types';
 
 export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
   const datasources = new Set(getDatasourceList());
