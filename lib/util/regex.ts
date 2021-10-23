@@ -21,7 +21,6 @@ export function regEx(pattern: string | RegExp, flags?: string): RegExp {
     return new RegEx(pattern, flags);
   } catch (err) {
     // eslint-disable-next-line
-    console.log(err);
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = pattern.toString();
     error.validationError = `Invalid regular expression: ${pattern.toString()}`;
