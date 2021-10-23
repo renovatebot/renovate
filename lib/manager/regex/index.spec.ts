@@ -37,7 +37,7 @@ describe('manager/regex/index', () => {
     expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
       'maven'
     );
-    expect(res.deps.find((dep) => dep.depType === 'final')).toHaveLength(8);
+    expect(res.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
   it('returns null if no dependencies found', async () => {
     const config = {
