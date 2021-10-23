@@ -161,8 +161,7 @@ export function generateBranchConfig(
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix);
       upgrade.toLowerCase =
-        // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-        upgrade.semanticCommitType.match(/[A-Z]/) === null && // TODO #12070 #12071
+        regEx(/[A-Z]/).exec(upgrade.semanticCommitType) === null && // TODO #12071
         !upgrade.semanticCommitType.startsWith(':');
     }
     // Compile a few times in case there are nested templates
