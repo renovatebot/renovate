@@ -1,6 +1,5 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { VERSION_PATTERN } from './patterns';
@@ -23,51 +22,6 @@ function equals(a: string, b: string): boolean {
 
 function getMajor(version: string): number {
   return npm.getMajor(poetry2semver(version));
-}
-
-function padZeroes(input: string): string {
-  if (regEx(/[~^*]/).test(input)) {
-    // ignore ranges
-    return input;
-  }
-
-  const [output, stability] = getVersionParts(input);
-
-  const sections = output.split('.');
-  while (sections.length < 3) {
-    sections.push('0');
-  }
-  return sections.join('.') + stability;
-}
-
-// This function works like cargo2npm, but it doesn't
-// add a '^', because poetry treats versions without operators as
-// exact versions.
-function poetry2npm(input: string): string {
-  return input
-    .split(',')
-    .map((str) => str.trim())
-    .filter(notEmpty)
-    .join(' ');
-}
-
-// NOTE: This function is copied from cargo versioning code.
-// Poetry uses commas (like in cargo) instead of spaces (like in npm)
-// for AND operation.
-function npm2poetry(input: string): string {
-  // Note: this doesn't remove the ^
-  const res = input
-    .split(' ')
-    .map((str) => str.trim())
-    .filter(notEmpty);
-  const operators = ['^', '~', '=', '>', '<', '<=', '>='];
-  for (let i = 0; i < res.length - 1; i += 1) {
-    if (operators.includes(res[i])) {
-      const newValue = res[i] + ' ' + res[i + 1];
-      res.splice(i, 2, newValue);
-    }
-  }
-  return res.join(', ').replace(regEx(/\s*,?\s*\|\|\s*,?\s*/), ' || ');
 }
 
 function getMinor(version: string): number {
