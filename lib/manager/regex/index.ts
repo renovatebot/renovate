@@ -118,18 +118,19 @@ function handleAny(
 
 function mergeGroups(
   mergedGroup: Record<string, string>,
-  secondGroup: Record<string, string>
+  secondGroup: Record<string, string>,
+  onlyValidMatchFields = true
 ): Record<string, string> {
   const resultGroup = {};
 
   Object.keys(mergedGroup)
-    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
+    .filter((key) => !onlyValidMatchFields || validMatchFields.includes(key)) // prevent prototype pollution
     .forEach(
       // eslint-disable-next-line no-return-assign
       (key) => (resultGroup[key] = mergedGroup[key])
     );
   Object.keys(secondGroup)
-    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
+    .filter((key) => !onlyValidMatchFields || validMatchFields.includes(key)) // prevent prototype pollution
     .forEach((key) => {
       if (secondGroup[key] && secondGroup[key] !== '') {
         resultGroup[key] = secondGroup[key];
@@ -171,7 +172,8 @@ function handleRecursive(
   content: string,
   packageFile: string,
   config: CustomExtractConfig,
-  index = 0
+  index = 0,
+  combinedGroups: Record<string, string> = {}
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
@@ -183,9 +185,20 @@ function handleRecursive(
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     // if we have a depName and a currentValue with have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
-      return createDependency(match, null, config);
+      return createDependency(
+        match,
+        mergeGroups(combinedGroups, match.groups, false),
+        config
+      );
     }
-    return handleRecursive(match[0], packageFile, config, index + 1);
+
+    return handleRecursive(
+      match[0],
+      packageFile,
+      config,
+      index + 1,
+      mergeGroups(combinedGroups, match.groups || {}, false)
+    );
   });
 }
 
