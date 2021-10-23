@@ -289,6 +289,11 @@ Note that if `commitMessagePrefix` or `semanticCommits` values are defined then 
 If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
 
+## onboardingNoDeps
+
+Set this to true if you want Renovate to create the onboarding PR even if no dependencies are found for update.
+By default Renovate skips the repo if it finds no dependencies in it.
+
 ## onboardingPrTitle
 
 Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
