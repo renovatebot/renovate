@@ -12,6 +12,6 @@ export interface VersionInfo {
 }
 
 export interface GoproxyItem {
-  url: string;
+  url: 'off' | 'direct' | string;
   fallback: GoproxyFallback;
 }

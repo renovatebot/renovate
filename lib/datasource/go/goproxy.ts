@@ -7,6 +7,7 @@ import { regEx } from '../../util/regex';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GoproxyFallback, http } from './common';
 import type { GoproxyItem, VersionInfo } from './types';
+import * as vcs from './vcs';
 
 const parsedGoproxy: Record<string, GoproxyItem[]> = {};
 
@@ -34,7 +35,7 @@ export function parseGoproxy(
     return parsedGoproxy[input];
   }
 
-  let result: GoproxyItem[] = input
+  const result: GoproxyItem[] = input
     .split(/([^,|]*(?:,|\|))/) // TODO: #12070
     .filter(Boolean)
     .map((s) => s.split(/(?=,|\|)/)) // TODO: #12070
@@ -45,15 +46,6 @@ export function parseGoproxy(
           ? GoproxyFallback.WhenNotFoundOrGone
           : GoproxyFallback.Always,
     }));
-
-  // Ignore hosts after any keyword
-  for (let idx = 0; idx < result.length; idx += 1) {
-    const { url } = result[idx];
-    if (['off', 'direct'].includes(url)) {
-      result = result.slice(0, idx);
-      break;
-    }
-  }
 
   parsedGoproxy[input] = result;
   return result;
@@ -156,28 +148,15 @@ export async function versionInfo(
   return result;
 }
 
-export interface GoProxyResult {
-  proxyUsed: boolean;
-  result?: ReleaseResult | null;
-}
-
 export async function getReleases(
   config: GetReleasesConfig
-): Promise<GoProxyResult> {
-  const result: GoProxyResult = {
-    proxyUsed: false,
-  };
-
-  if (!process.env.GOPROXY) {
-    return result;
-  }
-
+): Promise<ReleaseResult | null> {
   const { lookupName } = config;
 
   const noproxy = parseNoproxy();
   if (noproxy?.test(lookupName)) {
     logger.debug(`Skipping ${lookupName} via GONOPROXY match`);
-    return result;
+    return null;
   }
 
   const goproxy = process.env.GOPROXY;
@@ -186,18 +165,30 @@ export async function getReleases(
   const cacheNamespaces = 'datasource-go-proxy';
   const cacheKey = `${lookupName}@@${goproxy}`;
   const cacheMinutes = 60;
-  const cachedResult = await packageCache.get<GoProxyResult>(
+  const cachedResult = await packageCache.get<ReleaseResult | null>(
     cacheNamespaces,
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult) {
-    return result;
+  if (cachedResult || cachedResult === null) {
+    return cachedResult;
   }
+
+  let result: ReleaseResult | null = null;
 
   for (const { url, fallback } of proxyList) {
     try {
-      result.proxyUsed = true;
+      if (url === 'off') {
+        break;
+      } else if (url === 'direct') {
+        result = await vcs.getReleases(config);
+        if (result) {
+          break;
+        } else {
+          throw new Error(`Can't obtain data directly from VCS`);
+        }
+      }
+
       const versions = await listVersions(url, lookupName);
       const queue = versions.map((version) => async (): Promise<Release> => {
         try {
@@ -209,7 +200,7 @@ export async function getReleases(
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        result.result = { releases };
+        result = { releases };
         break;
       }
     } catch (err) {
