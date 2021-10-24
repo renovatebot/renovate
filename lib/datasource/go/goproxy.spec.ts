@@ -77,10 +77,17 @@ describe('datasource/go/goproxy', () => {
       expect(parseGoproxy(undefined)).toBeEmpty();
       expect(parseGoproxy(null)).toBeEmpty();
       expect(parseGoproxy('')).toBeEmpty();
-      expect(parseGoproxy('off')).toBeEmpty();
-      expect(parseGoproxy('direct')).toBeEmpty();
+      expect(parseGoproxy('off')).toMatchObject([
+        { url: 'off', fallback: '|' },
+      ]);
+      expect(parseGoproxy('direct')).toMatchObject([
+        { url: 'direct', fallback: '|' },
+      ]);
       expect(parseGoproxy('foo,off|direct,qux')).toMatchObject([
         { url: 'foo', fallback: ',' },
+        { url: 'off', fallback: '|' },
+        { url: 'direct', fallback: ',' },
+        { url: 'qux', fallback: '|' },
       ]);
     });
   });

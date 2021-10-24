@@ -1,153 +1,12 @@
-import URL from 'url';
-import { PlatformId } from '../../constants';
-import { logger } from '../../logger';
-import * as hostRules from '../../util/host-rules';
-import { regEx } from '../../util/regex';
-import { trimTrailingSlash } from '../../util/url';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import * as github from '../github-tags';
-import * as gitlab from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { http } from './common';
 import * as goproxy from './goproxy';
-import type { DataSource } from './types';
+import { bitbucket, getDatasource } from './util';
+import * as vcs from './vcs';
 
 export { id } from './common';
 
 export const customRegistrySupport = false;
-
-const gitlabHttpsRegExp = regEx(
-  /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)[/]?$/
-);
-const gitlabRegExp = regEx(
-  /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)[/]?$/
-);
-const bitbucket = new BitBucketTagsDatasource();
-
-async function getDatasource(goModule: string): Promise<DataSource | null> {
-  if (goModule.startsWith('gopkg.in/')) {
-    const [pkg] = goModule.replace('gopkg.in/', '').split('.');
-    if (pkg.includes('/')) {
-      return { datasource: github.id, lookupName: pkg };
-    }
-    return {
-      datasource: github.id,
-      lookupName: `go-${pkg}/${pkg}`,
-    };
-  }
-  if (goModule.startsWith('github.com/')) {
-    const split = goModule.split('/');
-    const lookupName = split[1] + '/' + split[2];
-    return {
-      datasource: github.id,
-      lookupName,
-    };
-  }
-
-  if (goModule.startsWith('bitbucket.org/')) {
-    const split = goModule.split('/');
-    const lookupName = split[1] + '/' + split[2];
-    return {
-      datasource: bitbucket.id,
-      lookupName,
-    };
-  }
-
-  const pkgUrl = `https://${goModule}?go-get=1`;
-  const res = (await http.get(pkgUrl)).body;
-  const sourceMatch = regEx(
-    `<meta\\s+name="go-source"\\s+content="([^\\s]+)\\s+([^\\s]+)`
-  ).exec(res);
-  if (sourceMatch) {
-    const [, prefix, goSourceUrl] = sourceMatch;
-    if (!goModule.startsWith(prefix)) {
-      logger.trace({ goModule }, 'go-source header prefix not match');
-      return null;
-    }
-    logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
-    if (goSourceUrl?.startsWith('https://github.com/')) {
-      return {
-        datasource: github.id,
-        lookupName: goSourceUrl
-          .replace('https://github.com/', '')
-          .replace(regEx(/\/$/), ''),
-      };
-    }
-    const gitlabUrl =
-      gitlabHttpsRegExp.exec(goSourceUrl)?.groups?.httpsRegExpUrl;
-    const gitlabUrlName =
-      gitlabHttpsRegExp.exec(goSourceUrl)?.groups?.httpsRegExpName;
-    const gitlabModuleName = gitlabRegExp.exec(goModule)?.groups?.regExpPath;
-
-    if (gitlabUrl && gitlabUrlName) {
-      if (gitlabModuleName?.startsWith(gitlabUrlName)) {
-        return {
-          datasource: gitlab.id,
-          registryUrl: gitlabUrl,
-          lookupName: gitlabModuleName,
-        };
-      }
-      return {
-        datasource: gitlab.id,
-        registryUrl: gitlabUrl,
-        lookupName: gitlabUrlName,
-      };
-    }
-
-    const opts = hostRules.find({
-      hostType: PlatformId.Gitlab,
-      url: goSourceUrl,
-    });
-    if (opts.token) {
-      // get server base url from import url
-      const parsedUrl = URL.parse(goSourceUrl);
-
-      // split the go module from the URL: host/go/module -> go/module
-      const split = goModule.split('/');
-      const lookupName = split[1] + '/' + split[2];
-
-      const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
-
-      return {
-        datasource: gitlab.id,
-        registryUrl,
-        lookupName,
-      };
-    }
-  } else {
-    // GitHub Enterprise only returns a go-import meta
-    const importMatch = regEx(
-      `<meta\\s+name="go-import"\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
-    ).exec(res);
-    if (importMatch) {
-      const [, prefix, , goImportURL] = importMatch;
-      if (!goModule.startsWith(prefix)) {
-        logger.trace({ goModule }, 'go-import header prefix not match');
-        return null;
-      }
-      logger.debug({ goModule, goImportURL }, 'Go lookup import url');
-
-      // get server base url from import url
-      const parsedUrl = URL.parse(goImportURL);
-
-      // split the go module from the URL: host/go/module -> go/module
-      const lookupName = trimTrailingSlash(parsedUrl.pathname)
-        .replace(regEx(/\.git$/), '')
-        .split('/')
-        .slice(-2)
-        .join('/');
-
-      return {
-        datasource: github.id,
-        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-        lookupName,
-      };
-    }
-
-    logger.trace({ goModule }, 'No go-source or go-import header found');
-  }
-  return null;
-}
 
 /**
  * go.getReleases
@@ -160,99 +19,12 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  *  - Call the respective getReleases in github/gitlab to retrieve the tags
  *  - Filter module tags according to the module path
  */
-export async function getReleases(
+export function getReleases(
   config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
-  const { lookupName } = config;
-
-  let res: ReleaseResult = null;
-
-  logger.trace(`goproxy.getReleases(${lookupName})`);
-  const goProxyResult = await goproxy.getReleases(config);
-  if (goProxyResult.proxyUsed) {
-    return goProxyResult.result;
-  }
-
-  logger.trace(`go.getReleases(${lookupName})`);
-  const source = await getDatasource(lookupName);
-
-  if (!source) {
-    logger.info(
-      { lookupName },
-      'Unsupported go host - cannot look up versions'
-    );
-    return null;
-  }
-
-  switch (source.datasource) {
-    case github.id: {
-      res = await github.getReleases(source);
-      break;
-    }
-    case gitlab.id: {
-      res = await gitlab.getReleases(source);
-      break;
-    }
-    case bitbucket.id: {
-      res = await bitbucket.getReleases(source);
-      break;
-    }
-    /* istanbul ignore next: can never happen, makes lint happy */
-    default: {
-      return null;
-    }
-  }
-
-  // istanbul ignore if
-  if (!res) {
-    return null;
-  }
-
-  /**
-   * github.com/org/mod/submodule should be tagged as submodule/va.b.c
-   * and that tag should be used instead of just va.b.c, although for compatibility
-   * the old behaviour stays the same.
-   */
-  const nameParts = lookupName.replace(regEx(/\/v\d+$/), '').split('/');
-  logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
-
-  // If it has more than 3 parts it's a submodule or subgroup (gitlab only)
-  if (nameParts.length > 3) {
-    const prefix = nameParts.slice(3, nameParts.length).join('/');
-    logger.trace(`go.getReleases.prefix:${prefix}`);
-
-    // Filter the releases so that we only get the ones that are for this submodule
-    // Also trim the submodule prefix from the version number
-    const submodReleases = res.releases
-      .filter((release) => release.version?.startsWith(prefix))
-      .map((release) => {
-        const r2 = release;
-        r2.version = r2.version.replace(`${prefix}/`, '');
-        return r2;
-      });
-    logger.trace({ submodReleases }, 'go.getReleases');
-
-    // If not from gitlab -> no subgroups -> must be submodule
-    // If from gitlab and directory one level above has tags -> has to be submodule, since groups can't have tags
-    // If not, it's simply a repo in a subfolder, and the normal tags are used.
-    if (
-      !(source.datasource === gitlab.id) ||
-      (source.datasource === gitlab.id && submodReleases.length)
-    ) {
-      return {
-        sourceUrl: res.sourceUrl,
-        releases: submodReleases,
-      };
-    }
-  }
-
-  if (res.releases) {
-    res.releases = res.releases.filter((release) =>
-      release.version?.startsWith('v')
-    );
-  }
-
-  return res;
+  return process.env.GOPROXY
+    ? goproxy.getReleases(config)
+    : vcs.getReleases(config);
 }
 
 /**
