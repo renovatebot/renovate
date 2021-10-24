@@ -372,7 +372,7 @@ describe('config/validation', () => {
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             depTypeTemplate: 'apple',
-            automerge: true,            
+            automerge: true,
           },
         ],
       };

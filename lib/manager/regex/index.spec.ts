@@ -21,8 +21,7 @@ describe('manager/regex/index', () => {
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
-      depTypeTemplate:
-        'final'
+      depTypeTemplate: 'final',
     };
     const res = await extractPackageFile(
       dockerfileContent,
