@@ -1,110 +1,20 @@
-import { URL } from 'url';
-import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-import * as template from '../../util/template';
 import type {
   CustomExtractConfig,
   PackageDependency,
   PackageFile,
   Result,
 } from '../types';
+import {
+  createDependency,
+  mergeExtractionTemplate,
+  regexMatchAll,
+  validMatchFields,
+} from './util';
 
 export const defaultConfig = {
   pinDigests: false,
 };
-
-const validMatchFields = [
-  'depName',
-  'lookupName',
-  'currentValue',
-  'currentDigest',
-  'datasource',
-  'versioning',
-  'extractVersion',
-  'registryUrl',
-  'depType',
-];
-
-const mergeFields = ['registryUrls', ...validMatchFields];
-
-function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
-  const matches: RegExpMatchArray[] = [];
-  let matchResult;
-  do {
-    matchResult = regex.exec(content);
-    if (matchResult) {
-      matches.push(matchResult);
-    }
-  } while (matchResult);
-  return matches;
-}
-
-function createDependency(
-  matchResult: RegExpMatchArray,
-  combinedGroups: Record<string, string>,
-  config: CustomExtractConfig,
-  dep?: PackageDependency
-): PackageDependency {
-  const dependency = dep || {};
-  const { groups } = matchResult;
-
-  function updateDependency(field: string, value: string): void {
-    switch (field) {
-      case 'registryUrl':
-        // check if URL is valid and pack inside an array
-        try {
-          const url = new URL(value).toString();
-          dependency.registryUrls = [url];
-        } catch (err) {
-          logger.warn({ value }, 'Invalid regex manager registryUrl');
-        }
-        break;
-      default:
-        dependency[field] = value;
-        break;
-    }
-  }
-
-  for (const field of validMatchFields) {
-    const fieldTemplate = `${field}Template`;
-    if (config[fieldTemplate]) {
-      try {
-        const compiled = template.compile(
-          config[fieldTemplate],
-          combinedGroups ?? groups,
-          false
-        );
-        updateDependency(field, compiled);
-      } catch (err) {
-        logger.warn(
-          { template: config[fieldTemplate] },
-          'Error compiling template for custom manager'
-        );
-        return null;
-      }
-    } else if (groups[field]) {
-      updateDependency(field, groups[field]);
-    }
-  }
-  dependency.replaceString = String(matchResult[0]);
-  return dependency;
-}
-
-function mergeDependency(deps: PackageDependency[]): PackageDependency {
-  const result: PackageDependency = {};
-  deps.forEach((dep) => {
-    mergeFields.forEach((field) => {
-      if (dep[field]) {
-        result[field] = dep[field];
-        // save the line replaceString of the section which contains the current Value for a speed up lookup during the replace phase
-        if (field === 'currentValue') {
-          result.replaceString = dep.replaceString;
-        }
-      }
-    });
-  });
-  return result;
-}
 
 function handleAny(
   content: string,
@@ -114,29 +24,12 @@ function handleAny(
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
-    .map((matchResult) => createDependency(matchResult, null, config));
-}
-
-function mergeGroups(
-  mergedGroup: Record<string, string>,
-  secondGroup: Record<string, string>
-): Record<string, string> {
-  const resultGroup = {};
-
-  Object.keys(mergedGroup)
-    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
-    .forEach(
-      // eslint-disable-next-line no-return-assign
-      (key) => (resultGroup[key] = mergedGroup[key])
+    .map((matchResult) =>
+      createDependency(
+        { groups: matchResult.groups, replaceString: matchResult[0] },
+        config
+      )
     );
-  Object.keys(secondGroup)
-    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
-    .forEach((key) => {
-      if (secondGroup[key] && secondGroup[key] !== '') {
-        resultGroup[key] = secondGroup[key];
-      }
-    });
-  return resultGroup;
 }
 
 function handleCombination(
@@ -152,20 +45,13 @@ function handleCombination(
     return [];
   }
 
-  const combinedGroup = matches
-    .map((match) => match.groups)
-    .reduce((mergedGroup, currentGroup) =>
-      mergeGroups(mergedGroup, currentGroup)
-    );
-
-  // TODO: this seems to be buggy behavior, needs to be checked #11387
-  const dep = matches
-    .map((match) => createDependency(match, combinedGroup, config))
-    .reduce(
-      (mergedDep, currentDep) => mergeDependency([mergedDep, currentDep]),
-      {}
-    ); // merge fields of dependencies
-  return [dep];
+  const extraction = matches
+    .map((match) => ({
+      groups: match.groups,
+      replaceString: match?.groups?.currentValue ? match[0] : undefined,
+    }))
+    .reduce((base, addition) => mergeExtractionTemplate(base, addition));
+  return [createDependency(extraction, config)];
 }
 
 function handleRecursive(
@@ -184,7 +70,10 @@ function handleRecursive(
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     // if we have a depName and a currentValue with have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
-      return createDependency(match, null, config);
+      return createDependency(
+        { groups: match.groups, replaceString: match[0] },
+        config
+      );
     }
     return handleRecursive(match[0], packageFile, config, index + 1);
   });
