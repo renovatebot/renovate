@@ -108,8 +108,8 @@ describe('datasource/crate/index', () => {
       memCache.init();
     });
 
-    afterEach(() => {
-      fs.rm(tmpDir.path, { recursive: true });
+    afterEach(async () => {
+      await fs.rm(tmpDir.path, { recursive: true });
       tmpDir = null;
       setGlobalConfig();
     });
