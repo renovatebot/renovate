@@ -109,7 +109,7 @@ describe('datasource/crate/index', () => {
     });
 
     afterEach(() => {
-      fs.rmdirSync(tmpDir.path, { recursive: true });
+      fs.rm(tmpDir.path, { recursive: true });
       tmpDir = null;
       setGlobalConfig();
     });
