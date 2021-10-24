@@ -22,7 +22,7 @@ const validMatchFields = [
   'versioning',
   'extractVersion',
   'registryUrl',
-  'depType'
+  'depType',
 ];
 
 const mergeFields = ['registryUrls', ...validMatchFields];
