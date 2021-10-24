@@ -68,23 +68,23 @@ export function massageBody(
 ): string {
   let body = input || '';
   // Convert line returns
-  body = body.replace(regEx(/\r\n/g), '\n');
+  body = body.replace(regEx(/\r\n/g), '\n'); // TODO #12071
   // semantic-release cleanup
-  body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
+  body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), ''); // TODO #12071
   body = body.replace(
     regEx(`^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`),
     ''
-  );
+  ); // TODO #12071
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
     regEx(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
     '\n'
-  );
+  ); // TODO #12071
   // Reduce headings size
   body = body
-    .replace(regEx(/\n\s*####? /g), '\n##### ')
-    .replace(regEx(/\n\s*## /g), '\n#### ')
-    .replace(regEx(/\n\s*# /g), '\n### ');
+    .replace(regEx(/\n\s*####? /g), '\n##### ') // TODO #12071
+    .replace(regEx(/\n\s*## /g), '\n#### ') // TODO #12071
+    .replace(regEx(/\n\s*# /g), '\n### '); // TODO #12071
   // Trim whitespace
   return body.trim();
 }

@@ -23,8 +23,8 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
     ? updateConfig.depName
         .replace('@types/', '')
         .replace('@', '')
-        .replace(regEx(/\//g), '-')
-        .replace(regEx(/\s+/g), '-')
+        .replace(regEx(/\//g), '-') // TODO #12071
+        .replace(regEx(/\s+/g), '-') // TODO #12071
         .replace(regEx(/-+/), '-')
         .toLowerCase()
     : undefined;
@@ -32,8 +32,8 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
     const parsedSourceUrl = parseUrl(updateConfig.sourceUrl);
     if (parsedSourceUrl?.pathname) {
       updateConfig.sourceRepoSlug = parsedSourceUrl.pathname
-        .replace(regEx(/^\//), '') // remove leading slash
-        .replace(regEx(/\//g), '-') // change slashes to hyphens
+        .replace(regEx(/^\//), '') // remove leading slash  // TODO #12071
+        .replace(regEx(/\//g), '-') // change slashes to hyphens   // TODO #12071
         .replace(regEx(/-+/g), '-'); // remove multiple hyphens
     }
   }
