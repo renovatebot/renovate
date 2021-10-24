@@ -12,6 +12,7 @@ const tf2 = `module "relative" {
 const helm = loadFixture('helm.tf');
 const lockedVersion = loadFixture('lockedVersion.tf');
 const lockedVersionLockfile = loadFixture('rangeStrategy.hcl');
+const terraformBlock = loadFixture('terraformBlock.tf');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -61,6 +62,17 @@ describe('manager/terraform/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+    });
+
+    it('test terraform block with only requirement_terraform_version', async () => {
+      const res = await extractPackageFile(
+        terraformBlock,
+        'terraformBlock.tf',
+        {}
+      );
+      expect(res.deps).toHaveLength(1);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+      expect(res).toMatchSnapshot();
     });
   });
 });
