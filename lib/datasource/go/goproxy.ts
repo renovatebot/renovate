@@ -153,12 +153,6 @@ export async function getReleases(
 ): Promise<ReleaseResult | null> {
   const { lookupName } = config;
 
-  const noproxy = parseNoproxy();
-  if (noproxy?.test(lookupName)) {
-    logger.debug(`Skipping ${lookupName} via GONOPROXY match`);
-    return null;
-  }
-
   const goproxy = process.env.GOPROXY;
   const proxyList = parseGoproxy(goproxy);
 
@@ -176,45 +170,53 @@ export async function getReleases(
 
   let result: ReleaseResult | null = null;
 
-  for (const { url, fallback } of proxyList) {
-    try {
-      if (url === 'off') {
-        break;
-      } else if (url === 'direct') {
-        result = await vcs.getReleases(config);
-        if (result) {
+  const noproxy = parseNoproxy();
+  if (noproxy?.test(lookupName)) {
+    logger.debug(`Fetching ${lookupName} via GONOPROXY match`);
+    result = await vcs.getReleases(config);
+  } else {
+    for (const { url, fallback } of proxyList) {
+      try {
+        if (url === 'off') {
           break;
-        } else {
-          throw new Error(`Can't obtain data directly from VCS`);
+        } else if (url === 'direct') {
+          const directResult = await vcs.getReleases(config);
+          // istanbul ignore else
+          if (directResult) {
+            result = directResult;
+            break;
+          } else {
+            throw new Error(`Can't obtain data directly from VCS`);
+          }
         }
-      }
 
-      const versions = await listVersions(url, lookupName);
-      const queue = versions.map((version) => async (): Promise<Release> => {
-        try {
-          return await versionInfo(url, lookupName, version);
-        } catch (err) {
-          logger.trace({ err }, `Can't obtain data from ${url}`);
-          return { version };
+        const versions = await listVersions(url, lookupName);
+        const queue = versions.map((version) => async (): Promise<Release> => {
+          try {
+            return await versionInfo(url, lookupName, version);
+          } catch (err) {
+            logger.trace({ err }, `Can't obtain data from ${url}`);
+            return { version };
+          }
+        });
+        const releases = await pAll(queue, { concurrency: 5 });
+        if (releases.length) {
+          result = { releases };
+          break;
         }
-      });
-      const releases = await pAll(queue, { concurrency: 5 });
-      if (releases.length) {
-        result = { releases };
-        break;
-      }
-    } catch (err) {
-      const statusCode = err?.response?.statusCode;
-      const canFallback =
-        fallback === GoproxyFallback.Always
-          ? true
-          : statusCode === 404 || statusCode === 410;
-      const msg = canFallback
-        ? 'Goproxy error: trying next URL provided with GOPROXY'
-        : 'Goproxy error: skipping other URLs provided with GOPROXY';
-      logger.debug({ err }, msg);
-      if (!canFallback) {
-        break;
+      } catch (err) {
+        const statusCode = err?.response?.statusCode;
+        const canFallback =
+          fallback === GoproxyFallback.Always
+            ? true
+            : statusCode === 404 || statusCode === 410;
+        const msg = canFallback
+          ? 'Goproxy error: trying next URL provided with GOPROXY'
+          : 'Goproxy error: skipping other URLs provided with GOPROXY';
+        logger.debug({ err }, msg);
+        if (!canFallback) {
+          break;
+        }
       }
     }
   }
