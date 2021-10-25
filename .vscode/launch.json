@@ -7,7 +7,9 @@
       "name": "debug",
       "program": "${workspaceFolder}/lib/renovate.ts",
       "env": {
-        "LOG_LEVEL": "debug"
+        "LOG_LEVEL": "debug",
+        "GOPROXY": "off",
+        "GOPRIVATE": "github.com/*/*"
       },
       "console": "integratedTerminal",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],

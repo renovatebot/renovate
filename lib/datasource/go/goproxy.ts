@@ -71,7 +71,10 @@ const lexer = moo.states({
       push: 'characterRange',
       value: (_: string) => '[',
     },
-    char: /[^*?\\[\n]/, // TODO #12070
+    char: {
+      match: /[^*?\\[\n]/, // TODO #12070
+      value: (s: string) => s.replace('.', '\\.'),
+    },
     escapedChar: {
       match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
@@ -155,9 +158,10 @@ export async function getReleases(
 
   const goproxy = process.env.GOPROXY;
   const proxyList = parseGoproxy(goproxy);
+  const noproxy = parseNoproxy();
 
   const cacheNamespaces = 'datasource-go-proxy';
-  const cacheKey = `${lookupName}@@${goproxy}`;
+  const cacheKey = `${lookupName}@@${goproxy}@@${noproxy.toString()}`;
   const cacheMinutes = 60;
   const cachedResult = await packageCache.get<ReleaseResult | null>(
     cacheNamespaces,
@@ -170,7 +174,6 @@ export async function getReleases(
 
   let result: ReleaseResult | null = null;
 
-  const noproxy = parseNoproxy();
   if (noproxy?.test(lookupName)) {
     logger.debug(`Fetching ${lookupName} via GONOPROXY match`);
     result = await vcs.getReleases(config);
