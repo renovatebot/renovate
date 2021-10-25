@@ -47,6 +47,8 @@ export function updateDependency({
       return null;
     }
     let newLine: string;
+    // This divider is to prevent something like `$1$2${digest}` becoming "$1$2345678abc"
+    const regexDivider = '""""';
     if (upgrade.updateType === 'digest') {
       const newDigestRightSized = upgrade.newDigest.substring(
         0,
@@ -59,13 +61,16 @@ export function updateDependency({
         { depName, lineToChange, newDigestRightSized },
         'gomod: need to update digest'
       );
+      newLine = lineToChange
+        .replace(updateLineExp, `$1$2${regexDivider}${newDigestRightSized}`)
+        .replace(regexDivider, '');
+    } else {
       newLine = lineToChange.replace(
         updateLineExp,
-        `$1$2${newDigestRightSized}`
+        `$1$2${regexDivider}${upgrade.newValue}`
       );
-    } else {
-      newLine = lineToChange.replace(updateLineExp, `$1$2${upgrade.newValue}`);
     }
+    newLine = newLine.replace(regexDivider, '');
     if (upgrade.updateType === 'major') {
       logger.debug({ depName }, 'gomod: major update');
       if (depName.startsWith('gopkg.in/')) {
