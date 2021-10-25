@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { regEx, REGEX_DIVIDER } from '../../util/regex';
+import { regEx } from '../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
 function getDepNameWithNoVersion(depName: string): string {
@@ -59,16 +59,18 @@ export function updateDependency({
         { depName, lineToChange, newDigestRightSized },
         'gomod: need to update digest'
       );
-      newLine = lineToChange
-        .replace(updateLineExp, `$1$2${REGEX_DIVIDER}${newDigestRightSized}`)
-        .replace(REGEX_DIVIDER, '');
+      newLine = lineToChange.replace(
+        updateLineExp,
+        (_, name: string, whitespace: string) =>
+          `${name}${whitespace}${newDigestRightSized}`
+      );
     } else {
       newLine = lineToChange.replace(
         updateLineExp,
-        `$1$2${REGEX_DIVIDER}${upgrade.newValue}`
+        (_, name: string, whitespace: string) =>
+          `${name}${whitespace}${upgrade.newValue}`
       );
     }
-    newLine = newLine.replace(REGEX_DIVIDER, '');
     if (upgrade.updateType === 'major') {
       logger.debug({ depName }, 'gomod: major update');
       if (depName.startsWith('gopkg.in/')) {
