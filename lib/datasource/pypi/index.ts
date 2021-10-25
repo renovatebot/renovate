@@ -73,7 +73,7 @@ export class PypiDatasource extends Datasource {
   }
 
   private static normalizeName(input: string): string {
-    return input.toLowerCase().replace(regEx(/(_|\.)/g), '-');
+    return input.toLowerCase().replace(regEx(/(_|\.|-)+/g), '-');
   }
 
   private async getDependency(
