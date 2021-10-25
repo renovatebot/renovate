@@ -1,9 +1,7 @@
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
-import { HttpError } from '../../util/http/types';
 import { ensureTrailingSlash } from '../../util/url';
-import * as loose from '../../versioning/loose';
+import * as conan from '../../versioning/conan';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { ConanJSON, datasource, defaultRegistryUrl } from './common';
@@ -17,7 +15,7 @@ export class ConanDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
-  override readonly defaultVersioning = loose.id;
+  override readonly defaultVersioning = conan.id;
 
   constructor() {
     super(ConanDatasource.id);
@@ -39,7 +37,7 @@ export class ConanDatasource extends Datasource {
       if (versions) {
         logger.trace({ lookupUrl }, 'Got conan api result');
         const dep: ReleaseResult = { releases: [] };
-  
+
         for (const resultString of Object.values(versions.results)) {
           const fromMatches = resultString.matchAll(
             /^(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)?/gim
@@ -62,7 +60,6 @@ export class ConanDatasource extends Datasource {
         }
         return dep;
       }
-
     } catch (err) {
       this.handleGenericErrors(err);
     }

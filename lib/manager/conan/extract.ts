@@ -1,7 +1,7 @@
 import { ConanDatasource } from '../../datasource/conan';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-import * as loose from '../../versioning/loose';
+import * as conan from '../../versioning/conan';
 import type { PackageDependency, PackageFile } from '../types';
 
 const regex = regEx(
@@ -56,22 +56,22 @@ export default function extractPackageFile(
               replaceString = `${depName}/${currentValue}${userAndChannel}`;
             }
 
-            logger.trace(
-              `Found a conan package: ${depName}, ${currentValue}, ${userAndChannel}, ${depType}.`
-            );
             dep = {
               ...dep,
               depName,
               currentValue,
               userAndChannel,
               datasource: ConanDatasource.id,
-              versioning: loose.id,
+              versioning: conan.id,
+              rangeStrategy: 'bump',
               replaceString,
               depType,
-              autoReplaceStringTemplate:
-                '{{depName}}/{{newValue}}{{#if userAndChannel}}{{userAndChannel}}{{/if}}',
             };
             deps.push(dep);
+
+            logger.trace(
+              `Found a conan package: ${depName}, ${currentValue}, ${userAndChannel}, ${depType}, ${dep.rangeStrategy}.`
+            );
           }
         }
       }
