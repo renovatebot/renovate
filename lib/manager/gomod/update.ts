@@ -33,13 +33,15 @@ export function updateDependency({
     let updateLineExp: RegExp;
     if (depType === 'replace') {
       updateLineExp = regEx(
-        /^(replace\s+[^\s]+[\s]+[=][>]+\s+)([^\s]+\s+)([^\s]+)/
+        /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
       );
     } else if (depType === 'require') {
       if (upgrade.managerData.multiLine) {
-        updateLineExp = regEx(/^(\s+[^\s]+)(\s+)([^\s]+)/);
+        updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
-        updateLineExp = regEx(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
+        updateLineExp = regEx(
+          /^(?<depPart>require\s+[^\s]+)(?<divider>\s+)[^\s]+/
+        );
       }
     }
     if (updateLineExp && !updateLineExp.test(lineToChange)) {
@@ -61,14 +63,12 @@ export function updateDependency({
       );
       newLine = lineToChange.replace(
         updateLineExp,
-        (_, name: string, whitespace: string) =>
-          `${name}${whitespace}${newDigestRightSized}`
+        `$<depPart>$<divider>${newDigestRightSized}`
       );
     } else {
       newLine = lineToChange.replace(
         updateLineExp,
-        (_, name: string, whitespace: string) =>
-          `${name}${whitespace}${upgrade.newValue}`
+        `$<depPart>$<divider>${upgrade.newValue}`
       );
     }
     if (upgrade.updateType === 'major') {
