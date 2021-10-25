@@ -12,6 +12,7 @@ export const validMatchFields: string[] = [
   'versioning',
   'extractVersion',
   'registryUrl',
+  'depType',
 ];
 
 interface ExtractionTemplate {
