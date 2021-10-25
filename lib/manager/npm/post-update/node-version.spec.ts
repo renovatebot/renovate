@@ -36,7 +36,7 @@ describe('manager/npm/post-update/node-version', () => {
       ...config,
       constraints: { node: '>= 12.16.0' },
     });
-    const isAugmentedRange = res === '>=15';
+    const isAugmentedRange = res === '>=15 <17';
     const node16IsStable = isStable('16.100.0');
     expect(isAugmentedRange || node16IsStable).toBe(true);
   });
