@@ -94,6 +94,11 @@ export async function getDockerTag(
     versions = versions.filter(
       (version) => ver.isVersion(version) && ver.matches(version, constraint)
     );
+    // Prefer stable versions over unstable, even if the range satisfies both types
+    if (!versions.every((version) => ver.isStable(version))) {
+      logger.debug('Filtering out unstable versions');
+      versions = versions.filter((version) => ver.isStable(version));
+    }
     versions = versions.sort(ver.sortVersions.bind(ver));
     if (versions.length) {
       const version = versions.pop();
