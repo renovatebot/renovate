@@ -1,6 +1,22 @@
-export const PLATFORM_TYPE_AZURE = 'azure';
-export const PLATFORM_TYPE_BITBUCKET = 'bitbucket';
-export const PLATFORM_TYPE_BITBUCKET_SERVER = 'bitbucket-server';
-export const PLATFORM_TYPE_GITEA = 'gitea';
-export const PLATFORM_TYPE_GITHUB = 'github';
-export const PLATFORM_TYPE_GITLAB = 'gitlab';
+export const enum PlatformId {
+  Azure = 'azure',
+  Bitbucket = 'bitbucket',
+  BitbucketServer = 'bitbucket-server',
+  Gitea = 'gitea',
+  Github = 'github',
+  Gitlab = 'gitlab',
+}
+
+export const GITHUB_API_USING_HOST_TYPES = [
+  PlatformId.Github,
+  'github-releases',
+  'github-tags',
+  'pod',
+];
+
+export const GITLAB_API_USING_HOST_TYPES = [
+  PlatformId.Gitlab,
+  'gitlab-releases',
+  'gitlab-tags',
+  'gitlab-packages',
+];

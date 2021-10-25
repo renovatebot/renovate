@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { deleteLocalFile, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
+import { regEx } from '../../util/regex';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -42,7 +43,7 @@ export async function updateArtifacts({
   newPackageFileContent: newInputContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const outputFileName = inputFileName.replace(/(\.in)?$/, '.txt');
+  const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
   logger.debug(
     `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`
   );

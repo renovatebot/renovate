@@ -73,7 +73,7 @@ Array [
 exports[`manager/composer/artifacts performs lockFileMaintenance 1`] = `
 Array [
   Object {
-    "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -234,7 +234,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
-        "COMPOSER_AUTH": "{\\"github-oauth\\":{\\"github.com\\":\\"github-token\\"},\\"gitlab-token\\":{\\"gitlab.com\\":\\"gitlab-token\\"},\\"gitlab-domains\\":[\\"gitlab.com\\"],\\"http-basic\\":{\\"packagist.renovatebot.com\\":{\\"username\\":\\"some-username\\",\\"password\\":\\"some-password\\"},\\"artifactory.yyyyyyy.com\\":{\\"username\\":\\"some-other-username\\",\\"password\\":\\"some-other-password\\"}}}",
+        "COMPOSER_AUTH": "{\\"github-oauth\\":{\\"github.com\\":\\"github-token\\"},\\"gitlab-token\\":{\\"gitlab.com\\":\\"gitlab-token\\"},\\"gitlab-domains\\":[\\"gitlab.com\\"],\\"http-basic\\":{\\"packagist.renovatebot.com\\":{\\"username\\":\\"some-username\\",\\"password\\":\\"some-password\\"},\\"artifactory.yyyyyyy.com\\":{\\"username\\":\\"some-other-username\\",\\"password\\":\\"some-other-password\\"}},\\"bearer\\":{\\"packages-bearer.example.com\\":\\"abcdef0123456789\\"}}",
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

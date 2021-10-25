@@ -78,11 +78,10 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   azureAutoApprove?: boolean;
-  azureAutoComplete?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
-  gitLabAutomerge?: boolean;
   gitLabIgnoreApprovals?: boolean;
+  usePlatformAutomerge?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -184,10 +183,7 @@ export interface Platform {
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;
-  getBranchStatus(
-    branchName: string,
-    requiredStatusChecks?: string[] | null
-  ): Promise<BranchStatus>;
+  getBranchStatus(branchName: string): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;

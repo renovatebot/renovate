@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import type { BranchUpgradeConfig } from '../../types';
@@ -40,7 +40,7 @@ describe('workers/pr/changelog/gitlab', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITLAB,
+        hostType: PlatformId.Gitlab,
         matchHost,
         token: 'abc',
       });
@@ -181,7 +181,7 @@ describe('workers/pr/changelog/gitlab', () => {
     });
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITLAB,
+        hostType: PlatformId.Gitlab,
         matchHost: 'https://gitlab-enterprise.example.com/',
         token: 'abc',
       });
@@ -198,7 +198,7 @@ describe('workers/pr/changelog/gitlab', () => {
     it('supports self-hosted gitlab changelog', async () => {
       httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITLAB,
+        hostType: PlatformId.Gitlab,
         matchHost: 'https://git.test.com/',
         token: 'abc',
       });
@@ -207,7 +207,7 @@ describe('workers/pr/changelog/gitlab', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: PLATFORM_TYPE_GITLAB,
+          platform: PlatformId.Gitlab,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
           endpoint: 'https://git.test.com/api/v4/',
         })

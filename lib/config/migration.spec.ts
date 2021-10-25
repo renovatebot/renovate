@@ -1,4 +1,4 @@
-import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
 import { setGlobalConfig } from './global';
 import * as configMigration from './migration';
@@ -20,7 +20,7 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
-        platform: PLATFORM_TYPE_GITHUB,
+        platform: PlatformId.Github,
         hostRules: [
           {
             platform: 'docker',
@@ -155,6 +155,7 @@ describe('config/migration', () => {
           },
         ],
         raiseDeprecationWarnings: false,
+        enabledManagers: ['yarn'],
       } as any;
       const parentConfig = { ...defaultConfig, semanticCommits: 'disabled' };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -687,9 +688,9 @@ describe('config/migration', () => {
   it('it migrates hostRules fields', () => {
     const config: RenovateConfig = {
       hostRules: [
-        { baseUrl: 'https://some.domain.com', token: 'abc123' },
-        { domainName: 'domain.com', token: 'abc123' },
-        { hostName: 'some.domain.com', token: 'abc123' },
+        { baseUrl: 'https://some.domain.com', token: '123test' },
+        { domainName: 'domain.com', token: '123test' },
+        { hostName: 'some.domain.com', token: '123test' },
       ],
     } as any;
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -699,9 +700,9 @@ describe('config/migration', () => {
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toEqual({
       hostRules: [
-        { matchHost: 'https://some.domain.com', token: 'abc123' },
-        { matchHost: 'domain.com', token: 'abc123' },
-        { matchHost: 'some.domain.com', token: 'abc123' },
+        { matchHost: 'https://some.domain.com', token: '123test' },
+        { matchHost: 'domain.com', token: '123test' },
+        { matchHost: 'some.domain.com', token: '123test' },
       ],
     });
   });
@@ -771,5 +772,66 @@ describe('config/migration', () => {
     );
     expect(isMigrated).toBe(true);
     expect(migratedConfig).toMatchSnapshot();
+  });
+  it('migrates empty requiredStatusChecks', () => {
+    const config: RenovateConfig = {
+      requiredStatusChecks: [],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
+  });
+
+  it('migrates azureAutoComplete', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
+
+    expect(migrate({ azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: true },
+    });
+
+    expect(migrate({ azureAutoComplete: false })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: false },
+    });
+
+    expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, platformAutomerge: true },
+    });
+
+    expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, platformAutomerge: true },
+    });
+  });
+
+  it('migrates gitLabAutomerge', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
+
+    expect(migrate({ gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: true },
+    });
+
+    expect(migrate({ gitLabAutomerge: false })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: false },
+    });
+
+    expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, platformAutomerge: true },
+    });
+
+    expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, platformAutomerge: true },
+    });
   });
 });

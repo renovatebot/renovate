@@ -75,7 +75,7 @@ describe('util/git/index', () => {
     await git.initRepo({
       url: origin.path,
     });
-    await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     git.setGitAuthor('Jest <Jest@example.com>');
     setNoVerify([]);
     await git.syncGit();
@@ -159,7 +159,7 @@ describe('util/git/index', () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
     });
     it('should return false when author is ignored', async () => {
-      await git.setUserRepoConfig({
+      git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
       expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
@@ -412,6 +412,24 @@ describe('util/git/index', () => {
         expect.objectContaining({ '--no-verify': null })
       );
     });
+
+    it('creates file with the executable bit', async () => {
+      const file = {
+        name: 'some-executable',
+        contents: 'some new-contents',
+        executable: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/past_branch',
+        files: [file],
+        message: 'Create something',
+      });
+      expect(commit).not.toBeNull();
+
+      const repo = Git(tmpDir.path);
+      const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
+      expect(result).toStartWith('100755');
+    });
   });
 
   describe('getCommitMessages()', () => {
@@ -494,7 +512,7 @@ describe('util/git/index', () => {
         url: base.path,
       });
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
 
       await git.initRepo({
@@ -504,7 +522,7 @@ describe('util/git/index', () => {
       await repo.checkout('renovate/test');
       await repo.commit('past message3', ['--amend']);
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBe(true);
     });
 
@@ -540,6 +558,7 @@ describe('util/git/index', () => {
         extraCloneOpts: {
           '-c': 'extra.clone.config=test-extra-config-value',
         },
+        fullClone: true,
       });
       git.getBranchCommit(defaultBranch);
       await git.syncGit();

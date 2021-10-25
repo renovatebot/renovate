@@ -1,6 +1,7 @@
 import { satisfies, validRange } from 'semver';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { isStable } from '../../../versioning/node';
 import type { PostUpdateConfig } from '../../types';
 
@@ -8,7 +9,7 @@ async function getNodeFile(filename: string): Promise<string> | null {
   try {
     const constraint = (await readLocalFile(filename, 'utf8'))
       .split('\n')[0]
-      .replace(/^v/, '');
+      .replace(regEx(/^v/), '');
     if (validRange(constraint)) {
       logger.debug(`Using node constraint "${constraint}" from ${filename}`);
       return constraint;
@@ -56,8 +57,8 @@ export async function getNodeConstraint(
       !isStable('16.100.0')
     ) {
       if (lockfileVersion === 2) {
-        logger.debug('Forcing node 15 to ensure lockfileVersion=2 is used');
-        constraint = '>=15';
+        logger.debug('Forcing node 15+ to ensure lockfileVersion=2 is used');
+        constraint = '>=15 <17';
       } else if (validRange(`${constraint} <15`)) {
         logger.debug('Augmenting constraint to avoid node 15');
         constraint = `${constraint} <15`;
