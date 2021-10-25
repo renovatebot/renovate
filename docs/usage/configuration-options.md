@@ -762,6 +762,8 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
 For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://golang.org/ref/mod#module-proxy)).
+Usage of `direct` will fallback to Renovate-native release fetching mechanism.
+Also we support `off` keyword which immediately will stop any fetching.
 
 ## group
 
