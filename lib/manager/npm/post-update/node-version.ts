@@ -57,8 +57,8 @@ export async function getNodeConstraint(
       !isStable('16.100.0')
     ) {
       if (lockfileVersion === 2) {
-        logger.debug('Forcing node 15 to ensure lockfileVersion=2 is used');
-        constraint = '>=15';
+        logger.debug('Forcing node 15+ to ensure lockfileVersion=2 is used');
+        constraint = '>=15 <17';
       } else if (validRange(`${constraint} <15`)) {
         logger.debug('Augmenting constraint to avoid node 15');
         constraint = `${constraint} <15`;
