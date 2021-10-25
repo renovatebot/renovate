@@ -96,7 +96,7 @@ describe('datasource/crate/index', () => {
     let adminConfig: RepoGlobalConfig;
 
     beforeEach(async () => {
-      tmpDir = await dir();
+      tmpDir = await dir({ unsafeCleanup: true });
 
       adminConfig = {
         localDir: join(tmpDir.path, 'local'),
@@ -109,7 +109,7 @@ describe('datasource/crate/index', () => {
     });
 
     afterEach(async () => {
-      await fs.rm(tmpDir.path, { recursive: true });
+      await tmpDir.cleanup();
       tmpDir = null;
       setGlobalConfig();
     });
