@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import moo from 'moo';
 import pAll from 'p-all';
 import { logger } from '../../logger';
+import * as packageCache from '../../util/cache/package';
 import { regEx } from '../../util/regex';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GoproxyFallback, http } from './common';
@@ -166,7 +167,22 @@ export async function getReleases(
     return null;
   }
 
-  const proxyList = parseGoproxy();
+  const goproxy = process.env.GOPROXY;
+  const proxyList = parseGoproxy(goproxy);
+
+  const cacheNamespaces = 'datasource-go-proxy';
+  const cacheKey = `${lookupName}@@${goproxy}`;
+  const cacheMinutes = 60;
+  const cachedResult = await packageCache.get<ReleaseResult | null>(
+    cacheNamespaces,
+    cacheKey
+  );
+  // istanbul ignore if
+  if (cachedResult || cachedResult === null) {
+    return cachedResult;
+  }
+
+  let result: ReleaseResult | null = null;
 
   for (const { url, fallback } of proxyList) {
     try {
@@ -181,7 +197,8 @@ export async function getReleases(
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        return { releases };
+        result = { releases };
+        break;
       }
     } catch (err) {
       const statusCode = err?.response?.statusCode;
@@ -199,5 +216,6 @@ export async function getReleases(
     }
   }
 
-  return null;
+  await packageCache.set(cacheNamespaces, cacheKey, result, cacheMinutes);
+  return result;
 }
