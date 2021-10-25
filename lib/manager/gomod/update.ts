@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { regEx, REGEX_DIVIDER } from '../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
 function getDepNameWithNoVersion(depName: string): string {
@@ -47,8 +47,6 @@ export function updateDependency({
       return null;
     }
     let newLine: string;
-    // This divider is to prevent something like `$1$2${digest}` becoming "$1$2345678abc"
-    const regexDivider = '""""';
     if (upgrade.updateType === 'digest') {
       const newDigestRightSized = upgrade.newDigest.substring(
         0,
@@ -62,15 +60,15 @@ export function updateDependency({
         'gomod: need to update digest'
       );
       newLine = lineToChange
-        .replace(updateLineExp, `$1$2${regexDivider}${newDigestRightSized}`)
-        .replace(regexDivider, '');
+        .replace(updateLineExp, `$1$2${REGEX_DIVIDER}${newDigestRightSized}`)
+        .replace(REGEX_DIVIDER, '');
     } else {
       newLine = lineToChange.replace(
         updateLineExp,
-        `$1$2${regexDivider}${upgrade.newValue}`
+        `$1$2${REGEX_DIVIDER}${upgrade.newValue}`
       );
     }
-    newLine = newLine.replace(regexDivider, '');
+    newLine = newLine.replace(REGEX_DIVIDER, '');
     if (upgrade.updateType === 'major') {
       logger.debug({ depName }, 'gomod: major update');
       if (depName.startsWith('gopkg.in/')) {
