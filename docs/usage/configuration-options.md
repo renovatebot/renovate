@@ -763,8 +763,6 @@ Configuration added here applies for all Go-related updates, however currently t
 
 For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://golang.org/ref/mod#module-proxy)).
 
-But when you use the `direct` or `off` keywords Renovate will fallback to its own fetching strategy (i.e. directly from GitHub, etc).
-
 ## group
 
 Caution: Advanced functionality only. Do not use unless you know what you're doing.
