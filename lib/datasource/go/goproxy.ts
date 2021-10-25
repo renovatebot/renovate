@@ -161,7 +161,7 @@ export async function getReleases(
   const noproxy = parseNoproxy();
 
   const cacheNamespaces = 'datasource-go-proxy';
-  const cacheKey = `${lookupName}@@${goproxy}@@${noproxy.toString()}`;
+  const cacheKey = `${lookupName}@@${goproxy}@@${noproxy?.toString()}`;
   const cacheMinutes = 60;
   const cachedResult = await packageCache.get<ReleaseResult | null>(
     cacheNamespaces,
