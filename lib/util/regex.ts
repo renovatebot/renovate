@@ -5,9 +5,6 @@ import { logger } from '../logger';
 
 let RegEx: RegExpConstructor;
 
-// This divider is to prevent something like `$1$2${digest}` becoming "$1$2345678abc"
-export const REGEX_DIVIDER = '""""""';
-
 try {
   // eslint-disable-next-line
   const RE2 = require('re2');
