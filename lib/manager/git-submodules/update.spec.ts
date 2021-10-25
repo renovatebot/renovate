@@ -17,7 +17,7 @@ describe('manager/git-submodules/update', () => {
     beforeAll(async () => {
       upgrade = { depName: 'renovate' };
 
-      tmpDir = await dir();
+      tmpDir = await dir({ unsafeCleanup: true });
       adminConfig = { localDir: join(tmpDir.path) };
       setGlobalConfig(adminConfig);
     });

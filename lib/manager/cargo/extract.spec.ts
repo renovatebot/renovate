@@ -23,7 +23,7 @@ describe('manager/cargo/extract', () => {
 
     beforeEach(async () => {
       config = {};
-      tmpDir = await dir();
+      tmpDir = await dir({ unsafeCleanup: true });
       adminConfig = {
         localDir: join(tmpDir.path, 'local'),
         cacheDir: join(tmpDir.path, 'cache'),
