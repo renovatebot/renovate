@@ -1,5 +1,5 @@
 import _simpleGit from 'simple-git';
-import { dir } from 'tmp-promise';
+import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { setGlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
@@ -13,14 +13,16 @@ describe('manager/git-submodules/update', () => {
   describe('updateDependency', () => {
     let upgrade: Upgrade;
     let adminConfig: RepoGlobalConfig;
+    let tmpDir: DirectoryResult;
     beforeAll(async () => {
       upgrade = { depName: 'renovate' };
 
-      const tmpDir = await dir();
+      tmpDir = await dir();
       adminConfig = { localDir: join(tmpDir.path) };
       setGlobalConfig(adminConfig);
     });
-    afterAll(() => {
+    afterAll(async () => {
+      await tmpDir.cleanup();
       setGlobalConfig();
     });
     it('returns null on error', async () => {
