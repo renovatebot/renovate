@@ -63,7 +63,6 @@ export function splitImageParts(currentFrom: string): PackageDependency {
       depName,
       currentValue,
       currentDigest,
-      datasource: datasourceDocker.id,
       replaceString: cleanedCurrentFrom,
     };
 
