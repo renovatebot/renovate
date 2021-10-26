@@ -12,6 +12,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
 import { readFile, remove } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import { GenerateLockFileResult } from './types';
@@ -32,7 +33,7 @@ export async function checkYarnrc(
         .split('\n')
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace(/^yarn-path\s+"?(.+?)"?$/, '$1');
+        yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
       }
     }
   } catch (err) /* istanbul ignore next */ {
@@ -128,7 +129,7 @@ export async function generateLockFile(
       extraEnv,
       docker: {
         image: 'node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
         preCommands,
       },
