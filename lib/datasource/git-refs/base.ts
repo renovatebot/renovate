@@ -1,4 +1,5 @@
 import simpleGit from 'simple-git';
+import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { simpleGitConfig } from '../../util/git/config';
 import { getRemoteUrlWithToken } from '../../util/git/url';
@@ -52,6 +53,7 @@ export class GitDatasource {
             hash: match.groups.hash,
           };
         }
+        logger.trace(`malformed ref: ${line}`);
         // istanbul ignore next
         return null;
       })

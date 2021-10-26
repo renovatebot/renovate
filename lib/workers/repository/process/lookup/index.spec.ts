@@ -24,7 +24,6 @@ import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
-jest.mock('../../../../datasource/git-refs/base');
 jest.mock('../../../../datasource/github-releases');
 
 const fixtureRoot = '../../../../config/npm';
