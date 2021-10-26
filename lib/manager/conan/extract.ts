@@ -70,7 +70,7 @@ export default function extractPackageFile(
             deps.push(dep);
 
             logger.trace(
-              `Found a conan package: ${depName}, ${currentValue}, ${userAndChannel}, ${depType}, ${dep.rangeStrategy}.`
+              `Found a conan package: ${depName}, ${currentValue}, ${userAndChannel}, ${depType}.`
             );
           }
         }

@@ -552,37 +552,6 @@ export function bumpRange(
   return null;
 }
 
-export function getValue({
-  currentValue,
-  rangeStrategy,
-  currentVersion,
-  newVersion,
-}: NewValueConfig): string {
-  const cleanRange = cleanVersion(currentValue);
-  const options = getOptions(currentValue);
-
-  if (rangeStrategy === 'widen') {
-    return widenRange(
-      { currentValue: cleanRange, rangeStrategy, currentVersion, newVersion },
-      options
-    );
-  }
-
-  if (rangeStrategy === 'bump') {
-    return bumpRange(
-      { currentValue: cleanRange, rangeStrategy, currentVersion, newVersion },
-      options
-    );
-  }
-
-  return replaceRange({
-    currentValue: cleanRange,
-    rangeStrategy,
-    currentVersion,
-    newVersion,
-  });
-}
-
 export function getNewValue({
   currentValue,
   rangeStrategy,
@@ -593,13 +562,27 @@ export function getNewValue({
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return newVersion;
   }
+  const options = getOptions(currentValue);
+  let newValue = '';
 
-  const newValue = getValue({
-    currentValue,
-    rangeStrategy,
-    currentVersion,
-    newVersion,
-  });
+  if (rangeStrategy === 'widen') {
+    newValue = widenRange(
+      { currentValue: cleanRange, rangeStrategy, currentVersion, newVersion },
+      options
+    );
+  } else if (rangeStrategy === 'bump') {
+    newValue = bumpRange(
+      { currentValue: cleanRange, rangeStrategy, currentVersion, newVersion },
+      options
+    );
+  } else {
+    newValue = replaceRange({
+      currentValue: cleanRange,
+      rangeStrategy,
+      currentVersion,
+      newVersion,
+    });
+  }
 
   if (newValue) {
     return currentValue.replace(cleanRange, newValue);
