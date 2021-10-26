@@ -1,4 +1,4 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { logger } from '../../logger';
@@ -53,7 +53,7 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
       dep.lookupName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = datasourceGitTags.id;
+    dep.datasource = GitTagsDatasource.id;
   } else if (dep.managerData.source) {
     const moduleParts = dep.managerData.source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
