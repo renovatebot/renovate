@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
@@ -11,6 +12,7 @@ const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<lookupName>[^/]*)$');
 function createDep(key: string, doc: HelmsmanDocument): PackageDependency {
   const dep: PackageDependency = {
     depName: key,
+    datasource: HelmDatasource.id,
   };
   const anApp = doc.apps[key];
   if (!anApp) {
