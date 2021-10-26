@@ -44,17 +44,20 @@ function getNewValue({
       const testFullVersion = regEx(/(~>\s*0\.)(\d+)\.\d$/);
       let replaceValue = '';
       if (testFullVersion.test(currentValue)) {
-        replaceValue = `$1${npm.getMinor(newVersion)}.0`;
+        replaceValue = `$<prefix>${npm.getMinor(newVersion)}.0`;
       } else {
-        replaceValue = `$1${npm.getMinor(newVersion)}$3`;
+        replaceValue = `$<prefix>${npm.getMinor(newVersion)}$<suffix>`;
       }
-      return currentValue.replace(/(~>\s*0\.)(\d+)(.*)$/, replaceValue); // TODO #12070
+      return currentValue.replace(
+        /(?<prefix>~>\s*0\.)\d+(?<suffix>.*)$/,  // TODO #12070
+        replaceValue
+      );
     }
     // handle special ~> 1.2 case
     if (regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
       return currentValue.replace(
-        /(~>\s*)\d+\.\d+$/, // TODO #12070
-        `$1${npm.getMajor(newVersion)}.0`
+        /(?<prefix>~>\s*)\d+\.\d+$/,   // TODO #12070
+        `$<prefix>${npm.getMajor(newVersion)}.0`
       );
     }
   }

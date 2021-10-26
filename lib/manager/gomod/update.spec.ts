@@ -185,7 +185,7 @@ describe('manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod2, upgrade });
       expect(res).not.toEqual(gomod2);
-      expect(res).not.toContain(upgrade.newDigest);
+      expect(res).toContain('github.com/spf13/jwalterweatherman 123456123456');
       expect(res).toContain(upgrade.newDigest.substring(0, 12));
     });
     it('skips already-updated multiline digest', () => {
