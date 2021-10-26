@@ -12,7 +12,7 @@ export class AwsMachineImageDataSource extends Datasource {
   override readonly caching = true;
 
   override readonly defaultConfig = {
-    // Because amis don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
+    // Because AMIs don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
     commitMessageExtra: 'to {{{newVersion}}}',
     prBodyColumns: ['Change', 'Image'],
     prBodyDefinitions: {
