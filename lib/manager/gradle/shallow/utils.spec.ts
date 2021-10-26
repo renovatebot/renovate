@@ -70,7 +70,7 @@ describe('manager/gradle/shallow/utils', () => {
   });
 
   it('interpolateString', () => {
-    expect(interpolateString([], {})).toBe('');
+    expect(interpolateString([], {})).toBeEmptyString();
     expect(
       interpolateString(
         [

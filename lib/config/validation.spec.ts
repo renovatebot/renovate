@@ -4,7 +4,7 @@ import * as configValidation from './validation';
 describe('config/validation', () => {
   describe('getParentName()', () => {
     it('ignores encrypted in root', () => {
-      expect(configValidation.getParentName('encrypted')).toEqual('');
+      expect(configValidation.getParentName('encrypted')).toBeEmptyString();
     });
     it('handles array types', () => {
       expect(configValidation.getParentName('hostRules[1]')).toEqual(

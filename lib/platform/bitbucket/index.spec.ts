@@ -859,7 +859,7 @@ describe('platform/bitbucket/index', () => {
         id: 5,
         strategy: 'rebase',
       });
-      expect(httpMock.getTrace()).toEqual([]);
+      expect(httpMock.getTrace()).toBeEmptyArray();
     });
 
     it('posts Merge with fast-forward', async () => {

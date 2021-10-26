@@ -312,7 +312,7 @@ describe('datasource/npm/index', () => {
     setNpmrc(npmrcContent);
     setNpmrc(npmrcContent);
     setNpmrc();
-    expect(getNpmrc()).toEqual({});
+    expect(getNpmrc()).toBeEmptyObject();
   });
 
   it('should use default registry if missing from npmrc', async () => {

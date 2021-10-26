@@ -125,7 +125,7 @@ describe('workers/pr/changelog/release-notes', () => {
   describe('getReleaseList()', () => {
     it('should return empty array if no apiBaseUrl', async () => {
       const res = await getReleaseList({} as ChangeLogProject);
-      expect(res).toEqual([]);
+      expect(res).toBeEmptyArray();
     });
 
     it('should return release list for github repo', async () => {

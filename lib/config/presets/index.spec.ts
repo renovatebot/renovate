@@ -243,7 +243,7 @@ describe('config/presets/index', () => {
         'config:base',
       ]);
       expect(config).toMatchObject(res);
-      expect(res).toEqual({});
+      expect(res).toBeEmptyObject();
     });
 
     it('resolves self-hosted presets without baseConfig', async () => {
