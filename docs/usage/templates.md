@@ -21,7 +21,7 @@ Some are configuration options passed through, while others are generated as par
 
 <!-- Insert runtime fields here -->
 
-## Additional handlebars helpers
+## Additional Handlebars helpers
 
 ### stringToPrettyJSON
 
