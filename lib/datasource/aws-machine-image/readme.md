@@ -22,7 +22,7 @@ Example:
     }
 ]
 
-# in order to use it with this datasource, you have to minify it:
+# In order to use it with this datasource, you have to minify it:
 
 [{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
 ```
