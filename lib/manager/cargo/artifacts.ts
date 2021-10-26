@@ -7,12 +7,11 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
-import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function cargoUpdate(
   manifestPath: string,
-  isLockFileMaintenance: boolean,
+  isLockFileMaintenance: boolean
 ): Promise<void> {
   let cmd = `cargo update --manifest-path ${quote(manifestPath)}`;
   if (isLockFileMaintenance) {
