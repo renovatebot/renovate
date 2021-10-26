@@ -124,10 +124,10 @@ describe('util/git/index', () => {
   });
   describe('branchExists(branchName)', () => {
     it('should return true if found', () => {
-      expect(git.branchExists('renovate/future_branch')).toBe(true);
+      expect(git.branchExists('renovate/future_branch')).toBeTrue();
     });
     it('should return false if not found', () => {
-      expect(git.branchExists('not_found')).toBe(false);
+      expect(git.branchExists('not_found')).toBeFalse();
     });
   });
   describe('getBranchList()', () => {
@@ -140,32 +140,32 @@ describe('util/git/index', () => {
   });
   describe('isBranchStale()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
     });
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
+      expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
     });
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchStale('develop')).toBe(true);
-      expect(await git.isBranchStale('develop')).toBe(true); // cache
+      expect(await git.isBranchStale('develop')).toBeTrue();
+      expect(await git.isBranchStale('develop')).toBeTrue(); // cache
     });
   });
   describe('isBranchModified()', () => {
     it('should return false when branch is not found', async () => {
-      expect(await git.isBranchModified('renovate/not_found')).toBe(false);
+      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
     });
     it('should return false when author matches', async () => {
-      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
-      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
     });
     it('should return false when author is ignored', async () => {
       await git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
-      expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
+      expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
     });
     it('should return true when custom author is unknown', async () => {
-      expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
+      expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
     });
   });
 
@@ -495,7 +495,7 @@ describe('util/git/index', () => {
       });
 
       await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
-      expect(git.branchExists('renovate/test')).toBe(true);
+      expect(git.branchExists('renovate/test')).toBeTrue();
 
       await git.initRepo({
         url: base.path,
@@ -505,7 +505,7 @@ describe('util/git/index', () => {
       await repo.commit('past message3', ['--amend']);
 
       await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
-      expect(git.branchExists('renovate/test')).toBe(true);
+      expect(git.branchExists('renovate/test')).toBeTrue();
     });
 
     it('should fail clone ssh submodule', async () => {

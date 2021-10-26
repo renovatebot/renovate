@@ -377,7 +377,7 @@ describe('platform/gitlab/index', () => {
           merge_method: 'merge',
         }
       );
-      expect(await gitlab.getRepoForceRebase()).toBe(false);
+      expect(await gitlab.getRepoForceRebase()).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -392,7 +392,7 @@ describe('platform/gitlab/index', () => {
           merge_method: 'ff',
         }
       );
-      expect(await gitlab.getRepoForceRebase()).toBe(true);
+      expect(await gitlab.getRepoForceRebase()).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1645,7 +1645,7 @@ describe('platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBe(false);
+      expect(pr.hasAssignees).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('removes draft prefix from returned title', async () => {
@@ -1719,7 +1719,7 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ status: 'success' }]);
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBe(true);
+      expect(pr.hasAssignees).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the PR with nonexisting branch', async () => {
@@ -1746,7 +1746,7 @@ describe('platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBe(true);
+      expect(pr.hasAssignees).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

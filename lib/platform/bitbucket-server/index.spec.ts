@@ -410,7 +410,7 @@ describe('platform/bitbucket-server/index', () => {
               mergeConfig: null,
             });
           const actual = await bitbucket.getRepoForceRebase();
-          expect(actual).toBe(false);
+          expect(actual).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -427,7 +427,7 @@ describe('platform/bitbucket-server/index', () => {
               },
             });
           const actual = await bitbucket.getRepoForceRebase();
-          expect(actual).toBe(false);
+          expect(actual).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -448,7 +448,7 @@ describe('platform/bitbucket-server/index', () => {
                 },
               });
             const actual = await bitbucket.getRepoForceRebase();
-            expect(actual).toBe(true);
+            expect(actual).toBeTrue();
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
@@ -470,7 +470,7 @@ describe('platform/bitbucket-server/index', () => {
                 },
               });
             const actual = await bitbucket.getRepoForceRebase();
-            expect(actual).toBe(false);
+            expect(actual).toBeFalse();
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
@@ -677,7 +677,7 @@ describe('platform/bitbucket-server/index', () => {
             topic: 'topic',
             content: 'content',
           });
-          expect(res).toBe(false);
+          expect(res).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -721,7 +721,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: 'topic',
               content: 'content',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -765,7 +765,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: null,
               content: 'content',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -815,7 +815,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: 'some-subject',
               content: 'some\ncontent',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -859,7 +859,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: null,
               content: 'some\ncontent',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -899,7 +899,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: 'some-subject',
               content: 'blablabla',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -938,7 +938,7 @@ describe('platform/bitbucket-server/index', () => {
             topic: null,
             content: '!merge',
           });
-          expect(res).toBe(true);
+          expect(res).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1597,7 +1597,7 @@ describe('platform/bitbucket-server/index', () => {
               branchName: 'branch',
               id: 5,
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1699,7 +1699,7 @@ describe('platform/bitbucket-server/index', () => {
               branchName: 'branch',
               id: 5,
             })
-          ).resolves.toBe(false);
+          ).resolves.toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

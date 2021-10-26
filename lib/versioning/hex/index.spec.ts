@@ -3,12 +3,12 @@ import { api as hexScheme } from '.';
 describe('versioning/hex/index', () => {
   describe('hexScheme.matches()', () => {
     it('handles tilde greater than', () => {
-      expect(hexScheme.matches('4.2.0', '~> 4.0')).toBe(true);
-      expect(hexScheme.matches('2.1.0', '~> 2.0.0')).toBe(false);
-      expect(hexScheme.matches('2.0.0', '>= 2.0.0 and < 2.1.0')).toBe(true);
-      expect(hexScheme.matches('2.1.0', '== 2.0.0 or < 2.1.0')).toBe(false);
-      expect(hexScheme.matches('1.9.4', '== 1.9.4')).toBe(true);
-      expect(hexScheme.matches('1.9.5', '== 1.9.4')).toBe(false);
+      expect(hexScheme.matches('4.2.0', '~> 4.0')).toBeTrue();
+      expect(hexScheme.matches('2.1.0', '~> 2.0.0')).toBeFalse();
+      expect(hexScheme.matches('2.0.0', '>= 2.0.0 and < 2.1.0')).toBeTrue();
+      expect(hexScheme.matches('2.1.0', '== 2.0.0 or < 2.1.0')).toBeFalse();
+      expect(hexScheme.matches('1.9.4', '== 1.9.4')).toBeTrue();
+      expect(hexScheme.matches('1.9.5', '== 1.9.4')).toBeFalse();
     });
   });
   it('handles tilde greater than', () => {

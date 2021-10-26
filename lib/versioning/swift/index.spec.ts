@@ -14,40 +14,40 @@ const {
 describe('versioning/swift/index', () => {
   describe('isValid(input)', () => {
     it('supports isVersion', () => {
-      expect(isVersion('from: "1.2.3"')).toBe(false);
-      expect(isVersion('1.2.3')).toBe(true);
+      expect(isVersion('from: "1.2.3"')).toBeFalse();
+      expect(isVersion('1.2.3')).toBeTrue();
     });
     it('understands Swift version ranges', () => {
-      expect(isValid('from: "1.2.3"')).toBe(true);
-      expect(isValid('from : "1.2.3"')).toBe(true);
-      expect(isValid('from:"1.2.3"')).toBe(true);
-      expect(isValid(' from:"1.2.3" ')).toBe(true);
-      expect(isValid(' from : "1.2.3" ')).toBe(true);
+      expect(isValid('from: "1.2.3"')).toBeTrue();
+      expect(isValid('from : "1.2.3"')).toBeTrue();
+      expect(isValid('from:"1.2.3"')).toBeTrue();
+      expect(isValid(' from:"1.2.3" ')).toBeTrue();
+      expect(isValid(' from : "1.2.3" ')).toBeTrue();
 
-      expect(isValid('"1.2.3"..."1.2.4"')).toBe(true);
-      expect(isValid(' "1.2.3" ... "1.2.4" ')).toBe(true);
+      expect(isValid('"1.2.3"..."1.2.4"')).toBeTrue();
+      expect(isValid(' "1.2.3" ... "1.2.4" ')).toBeTrue();
 
-      expect(isValid('"1.2.3"...')).toBe(true);
-      expect(isValid(' "1.2.3" ... ')).toBe(true);
+      expect(isValid('"1.2.3"...')).toBeTrue();
+      expect(isValid(' "1.2.3" ... ')).toBeTrue();
 
-      expect(isValid('..."1.2.4"')).toBe(true);
-      expect(isValid(' ... "1.2.4" ')).toBe(true);
+      expect(isValid('..."1.2.4"')).toBeTrue();
+      expect(isValid(' ... "1.2.4" ')).toBeTrue();
 
-      expect(isValid('"1.2.3"..<"1.2.4"')).toBe(true);
-      expect(isValid(' "1.2.3" ..< "1.2.4" ')).toBe(true);
+      expect(isValid('"1.2.3"..<"1.2.4"')).toBeTrue();
+      expect(isValid(' "1.2.3" ..< "1.2.4" ')).toBeTrue();
 
-      expect(isValid('..<"1.2.4"')).toBe(true);
-      expect(isValid(' ..< "1.2.4" ')).toBe(true);
+      expect(isValid('..<"1.2.4"')).toBeTrue();
+      expect(isValid(' ..< "1.2.4" ')).toBeTrue();
     });
     it('should return null for irregular versions', () => {
       expect(isValid('17.04.0')).toBeFalsy();
     });
     it('should support simple semver', () => {
-      expect(isValid('1.2.3')).toBe(true);
-      expect(isValid('v1.2.3')).toBe(true);
+      expect(isValid('1.2.3')).toBeTrue();
+      expect(isValid('v1.2.3')).toBeTrue();
     });
     it('should support semver with dash', () => {
-      expect(isValid('1.2.3-foo')).toBe(true);
+      expect(isValid('1.2.3-foo')).toBeTrue();
     });
     it('should reject semver without dash', () => {
       expect(isValid('1.2.3foo')).toBeFalsy();
@@ -55,13 +55,13 @@ describe('versioning/swift/index', () => {
     it('should support ranges', () => {
       expect(isValid('~1.2.3')).toBeFalsy();
       expect(isValid('^1.2.3')).toBeFalsy();
-      expect(isValid('from: "1.2.3"')).toBe(true);
-      expect(isValid('"1.2.3"..."1.2.4"')).toBe(true);
-      expect(isValid('"1.2.3"..."1.2.4"')).toBe(true);
-      expect(isValid('"1.2.3"..<"1.2.4"')).toBe(true);
-      expect(isValid('"1.2.3"..<"1.2.4"')).toBe(true);
-      expect(isValid('..."1.2.3"')).toBe(true);
-      expect(isValid('..<"1.2.4"')).toBe(true);
+      expect(isValid('from: "1.2.3"')).toBeTrue();
+      expect(isValid('"1.2.3"..."1.2.4"')).toBeTrue();
+      expect(isValid('"1.2.3"..."1.2.4"')).toBeTrue();
+      expect(isValid('"1.2.3"..<"1.2.4"')).toBeTrue();
+      expect(isValid('"1.2.3"..<"1.2.4"')).toBeTrue();
+      expect(isValid('..."1.2.3"')).toBeTrue();
+      expect(isValid('..<"1.2.4"')).toBeTrue();
       expect(
         minSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..<"1.2.4"')
       ).toBe('1.2.3');
@@ -77,15 +77,15 @@ describe('versioning/swift/index', () => {
       expect(
         getSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..."1.2.4"')
       ).toBe('1.2.4');
-      expect(isLessThanRange('1.2.3', '..."1.2.4"')).toBe(false);
-      expect(isLessThanRange('v1.2.3', '..."1.2.4"')).toBe(false);
-      expect(isLessThanRange('1.2.3', '"1.2.4"...')).toBe(true);
-      expect(isLessThanRange('v1.2.3', '"1.2.4"...')).toBe(true);
+      expect(isLessThanRange('1.2.3', '..."1.2.4"')).toBeFalse();
+      expect(isLessThanRange('v1.2.3', '..."1.2.4"')).toBeFalse();
+      expect(isLessThanRange('1.2.3', '"1.2.4"...')).toBeTrue();
+      expect(isLessThanRange('v1.2.3', '"1.2.4"...')).toBeTrue();
 
-      expect(matches('1.2.4', '..."1.2.4"')).toBe(true);
-      expect(matches('v1.2.4', '..."1.2.4"')).toBe(true);
-      expect(matches('1.2.4', '..."1.2.3"')).toBe(false);
-      expect(matches('v1.2.4', '..."1.2.3"')).toBe(false);
+      expect(matches('1.2.4', '..."1.2.4"')).toBeTrue();
+      expect(matches('v1.2.4', '..."1.2.4"')).toBeTrue();
+      expect(matches('1.2.4', '..."1.2.3"')).toBeFalse();
+      expect(matches('v1.2.4', '..."1.2.3"')).toBeFalse();
     });
   });
   describe('getNewValue()', () => {

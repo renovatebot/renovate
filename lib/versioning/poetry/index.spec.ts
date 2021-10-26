@@ -8,7 +8,7 @@ describe('versioning/poetry/index', () => {
       ['1.0.0', '1'],
       ['1.9.0', '1.9'],
     ])('%s == %s', (a, b) => {
-      expect(versionig.equals(a, b)).toBe(true);
+      expect(versionig.equals(a, b)).toBeTrue();
     });
 
     it.each([
@@ -16,7 +16,7 @@ describe('versioning/poetry/index', () => {
       ['1.9.1', '1.9'],
       ['1.9-beta', '1.9'],
     ])('%s != %s', (a, b) => {
-      expect(versionig.equals(a, b)).toBe(false);
+      expect(versionig.equals(a, b)).toBeFalse();
     });
   });
 
@@ -59,7 +59,7 @@ describe('versioning/poetry/index', () => {
       ['1.10.0', '1.9'],
       ['1.9', '1.9-beta'],
     ])('%s > %s', (a, b) => {
-      expect(versionig.isGreaterThan(a, b)).toBe(true);
+      expect(versionig.isGreaterThan(a, b)).toBeTrue();
     });
 
     it.each([
@@ -68,7 +68,7 @@ describe('versioning/poetry/index', () => {
       ['1.0.0', '1'],
       ['1.9.0', '1.9'],
     ])('%s <= %s', (a, b) => {
-      expect(versionig.isGreaterThan(a, b)).toBe(false);
+      expect(versionig.isGreaterThan(a, b)).toBeFalse();
     });
   });
 
@@ -128,18 +128,18 @@ describe('versioning/poetry/index', () => {
   });
   describe('matches()', () => {
     it('handles comma', () => {
-      expect(versionig.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
-      expect(versionig.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
-      expect(versionig.matches('4.2.2', '4.2.0, < 4.2.4')).toBe(false);
-      expect(versionig.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(true);
-      expect(versionig.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
-      expect(versionig.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
+      expect(versionig.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBeTrue();
+      expect(versionig.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBeFalse();
+      expect(versionig.matches('4.2.2', '4.2.0, < 4.2.4')).toBeFalse();
+      expect(versionig.matches('4.2.2', '^4.2.0, < 4.2.4')).toBeTrue();
+      expect(versionig.matches('4.2.0', '4.3.0, 3.0.0')).toBeFalse();
+      expect(versionig.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBeFalse();
     });
     it('handles wildcards', () => {
-      expect(versionig.matches('4.2.0', '*')).toBe(true);
+      expect(versionig.matches('4.2.0', '*')).toBeTrue();
     });
     it('handles short', () => {
-      expect(versionig.matches('1.4', '1.4')).toBe(true);
+      expect(versionig.matches('1.4', '1.4')).toBeTrue();
     });
   });
   describe('isLessThanRange()', () => {

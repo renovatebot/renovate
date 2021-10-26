@@ -54,12 +54,12 @@ describe('util/url', () => {
   });
 
   it('validates URLs', () => {
-    expect(validateUrl()).toBe(false);
-    expect(validateUrl(null)).toBe(false);
-    expect(validateUrl('foo')).toBe(false);
-    expect(validateUrl('ssh://github.com')).toBe(false);
-    expect(validateUrl('http://github.com')).toBe(true);
-    expect(validateUrl('https://github.com')).toBe(true);
+    expect(validateUrl()).toBeFalse();
+    expect(validateUrl(null)).toBeFalse();
+    expect(validateUrl('foo')).toBeFalse();
+    expect(validateUrl('ssh://github.com')).toBeFalse();
+    expect(validateUrl('http://github.com')).toBeTrue();
+    expect(validateUrl('https://github.com')).toBeTrue();
   });
 
   it('parses URL', () => {

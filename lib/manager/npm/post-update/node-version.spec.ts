@@ -26,7 +26,7 @@ describe('manager/npm/post-update/node-version', () => {
     });
     const isAugmentedRange = res === '>= 12.16.0 <15';
     const node16IsStable = isStable('16.100.0');
-    expect(isAugmentedRange || node16IsStable).toBe(true);
+    expect(isAugmentedRange || node16IsStable).toBeTrue();
   });
   it('forces node 15 if v2 lockfile detected and constraint allows', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
@@ -38,7 +38,7 @@ describe('manager/npm/post-update/node-version', () => {
     });
     const isAugmentedRange = res === '>=15';
     const node16IsStable = isStable('16.100.0');
-    expect(isAugmentedRange || node16IsStable).toBe(true);
+    expect(isAugmentedRange || node16IsStable).toBeTrue();
   });
   it('forces node 15 if v2 lockfile detected and no constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
@@ -53,7 +53,7 @@ describe('manager/npm/post-update/node-version', () => {
     );
     const isAugmentedRange = res === '>=15';
     const node16IsStable = isStable('16.100.0');
-    expect(isAugmentedRange || node16IsStable).toBe(true);
+    expect(isAugmentedRange || node16IsStable).toBeTrue();
   });
   it('returns .node-version value', async () => {
     fs.readLocalFile = jest.fn();

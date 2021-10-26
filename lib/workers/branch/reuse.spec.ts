@@ -25,13 +25,13 @@ describe('workers/branch/reuse', () => {
     it('returns false if branch does not exist', async () => {
       git.branchExists.mockReturnValueOnce(false);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
+      expect(res.reuseExistingBranch).toBeFalse();
     });
     it('returns true if no PR', async () => {
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValue(null);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
+      expect(res.reuseExistingBranch).toBeTrue();
     });
     it('returns true if does not need rebasing', async () => {
       git.branchExists.mockReturnValueOnce(true);
@@ -40,7 +40,7 @@ describe('workers/branch/reuse', () => {
         isConflicted: false,
       });
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
+      expect(res.reuseExistingBranch).toBeTrue();
     });
     it('returns true if unmergeable and cannot rebase', async () => {
       git.branchExists.mockReturnValueOnce(true);
@@ -50,7 +50,7 @@ describe('workers/branch/reuse', () => {
       });
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
+      expect(res.reuseExistingBranch).toBeTrue();
     });
     it('returns true if unmergeable and can rebase, but rebaseWhen is never', async () => {
       config.rebaseWhen = 'never';
@@ -61,7 +61,7 @@ describe('workers/branch/reuse', () => {
       });
       git.isBranchModified.mockResolvedValueOnce(false);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
+      expect(res.reuseExistingBranch).toBeTrue();
     });
     it('returns false if PR title rebase!', async () => {
       git.branchExists.mockReturnValueOnce(true);
@@ -70,7 +70,7 @@ describe('workers/branch/reuse', () => {
         title: 'rebase!Update foo to v4',
       });
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
+      expect(res.reuseExistingBranch).toBeFalse();
     });
     it('returns false if PR body check rebase', async () => {
       git.branchExists.mockReturnValueOnce(true);
@@ -80,7 +80,7 @@ describe('workers/branch/reuse', () => {
         body: 'blah\nblah\n- [x] <!-- rebase-check -->foo\n',
       });
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
+      expect(res.reuseExistingBranch).toBeFalse();
     });
     it('returns false if manual rebase by label', async () => {
       git.branchExists.mockReturnValueOnce(true);
@@ -89,7 +89,7 @@ describe('workers/branch/reuse', () => {
         labels: ['rebase'],
       });
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
+      expect(res.reuseExistingBranch).toBeFalse();
     });
     it('returns false if unmergeable and can rebase', async () => {
       git.branchExists.mockReturnValueOnce(true);
@@ -99,14 +99,14 @@ describe('workers/branch/reuse', () => {
       });
       git.isBranchModified.mockResolvedValueOnce(false);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
+      expect(res.reuseExistingBranch).toBeFalse();
     });
     it('returns true if automerge branch and not stale', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       git.branchExists.mockReturnValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
+      expect(res.reuseExistingBranch).toBeTrue();
     });
     it('returns false if automerge branch and stale', async () => {
       config.rebaseWhen = 'auto';
@@ -115,7 +115,7 @@ describe('workers/branch/reuse', () => {
       git.branchExists.mockReturnValueOnce(true);
       git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
+      expect(res.reuseExistingBranch).toBeFalse();
     });
     it('returns true if rebaseWhen=behind-base-branch but cannot rebase', async () => {
       config.rebaseWhen = 'behind-base-branch';
@@ -127,7 +127,7 @@ describe('workers/branch/reuse', () => {
       });
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
+      expect(res.reuseExistingBranch).toBeTrue();
     });
 
     it('returns false if automerge pr and stale', async () => {
@@ -137,7 +137,7 @@ describe('workers/branch/reuse', () => {
       git.branchExists.mockReturnValueOnce(true);
       git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
+      expect(res.reuseExistingBranch).toBeFalse();
     });
 
     it('returns false if getRepoForceRebase and stale', async () => {
@@ -146,7 +146,7 @@ describe('workers/branch/reuse', () => {
       git.branchExists.mockReturnValueOnce(true);
       git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(false);
+      expect(res.reuseExistingBranch).toBeFalse();
     });
 
     it('returns true if automerge, rebaseWhen=never and stale', async () => {
@@ -154,7 +154,7 @@ describe('workers/branch/reuse', () => {
       config.automerge = true;
       git.branchExists.mockReturnValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
+      expect(res.reuseExistingBranch).toBeTrue();
       expect(git.isBranchStale).not.toHaveBeenCalled();
       expect(git.isBranchModified).not.toHaveBeenCalled();
     });
@@ -165,7 +165,7 @@ describe('workers/branch/reuse', () => {
       git.branchExists.mockReturnValueOnce(true);
       git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBe(true);
+      expect(res.reuseExistingBranch).toBeTrue();
     });
   });
 });

@@ -4,17 +4,17 @@ import { api as semverRuby } from '.';
 describe('versioning/ruby/index', () => {
   describe('.equals', () => {
     it('returns true when versions are equal', () => {
-      expect(semverRuby.equals('1.0.0', '1')).toBe(true);
-      expect(semverRuby.equals('1.2.0', '1.2')).toBe(true);
-      expect(semverRuby.equals('1.2.0', '1.2.0')).toBe(true);
-      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc1')).toBe(true);
+      expect(semverRuby.equals('1.0.0', '1')).toBeTrue();
+      expect(semverRuby.equals('1.2.0', '1.2')).toBeTrue();
+      expect(semverRuby.equals('1.2.0', '1.2.0')).toBeTrue();
+      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc1')).toBeTrue();
     });
 
     it('returns false when versions are different', () => {
-      expect(semverRuby.equals('1.2.0', '2')).toBe(false);
-      expect(semverRuby.equals('1.2.0', '1.1')).toBe(false);
-      expect(semverRuby.equals('1.2.0', '1.2.1')).toBe(false);
-      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc2')).toBe(false);
+      expect(semverRuby.equals('1.2.0', '2')).toBeFalse();
+      expect(semverRuby.equals('1.2.0', '1.1')).toBeFalse();
+      expect(semverRuby.equals('1.2.0', '1.2.1')).toBeFalse();
+      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc2')).toBeFalse();
     });
   });
 
@@ -53,68 +53,68 @@ describe('versioning/ruby/index', () => {
 
   describe('.isVersion', () => {
     it('returns true when version is valid', () => {
-      expect(semverRuby.isVersion('0')).toBe(true);
-      expect(semverRuby.isVersion('v0')).toBe(true);
-      expect(semverRuby.isVersion('v1')).toBe(true);
-      expect(semverRuby.isVersion('v1.2')).toBe(true);
-      expect(semverRuby.isVersion('v1.2.3')).toBe(true);
-      expect(semverRuby.isVersion('1')).toBe(true);
-      expect(semverRuby.isVersion('1.1')).toBe(true);
-      expect(semverRuby.isVersion('1.1.2')).toBe(true);
-      expect(semverRuby.isVersion('1.1.2.3')).toBe(true);
-      expect(semverRuby.isVersion('1.1.2-4')).toBe(true);
-      expect(semverRuby.isVersion('1.1.2.pre.4')).toBe(true);
-      expect(semverRuby.isVersion('v1.1.2.pre.4')).toBe(true);
+      expect(semverRuby.isVersion('0')).toBeTrue();
+      expect(semverRuby.isVersion('v0')).toBeTrue();
+      expect(semverRuby.isVersion('v1')).toBeTrue();
+      expect(semverRuby.isVersion('v1.2')).toBeTrue();
+      expect(semverRuby.isVersion('v1.2.3')).toBeTrue();
+      expect(semverRuby.isVersion('1')).toBeTrue();
+      expect(semverRuby.isVersion('1.1')).toBeTrue();
+      expect(semverRuby.isVersion('1.1.2')).toBeTrue();
+      expect(semverRuby.isVersion('1.1.2.3')).toBeTrue();
+      expect(semverRuby.isVersion('1.1.2-4')).toBeTrue();
+      expect(semverRuby.isVersion('1.1.2.pre.4')).toBeTrue();
+      expect(semverRuby.isVersion('v1.1.2.pre.4')).toBeTrue();
     });
 
     it('returns false when version is invalid', () => {
-      expect(semverRuby.isVersion(undefined)).toBe(false);
-      expect(semverRuby.isVersion('')).toBe(false);
-      expect(semverRuby.isVersion(null)).toBe(false);
-      expect(semverRuby.isVersion('v')).toBe(false);
-      expect(semverRuby.isVersion('tottally-not-a-version')).toBe(false);
+      expect(semverRuby.isVersion(undefined)).toBeFalse();
+      expect(semverRuby.isVersion('')).toBeFalse();
+      expect(semverRuby.isVersion(null)).toBeFalse();
+      expect(semverRuby.isVersion('v')).toBeFalse();
+      expect(semverRuby.isVersion('tottally-not-a-version')).toBeFalse();
     });
   });
 
   describe('.isGreaterThan', () => {
     it('returns true when version is greater than another', () => {
-      expect(semverRuby.isGreaterThan('2', '1')).toBe(true);
-      expect(semverRuby.isGreaterThan('2.2', '2.1')).toBe(true);
-      expect(semverRuby.isGreaterThan('2.2.1', '2.2.0')).toBe(true);
-      expect(semverRuby.isGreaterThan('3.0.0.rc2', '3.0.0.rc1')).toBe(true);
-      expect(semverRuby.isGreaterThan('3.0.0-rc.2', '3.0.0-rc.1')).toBe(true);
-      expect(semverRuby.isGreaterThan('3.0.0.rc1', '3.0.0.beta')).toBe(true);
-      expect(semverRuby.isGreaterThan('3.0.0-rc.1', '3.0.0-beta')).toBe(true);
-      expect(semverRuby.isGreaterThan('3.0.0.beta', '3.0.0.alpha')).toBe(true);
-      expect(semverRuby.isGreaterThan('3.0.0-beta', '3.0.0-alpha')).toBe(true);
-      expect(semverRuby.isGreaterThan('5.0.1.rc1', '5.0.1.beta1')).toBe(true);
-      expect(semverRuby.isGreaterThan('5.0.1-rc.1', '5.0.1-beta.1')).toBe(true);
+      expect(semverRuby.isGreaterThan('2', '1')).toBeTrue();
+      expect(semverRuby.isGreaterThan('2.2', '2.1')).toBeTrue();
+      expect(semverRuby.isGreaterThan('2.2.1', '2.2.0')).toBeTrue();
+      expect(semverRuby.isGreaterThan('3.0.0.rc2', '3.0.0.rc1')).toBeTrue();
+      expect(semverRuby.isGreaterThan('3.0.0-rc.2', '3.0.0-rc.1')).toBeTrue();
+      expect(semverRuby.isGreaterThan('3.0.0.rc1', '3.0.0.beta')).toBeTrue();
+      expect(semverRuby.isGreaterThan('3.0.0-rc.1', '3.0.0-beta')).toBeTrue();
+      expect(semverRuby.isGreaterThan('3.0.0.beta', '3.0.0.alpha')).toBeTrue();
+      expect(semverRuby.isGreaterThan('3.0.0-beta', '3.0.0-alpha')).toBeTrue();
+      expect(semverRuby.isGreaterThan('5.0.1.rc1', '5.0.1.beta1')).toBeTrue();
+      expect(semverRuby.isGreaterThan('5.0.1-rc.1', '5.0.1-beta.1')).toBeTrue();
     });
 
     it('returns false when version is lower than another', () => {
-      expect(semverRuby.isGreaterThan('1', '2')).toBe(false);
-      expect(semverRuby.isGreaterThan('2.1', '2.2')).toBe(false);
-      expect(semverRuby.isGreaterThan('2.2.0', '2.2.1')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0.rc1', '3.0.0.rc2')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0-rc.1', '3.0.0-rc.2')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0.beta', '3.0.0.rc1')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0-beta', '3.0.0-rc.1')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0.alpha', '3.0.0.beta')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0-alpha', '3.0.0-beta')).toBe(false);
-      expect(semverRuby.isGreaterThan('5.0.1.beta1', '5.0.1.rc1')).toBe(false);
+      expect(semverRuby.isGreaterThan('1', '2')).toBeFalse();
+      expect(semverRuby.isGreaterThan('2.1', '2.2')).toBeFalse();
+      expect(semverRuby.isGreaterThan('2.2.0', '2.2.1')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0.rc1', '3.0.0.rc2')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0-rc.1', '3.0.0-rc.2')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0.beta', '3.0.0.rc1')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0-beta', '3.0.0-rc.1')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0.alpha', '3.0.0.beta')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0-alpha', '3.0.0-beta')).toBeFalse();
+      expect(semverRuby.isGreaterThan('5.0.1.beta1', '5.0.1.rc1')).toBeFalse();
       expect(semverRuby.isGreaterThan('5.0.1-beta.1', '5.0.1-rc.1')).toBe(
         false
       );
     });
 
     it('returns false when versions are equal', () => {
-      expect(semverRuby.isGreaterThan('1', '1')).toBe(false);
-      expect(semverRuby.isGreaterThan('2.1', '2.1')).toBe(false);
-      expect(semverRuby.isGreaterThan('2.2.0', '2.2.0')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0.rc1', '3.0.0.rc1')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0-rc.1', '3.0.0-rc.1')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0.beta', '3.0.0.beta')).toBe(false);
-      expect(semverRuby.isGreaterThan('3.0.0-beta', '3.0.0-beta')).toBe(false);
+      expect(semverRuby.isGreaterThan('1', '1')).toBeFalse();
+      expect(semverRuby.isGreaterThan('2.1', '2.1')).toBeFalse();
+      expect(semverRuby.isGreaterThan('2.2.0', '2.2.0')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0.rc1', '3.0.0.rc1')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0-rc.1', '3.0.0-rc.1')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0.beta', '3.0.0.beta')).toBeFalse();
+      expect(semverRuby.isGreaterThan('3.0.0-beta', '3.0.0-beta')).toBeFalse();
       expect(semverRuby.isGreaterThan('3.0.0.alpha', '3.0.0.alpha')).toBe(
         false
       );
@@ -132,23 +132,23 @@ describe('versioning/ruby/index', () => {
 
   describe('.isStable', () => {
     it('returns true when version is stable', () => {
-      expect(semverRuby.isStable('1')).toBe(true);
-      expect(semverRuby.isStable('1.2')).toBe(true);
-      expect(semverRuby.isStable('1.2.3')).toBe(true);
+      expect(semverRuby.isStable('1')).toBeTrue();
+      expect(semverRuby.isStable('1.2')).toBeTrue();
+      expect(semverRuby.isStable('1.2.3')).toBeTrue();
     });
 
     it('returns false when version is prerelease', () => {
-      expect(semverRuby.isStable('1.2.0-alpha')).toBe(false);
-      expect(semverRuby.isStable('1.2.0.alpha')).toBe(false);
-      expect(semverRuby.isStable('1.2.0.alpha1')).toBe(false);
-      expect(semverRuby.isStable('1.2.0-alpha.1')).toBe(false);
+      expect(semverRuby.isStable('1.2.0-alpha')).toBeFalse();
+      expect(semverRuby.isStable('1.2.0.alpha')).toBeFalse();
+      expect(semverRuby.isStable('1.2.0.alpha1')).toBeFalse();
+      expect(semverRuby.isStable('1.2.0-alpha.1')).toBeFalse();
     });
 
     it('returns false when version is invalid', () => {
-      expect(semverRuby.isStable(undefined)).toBe(false);
-      expect(semverRuby.isStable('')).toBe(false);
-      expect(semverRuby.isStable(null)).toBe(false);
-      expect(semverRuby.isStable('tottally-not-a-version')).toBe(false);
+      expect(semverRuby.isStable(undefined)).toBeFalse();
+      expect(semverRuby.isStable('')).toBeFalse();
+      expect(semverRuby.isStable(null)).toBeFalse();
+      expect(semverRuby.isStable('tottally-not-a-version')).toBeFalse();
     });
   });
 
@@ -240,24 +240,24 @@ describe('versioning/ruby/index', () => {
 
   describe('.matches', () => {
     it('returns true when version match range', () => {
-      expect(semverRuby.matches('1.2', '>= 1.2')).toBe(true);
-      expect(semverRuby.matches('1.2.3', '~> 1.2.1')).toBe(true);
-      expect(semverRuby.matches('1.2.7', '1.2.7')).toBe(true);
-      expect(semverRuby.matches('1.1.6', '>= 1.1.5, < 2.0')).toBe(true);
+      expect(semverRuby.matches('1.2', '>= 1.2')).toBeTrue();
+      expect(semverRuby.matches('1.2.3', '~> 1.2.1')).toBeTrue();
+      expect(semverRuby.matches('1.2.7', '1.2.7')).toBeTrue();
+      expect(semverRuby.matches('1.1.6', '>= 1.1.5, < 2.0')).toBeTrue();
     });
 
     it('returns false when version not match range', () => {
-      expect(semverRuby.matches('1.2', '>= 1.3')).toBe(false);
-      expect(semverRuby.matches('1.3.8', '~> 1.2.1')).toBe(false);
-      expect(semverRuby.matches('1.3.9', '1.3.8')).toBe(false);
-      expect(semverRuby.matches('2.0.0', '>= 1.1.5, < 2.0')).toBe(false);
+      expect(semverRuby.matches('1.2', '>= 1.3')).toBeFalse();
+      expect(semverRuby.matches('1.3.8', '~> 1.2.1')).toBeFalse();
+      expect(semverRuby.matches('1.3.9', '1.3.8')).toBeFalse();
+      expect(semverRuby.matches('2.0.0', '>= 1.1.5, < 2.0')).toBeFalse();
     });
   });
 
   describe('.isLessThanRange', () => {
     it('returns true when version less than range', () => {
-      expect(semverRuby.isLessThanRange('1.2.2', '< 1.2.2')).toBe(true);
-      expect(semverRuby.isLessThanRange('1.1.4', '>= 1.1.5, < 2.0')).toBe(true);
+      expect(semverRuby.isLessThanRange('1.2.2', '< 1.2.2')).toBeTrue();
+      expect(semverRuby.isLessThanRange('1.1.4', '>= 1.1.5, < 2.0')).toBeTrue();
       expect(semverRuby.isLessThanRange('1.2.0-alpha', '1.2.0-beta')).toBe(
         true
       );
@@ -267,7 +267,7 @@ describe('versioning/ruby/index', () => {
     });
 
     it('returns false when version greater or satisfies range', () => {
-      expect(semverRuby.isLessThanRange('1.2.2', '<= 1.2.2')).toBe(false);
+      expect(semverRuby.isLessThanRange('1.2.2', '<= 1.2.2')).toBeFalse();
       expect(semverRuby.isLessThanRange('2.0.0', '>= 1.1.5, < 2.0')).toBe(
         false
       );
@@ -291,74 +291,74 @@ describe('versioning/ruby/index', () => {
 
   describe('.isValid', () => {
     it('returns true when version is valid', () => {
-      expect(semverRuby.isValid('1')).toBe(true);
-      expect(semverRuby.isValid('1.1')).toBe(true);
-      expect(semverRuby.isValid('1.1.2')).toBe(true);
-      expect(semverRuby.isValid('1.2.0.alpha1')).toBe(true);
-      expect(semverRuby.isValid('1.2.0-alpha.1')).toBe(true);
+      expect(semverRuby.isValid('1')).toBeTrue();
+      expect(semverRuby.isValid('1.1')).toBeTrue();
+      expect(semverRuby.isValid('1.1.2')).toBeTrue();
+      expect(semverRuby.isValid('1.2.0.alpha1')).toBeTrue();
+      expect(semverRuby.isValid('1.2.0-alpha.1')).toBeTrue();
 
-      expect(semverRuby.isValid('= 1')).toBe(true);
-      expect(semverRuby.isValid('!= 1.1')).toBe(true);
-      expect(semverRuby.isValid('> 1.1.2')).toBe(true);
-      expect(semverRuby.isValid('< 1.0.0-beta')).toBe(true);
-      expect(semverRuby.isValid('>= 1.0.0.beta')).toBe(true);
-      expect(semverRuby.isValid('<= 1.2.0.alpha1')).toBe(true);
-      expect(semverRuby.isValid('~> 1.2.0-alpha.1')).toBe(true);
+      expect(semverRuby.isValid('= 1')).toBeTrue();
+      expect(semverRuby.isValid('!= 1.1')).toBeTrue();
+      expect(semverRuby.isValid('> 1.1.2')).toBeTrue();
+      expect(semverRuby.isValid('< 1.0.0-beta')).toBeTrue();
+      expect(semverRuby.isValid('>= 1.0.0.beta')).toBeTrue();
+      expect(semverRuby.isValid('<= 1.2.0.alpha1')).toBeTrue();
+      expect(semverRuby.isValid('~> 1.2.0-alpha.1')).toBeTrue();
     });
 
     it('returns true when range is valid', () => {
-      expect(semverRuby.isValid('>= 3.0.5, < 3.2')).toBe(true);
+      expect(semverRuby.isValid('>= 3.0.5, < 3.2')).toBeTrue();
     });
 
     it('returns false when version is invalid', () => {
-      expect(semverRuby.isVersion(undefined)).toBe(false);
-      expect(semverRuby.isVersion('')).toBe(false);
-      expect(semverRuby.isVersion(null)).toBe(false);
-      expect(semverRuby.isVersion('tottally-not-a-version')).toBe(false);
+      expect(semverRuby.isVersion(undefined)).toBeFalse();
+      expect(semverRuby.isVersion('')).toBeFalse();
+      expect(semverRuby.isVersion(null)).toBeFalse();
+      expect(semverRuby.isVersion('tottally-not-a-version')).toBeFalse();
 
-      expect(semverRuby.isValid('+ 1')).toBe(false);
-      expect(semverRuby.isValid('- 1.1')).toBe(false);
-      expect(semverRuby.isValid('=== 1.1.2')).toBe(false);
-      expect(semverRuby.isValid('! 1.0.0-beta')).toBe(false);
-      expect(semverRuby.isValid('& 1.0.0.beta')).toBe(false);
+      expect(semverRuby.isValid('+ 1')).toBeFalse();
+      expect(semverRuby.isValid('- 1.1')).toBeFalse();
+      expect(semverRuby.isValid('=== 1.1.2')).toBeFalse();
+      expect(semverRuby.isValid('! 1.0.0-beta')).toBeFalse();
+      expect(semverRuby.isValid('& 1.0.0.beta')).toBeFalse();
     });
   });
 
   describe('.isSingleVersion', () => {
     it('returns true when version is single', () => {
-      expect(semverRuby.isSingleVersion('1')).toBe(true);
-      expect(semverRuby.isSingleVersion('1.2')).toBe(true);
-      expect(semverRuby.isSingleVersion('1.2.1')).toBe(true);
+      expect(semverRuby.isSingleVersion('1')).toBeTrue();
+      expect(semverRuby.isSingleVersion('1.2')).toBeTrue();
+      expect(semverRuby.isSingleVersion('1.2.1')).toBeTrue();
 
-      expect(semverRuby.isSingleVersion('=1')).toBe(true);
-      expect(semverRuby.isSingleVersion('=1.2')).toBe(true);
-      expect(semverRuby.isSingleVersion('=1.2.1')).toBe(true);
+      expect(semverRuby.isSingleVersion('=1')).toBeTrue();
+      expect(semverRuby.isSingleVersion('=1.2')).toBeTrue();
+      expect(semverRuby.isSingleVersion('=1.2.1')).toBeTrue();
 
-      expect(semverRuby.isSingleVersion('= 1')).toBe(true);
-      expect(semverRuby.isSingleVersion('= 1.2')).toBe(true);
-      expect(semverRuby.isSingleVersion('= 1.2.1')).toBe(true);
+      expect(semverRuby.isSingleVersion('= 1')).toBeTrue();
+      expect(semverRuby.isSingleVersion('= 1.2')).toBeTrue();
+      expect(semverRuby.isSingleVersion('= 1.2.1')).toBeTrue();
 
-      expect(semverRuby.isSingleVersion('1.2.1.rc1')).toBe(true);
-      expect(semverRuby.isSingleVersion('1.2.1-rc.1')).toBe(true);
+      expect(semverRuby.isSingleVersion('1.2.1.rc1')).toBeTrue();
+      expect(semverRuby.isSingleVersion('1.2.1-rc.1')).toBeTrue();
 
-      expect(semverRuby.isSingleVersion('= 1.2.0.alpha')).toBe(true);
-      expect(semverRuby.isSingleVersion('= 1.2.0-alpha')).toBe(true);
+      expect(semverRuby.isSingleVersion('= 1.2.0.alpha')).toBeTrue();
+      expect(semverRuby.isSingleVersion('= 1.2.0-alpha')).toBeTrue();
     });
 
     it('returns false when version is multiple', () => {
-      expect(semverRuby.isSingleVersion('!= 1')).toBe(false);
-      expect(semverRuby.isSingleVersion('> 1.2')).toBe(false);
-      expect(semverRuby.isSingleVersion('< 1.2.1')).toBe(false);
-      expect(semverRuby.isSingleVersion('>= 1')).toBe(false);
-      expect(semverRuby.isSingleVersion('<= 1.2')).toBe(false);
-      expect(semverRuby.isSingleVersion('~> 1.2.1')).toBe(false);
+      expect(semverRuby.isSingleVersion('!= 1')).toBeFalse();
+      expect(semverRuby.isSingleVersion('> 1.2')).toBeFalse();
+      expect(semverRuby.isSingleVersion('< 1.2.1')).toBeFalse();
+      expect(semverRuby.isSingleVersion('>= 1')).toBeFalse();
+      expect(semverRuby.isSingleVersion('<= 1.2')).toBeFalse();
+      expect(semverRuby.isSingleVersion('~> 1.2.1')).toBeFalse();
     });
 
     it('returns false when version is invalid', () => {
-      expect(semverRuby.isSingleVersion(undefined)).toBe(false);
-      expect(semverRuby.isSingleVersion('')).toBe(false);
-      expect(semverRuby.isSingleVersion(null)).toBe(false);
-      expect(semverRuby.isSingleVersion('tottally-not-a-version')).toBe(false);
+      expect(semverRuby.isSingleVersion(undefined)).toBeFalse();
+      expect(semverRuby.isSingleVersion('')).toBeFalse();
+      expect(semverRuby.isSingleVersion(null)).toBeFalse();
+      expect(semverRuby.isSingleVersion('tottally-not-a-version')).toBeFalse();
     });
   });
 

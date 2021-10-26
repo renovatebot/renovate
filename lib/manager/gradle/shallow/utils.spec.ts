@@ -33,16 +33,16 @@ describe('manager/gradle/shallow/utils', () => {
   });
 
   it('isDependencyString', () => {
-    expect(isDependencyString('foo:bar:1.2.3')).toBe(true);
-    expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBe(true);
-    expect(isDependencyString('foo:bar:baz:qux')).toBe(false);
-    expect(isDependencyString('foo.bar:baz:1.2.3')).toBe(true);
-    expect(isDependencyString('foo.bar:baz:1.2.+')).toBe(true);
-    expect(isDependencyString('foo.bar:baz:qux:quux')).toBe(false);
-    expect(isDependencyString("foo:bar:1.2.3'")).toBe(false);
-    expect(isDependencyString('foo:bar:1.2.3"')).toBe(false);
-    expect(isDependencyString('-Xep:ParameterName:OFF')).toBe(false);
-    expect(isDependencyString('foo$bar:baz:1.2.+')).toBe(false);
+    expect(isDependencyString('foo:bar:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo:bar:baz:qux')).toBeFalse();
+    expect(isDependencyString('foo.bar:baz:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:1.2.+')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:qux:quux')).toBeFalse();
+    expect(isDependencyString("foo:bar:1.2.3'")).toBeFalse();
+    expect(isDependencyString('foo:bar:1.2.3"')).toBeFalse();
+    expect(isDependencyString('-Xep:ParameterName:OFF')).toBeFalse();
+    expect(isDependencyString('foo$bar:baz:1.2.+')).toBeFalse();
   });
 
   it('parseDependencyString', () => {

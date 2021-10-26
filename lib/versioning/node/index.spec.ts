@@ -56,6 +56,6 @@ describe('versioning/node/index', () => {
   });
 
   it('isValid', () => {
-    expect(isValid === nodever.isValid).toBe(true);
+    expect(isValid === nodever.isValid).toBeTrue();
   });
 });

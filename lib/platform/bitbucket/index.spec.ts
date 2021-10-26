@@ -151,7 +151,7 @@ describe('platform/bitbucket/index', () => {
   describe('getRepoForceRebase()', () => {
     it('always return false, since bitbucket does not support force rebase', async () => {
       const actual = await bitbucket.getRepoForceRebase();
-      expect(actual).toBe(false);
+      expect(actual).toBeFalse();
     });
   });
 

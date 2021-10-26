@@ -433,7 +433,7 @@ describe('platform/github/index', () => {
           },
         });
       const res = await github.getRepoForceRebase();
-      expect(res).toBe(true);
+      expect(res).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle 404', async () => {
@@ -442,7 +442,7 @@ describe('platform/github/index', () => {
         .get('/repos/undefined/branches/undefined/protection')
         .reply(404);
       const res = await github.getRepoForceRebase();
-      expect(res).toBe(false);
+      expect(res).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle 403', async () => {
@@ -451,7 +451,7 @@ describe('platform/github/index', () => {
         .get('/repos/undefined/branches/undefined/protection')
         .reply(403);
       const res = await github.getRepoForceRebase();
-      expect(res).toBe(false);
+      expect(res).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw 401', async () => {
@@ -2051,7 +2051,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle merge error', async () => {
@@ -2072,7 +2072,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(false);
+      ).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -2125,7 +2125,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should try squash after rebase', async () => {
@@ -2169,7 +2169,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should give up', async () => {
@@ -2196,7 +2196,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(false);
+      ).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

@@ -37,26 +37,26 @@ describe('versioning/nuget/index', () => {
   });
   describe('isEqual', () => {
     it('should ignore leading zeros', () => {
-      expect(nuget.equals('17.4', '17.04')).toBe(true);
+      expect(nuget.equals('17.4', '17.04')).toBeTrue();
     });
     it('should treat missing trailing version parts as zero', () => {
-      expect(nuget.equals('1.4', '1.4.0')).toBe(true);
-      expect(nuget.equals('1.0.110', '1.0.110.0')).toBe(true);
+      expect(nuget.equals('1.4', '1.4.0')).toBeTrue();
+      expect(nuget.equals('1.0.110', '1.0.110.0')).toBeTrue();
     });
     it('should ignore hash suffixes', () => {
-      expect(nuget.equals('1.0.0', '1.0.0+c30d7625')).toBe(true);
+      expect(nuget.equals('1.0.0', '1.0.0+c30d7625')).toBeTrue();
     });
   });
   describe('isGreaterThan', () => {
     it('should compare using release number then suffix', () => {
-      expect(nuget.isGreaterThan('2.4.2', '2.4.1')).toBe(true);
-      expect(nuget.isGreaterThan('2.4-beta', '2.4-alpha')).toBe(true);
-      expect(nuget.isGreaterThan('1.9', '2')).toBe(false);
-      expect(nuget.isGreaterThan('1.9', '1.9.1')).toBe(false);
+      expect(nuget.isGreaterThan('2.4.2', '2.4.1')).toBeTrue();
+      expect(nuget.isGreaterThan('2.4-beta', '2.4-alpha')).toBeTrue();
+      expect(nuget.isGreaterThan('1.9', '2')).toBeFalse();
+      expect(nuget.isGreaterThan('1.9', '1.9.1')).toBeFalse();
     });
     it('should prioritize non-prerelease over prerelease', () => {
-      expect(nuget.isGreaterThan('2.4.0', '2.4.0-beta')).toBe(true);
-      expect(nuget.isGreaterThan('2.4.0-alpha', '2.4.0')).toBe(false);
+      expect(nuget.isGreaterThan('2.4.0', '2.4.0-beta')).toBeTrue();
+      expect(nuget.isGreaterThan('2.4.0-alpha', '2.4.0')).toBeFalse();
     });
   });
 });

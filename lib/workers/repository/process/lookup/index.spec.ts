@@ -749,7 +749,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newVersion).toEqual('1.4.6');
-      expect(res.updates[0].pendingChecks).toBe(true);
+      expect(res.updates[0].pendingChecks).toBeTrue();
     });
 
     it('should return pendingVersions', async () => {

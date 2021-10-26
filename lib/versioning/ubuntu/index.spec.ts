@@ -4,143 +4,143 @@ describe('versioning/ubuntu/index', () => {
   // validation
 
   it('isValid', () => {
-    expect(ubuntu.isValid(undefined)).toBe(false);
-    expect(ubuntu.isValid(null)).toBe(false);
-    expect(ubuntu.isValid('')).toBe(false);
-    expect(ubuntu.isValid('xenial')).toBe(false);
+    expect(ubuntu.isValid(undefined)).toBeFalse();
+    expect(ubuntu.isValid(null)).toBeFalse();
+    expect(ubuntu.isValid('')).toBeFalse();
+    expect(ubuntu.isValid('xenial')).toBeFalse();
 
-    expect(ubuntu.isValid('04.10')).toBe(true);
-    expect(ubuntu.isValid('05.04')).toBe(true);
-    expect(ubuntu.isValid('05.10')).toBe(true);
-    expect(ubuntu.isValid('6.06')).toBe(true);
-    expect(ubuntu.isValid('6.10')).toBe(true);
-    expect(ubuntu.isValid('7.04')).toBe(true);
-    expect(ubuntu.isValid('7.10')).toBe(true);
-    expect(ubuntu.isValid('8.04')).toBe(true);
-    expect(ubuntu.isValid('8.10')).toBe(true);
-    expect(ubuntu.isValid('9.04')).toBe(true);
-    expect(ubuntu.isValid('9.10')).toBe(true);
-    expect(ubuntu.isValid('10.04.4')).toBe(true);
-    expect(ubuntu.isValid('10.10')).toBe(true);
-    expect(ubuntu.isValid('11.04')).toBe(true);
-    expect(ubuntu.isValid('11.10')).toBe(true);
-    expect(ubuntu.isValid('12.04.5')).toBe(true);
-    expect(ubuntu.isValid('12.10')).toBe(true);
-    expect(ubuntu.isValid('13.04')).toBe(true);
-    expect(ubuntu.isValid('13.10')).toBe(true);
-    expect(ubuntu.isValid('14.04.6')).toBe(true);
-    expect(ubuntu.isValid('14.10')).toBe(true);
-    expect(ubuntu.isValid('15.04')).toBe(true);
-    expect(ubuntu.isValid('15.10')).toBe(true);
-    expect(ubuntu.isValid('16.04.7')).toBe(true);
-    expect(ubuntu.isValid('16.10')).toBe(true);
-    expect(ubuntu.isValid('17.04')).toBe(true);
-    expect(ubuntu.isValid('17.10')).toBe(true);
-    expect(ubuntu.isValid('18.04.5')).toBe(true);
-    expect(ubuntu.isValid('18.10')).toBe(true);
-    expect(ubuntu.isValid('19.04')).toBe(true);
-    expect(ubuntu.isValid('19.10')).toBe(true);
-    expect(ubuntu.isValid('20.04')).toBe(true);
-    expect(ubuntu.isValid('20.10')).toBe(true);
-    expect(ubuntu.isValid('2020.04')).toBe(false);
+    expect(ubuntu.isValid('04.10')).toBeTrue();
+    expect(ubuntu.isValid('05.04')).toBeTrue();
+    expect(ubuntu.isValid('05.10')).toBeTrue();
+    expect(ubuntu.isValid('6.06')).toBeTrue();
+    expect(ubuntu.isValid('6.10')).toBeTrue();
+    expect(ubuntu.isValid('7.04')).toBeTrue();
+    expect(ubuntu.isValid('7.10')).toBeTrue();
+    expect(ubuntu.isValid('8.04')).toBeTrue();
+    expect(ubuntu.isValid('8.10')).toBeTrue();
+    expect(ubuntu.isValid('9.04')).toBeTrue();
+    expect(ubuntu.isValid('9.10')).toBeTrue();
+    expect(ubuntu.isValid('10.04.4')).toBeTrue();
+    expect(ubuntu.isValid('10.10')).toBeTrue();
+    expect(ubuntu.isValid('11.04')).toBeTrue();
+    expect(ubuntu.isValid('11.10')).toBeTrue();
+    expect(ubuntu.isValid('12.04.5')).toBeTrue();
+    expect(ubuntu.isValid('12.10')).toBeTrue();
+    expect(ubuntu.isValid('13.04')).toBeTrue();
+    expect(ubuntu.isValid('13.10')).toBeTrue();
+    expect(ubuntu.isValid('14.04.6')).toBeTrue();
+    expect(ubuntu.isValid('14.10')).toBeTrue();
+    expect(ubuntu.isValid('15.04')).toBeTrue();
+    expect(ubuntu.isValid('15.10')).toBeTrue();
+    expect(ubuntu.isValid('16.04.7')).toBeTrue();
+    expect(ubuntu.isValid('16.10')).toBeTrue();
+    expect(ubuntu.isValid('17.04')).toBeTrue();
+    expect(ubuntu.isValid('17.10')).toBeTrue();
+    expect(ubuntu.isValid('18.04.5')).toBeTrue();
+    expect(ubuntu.isValid('18.10')).toBeTrue();
+    expect(ubuntu.isValid('19.04')).toBeTrue();
+    expect(ubuntu.isValid('19.10')).toBeTrue();
+    expect(ubuntu.isValid('20.04')).toBeTrue();
+    expect(ubuntu.isValid('20.10')).toBeTrue();
+    expect(ubuntu.isValid('2020.04')).toBeFalse();
   });
 
   it('isCompatible', () => {
-    expect(ubuntu.isCompatible(undefined)).toBe(false);
-    expect(ubuntu.isCompatible(null)).toBe(false);
-    expect(ubuntu.isCompatible('')).toBe(false);
+    expect(ubuntu.isCompatible(undefined)).toBeFalse();
+    expect(ubuntu.isCompatible(null)).toBeFalse();
+    expect(ubuntu.isCompatible('')).toBeFalse();
 
-    expect(ubuntu.isCompatible('04.10')).toBe(true);
-    expect(ubuntu.isCompatible('20.10')).toBe(true);
+    expect(ubuntu.isCompatible('04.10')).toBeTrue();
+    expect(ubuntu.isCompatible('20.10')).toBeTrue();
   });
 
   it('isSingleVersion', () => {
     expect(ubuntu.isSingleVersion(undefined)).toBeNull();
     expect(ubuntu.isSingleVersion(null)).toBeNull();
     expect(ubuntu.isSingleVersion('')).toBeNull();
-    expect(ubuntu.isSingleVersion('20.04')).toBe(true);
+    expect(ubuntu.isSingleVersion('20.04')).toBeTrue();
     expect(ubuntu.isSingleVersion('>=20.04')).toBeNull();
   });
 
   it('isStable', () => {
-    expect(ubuntu.isStable(undefined)).toBe(false);
-    expect(ubuntu.isStable(null)).toBe(false);
-    expect(ubuntu.isStable('')).toBe(false);
+    expect(ubuntu.isStable(undefined)).toBeFalse();
+    expect(ubuntu.isStable(null)).toBeFalse();
+    expect(ubuntu.isStable('')).toBeFalse();
 
-    expect(ubuntu.isStable('04.10')).toBe(false);
-    expect(ubuntu.isStable('05.04')).toBe(false);
-    expect(ubuntu.isStable('05.10')).toBe(false);
-    expect(ubuntu.isStable('6.06')).toBe(false); // it's okay
-    expect(ubuntu.isStable('6.10')).toBe(false);
-    expect(ubuntu.isStable('7.04')).toBe(false);
-    expect(ubuntu.isStable('7.10')).toBe(false);
-    expect(ubuntu.isStable('8.04')).toBe(true);
-    expect(ubuntu.isStable('8.10')).toBe(false);
-    expect(ubuntu.isStable('9.04')).toBe(false);
-    expect(ubuntu.isStable('9.10')).toBe(false);
-    expect(ubuntu.isStable('10.04.4')).toBe(true);
-    expect(ubuntu.isStable('10.10')).toBe(false);
-    expect(ubuntu.isStable('11.04')).toBe(false);
-    expect(ubuntu.isStable('11.10')).toBe(false);
-    expect(ubuntu.isStable('12.04.5')).toBe(true);
-    expect(ubuntu.isStable('12.10')).toBe(false);
-    expect(ubuntu.isStable('13.04')).toBe(false);
-    expect(ubuntu.isStable('13.10')).toBe(false);
-    expect(ubuntu.isStable('14.04.6')).toBe(true);
-    expect(ubuntu.isStable('14.10')).toBe(false);
-    expect(ubuntu.isStable('15.04')).toBe(false);
-    expect(ubuntu.isStable('15.10')).toBe(false);
-    expect(ubuntu.isStable('16.04.7')).toBe(true);
-    expect(ubuntu.isStable('16.10')).toBe(false);
-    expect(ubuntu.isStable('17.04')).toBe(false);
-    expect(ubuntu.isStable('17.10')).toBe(false);
-    expect(ubuntu.isStable('18.04.5')).toBe(true);
-    expect(ubuntu.isStable('18.10')).toBe(false);
-    expect(ubuntu.isStable('19.04')).toBe(false);
-    expect(ubuntu.isStable('19.10')).toBe(false);
-    expect(ubuntu.isStable('20.04')).toBe(true);
-    expect(ubuntu.isStable('20.10')).toBe(false);
+    expect(ubuntu.isStable('04.10')).toBeFalse();
+    expect(ubuntu.isStable('05.04')).toBeFalse();
+    expect(ubuntu.isStable('05.10')).toBeFalse();
+    expect(ubuntu.isStable('6.06')).toBeFalse(); // it's okay
+    expect(ubuntu.isStable('6.10')).toBeFalse();
+    expect(ubuntu.isStable('7.04')).toBeFalse();
+    expect(ubuntu.isStable('7.10')).toBeFalse();
+    expect(ubuntu.isStable('8.04')).toBeTrue();
+    expect(ubuntu.isStable('8.10')).toBeFalse();
+    expect(ubuntu.isStable('9.04')).toBeFalse();
+    expect(ubuntu.isStable('9.10')).toBeFalse();
+    expect(ubuntu.isStable('10.04.4')).toBeTrue();
+    expect(ubuntu.isStable('10.10')).toBeFalse();
+    expect(ubuntu.isStable('11.04')).toBeFalse();
+    expect(ubuntu.isStable('11.10')).toBeFalse();
+    expect(ubuntu.isStable('12.04.5')).toBeTrue();
+    expect(ubuntu.isStable('12.10')).toBeFalse();
+    expect(ubuntu.isStable('13.04')).toBeFalse();
+    expect(ubuntu.isStable('13.10')).toBeFalse();
+    expect(ubuntu.isStable('14.04.6')).toBeTrue();
+    expect(ubuntu.isStable('14.10')).toBeFalse();
+    expect(ubuntu.isStable('15.04')).toBeFalse();
+    expect(ubuntu.isStable('15.10')).toBeFalse();
+    expect(ubuntu.isStable('16.04.7')).toBeTrue();
+    expect(ubuntu.isStable('16.10')).toBeFalse();
+    expect(ubuntu.isStable('17.04')).toBeFalse();
+    expect(ubuntu.isStable('17.10')).toBeFalse();
+    expect(ubuntu.isStable('18.04.5')).toBeTrue();
+    expect(ubuntu.isStable('18.10')).toBeFalse();
+    expect(ubuntu.isStable('19.04')).toBeFalse();
+    expect(ubuntu.isStable('19.10')).toBeFalse();
+    expect(ubuntu.isStable('20.04')).toBeTrue();
+    expect(ubuntu.isStable('20.10')).toBeFalse();
 
-    expect(ubuntu.isStable('42.01')).toBe(false);
-    expect(ubuntu.isStable('42.02')).toBe(false);
-    expect(ubuntu.isStable('42.03')).toBe(false);
-    expect(ubuntu.isStable('42.04')).toBe(true);
-    expect(ubuntu.isStable('42.05')).toBe(false);
-    expect(ubuntu.isStable('42.06')).toBe(false);
-    expect(ubuntu.isStable('42.07')).toBe(false);
-    expect(ubuntu.isStable('42.08')).toBe(false);
-    expect(ubuntu.isStable('42.09')).toBe(false);
-    expect(ubuntu.isStable('42.10')).toBe(false);
-    expect(ubuntu.isStable('42.11')).toBe(false);
+    expect(ubuntu.isStable('42.01')).toBeFalse();
+    expect(ubuntu.isStable('42.02')).toBeFalse();
+    expect(ubuntu.isStable('42.03')).toBeFalse();
+    expect(ubuntu.isStable('42.04')).toBeTrue();
+    expect(ubuntu.isStable('42.05')).toBeFalse();
+    expect(ubuntu.isStable('42.06')).toBeFalse();
+    expect(ubuntu.isStable('42.07')).toBeFalse();
+    expect(ubuntu.isStable('42.08')).toBeFalse();
+    expect(ubuntu.isStable('42.09')).toBeFalse();
+    expect(ubuntu.isStable('42.10')).toBeFalse();
+    expect(ubuntu.isStable('42.11')).toBeFalse();
 
-    expect(ubuntu.isStable('2020.04')).toBe(false);
+    expect(ubuntu.isStable('2020.04')).toBeFalse();
   });
 
   it('isVersion', () => {
-    expect(ubuntu.isVersion(undefined)).toBe(false);
-    expect(ubuntu.isVersion(null)).toBe(false);
-    expect(ubuntu.isVersion('')).toBe(false);
+    expect(ubuntu.isVersion(undefined)).toBeFalse();
+    expect(ubuntu.isVersion(null)).toBeFalse();
+    expect(ubuntu.isVersion('')).toBeFalse();
 
-    expect(ubuntu.isVersion('02.10')).toBe(false);
-    expect(ubuntu.isVersion('04.10')).toBe(true);
-    expect(ubuntu.isVersion('05.04')).toBe(true);
-    expect(ubuntu.isVersion('6.06')).toBe(true);
-    expect(ubuntu.isVersion('8.04')).toBe(true);
-    expect(ubuntu.isVersion('9.04')).toBe(true);
-    expect(ubuntu.isVersion('10.04.4')).toBe(true);
-    expect(ubuntu.isVersion('12.04.5')).toBe(true);
-    expect(ubuntu.isVersion('13.04')).toBe(true);
-    expect(ubuntu.isVersion('14.04.6')).toBe(true);
-    expect(ubuntu.isVersion('15.04')).toBe(true);
-    expect(ubuntu.isVersion('16.04.7')).toBe(true);
-    expect(ubuntu.isVersion('16.10')).toBe(true);
-    expect(ubuntu.isVersion('17.04')).toBe(true);
-    expect(ubuntu.isVersion('18.04.5')).toBe(true);
-    expect(ubuntu.isVersion('18.10')).toBe(true);
-    expect(ubuntu.isVersion('20.04')).toBe(true);
-    expect(ubuntu.isVersion('20.10')).toBe(true);
-    expect(ubuntu.isVersion('30.11')).toBe(true);
-    expect(ubuntu.isVersion('2020.04')).toBe(false);
+    expect(ubuntu.isVersion('02.10')).toBeFalse();
+    expect(ubuntu.isVersion('04.10')).toBeTrue();
+    expect(ubuntu.isVersion('05.04')).toBeTrue();
+    expect(ubuntu.isVersion('6.06')).toBeTrue();
+    expect(ubuntu.isVersion('8.04')).toBeTrue();
+    expect(ubuntu.isVersion('9.04')).toBeTrue();
+    expect(ubuntu.isVersion('10.04.4')).toBeTrue();
+    expect(ubuntu.isVersion('12.04.5')).toBeTrue();
+    expect(ubuntu.isVersion('13.04')).toBeTrue();
+    expect(ubuntu.isVersion('14.04.6')).toBeTrue();
+    expect(ubuntu.isVersion('15.04')).toBeTrue();
+    expect(ubuntu.isVersion('16.04.7')).toBeTrue();
+    expect(ubuntu.isVersion('16.10')).toBeTrue();
+    expect(ubuntu.isVersion('17.04')).toBeTrue();
+    expect(ubuntu.isVersion('18.04.5')).toBeTrue();
+    expect(ubuntu.isVersion('18.10')).toBeTrue();
+    expect(ubuntu.isVersion('20.04')).toBeTrue();
+    expect(ubuntu.isVersion('20.10')).toBeTrue();
+    expect(ubuntu.isVersion('30.11')).toBeTrue();
+    expect(ubuntu.isVersion('2020.04')).toBeFalse();
   });
 
   // digestion of version
@@ -190,27 +190,27 @@ describe('versioning/ubuntu/index', () => {
   // comparison
 
   it('equals', () => {
-    expect(ubuntu.equals('20.04', '2020.04')).toBe(false);
+    expect(ubuntu.equals('20.04', '2020.04')).toBeFalse();
 
-    expect(ubuntu.equals('focal', '20.04')).toBe(false);
-    expect(ubuntu.equals('20.04', 'focal')).toBe(false);
+    expect(ubuntu.equals('focal', '20.04')).toBeFalse();
+    expect(ubuntu.equals('20.04', 'focal')).toBeFalse();
 
-    expect(ubuntu.equals('19.10', '19.10')).toBe(true);
+    expect(ubuntu.equals('19.10', '19.10')).toBeTrue();
   });
 
   it('isGreaterThan', () => {
-    expect(ubuntu.isGreaterThan('20.04', '20.10')).toBe(false);
-    expect(ubuntu.isGreaterThan('20.10', '20.04')).toBe(true);
+    expect(ubuntu.isGreaterThan('20.04', '20.10')).toBeFalse();
+    expect(ubuntu.isGreaterThan('20.10', '20.04')).toBeTrue();
 
-    expect(ubuntu.isGreaterThan('19.10', '20.04')).toBe(false);
-    expect(ubuntu.isGreaterThan('20.04', '19.10')).toBe(true);
+    expect(ubuntu.isGreaterThan('19.10', '20.04')).toBeFalse();
+    expect(ubuntu.isGreaterThan('20.04', '19.10')).toBeTrue();
 
-    expect(ubuntu.isGreaterThan('16.04', '16.04.7')).toBe(false);
-    expect(ubuntu.isGreaterThan('16.04.7', '16.04')).toBe(true);
-    expect(ubuntu.isGreaterThan('16.04.1', '16.04.7')).toBe(false);
-    expect(ubuntu.isGreaterThan('16.04.7', '16.04.1')).toBe(true);
-    expect(ubuntu.isGreaterThan('19.10.1', '20.04.1')).toBe(false);
-    expect(ubuntu.isGreaterThan('20.04.1', '19.10.1')).toBe(true);
+    expect(ubuntu.isGreaterThan('16.04', '16.04.7')).toBeFalse();
+    expect(ubuntu.isGreaterThan('16.04.7', '16.04')).toBeTrue();
+    expect(ubuntu.isGreaterThan('16.04.1', '16.04.7')).toBeFalse();
+    expect(ubuntu.isGreaterThan('16.04.7', '16.04.1')).toBeTrue();
+    expect(ubuntu.isGreaterThan('19.10.1', '20.04.1')).toBeFalse();
+    expect(ubuntu.isGreaterThan('20.04.1', '19.10.1')).toBeTrue();
   });
 
   it('getSatisfyingVersion', () => {
@@ -247,8 +247,8 @@ describe('versioning/ubuntu/index', () => {
   });
 
   it('matches', () => {
-    expect(ubuntu.matches('20.04', '2020.04')).toBe(false);
-    expect(ubuntu.matches('20.04', '20.04')).toBe(true);
-    expect(ubuntu.matches('20.04', '20.04.0')).toBe(false);
+    expect(ubuntu.matches('20.04', '2020.04')).toBeFalse();
+    expect(ubuntu.matches('20.04', '20.04')).toBeTrue();
+    expect(ubuntu.matches('20.04', '20.04.0')).toBeFalse();
   });
 });

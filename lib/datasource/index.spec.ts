@@ -61,13 +61,13 @@ describe('datasource/index', () => {
 
     for (const dsName of dss.keys()) {
       const ds = dss.get(dsName);
-      expect(validateDatasource(ds, dsName)).toBe(true);
+      expect(validateDatasource(ds, dsName)).toBeTrue();
     }
   });
   it('returns if digests are supported', () => {
     expect(
       datasource.supportsDigests({ datasource: datasourceGithubTags.id })
-    ).toBe(true);
+    ).toBeTrue();
   });
   it('returns null for no datasource', async () => {
     expect(

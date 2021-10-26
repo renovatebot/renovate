@@ -39,7 +39,7 @@ describe('manager/index', () => {
 
     for (const name of mgrs.keys()) {
       const mgr = mgrs.get(name);
-      expect(validate(mgr)).toBe(true);
+      expect(validate(mgr)).toBeTrue();
     }
   });
 

@@ -3,8 +3,8 @@ import { api as semver } from '.';
 describe('versioning/hashicorp/index', () => {
   describe('semver.matches()', () => {
     it('handles tilde greater than', () => {
-      expect(semver.matches('4.2.0', '~> 4.0')).toBe(true);
-      expect(semver.matches('4.2.0', '~> 4.0.0')).toBe(false);
+      expect(semver.matches('4.2.0', '~> 4.0')).toBeTrue();
+      expect(semver.matches('4.2.0', '~> 4.0.0')).toBeFalse();
     });
   });
   describe('semver.getSatisfyingVersion()', () => {
@@ -30,8 +30,8 @@ describe('versioning/hashicorp/index', () => {
   });
   describe('semver.isLessThanRange()', () => {
     it('handles comma', () => {
-      expect(semver.isLessThanRange('0.9.0', '>= 1.0.0, <= 2.0.0')).toBe(true);
-      expect(semver.isLessThanRange('1.9.0', '>= 1.0.0, <= 2.0.0')).toBe(false);
+      expect(semver.isLessThanRange('0.9.0', '>= 1.0.0, <= 2.0.0')).toBeTrue();
+      expect(semver.isLessThanRange('1.9.0', '>= 1.0.0, <= 2.0.0')).toBeFalse();
     });
   });
   describe('semver.minSatisfyingVersion()', () => {
