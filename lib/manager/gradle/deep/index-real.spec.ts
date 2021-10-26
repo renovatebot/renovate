@@ -46,7 +46,8 @@ allprojects {
       successFile = `${workingDir.path}/${SUCCESS_FILE_NAME}`;
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+      await workingDir.cleanup();
       setGlobalConfig();
     });
 
