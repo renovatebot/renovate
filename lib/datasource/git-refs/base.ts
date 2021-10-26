@@ -54,7 +54,6 @@ export class GitDatasource {
           };
         }
         logger.trace(`malformed ref: ${line}`);
-        // istanbul ignore next
         return null;
       })
       .filter(Boolean)

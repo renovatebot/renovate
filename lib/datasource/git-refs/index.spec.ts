@@ -26,6 +26,18 @@ describe('datasource/git-refs/index', () => {
       });
       expect(versions).toBeNull();
     });
+    it('returns nil if response is malformed', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve('aabbccddeeff');
+        },
+      });
+      const { releases } = await getPkgReleases({
+        datasource,
+        depName,
+      });
+      expect(releases).toBeEmpty();
+    });
     it('returns nil if remote call throws exception', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
