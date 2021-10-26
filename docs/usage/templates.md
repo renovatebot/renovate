@@ -25,8 +25,8 @@ Some are configuration options passed through, while others are generated as par
 
 ### stringToPrettyJSON
 
-If you want to print pretty JSON with handlebars you can use the builtin function stringToPrettyJSON.
+If you want to print pretty JSON with Handlebars you can use the built-in function `StringToPrettyJSON` like this:
 
 `{{{stringToPrettyJSON myvar}}}`
 
-where myvar is a variable/field, that contains valid JSON.
+In the example above `myvar` is a variable/field, that contains valid JSON.
