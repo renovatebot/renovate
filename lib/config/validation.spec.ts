@@ -352,6 +352,7 @@ describe('config/validation', () => {
             datasourceTemplate: 'bar',
             registryUrlTemplate: 'foobar',
             extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
+            depTypeTemplate: 'apple',
           },
         ],
       };
@@ -370,6 +371,7 @@ describe('config/validation', () => {
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
+            depTypeTemplate: 'apple',
             automerge: true,
           },
         ],

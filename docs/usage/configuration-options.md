@@ -2154,6 +2154,11 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### depTypeTemplate
+
+If `depType` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
 ### versioningTemplate
 
 If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
