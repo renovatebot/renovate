@@ -263,16 +263,22 @@ describe('manager/npm/post-update/yarn', () => {
     });
 
     it('returns offline mirror and no yarn path for non-existant yarn-path binary', async () => {
+      let yarnrcContents = 'yarn-path ./.yarn/cli.js\n';
+      fs.writeFile.mockImplementation((filename, fileContents) => {
+        if (filename.endsWith('.yarnrc')) {
+          yarnrcContents = fileContents;
+        }
+        return new Promise<void>((resolve) => resolve());
+      });
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
-          return new Promise<string>((resolve) =>
-            resolve('yarn-path ./.yarn/cli.js\n')
-          );
+          return new Promise<string>((resolve) => resolve(yarnrcContents));
         }
         return new Promise<string>((resolve) => resolve(''));
       });
       // FIXME: explicit assert condition
       expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+      expect(yarnrcContents).not.toContain('yarn-path');
     });
   });
 });
