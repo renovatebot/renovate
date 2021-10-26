@@ -1,8 +1,7 @@
 import Marshal from 'marshal';
-import urlJoin from 'url-join';
 import { logger } from '../../logger';
 import { HttpError } from '../../util/http/types';
-import { getQueryString, parseUrl } from '../../util/url';
+import { getQueryString, joinUrlParts, parseUrl } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -151,7 +150,7 @@ export class InternalRubyGemsDatasource extends Datasource {
     registry: string,
     path: string
   ): Promise<T> {
-    const url = urlJoin(registry, path, `${dependency}.json`);
+    const url = joinUrlParts(registry, path, `${dependency}.json`);
 
     logger.trace({ registry, dependency, url }, `RubyGems lookup request`);
     const response = (await this.http.getJson<T>(url)) || {
@@ -166,7 +165,7 @@ export class InternalRubyGemsDatasource extends Datasource {
     registry: string,
     path: string
   ): Promise<T> {
-    const url = `${urlJoin(registry, path)}?${getQueryString({
+    const url = `${joinUrlParts(registry, path)}?${getQueryString({
       gems: dependency,
     })}`;
 

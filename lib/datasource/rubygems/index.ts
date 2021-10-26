@@ -1,3 +1,4 @@
+import { cache } from '../../util/cache/package/decorator';
 import { parseUrl } from '../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
@@ -28,6 +29,11 @@ export class RubyGemsDatasource extends Datasource {
 
   private readonly internalRubyGemsDatasource: InternalRubyGemsDatasource;
 
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      `${registryUrl}/${lookupName}`,
+  })
   getReleases({
     lookupName,
     registryUrl,
