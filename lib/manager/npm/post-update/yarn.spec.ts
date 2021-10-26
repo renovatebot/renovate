@@ -223,6 +223,12 @@ describe('manager/npm/post-update/yarn', () => {
 
   describe('checkYarnrc()', () => {
     it('returns offline mirror and yarn path', async () => {
+      fs.exists.mockImplementation((path) => {
+        if (path === './.yarn/cli.js') {
+          return new Promise<boolean>((resolve) => resolve(true));
+        }
+        return new Promise<boolean>((resolve) => resolve(false));
+      });
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) =>
@@ -238,6 +244,25 @@ describe('manager/npm/post-update/yarn', () => {
     });
 
     it('returns no offline mirror and unquoted yarn path', async () => {
+      fs.exists.mockImplementation((path) => {
+        if (path === './.yarn/cli.js') {
+          return new Promise<boolean>((resolve) => resolve(true));
+        }
+        return new Promise<boolean>((resolve) => resolve(false));
+      });
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) =>
+            resolve('yarn-path ./.yarn/cli.js\n')
+          );
+        }
+        return new Promise<string>((resolve) => resolve(''));
+      });
+      // FIXME: explicit assert condition
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+    });
+
+    it('returns offline mirror and no yarn path for non-existant yarn-path binary', async () => {
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) =>

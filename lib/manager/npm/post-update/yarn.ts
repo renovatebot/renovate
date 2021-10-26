@@ -11,7 +11,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readFile, remove } from '../../../util/fs';
+import { exists, readFile, remove } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -34,6 +34,10 @@ export async function checkYarnrc(
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
         yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
+      }
+      const yarnBinaryExists = await exists(yarnPath);
+      if (!yarnBinaryExists) {
+        yarnPath = null;
       }
     }
   } catch (err) /* istanbul ignore next */ {
