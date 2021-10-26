@@ -1,5 +1,5 @@
 import { load } from 'js-yaml';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -19,7 +19,7 @@ export function extractRepository(
   return {
     autoReplaceStringTemplate: 'refs/tags/{{newValue}}',
     currentValue: repository.ref.replace('refs/tags/', ''),
-    datasource: datasourceGitTags.id,
+    datasource: GitTagsDatasource.id,
     depName: repository.name,
     depType: 'gitTags',
     lookupName: `https://github.com/${repository.name}.git`,
