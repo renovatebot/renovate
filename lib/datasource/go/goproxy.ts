@@ -159,10 +159,10 @@ export async function versionInfo(
   return result;
 }
 
-export async function getReleases(
-  config: GetReleasesConfig
-): Promise<ReleaseResult | null> {
-  const { lookupName } = config;
+export async function getReleases({
+  lookupName,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
+  logger.trace(`goproxy.getReleases(${lookupName})`);
 
   const noproxy = parseNoproxy();
   if (noproxy?.test(lookupName)) {

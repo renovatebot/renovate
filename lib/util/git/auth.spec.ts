@@ -18,14 +18,15 @@ describe('util/git/auth', () => {
       });
     });
 
-    it('returns url with correctly encoded token', () => {
+    it('returns correct url if token already contains GitHub App username', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
-          'token:1234'
+          'x-access-token:token1234'
         )
       ).toStrictEqual({
-        GIT_CONFIG_KEY_0: 'url.https://token%3A1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'https://github.com/',
         GIT_CONFIG_COUNT: '1',
       });
