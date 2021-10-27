@@ -7,7 +7,8 @@ import { getHttpUrl } from './url';
 export function getGitAuthenticatedEnvironmentVariables(
   gitUrl: string,
   token: string,
-  environmentVariables?: NodeJS.ProcessEnv
+  environmentVariables?: NodeJS.ProcessEnv,
+  user = 'x-access-token'
 ): NodeJS.ProcessEnv {
   // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
   const gitConfigCountEnvVariable =
@@ -24,7 +25,10 @@ export function getGitAuthenticatedEnvironmentVariables(
     }
   }
 
-  const gitUrlWithToken = getHttpUrl(gitUrl, encodeURIComponent(token));
+  const gitUrlWithToken = getHttpUrl(
+    gitUrl,
+    `${encodeURIComponent(user)}:${encodeURIComponent(token)}`
+  );
 
   // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
   // add the two new config key and value to the returnEnvironmentVariables object

@@ -290,7 +290,7 @@ Array [
       "env": Object {
         "CGO_ENABLED": "1",
         "GIT_CONFIG_COUNT": "1",
-        "GIT_CONFIG_KEY_0": "url.https://some-token@github.com/.insteadOf",
+        "GIT_CONFIG_KEY_0": "url.https://x-access-token:some-token@github.com/.insteadOf",
         "GIT_CONFIG_VALUE_0": "https://github.com/",
         "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
