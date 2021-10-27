@@ -95,6 +95,16 @@ describe('util/exec/docker/index', () => {
       getPkgReleases.mockResolvedValueOnce({ releases } as never);
       expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
     });
+    it('filters out node unstable', async () => {
+      const releases = [
+        { version: '12.0.0' },
+        { version: '13.0.1' },
+        { version: '14.0.2' },
+        { version: '15.0.2' },
+      ];
+      getPkgReleases.mockResolvedValueOnce({ releases } as never);
+      expect(await getDockerTag('foo', '>=12', 'node')).toBe('14.0.2');
+    });
   });
 
   describe('removeDockerContainer', () => {

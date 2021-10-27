@@ -81,7 +81,7 @@ describe('datasource/pypi/index', () => {
     });
 
     it('sets private if authorization privided', async () => {
-      hostRules.add({ matchHost: 'customprivate.pypi.net', token: 'abc123' });
+      hostRules.add({ matchHost: 'customprivate.pypi.net', token: '123test' });
       httpMock
         .scope('https://customprivate.pypi.net/foo')
         .get('/azure-cli-monitor/json')
@@ -258,7 +258,7 @@ describe('datasource/pypi/index', () => {
     it('sets private simple if authorization provided', async () => {
       hostRules.add({
         matchHost: 'some.private.registry.org',
-        token: 'abc123',
+        token: '123test',
       });
       httpMock
         .scope('https://some.private.registry.org/+simple/')

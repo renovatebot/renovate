@@ -27,7 +27,7 @@ describe('workers/repository/process/write', () => {
       const branches: BranchConfig[] = [
         {},
         {},
-        { automergeType: 'pr-comment', requiredStatusChecks: null },
+        { automergeType: 'pr-comment', ignoreTests: true },
         {},
         {},
       ] as never;

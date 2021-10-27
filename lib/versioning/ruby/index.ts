@@ -126,8 +126,12 @@ const getNewValue = ({
     const delimiter = currentValue[0];
     return newValue
       .split(',')
-      .map((element) => element.replace(/^(\s*)/, `$1${delimiter}`))
-      .map((element) => element.replace(/(\s*)$/, `${delimiter}$1`))
+      .map((element) =>
+        element.replace(/^(?<whitespace>\s*)/, `$<whitespace>${delimiter}`)
+      )
+      .map((element) =>
+        element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`)
+      )
       .join(',');
   }
   return newValue;

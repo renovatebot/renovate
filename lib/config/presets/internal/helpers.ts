@@ -2,6 +2,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   disableTypesNodeMajor: {
+    description: 'Disable major updates to <code>@types/node</code>',
     packageRules: [
       {
         matchPackageNames: ['@types/node'],

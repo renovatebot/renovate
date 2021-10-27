@@ -1,10 +1,5 @@
 import type { PackageRuleInputConfig, UpdateType } from '../config/types';
-import {
-  LANGUAGE_DOCKER,
-  LANGUAGE_JAVASCRIPT,
-  LANGUAGE_NODE,
-  LANGUAGE_PYTHON,
-} from '../constants/languages';
+import { ProgrammingLanguage } from '../constants';
 
 import * as datasourceDocker from '../datasource/docker';
 import { OrbDatasource } from '../datasource/orb';
@@ -251,7 +246,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_JAVASCRIPT,
+      language: ProgrammingLanguage.JavaScript,
       manager: 'meteor',
       depName: 'node',
     };
@@ -270,7 +265,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_PYTHON,
+      language: ProgrammingLanguage.Python,
       manager: 'pipenv',
       depName: 'node',
     };
@@ -281,7 +276,10 @@ describe('util/package-rules', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: [LANGUAGE_JAVASCRIPT, LANGUAGE_NODE],
+          matchLanguages: [
+            ProgrammingLanguage.JavaScript,
+            ProgrammingLanguage.NodeJS,
+          ],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -289,7 +287,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_JAVASCRIPT,
+      language: ProgrammingLanguage.JavaScript,
       manager: 'meteor',
       depName: 'node',
     };
@@ -300,7 +298,7 @@ describe('util/package-rules', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: [LANGUAGE_DOCKER],
+          matchLanguages: [ProgrammingLanguage.Docker],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -308,7 +306,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_PYTHON,
+      language: ProgrammingLanguage.Python,
       manager: 'pipenv',
       depName: 'node',
     };

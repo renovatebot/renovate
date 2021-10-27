@@ -1,5 +1,5 @@
 import { defaultConfig, git, mocked } from '../../../test/util';
-import * as datasourceGitRefs from '../../datasource/git-refs';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
 import * as _helmv3 from '../../manager/helmv3';
@@ -183,7 +183,7 @@ describe('workers/branch/get-updated', () => {
     it('handles git submodules', async () => {
       config.upgrades.push({
         manager: 'git-submodules',
-        datasource: datasourceGitRefs.id,
+        datasource: GitRefsDatasource.id,
       } as never);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);

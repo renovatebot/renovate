@@ -2,13 +2,14 @@ import url from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../logger';
 import { parse } from '../../util/html';
+import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
-const githubRepoPattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
+const githubRepoPattern = regEx(/^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/);
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -65,7 +66,7 @@ export class PypiDatasource extends Datasource {
   }
 
   private static normalizeName(input: string): string {
-    return input.toLowerCase().replace(/(-|\.)/g, '_');
+    return input.toLowerCase().replace(regEx(/(-|\.)/g), '_');
   }
 
   private async getDependency(
@@ -171,18 +172,18 @@ export class PypiDatasource extends Datasource {
   ): string | null {
     const srcPrefixes = [
       `${packageName}-`,
-      `${packageName.replace(/-/g, '_')}-`,
+      `${packageName.replace(regEx(/-/g), '_')}-`,
     ];
     for (const prefix of srcPrefixes) {
       const suffix = '.tar.gz';
       if (text.startsWith(prefix) && text.endsWith(suffix)) {
-        return text.replace(prefix, '').replace(/\.tar\.gz$/, '');
+        return text.replace(prefix, '').replace(regEx(/\.tar\.gz$/), ''); // TODO #12071
       }
     }
 
     // pep-0427 wheel packages
     //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
-    const wheelPrefix = packageName.replace(/[^\w\d.]+/g, '_') + '-';
+    const wheelPrefix = packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
     const wheelSuffix = '.whl';
     if (
       text.startsWith(wheelPrefix) &&
@@ -198,14 +199,14 @@ export class PypiDatasource extends Datasource {
   private static cleanSimpleHtml(html: string): string {
     return (
       html
-        .replace(/<\/?pre>/, '')
+        .replace(regEx(/<\/?pre>/), '')
         // Certain simple repositories like artifactory don't escape > and <
         .replace(
-          /data-requires-python="([^"]*?)>([^"]*?)"/g,
+          regEx(/data-requires-python="([^"]*?)>([^"]*?)"/g),
           'data-requires-python="$1&gt;$2"'
         )
         .replace(
-          /data-requires-python="([^"]*?)<([^"]*?)"/g,
+          regEx(/data-requires-python="([^"]*?)<([^"]*?)"/g),
           'data-requires-python="$1&lt;$2"'
         )
     );

@@ -9,12 +9,12 @@ import type {
 } from './types';
 
 const providerStartLineRegex =
-  /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/;
+  /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/; // TODO #12070
 const versionLineRegex =
-  /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/;
+  /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/; // TODO #12070
 const constraintLineRegex =
-  /^(?<prefix>[\s]*constraints[\s]*=[\s]*")(?<constraint>[^"']+)(?<suffix>".*)$/;
-const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/;
+  /^(?<prefix>[\s]*constraints[\s]*=[\s]*")(?<constraint>[^"']+)(?<suffix>".*)$/; // TODO #12070
+const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/; // TODO #12070
 
 const lockFile = '.terraform.lock.hcl';
 
@@ -133,6 +133,9 @@ export function writeLockUpdates(
   const lines = oldLockFileContent.split('\n');
 
   const sections: string[][] = [];
+
+  // sort updates in order of appearance in the lockfile
+  updates.sort((a, b) => a.lineNumbers.block.start - b.lineNumbers.block.start);
   updates.forEach((update, index, array) => {
     // re add leading whitespace
     let startWhitespace;
@@ -156,7 +159,7 @@ export function writeLockUpdates(
     providerBlockLines.forEach((providerBlockLine, providerBlockIndex) => {
       const versionLine = providerBlockLine.replace(
         versionLineRegex,
-        `$1${update.newVersion}$3`
+        `$<prefix>${update.newVersion}$<suffix>`
       );
       if (versionLine !== providerBlockLine) {
         newProviderBlockLines.push(versionLine);
@@ -165,7 +168,7 @@ export function writeLockUpdates(
 
       const constraintLine = providerBlockLine.replace(
         constraintLineRegex,
-        `$1${update.newConstraint}$3`
+        `$<prefix>${update.newConstraint}$<suffix>`
       );
       if (constraintLine !== providerBlockLine) {
         newProviderBlockLines.push(constraintLine);

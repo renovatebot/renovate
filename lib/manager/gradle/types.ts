@@ -1,4 +1,4 @@
 export interface GradleManagerData {
-  fileReplacePosition: number;
+  fileReplacePosition?: number;
   packageFile?: string;
 }

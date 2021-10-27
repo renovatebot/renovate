@@ -14,6 +14,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   mavenCommonsAncientVersion: {
+    description: 'Fix some problems with very old Maven commons versions',
     packageRules: [
       {
         matchDatasources: ['maven', 'sbt-package'],

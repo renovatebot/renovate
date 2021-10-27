@@ -168,7 +168,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('abc123');
+      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('123test');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);

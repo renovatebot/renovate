@@ -21,6 +21,7 @@ describe('manager/regex/index', () => {
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
+      depTypeTemplate: 'final',
     };
     const res = await extractPackageFile(
       dockerfileContent,
@@ -35,6 +36,7 @@ describe('manager/regex/index', () => {
     expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
       'maven'
     );
+    expect(res.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
   it('returns null if no dependencies found', async () => {
     const config = {
@@ -168,6 +170,25 @@ describe('manager/regex/index', () => {
       'maven'
     );
   });
+
+  it('extracts dependency with autoReplaceStringTemplate', async () => {
+    const config = {
+      matchStrings: [
+        'image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)',
+      ],
+      depNameTemplate: 'my.new.registry/aRepository/andImage',
+      autoReplaceStringTemplate: 'image: {{{depName}}}:{{{newValue}}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      'image: my.old.registry/aRepository/andImage:1.18-alpine',
+      'values.yaml',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+  });
+
   it('extracts with combination strategy', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [

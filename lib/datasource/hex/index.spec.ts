@@ -89,7 +89,7 @@ describe('datasource/hex/index', () => {
       httpMock
         .scope(baseUrl, {
           reqheaders: {
-            authorization: 'this_simple_token',
+            authorization: 'abc',
           },
         })
         .get('/packages/certifi')
@@ -97,7 +97,7 @@ describe('datasource/hex/index', () => {
 
       hostRules.find.mockReturnValueOnce({
         authType: 'Token-Only',
-        token: 'this_simple_token',
+        token: 'abc',
       });
 
       const res = await getPkgReleases({
@@ -143,7 +143,7 @@ describe('datasource/hex/index', () => {
       httpMock
         .scope(baseUrl, {
           reqheaders: {
-            authorization: 'valid_token',
+            authorization: 'abc',
           },
         })
         .get('/repos/renovate_test/packages/private_package')
@@ -151,7 +151,7 @@ describe('datasource/hex/index', () => {
 
       hostRules.find.mockReturnValueOnce({
         authType: 'Token-Only',
-        token: 'valid_token',
+        token: 'abc',
       });
 
       const result = await getPkgReleases({

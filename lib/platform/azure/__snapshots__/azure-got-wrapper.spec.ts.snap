@@ -4,7 +4,7 @@ exports[`platform/azure/azure-got-wrapper gitApi should set bearer token and end
 WebApi {
   "authHandler": BearerCredentialHandler {
     "allowCrossOriginAuthentication": true,
-    "token": "token",
+    "token": "testtoken",
   },
   "isNoProxyHost": [Function],
   "options": Object {
@@ -26,7 +26,7 @@ WebApi {
       "handlers": Array [
         BearerCredentialHandler {
           "allowCrossOriginAuthentication": true,
-          "token": "token",
+          "token": "testtoken",
         },
       ],
       "requestOptions": Object {
@@ -56,7 +56,7 @@ WebApi {
         "handlers": Array [
           BearerCredentialHandler {
             "allowCrossOriginAuthentication": true,
-            "token": "token",
+            "token": "testtoken",
           },
         ],
         "requestOptions": Object {
@@ -141,9 +141,9 @@ WebApi {
 
 exports[`platform/azure/azure-got-wrapper gitApi should set personal access token and endpoint 1`] = `
 WebApi {
-  "authHandler": PersonalAccessTokenCredentialHandler {
+  "authHandler": BearerCredentialHandler {
     "allowCrossOriginAuthentication": true,
-    "token": "1234567890123456789012345678901234567890123456789012",
+    "token": "123test",
   },
   "isNoProxyHost": [Function],
   "options": Object {
@@ -163,9 +163,9 @@ WebApi {
       "_maxRetries": 1,
       "_socketTimeout": undefined,
       "handlers": Array [
-        PersonalAccessTokenCredentialHandler {
+        BearerCredentialHandler {
           "allowCrossOriginAuthentication": true,
-          "token": "1234567890123456789012345678901234567890123456789012",
+          "token": "123test",
         },
       ],
       "requestOptions": Object {
@@ -193,9 +193,9 @@ WebApi {
         "_maxRetries": 1,
         "_socketTimeout": undefined,
         "handlers": Array [
-          PersonalAccessTokenCredentialHandler {
+          BearerCredentialHandler {
             "allowCrossOriginAuthentication": true,
-            "token": "1234567890123456789012345678901234567890123456789012",
+            "token": "123test",
           },
         ],
         "requestOptions": Object {

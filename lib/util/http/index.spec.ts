@@ -208,4 +208,11 @@ describe('util/http/index', () => {
     expect(bar).toBeTrue();
     expect(baz).toBeTrue();
   });
+
+  it('getBuffer', async () => {
+    httpMock.scope(baseUrl).get('/').reply(200, Buffer.from('test'));
+    const res = await http.getBuffer('http://renovate.com');
+    expect(res.body).toBeInstanceOf(Buffer);
+    expect(res.body.toString('utf-8')).toEqual('test');
+  });
 });
