@@ -115,7 +115,7 @@ export async function isHttpResourceExists(
     }
 
     const failedUrl = pkgUrl.toString();
-    logger.debug({ failedUrl }, `Can't check HTTP resource existence`);
+    logger.debug({ failedUrl, status: err.statusCode }, `Can't check HTTP resource existence`);
     return null;
   }
 }
@@ -141,10 +141,11 @@ export async function downloadMavenXml(
   }
   let rawContent: string;
   let authorization: boolean;
+  let statusCode: number;
   switch (pkgUrl.protocol) {
     case 'http:':
     case 'https:':
-      ({ authorization, body: rawContent } = await downloadHttpProtocol(
+      ({ authorization, body: rawContent, statusCode: statusCode} = await downloadHttpProtocol(
         pkgUrl
       ));
       break;
@@ -157,7 +158,7 @@ export async function downloadMavenXml(
   }
 
   if (!rawContent) {
-    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
+    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()} due to status ${statusCode}`);
     return {};
   }
 
