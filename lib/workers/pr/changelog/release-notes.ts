@@ -6,6 +6,7 @@ import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import { linkify } from '../../../util/markdown';
+import { regEx } from '../../../util/regex';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -67,25 +68,23 @@ export function massageBody(
 ): string {
   let body = input || '';
   // Convert line returns
-  body = body.replace(/\r\n/g, '\n');
+  body = body.replace(regEx(/\r\n/g), '\n'); // TODO #12071
   // semantic-release cleanup
-  body = body.replace(/^<a name="[^"]*"><\/a>\n/, '');
+  body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), ''); // TODO #12071
   body = body.replace(
-    new RegExp(
-      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`
-    ),
+    regEx(`^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`),
     ''
-  );
+  ); // TODO #12071
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    new RegExp(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
+    regEx(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
     '\n'
-  );
+  ); // TODO #12071
   // Reduce headings size
   body = body
-    .replace(/\n\s*####? /g, '\n##### ')
-    .replace(/\n\s*## /g, '\n#### ')
-    .replace(/\n\s*# /g, '\n### ');
+    .replace(regEx(/\n\s*####? /g), '\n##### ') // TODO #12071
+    .replace(regEx(/\n\s*## /g), '\n#### ') // TODO #12071
+    .replace(regEx(/\n\s*# /g), '\n### '); // TODO #12071
   // Trim whitespace
   return body.trim();
 }
@@ -236,7 +235,7 @@ export async function getReleaseNotesMd(
   }
   const { changelogFile } = changelog;
   const changelogMd = changelog.changelogMd.replace(
-    /\n\s*<a name="[^"]*">.*?<\/a>\n/g,
+    regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
     '\n'
   );
   for (const level of [1, 2, 3, 4, 5, 6, 7]) {
@@ -245,19 +244,22 @@ export async function getReleaseNotesMd(
       for (const section of changelogParsed) {
         try {
           // replace brackets and parenthesis with space
-          const deParenthesizedSection = section.replace(/[[\]()]/g, ' ');
+          const deParenthesizedSection = section.replace(
+            regEx(/[[\]()]/g),
+            ' '
+          ); // TODO #12071
           const [heading] = deParenthesizedSection.split('\n');
           const title = heading
-            .replace(/^\s*#*\s*/, '')
+            .replace(regEx(/^\s*#*\s*/), '') // TODO #12071
             .split(' ')
             .filter(Boolean);
-          let body = section.replace(/.*?\n(-{3,}\n)?/, '').trim();
+          let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim(); // TODO #12071
           for (const word of title) {
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
               let url = `${baseUrl}${repository}/blob/master/${changelogFile}#`;
-              url += title.join('-').replace(/[^A-Za-z0-9-]/g, '');
+              url += title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), ''); // TODO #12071
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
