@@ -31,6 +31,20 @@ describe('util/git/auth', () => {
       });
     });
 
+    it('returns correct url if token already contains GitHub App username', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables(
+          'https://github.com/',
+          'x-access-token:token:1234'
+        )
+      ).toStrictEqual({
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token%3A1234@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'https://github.com/',
+        GIT_CONFIG_COUNT: '1',
+      });
+    });
+
     it('returns url with token and already existing GIT_CONFIG_COUNT from parameter', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
