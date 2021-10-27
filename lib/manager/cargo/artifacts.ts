@@ -14,12 +14,9 @@ async function cargoUpdate(
   isLockFileMaintenance: boolean
 ): Promise<void> {
   let cmd = `cargo update --manifest-path ${quote(manifestPath)}`;
-  if (isLockFileMaintenance) {
-    // for lockfile maintenance, we want to upgrade /all/ crates, even
-    // transitive dependencies. that's the default for `cargo update`
-  } else {
-    // we've updated a specific crate, the proper `cargo update` invocation
-    // involves `--workspace`, see https://github.com/renovatebot/renovate/issues/12332
+  // If we're updating a specific crate, `cargo-update` requires `--workspace`
+  // for more information, see: https://github.com/renovatebot/renovate/issues/12332
+  if (!isLockFileMaintenance) {
     cmd += ` --workspace`;
   }
 
