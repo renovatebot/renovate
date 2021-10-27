@@ -3,7 +3,7 @@
 exports[`manager/cargo/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "cargo update --manifest-path Cargo.toml --package dep1",
+    "cmd": "cargo update --manifest-path Cargo.toml --workspace",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -26,7 +26,7 @@ Array [
 exports[`manager/cargo/artifacts returns updated Cargo.lock 1`] = `
 Array [
   Object {
-    "cmd": "cargo update --manifest-path Cargo.toml --package dep1",
+    "cmd": "cargo update --manifest-path Cargo.toml --workspace",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -84,7 +84,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_rust --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/rust bash -l -c \\"cargo update --manifest-path Cargo.toml --package dep1\\"",
+    "cmd": "docker run --rm --name=renovate_rust --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/rust bash -l -c \\"cargo update --manifest-path Cargo.toml --workspace\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -107,7 +107,7 @@ Array [
 exports[`manager/cargo/artifacts returns updated workspace Cargo.lock 1`] = `
 Array [
   Object {
-    "cmd": "cargo update --manifest-path crates/one/Cargo.toml --package dep1",
+    "cmd": "cargo update --manifest-path crates/one/Cargo.toml --workspace",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -130,7 +130,7 @@ Array [
 exports[`manager/cargo/artifacts updates Cargo.lock based on the lookupName, when given 1`] = `
 Array [
   Object {
-    "cmd": "cargo update --manifest-path Cargo.toml --package dep1",
+    "cmd": "cargo update --manifest-path Cargo.toml --workspace",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
