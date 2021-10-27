@@ -98,6 +98,7 @@ describe('datasource/go/goproxy', () => {
       expect(parseNoproxy('[abc]')?.source).toEqual('^(?:[abc])$');
       expect(parseNoproxy('[a-c]')?.source).toEqual('^(?:[a-c])$');
       expect(parseNoproxy('[\\a-\\c]')?.source).toEqual('^(?:[a-c])$');
+      expect(parseNoproxy('a.b')?.source).toEqual('^(?:a\\.b)$');
     });
 
     it('matches on real package prefixes', () => {
