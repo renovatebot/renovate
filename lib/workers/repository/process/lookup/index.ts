@@ -14,6 +14,7 @@ import { getRangeStrategy } from '../../../../manager';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
+import { regEx } from '../../../../util/regex';
 import * as allVersioning from '../../../../versioning';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
@@ -284,7 +285,7 @@ export async function lookupUpdates(
     res.currentVersion = lockedVersion;
     res.fixedVersion = lockedVersion;
   } else if (currentValue && versioning.isSingleVersion(currentValue)) {
-    res.fixedVersion = currentValue.replace(/^=+/, '');
+    res.fixedVersion = currentValue.replace(regEx(/^=+/), '');
   }
   // Add digests if necessary
   if (supportsDigests(config)) {
