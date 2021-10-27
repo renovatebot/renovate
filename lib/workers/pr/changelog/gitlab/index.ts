@@ -4,13 +4,14 @@ import type { GitlabTag } from '../../../../datasource/gitlab-tags/types';
 import { logger } from '../../../../logger';
 import type { GitlabTreeNode } from '../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../util/http/gitlab';
+import { regEx } from '../../../../util/regex';
 import { ensureTrailingSlash } from '../../../../util/url';
 import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
 const http = new GitlabHttp();
 
 function getRepoId(repository: string): string {
-  return repository.replace(/\//g, '%2f');
+  return repository.replace(regEx(/\//g), '%2f');
 }
 
 export async function getTags(

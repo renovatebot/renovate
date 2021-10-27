@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -40,7 +41,7 @@ function npm2cargo(input: string): string {
   }
   // Note: this doesn't remove the ^
   const res = input
-    .split(/\s+,?\s*|\s*,?\s+/)
+    .split(regEx(/\s+,?\s*|\s*,?\s+/))
     .map((str) => str.trim())
     .filter(notEmpty);
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
