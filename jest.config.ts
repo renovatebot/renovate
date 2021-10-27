@@ -26,7 +26,11 @@ const config: InitialOptionsTsJest = {
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
   reporters: ci ? ['default', 'jest-github-actions-reporter'] : ['default'],
-  setupFilesAfterEnv: ['jest-extended', '<rootDir>/test/setup.ts'],
+  setupFilesAfterEnv: [
+    'jest-extended',
+    'expect-more-jest',
+    '<rootDir>/test/setup.ts',
+  ],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   testEnvironment: 'node',
   testRunner: 'jest-circus/runner',
