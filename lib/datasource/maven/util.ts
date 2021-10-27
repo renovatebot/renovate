@@ -145,7 +145,7 @@ export async function downloadMavenXml(
   switch (pkgUrl.protocol) {
     case 'http:':
     case 'https:':
-      ({ authorization, body: rawContent, statusCode: statusCode} = await downloadHttpProtocol(
+      ({ authorization, body: rawContent, statusCode } = await downloadHttpProtocol(
         pkgUrl
       ));
       break;
@@ -158,7 +158,7 @@ export async function downloadMavenXml(
   }
 
   if (!rawContent) {
-    logger.debug({ url: pkgUrl.toString(), statusCode: statusCode}, `Content is not found for Maven url`);
+    logger.debug({ url: pkgUrl.toString(), statusCode}, `Content is not found for Maven url`);
     return {};
   }
 
