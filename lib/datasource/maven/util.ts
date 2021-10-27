@@ -115,7 +115,7 @@ export async function isHttpResourceExists(
     }
 
     const failedUrl = pkgUrl.toString();
-    logger.debug({ failedUrl, status: err.statusCode }, `Can't check HTTP resource existence`);
+    logger.debug({ failedUrl, statusCode: err.statusCode }, `Can't check HTTP resource existence`);
     return null;
   }
 }
