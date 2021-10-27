@@ -55,7 +55,7 @@ describe('manager/npm/extract/monorepo', () => {
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.skipReason)
         )
-      ).toBe(true);
+      ).toBeTrue();
     });
 
     it('updates internal packages', async () => {
@@ -109,7 +109,7 @@ describe('manager/npm/extract/monorepo', () => {
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.skipReason)
         )
-      ).toBe(false);
+      ).toBeFalse();
     });
 
     it('uses yarn workspaces package settings with lerna', async () => {

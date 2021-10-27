@@ -51,7 +51,7 @@ describe('manager/bundler/extract', () => {
               Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
               isValid(dep.lockedVersion)
           )
-      ).toBe(true);
+      ).toBeTrue();
       validateGems(railsGemfile, res);
     });
     it('parses sourceGroups', async () => {
@@ -69,7 +69,7 @@ describe('manager/bundler/extract', () => {
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
             isValid(dep.lockedVersion)
         )
-      ).toBe(true);
+      ).toBeTrue();
       validateGems(webPackerGemfile, res);
     });
     it('parse mastodon Gemfile', async () => {
@@ -86,7 +86,7 @@ describe('manager/bundler/extract', () => {
               Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
               isValid(dep.lockedVersion)
           )
-      ).toBe(true);
+      ).toBeTrue();
       validateGems(mastodonGemfile, res);
     });
     it('parse Ruby CI Gemfile', async () => {
@@ -99,7 +99,7 @@ describe('manager/bundler/extract', () => {
             Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
             isValid(dep.lockedVersion)
         )
-      ).toBe(true);
+      ).toBeTrue();
       validateGems(rubyCIGemfile, res);
     });
   });
@@ -113,7 +113,7 @@ describe('manager/bundler/extract', () => {
           Object.prototype.hasOwnProperty.call(dep, 'lockedVersion') &&
           isValid(dep.lockedVersion)
       )
-    ).toBe(true);
+    ).toBeTrue();
     validateGems(gitlabFossGemfile, res);
   });
 
