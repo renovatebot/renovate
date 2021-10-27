@@ -25,7 +25,7 @@ describe('util/git/auth', () => {
           'token:1234'
         )
       ).toStrictEqual({
-        GIT_CONFIG_KEY_0: 'url.https://token%3A1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'https://github.com/',
         GIT_CONFIG_COUNT: '1',
       });
@@ -39,7 +39,7 @@ describe('util/git/auth', () => {
         )
       ).toStrictEqual({
         GIT_CONFIG_KEY_0:
-          'url.https://x-access-token:token%3A1234@github.com/.insteadOf',
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'https://github.com/',
         GIT_CONFIG_COUNT: '1',
       });
