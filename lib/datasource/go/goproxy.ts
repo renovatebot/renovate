@@ -81,7 +81,7 @@ const lexer = moo.states({
     },
     char: {
       match: /[^*?\\[\n]/,
-      value: (s: string) => s.replace(/\./g, '\\.'),
+      value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
     },
     escapedChar: {
       match: /\\./, // TODO #12070
