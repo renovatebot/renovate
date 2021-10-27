@@ -158,7 +158,7 @@ export async function downloadMavenXml(
   }
 
   if (!rawContent) {
-    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()} due to status ${statusCode}`);
+    logger.debug({ url: pkgUrl.toString(), statusCode: statusCode}, `Content is not found for Maven url`);
     return {};
   }
 
