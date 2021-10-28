@@ -344,7 +344,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error({ res }, 'Error fetching GraphQL nodes');
+          logger.error({ query, options, res }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }
