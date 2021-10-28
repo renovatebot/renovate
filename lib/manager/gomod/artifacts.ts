@@ -53,8 +53,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   // for each hostRule we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
     if (
-      hostRule &&
-      hostRule.token &&
+      hostRule?.token &&
       hostRule.matchHost &&
       goGitAllowedHostType.includes(hostRule.hostType)
     ) {
