@@ -296,29 +296,6 @@ describe('manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('supports docker mode with weird credentials', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token-// &&5übken',
-    });
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
-    const execSnapshots = mockExecAll(exec);
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
-    expect(
-      await gomod.updateArtifacts({
-        packageFileName: 'go.mod',
-        updatedDeps: [],
-        newPackageFileContent: gomod1,
-        config,
-      })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
-  });
-
   it('supports docker mode and ignores non http credentials', async () => {
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.getAll.mockReturnValueOnce([

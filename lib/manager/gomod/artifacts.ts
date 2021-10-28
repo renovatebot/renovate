@@ -19,32 +19,6 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-/**
- * get extra host rules for other git-based Go Module hosts
- * @returns Array of potential host rules
- */
-/*
-function getGoGitHostRules(): HostRule[] {
-  let hostRules: HostRule[] = [];
-
-  // add all host rules for GitHub
-  hostRules = hostRules.concat(
-    findAll({
-      hostType: PlatformId.Github,
-    })
-  );
-
-  // add all host rules for GitLab
-  hostRules = hostRules.concat(
-    findAll({
-      hostType: PlatformId.Gitlab,
-    })
-  );
-
-  return hostRules;
-}
-*/
-
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
@@ -65,9 +39,25 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   // if none is returned, use an empty array
   const hostRules = getAll() || [];
 
+  const goGitAllowedHostType: string[] = [
+    // All known git platforms
+    PlatformId.Azure,
+    PlatformId.Bitbucket,
+    PlatformId.BitbucketServer,
+    PlatformId.Gitea,
+    PlatformId.Github,
+    PlatformId.Gitlab,
+    // plus all without a host type (=== undefined)
+    undefined,
+  ];
+
   // for each hostRule we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
-    if (hostRule?.token && hostRule?.matchHost) {
+    if (
+      hostRule?.token &&
+      hostRule?.matchHost &&
+      goGitAllowedHostType.includes(hostRule?.hostType)
+    ) {
       const httpUrl = createURLFromHostOrURL(hostRule.matchHost);
       if (validateUrl(httpUrl?.toString())) {
         logger.debug(
