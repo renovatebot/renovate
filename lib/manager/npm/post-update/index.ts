@@ -374,12 +374,6 @@ async function updateYarnOffline(
 }
 
 // istanbul ignore next
-function getYarnPath(yarnrcYml: string, dir: string): string {
-  const updatedYarnrcYml = load(yarnrcYml) as Record<string, unknown>;
-  return upath.join(dir, updatedYarnrcYml.yarnPath);
-}
-
-// istanbul ignore next
 async function updateYarnBinary(
   lockFileDir: string,
   updatedArtifacts: UpdatedArtifacts[],
@@ -394,8 +388,10 @@ async function updateYarnBinary(
       return existingYarnrcYmlContent;
     }
 
-    const oldYarnPath = getYarnPath(yarnrcYml, lockFileDir);
-    const newYarnPath = getYarnPath(newYarnrcYml, lockFileDir);
+    const oldYarnPath = (load(yarnrcYml) as Record<string, string>).yarnPath;
+    const newYarnPath = (load(newYarnrcYml) as Record<string, string>).yarnPath;
+    const oldYarnFullPath = upath.join(lockFileDir, oldYarnPath);
+    const newYarnFullPath = upath.join(lockFileDir, newYarnPath);
     logger.debug({ oldYarnPath, newYarnPath }, 'Found updated Yarn binary');
 
     yarnrcYml = yarnrcYml.replace(oldYarnPath, newYarnPath);
@@ -406,11 +402,11 @@ async function updateYarnBinary(
       },
       {
         name: '|delete|',
-        contents: oldYarnPath,
+        contents: oldYarnFullPath,
       },
       {
-        name: newYarnPath,
-        contents: await readLocalFile(newYarnPath, 'utf8'),
+        name: newYarnFullPath,
+        contents: await readLocalFile(newYarnFullPath, 'utf8'),
         executable: true,
       }
     );
