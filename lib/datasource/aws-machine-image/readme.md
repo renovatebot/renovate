@@ -28,7 +28,7 @@ Example:
     }
 ]
 
-# in order to use it with this datasource, you have to minify it:
+# In order to use it with this datasource, you have to minify it:
 
 [{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
 ```
@@ -58,11 +58,11 @@ module.exports = {
 This would match every file, and would recognize the following lines:
 
 ```yaml
-# With am name mentioned in the comments
+# With AMI name mentioned in the comments
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
 # currentImageName=unknown
 my_ami1: ami-02ce3d9008cab69cb
-# Only ami, no name mentioned
+# Only AMI, no name mentioned
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
 # currentImageName=unknown
 my_ami2: ami-0083e9407e275acf2
@@ -70,14 +70,14 @@ my_ami2: ami-0083e9407e275acf2
 
 ```typescript
 const myConfigObject = {
-  // With am name mentioned in the comments
+  // With AMI name mentioned in the comments
   // amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]
   // currentImageName=unknown
   my_ami1: 'ami-02ce3d9008cab69cb',
 };
 
 /**
- * Only ami, no ami name mentioned
+ * Only AMI, no AMI name mentioned
  * amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
  * currentImageName=unknown
  */

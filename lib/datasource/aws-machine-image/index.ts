@@ -12,14 +12,14 @@ export class AwsMachineImageDataSource extends Datasource {
   override readonly caching = true;
 
   override readonly defaultConfig = {
-    // Because amis don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
+    // Because AMIs don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
     commitMessageExtra: 'to {{{newVersion}}}',
     prBodyColumns: ['Change', 'Image'],
     prBodyDefinitions: {
       Image: '```{{{newDigest}}}```',
     },
     digest: {
-      // Because newDigestShort will allways be 'amazon-' we override to print the name of the ami
+      // Because newDigestShort will allways be 'amazon-' we override to print the name of the AMI
       commitMessageExtra: 'to {{{newDigest}}}',
       prBodyColumns: ['Image'],
       prBodyDefinitions: {
