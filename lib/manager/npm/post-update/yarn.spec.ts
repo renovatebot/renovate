@@ -223,6 +223,12 @@ describe('manager/npm/post-update/yarn', () => {
 
   describe('checkYarnrc()', () => {
     it('returns offline mirror and yarn path', async () => {
+      fs.exists.mockImplementation((path) => {
+        if (path === './.yarn/cli.js') {
+          return new Promise<boolean>((resolve) => resolve(true));
+        }
+        return new Promise<boolean>((resolve) => resolve(false));
+      });
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) =>
@@ -238,6 +244,12 @@ describe('manager/npm/post-update/yarn', () => {
     });
 
     it('returns no offline mirror and unquoted yarn path', async () => {
+      fs.exists.mockImplementation((path) => {
+        if (path === './.yarn/cli.js') {
+          return new Promise<boolean>((resolve) => resolve(true));
+        }
+        return new Promise<boolean>((resolve) => resolve(false));
+      });
       fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) =>
@@ -248,6 +260,28 @@ describe('manager/npm/post-update/yarn', () => {
       });
       // FIXME: explicit assert condition
       expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+    });
+
+    it('returns offline mirror and no yarn path for non-existant yarn-path binary', async () => {
+      let yarnrcContents = 'yarn-path ./.yarn/cli.js\n';
+      fs.writeFile.mockImplementation((filename, fileContents) => {
+        if (filename.endsWith('.yarnrc')) {
+          yarnrcContents = fileContents;
+        }
+        return new Promise<void>((resolve) => resolve());
+      });
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) => resolve(yarnrcContents));
+        }
+        return new Promise<string>((resolve) => resolve(''));
+      });
+      const { offlineMirror, yarnPath } = await _yarnHelper.checkYarnrc(
+        '/tmp/renovate'
+      );
+      expect(offlineMirror).toBeFalse();
+      expect(yarnPath).toBeNull();
+      expect(yarnrcContents).not.toContain('yarn-path');
     });
   });
 });
