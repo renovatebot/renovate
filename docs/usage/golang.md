@@ -56,7 +56,7 @@ This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a constraint
 
 ### Custom registry support, and authentication
 
-This example shows how you can use a `hostRule` configuration to configure Renovate for use with a custom private Go module source using Git to pull the modules when updating `go.sum` and vendored modules.
+This example shows how you can use a `hostRules` configuration to configure Renovate for use with a custom private Go module source using Git to pull the modules when updating `go.sum` and vendored modules.
 All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, ... ) and host rules without a `hostType` are setup for authentication.
 
 ```js
