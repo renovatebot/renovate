@@ -1,4 +1,4 @@
-> :warning: **This datasource is _experimental_ **: Be aware that its syntax and behavior may change at any time!
+> :warning: **This datasource is _experimental_**: Be aware that its syntax and behavior may change at any time!
 
 This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API (valid credentials required).
 
