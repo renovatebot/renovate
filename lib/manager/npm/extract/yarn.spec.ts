@@ -8,7 +8,7 @@ describe('manager/npm/extract/yarn', () => {
     it('returns empty if exception parsing', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');
       const res = await getYarnLock('package.json');
-      expect(res.isYarn1).toBe(true);
+      expect(res.isYarn1).toBeTrue();
       expect(Object.keys(res.lockedVersions)).toHaveLength(0);
     });
 
@@ -16,7 +16,7 @@ describe('manager/npm/extract/yarn', () => {
       const plocktest1Lock = loadFixture('plocktest1/yarn.lock', '..');
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
-      expect(res.isYarn1).toBe(true);
+      expect(res.isYarn1).toBeTrue();
       expect(res.lockfileVersion).toBeUndefined();
       expect(res.lockedVersions).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(7);
@@ -26,7 +26,7 @@ describe('manager/npm/extract/yarn', () => {
       const plocktest1Lock = loadFixture('yarn2/yarn.lock', '..');
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
-      expect(res.isYarn1).toBe(false);
+      expect(res.isYarn1).toBeFalse();
       expect(res.lockfileVersion).toBe(NaN);
       expect(res.lockedVersions).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(8);
@@ -36,7 +36,7 @@ describe('manager/npm/extract/yarn', () => {
       const plocktest1Lock = loadFixture('yarn2.2/yarn.lock', '..');
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
-      expect(res.isYarn1).toBe(false);
+      expect(res.isYarn1).toBeFalse();
       expect(res.lockfileVersion).toBe(6);
       expect(res.lockedVersions).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(10);

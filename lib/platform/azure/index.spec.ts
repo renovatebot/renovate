@@ -172,7 +172,7 @@ describe('platform/azure/index', () => {
 
   describe('getRepoForceRebase', () => {
     it('should return false', async () => {
-      expect(await azure.getRepoForceRebase()).toBe(false);
+      expect(await azure.getRepoForceRebase()).toBeFalse();
     });
   });
 
@@ -1089,7 +1089,7 @@ describe('platform/azure/index', () => {
         '1',
         pullRequestIdMock
       );
-      expect(res).toBe(true);
+      expect(res).toBeTrue();
     });
     it('should return false if the PR does not update successfully', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -1116,7 +1116,7 @@ describe('platform/azure/index', () => {
         branchName: branchNameMock,
         id: pullRequestIdMock,
       });
-      expect(res).toBe(false);
+      expect(res).toBeFalse();
     });
 
     it('should cache the mergeMethod for subsequent merges', async () => {
@@ -1176,7 +1176,7 @@ describe('platform/azure/index', () => {
       });
 
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
-      expect(res).toBe(true);
+      expect(res).toBeTrue();
     });
 
     it('should log a warning after retrying if the PR has still not yet been set to completed', async () => {
@@ -1212,7 +1212,7 @@ describe('platform/azure/index', () => {
         expectedNumRetries + 1
       );
       expect(logger.warn).toHaveBeenCalled();
-      expect(res).toBe(true);
+      expect(res).toBeTrue();
     });
   });
 

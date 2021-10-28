@@ -108,6 +108,13 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingNoDeps',
+    description: 'Onboard repository even if no dependencies found.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'onboardingPrTitle',
     description:
       'Change this value in order to override the default onboarding PR title.',
