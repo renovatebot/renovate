@@ -216,6 +216,7 @@ export async function initRepo({
       ...config,
       url: gitUrl,
       cloneSubmodules,
+      fullClone: true,
     });
 
     config.mergeMethod = 'merge';
