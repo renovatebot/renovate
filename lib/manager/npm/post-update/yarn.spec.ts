@@ -276,8 +276,11 @@ describe('manager/npm/post-update/yarn', () => {
         }
         return new Promise<string>((resolve) => resolve(''));
       });
-      // FIXME: explicit assert condition
-      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+      const { offlineMirror, yarnPath } = await _yarnHelper.checkYarnrc(
+        '/tmp/renovate'
+      );
+      expect(offlineMirror).toBeFalse();
+      expect(yarnPath).toBeNull();
       expect(yarnrcContents).not.toContain('yarn-path');
     });
   });

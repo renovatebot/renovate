@@ -31,13 +31,6 @@ Object {
 }
 `;
 
-exports[`manager/npm/post-update/yarn checkYarnrc() returns offline mirror and no yarn path for non-existant yarn-path binary 1`] = `
-Object {
-  "offlineMirror": false,
-  "yarnPath": null,
-}
-`;
-
 exports[`manager/npm/post-update/yarn checkYarnrc() returns offline mirror and yarn path 1`] = `
 Object {
   "offlineMirror": true,
