@@ -93,19 +93,6 @@ export class PypiDatasource extends Datasource {
       dependency.isPrivate = true;
     }
     logger.trace({ lookupUrl }, 'Got pypi api result');
-    if (
-      !(
-        dep.info &&
-        PypiDatasource.normalizeName(dep.info.name) ===
-          PypiDatasource.normalizeName(packageName)
-      )
-    ) {
-      logger.warn(
-        { lookupUrl, lookupName: packageName, returnedName: dep.info.name },
-        'Returned name does not match with requested name'
-      );
-      return null;
-    }
 
     if (dep.info?.home_page) {
       dependency.homepage = dep.info.home_page;
