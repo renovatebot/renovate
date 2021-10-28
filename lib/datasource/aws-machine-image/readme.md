@@ -83,7 +83,7 @@ const my_ami2 = 'ami-0083e9407e275acf2';
 ```hcl
 resource "aws_instance" "web" {
 
-    # Only ami, no name mentioned
+    # Only AMI, no name mentioned
     # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
     # currentImageName=unknown
     ami = "ami-0083e9407e275acf2"
