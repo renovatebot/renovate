@@ -8,6 +8,7 @@ export enum SkipReason {
   GitDependency = 'git-dependency',
   GitPlugin = 'git-plugin',
   Ignored = 'ignored',
+  InternalError = 'internal-error',
   InternalPackage = 'internal-package',
   InvalidConfig = 'invalid-config',
   InvalidDependencySpecification = 'invalid-dependency-specification',

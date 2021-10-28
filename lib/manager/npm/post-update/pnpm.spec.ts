@@ -38,7 +38,7 @@ describe('manager/npm/post-update/pnpm', () => {
     }) as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBe(true);
+    expect(res.error).toBeTrue();
     expect(res.lockFile).not.toBeDefined();
     expect(execSnapshots).toMatchSnapshot();
   });

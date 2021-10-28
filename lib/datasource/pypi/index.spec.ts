@@ -94,7 +94,7 @@ describe('datasource/pypi/index', () => {
         datasource,
         depName: 'azure-cli-monitor',
       });
-      expect(res.isPrivate).toBe(true);
+      expect(res.isPrivate).toBeTrue();
     });
     it('supports multiple custom datasource urls', async () => {
       httpMock
@@ -320,7 +320,7 @@ describe('datasource/pypi/index', () => {
         constraints: { python: '2.7' },
         depName: 'dj-database-url',
       });
-      expect(res.isPrivate).toBe(true);
+      expect(res.isPrivate).toBeTrue();
     });
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock

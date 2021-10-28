@@ -123,7 +123,7 @@ describe('manager/gradle-wrapper/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchSnapshot();
-    expect(res).toEqual([]);
+    expect(res).toBeEmptyArray();
   });
 
   it('updates distributionSha256Sum', async () => {

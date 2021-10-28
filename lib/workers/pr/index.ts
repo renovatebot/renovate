@@ -12,6 +12,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
 import { stripEmojis } from '../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
+import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
@@ -21,7 +22,7 @@ import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
 
 function noWhitespaceOrHeadings(input: string): string {
-  return input.replace(/\r?\n|\r|\s|#/g, '');
+  return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
 }
 
 function noLeadingAtSymbol(input: string): string {

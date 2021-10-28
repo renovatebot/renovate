@@ -1,10 +1,11 @@
 import semver from 'semver';
+import { regEx } from '../../util/regex';
 import type { NewValueConfig } from '../types';
 
-const fromParam = /^\s*from\s*:\s*"([^"]+)"\s*$/;
-const fromRange = /^\s*"([^"]+)"\s*\.\.\.\s*$/;
-const binaryRange = /^\s*"([^"]+)"\s*(\.\.[.<])\s*"([^"]+)"\s*$/;
-const toRange = /^\s*(\.\.[.<])\s*"([^"]+)"\s*$/;
+const fromParam = regEx(/^\s*from\s*:\s*"([^"]+)"\s*$/);
+const fromRange = regEx(/^\s*"([^"]+)"\s*\.\.\.\s*$/);
+const binaryRange = regEx(/^\s*"([^"]+)"\s*(\.\.[.<])\s*"([^"]+)"\s*$/);
+const toRange = regEx(/^\s*(\.\.[.<])\s*"([^"]+)"\s*$/);
 
 function toSemverRange(range: string): string {
   if (fromParam.test(range)) {
@@ -40,7 +41,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (fromParam.test(currentValue)) {
-    return currentValue.replace(/".*?"/, `"${newVersion}"`);
+    return currentValue.replace(regEx(/".*?"/), `"${newVersion}"`);
   }
   if (fromRange.test(currentValue)) {
     const [, version] = fromRange.exec(currentValue);
