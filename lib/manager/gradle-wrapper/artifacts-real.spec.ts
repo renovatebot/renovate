@@ -127,7 +127,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         config,
       });
 
-      expect(res).toEqual([]);
+      expect(res).toBeEmptyArray();
 
       // 5.6.4 => 5.6.4 (updates execs)
       // 6.3 => (5.6.4) (downgrades execs)

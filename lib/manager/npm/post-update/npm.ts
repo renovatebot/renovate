@@ -65,7 +65,7 @@ export async function generateLockFile(
       },
       docker: {
         image: 'node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
         preCommands,
       },

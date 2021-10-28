@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'ubuntu';
@@ -10,7 +11,7 @@ export const supportsRanges = false;
 function isValid(input: string): string | boolean | null {
   return (
     typeof input === 'string' &&
-    /^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/.test(input)
+    regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
   );
 }
 
@@ -33,7 +34,7 @@ function isStable(version: string): boolean {
   if (!isValid(version)) {
     return false;
   }
-  return /^\d?[02468]\.04/.test(version);
+  return regEx(/^\d?[02468]\.04/).test(version);
 }
 
 // digestion of version

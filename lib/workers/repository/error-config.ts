@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { PrState } from '../../types';
+import { regEx } from '../../util/regex';
 
 export async function raiseConfigWarningIssue(
   config: RenovateConfig,
@@ -15,7 +16,10 @@ export async function raiseConfigWarningIssue(
   }
   body += `Error type: ${error.validationError}\n`;
   if (error.validationMessage) {
-    body += `Message: \`${error.validationMessage.replace(/`/g, "'")}\`\n`;
+    body += `Message: \`${error.validationMessage.replace(
+      regEx(/`/g),
+      "'"
+    )}\`\n`;
   }
   const pr = await platform.getBranchPr(config.onboardingBranch);
   if (pr?.state === PrState.Open) {

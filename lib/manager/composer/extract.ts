@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -135,7 +135,7 @@ export async function extractPackageFile(
             switch (repositories[depName].type) {
               case 'vcs':
               case 'git':
-                datasource = datasourceGitTags.id;
+                datasource = GitTagsDatasource.id;
                 lookupName = repositories[depName].url;
                 break;
             }

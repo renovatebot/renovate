@@ -36,6 +36,7 @@ const contentCheckList = [
   'required_providers ',
   ' "helm_release" ',
   ' "docker_image" ',
+  'required_version',
 ];
 
 export async function extractPackageFile(
@@ -45,6 +46,10 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ content }, 'terraform.extractPackageFile()');
   if (!checkFileContainsDependency(content, contentCheckList)) {
+    logger.trace(
+      { fileName },
+      'preflight content check has not found any relevant content'
+    );
     return null;
   }
   let deps: PackageDependency<TerraformManagerData>[] = [];
