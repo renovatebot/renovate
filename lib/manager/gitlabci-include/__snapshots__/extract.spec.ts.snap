@@ -22,3 +22,14 @@ Array [
   },
 ]
 `;
+
+exports[`manager/gitlabci-include/extract extractPackageFile() extracts single include block 1`] = `
+Array [
+  Object {
+    "currentValue": "1.0.0",
+    "datasource": "gitlab-tags",
+    "depName": "mikebryant/include-source-example",
+    "depType": "repository",
+  },
+]
+`;

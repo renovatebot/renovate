@@ -22,6 +22,7 @@ const validMatchFields = [
   'versioning',
   'extractVersion',
   'registryUrl',
+  'depType',
 ];
 
 const mergeFields = ['registryUrls', ...validMatchFields];
@@ -220,6 +221,9 @@ export function extractPackageFile(
       if (config[field]) {
         res[field] = config[field];
       }
+    }
+    if (config.autoReplaceStringTemplate) {
+      res.autoReplaceStringTemplate = config.autoReplaceStringTemplate;
     }
     return res;
   }

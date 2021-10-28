@@ -44,6 +44,8 @@ export interface Release {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;
+  sourceUrl?: string;
+  sourceDirectory?: string;
 }
 
 export interface ReleaseResult {

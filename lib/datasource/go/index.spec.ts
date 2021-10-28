@@ -2,7 +2,8 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { logger, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
-import { id as datasource, getDigest } from '.';
+import { getDigest } from './digest';
+import { id as datasource } from '.';
 
 jest.mock('../../util/host-rules');
 
@@ -18,6 +19,18 @@ const res1 = `<!DOCTYPE html>
 </head>
 <body>
 Nothing to see here; <a href="https://godoc.org/golang.org/x/text">move along</a>.
+</body>
+</html>`;
+
+const res2 = `<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="go-import" content="gitlab.com/group/subgroup git https://gitlab.com/group/subgroup/repo">
+<meta name="go-source" content="gitlab.com/group/subgroup https://gitlab.com/group/subgroup https://gitlab.com/group/subgroup/-/tree/master{/dir} https://gitlab.com/group/subgroup/-/blob/master{/dir}/{file}#L{line}">
+</head>
+<body>
+go get https://gitlab.com/group/subgroup
 </body>
 </html>`;
 
@@ -363,6 +376,26 @@ describe('datasource/go/index', () => {
       const httpCalls = httpMock.getTrace();
       expect(httpCalls).toHaveLength(6);
       expect(httpCalls).toMatchSnapshot();
+    });
+    it('support gitlab subgroups', async () => {
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/group/subgroup/repo?go-get=1')
+        .reply(200, res2);
+      httpMock
+        .scope('https://gitlab.com/')
+        .get(
+          '/api/v4/projects/group%2Fsubgroup%2Frepo/repository/tags?per_page=100'
+        )
+        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'gitlab.com/group/subgroup/repo',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('works for nested modules on github', async () => {
       const packages = [

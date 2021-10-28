@@ -24,8 +24,8 @@ describe('logger/index', () => {
     expect(logger).toBeDefined();
   });
   it('sets and gets context', () => {
-    setContext('abc123');
-    expect(getContext()).toEqual('abc123');
+    setContext('123test');
+    expect(getContext()).toEqual('123test');
   });
   it('supports logging with metadata', () => {
     expect(() => logger.debug({ some: 'meta' }, 'some meta')).not.toThrow();

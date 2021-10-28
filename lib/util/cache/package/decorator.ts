@@ -57,6 +57,7 @@ function decorate<T>(fn: Handler<T>): Decorator<T> {
 }
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
+type BooleanFunction<T extends any[] = any[]> = (...args: T) => boolean;
 
 /**
  * The cache decorator parameters.
@@ -75,6 +76,12 @@ interface CacheParameters {
   key: string | HashFunction;
 
   /**
+   * A function that returns true if a result is cacheable
+   * Used to prevent caching of private, sensitive, results
+   */
+  cacheable?: BooleanFunction;
+
+  /**
    * The TTL (or expiry) of the key in minutes
    */
   ttlMinutes?: number;
@@ -86,9 +93,14 @@ interface CacheParameters {
 export function cache<T>({
   namespace,
   key,
+  cacheable = () => true,
   ttlMinutes = 30,
 }: CacheParameters): Decorator<T> {
   return decorate(async ({ args, instance, callback }) => {
+    if (!cacheable.apply(instance, args)) {
+      return callback();
+    }
+
     let finalNamespace: string;
     if (is.string(namespace)) {
       finalNamespace = namespace;

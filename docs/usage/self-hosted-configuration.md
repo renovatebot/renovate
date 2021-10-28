@@ -130,6 +130,15 @@ e.g.
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
+## detectGlobalManagerConfig
+
+The purpose of this capability is to allow a bot admin to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
+
+This feature is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
+
+Currently this capability is supported for the `npm` manager only - specifically the `~/.npmrc` file.
+If found, it will be imported into `config.npmrc` with `config.npmrcMerge` will be set to `true`.
+
 ## dockerChildPrefix
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
@@ -327,28 +336,96 @@ e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved c
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://renovatebot.com/encrypt>.
+If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
 
-To create the key pair with OpenSSL use the following commands:
+To create the key pair with GPG use the following commands:
 
-- `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
-- `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
+- `gpg --full-generate-key` and follow the prompts to generate a key. Name and email are not important to Renovate, and do not configure a passphrase. Use a 4096bit key.
 
-To encrypt a secret with OpenSSL use the following command:
+<details><summary>key generation log</summary>
 
-```bash
-echo 'actual-secret' | openssl rsautl -encrypt -pubin -inkey rsa_pub.pem | base64
+```
+❯ gpg --full-generate-key
+gpg (GnuPG) 2.2.24; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+  (14) Existing key from card
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0)
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: Renovate Bot
+Email address: renovate@whitesourcesoftware.com
+Comment:
+You selected this USER-ID:
+    "Renovate Bot <renovate@whitesourcesoftware.com>"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+
+gpg: key 0649CC3899F22A66 marked as ultimately trusted
+gpg: revocation certificate stored as '/Users/rhys/.gnupg/openpgp-revocs.d/794B820F34B34A8DF32AADB20649CC3899F22A66.rev'
+public and secret key created and signed.
+
+pub   rsa4096 2021-09-10 [SC]
+      794B820F34B34A8DF32AADB20649CEXAMPLEONLY
+uid                      Renovate Bot <renovate@whitesourcesoftware.com>
+sub   rsa4096 2021-09-10 [E]
 ```
 
-Replace `actual-secret` with the secret to encrypt.
+</details>
+
+- Copy the key ID from the output (`794B820F34B34A8DF32AADB20649CEXAMPLEONLY` in the above example) or run `gpg --list-secret-keys` if you forgot to take a copy
+- Run `gpg --armor --export-secret-keys YOUR_NEW_KEY_ID > renovate-private-key.asc` to generate an armored (text-based) private key file
+- Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
+
+The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
+The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
+
+Any encrypted secrets using GPG must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
+The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
+Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
+
+Note: simple public key encryption was previously used to encrypt secrets, but this approach has now been deprecated and no longer documented.
+
+## privateKeyOld
+
+Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
+Decryption with this key will be attempted after `privateKey`.
+
+If you are migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
+Doing so will mean that Renovate will first attempt to decrypt using the GPG key but fall back to the legacy key and try that next.
+
+You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
 
 ## privateKeyPath
 
-Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
+Used as an alternative to `privateKey`, if you want the key to be read from disk instead.
+
+## privateKeyPathOld
+
+Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
 ## productLinks
 
-Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
+Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
 ## redisUrl
 
@@ -424,3 +501,13 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 ## username
 
 Mandatory if a GitHub app token is in use using the CLI.
+
+## writeDiscoveredRepos
+
+Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+
+Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
+
+```json
+["myOrg/myRepo", "myOrg/anotherRepo"]
+```

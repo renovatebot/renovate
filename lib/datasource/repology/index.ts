@@ -152,7 +152,14 @@ async function queryPackage(
         // exit immediately if package found
         return pkg;
       }
+    } else if (err.statusCode === 300) {
+      logger.warn(
+        { repoName, pkgName },
+        'Ambiguous redirection from package name to project name in Repology. Skipping this package'
+      );
+      return null;
     }
+
     throw err;
   }
 

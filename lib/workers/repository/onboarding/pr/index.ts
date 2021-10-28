@@ -72,7 +72,7 @@ If you need any further assistance then you can also [request help here](${confi
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
-    if (existingPr.isConflicted) {
+    if (existingPr?.isConflicted) {
       configDesc += emojify(
         `:warning: This PR has a merge conflict, however Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
       );

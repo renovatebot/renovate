@@ -8,6 +8,7 @@ buildscript {
         }
         mavenCentral()
         jcenter()
+        gradlePluginPortal()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -15,6 +16,7 @@ buildscript {
         classpath 'com.fkorotkov:gradle-libraries-plugin:0.1'
         classpath "gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin:0.2.3"
         classpath 'org.apache.openjpa:openjpa:3.1.1'
+        classpath 'com.gradle.publish:plugin-publish-plugin:0.13.0'
     }
 }
 

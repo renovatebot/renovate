@@ -1,6 +1,6 @@
 import * as httpMock from '../../test/http-mock';
+import { PlatformId } from '../constants';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET } from '../constants/platforms';
 import { loadModules } from '../util/modules';
 import type { Platform } from './types';
 import * as platform from '.';
@@ -31,7 +31,7 @@ describe('platform/index', () => {
 
     for (const name of platforms.keys()) {
       const value = platforms.get(name);
-      expect(validate(value, name)).toBe(true);
+      expect(validate(value, name)).toBeTrue();
     }
   });
 
@@ -51,7 +51,7 @@ describe('platform/index', () => {
       .basicAuth({ user: 'abc', pass: '123' })
       .reply(200, { uuid: 123 });
     const config = {
-      platform: PLATFORM_TYPE_BITBUCKET,
+      platform: PlatformId.Bitbucket,
       gitAuthor: 'user@domain.com',
       username: 'abc',
       password: '123',
@@ -67,7 +67,7 @@ describe('platform/index', () => {
           username: 'abc',
         },
       ],
-      platform: PLATFORM_TYPE_BITBUCKET,
+      platform: PlatformId.Bitbucket,
     });
   });
 });

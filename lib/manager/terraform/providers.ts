@@ -2,13 +2,20 @@ import is from '@sindresorhus/is';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
+import type { ProviderLock } from './lockfile/types';
 import type { ExtractionResult } from './types';
-import { keyValueExtractionRegex } from './util';
+import {
+  getLockedVersion,
+  keyValueExtractionRegex,
+  massageProviderLookupName,
+} from './util';
 
-export const sourceExtractionRegex =
-  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
+export const sourceExtractionRegex = regEx(
+  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
+);
 
 export function extractTerraformProvider(
   startingLine: number,
@@ -31,24 +38,30 @@ export function extractTerraformProvider(
     }
 
     const line = lines[lineNumber];
-    // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-    const openBrackets = (line.match(/\{/g) || []).length;
-    const closedBrackets = (line.match(/\}/g) || []).length;
-    braceCounter = braceCounter + openBrackets - closedBrackets;
 
-    // only update fields inside the root block
-    if (braceCounter === 1) {
-      const kvMatch = keyValueExtractionRegex.exec(line);
-      if (kvMatch) {
-        if (kvMatch.groups.key === 'version') {
-          dep.currentValue = kvMatch.groups.value;
-        } else if (kvMatch.groups.key === 'source') {
-          dep.managerData.source = kvMatch.groups.value;
-          dep.managerData.sourceLine = lineNumber;
+    // istanbul ignore else
+    if (is.string(line)) {
+      // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
+      const openBrackets = (line.match(/\{/g) || []).length; // TODO #12071 #12070
+      const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12071 #12070
+      braceCounter = braceCounter + openBrackets - closedBrackets;
+
+      // only update fields inside the root block
+      if (braceCounter === 1) {
+        const kvMatch = keyValueExtractionRegex.exec(line);
+        if (kvMatch) {
+          if (kvMatch.groups.key === 'version') {
+            dep.currentValue = kvMatch.groups.value;
+          } else if (kvMatch.groups.key === 'source') {
+            dep.managerData.source = kvMatch.groups.value;
+            dep.managerData.sourceLine = lineNumber;
+          }
         }
       }
+    } else {
+      // stop - something went wrong
+      braceCounter = 0;
     }
-
     lineNumber += 1;
   } while (braceCounter !== 0);
   deps.push(dep);
@@ -58,7 +71,10 @@ export function extractTerraformProvider(
   return { lineNumber, dependencies: deps };
 }
 
-export function analyzeTerraformProvider(dep: PackageDependency): void {
+export function analyzeTerraformProvider(
+  dep: PackageDependency,
+  locks: ProviderLock[]
+): void {
   /* eslint-disable no-param-reassign */
   dep.depType = 'provider';
   dep.depName = dep.managerData.moduleName;
@@ -66,19 +82,23 @@ export function analyzeTerraformProvider(dep: PackageDependency): void {
 
   if (is.nonEmptyString(dep.managerData.source)) {
     const source = sourceExtractionRegex.exec(dep.managerData.source);
-    if (source) {
-      // buildin providers https://github.com/terraform-providers
-      if (source.groups.namespace === 'terraform-providers') {
-        dep.registryUrls = [`https://releases.hashicorp.com`];
-      } else if (source.groups.hostname) {
-        dep.registryUrls = [`https://${source.groups.hostname}`];
-        dep.lookupName = `${source.groups.namespace}/${source.groups.type}`;
-      } else {
-        dep.lookupName = dep.managerData.source;
-      }
-    } else {
+    if (!source) {
       dep.skipReason = SkipReason.UnsupportedUrl;
+      return;
+    }
+
+    // buildin providers https://github.com/terraform-providers
+    if (source.groups.namespace === 'terraform-providers') {
+      dep.registryUrls = [`https://releases.hashicorp.com`];
+    } else if (source.groups.hostname) {
+      dep.registryUrls = [`https://${source.groups.hostname}`];
+      dep.lookupName = `${source.groups.namespace}/${source.groups.type}`;
+    } else {
+      dep.lookupName = dep.managerData.source;
     }
   }
+  massageProviderLookupName(dep);
+
+  dep.lockedVersion = getLockedVersion(dep, locks);
   /* eslint-enable no-param-reassign */
 }

@@ -103,14 +103,14 @@ describe('workers/repository/onboarding/branch/index', () => {
       config.requireConfig = false;
       config.onboarding = false;
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTrue();
     });
     it('handles skipped onboarding, requireConfig=true, and a config file', async () => {
       config.requireConfig = true;
       config.onboarding = false;
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTrue();
     });
     it('handles skipped onboarding, requireConfig=true, and no config file', async () => {
       config.requireConfig = true;
@@ -123,21 +123,21 @@ describe('workers/repository/onboarding/branch/index', () => {
     it('detects repo is onboarded via file', async () => {
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('handles removed cached file name', async () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('handles cached file name', async () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('handles cached package.json', async () => {
@@ -145,20 +145,20 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('detects repo is onboarded via package.json config', async () => {
       git.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTrue();
     });
     it('detects repo is onboarded via PR', async () => {
       config.requireConfig = false;
       platform.findPr.mockResolvedValueOnce(mock<Pr>());
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTrue();
     });
     it('throws if no required config', async () => {
       config.requireConfig = true;
@@ -176,9 +176,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('abc123');
+      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('123test');
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(false);
+      expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);

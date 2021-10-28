@@ -3,6 +3,7 @@ import { BranchStatus } from '../../types';
 import {
   ConfidenceConfig,
   StabilityConfig,
+  resolveBranchStatus,
   setConfidence,
   setStability,
 } from './status-checks';
@@ -84,6 +85,14 @@ describe('workers/branch/status-checks', () => {
       await setConfidence(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('getBranchStatus', () => {
+    it('should return green if ignoreTests=true', async () => {
+      expect(await resolveBranchStatus('somebranch', true)).toBe(
+        BranchStatus.green
+      );
     });
   });
 });

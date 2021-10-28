@@ -1,4 +1,4 @@
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { getManagers } from '../../manager';
 import { getPlatformList } from '../../platform';
 import { getVersioningList } from '../../versioning';
@@ -7,6 +7,14 @@ import * as pep440Versioning from '../../versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
+  {
+    name: 'detectGlobalManagerConfig',
+    description:
+      'If true, Renovate will attempt to read global manager config from the file system.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
   {
     name: 'allowPostUpgradeCommandTemplating',
     description: 'If true allow templating for post-upgrade commands.',
@@ -461,8 +469,23 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'privateKeyOld',
+    description: 'Secondary/old private key to try.',
+    stage: 'repository',
+    type: 'string',
+    replaceLineReturns: true,
+    globalOnly: true,
+  },
+  {
     name: 'privateKeyPath',
     description: 'Path to the Server-side private key.',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
+    name: 'privateKeyPathOld',
+    description: 'Path to the Server-side old private key.',
     stage: 'repository',
     type: 'string',
     globalOnly: true,
@@ -544,7 +567,7 @@ const options: RenovateOptions[] = [
     description: 'Platform type of repository.',
     type: 'string',
     allowedValues: getPlatformList(),
-    default: PLATFORM_TYPE_GITHUB,
+    default: PlatformId.Github,
     globalOnly: true,
   },
   {
@@ -581,6 +604,14 @@ const options: RenovateOptions[] = [
     description: 'String copy of npmrc file. Use \\n instead of line breaks.',
     stage: 'branch',
     type: 'string',
+  },
+  {
+    name: 'npmrcMerge',
+    description:
+      'Whether to merge config.npmrc with repo .npmrc content if both are found.',
+    stage: 'branch',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'npmToken',
@@ -728,13 +759,6 @@ const options: RenovateOptions[] = [
     allowedValues: getVersioningList(),
     cli: false,
     env: false,
-  },
-  {
-    name: 'azureAutoComplete',
-    description:
-      'If set to true, Azure DevOps PRs will be set to auto-complete after all (if any) branch policies have been met.',
-    type: 'boolean',
-    default: false,
   },
   {
     name: 'azureWorkItemId',
@@ -1310,13 +1334,10 @@ const options: RenovateOptions[] = [
     default: 'automergeComment',
   },
   {
-    name: 'requiredStatusChecks',
-    description:
-      'List of status checks that must pass before automerging. Set to null to enable automerging without tests.',
-    type: 'array',
-    subType: 'string',
-    cli: false,
-    env: false,
+    name: 'ignoreTests',
+    description: 'Set to true to enable automerging without tests.',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'transitiveRemediation',
@@ -1891,12 +1912,6 @@ const options: RenovateOptions[] = [
     default: true,
   },
   {
-    name: 'gitLabAutomerge',
-    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging MRs.`,
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'gitLabIgnoreApprovals',
     description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
@@ -1961,6 +1976,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'depTypeTemplate',
+    description:
+      'Optional depType for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'currentValueTemplate',
     description:
       'Optional currentValue for extracted dependencies. Valid only within a `regexManagers` object.',
@@ -1989,6 +2013,15 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extractVersionTemplate',
+    description:
+      'Optional extractVersion for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'autoReplaceStringTemplate',
     description:
       'Optional extractVersion for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
@@ -2046,6 +2079,19 @@ const options: RenovateOptions[] = [
     default: 'default',
     stage: 'repository',
     globalOnly: true,
+  },
+  {
+    name: 'writeDiscoveredRepos',
+    description: 'Writes discovered repositories to a JSON file and then exit.',
+    type: 'string',
+    globalOnly: true,
+    env: false,
+  },
+  {
+    name: 'platformAutomerge',
+    description: `Enable or disable usage of platform-native auto-merge capabilities when available.`,
+    type: 'boolean',
+    default: true,
   },
 ];
 

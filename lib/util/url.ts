@@ -1,4 +1,5 @@
 import urlJoin from 'url-join';
+import { regEx } from './regex';
 
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
@@ -6,7 +7,7 @@ export function joinUrlParts(...parts: string[]): string {
 
 export function ensurePathPrefix(url: string, prefix: string): string {
   const parsed = new URL(url);
-  const fullPath = url.replace(parsed.origin, '');
+  const fullPath = parsed.pathname + parsed.search;
   if (fullPath.startsWith(prefix)) {
     return url;
   }
@@ -14,11 +15,11 @@ export function ensurePathPrefix(url: string, prefix: string): string {
 }
 
 export function ensureTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '/');
+  return url.replace(/\/?$/, '/'); // TODO #12070 #12071 add tests for this one
 }
 
 export function trimTrailingSlash(url: string): string {
-  return url.replace(/\/+$/, '');
+  return url.replace(regEx(/\/+$/), ''); // TODO #12071
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {

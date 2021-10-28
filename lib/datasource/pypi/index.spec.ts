@@ -81,7 +81,7 @@ describe('datasource/pypi/index', () => {
     });
 
     it('sets private if authorization privided', async () => {
-      hostRules.add({ matchHost: 'customprivate.pypi.net', token: 'abc123' });
+      hostRules.add({ matchHost: 'customprivate.pypi.net', token: '123test' });
       httpMock
         .scope('https://customprivate.pypi.net/foo')
         .get('/azure-cli-monitor/json')
@@ -94,7 +94,7 @@ describe('datasource/pypi/index', () => {
         datasource,
         depName: 'azure-cli-monitor',
       });
-      expect(res.isPrivate).toBe(true);
+      expect(res.isPrivate).toBeTrue();
     });
     it('supports multiple custom datasource urls', async () => {
       httpMock
@@ -258,7 +258,7 @@ describe('datasource/pypi/index', () => {
     it('sets private simple if authorization provided', async () => {
       hostRules.add({
         matchHost: 'some.private.registry.org',
-        token: 'abc123',
+        token: '123test',
       });
       httpMock
         .scope('https://some.private.registry.org/+simple/')
@@ -273,7 +273,7 @@ describe('datasource/pypi/index', () => {
         constraints: { python: '2.7' },
         depName: 'dj-database-url',
       });
-      expect(res.isPrivate).toBe(true);
+      expect(res.isPrivate).toBeTrue();
     });
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock

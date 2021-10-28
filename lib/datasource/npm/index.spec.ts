@@ -270,11 +270,11 @@ describe('datasource/npm/index', () => {
     hostRules.add({
       hostType: 'npm',
       matchHost: 'npm.mycustomregistry.com',
-      token: 'abcde',
+      token: 'abc',
     });
     httpMock
       .scope('https://npm.mycustomregistry.com', {
-        reqheaders: { authorization: 'Bearer abcde' },
+        reqheaders: { authorization: 'Bearer abc' },
       })
       .get('/foobar')
       .reply(200, npmResponse);
@@ -289,13 +289,13 @@ describe('datasource/npm/index', () => {
       hostType: 'npm',
       matchHost:
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/',
-      token: 'abcde',
+      token: 'abc',
     });
     httpMock
       .scope(
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry',
         {
-          reqheaders: { authorization: 'Bearer abcde' },
+          reqheaders: { authorization: 'Bearer abc' },
         }
       )
       .get('/foobar')
@@ -312,7 +312,7 @@ describe('datasource/npm/index', () => {
     setNpmrc(npmrcContent);
     setNpmrc(npmrcContent);
     setNpmrc();
-    expect(getNpmrc()).toEqual({});
+    expect(getNpmrc()).toBeEmptyObject();
   });
 
   it('should use default registry if missing from npmrc', async () => {

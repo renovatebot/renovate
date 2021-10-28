@@ -2,6 +2,8 @@ import { loadModules } from '../util/modules';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
+jest.mock('../util/fs');
+
 describe('manager/index', () => {
   describe('get()', () => {
     it('gets something', () => {
@@ -39,8 +41,14 @@ describe('manager/index', () => {
 
     for (const name of mgrs.keys()) {
       const mgr = mgrs.get(name);
-      expect(validate(mgr)).toBe(true);
+      expect(validate(mgr)).toBeTrue();
     }
+  });
+
+  describe('detectGlobalConfig()', () => {
+    it('iterates through managers', async () => {
+      expect(await manager.detectAllGlobalConfig()).toEqual({});
+    });
   });
 
   describe('extractAllPackageFiles()', () => {

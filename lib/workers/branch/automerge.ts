@@ -4,6 +4,7 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { mergeBranch } from '../../util/git';
+import { resolveBranchStatus } from './status-checks';
 
 export type AutomergeResult =
   | 'automerged'
@@ -25,9 +26,9 @@ export async function tryBranchAutomerge(
   if (existingPr) {
     return 'automerge aborted - PR exists';
   }
-  const branchStatus = await platform.getBranchStatus(
+  const branchStatus = await resolveBranchStatus(
     config.branchName,
-    config.requiredStatusChecks
+    config.ignoreTests
   );
   if (branchStatus === BranchStatus.green) {
     logger.debug(`Automerging branch`);

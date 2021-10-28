@@ -400,20 +400,8 @@ describe('platform/gitea/index', () => {
         })
       );
 
-      return gitea.getBranchStatus('some-branch', []);
+      return gitea.getBranchStatus('some-branch');
     };
-
-    it('should return success if requiredStatusChecks null', async () => {
-      expect(await gitea.getBranchStatus('some-branch', null)).toEqual(
-        BranchStatus.green
-      );
-    });
-
-    it('should return failed if unsupported requiredStatusChecks', async () => {
-      expect(await gitea.getBranchStatus('some-branch', ['foo'])).toEqual(
-        BranchStatus.red
-      );
-    });
 
     it('should return yellow for unknown result', async () => {
       expect(await getBranchStatus('unknown')).toEqual(BranchStatus.yellow);
@@ -434,7 +422,7 @@ describe('platform/gitea/index', () => {
     it('should abort when branch status returns 404', async () => {
       helper.getCombinedCommitStatus.mockRejectedValueOnce({ statusCode: 404 });
 
-      await expect(gitea.getBranchStatus('some-branch', [])).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
         REPOSITORY_CHANGED
       );
     });
@@ -444,7 +432,7 @@ describe('platform/gitea/index', () => {
         new Error('getCombinedCommitStatus()')
       );
 
-      await expect(gitea.getBranchStatus('some-branch', [])).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
         'getCombinedCommitStatus()'
       );
     });

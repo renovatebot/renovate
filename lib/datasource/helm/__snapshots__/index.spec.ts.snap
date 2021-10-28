@@ -20,7 +20,6 @@ Object {
   "registryUrl": "https://example-repository.com",
   "releases": Array [
     Object {
-      "releaseTimestamp": "2019-02-13T00:56:01.476Z",
       "version": "1.0.0",
     },
     Object {

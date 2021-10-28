@@ -1,5 +1,6 @@
 import addrs from 'email-addresses';
 import { logger } from '../../logger';
+import { regEx } from '../regex';
 
 export interface GitAuthor {
   name?: string;
@@ -16,25 +17,30 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     if (result) {
       return result;
     }
-    if (input.includes('[bot]@')) {
-      // invalid github app/bot addresses
-      const parsed = addrs.parseOneAddress(
-        input.replace('[bot]@', '@')
-      ) as addrs.ParsedMailbox;
-      if (parsed?.address) {
-        result = {
-          name: parsed.name || input.replace(/@.*/, ''),
-          address: parsed.address.replace('@', '[bot]@'),
-        };
-        return result;
-      }
-    }
+    let massagedInput;
+    let massagedBotEmail = false;
     if (input.includes('<') && input.includes('>')) {
       // try wrapping the name part in quotations
-      result = addrs.parseOneAddress('"' + input.replace(/(\s?<)/, '"$1'));
-      if (result) {
-        return result;
+      massagedInput = '"' + input.replace(regEx(/(\s?<)/), '"$1');
+    }
+    if (input.includes('[bot]@')) {
+      // invalid github app/bot addresses
+      massagedInput = (massagedInput || input).replace('[bot]@', '@');
+      massagedBotEmail = true;
+    }
+    if (!massagedInput) {
+      return null;
+    }
+    const parsed = addrs.parseOneAddress(massagedInput) as addrs.ParsedMailbox;
+    if (parsed?.address) {
+      result = {
+        name: parsed.name || input.replace(regEx(/@.*/), ''),
+        address: parsed.address,
+      };
+      if (massagedBotEmail) {
+        result.address = result.address.replace('@', '[bot]@');
       }
+      return result;
     }
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Unknown error parsing gitAuthor');

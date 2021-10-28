@@ -63,23 +63,23 @@ export interface ParseGradleResult {
 }
 
 export interface GradleCatalog {
-  versions?: Map<string, string>;
-  libraries?: Map<
+  versions?: Record<string, string>;
+  libraries?: Record<
     string,
     GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor | string
   >;
-  plugins?: Map<string, GradleCatalogPluginDescriptor>;
+  plugins?: Record<string, GradleCatalogPluginDescriptor>;
 }
 
 export interface GradleCatalogModuleDescriptor {
   module: string;
-  version: string | VersionPointer;
+  version?: string | VersionPointer;
 }
 
 export interface GradleCatalogArtifactDescriptor {
   name: string;
   group: string;
-  version: string | VersionPointer;
+  version?: string | VersionPointer;
 }
 
 export interface GradleCatalogPluginDescriptor {

@@ -23,7 +23,23 @@ export function isDependencyString(input: string): boolean {
   if (split?.length !== 3) {
     return false;
   }
-  const [groupId, artifactId, versionPart] = split;
+  // eslint-disable-next-line prefer-const
+  let [tempGroupId, tempArtifactId, tempVersionPart] = split;
+  if (
+    tempVersionPart !== versionLikeSubstring(tempVersionPart) &&
+    tempVersionPart.includes('@')
+  ) {
+    const versionSplit = tempVersionPart?.split('@');
+    if (versionSplit?.length !== 2) {
+      return false;
+    }
+    [tempVersionPart] = versionSplit;
+  }
+  const [groupId, artifactId, versionPart] = [
+    tempGroupId,
+    tempArtifactId,
+    tempVersionPart,
+  ];
   return (
     groupId &&
     artifactId &&
@@ -40,10 +56,18 @@ export function parseDependencyString(
   if (!isDependencyString(input)) {
     return null;
   }
-  const [groupId, artifactId, currentValue] = input?.split(':');
+  const [groupId, artifactId, FullValue] = input?.split(':');
+  if (FullValue === versionLikeSubstring(FullValue)) {
+    return {
+      depName: `${groupId}:${artifactId}`,
+      currentValue: FullValue,
+    };
+  }
+  const [currentValue, dataType] = FullValue?.split('@');
   return {
     depName: `${groupId}:${artifactId}`,
     currentValue,
+    dataType,
   };
 }
 
@@ -87,7 +111,7 @@ export function isTOMLFile(path: string): boolean {
 }
 
 export function toAbsolutePath(packageFile: string): string {
-  return upath.join(packageFile.replace(/^[/\\]*/, '/'));
+  return upath.join(packageFile.replace(regEx(/^[/\\]*/), '/'));
 }
 
 export function reorderFiles(packageFiles: string[]): string[] {

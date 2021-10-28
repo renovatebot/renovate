@@ -1,4 +1,7 @@
-export const keyValueExtractionRegex =
-  /^\s*(?<key>[^\s]+):\s+"?(?<value>[^"\s]+)"?\s*$/;
+import { regEx } from '../../util/regex';
+
+export const keyValueExtractionRegex = regEx(
+  /^\s*(?<key>[^\s]+):\s+"?(?<value>[^"\s]+)"?\s*$/
+);
 // looks for `apiVersion: argoproj.io/
-export const fileTestRegex = /\s*apiVersion:\s*argoproj.io\/\s*/;
+export const fileTestRegex = regEx(/\s*apiVersion:\s*argoproj.io\/\s*/);

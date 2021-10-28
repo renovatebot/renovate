@@ -410,7 +410,7 @@ describe('platform/bitbucket-server/index', () => {
               mergeConfig: null,
             });
           const actual = await bitbucket.getRepoForceRebase();
-          expect(actual).toBe(false);
+          expect(actual).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -427,7 +427,7 @@ describe('platform/bitbucket-server/index', () => {
               },
             });
           const actual = await bitbucket.getRepoForceRebase();
-          expect(actual).toBe(false);
+          expect(actual).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -448,7 +448,7 @@ describe('platform/bitbucket-server/index', () => {
                 },
               });
             const actual = await bitbucket.getRepoForceRebase();
-            expect(actual).toBe(true);
+            expect(actual).toBeTrue();
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
@@ -470,7 +470,7 @@ describe('platform/bitbucket-server/index', () => {
                 },
               });
             const actual = await bitbucket.getRepoForceRebase();
-            expect(actual).toBe(false);
+            expect(actual).toBeFalse();
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
@@ -677,7 +677,7 @@ describe('platform/bitbucket-server/index', () => {
             topic: 'topic',
             content: 'content',
           });
-          expect(res).toBe(false);
+          expect(res).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -721,7 +721,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: 'topic',
               content: 'content',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -765,7 +765,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: null,
               content: 'content',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -815,7 +815,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: 'some-subject',
               content: 'some\ncontent',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -859,7 +859,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: null,
               content: 'some\ncontent',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -899,7 +899,7 @@ describe('platform/bitbucket-server/index', () => {
               topic: 'some-subject',
               content: 'blablabla',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -938,7 +938,7 @@ describe('platform/bitbucket-server/index', () => {
             topic: null,
             content: '!merge',
           });
-          expect(res).toBe(true);
+          expect(res).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1597,7 +1597,7 @@ describe('platform/bitbucket-server/index', () => {
               branchName: 'branch',
               id: 5,
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1699,7 +1699,7 @@ describe('platform/bitbucket-server/index', () => {
               branchName: 'branch',
               id: 5,
             })
-          ).resolves.toBe(false);
+          ).resolves.toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1716,7 +1716,7 @@ describe('platform/bitbucket-server/index', () => {
         it('sanitizes HTML comments in the body', () => {
           const prBody = bitbucket.massageMarkdown(`---
 
-- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box
+- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
 - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
 ---
@@ -1749,10 +1749,6 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
-            BranchStatus.green
-          );
-
           expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.green
           );
@@ -1772,7 +1768,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.yellow
           );
 
@@ -1786,7 +1782,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.yellow
           );
 
@@ -1805,7 +1801,7 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.red
           );
 
@@ -1815,7 +1811,7 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.red
           );
 
@@ -1825,9 +1821,9 @@ Followed by some information.
         it('throws repository-changed', async () => {
           git.branchExists.mockReturnValue(false);
           await initRepo();
-          await expect(
-            bitbucket.getBranchStatus('somebranch', [])
-          ).rejects.toThrow(REPOSITORY_CHANGED);
+          await expect(bitbucket.getBranchStatus('somebranch')).rejects.toThrow(
+            REPOSITORY_CHANGED
+          );
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
