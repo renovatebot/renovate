@@ -79,7 +79,10 @@ const lexer = moo.states({
       push: 'characterRange',
       value: (_: string) => '[',
     },
-    char: /[^*?\\[\n]/, // TODO #12070
+    char: {
+      match: /[^*?\\[\n]/,
+      value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
+    },
     escapedChar: {
       match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
@@ -156,10 +159,10 @@ export async function versionInfo(
   return result;
 }
 
-export async function getReleases(
-  config: GetReleasesConfig
-): Promise<ReleaseResult | null> {
-  const { lookupName } = config;
+export async function getReleases({
+  lookupName,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
+  logger.trace(`goproxy.getReleases(${lookupName})`);
 
   const noproxy = parseNoproxy();
   if (noproxy?.test(lookupName)) {

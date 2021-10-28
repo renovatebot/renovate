@@ -1,153 +1,18 @@
-import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
-import * as github from '../github-tags';
-import * as gitlab from '../gitlab-tags';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as goproxy from './goproxy';
-import { bitbucket, getDatasource } from './util';
+import { getReleases as directReleases } from './releases-direct';
 
 export { id } from './common';
 
 export const customRegistrySupport = false;
 
-/**
- * go.getReleases
- *
- * This datasource resolves a go module URL into its source repository
- *  and then fetch it if it is on GitHub.
- *
- * This function will:
- *  - Determine the source URL for the module
- *  - Call the respective getReleases in github/gitlab to retrieve the tags
- *  - Filter module tags according to the module path
- */
 export async function getReleases(
   config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
-  const { lookupName } = config;
-
-  let res: ReleaseResult = null;
-
-  logger.trace(`goproxy.getReleases(${lookupName})`);
-  res = await goproxy.getReleases(config);
+  const res = await goproxy.getReleases(config);
   if (res) {
     return res;
   }
 
-  logger.trace(`go.getReleases(${lookupName})`);
-  const source = await getDatasource(lookupName);
-
-  if (!source) {
-    logger.info(
-      { lookupName },
-      'Unsupported go host - cannot look up versions'
-    );
-    return null;
-  }
-
-  switch (source.datasource) {
-    case github.id: {
-      res = await github.getReleases(source);
-      break;
-    }
-    case gitlab.id: {
-      res = await gitlab.getReleases(source);
-      break;
-    }
-    case bitbucket.id: {
-      res = await bitbucket.getReleases(source);
-      break;
-    }
-    /* istanbul ignore next: can never happen, makes lint happy */
-    default: {
-      return null;
-    }
-  }
-
-  // istanbul ignore if
-  if (!res) {
-    return null;
-  }
-
-  /**
-   * github.com/org/mod/submodule should be tagged as submodule/va.b.c
-   * and that tag should be used instead of just va.b.c, although for compatibility
-   * the old behaviour stays the same.
-   */
-  const nameParts = lookupName.replace(regEx(/\/v\d+$/), '').split('/');
-  logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
-
-  // If it has more than 3 parts it's a submodule or subgroup (gitlab only)
-  if (nameParts.length > 3) {
-    const prefix = nameParts.slice(3, nameParts.length).join('/');
-    logger.trace(`go.getReleases.prefix:${prefix}`);
-
-    // Filter the releases so that we only get the ones that are for this submodule
-    // Also trim the submodule prefix from the version number
-    const submodReleases = res.releases
-      .filter((release) => release.version?.startsWith(prefix))
-      .map((release) => {
-        const r2 = release;
-        r2.version = r2.version.replace(`${prefix}/`, '');
-        return r2;
-      });
-    logger.trace({ submodReleases }, 'go.getReleases');
-
-    // If not from gitlab -> no subgroups -> must be submodule
-    // If from gitlab and directory one level above has tags -> has to be submodule, since groups can't have tags
-    // If not, it's simply a repo in a subfolder, and the normal tags are used.
-    if (
-      !(source.datasource === gitlab.id) ||
-      (source.datasource === gitlab.id && submodReleases.length)
-    ) {
-      return {
-        sourceUrl: res.sourceUrl,
-        releases: submodReleases,
-      };
-    }
-  }
-
-  if (res.releases) {
-    res.releases = res.releases.filter((release) =>
-      release.version?.startsWith('v')
-    );
-  }
-
-  return res;
-}
-
-/**
- * go.getDigest
- *
- * This datasource resolves a go module URL into its source repository
- *  and then fetches the digest it if it is on GitHub.
- *
- * This function will:
- *  - Determine the source URL for the module
- *  - Call the respective getDigest in github to retrieve the commit hash
- */
-export async function getDigest(
-  { lookupName }: Partial<DigestConfig>,
-  value?: string
-): Promise<string | null> {
-  const source = await getDatasource(lookupName);
-  if (!source) {
-    return null;
-  }
-
-  // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
-  const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
-
-  switch (source.datasource) {
-    case github.id: {
-      return github.getDigest(source, tag);
-    }
-    case bitbucket.id: {
-      return bitbucket.getDigest(source, tag);
-    }
-    /* istanbul ignore next: can never happen, makes lint happy */
-    default: {
-      return null;
-    }
-  }
+  return directReleases(config);
 }

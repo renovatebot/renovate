@@ -172,24 +172,6 @@ describe('datasource/pypi/index', () => {
       expect(result.changelogUrl).toBe(info.project_urls.changelog);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null if mismatched name', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/something/json')
-        .reply(200, {
-          info: {
-            name: 'something-else',
-            home_page: 'https://microsoft.com',
-          },
-        });
-      expect(
-        await getPkgReleases({
-          datasource,
-          depName: 'something',
-        })
-      ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
 
     it('respects constraints', async () => {
       httpMock
