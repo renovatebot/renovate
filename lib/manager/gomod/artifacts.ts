@@ -57,13 +57,13 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
       hostRule.matchHost &&
       goGitAllowedHostType.includes(hostRule.hostType)
     ) {
-      const httpUrl = createURLFromHostOrURL(hostRule.matchHost);
-      if (validateUrl(httpUrl?.toString())) {
+      const httpUrl = createURLFromHostOrURL(hostRule.matchHost).toString();
+      if (validateUrl(httpUrl)) {
         logger.debug(
-          `Adding Git authentication for Go Module retrieval for ${httpUrl.toString()} using token auth.`
+          `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
         );
         environmentVariables = getGitAuthenticatedEnvironmentVariables(
-          httpUrl.toString(),
+          httpUrl,
           hostRule.token,
           environmentVariables
         );
