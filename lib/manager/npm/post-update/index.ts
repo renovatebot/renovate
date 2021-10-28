@@ -373,8 +373,8 @@ async function updateYarnOffline(
   }
 }
 
-// istanbul ignore next
-async function updateYarnBinary(
+// exported for testing
+export async function updateYarnBinary(
   lockFileDir: string,
   updatedArtifacts: UpdatedArtifacts[],
   existingYarnrcYmlContent: string | undefined
@@ -410,7 +410,7 @@ async function updateYarnBinary(
         executable: true,
       }
     );
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'Error updating Yarn binary');
   }
   return existingYarnrcYmlContent && yarnrcYml;
