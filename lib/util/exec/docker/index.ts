@@ -4,6 +4,7 @@ import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
+import { regEx } from '../../regex';
 import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
@@ -119,7 +120,7 @@ export async function getDockerTag(
 }
 
 function getContainerName(image: string, prefix?: string): string {
-  return `${prefix || 'renovate_'}${image}`.replace(/\//g, '_');
+  return `${prefix || 'renovate_'}${image}`.replace(regEx(/\//g), '_');
 }
 
 function getContainerLabel(prefix: string): string {
@@ -257,7 +258,7 @@ export async function generateDockerCommand(
     ...commands,
     ...prepareCommands(postCommands),
   ].join(' && ');
-  result.push(`bash -l -c "${bashCommand.replace(/"/g, '\\"')}"`); // lgtm [js/incomplete-sanitization]
+  result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');
 }

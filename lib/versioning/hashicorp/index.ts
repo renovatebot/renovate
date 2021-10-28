@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -11,7 +12,7 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function hashicorp2npm(input: string): string {
   // The only case incompatible with semver is a "short" ~>, e.g. ~> 1.2
-  return input.replace(/~>(\s*\d+\.\d+$)/, '^$1').replace(',', '');
+  return input.replace(regEx(/~>(\s*\d+\.\d+$)/), '^$1').replace(',', '');
 }
 
 const isLessThanRange = (version: string, range: string): boolean =>
@@ -36,8 +37,11 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (['replace', 'update-lockfile'].includes(rangeStrategy)) {
-    if (/~>\s*0\.\d+/.test(currentValue) && npm.getMajor(newVersion) === 0) {
-      const testFullVersion = /(~>\s*0\.)(\d+)\.\d$/;
+    if (
+      regEx(/~>\s*0\.\d+/).test(currentValue) &&
+      npm.getMajor(newVersion) === 0
+    ) {
+      const testFullVersion = regEx(/(~>\s*0\.)(\d+)\.\d$/);
       let replaceValue = '';
       if (testFullVersion.test(currentValue)) {
         replaceValue = `$<prefix>${npm.getMinor(newVersion)}.0`;
@@ -45,14 +49,14 @@ function getNewValue({
         replaceValue = `$<prefix>${npm.getMinor(newVersion)}$<suffix>`;
       }
       return currentValue.replace(
-        /(?<prefix>~>\s*0\.)\d+(?<suffix>.*)$/,
+        /(?<prefix>~>\s*0\.)\d+(?<suffix>.*)$/, // TODO #12070
         replaceValue
       );
     }
     // handle special ~> 1.2 case
-    if (/(~>\s*)\d+\.\d+$/.test(currentValue)) {
+    if (regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
       return currentValue.replace(
-        /(?<prefix>~>\s*)\d+\.\d+$/,
+        /(?<prefix>~>\s*)\d+\.\d+$/, // TODO #12070
         `$<prefix>${npm.getMajor(newVersion)}.0`
       );
     }

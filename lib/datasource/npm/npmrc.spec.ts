@@ -51,6 +51,6 @@ describe('datasource/npm/npmrc', () => {
   it('ignores localhost', () => {
     setNpmrc(`registry=http://localhost`);
     expect(sanitize.add).toHaveBeenCalledTimes(0);
-    expect(getNpmrc()).toEqual({});
+    expect(getNpmrc()).toBeEmptyObject();
   });
 });

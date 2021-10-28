@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 3am on the first day of the month',
@@ -10,7 +11,7 @@ const scheduleMappings: Record<string, string> = {
 };
 
 function fixShortHours(input: string): string {
-  return input.replace(/( \d?\d)((a|p)m)/g, '$1:00$2');
+  return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
 }
 
 export function hasValidTimezone(
