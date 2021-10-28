@@ -37,7 +37,7 @@ describe('versioning/index', () => {
 
     for (const name of vers.keys()) {
       const ver = vers.get(name);
-      expect(validate(ver, name)).toBe(true);
+      expect(validate(ver, name)).toBeTrue();
     }
   });
 

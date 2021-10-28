@@ -55,7 +55,7 @@ export function emojify(text: string): string {
 const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
   ({ source }) => source
 );
-const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g');
+const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g'); // TODO #12070
 const excludedModifiers = new Set([
   '20E3',
   '200D',
