@@ -119,24 +119,19 @@ function handleAny(
 
 function mergeGroups(
   mergedGroup: Record<string, string>,
-  secondGroup: Record<string, string>,
-  onlyValidMatchFields = true
+  secondGroup: Record<string, string>
 ): Record<string, string> {
-  const resultGroup = Object.create(null);
+  const resultGroup = Object.create(null); // prevent prototype pollution
 
-  Object.keys(mergedGroup)
-    .filter((key) => !onlyValidMatchFields || validMatchFields.includes(key)) // prevent prototype pollution
-    .forEach(
-      // eslint-disable-next-line no-return-assign
-      (key) => (resultGroup[key] = mergedGroup[key])
-    );
-  Object.keys(secondGroup)
-    .filter((key) => !onlyValidMatchFields || validMatchFields.includes(key)) // prevent prototype pollution
-    .forEach((key) => {
-      if (secondGroup[key] && secondGroup[key] !== '') {
-        resultGroup[key] = secondGroup[key];
-      }
-    });
+  Object.keys(mergedGroup).forEach(
+    // eslint-disable-next-line no-return-assign
+    (key) => (resultGroup[key] = mergedGroup[key])
+  );
+  Object.keys(secondGroup).forEach((key) => {
+    if (secondGroup[key] && secondGroup[key] !== '') {
+      resultGroup[key] = secondGroup[key];
+    }
+  });
   return resultGroup;
 }
 
@@ -188,7 +183,7 @@ function handleRecursive(
     if (match?.groups?.depName && match?.groups?.currentValue) {
       return createDependency(
         match,
-        mergeGroups(combinedGroups, match.groups, false),
+        mergeGroups(combinedGroups, match.groups),
         config
       );
     }
@@ -198,7 +193,7 @@ function handleRecursive(
       packageFile,
       config,
       index + 1,
-      mergeGroups(combinedGroups, match.groups || {}, false)
+      mergeGroups(combinedGroups, match.groups || {})
     );
   });
 }

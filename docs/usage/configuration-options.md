@@ -2027,7 +2027,7 @@ All matches of the first `matchStrings` pattern are detected, then each of these
 If the next `matchStrings` pattern has multiple matches then it will split again.
 This process will be followed as long there is a match plus a next `matchingStrings` pattern is available or a dependency is detected.
 
-Matched group values will be merged to form a single dependency.
+Matched groups will be available in subsequent matching layers.
 
 This is an example how this can work.
 The first regex manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.

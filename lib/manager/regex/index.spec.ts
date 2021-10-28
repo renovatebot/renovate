@@ -366,6 +366,6 @@ describe('manager/regex/index', () => {
       config
     );
     expect(res).toMatchSnapshot();
-    expect(res.deps).toHaveLength(1);
+    expect(res.deps).toHaveLength(4);
   });
 });
