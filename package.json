@@ -273,7 +273,7 @@
     "strip-ansi": "6.0.1",
     "tmp-promise": "3.0.2",
     "ts-jest": "27.0.7",
-    "ts-node": "10.3.0",
+    "ts-node": "10.3.1",
     "type-fest": "2.5.1",
     "typescript": "4.4.4",
     "unified": "9.2.2"
