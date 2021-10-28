@@ -101,11 +101,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'onboardingNoDeps',
-    description: 'Onboard repository even if no dependencies found for update.',
+    description: 'Onboard repository even if no dependencies found.',
     type: 'boolean',
     default: false,
     globalOnly: true,
-    cli: false,
   },
   {
     name: 'onboardingPrTitle',

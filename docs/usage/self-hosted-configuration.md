@@ -300,8 +300,8 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
 
-Set this to true if you want Renovate to create the onboarding PR even if no dependencies are found for update.
-By default Renovate skips the repo if it finds no dependencies in it.
+Set this to true if you want Renovate to create an onboarding PR even if no dependencies are found.
+Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
 
 ## onboardingPrTitle
 
