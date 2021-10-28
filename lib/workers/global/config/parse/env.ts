@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-
 import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';

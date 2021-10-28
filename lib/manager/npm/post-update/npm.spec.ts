@@ -158,7 +158,7 @@ describe('manager/npm/post-update/npm', () => {
       'package-lock.json'
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBe(true);
+    expect(res.error).toBeTrue();
     expect(res.lockFile).not.toBeDefined();
     expect(execSnapshots).toMatchSnapshot();
   });

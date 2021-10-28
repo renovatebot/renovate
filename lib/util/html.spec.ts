@@ -7,7 +7,7 @@ describe('util/html', () => {
     const div = body.childNodes[0] as HTMLElement;
     expect(div.tagName).toBe('DIV');
     expect(div.textContent).toBe('Hello, world!');
-    expect(div instanceof HTMLElement).toBe(true);
+    expect(div instanceof HTMLElement).toBeTrue();
   });
   it('returns empty', () => {
     const body = parse('');
