@@ -1,6 +1,6 @@
 import { loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
 import {
@@ -54,7 +54,7 @@ describe('manager/kustomize/extract', () => {
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
-        datasource: datasourceGitTags.id,
+        datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com/user/test-repo',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
@@ -65,7 +65,7 @@ describe('manager/kustomize/extract', () => {
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
-        datasource: datasourceGitTags.id,
+        datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com:7999/user/test-repo',
         lookupName: 'ssh://git@bitbucket.com:7999/user/test-repo',
       });
@@ -76,7 +76,7 @@ describe('manager/kustomize/extract', () => {
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
-        datasource: datasourceGitTags.id,
+        datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com/user/test-repo',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
