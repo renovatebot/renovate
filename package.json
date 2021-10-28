@@ -202,7 +202,6 @@
   },
   "devDependencies": {
     "@actions/core": "1.6.0",
-    "@aws-sdk/client-s3": "3.35.0",
     "@jest/globals": "27.3.1",
     "@jest/reporters": "27.3.1",
     "@jest/test-result": "27.3.1",
