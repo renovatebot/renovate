@@ -237,10 +237,25 @@ describe('manager/gomod/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '2',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+              GIT_CONFIG_VALUE_1: 'https://github.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
   });
 
-  it('supports docker mode with multiple credentials', async () => {
+  it('supports docker mode with single credential', async () => {
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.getAll.mockReturnValueOnce([
       {
@@ -263,7 +278,20 @@ describe('manager/gomod/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-enterprise-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
   });
 
   it('supports docker mode with multiple credentials for different paths', async () => {
@@ -293,7 +321,23 @@ describe('manager/gomod/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '2',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/repo1',
+              GIT_CONFIG_VALUE_1: 'https://gitlab.enterprise.com/repo2',
+            }),
+          }),
+        }),
+      ])
+    );
   });
 
   it('supports docker mode and ignores non http credentials', async () => {
@@ -323,7 +367,20 @@ describe('manager/gomod/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
   });
 
   it('supports docker mode with many credentials', async () => {
@@ -360,7 +417,28 @@ describe('manager/gomod/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '4',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-token@api.github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_3:
+                'url.https://some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+              GIT_CONFIG_VALUE_1: 'https://api.github.com/',
+              GIT_CONFIG_VALUE_2: 'https://github.enterprise.com/',
+              GIT_CONFIG_VALUE_3: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
   });
 
   it('supports docker mode and ignores non git credentials', async () => {
@@ -390,7 +468,19 @@ describe('manager/gomod/artifacts', () => {
         config,
       })
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+            }),
+          }),
+        }),
+      ])
+    );
   });
 
   it('supports docker mode with goModTidy', async () => {
