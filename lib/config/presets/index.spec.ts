@@ -224,7 +224,7 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
-      expect(rule.automerge).toBe(true);
+      expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(4);
       expect(rule.matchPackagePatterns).toHaveLength(1);
       expect(rule.matchPackagePrefixes).toHaveLength(4);
@@ -234,7 +234,7 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.automerge).not.toBeDefined();
-      expect(res.minor.automerge).toBe(true);
+      expect(res.minor.automerge).toBeTrue();
     });
 
     it('ignores presets', async () => {
@@ -243,7 +243,7 @@ describe('config/presets/index', () => {
         'config:base',
       ]);
       expect(config).toMatchObject(res);
-      expect(res).toEqual({});
+      expect(res).toBeEmptyObject();
     });
 
     it('resolves self-hosted presets without baseConfig', async () => {

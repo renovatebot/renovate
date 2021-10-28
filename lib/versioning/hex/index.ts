@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -9,11 +10,11 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function hex2npm(input: string): string {
   return input
-    .replace(/~>\s*(\d+\.\d+)$/, '^$1')
-    .replace(/~>\s*(\d+\.\d+\.\d+)/, '~$1')
-    .replace(/==|and/, '')
+    .replace(regEx(/~>\s*(\d+\.\d+)$/), '^$1') // TODO #12071
+    .replace(regEx(/~>\s*(\d+\.\d+\.\d+)/), '~$1') // TODO #12071
+    .replace(regEx(/==|and/), '') // TODO #12071
     .replace('or', '||')
-    .replace(/!=\s*(\d+\.\d+(\.\d+.*)?)/, '>$1 <$1')
+    .replace(regEx(/!=\s*(\d+\.\d+(\.\d+.*)?)/), '>$1 <$1') // TODO #12071
     .trim();
 }
 
@@ -69,18 +70,18 @@ const getNewValue = ({
     newVersion,
   });
   newSemver = npm2hex(newSemver);
-  if (/~>\s*(\d+\.\d+\.\d+)$/.test(currentValue)) {
+  if (regEx(/~>\s*(\d+\.\d+\.\d+)$/).test(currentValue)) {
     newSemver = newSemver.replace(
-      /[\^~]\s*(\d+\.\d+\.\d+)/,
+      regEx(/[\^~]\s*(\d+\.\d+\.\d+)/),
       (_str, p1: string) => `~> ${p1}`
     );
-  } else if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
+  } else if (regEx(/~>\s*(\d+\.\d+)$/).test(currentValue)) {
     newSemver = newSemver.replace(
-      /\^\s*(\d+\.\d+)(\.\d+)?/,
+      regEx(/\^\s*(\d+\.\d+)(\.\d+)?/),
       (_str, p1: string) => `~> ${p1}`
     );
   } else {
-    newSemver = newSemver.replace(/~\s*(\d+\.\d+\.\d)/, '~> $1');
+    newSemver = newSemver.replace(regEx(/~\s*(\d+\.\d+\.\d)/), '~> $1');
   }
   if (npm.isVersion(newSemver)) {
     newSemver = `== ${newSemver}`;

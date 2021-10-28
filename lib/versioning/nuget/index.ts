@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import * as generic from '../loose/generic';
 import type { VersioningApi } from '../types';
 
@@ -8,7 +9,7 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const pattern = /^(\d+(?:\.\d+)*)(-[^+]+)?(\+.*)?$/;
+const pattern = regEx(/^(\d+(?:\.\d+)*)(-[^+]+)?(\+.*)?$/);
 
 function parse(version: string): any {
   const matches = pattern.exec(version);

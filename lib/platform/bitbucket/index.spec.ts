@@ -151,7 +151,7 @@ describe('platform/bitbucket/index', () => {
   describe('getRepoForceRebase()', () => {
     it('always return false, since bitbucket does not support force rebase', async () => {
       const actual = await bitbucket.getRepoForceRebase();
-      expect(actual).toBe(false);
+      expect(actual).toBeFalse();
     });
   });
 
@@ -906,7 +906,7 @@ describe('platform/bitbucket/index', () => {
         id: 5,
         strategy: 'rebase',
       });
-      expect(httpMock.getTrace()).toEqual([]);
+      expect(httpMock.getTrace()).toBeEmptyArray();
     });
 
     it('posts Merge with fast-forward', async () => {
