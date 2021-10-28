@@ -158,9 +158,9 @@ describe('util/package-rules', () => {
       ],
     };
     const res = applyPackageRules(dep);
-    expect(res.enabled).toBe(true);
+    expect(res.enabled).toBeTrue();
     const res2 = applyPackageRules({ ...dep, depName: 'anything' });
-    expect(res2.enabled).toBe(false);
+    expect(res2.enabled).toBeFalse();
   });
   it('matches anything if missing inclusive rules', () => {
     const config: TestConfig = {

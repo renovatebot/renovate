@@ -128,6 +128,7 @@ export async function updateArtifacts({
         GOPRIVATE: process.env.GOPRIVATE,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
+        GOSUMDB: process.env.GOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: getGlobalConfig().binarySource === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
@@ -159,9 +160,17 @@ export async function updateArtifacts({
       }
     }
 
-    const isGoModTidyRequired =
-      config.postUpdateOptions?.includes('gomodTidy') ||
+    const mustSkipGoModTidy =
+      !config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
+    if (mustSkipGoModTidy) {
+      logger.debug({ cmd, args }, 'go mod tidy command skipped');
+    }
+
+    const isGoModTidyRequired =
+      !mustSkipGoModTidy &&
+      (config.postUpdateOptions?.includes('gomodTidy') ||
+        (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy';
       logger.debug({ cmd, args }, 'go mod tidy command included');

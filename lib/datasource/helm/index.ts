@@ -3,6 +3,7 @@ import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { ensureTrailingSlash } from '../../util/url';
+import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { findSourceUrl } from './common';
@@ -23,6 +24,8 @@ export class HelmDatasource extends Datasource {
       commitMessageTopic: '{{{groupName}}} Helm releases',
     },
   };
+
+  override readonly defaultVersioning = helmVersioning.id;
 
   @cache({
     namespace: `datasource-${HelmDatasource.id}`,

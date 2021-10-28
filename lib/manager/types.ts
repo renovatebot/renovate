@@ -35,6 +35,7 @@ export interface CustomExtractConfig extends ExtractConfig {
   lookupNameTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
+  depTypeTemplate?: string;
 }
 
 export interface UpdateArtifactsConfig {
