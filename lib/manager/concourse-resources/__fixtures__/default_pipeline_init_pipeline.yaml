@@ -1,0 +1,55 @@
+# Default pipeline for test-pipeline.
+# This is a YAML-formatted file.
+
+resource_types:
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: teliaoss/github-pr-resource
+      tag: v0.19.1
+
+resources:
+  - name: master
+    type: git
+    check_every: 24h
+    webhook_token: ((github_webhook_token))
+    source:
+      uri: git@github.com:((organization))/((repository)).git
+      branch: master
+      private_key: ((github_private_key))
+  - name: pull-request
+    type: pull-request
+    check_every: 24h
+    webhook_token: ((github_webhook_token))
+    source:
+      access_token: ((concourse_svc_github_status_token))
+      repository: ((organization))/((repository))
+      v3_endpoint: https://github.com/api/v3
+      v4_endpoint: https://github.com/api/graphql
+
+jobs:
+  - name: set-pipeline
+    build_log_retention:
+      builds: 50
+    plan:
+      - get: master
+        trigger: true
+      - set_pipeline: ((repository))
+        file: master/ci/pipeline.yml
+        var_files:
+          - master/ci/pipeline-vars.yml
+  - name: pull-request
+    build_log_retention:
+      builds: 50
+    serial: true
+    plan:
+      - in_parallel:
+          - get: master
+            resource: ((repository))
+          - get: pull-request
+            trigger: true
+      - put: update-status
+        resource: pull-request
+        params:
+          path: pull-request
+          status: pending

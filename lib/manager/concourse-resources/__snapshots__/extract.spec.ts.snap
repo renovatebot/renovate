@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/concourse-pipeline/extract extractPackageFile() extracts from pipeline.yaml correctly 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v0.19.1",
+      "datasource": "docker",
+      "depName": "teliaoss/github-pr-resource",
+      "replaceString": "v0.19.1",
+      "versioning": "docker",
+    },
+  ],
+}
+`;
