@@ -56,14 +56,19 @@ This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a constraint
 
 ### Custom registry support, and authentication
 
-This example shows how you can use a `config.js` file to configure Renovate for use with a custom private Go module source using Git to pull the modules when updating `go.sum` and vendored modules.
-We're using ([`GIT_CONFIG_`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT)) environment variables to pass the Git token to Renovate bot.
+This example shows how you can use a `hostRule` configuration to configure Renovate for use with a custom private Go module source using Git to pull the modules when updating `go.sum` and vendored modules.
+All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, ... ) and host rules without a `hostType` are setup for authentication.
 
 ```js
 module.exports = {
   hostRules: [
     {
       matchHost: 'github.enterprise.com',
+      token: process.env.GO_GITHUB_TOKEN,
+      hostType: 'github',
+    },
+    {
+      matchHost: 'someGitHost.enterprise.com',
       token: process.env.GO_GIT_TOKEN,
     },
   ],
