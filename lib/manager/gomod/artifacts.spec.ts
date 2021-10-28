@@ -494,6 +494,57 @@ describe('manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('skips gomodTidy without gomodUpdateImportPaths on major update', async () => {
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readFile
+      .mockResolvedValueOnce('New go.sum' as any)
+      .mockResolvedValueOnce('New main.go' as any)
+      .mockResolvedValueOnce('New go.mod' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          newMajor: 28,
+          postUpdateOptions: ['gomodTidy'],
+        },
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set', async () => {
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readFile
+      .mockResolvedValueOnce('New go.sum' as any)
+      .mockResolvedValueOnce('New main.go' as any)
+      .mockResolvedValueOnce('New go.mod' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          newMajor: 28,
+        },
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('updates import paths with specific tool version from constraint', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename

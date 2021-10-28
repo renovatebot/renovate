@@ -49,7 +49,7 @@ describe('datasource/github-releases/index', () => {
       ).toBeDefined();
       expect(
         res.releases.find((release) => release.version === '2.0.0').isStable
-      ).toBe(false);
+      ).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports ghe', async () => {

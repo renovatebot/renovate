@@ -40,10 +40,10 @@ describe('util/fs/index', () => {
 
   describe('localPathExists', () => {
     it('returns true for file', async () => {
-      expect(await localPathExists(__filename)).toBe(true);
+      expect(await localPathExists(__filename)).toBeTrue();
     });
     it('returns true for directory', async () => {
-      expect(await localPathExists(getSubDirectory(__filename))).toBe(true);
+      expect(await localPathExists(getSubDirectory(__filename))).toBeTrue();
     });
     it('returns false', async () => {
       expect(await localPathExists(__filename.replace('.ts', '.txt'))).toBe(

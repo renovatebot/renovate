@@ -1,5 +1,5 @@
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
@@ -50,14 +50,14 @@ function handleGitDep(
   nameMatch: RegExpExecArray
 ): void {
   /* eslint-disable no-param-reassign */
-  dep.datasource = datasourceGitTags.id;
+  dep.datasource = GitTagsDatasource.id;
 
   if (nameMatch) {
     // if a github.com repository is referenced use github-tags instead of git-tags
     if (nameMatch.groups.hostname === 'github.com') {
       dep.datasource = datasourceGithubTags.id;
     } else {
-      dep.datasource = datasourceGitTags.id;
+      dep.datasource = GitTagsDatasource.id;
     }
     // source definition without version appendix
     const source = nameMatch.groups.source;
