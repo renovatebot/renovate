@@ -7,6 +7,7 @@ import {
   valid,
 } from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
 import { ltr, parse as parseRange } from './range';
@@ -25,7 +26,7 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function vtrim<T = unknown>(version: T): string | T {
   if (typeof version === 'string') {
-    return version.replace(/^v/, '').replace(/('|")/g, '');
+    return version.replace(regEx(/^v/), '').replace(regEx(/('|")/g), '');
   }
   return version;
 }
@@ -87,7 +88,7 @@ const getNewValue = ({
   let newValue = null;
   if (isVersion(currentValue)) {
     newValue = currentValue.startsWith('v') ? 'v' + newVersion : newVersion;
-  } else if (currentValue.replace(/^=\s*/, '') === currentVersion) {
+  } else if (currentValue.replace(regEx(/^=\s*/), '') === currentVersion) {
     newValue = currentValue.replace(currentVersion, newVersion);
   } else {
     switch (rangeStrategy) {
@@ -122,12 +123,18 @@ const getNewValue = ({
         logger.warn(`Unsupported strategy ${rangeStrategy}`);
     }
   }
-  if (/^('|")/.exec(currentValue)) {
+  if (regEx(/^('|")/).exec(currentValue)) {
     const delimiter = currentValue[0];
     return newValue
       .split(',')
-      .map((element) => element.replace(/^(\s*)/, `$1${delimiter}`))
-      .map((element) => element.replace(/(\s*)$/, `${delimiter}$1`))
+      .map(
+        (element) =>
+          element.replace(/^(?<whitespace>\s*)/, `$<whitespace>${delimiter}`) // TODO #12071 #12070
+      )
+      .map(
+        (element) =>
+          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12071 #12070
+      )
       .join(',');
   }
   return newValue;

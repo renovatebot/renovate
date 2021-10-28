@@ -9,6 +9,7 @@ import {
 } from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { NewValueConfig } from '../types';
 
 function replaceCaretValue(oldValue: string, newValue: string): string {
@@ -234,7 +235,7 @@ export function getNewValue({
       res = `<${toVersionMajor + 1}`;
     }
     if (currentValue.includes('< ')) {
-      res = res.replace(/</g, '< ');
+      res = res.replace(regEx(/</g), '< ');
     }
     return res;
   }

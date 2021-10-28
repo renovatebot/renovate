@@ -3,6 +3,7 @@ import {
   SegmentElement,
   create,
 } from '@renovatebot/ruby-semver/dist/ruby/version';
+import { regEx } from '../../util/regex';
 
 interface RubyVersion {
   major: number;
@@ -71,7 +72,7 @@ const increment = (from: string, to: string): string => {
     return incrementLastSegment(from);
   }
 
-  const isStable = (x: string): boolean => /^[0-9.-/]+$/.test(x);
+  const isStable = (x: string): boolean => regEx(/^[0-9.-/]+$/).test(x);
   if (major(from) !== major(adapted)) {
     nextVersion = [incrementMajor(maj, min, ptch, pre || []), 0, 0].join('.');
   } else if (minor(from) !== minor(adapted)) {

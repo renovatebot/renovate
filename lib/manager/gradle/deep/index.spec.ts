@@ -176,7 +176,7 @@ describe('manager/gradle/deep/index', () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      expect(dependencies).toEqual([]);
+      expect(dependencies).toBeEmptyArray();
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -185,7 +185,7 @@ describe('manager/gradle/deep/index', () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      expect(dependencies).toEqual([]);
+      expect(dependencies).toBeEmptyArray();
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -194,7 +194,7 @@ describe('manager/gradle/deep/index', () => {
       const dependencies = await extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-      expect(dependencies).toEqual([]);
+      expect(dependencies).toBeEmptyArray();
       expect(execSnapshots).toMatchSnapshot();
     });
 

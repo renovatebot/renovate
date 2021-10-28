@@ -1,4 +1,4 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import * as datasourcePod from '../../datasource/pod';
@@ -72,7 +72,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   }
 
   return {
-    datasource: datasourceGitTags.id,
+    datasource: GitTagsDatasource.id,
     depName,
     lookupName: git,
     currentValue: tag,
