@@ -268,6 +268,51 @@ Array [
 ]
 `;
 
+exports[`manager/gomod/artifacts supports docker mode and ignores non git credentials 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/go:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_go -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 -e GIT_CONFIG_COUNT -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./...\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": "url.https://some-token@github.com/.insteadOf",
+        "GIT_CONFIG_VALUE_0": "https://github.com/",
+        "GOFLAGS": "-modcacherw",
+        "GONOPROXY": "noproxy.example.com/*",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPRIVATE": "private.example.com/*",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`manager/gomod/artifacts supports docker mode and ignores non http credentials 1`] = `
 Array [
   Object {

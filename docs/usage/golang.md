@@ -53,3 +53,19 @@ As an example, say you want Renovate to use the latest patch version of the `1.1
 
 We do not support patch level versions for the minimum `go` version.
 This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a constraint.
+
+### Custom registry support, and authentication
+
+This example shows how you can use a `config.js` file to configure Renovate for use with a custom private Go module source using Git to pull the modules when updating `go.sum` and vendored modules.
+We're using ([`GIT_CONFIG_`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT)) environment variables to pass the Git token to Renovate bot.
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'github.enterprise.com',
+      token: process.env.GO_GIT_TOKEN,
+    },
+  ],
+};
+```
