@@ -10,15 +10,15 @@ describe('workers/global/config/parse/env', () => {
     });
     it('supports boolean true', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'true' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(true);
+      expect(env.getConfig(envParam).recreateClosed).toBeTrue();
     });
     it('supports boolean false', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'false' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(false);
+      expect(env.getConfig(envParam).recreateClosed).toBeFalse();
     });
     it('supports boolean nonsense as false', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'foo' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(false);
+      expect(env.getConfig(envParam).recreateClosed).toBeFalse();
     });
     delete process.env.RENOVATE_RECREATE_CLOSED;
     it('supports list single', () => {
@@ -266,7 +266,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_TOKEN: 'a',
       };
       const config = env.getConfig(envParam);
-      expect(config.enabled).toBe(false);
+      expect(config.enabled).toBeFalse();
       expect(config.token).toBe('a');
     });
     describe('malformed RENOVATE_CONFIG', () => {
