@@ -36,7 +36,6 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   }
 
   // get extra host rules for other git-based Go Module hosts
-  // if none is returned, use an empty array
   const hostRules = getAll() || [];
 
   const goGitAllowedHostType: string[] = [
