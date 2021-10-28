@@ -439,7 +439,7 @@ describe('manager/dockerfile/extract', () => {
         res[1].depType === 'stage',
         res[0].depType === 'stage',
       ].every(Boolean);
-      expect(passed).toBe(true);
+      expect(passed).toBeTrue();
     });
 
     it('extracts images on adjacent lines', () => {

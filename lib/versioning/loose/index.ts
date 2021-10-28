@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import type { VersioningApi } from '../types';
 import * as generic from './generic';
 
@@ -6,9 +7,9 @@ export const displayName = 'Loose';
 export const urls = [];
 export const supportsRanges = false;
 
-const versionPattern = /^v?(\d+(?:\.\d+)*)(.*)$/;
-const commitHashPattern = /^[a-f0-9]{7,40}$/;
-const numericPattern = /^[0-9]+$/;
+const versionPattern = regEx(/^v?(\d+(?:\.\d+)*)(.*)$/);
+const commitHashPattern = regEx(/^[a-f0-9]{7,40}$/);
+const numericPattern = regEx(/^[0-9]+$/);
 
 function parse(version: string): any {
   if (commitHashPattern.test(version) && !numericPattern.test(version)) {
