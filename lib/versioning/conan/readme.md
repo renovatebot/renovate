@@ -9,7 +9,7 @@ More information can be found in the [Conan docs](https://docs.conan.io/en/lates
 | `5.45`                                           | equivalent to `5.45`                                                                                        |
 | `16.00`                                          | equivalent to `16.00`                                                                                       |
 | `2.8.3`                                          | equivalent to `2.8.3`                                                                                       |
-| `[>1.1 <2.1]`                                    | In such range                                                                                               |
+| `[>1.1 <2.1]`                                    | Keep version within range                                                                                               |
 | `[2.8]`                                          | equivalent to `=2.8`                                                                                        |
 | `[~=3.0]`                                        | compatible, according to semver                                                                             |
 | `[>1.1 \|\| 0.8]`                                | conditions can be OR'ed                                                                                     |
