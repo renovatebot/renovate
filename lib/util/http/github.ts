@@ -37,11 +37,7 @@ interface GithubGraphqlRepoData<T = unknown> {
 
 interface GithubGraphqlResponse<T = unknown> {
   data?: T;
-  errors?: {
-    type?: string;
-    message: string;
-    locations: unknown;
-  }[];
+  errors?: { message: string; locations: unknown }[];
 }
 
 function handleGotError(

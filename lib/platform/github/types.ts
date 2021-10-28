@@ -39,7 +39,6 @@ export interface GhRestPr extends GhPr {
   created_at: string;
   closed_at: string;
   user?: { login?: string };
-  node_id: string;
 }
 
 export interface GhGraphQlPr extends GhPr {
@@ -92,11 +91,5 @@ export interface GhRepo {
     target: {
       oid: string;
     };
-  };
-}
-
-export interface GhAutomergeResponse {
-  enablePullRequestAutoMerge: {
-    pullRequest: { number: number };
   };
 }

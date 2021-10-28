@@ -39,5 +39,4 @@ export interface Cache {
   revision?: number;
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
-  lastPlatformAutomergeFailure?: string;
 }

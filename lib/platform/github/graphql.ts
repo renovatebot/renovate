@@ -173,19 +173,3 @@ query($owner: String!, $name: String!) {
   }
 }
 `;
-
-export const enableAutoMergeMutation = `
-mutation EnablePullRequestAutoMerge(
-  $pullRequestId: ID!
-) {
-  enablePullRequestAutoMerge(
-    input: {
-      pullRequestId: $pullRequestId
-    }
-  ) {
-    pullRequest {
-      number
-    }
-  }
-}
-`;
