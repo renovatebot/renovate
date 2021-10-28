@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
+import { regEx } from '../../../../util/regex';
 import type { VersioningApi } from '../../../../versioning/types';
 import type { LookupUpdateConfig } from './types';
 
@@ -19,7 +20,7 @@ export function getCurrentVersion(
     return currentValue;
   }
   if (versioning.isSingleVersion(currentValue)) {
-    return currentValue.replace(/=/g, '').trim();
+    return currentValue.replace(regEx(/=/g), '').trim();
   }
   logger.trace(`currentValue ${currentValue} is range`);
   let useVersions = allVersions.filter((v) =>

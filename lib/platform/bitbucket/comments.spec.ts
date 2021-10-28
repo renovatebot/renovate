@@ -27,7 +27,7 @@ describe('platform/bitbucket/comments', () => {
           topic: 'topic',
           content: 'content',
         })
-      ).toBe(false);
+      ).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -47,7 +47,7 @@ describe('platform/bitbucket/comments', () => {
           topic: 'topic',
           content: 'content',
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -72,7 +72,7 @@ describe('platform/bitbucket/comments', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(res).toBe(true);
+      expect(res).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -96,7 +96,7 @@ describe('platform/bitbucket/comments', () => {
           topic: null,
           content: 'blablabla',
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

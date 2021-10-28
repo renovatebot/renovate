@@ -72,8 +72,7 @@ export async function generateLockFiles(
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
     lernaCommand += cmdOptions;
-    const allowUnstable = true; // lerna will pick the default installed npm@6 unless we use node@>=15
-    const tagConstraint = await getNodeConstraint(config, allowUnstable);
+    const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
@@ -82,7 +81,7 @@ export async function generateLockFiles(
       },
       docker: {
         image: 'node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
         preCommands,
       },

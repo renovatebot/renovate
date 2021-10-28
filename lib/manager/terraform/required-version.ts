@@ -20,8 +20,8 @@ export function extractTerraformRequiredVersion(
 
     const line = lines[lineNumber];
     // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-    const openBrackets = (line.match(/\{/g) || []).length;
-    const closedBrackets = (line.match(/\}/g) || []).length;
+    const openBrackets = (line.match(/\{/g) || []).length; // TODO #12070
+    const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12070
     braceCounter = braceCounter + openBrackets - closedBrackets;
 
     const kvMatch = keyValueExtractionRegex.exec(line);

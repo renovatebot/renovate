@@ -2,7 +2,8 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { logger, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
-import { id as datasource, getDigest } from '.';
+import { getDigest } from './digest';
+import { id as datasource } from '.';
 
 jest.mock('../../util/host-rules');
 

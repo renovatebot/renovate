@@ -11,6 +11,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -36,7 +37,11 @@ interface GithubGraphqlRepoData<T = unknown> {
 
 interface GithubGraphqlResponse<T = unknown> {
   data?: T;
-  errors?: { message: string; locations: unknown }[];
+  errors?: {
+    type?: string;
+    message: string;
+    locations: unknown;
+  }[];
 }
 
 function handleGotError(
@@ -149,7 +154,8 @@ interface GraphqlOptions {
 
 function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
-  const acceptStrings = typeof input === 'string' ? input.split(/\s*,\s*/) : [];
+  const acceptStrings =
+    typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
   if (
     !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
     acceptStrings.length < 2
@@ -338,7 +344,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error({ res }, 'Error fetching GraphQL nodes');
+          logger.error({ query, options, res }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }

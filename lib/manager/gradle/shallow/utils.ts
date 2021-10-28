@@ -111,7 +111,7 @@ export function isTOMLFile(path: string): boolean {
 }
 
 export function toAbsolutePath(packageFile: string): string {
-  return upath.join(packageFile.replace(/^[/\\]*/, '/'));
+  return upath.join(packageFile.replace(regEx(/^[/\\]*/), '/'));
 }
 
 export function reorderFiles(packageFiles: string[]): string[] {
