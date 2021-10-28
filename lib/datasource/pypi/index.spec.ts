@@ -94,7 +94,7 @@ describe('datasource/pypi/index', () => {
         datasource,
         depName: 'azure-cli-monitor',
       });
-      expect(res.isPrivate).toBe(true);
+      expect(res.isPrivate).toBeTrue();
     });
     it('supports multiple custom datasource urls', async () => {
       httpMock
@@ -170,24 +170,6 @@ describe('datasource/pypi/index', () => {
       });
       expect(result.sourceUrl).toBe(info.project_urls.Repository);
       expect(result.changelogUrl).toBe(info.project_urls.changelog);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('returns null if mismatched name', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/something/json')
-        .reply(200, {
-          info: {
-            name: 'something-else',
-            home_page: 'https://microsoft.com',
-          },
-        });
-      expect(
-        await getPkgReleases({
-          datasource,
-          depName: 'something',
-        })
-      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -273,7 +255,7 @@ describe('datasource/pypi/index', () => {
         constraints: { python: '2.7' },
         depName: 'dj-database-url',
       });
-      expect(res.isPrivate).toBe(true);
+      expect(res.isPrivate).toBeTrue();
     });
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock

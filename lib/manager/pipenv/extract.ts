@@ -5,15 +5,16 @@ import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { localPathExists } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { PipFile } from './types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
-const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
+const packageRegex = regEx(/^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i);
 const rangePattern: string = RANGE_PATTERN;
 
 const specifierPartPattern = `\\s*${rangePattern.replace(
-  /\?<\w+>/g,
+  regEx(/\?<\w+>/g),
   '?:'
 )}\\s*`;
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
@@ -24,7 +25,7 @@ function extractFromSection(
   if (!(section in pipfile)) {
     return [];
   }
-  const specifierRegex = new RegExp(`^${specifierPattern}$`);
+  const specifierRegex = regEx(`^${specifierPattern}$`);
   const pipfileSection = pipfile[section];
 
   const deps = Object.entries(pipfileSection)

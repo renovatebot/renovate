@@ -31,8 +31,8 @@ export function bumpPackageVersion(
     }
     logger.debug({ newPjVersion });
     bumpedContent = content.replace(
-      /("version":\s*")[^"]*/,
-      `$1${newPjVersion}`
+      /(?<version>"version":\s*")[^"]*/, // TODO #12070
+      `$<version>${newPjVersion}`
     );
     if (bumpedContent === content) {
       logger.debug('Version was already bumped');

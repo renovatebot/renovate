@@ -23,7 +23,7 @@ describe('workers/repository/updates/branchify', () => {
     it('returns empty', async () => {
       flattenUpdates.mockResolvedValueOnce([]);
       const res = await branchifyUpgrades(config, {});
-      expect(res.branches).toEqual([]);
+      expect(res.branches).toBeEmptyArray();
     });
     it('returns one branch if one input', async () => {
       flattenUpdates.mockResolvedValueOnce([

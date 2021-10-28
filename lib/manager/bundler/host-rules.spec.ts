@@ -42,21 +42,27 @@ describe('manager/bundler/host-rules', () => {
     it('returns an empty array if matchHost is missing', () => {
       delete hostRule.matchHost;
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toBeEmptyArray();
     });
     it('returns an empty array if username is missing and password is present', () => {
       delete hostRule.username;
       delete hostRule.token;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toBeEmptyArray();
     });
     it('returns an empty array if password and token are missing', () => {
       delete hostRule.password;
       delete hostRule.token;
 
       add(hostRule);
-      expect(findAllAuthenticatable({ hostType: 'nuget' } as any)).toEqual([]);
+      expect(
+        findAllAuthenticatable({ hostType: 'nuget' } as any)
+      ).toBeEmptyArray();
     });
     it('returns the hostRule if using matchHost and password', () => {
       delete hostRule.token;
