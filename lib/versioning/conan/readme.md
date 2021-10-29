@@ -16,4 +16,4 @@ More information can be found in the [Conan docs](https://docs.conan.io/en/lates
 | `[1.2.7 \|\| >=1.2.9 <2.0.0]`                    | This range would match the versions `1.2.7`, `1.2.9`, and `1.4.6`, but not the versions `1.2.8` or `2.0.0`. |
 | `[>1.1 <2.1, include_prerelease=True]`           | Would e.g. accept `2.0.0-pre.1` as match                                                                    |
 | `[~1.2.3, loose=False]`                          | Would only accept correct Semantic Versioning strings. E.g. version `1.2.3.4` would not be accepted.        |
-| `[~1.2.3, loose=False, include_prerelease=True]` | Both options can be used for the same version range.                                                        |
+| `[~1.2.3, loose=False, include_prerelease=True]` | Both options can be used for the same version range                                                        |
