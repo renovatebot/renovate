@@ -67,9 +67,6 @@ export interface LocalRepoConfig {
   prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
-  mergeCommitAllowed?: boolean;
-  squashMergeAllowed?: boolean;
-  rebaseMergeAllowed?: boolean;
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
