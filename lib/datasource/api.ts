@@ -47,7 +47,7 @@ api.set('bitbucket-tags', new BitBucketTagsDatasource());
 api.set('cdnjs', new CdnJsDatasource());
 api.set('clojure', new ClojureDatasource());
 api.set(ConanDatasource.id, new ConanDatasource());
-api.set(CrateDatasource.id, new CrateDatasource());
+api.set('crate', new CrateDatasource());
 api.set('dart', new DartDatasource());
 api.set('docker', docker);
 api.set('galaxy', new GalaxyDatasource());

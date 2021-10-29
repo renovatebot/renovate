@@ -23,8 +23,7 @@ export class ConanDatasource extends Datasource {
 
   private async lookupConanPackage(
     packageName: string,
-    hostUrl: string,
-    userAndChannel: string
+    hostUrl: string
   ): Promise<ReleaseResult | null> {
     logger.trace({ packageName, hostUrl }, 'Looking up conan api dependency');
     try {
@@ -45,16 +44,11 @@ export class ConanDatasource extends Datasource {
           for (const fromMatch of fromMatches) {
             if (fromMatch.groups.version && fromMatch.groups.userChannel) {
               const version = fromMatch.groups.version;
-              // conan uses @_/_ as a place holder for no userChannel
-              if (
-                fromMatch.groups.userChannel === userAndChannel ||
-                (fromMatch.groups.userChannel === '@_/_' && !userAndChannel)
-              ) {
-                const result: Release = {
-                  version,
-                };
-                dep.releases.push(result);
-              }
+              const result: Release = {
+                version,
+                userAndChannel: fromMatch.groups.userChannel,
+              };
+              dep.releases.push(result);
             }
           }
         }
@@ -74,12 +68,10 @@ export class ConanDatasource extends Datasource {
   async getReleases({
     registryUrl,
     lookupName,
-    userAndChannel,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const result: ReleaseResult = await this.lookupConanPackage(
       lookupName,
-      registryUrl,
-      userAndChannel
+      registryUrl
     );
 
     return result.releases.length ? result : null;

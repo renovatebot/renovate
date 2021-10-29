@@ -49,7 +49,9 @@ export default function extractPackageFile(
             let dep: PackageDependency = {};
             const depName = matches.groups.name;
             const currentValue = matches.groups.version.trim();
-            const userAndChannel = matches.groups.userChannel;
+            const userAndChannel = matches.groups.userChannel
+              ? matches.groups.userAndChannel
+              : '@_/_';
             let replaceString = `${depName}/${currentValue}`;
 
             if (matches.groups.userChannel) {

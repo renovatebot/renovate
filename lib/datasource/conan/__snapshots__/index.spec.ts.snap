@@ -39,6 +39,7 @@ Object {
   "registryUrl": "https://center.conan.io",
   "releases": Array [
     Object {
+      "userAndChannel": "@_/_",
       "version": "1.9.3",
     },
   ],
@@ -114,18 +115,23 @@ Object {
   "registryUrl": "https://center.conan.io",
   "releases": Array [
     Object {
+      "userAndChannel": "@_/_",
       "version": "1.8.1",
     },
     Object {
+      "userAndChannel": "@_/_",
       "version": "1.9.3",
     },
     Object {
+      "userAndChannel": "@_/_",
       "version": "1.9.4",
     },
     Object {
+      "userAndChannel": "@_/_",
       "version": "1.10.0",
     },
     Object {
+      "userAndChannel": "@_/_",
       "version": "1.10.1",
     },
   ],
