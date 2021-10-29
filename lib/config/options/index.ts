@@ -100,6 +100,13 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingNoDeps',
+    description: 'Onboard repository even if no dependencies found.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'onboardingPrTitle',
     description:
       'Change this value in order to override the default onboarding PR title.',
@@ -1962,6 +1969,15 @@ const options: RenovateOptions[] = [
     name: 'datasourceTemplate',
     description:
       'Optional datasource for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'depTypeTemplate',
+    description:
+      'Optional depType for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,

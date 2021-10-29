@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { isVersion } from '../../versioning/ruby';
 
-const DEP_REGEX = new RegExp('(?<=\\().*(?=\\))');
+const DEP_REGEX = new RegExp('(?<=\\().*(?=\\))'); // TODO #12070
 export function extractLockFileEntries(
   lockFileContent: string
 ): Map<string, string> {

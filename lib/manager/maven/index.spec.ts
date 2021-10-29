@@ -20,13 +20,13 @@ describe('manager/maven/index', () => {
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
-      expect(res).toEqual([]);
+      expect(res).toBeEmptyArray();
     });
 
     it('should return empty for packages with invalid content', async () => {
       fs.readLocalFile.mockResolvedValueOnce('invalid content');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
-      expect(res).toEqual([]);
+      expect(res).toBeEmptyArray();
     });
 
     it('should return package files info', async () => {

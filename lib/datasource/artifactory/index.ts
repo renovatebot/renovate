@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { parse } from '../../util/html';
 import { HttpError } from '../../util/http/types';
+import { regEx } from '../../util/regex';
 import { joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -108,6 +109,6 @@ export class ArtifactoryDatasource extends Datasource {
   }
 
   private static parseReleaseTimestamp(rawText: string): string {
-    return rawText.trim().replace(/ ?-$/, '');
+    return rawText.trim().replace(regEx(/ ?-$/), ''); // TODO #12071
   }
 }
