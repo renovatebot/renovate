@@ -1958,7 +1958,7 @@ describe('platform/github/index', () => {
           },
           variables: {
             pullRequestId: 'abcd',
-            mergeMethod: 'rebase',
+            mergeMethod: 'REBASE',
           },
         },
       };

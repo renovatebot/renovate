@@ -1407,7 +1407,7 @@ async function tryPrAutomerge(
   }
 
   try {
-    const mergeMethod = config.mergeMethod || 'merge';
+    const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
     const variables = { pullRequestId: prNodeId, mergeMethod };
     const queryOptions = { variables };
     const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
