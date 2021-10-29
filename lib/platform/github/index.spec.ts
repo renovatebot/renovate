@@ -6,7 +6,6 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
-import * as _repoCache from '../../util/cache/repository';
 import * as _git from '../../util/git';
 import type { CreatePRConfig, Platform } from '../types';
 
@@ -16,7 +15,6 @@ describe('platform/github/index', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
-  let repoCache: jest.Mocked<typeof _repoCache>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -35,8 +33,6 @@ describe('platform/github/index', () => {
     hostRules.find.mockReturnValue({
       token: '123test',
     });
-    jest.mock('../../util/cache/repository');
-    repoCache = mocked(await import('../../util/cache/repository'));
   });
 
   const graphqlOpenPullRequests = loadFixture('graphql/pullrequest-1.json');
@@ -154,7 +150,11 @@ describe('platform/github/index', () => {
     });
   });
 
-  function initRepoMock(scope: httpMock.Scope, repository: string): void {
+  function initRepoMock(
+    scope: httpMock.Scope,
+    repository: string,
+    other: any = {}
+  ): void {
     scope.post(`/graphql`).reply(200, {
       data: {
         repository: {
@@ -171,6 +171,7 @@ describe('platform/github/index', () => {
               oid: '1234',
             },
           },
+          ...other,
         },
       },
     });
@@ -1907,9 +1908,9 @@ describe('platform/github/index', () => {
         platformOptions: { usePlatformAutomerge: true },
       };
 
-      const mockScope = async (): Promise<httpMock.Scope> => {
+      const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
         const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
+        initRepoMock(scope, 'some/repo', repoOpts);
         scope
           .post('/repos/some/repo/pulls')
           .reply(200, createdPrResp)
@@ -1963,6 +1964,19 @@ describe('platform/github/index', () => {
         },
       };
 
+      it('should skip automerge if disabled in repo settings', async () => {
+        await mockScope({ autoMergeAllowed: false });
+
+        const pr = await github.createPr(prConfig);
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+        ]);
+      });
+
       it('should set automatic merge', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeResp);
@@ -1978,9 +1992,9 @@ describe('platform/github/index', () => {
         ]);
       });
 
-      it('should handle automatic merge', async () => {
+      it('should handle GraphQL errors', async () => {
         const scope = await mockScope();
-        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+        scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
         const pr = await github.createPr(prConfig);
         expect(pr).toMatchObject({ number: 123 });
         expect(httpMock.getTrace()).toMatchObject([
@@ -1990,9 +2004,10 @@ describe('platform/github/index', () => {
           graphqlAutomerge,
         ]);
       });
-      it('should handle automerge errors', async () => {
+
+      it('should handle REST API errors', async () => {
         const scope = await mockScope();
-        scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
+        scope.post('/graphql').reply(500);
         const pr = await github.createPr(prConfig);
         expect(pr).toMatchObject({ number: 123 });
         expect(httpMock.getTrace()).toMatchObject([
