@@ -11,7 +11,7 @@ More information can be found in the [Conan docs](https://docs.conan.io/en/lates
 | `2.8.3`                                          | equivalent to `2.8.3`                                                                                       |
 | `[>1.1 <2.1]`                                    | Keep version within range                                                                                   |
 | `[2.8]`                                          | Equivalent to `=2.8`                                                                                        |
-| `[~=3.0]`                                        | compatible, according to SemVer                                                                             |
+| `[~=3.0]`                                        | Compatible, according to SemVer                                                                             |
 | `[>1.1 \|\| 0.8]`                                | Conditions can be OR'ed                                                                                     |
 | `[1.2.7 \|\| >=1.2.9 <2.0.0]`                    | This range would match the versions `1.2.7`, `1.2.9`, and `1.4.6`, but not the versions `1.2.8` or `2.0.0` |
 | `[>1.1 <2.1, include_prerelease=True]`           | Would e.g. accept `2.0.0-pre.1` as match                                                                    |
