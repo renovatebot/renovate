@@ -95,6 +95,11 @@ export function interpolateString(
   return resolvedSubstrings.join('');
 }
 
+export function isMultiModuleFile(path: string): boolean {
+  const filename = upath.basename(path);
+  return /^(?:Dependencies|Plugins)\\.kts?$/.test(filename);
+}
+
 export function isGradleFile(path: string): boolean {
   const filename = upath.basename(path).toLowerCase();
   return filename.endsWith('.gradle') || filename.endsWith('.gradle.kts');
@@ -125,7 +130,8 @@ export function reorderFiles(packageFiles: string[]): string[] {
     if (xDir === yDir) {
       if (
         (isGradleFile(xAbs) && isGradleFile(yAbs)) ||
-        (isPropsFile(xAbs) && isPropsFile(yAbs))
+        (isPropsFile(xAbs) && isPropsFile(yAbs)) ||
+        (isMultiModuleFile(xAbs) && isMultiModuleFile(yAbs))
       ) {
         if (xAbs > yAbs) {
           return 1;
@@ -133,6 +139,10 @@ export function reorderFiles(packageFiles: string[]): string[] {
         if (xAbs < yAbs) {
           return -1;
         }
+      } else if (isMultiModuleFile(xAbs)) {
+        return 1;
+      } else if (isMultiModuleFile(yAbs)) {
+        return -1;
       } else if (isGradleFile(xAbs)) {
         return 1;
       } else if (isGradleFile(yAbs)) {

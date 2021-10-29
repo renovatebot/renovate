@@ -98,7 +98,17 @@ describe('manager/gradle/shallow/utils', () => {
   });
 
   it('reorderFiles', () => {
-    expect(reorderFiles(['a.gradle', 'b.gradle', 'a.gradle'])).toStrictEqual([
+    expect(
+      reorderFiles([
+        'a.gradle',
+        'b.gradle',
+        'Plugins.kt',
+        'a.gradle',
+        'Dependencies.kt',
+      ])
+    ).toStrictEqual([
+      'Plugins.kt',
+      'Dependencies.kt',
       'a.gradle',
       'a.gradle',
       'b.gradle',
@@ -106,15 +116,23 @@ describe('manager/gradle/shallow/utils', () => {
 
     expect(
       reorderFiles([
+        'a/b/c/Dependencies.kt',
         'a/b/c/build.gradle',
         'a/build.gradle',
+        'a/Dependencies.kt',
         'a/b/build.gradle',
+        'a/b/Dependencies.kt',
         'build.gradle',
+        'Dependencies.kt',
       ])
     ).toStrictEqual([
+      'Dependencies.kt',
       'build.gradle',
+      'a/Dependencies.kt',
       'a/build.gradle',
+      'a/b/Dependencies.kt',
       'a/b/build.gradle',
+      'a/b/c/Dependencies.kt',
       'a/b/c/build.gradle',
     ]);
 

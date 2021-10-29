@@ -17,6 +17,7 @@ import type { PackageVariables, VariableRegistry } from './types';
 import {
   getVars,
   isGradleFile,
+  isMultiModuleFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
@@ -69,7 +70,7 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
-      } else if (isGradleFile(packageFile)) {
+      } else if (isGradleFile(packageFile) || isMultiModuleFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
           deps,

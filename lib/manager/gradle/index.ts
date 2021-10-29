@@ -30,7 +30,8 @@ export const language = ProgrammingLanguage.Java;
 
 export const defaultConfig = {
   fileMatch: [
-    '\\.gradle(\\.kts)?$',
+    '(^|\\/)Dependencies\\.kts?$',
+    '(^|\\/)Plugins\\.kts?$',
     '(^|\\/)gradle\\.properties$',
     '(^|\\/)gradle\\/.+\\.toml$',
     '\\.versions\\.toml$',
