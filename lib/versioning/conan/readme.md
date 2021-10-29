@@ -8,7 +8,7 @@ More information can be found in the [Conan docs](https://docs.conan.io/en/lates
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | `5.45`                                           | Equivalent to `5.45`                                                                                        |
 | `16.00`                                          | Equivalent to `16.00`                                                                                       |
-| `2.8.3`                                          | equivalent to `2.8.3`                                                                                       |
+| `2.8.3`                                          | Equivalent to `2.8.3`                                                                                       |
 | `[>1.1 <2.1]`                                    | Keep version within range                                                                                   |
 | `[2.8]`                                          | Equivalent to `=2.8`                                                                                        |
 | `[~=3.0]`                                        | Compatible, according to SemVer                                                                             |
