@@ -7,7 +7,6 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as _repoCache from '../../util/cache/repository';
-import { Cache } from '../../util/cache/repository/types';
 import * as _git from '../../util/git';
 import type { CreatePRConfig, Platform } from '../types';
 
@@ -162,6 +161,7 @@ describe('platform/github/index', () => {
           isFork: false,
           isArchived: false,
           nameWithOwner: repository,
+          autoMergeAllowed: true,
           mergeCommitAllowed: true,
           rebaseMergeAllowed: true,
           squashMergeAllowed: true,
@@ -1963,12 +1963,6 @@ describe('platform/github/index', () => {
         },
       };
 
-      let cache: Cache;
-      beforeEach(() => {
-        cache = {};
-        repoCache.getCache.mockReturnValue(cache);
-      });
-
       it('should set automatic merge', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeResp);
@@ -1984,104 +1978,25 @@ describe('platform/github/index', () => {
         ]);
       });
 
-      it('should stop trying after GraphQL error', async () => {
+      it('should handle automatic merge', async () => {
         const scope = await mockScope();
-        scope
-          .post('/graphql')
-          .reply(200, graphqlAutomergeErrorResp)
-          .post('/repos/some/repo/pulls')
-          .reply(200, createdPrResp)
-          .post('/repos/some/repo/issues/123/labels')
-          .reply(200, []);
-
-        await github.createPr(prConfig);
-        await github.createPr(prConfig);
-
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+        const pr = await github.createPr(prConfig);
+        expect(pr).toMatchObject({ number: 123 });
         expect(httpMock.getTrace()).toMatchObject([
           graphqlGetRepo,
           restCreatePr,
           restAddLabels,
           graphqlAutomerge,
-          restCreatePr,
-          restAddLabels,
         ]);
       });
-
-      it('should retry 24 hours after GraphQL error', async () => {
+      it('should handle automerge errors', async () => {
         const scope = await mockScope();
-        scope
-          .post('/graphql')
-          .reply(200, graphqlAutomergeErrorResp)
-          .post('/repos/some/repo/pulls')
-          .reply(200, createdPrResp)
-          .post('/repos/some/repo/issues/123/labels')
-          .reply(200, [])
-          .post('/repos/some/repo/pulls')
-          .reply(200, createdPrResp)
-          .post('/repos/some/repo/issues/123/labels')
-          .reply(200, [])
-          .post('/graphql')
-          .reply(200, graphqlAutomergeResp);
-
-        // Error occured
-        const t1 = DateTime.local().toMillis();
-        await github.createPr(prConfig);
-        const t2 = DateTime.local().toMillis();
-
-        expect(cache.lastPlatformAutomergeFailure).toBeString();
-
-        let failedAt = DateTime.fromISO(cache.lastPlatformAutomergeFailure);
-
-        expect(failedAt.toMillis()).toBeGreaterThanOrEqual(t1);
-        expect(failedAt.toMillis()).toBeLessThanOrEqual(t2);
-
-        // Too early
-        failedAt = failedAt.minus({ hours: 12 });
-        cache.lastPlatformAutomergeFailure = failedAt.toISO();
-        await github.createPr(prConfig);
-        expect(cache.lastPlatformAutomergeFailure).toEqual(failedAt.toISO());
-
-        // Now should retry
-        failedAt = failedAt.minus({ hours: 12 });
-        cache.lastPlatformAutomergeFailure = failedAt.toISO();
-        await github.createPr(prConfig);
-
-        expect(httpMock.getTrace()).toMatchObject([
-          // 1
-          graphqlGetRepo,
-          restCreatePr,
-          restAddLabels,
-          graphqlAutomerge, // error
-          // 2
-          restCreatePr,
-          restAddLabels,
-          // 3
-          restCreatePr,
-          restAddLabels,
-          graphqlAutomerge, // retry
-        ]);
-      });
-
-      it('should keep trying after HTTP error', async () => {
-        const scope = await mockScope();
-        scope
-          .post('/graphql')
-          .reply(500)
-          .post('/repos/some/repo/pulls')
-          .reply(200, createdPrResp)
-          .post('/repos/some/repo/issues/123/labels')
-          .reply(200, [])
-          .post('/graphql')
-          .reply(200, graphqlAutomergeResp);
-
-        await github.createPr(prConfig);
-        await github.createPr(prConfig);
-
+        scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
+        const pr = await github.createPr(prConfig);
+        expect(pr).toMatchObject({ number: 123 });
         expect(httpMock.getTrace()).toMatchObject([
           graphqlGetRepo,
-          restCreatePr,
-          restAddLabels,
-          graphqlAutomerge,
           restCreatePr,
           restAddLabels,
           graphqlAutomerge,
