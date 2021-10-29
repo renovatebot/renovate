@@ -2347,10 +2347,10 @@
   resolved "https://registry.yarnpkg.com/@types/emscripten/-/emscripten-1.39.5.tgz#eb0fb1048301df980b6f8a5ec3d63f7d1572bb73"
   integrity sha512-DIOOg+POSrYl+OlNRHQuIEqCd8DCtynG57H862UCce16nXJX7J8eWxNGgOcf8Eyge8zXeSs27mz1UcFu8L/L7g==
 
-"@types/eslint@7.28.1":
-  version "7.28.1"
-  resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-7.28.1.tgz#50b07747f1f84c2ba8cd394cf0fe0ba07afce320"
-  integrity sha512-XhZKznR3i/W5dXqUhgU9fFdJekufbeBd5DALmkuXoeFcjbQcPk+2cL+WLHf6Q81HWAnM2vrslIHpGVyCAviRwg==
+"@types/eslint@7.28.2":
+  version "7.28.2"
+  resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-7.28.2.tgz#0ff2947cdd305897c52d5372294e8c76f351db68"
+  integrity sha512-KubbADPkfoU75KgKeKLsFHXnU4ipH7wYg0TRT33NK3N3yiu7jlFAAoygIWBV+KbuHx/G+AvuGX6DllnK35gfJA==
   dependencies:
     "@types/estree" "*"
     "@types/json-schema" "*"
@@ -2548,10 +2548,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.10.3.tgz#7a8f2838603ea314d1d22bb3171d899e15c57bd5"
   integrity sha512-ho3Ruq+fFnBrZhUYI46n/bV2GjwzSkwuT4dTf0GkuNFmnb8nq4ny2z9JEVemFi6bdEJanHLlYfy9c6FN9B9McQ==
 
-"@types/node@14.17.27":
-  version "14.17.27"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.27.tgz#5054610d37bb5f6e21342d0e6d24c494231f3b85"
-  integrity sha512-94+Ahf9IcaDuJTle/2b+wzvjmutxXAEXU6O81JHblYXUg2BDG+dnBy7VxIPHKAyEEDHzCMQydTJuWvrE+Aanzw==
+"@types/node@14.17.28":
+  version "14.17.28"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.28.tgz#c683413f485a5690649ef36cdc9402bae32da2df"
+  integrity sha512-1Nh2wEWN8y9hyC4yTDPccUnRunqNeBEFmmTU+K5FpGZOEixqAzMhUXzrBwajNYCZq5uoGaztaMN9Yy1PDMMB6Q==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -2984,7 +2984,7 @@ ansi-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-3.0.0.tgz#ed0317c322064f79466c02966bddb605ab37d998"
   integrity sha1-7QMXwyIGT3lGbAKWa922Bas32Zg=
 
-ansi-regex@^4.0.0, ansi-regex@^4.1.0:
+ansi-regex@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-4.1.0.tgz#8b9f8f08cf1acb843756a839ca8c7e3168c51997"
   integrity sha512-1apePfXM1UOSqw0o9IiFAovVz9M5S1Dg+4TrDwfMewQ6p/rmMueb7tWZjQ1rx4Loy1ArBggoqGpfqqdI4rondg==
@@ -3816,10 +3816,10 @@ combined-stream@^1.0.6, combined-stream@^1.0.8, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-8.2.0.tgz#37fe2bde301d87d47a53adeff8b5915db1381ca8"
-  integrity sha512-LLKxDvHeL91/8MIyTAD5BFMNtoIwztGPMiM/7Bl8rIPmHCZXRxmSWr91h57dpOpnQ6jIUqEWdXE/uBYMfiVZDA==
+commander@8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-8.3.0.tgz#4837ea1b2da67b9c616a67afbb0fafee567bca66"
+  integrity sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==
 
 common-ancestor-path@^1.0.1:
   version "1.0.1"
@@ -6383,13 +6383,13 @@ jest-jasmine2@^27.3.1:
     pretty-format "^27.3.1"
     throat "^6.0.1"
 
-jest-junit@12.3.0:
-  version "12.3.0"
-  resolved "https://registry.yarnpkg.com/jest-junit/-/jest-junit-12.3.0.tgz#ee41a74e439eecdc8965f163f83035cce5998d6d"
-  integrity sha512-+NmE5ogsEjFppEl90GChrk7xgz8xzvF0f+ZT5AnhW6suJC93gvQtmQjfyjDnE0Z2nXJqEkxF0WXlvjG/J+wn/g==
+jest-junit@13.0.0:
+  version "13.0.0"
+  resolved "https://registry.yarnpkg.com/jest-junit/-/jest-junit-13.0.0.tgz#479be347457aad98ae8a5983a23d7c3ec526c9a3"
+  integrity sha512-JSHR+Dhb32FGJaiKkqsB7AR3OqWKtldLd6ZH2+FJ8D4tsweb8Id8zEVReU4+OlrRO1ZluqJLQEETm+Q6/KilBg==
   dependencies:
     mkdirp "^1.0.4"
-    strip-ansi "^5.2.0"
+    strip-ansi "^6.0.1"
     uuid "^8.3.2"
     xml "^1.0.1"
 
@@ -9782,13 +9782,6 @@ strip-ansi@^3.0.0, strip-ansi@^3.0.1:
   dependencies:
     ansi-regex "^3.0.0"
 
-strip-ansi@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-5.2.0.tgz#8c9a536feb6afc962bdfa5b104a5091c1ad9c0ae"
-  integrity sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA==
-  dependencies:
-    ansi-regex "^4.1.0"
-
 strip-bom@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/strip-bom/-/strip-bom-3.0.0.tgz#2334c18e9c759f7bdd56fdef7e9ae3d588e68ed3"
@@ -10099,10 +10092,10 @@ ts-jest@27.0.7:
     semver "7.x"
     yargs-parser "20.x"
 
-ts-node@10.3.0:
-  version "10.3.0"
-  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.3.0.tgz#a797f2ed3ff50c9a5d814ce400437cb0c1c048b4"
-  integrity sha512-RYIy3i8IgpFH45AX4fQHExrT8BxDeKTdC83QFJkNzkvt8uFB6QJ8XMyhynYiKMLxt9a7yuXaDBZNOYS3XjDcYw==
+ts-node@10.3.1:
+  version "10.3.1"
+  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.3.1.tgz#739b42839b56d1a3c85026994af7045b2fccc6f5"
+  integrity sha512-Yw3W2mYzhHfCHOICGNJqa0i+rbL0rAyg7ZIHxU+K4pgY8gd2Lh1j+XbHCusJMykbj6RZMJVOY0MlHVd+GOivcw==
   dependencies:
     "@cspotcode/source-map-support" "0.7.0"
     "@tsconfig/node10" "^1.0.7"
