@@ -310,17 +310,21 @@ export interface RenovateArrayOption<
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
-  supportedManagers?: 'array' | 'string';
-  supportedPlatforms?: 'array' | 'string';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
   subType: 'string';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
   subType: 'number';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
