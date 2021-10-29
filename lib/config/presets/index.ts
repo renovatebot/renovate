@@ -154,11 +154,11 @@ export function parsePreset(input: string): ParsedPreset {
     if (!nonScopedPresetWithSubdirRegex.test(str)) {
       throw new Error(PRESET_INVALID);
     }
-    [, packageName, presetPath, presetName, packageTag] =
-      nonScopedPresetWithSubdirRegex.exec(str);
+    ({ packageName, presetPath, presetName, packageTag } =
+      nonScopedPresetWithSubdirRegex.exec(str)?.groups || {});
   } else {
-    [, packageName, presetPath, presetName, packageTag] =
-      gitPresetRegex.exec(str);
+    ({ packageName, presetPath, presetName, packageTag } =
+      gitPresetRegex.exec(str)?.groups || {});
 
     if (is.nonEmptyString(presetPath) && presetPath.endsWith('/')) {
       presetPath = presetPath.slice(0, -1);
