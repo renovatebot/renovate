@@ -2399,7 +2399,7 @@ ansi-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-3.0.0.tgz#ed0317c322064f79466c02966bddb605ab37d998"
   integrity sha1-7QMXwyIGT3lGbAKWa922Bas32Zg=
 
-ansi-regex@^4.0.0, ansi-regex@^4.1.0:
+ansi-regex@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-4.1.0.tgz#8b9f8f08cf1acb843756a839ca8c7e3168c51997"
   integrity sha512-1apePfXM1UOSqw0o9IiFAovVz9M5S1Dg+4TrDwfMewQ6p/rmMueb7tWZjQ1rx4Loy1ArBggoqGpfqqdI4rondg==
@@ -5784,13 +5784,13 @@ jest-jasmine2@^27.3.1:
     pretty-format "^27.3.1"
     throat "^6.0.1"
 
-jest-junit@12.3.0:
-  version "12.3.0"
-  resolved "https://registry.yarnpkg.com/jest-junit/-/jest-junit-12.3.0.tgz#ee41a74e439eecdc8965f163f83035cce5998d6d"
-  integrity sha512-+NmE5ogsEjFppEl90GChrk7xgz8xzvF0f+ZT5AnhW6suJC93gvQtmQjfyjDnE0Z2nXJqEkxF0WXlvjG/J+wn/g==
+jest-junit@13.0.0:
+  version "13.0.0"
+  resolved "https://registry.yarnpkg.com/jest-junit/-/jest-junit-13.0.0.tgz#479be347457aad98ae8a5983a23d7c3ec526c9a3"
+  integrity sha512-JSHR+Dhb32FGJaiKkqsB7AR3OqWKtldLd6ZH2+FJ8D4tsweb8Id8zEVReU4+OlrRO1ZluqJLQEETm+Q6/KilBg==
   dependencies:
     mkdirp "^1.0.4"
-    strip-ansi "^5.2.0"
+    strip-ansi "^6.0.1"
     uuid "^8.3.2"
     xml "^1.0.1"
 
@@ -9142,13 +9142,6 @@ strip-ansi@^3.0.0, strip-ansi@^3.0.1:
   integrity sha1-qEeQIusaw2iocTibY1JixQXuNo8=
   dependencies:
     ansi-regex "^3.0.0"
-
-strip-ansi@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-5.2.0.tgz#8c9a536feb6afc962bdfa5b104a5091c1ad9c0ae"
-  integrity sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA==
-  dependencies:
-    ansi-regex "^4.1.0"
 
 strip-bom@^3.0.0:
   version "3.0.0"
