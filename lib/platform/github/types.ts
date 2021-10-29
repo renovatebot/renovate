@@ -66,7 +66,7 @@ export interface LocalRepoConfig {
   openPrList: PrList | null;
   prList: GhPr[] | null;
   issueList: any[] | null;
-  mergeMethod: string;
+  mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;

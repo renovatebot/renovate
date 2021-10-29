@@ -1943,10 +1943,23 @@ describe('platform/github/index', () => {
         url: 'https://api.github.com/graphql',
         graphql: {
           mutation: {
-            __vars: { $pullRequestId: 'ID!' },
-            enablePullRequestAutoMerge: {},
+            __vars: {
+              $pullRequestId: 'ID!',
+              $mergeMethod: 'PullRequestMergeMethod!',
+            },
+            enablePullRequestAutoMerge: {
+              __args: {
+                input: {
+                  pullRequestId: '$pullRequestId',
+                  mergeMethod: '$mergeMethod',
+                },
+              },
+            },
           },
-          variables: { pullRequestId: 'abcd' },
+          variables: {
+            pullRequestId: 'abcd',
+            mergeMethod: 'REBASE',
+          },
         },
       };
 
