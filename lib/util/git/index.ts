@@ -146,6 +146,11 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     ) {
       throw new Error(REPOSITORY_EMPTY);
     }
+    // istanbul ignore if
+    if (err.message.includes("fatal: ambiguous argument 'origin/HEAD'")) {
+      logger.warn({ err }, 'Error getting default branch');
+      throw new Error(TEMPORARY_ERROR);
+    }
     throw err;
   }
 }
