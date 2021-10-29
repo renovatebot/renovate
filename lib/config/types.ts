@@ -310,6 +310,8 @@ export interface RenovateArrayOption<
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
+  supportedManagers?: 'array' | 'string';
+  supportedPlatforms?: 'array' | 'string';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
@@ -324,11 +326,15 @@ export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
 export interface RenovateBooleanOption extends RenovateOptionBase {
   default?: boolean;
   type: 'boolean';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
   default?: number;
   type: 'integer';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
@@ -338,6 +344,8 @@ export interface RenovateStringOption extends RenovateOptionBase {
   // Not used
   replaceLineReturns?: boolean;
   type: 'string';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
@@ -345,6 +353,8 @@ export interface RenovateObjectOption extends RenovateOptionBase {
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export type RenovateOptions =
