@@ -176,11 +176,13 @@ query($owner: String!, $name: String!) {
 
 export const enableAutoMergeMutation = `
 mutation EnablePullRequestAutoMerge(
-  $pullRequestId: ID!
+  $pullRequestId: ID!,
+  $mergeMethod: PullRequestMergeMethod!,
 ) {
   enablePullRequestAutoMerge(
     input: {
-      pullRequestId: $pullRequestId
+      pullRequestId: $pullRequestId,
+      mergeMethod: $mergeMethod,
     }
   ) {
     pullRequest {

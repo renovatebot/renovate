@@ -82,6 +82,7 @@ export type PlatformPrOptions = {
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
+  automergeStrategy?: MergeStrategy;
 };
 export interface CreatePRConfig {
   sourceBranch: string;

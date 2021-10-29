@@ -129,6 +129,7 @@ export function getPlatformPrOptions(
     bbUseDefaultReviewers: config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
     usePlatformAutomerge,
+    automergeStrategy: config.automergeStrategy,
   };
 }
 

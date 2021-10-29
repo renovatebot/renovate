@@ -2,6 +2,7 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import { DateTime } from 'luxon';
+import type { MergeStrategy } from '../../config/types';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -236,6 +237,9 @@ export async function initRepo({
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
+    config.rebaseMergeAllowed = repo.rebaseMergeAllowed;
+    config.squashMergeAllowed = repo.squashMergeAllowed;
+    config.mergeCommitAllowed = repo.mergeCommitAllowed;
     if (repo.rebaseMergeAllowed) {
       config.mergeMethod = 'rebase';
     } else if (repo.squashMergeAllowed) {
@@ -1382,6 +1386,30 @@ export async function ensureCommentRemoval({
 
 // Pull Request
 
+type AutomergeMethod = 'SQUASH' | 'REBASE' | 'MERGE';
+
+function getAutomergeMethod(
+  platformAutomerge?: MergeStrategy
+): AutomergeMethod {
+  const { squashMergeAllowed, rebaseMergeAllowed, mergeCommitAllowed } = config;
+  let result: AutomergeMethod = 'MERGE';
+
+  // istanbul ignore next
+  if (platformAutomerge === 'squash' && squashMergeAllowed) {
+    result = 'SQUASH';
+  } else if (platformAutomerge === 'rebase' && rebaseMergeAllowed) {
+    result = 'REBASE';
+  } else if (platformAutomerge === 'merge-commit' && mergeCommitAllowed) {
+    result = 'MERGE';
+  } else if (squashMergeAllowed) {
+    result = 'SQUASH';
+  } else if (rebaseMergeAllowed) {
+    result = 'REBASE';
+  }
+
+  return result;
+}
+
 async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
@@ -1407,7 +1435,8 @@ async function tryPrAutomerge(
   }
 
   try {
-    const variables = { pullRequestId: prNodeId };
+    const mergeMethod = getAutomergeMethod(platformOptions.automergeStrategy);
+    const variables = { pullRequestId: prNodeId, mergeMethod };
     const queryOptions = { variables };
     const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
