@@ -260,7 +260,9 @@ export async function findPr({
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
+      prsFiltered = prsFiltered.filter(
+        (item) => item.title.toLowerCase() === prTitle.toLowerCase()
+      );
     }
 
     switch (state) {

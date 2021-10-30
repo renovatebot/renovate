@@ -184,7 +184,17 @@ export function generateBranchConfig(
     if (upgrade.toLowerCase) {
       // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split('\n');
-      splitMessage[0] = splitMessage[0].toLowerCase();
+      if (splitMessage.includes(':')) {
+        const firstMessage = splitMessage[0].split(':')[1].split(' ');
+        firstMessage[0] = firstMessage[0].toLowerCase();
+        splitMessage[0] = firstMessage.join(' ');
+        splitMessage[0] = splitMessage[0].toLowerCase();
+      } else {
+        const firstMessage = splitMessage[0].split(' ');
+        firstMessage[0] = firstMessage[0].toLowerCase();
+        splitMessage[0] = firstMessage.join(' ');
+        splitMessage[0] = splitMessage[0].toLowerCase();
+      }
       upgrade.commitMessage = splitMessage.join('\n');
     }
     if (upgrade.commitBody) {
@@ -206,6 +216,9 @@ export function generateBranchConfig(
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
       if (upgrade.toLowerCase) {
+        const titleMessage = upgrade.prTitle.split(' ');
+        titleMessage[0] = titleMessage[0].toLowerCase();
+        upgrade.prTitle = titleMessage.join(' ');
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {
