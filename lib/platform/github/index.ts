@@ -1170,6 +1170,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
     logger.info(
       'Cannot ensure issue because issues are disabled in this repository'
     );
+    return;
   }
   const issueList = await getIssueList();
   for (const issue of issueList) {
