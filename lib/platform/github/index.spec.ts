@@ -162,6 +162,7 @@ describe('platform/github/index', () => {
           isArchived: false,
           nameWithOwner: repository,
           autoMergeAllowed: true,
+          hasIssuesEnabled: true,
           mergeCommitAllowed: true,
           rebaseMergeAllowed: true,
           squashMergeAllowed: true,
@@ -192,6 +193,7 @@ describe('platform/github/index', () => {
             isFork: false,
             isArchived: false,
             nameWithOwner: repository,
+            hasIssuesEnabled: true,
             mergeCommitAllowed: true,
             rebaseMergeAllowed: true,
             squashMergeAllowed: true,
@@ -274,6 +276,7 @@ describe('platform/github/index', () => {
               isFork: false,
               isArchived: false,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               mergeCommitAllowed: true,
               rebaseMergeAllowed: false,
               squashMergeAllowed: true,
@@ -302,6 +305,7 @@ describe('platform/github/index', () => {
               isFork: false,
               isArchived: false,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               mergeCommitAllowed: true,
               rebaseMergeAllowed: false,
               squashMergeAllowed: false,
@@ -351,6 +355,7 @@ describe('platform/github/index', () => {
             repository: {
               isArchived: true,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               defaultBranchRef: {
                 name: 'master',
                 target: {
@@ -384,6 +389,7 @@ describe('platform/github/index', () => {
           data: {
             repository: {
               nameWithOwner: 'some/other',
+              hasIssuesEnabled: true,
               defaultBranchRef: {
                 name: 'master',
                 target: {
