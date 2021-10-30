@@ -208,7 +208,11 @@ mutation (
     name: $branchName,
     oid: $oid,
   }) {
-    clientMutationId
+    ref {
+      target {
+        oid
+      }
+    }
   }
 
   createCommitOnBranch(input: {
