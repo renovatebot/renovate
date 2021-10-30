@@ -986,7 +986,6 @@ export async function setBranchStatus({
 
 /* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
     return [];
   }
