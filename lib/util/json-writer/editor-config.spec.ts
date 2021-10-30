@@ -1,4 +1,4 @@
-import mock from 'mock-fs';
+import mockFs from 'mock-fs';
 import { loadFixture } from '../../../test/util';
 import { configFileNames } from '../../config/app-strings';
 import { EditorConfig } from './editor-config';
@@ -12,12 +12,12 @@ const NON_JSON_FILES_EDITOR_CONFIG = loadFixture('.non_json_editorconfig', '.');
 
 describe('util/json-writer/editor-config', () => {
   afterEach(() => {
-    mock.restore();
+    mockFs.restore();
   });
 
   it('should handle empty .editorconfig file', async () => {
     expect.assertions(2);
-    mock({
+    mockFs({
       '.editorconfig': '',
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
@@ -28,7 +28,7 @@ describe('util/json-writer/editor-config', () => {
 
   it('should handle global config from .editorconfig', async () => {
     expect.assertions(2);
-    mock({
+    mockFs({
       '.editorconfig': GLOBAL_EDITOR_CONFIG,
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
@@ -38,7 +38,7 @@ describe('util/json-writer/editor-config', () => {
 
   it('should not handle non json config from .editorconfig', async () => {
     expect.assertions(2);
-    mock({
+    mockFs({
       '.editorconfig': NON_JSON_FILES_EDITOR_CONFIG,
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
@@ -49,7 +49,7 @@ describe('util/json-writer/editor-config', () => {
 
   it('should handle json config from .editorconfig', async () => {
     expect.assertions(1);
-    mock({
+    mockFs({
       '.editorconfig': JSON_FILES_EDITOR_CONFIG,
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
