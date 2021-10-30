@@ -47,6 +47,8 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import {
   closedPrsQuery,
+  commitFilesMutation,
+  createBranchMutation,
   enableAutoMergeMutation,
   getIssuesQuery,
   openPrsQuery,
@@ -85,6 +87,7 @@ export async function initPlatform({
   token,
   username,
   gitAuthor,
+  platformCommit,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
@@ -107,9 +110,16 @@ export async function initPlatform({
   let discoveredGitAuthor: string;
   if (!gitAuthor) {
     userDetails = await getUserDetails(defaults.endpoint, token);
-    const userEmail = await getUserEmail(defaults.endpoint, token);
-    if (userEmail) {
-      discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
+    if (platformCommit) {
+      const userId = userDetails.id.toString();
+      const userName = userDetails.username;
+      const userEmail = `${userId}+${userName}@users.noreply.github.com`;
+      discoveredGitAuthor = `${userDetails.username} <${userEmail}>`;
+    } else {
+      const userEmail = await getUserEmail(defaults.endpoint, token);
+      if (userEmail) {
+        discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
+      }
     }
   }
   logger.debug('Authenticated as GitHub user: ' + renovateUsername);
@@ -209,6 +219,7 @@ export async function initRepo({
       },
     });
     repo = res?.data?.repository;
+    config.repositoryId = repo.repositoryId;
     // istanbul ignore if
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
@@ -232,6 +243,7 @@ export async function initRepo({
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
+    config.defaultBranchOid = repo.defaultBranchRef?.target?.oid;
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
@@ -1663,4 +1675,50 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
   return alerts;
+}
+
+export async function pushFiles({
+  branchName,
+  files,
+  message,
+}: git.CommitFilesConfig): Promise<git.CommitSha | null> {
+  const additions = files.map(({ name: path, contents }) => ({
+    path,
+    contents: Buffer.from(contents).toString('base64'),
+  }));
+  const fileChanges = { additions };
+
+  let result = null;
+  try {
+    const oid = config.defaultBranchOid;
+
+    const branchParams = {
+      repositoryId: config.repositoryId,
+      branchName: `refs/heads/${branchName}`,
+      oid,
+    };
+
+    await githubApi.requestGraphql(createBranchMutation, {
+      variables: branchParams,
+    });
+
+    const commitParams = {
+      repo: config.repository,
+      branchName,
+      fileChanges,
+      message,
+      oid,
+    };
+
+    const res = await githubApi.requestGraphql<{
+      createCommitOnBranch: { commit: { oid: string } };
+    }>(commitFilesMutation, {
+      variables: commitParams,
+    });
+    result = res.data?.createCommitOnBranch?.commit?.oid;
+  } catch (err) {
+    logger.debug({ err });
+  }
+
+  return result;
 }

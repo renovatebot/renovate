@@ -3,7 +3,8 @@ import minimatch from 'minimatch';
 import { getGlobalConfig } from '../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { commitFiles } from '../../util/git';
+import { platform } from '../../platform';
+import { CommitFilesConfig, commitFiles } from '../../util/git';
 import { sanitize } from '../../util/sanitize';
 import type { BranchConfig } from '../types';
 
@@ -43,11 +44,21 @@ export function commitFilesToBranch(
   ) {
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
+
+  // istanbul ignore next
+  const pushCallback =
+    config.platformCommit && !!platform.pushFiles
+      ? (x: CommitFilesConfig) => platform.pushFiles(x)
+      : undefined;
+
   // API will know whether to create new branch or not
-  return commitFiles({
-    branchName: config.branchName,
-    files: updatedFiles,
-    message: config.commitMessage,
-    force: !!config.forceCommit,
-  });
+  return commitFiles(
+    {
+      branchName: config.branchName,
+      files: updatedFiles,
+      message: config.commitMessage,
+      force: !!config.forceCommit,
+    },
+    pushCallback
+  );
 }

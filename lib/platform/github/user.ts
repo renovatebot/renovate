@@ -4,6 +4,7 @@ import * as githubHttp from '../../util/http/github';
 const githubApi = new githubHttp.GithubHttp();
 
 export interface UserDetails {
+  id: number;
   username: string;
   name: string;
 }
@@ -19,7 +20,7 @@ export async function getUserDetails(
   }
   try {
     const userData = (
-      await githubApi.getJson<{ login: string; name: string }>(
+      await githubApi.getJson<{ id: number; login: string; name: string }>(
         endpoint + 'user',
         {
           token,
@@ -27,6 +28,7 @@ export async function getUserDetails(
       )
     ).body;
     userDetails = {
+      id: userData.id,
       username: userData.login,
       name: userData.name,
     };

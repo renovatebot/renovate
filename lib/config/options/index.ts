@@ -2092,6 +2092,12 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
   },
+  {
+    name: 'platformCommit',
+    description: `Perform commits by taking advantage of the platform-native API.`,
+    type: 'boolean',
+    default: false,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

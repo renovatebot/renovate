@@ -1,6 +1,7 @@
 export const repoInfoQuery = `
 query($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
+    repositoryId: id
     isFork
     isArchived
     nameWithOwner
@@ -188,6 +189,48 @@ mutation EnablePullRequestAutoMerge(
   ) {
     pullRequest {
       number
+    }
+  }
+}
+`;
+
+export const createBranchMutation = `
+mutation (
+  $repositoryId: ID!,
+  $branchName: String!,
+  $oid: GitObjectID!,
+) {
+  createRef(input: {
+    repositoryId: $repositoryId,
+    name: $branchName,
+    oid: $oid,
+  }) {
+    clientMutationId
+  }
+}
+`;
+
+export const commitFilesMutation = `
+mutation (
+  $repo: String!,
+  $branchName: String!,
+  $fileChanges: FileChanges!,
+  $message: String!,
+  $oid: GitObjectID!,
+) {
+  createCommitOnBranch(input: {
+    branch: {
+      repositoryNameWithOwner: $repo,
+      branchName: $branchName,
+    },
+    expectedHeadOid: $oid,
+    message: {
+      headline: $message,
+    },
+    fileChanges: $fileChanges,
+  }) {
+    commit {
+      oid
     }
   }
 }

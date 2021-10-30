@@ -1,5 +1,6 @@
 import type { MergeStrategy } from '../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../types';
+import type { CommitFilesConfig, CommitSha } from '../util/git';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -15,6 +16,7 @@ export interface PlatformParams {
   username?: string;
   password?: string;
   gitAuthor?: string;
+  platformCommit?: boolean;
 }
 
 export interface PlatformResult {
@@ -82,6 +84,7 @@ export type PlatformPrOptions = {
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
+  usePlatformCommit?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -187,4 +190,5 @@ export interface Platform {
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
+  pushFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
 }

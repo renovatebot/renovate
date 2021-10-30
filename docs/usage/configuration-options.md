@@ -1678,6 +1678,10 @@ It falls back to Renovate-based automerge if the platform-native automerge is no
 
 Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
 
+## platformCommit
+
+Perform commits by taking advantage of the platform-native API.
+
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
