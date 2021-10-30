@@ -1690,35 +1690,23 @@ export async function pushFiles({
 
   let result = null;
   try {
-    const oid = config.defaultBranchOid;
-
-    const branchParams = {
+    const variables = {
+      repo: config.repository,
       repositoryId: config.repositoryId,
       branchName: `refs/heads/${branchName}`,
-      oid,
-    };
-
-    await githubApi.requestGraphql(createBranchMutation, {
-      variables: branchParams,
-    });
-
-    const commitParams = {
-      repo: config.repository,
-      branchName,
+      oid: config.defaultBranchOid,
       fileChanges,
       message,
-      oid,
     };
 
-    const res = await githubApi.requestGraphql<{
+    const commitRes = await githubApi.requestGraphql<{
       createCommitOnBranch: { commit: { oid: string } };
-    }>(commitFilesMutation, {
-      variables: commitParams,
-    });
-    result = res.data?.createCommitOnBranch?.commit?.oid;
+    }>(commitFilesMutation, { variables });
+
+    result = commitRes.data?.createCommitOnBranch?.commit?.oid;
   } catch (err) {
     logger.debug({ err });
   }
 
-  return result;
+  return result ?? null;
 }

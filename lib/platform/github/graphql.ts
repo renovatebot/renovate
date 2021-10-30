@@ -194,11 +194,14 @@ mutation EnablePullRequestAutoMerge(
 }
 `;
 
-export const createBranchMutation = `
+export const commitFilesMutation = `
 mutation (
+  $repo: String!,
   $repositoryId: ID!,
   $branchName: String!,
   $oid: GitObjectID!,
+  $fileChanges: FileChanges!,
+  $message: String!,
 ) {
   createRef(input: {
     repositoryId: $repositoryId,
@@ -207,17 +210,7 @@ mutation (
   }) {
     clientMutationId
   }
-}
-`;
 
-export const commitFilesMutation = `
-mutation (
-  $repo: String!,
-  $branchName: String!,
-  $fileChanges: FileChanges!,
-  $message: String!,
-  $oid: GitObjectID!,
-) {
   createCommitOnBranch(input: {
     branch: {
       repositoryNameWithOwner: $repo,
