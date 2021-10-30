@@ -1077,6 +1077,7 @@ export async function ensureIssue({
     logger.info(
       'Cannot ensure issue because issues are disabled in this repository'
     );
+    return null;
   }
   const body = sanitize(rawBody);
   try {
