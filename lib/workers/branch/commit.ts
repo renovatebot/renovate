@@ -45,20 +45,16 @@ export function commitFilesToBranch(
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
 
-  // istanbul ignore next
-  const pushCallback =
-    config.platformCommit && !!platform.pushFiles
-      ? (x: CommitFilesConfig) => platform.pushFiles(x)
-      : undefined;
+  const commitConfig = {
+    branchName: config.branchName,
+    files: updatedFiles,
+    message: config.commitMessage,
+    force: !!config.forceCommit,
+  };
 
   // API will know whether to create new branch or not
-  return commitFiles(
-    {
-      branchName: config.branchName,
-      files: updatedFiles,
-      message: config.commitMessage,
-      force: !!config.forceCommit,
-    },
-    pushCallback
-  );
+  // istanbul ignore next
+  return config.platformCommit && !!platform.pushFiles
+    ? commitFiles(commitConfig, (x: CommitFilesConfig) => platform.pushFiles(x))
+    : commitFiles(commitConfig);
 }
