@@ -48,7 +48,6 @@ import { smartTruncate } from '../utils/pr-body';
 import {
   closedPrsQuery,
   commitFilesMutation,
-  createBranchMutation,
   enableAutoMergeMutation,
   getIssuesQuery,
   openPrsQuery,
