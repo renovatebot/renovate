@@ -2109,6 +2109,26 @@ Followed by some information.
           expect(res).toEqual(data);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
+        it('returns file content in json5 format', async () => {
+          const json5Data = `
+          { 
+            // json5 comment
+            foo: 'bar' 
+          }
+        `;
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json5?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: json5Data }],
+            });
+          const res = await bitbucket.getJsonFile('file.json5');
+          expect(res).toEqual({ foo: 'bar' });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
         it('throws on malformed JSON', async () => {
           const scope = await initRepo();
           scope

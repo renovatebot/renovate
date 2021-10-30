@@ -938,6 +938,21 @@ describe('platform/bitbucket/index', () => {
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json5')
+        .reply(200, json5Data);
+      const res = await bitbucket.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('throws on malformed JSON', async () => {
       const scope = await initRepoMock();
       scope
