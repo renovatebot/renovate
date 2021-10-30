@@ -1,17 +1,17 @@
 import { mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
-import * as _goproxy from './goproxy';
 import * as _direct from './releases-direct';
+import * as _goproxy from './releases-goproxy';
 import { getReleases } from '.';
 
 jest.mock('../../util/host-rules');
 const hostRules = mocked(_hostRules);
 
-jest.mock('./goproxy');
-const goproxy = mocked(_goproxy);
-
 jest.mock('./releases-direct');
 const direct = mocked(_direct);
+
+jest.mock('./releases-goproxy');
+const goproxy = mocked(_goproxy);
 
 describe('datasource/go/index', () => {
   describe('getReleases', () => {
