@@ -2421,4 +2421,35 @@ describe('platform/github/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
+  describe('pushFiles', () => {
+    it('should commit and return SHA string', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/graphql').reply(200, {
+        data: { createCommitOnBranch: { commit: { oid: '123123' } } },
+      });
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      const res = await github.pushFiles({
+        branchName: 'foo/bar',
+        files: [{ name: 'foo.bar', contents: 'foobar' }],
+        message: 'foobar',
+      });
+      expect(res).toEqual('123123');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should return null on error', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/graphql').replyWithError('unknown');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      const res = await github.pushFiles({
+        branchName: 'foo/bar',
+        files: [{ name: 'foo.bar', contents: 'foobar' }],
+        message: 'foobar',
+      });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
 });
