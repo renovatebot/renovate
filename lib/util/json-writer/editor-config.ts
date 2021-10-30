@@ -1,5 +1,5 @@
-import { join } from 'path';
 import { KnownProps, parse } from 'editorconfig';
+import { join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import type { CodeFormat } from './code-format';
 import { IndentationType } from './indentation-type';
