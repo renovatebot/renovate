@@ -1,6 +1,6 @@
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import * as goproxy from './goproxy';
 import { getReleases as directReleases } from './releases-direct';
+import * as goproxy from './releases-goproxy';
 
 export { id } from './common';
 

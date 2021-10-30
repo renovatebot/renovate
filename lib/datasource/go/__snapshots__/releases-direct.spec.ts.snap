@@ -1,339 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/go/index getDigest gitlab digest is not supported at the moment 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "gitlab.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/golang/text?go-get=1",
-  },
-]
-`;
-
-exports[`datasource/go/index getDigest returns digest 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://golang.org/x/text?go-get=1",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/golang/text/commits?per_page=1",
-  },
-]
-`;
-
-exports[`datasource/go/index getDigest returns null for no go-source tag 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://golang.org/y/text?go-get=1",
-  },
-]
-`;
-
-exports[`datasource/go/index getDigest returns null for wrong name 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://golang.org/y/text?go-get=1",
-  },
-]
-`;
-
-exports[`datasource/go/index getDigest support bitbucket digest 1`] = `"123"`;
-
-exports[`datasource/go/index getDigest support bitbucket digest 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/golang/text",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/golang/text/commits/master",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases GOPROXY fetches release data from goproxy 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.0.info",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.1.info",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases GOPROXY handles comma fallback 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "foo.example.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://foo.example.com/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "bar.example.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://bar.example.com/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.0.info",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.1.info",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases GOPROXY handles pipe fallback 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "example.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://example.com/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.0.info",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.1.info",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases GOPROXY handles timestamp fetch errors 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.0.info",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "proxy.golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://proxy.golang.org/github.com/google/btree/@v/v1.0.1.info",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases GOPROXY short-circuits with comma fallback 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "foo.example.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://foo.example.com/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "bar.example.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://bar.example.com/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "baz.example.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://baz.example.com/github.com/google/btree/@v/list",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/google/btree/tags?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/google/btree/releases?per_page=100",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases GOPROXY skips GONOPROXY and GOPRIVATE packages 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/google/btree/tags?per_page=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/google/btree/releases?per_page=100",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases handles fyne.io 1`] = `
+exports[`datasource/go/releases-direct getReleases handles fyne.io 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -349,7 +16,7 @@ Object {
 }
 `;
 
-exports[`datasource/go/index getReleases handles fyne.io 2`] = `
+exports[`datasource/go/releases-direct getReleases handles fyne.io 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -383,7 +50,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases processes real data 1`] = `
+exports[`datasource/go/releases-direct getReleases processes real data 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -399,7 +66,7 @@ Object {
 }
 `;
 
-exports[`datasource/go/index getReleases processes real data 2`] = `
+exports[`datasource/go/releases-direct getReleases processes real data 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -433,7 +100,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases returns none if no tags match submodules 1`] = `
+exports[`datasource/go/releases-direct getReleases returns none if no tags match submodules 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -458,7 +125,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases returns none if no tags match submodules 2`] = `
+exports[`datasource/go/releases-direct getReleases returns none if no tags match submodules 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -483,7 +150,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases returns null for 404 1`] = `
+exports[`datasource/go/releases-direct getReleases returns null for empty result 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -497,21 +164,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases returns null for empty result 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://golang.org/foo/something?go-get=1",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases returns null for go-import prefix mismatch 1`] = `
+exports[`datasource/go/releases-direct getReleases returns null for go-import prefix mismatch 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -525,21 +178,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases returns null for unknown error 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "host": "golang.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://golang.org/foo/something?go-get=1",
-  },
-]
-`;
-
-exports[`datasource/go/index getReleases skips unsupported platform 1`] = `
+exports[`datasource/go/releases-direct getReleases skips unsupported platform 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -553,7 +192,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases skips wrong package 1`] = `
+exports[`datasource/go/releases-direct getReleases skips wrong package 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -567,16 +206,18 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases support bitbucket tags 1`] = `
+exports[`datasource/go/releases-direct getReleases support bitbucket tags 1`] = `
 Object {
   "registryUrl": "https://bitbucket.org",
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v2.0.0",
+      "releaseTimestamp": undefined,
       "version": "v2.0.0",
     },
   ],
@@ -584,7 +225,7 @@ Object {
 }
 `;
 
-exports[`datasource/go/index getReleases support bitbucket tags 2`] = `
+exports[`datasource/go/releases-direct getReleases support bitbucket tags 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -599,7 +240,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases support ghe 1`] = `
+exports[`datasource/go/releases-direct getReleases support ghe 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -615,7 +256,7 @@ Object {
 }
 `;
 
-exports[`datasource/go/index getReleases support ghe 2`] = `
+exports[`datasource/go/releases-direct getReleases support ghe 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -649,15 +290,17 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases support gitlab 1`] = `
+exports[`datasource/go/releases-direct getReleases support gitlab 1`] = `
 Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v2.0.0",
+      "releaseTimestamp": undefined,
       "version": "v2.0.0",
     },
   ],
@@ -665,7 +308,7 @@ Object {
 }
 `;
 
-exports[`datasource/go/index getReleases support gitlab 2`] = `
+exports[`datasource/go/releases-direct getReleases support gitlab 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -689,15 +332,17 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases support gitlab subgroups 1`] = `
+exports[`datasource/go/releases-direct getReleases support gitlab subgroups 1`] = `
 Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v2.0.0",
+      "releaseTimestamp": undefined,
       "version": "v2.0.0",
     },
   ],
@@ -705,7 +350,7 @@ Object {
 }
 `;
 
-exports[`datasource/go/index getReleases support gitlab subgroups 2`] = `
+exports[`datasource/go/releases-direct getReleases support gitlab subgroups 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -729,15 +374,17 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases support self hosted gitlab private repositories 1`] = `
+exports[`datasource/go/releases-direct getReleases support self hosted gitlab private repositories 1`] = `
 Object {
   "releases": Array [
     Object {
       "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
       "version": "v1.0.0",
     },
     Object {
       "gitRef": "v2.0.0",
+      "releaseTimestamp": undefined,
       "version": "v2.0.0",
     },
   ],
@@ -745,7 +392,7 @@ Object {
 }
 `;
 
-exports[`datasource/go/index getReleases support self hosted gitlab private repositories 2`] = `
+exports[`datasource/go/releases-direct getReleases support self hosted gitlab private repositories 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -771,9 +418,37 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases unknown datasource returns null 1`] = `null`;
+exports[`datasource/go/releases-direct getReleases throws for 404 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "golang.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://golang.org/foo/something?go-get=1",
+  },
+]
+`;
 
-exports[`datasource/go/index getReleases unknown datasource returns null 2`] = `
+exports[`datasource/go/releases-direct getReleases throws for unknown error 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "golang.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://golang.org/foo/something?go-get=1",
+  },
+]
+`;
+
+exports[`datasource/go/releases-direct getReleases unknown datasource returns null 1`] = `null`;
+
+exports[`datasource/go/releases-direct getReleases unknown datasource returns null 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -787,7 +462,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases works for known servers 1`] = `
+exports[`datasource/go/releases-direct getReleases works for known servers 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -852,7 +527,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases works for nested modules on github 1`] = `
+exports[`datasource/go/releases-direct getReleases works for nested modules on github 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -877,7 +552,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases works for nested modules on github 2`] = `
+exports[`datasource/go/releases-direct getReleases works for nested modules on github 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -902,7 +577,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/index getReleases works for nested modules on github v2+ major upgrades 1`] = `
+exports[`datasource/go/releases-direct getReleases works for nested modules on github v2+ major upgrades 1`] = `
 Array [
   Object {
     "headers": Object {
