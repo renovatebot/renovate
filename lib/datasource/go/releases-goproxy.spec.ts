@@ -8,9 +8,9 @@ import {
   parseGoproxy,
   parseNoproxy,
   versionInfo,
-} from './goproxy';
+} from './releases-goproxy';
 
-describe('datasource/go/goproxy', () => {
+describe('datasource/go/releases-goproxy', () => {
   beforeEach(() => {
     memCache.init();
   });

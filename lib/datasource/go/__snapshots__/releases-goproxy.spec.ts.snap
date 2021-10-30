@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/go/goproxy GOPROXY fetches release data from goproxy 1`] = `
+exports[`datasource/go/releases-goproxy GOPROXY fetches release data from goproxy 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -34,7 +34,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/goproxy GOPROXY handles comma fallback 1`] = `
+exports[`datasource/go/releases-goproxy GOPROXY handles comma fallback 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -86,7 +86,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/goproxy GOPROXY handles pipe fallback 1`] = `
+exports[`datasource/go/releases-goproxy GOPROXY handles pipe fallback 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -129,7 +129,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/goproxy GOPROXY handles timestamp fetch errors 1`] = `
+exports[`datasource/go/releases-goproxy GOPROXY handles timestamp fetch errors 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -163,7 +163,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/goproxy GOPROXY short-circuits with comma fallback 1`] = `
+exports[`datasource/go/releases-goproxy GOPROXY short-circuits with comma fallback 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -195,7 +195,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/goproxy requests listVersions 1`] = `
+exports[`datasource/go/releases-goproxy requests listVersions 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -209,7 +209,7 @@ Array [
 ]
 `;
 
-exports[`datasource/go/goproxy requests versionInfo 1`] = `
+exports[`datasource/go/releases-goproxy requests versionInfo 1`] = `
 Array [
   Object {
     "headers": Object {
