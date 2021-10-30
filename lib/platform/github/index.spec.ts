@@ -108,6 +108,22 @@ describe('platform/github/index', () => {
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should support setup special email for platformCommit', async () => {
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        id: 1234,
+        login: 'renovate-bot',
+        name: 'Renovate Bot',
+      });
+      expect(
+        await github.initPlatform({
+          token: '123test',
+          platformCommit: true,
+        } as any)
+      ).toMatchObject({
+        gitAuthor: 'renovate-bot <1234+renovate-bot@users.noreply.github.com>',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('should support custom endpoint', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
