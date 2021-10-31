@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import pAll from 'p-all';
 import { lt } from 'semver';
 import { PlatformId } from '../../constants';
@@ -171,6 +172,9 @@ export async function getJsonFile(
   repo: string = config.repository
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repo);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
