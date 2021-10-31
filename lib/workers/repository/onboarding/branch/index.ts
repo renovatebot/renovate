@@ -56,7 +56,9 @@ export async function checkOnboardingBranch(
     if (
       Object.entries(await extractAllDependencies(mergedConfig)).length === 0
     ) {
-      throw new Error(REPOSITORY_NO_PACKAGE_FILES);
+      if (!config?.onboardingNoDeps) {
+        throw new Error(REPOSITORY_NO_PACKAGE_FILES);
+      }
     }
     logger.debug('Need to create onboarding PR');
     const commit = await createOnboardingBranch(mergedConfig);
