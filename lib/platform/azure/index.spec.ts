@@ -1250,6 +1250,24 @@ describe('platform/azure/index', () => {
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() =>
+              Promise.resolve(Readable.from(json5Data))
+            ),
+          } as any)
+      );
+      const res = await azure.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
+    });
     it('throws on malformed JSON', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
