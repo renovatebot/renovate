@@ -1680,7 +1680,8 @@ Though this option is enabled by default, you can fine tune the behavior by sett
 
 ## platformCommit
 
-Perform commits by taking advantage of the platform-native API.
+Commits peformed by platform-native API will be marked as verified.
+Supports GitHub-only.
 
 ## postUpdateOptions
 
