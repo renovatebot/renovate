@@ -8,8 +8,8 @@ import type {
 import {
   createDependency,
   mergeExtractionTemplate,
-  regexMatchAll,
   mergeGroups,
+  regexMatchAll,
   validMatchFields,
 } from './util';
 
