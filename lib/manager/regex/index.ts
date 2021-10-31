@@ -9,6 +9,7 @@ import {
   createDependency,
   mergeExtractionTemplate,
   regexMatchAll,
+  mergeGroups,
   validMatchFields,
 } from './util';
 
@@ -58,7 +59,8 @@ function handleRecursive(
   content: string,
   packageFile: string,
   config: CustomExtractConfig,
-  index = 0
+  index = 0,
+  combinedGroups: Record<string, string> = {}
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
@@ -71,11 +73,21 @@ function handleRecursive(
     // if we have a depName and a currentValue with have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
       return createDependency(
-        { groups: match.groups, replaceString: match[0] },
+        {
+          groups: mergeGroups(combinedGroups, match.groups),
+          replaceString: match[0],
+        },
         config
       );
     }
-    return handleRecursive(match[0], packageFile, config, index + 1);
+
+    return handleRecursive(
+      match[0],
+      packageFile,
+      config,
+      index + 1,
+      mergeGroups(combinedGroups, match.groups || {})
+    );
   });
 }
 
