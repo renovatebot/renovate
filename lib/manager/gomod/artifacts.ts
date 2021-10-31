@@ -8,8 +8,9 @@ import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
-import { find } from '../../util/host-rules';
+import { find, getAll } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
+import { createURLFromHostOrURL, validateUrl } from '../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -21,6 +22,7 @@ import type {
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
+  // hard-coded logic to use authentication for github.com based on the credentials for api.github.com
   const credentials = find({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
@@ -33,6 +35,45 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     );
   }
 
+  // get extra host rules for other git-based Go Module hosts
+  const hostRules = getAll() || [];
+
+  const goGitAllowedHostType: string[] = [
+    // All known git platforms
+    PlatformId.Azure,
+    PlatformId.Bitbucket,
+    PlatformId.BitbucketServer,
+    PlatformId.Gitea,
+    PlatformId.Github,
+    PlatformId.Gitlab,
+    // plus all without a host type (=== undefined)
+    undefined,
+  ];
+
+  // for each hostRule we add additional authentication variables to the environmentVariables
+  for (const hostRule of hostRules) {
+    if (
+      hostRule?.token &&
+      hostRule.matchHost &&
+      goGitAllowedHostType.includes(hostRule.hostType)
+    ) {
+      const httpUrl = createURLFromHostOrURL(hostRule.matchHost).toString();
+      if (validateUrl(httpUrl)) {
+        logger.debug(
+          `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
+        );
+        environmentVariables = getGitAuthenticatedEnvironmentVariables(
+          httpUrl,
+          hostRule.token,
+          environmentVariables
+        );
+      } else {
+        logger.warn(
+          `Could not parse registryUrl ${hostRule.matchHost} or not using http(s). Ignoring`
+        );
+      }
+    }
+  }
   return environmentVariables;
 }
 
