@@ -42,7 +42,7 @@ export class MigrationsService {
     );
 
     for (const [key, value] of Object.entries(originalConfig)) {
-      migratedConfig[key] = value;
+      migratedConfig[key] ??= value;
       const migration = migrations.find((item) => item.propertyName === key);
       migration?.run();
     }

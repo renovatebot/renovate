@@ -1,17 +1,10 @@
-import type { RenovateConfig } from '../../types';
-import { IgnoreNodeModulesMigration } from './ignore-node-modules-migration';
+import { MigrationsService } from '../migrations-service';
 
 describe('config/migrations/custom/ignore-node-modules-migration', () => {
   it('should migrate to ignorePaths', () => {
-    const originalConfig: RenovateConfig = {
+    const migratedConfig = MigrationsService.run({
       ignoreNodeModules: true,
-    };
-    const migratedConfig: RenovateConfig = {};
-    const migration = new IgnoreNodeModulesMigration(
-      originalConfig,
-      migratedConfig
-    );
-    migration.run();
+    });
 
     expect(migratedConfig.ignorePaths).toEqual(['node_modules/']);
   });

@@ -1,14 +1,10 @@
-import type { RenovateConfig } from '../../types';
-import { TrustLevelMigration } from './trust-level-migration';
+import { MigrationsService } from '../migrations-service';
 
 describe('config/migrations/custom/trust-level-migration', () => {
   it('should handle hight level', () => {
-    const originalConfig: RenovateConfig = {
+    const migratedConfig = MigrationsService.run({
       trustLevel: 'high',
-    };
-    const migratedConfig: RenovateConfig = {};
-    const migration = new TrustLevelMigration(originalConfig, migratedConfig);
-    migration.run();
+    });
 
     expect(migratedConfig.allowCustomCrateRegistries).toBeTrue();
     expect(migratedConfig.allowScripts).toBeTrue();
@@ -16,15 +12,12 @@ describe('config/migrations/custom/trust-level-migration', () => {
   });
 
   it('should not rewrite provided properties', () => {
-    const originalConfig: RenovateConfig = {
+    const migratedConfig = MigrationsService.run({
       allowCustomCrateRegistries: false,
       allowScripts: false,
       exposeAllEnv: false,
       trustLevel: 'high',
-    };
-    const migratedConfig: RenovateConfig = {};
-    const migration = new TrustLevelMigration(originalConfig, migratedConfig);
-    migration.run();
+    });
 
     expect(migratedConfig.allowCustomCrateRegistries).toBeFalse();
     expect(migratedConfig.allowScripts).toBeFalse();

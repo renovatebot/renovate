@@ -1,14 +1,10 @@
-import type { RenovateConfig } from '../../types';
-import { BinarySourceMigration } from './binary-source-migration';
+import { MigrationsService } from '../migrations-service';
 
 describe('config/migrations/custom/binary-source-migration', () => {
   it('should migrate "auto" to "global"', () => {
-    const originalConfig: RenovateConfig = {
+    const migratedConfig = MigrationsService.run({
       binarySource: 'auto',
-    };
-    const migratedConfig: RenovateConfig = {};
-    const migration = new BinarySourceMigration(originalConfig, migratedConfig);
-    migration.run();
+    });
 
     expect(migratedConfig.binarySource).toBe('global');
   });

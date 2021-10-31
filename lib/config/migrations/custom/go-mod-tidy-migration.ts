@@ -7,12 +7,12 @@ export class GoModTidyMigration extends AbstractMigration {
   }
 
   override run(): void {
-    const { gomodTidy } = this.originalConfig;
+    const { gomodTidy, postUpdateOptions } = this.originalConfig;
 
     this.delete(this.propertyName);
 
     if (gomodTidy) {
-      this.migratedConfig.postUpdateOptions ??= [];
+      this.migratedConfig.postUpdateOptions ??= postUpdateOptions ?? [];
       this.migratedConfig.postUpdateOptions.push('gomodTidy');
     }
   }
