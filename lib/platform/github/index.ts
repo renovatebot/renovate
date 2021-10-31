@@ -986,9 +986,6 @@ export async function setBranchStatus({
 
 /* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  if (config.hasIssuesEnabled === false) {
-    return [];
-  }
   const result = await githubApi.queryRepoField<Issue>(
     getIssuesQuery,
     'issues',
