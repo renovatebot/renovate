@@ -162,6 +162,7 @@ describe('platform/github/index', () => {
           isArchived: false,
           nameWithOwner: repository,
           autoMergeAllowed: true,
+          hasIssuesEnabled: true,
           mergeCommitAllowed: true,
           rebaseMergeAllowed: true,
           squashMergeAllowed: true,
@@ -192,6 +193,7 @@ describe('platform/github/index', () => {
             isFork: false,
             isArchived: false,
             nameWithOwner: repository,
+            hasIssuesEnabled: true,
             mergeCommitAllowed: true,
             rebaseMergeAllowed: true,
             squashMergeAllowed: true,
@@ -274,6 +276,7 @@ describe('platform/github/index', () => {
               isFork: false,
               isArchived: false,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               mergeCommitAllowed: true,
               rebaseMergeAllowed: false,
               squashMergeAllowed: true,
@@ -302,6 +305,7 @@ describe('platform/github/index', () => {
               isFork: false,
               isArchived: false,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               mergeCommitAllowed: true,
               rebaseMergeAllowed: false,
               squashMergeAllowed: false,
@@ -351,6 +355,7 @@ describe('platform/github/index', () => {
             repository: {
               isArchived: true,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               defaultBranchRef: {
                 name: 'master',
                 target: {
@@ -384,6 +389,7 @@ describe('platform/github/index', () => {
           data: {
             repository: {
               nameWithOwner: 'some/other',
+              hasIssuesEnabled: true,
               defaultBranchRef: {
                 name: 'master',
                 target: {
@@ -2397,6 +2403,23 @@ describe('platform/github/index', () => {
       });
       const res = await github.getJsonFile('file.json');
       expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.get('/repos/some/repo/contents/file.json5').reply(200, {
+        content: Buffer.from(json5Data).toString('base64'),
+      });
+      const res = await github.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws on malformed JSON', async () => {

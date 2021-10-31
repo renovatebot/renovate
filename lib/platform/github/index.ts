@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import { PlatformId } from '../../constants';
 import {
@@ -166,6 +167,9 @@ export async function getJsonFile(
   repo: string = config.repository
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repo);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -246,6 +250,7 @@ export async function initRepo({
       logger.debug('Could not find allowed merge methods for repo');
     }
     config.autoMergeAllowed = repo.autoMergeAllowed;
+    config.hasIssuesEnabled = repo.hasIssuesEnabled;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -1016,6 +1021,10 @@ export async function getIssue(
   number: number,
   useCache = true
 ): Promise<Issue | null> {
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    return null;
+  }
   try {
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
@@ -1064,6 +1073,13 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    logger.info(
+      'Cannot ensure issue because issues are disabled in this repository'
+    );
+    return null;
+  }
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
@@ -1151,6 +1167,13 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    logger.info(
+      'Cannot ensure issue because issues are disabled in this repository'
+    );
+    return;
+  }
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
