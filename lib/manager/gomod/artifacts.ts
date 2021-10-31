@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
@@ -8,7 +7,10 @@ import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { find } from '../../util/host-rules';
+import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
+import { find, getAll } from '../../util/host-rules';
+import { regEx } from '../../util/regex';
+import { createURLFromHostOrURL, validateUrl } from '../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -17,19 +19,62 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-function getPreCommands(): string[] | null {
+function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
+  let environmentVariables: NodeJS.ProcessEnv = {};
+
+  // hard-coded logic to use authentication for github.com based on the credentials for api.github.com
   const credentials = find({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
-  let preCommands = null;
+
   if (credentials?.token) {
-    const token = quote(credentials.token);
-    preCommands = [
-      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
-    ];
+    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+      'https://github.com/',
+      credentials.token
+    );
   }
-  return preCommands;
+
+  // get extra host rules for other git-based Go Module hosts
+  const hostRules = getAll() || [];
+
+  const goGitAllowedHostType: string[] = [
+    // All known git platforms
+    PlatformId.Azure,
+    PlatformId.Bitbucket,
+    PlatformId.BitbucketServer,
+    PlatformId.Gitea,
+    PlatformId.Github,
+    PlatformId.Gitlab,
+    // plus all without a host type (=== undefined)
+    undefined,
+  ];
+
+  // for each hostRule we add additional authentication variables to the environmentVariables
+  for (const hostRule of hostRules) {
+    if (
+      hostRule?.token &&
+      hostRule.matchHost &&
+      goGitAllowedHostType.includes(hostRule.hostType)
+    ) {
+      const httpUrl = createURLFromHostOrURL(hostRule.matchHost).toString();
+      if (validateUrl(httpUrl)) {
+        logger.debug(
+          `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
+        );
+        environmentVariables = getGitAuthenticatedEnvironmentVariables(
+          httpUrl,
+          hostRule.token,
+          environmentVariables
+        );
+      } else {
+        logger.warn(
+          `Could not parse registryUrl ${hostRule.matchHost} or not using http(s). Ignoring`
+        );
+      }
+    }
+  }
+  return environmentVariables;
 }
 
 function getUpdateImportPathCmds(
@@ -48,10 +93,10 @@ function getUpdateImportPathCmds(
     if (gomodModCompatibility) {
       if (
         gomodModCompatibility.startsWith('v') &&
-        isValid(gomodModCompatibility.replace(/^v/, ''))
+        isValid(gomodModCompatibility.replace(regEx(/^v/), ''))
       ) {
         installMarwanModArgs = installMarwanModArgs.replace(
-          /@latest$/,
+          regEx(/@latest$/),
           `@${gomodModCompatibility}`
         );
       } else {
@@ -76,7 +121,7 @@ function useModcacherw(goVersion: string): boolean {
     return true;
   }
 
-  const [, majorPart, minorPart] = /(\d+)\.(\d+)/.exec(goVersion) ?? [];
+  const [, majorPart, minorPart] = regEx(/(\d+)\.(\d+)/).exec(goVersion) ?? [];
   const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
 
   return (
@@ -94,7 +139,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
-  const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
+  const sumFileName = goModFileName.replace(regEx(/\.mod$/), '.sum');
   const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
     logger.debug('No go.sum found');
@@ -107,7 +152,7 @@ export async function updateArtifacts({
 
   try {
     const massagedGoMod = newGoModContent.replace(
-      /\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
+      regEx(/\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g),
       '\n// renovate-replace $1'
     );
     if (massagedGoMod !== newGoModContent) {
@@ -124,14 +169,15 @@ export async function updateArtifacts({
         GOPRIVATE: process.env.GOPRIVATE,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
+        GOSUMDB: process.env.GOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
         CGO_ENABLED: getGlobalConfig().binarySource === 'docker' ? '0' : null,
+        ...getGitEnvironmentVariables(),
       },
       docker: {
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
-        preCommands: getPreCommands(),
       },
     };
 
@@ -155,9 +201,17 @@ export async function updateArtifacts({
       }
     }
 
-    const isGoModTidyRequired =
-      config.postUpdateOptions?.includes('gomodTidy') ||
+    const mustSkipGoModTidy =
+      !config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
+    if (mustSkipGoModTidy) {
+      logger.debug({ cmd, args }, 'go mod tidy command skipped');
+    }
+
+    const isGoModTidyRequired =
+      !mustSkipGoModTidy &&
+      (config.postUpdateOptions?.includes('gomodTidy') ||
+        (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy';
       logger.debug({ cmd, args }, 'go mod tidy command included');
@@ -237,7 +291,7 @@ export async function updateArtifacts({
 
     const finalGoModContent = (
       await readLocalFile(goModFileName, 'utf8')
-    ).replace(/\/\/ renovate-replace /g, '');
+    ).replace(regEx(/\/\/ renovate-replace /g), '');
     if (finalGoModContent !== newGoModContent) {
       logger.debug('Found updated go.mod after go.sum update');
       res.push({

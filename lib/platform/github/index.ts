@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import { PlatformId } from '../../constants';
 import {
@@ -22,6 +23,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
@@ -36,6 +38,7 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
   RepoParams,
@@ -45,6 +48,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import {
   closedPrsQuery,
+  enableAutoMergeMutation,
   getIssuesQuery,
   openPrsQuery,
   repoInfoQuery,
@@ -55,6 +59,7 @@ import {
   BranchProtection,
   CombinedBranchStatus,
   Comment,
+  GhAutomergeResponse,
   GhBranchStatus,
   GhGraphQlPr,
   GhRepo,
@@ -74,7 +79,7 @@ const defaults = {
 };
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(/#/g, '%23') : input;
+  input ? input.replace(regEx(/#/g), '%23') : input;
 
 export async function initPlatform({
   endpoint,
@@ -162,6 +167,9 @@ export async function getJsonFile(
   repo: string = config.repository
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repo);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -241,8 +249,10 @@ export async function initRepo({
       // This happens if we don't have Administrator read access, it is not a critical error
       logger.debug('Could not find allowed merge methods for repo');
     }
+    config.autoMergeAllowed = repo.autoMergeAllowed;
+    config.hasIssuesEnabled = repo.hasIssuesEnabled;
   } catch (err) /* istanbul ignore next */ {
-    logger.debug('Caught initRepo error');
+    logger.debug({ err }, 'Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
       err.message === REPOSITORY_RENAMED ||
@@ -764,7 +774,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
       return null;
     }
     try {
-      const title = autoclosedPr.title.replace(/ - autoclosed$/, '');
+      const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
       await githubApi.patchJson(`repos/${config.repository}/pulls/${number}`, {
         body: {
           state: 'open',
@@ -1011,6 +1021,10 @@ export async function getIssue(
   number: number,
   useCache = true
 ): Promise<Issue | null> {
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    return null;
+  }
   try {
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
@@ -1059,6 +1073,13 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    logger.info(
+      'Cannot ensure issue because issues are disabled in this repository'
+    );
+    return null;
+  }
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
@@ -1146,6 +1167,13 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    logger.info(
+      'Cannot ensure issue because issues are disabled in this repository'
+    );
+    return;
+  }
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1177,7 +1205,7 @@ export async function addReviewers(
   const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
     .filter((e) => e.startsWith('team:'))
-    .map((e) => e.replace(/^team:/, ''));
+    .map((e) => e.replace(regEx(/^team:/), '')); // TODO #12071
   try {
     await githubApi.postJson(
       `repos/${
@@ -1377,6 +1405,44 @@ export async function ensureCommentRemoval({
 
 // Pull Request
 
+async function tryPrAutomerge(
+  prNumber: number,
+  prNodeId: string,
+  platformOptions: PlatformPrOptions
+): Promise<void> {
+  if (!platformOptions?.usePlatformAutomerge) {
+    return;
+  }
+
+  if (!config.autoMergeAllowed) {
+    logger.debug(
+      { prNumber },
+      'GitHub-native automerge: not enabled in repo settings'
+    );
+    return;
+  }
+
+  try {
+    const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
+    const variables = { pullRequestId: prNodeId, mergeMethod };
+    const queryOptions = { variables };
+
+    const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
+      enableAutoMergeMutation,
+      queryOptions
+    );
+
+    if (errors) {
+      logger.debug({ prNumber, errors }, 'GitHub-native automerge: fail');
+      return;
+    }
+
+    logger.debug({ prNumber }, 'GitHub-native automerge: success');
+  } catch (err) {
+    logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
+  }
+}
+
 // Creates PR and returns PR number
 export async function createPr({
   sourceBranch,
@@ -1385,6 +1451,7 @@ export async function createPr({
   prBody: rawBody,
   labels,
   draftPR = false,
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = targetBranch;
@@ -1423,6 +1490,7 @@ export async function createPr({
   pr.sourceBranch = sourceBranch;
   pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
+  await tryPrAutomerge(pr.number, pr.node_id, platformOptions);
   return pr;
 }
 
@@ -1560,9 +1628,12 @@ export function massageMarkdown(input: string): string {
   }
   const massagedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with renovatebot redirector
-    .replace(/href="https?:\/\/github.com\//g, 'href="https://togithub.com/')
-    .replace(/]\(https:\/\/github\.com\//g, '](https://togithub.com/')
-    .replace(/]: https:\/\/github\.com\//g, ']: https://togithub.com/');
+    .replace(
+      regEx(/href="https?:\/\/github.com\//g),
+      'href="https://togithub.com/'
+    )
+    .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
+    .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/');
   return smartTruncate(massagedInput, 60000);
 }
 

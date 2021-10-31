@@ -24,6 +24,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
@@ -46,6 +47,7 @@ interface StorageConfig {
   url: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
+  fullClone?: boolean;
 }
 
 interface LocalConfig extends StorageConfig {
@@ -119,7 +121,7 @@ function checkForPlatformFailure(err: Error): void {
 }
 
 function localName(branchName: string): string {
-  return branchName.replace(/^origin\//, '');
+  return branchName.replace(regEx(/^origin\//), ''); // TODO #12071
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -131,10 +133,10 @@ async function isDirectory(dir: string): Promise<boolean> {
 }
 
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
-  // see https://stackoverflow.com/a/44750379/1438522
+  // see https://stackoverflow.com/a/62352647/3005034
   try {
-    const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
-    return res.replace('refs/remotes/origin/', '').trim();
+    const res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+    return res.replace('origin/', '').trim();
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (
@@ -143,6 +145,11 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
       )
     ) {
       throw new Error(REPOSITORY_EMPTY);
+    }
+    // istanbul ignore if
+    if (err.message.includes("fatal: ambiguous argument 'origin/HEAD'")) {
+      logger.warn({ err }, 'Error getting default branch');
+      throw new Error(TEMPORARY_ERROR);
     }
     throw err;
   }
@@ -167,7 +174,7 @@ async function fetchBranchCommits(): Promise<void> {
     (await git.raw(opts))
       .split('\n')
       .filter(Boolean)
-      .map((line) => line.trim().split(/\s+/))
+      .map((line) => line.trim().split(regEx(/\s+/))) // TODO #12071
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
@@ -271,7 +278,7 @@ export async function getSubmodules(): Promise<string[]> {
       ])) || ''
     )
       .trim()
-      .split(/[\n\s]/)
+      .split(regEx(/[\n\s]/))
       .filter((_e: string, i: number) => i % 2);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error getting submodules');
@@ -315,8 +322,13 @@ export async function syncGit(): Promise<void> {
     await fs.emptyDir(localDir);
     const cloneStart = Date.now();
     try {
-      // blobless clone
-      const opts = ['--filter=blob:none'];
+      const opts = [];
+      if (config.fullClone) {
+        logger.debug('Performing full clone');
+      } else {
+        logger.debug('Performing blobless clone');
+        opts.push('--filter=blob:none');
+      }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
@@ -453,7 +465,7 @@ export async function getFileList(): Promise<string[]> {
     .split('\n')
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(/\t/).pop())
+    .map((line) => line.split(regEx(/\t/)).pop()) // TODO #12071
     .filter((file: string) =>
       submodules.every((submodule: string) => !file.startsWith(submodule))
     );

@@ -1,20 +1,21 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import * as datasourcePod from '../../datasource/pod';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { ParsedLine } from './types';
 
 const regexMappings = [
-  /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,
-  /^\s*pod\s+(['"])[^'"]+\1\s*,\s*(['"])(?<currentValue>[^'"]+)\2\s*$/,
-  /,\s*:git\s*=>\s*(['"])(?<git>[^'"]+)\1/,
-  /,\s*:tag\s*=>\s*(['"])(?<tag>[^'"]+)\1/,
-  /,\s*:path\s*=>\s*(['"])(?<path>[^'"]+)\1/,
-  /^\s*source\s*(['"])(?<source>[^'"]+)\1/,
+  /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/, // TODO #12070
+  /^\s*pod\s+(['"])[^'"]+\1\s*,\s*(['"])(?<currentValue>[^'"]+)\2\s*$/, // TODO #12070
+  /,\s*:git\s*=>\s*(['"])(?<git>[^'"]+)\1/, // TODO #12070
+  /,\s*:tag\s*=>\s*(['"])(?<tag>[^'"]+)\1/, // TODO #12070
+  /,\s*:path\s*=>\s*(['"])(?<path>[^'"]+)\1/, // TODO #12070
+  /^\s*source\s*(['"])(?<source>[^'"]+)\1/, // TODO #12070
 ];
 
 export function parseLine(line: string): ParsedLine {
@@ -23,7 +24,7 @@ export function parseLine(line: string): ParsedLine {
     return result;
   }
   for (const regex of Object.values(regexMappings)) {
-    const match = regex.exec(line.replace(/#.*$/, ''));
+    const match = regex.exec(line.replace(regEx(/#.*$/), '')); // TODO #12071
     if (match?.groups) {
       result = { ...result, ...match.groups };
     }
@@ -50,10 +51,9 @@ export function parseLine(line: string): ParsedLine {
 export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
 
-  const platformMatch =
-    /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/.exec(
-      git
-    );
+  const platformMatch = regEx(
+    /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/
+  ).exec(git);
 
   if (platformMatch) {
     const { account, repo, platform } = platformMatch?.groups || {};
@@ -65,14 +65,14 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
       return {
         datasource,
         depName,
-        lookupName: `${account}/${repo.replace(/\.git$/, '')}`,
+        lookupName: `${account}/${repo.replace(regEx(/\.git$/), '')}`,
         currentValue: tag,
       };
     }
   }
 
   return {
-    datasource: datasourceGitTags.id,
+    datasource: GitTagsDatasource.id,
     depName,
     lookupName: git,
     currentValue: tag,
@@ -103,7 +103,7 @@ export async function extractPackageFile(
     }: ParsedLine = parsedLine;
 
     if (source) {
-      registryUrls.push(source.replace(/\/*$/, ''));
+      registryUrls.push(source.replace(regEx(/\/*$/), '')); // TODO #12071
     }
 
     if (depName) {

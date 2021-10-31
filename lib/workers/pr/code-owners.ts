@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import { Pr } from '../../platform';
 import { readLocalFile } from '../../util/fs';
 import { getBranchFiles } from '../../util/git';
+import { regEx } from '../../util/regex';
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
@@ -26,7 +27,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       .map((line) => line.trim())
       .filter((line) => line && !line.startsWith('#'))
       .map((line) => {
-        const [pattern, ...usernames] = line.split(/\s+/);
+        const [pattern, ...usernames] = line.split(regEx(/\s+/)); // TODO #12071
         return {
           usernames,
           match: (path: string) => {

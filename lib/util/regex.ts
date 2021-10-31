@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
+// eslint-disable-next-line import/no-cycle
 import { logger } from '../logger';
 
 let RegEx: RegExpConstructor;
@@ -16,23 +17,23 @@ try {
   RegEx = RegExp;
 }
 
-export function regEx(pattern: string, flags?: string): RegExp {
+export function regEx(pattern: string | RegExp, flags?: string): RegExp {
   try {
     return new RegEx(pattern, flags);
   } catch (err) {
     const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = pattern;
-    error.validationError = `Invalid regular expression: ${pattern}`;
+    error.validationSource = pattern.toString();
+    error.validationError = `Invalid regular expression: ${pattern.toString()}`;
     throw error;
   }
 }
 
 export function escapeRegExp(input: string): string {
-  return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string // TODO #12071
 }
 
-const configValStart = /^!?\//;
-const configValEnd = /\/$/;
+const configValStart = regEx(/^!?\//);
+const configValEnd = regEx(/\/$/);
 
 export function isConfigRegex(input: unknown): input is string {
   return (
