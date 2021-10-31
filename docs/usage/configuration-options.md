@@ -1091,7 +1091,8 @@ Useful to know: Renovate's default ignore is `node_modules` and `bower_component
 
 ## ignorePlugins
 
-Applicable for Composer only for now. Set this to `true` if running plugins causes problems.
+Set this to `true` if running plugins causes problems.
+Applicable for Composer only for now.
 
 ## ignorePrAuthor
 
