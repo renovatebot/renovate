@@ -1,6 +1,6 @@
 import { PlatformId } from '../constants';
 import * as datasourceNuget from '../datasource/nuget';
-import { add, clear, find, findAll, hosts } from './host-rules';
+import { add, clear, find, findAll, getAll, hosts } from './host-rules';
 
 describe('util/host-rules', () => {
   beforeEach(() => {
@@ -285,6 +285,24 @@ describe('util/host-rules', () => {
       add(hostRule);
       expect(findAll({ hostType: 'nuget' })).toHaveLength(1);
       expect(findAll({ hostType: 'nuget' })[0]).toMatchSnapshot();
+    });
+  });
+  describe('getAll()', () => {
+    it('returns all host rules', () => {
+      const hostRule1 = {
+        hostType: 'nuget',
+        matchHost: 'nuget.org',
+        username: 'root',
+        password: 'p4$$w0rd',
+      };
+      const hostRule2 = {
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 'token',
+      };
+      add(hostRule1);
+      add(hostRule2);
+      expect(getAll()).toMatchObject([hostRule1, hostRule2]);
     });
   });
 });
