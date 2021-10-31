@@ -4,6 +4,8 @@ import type { VersioningApi } from '../types';
 export const id = 'aws-machine-image';
 export const displayName = 'aws-machine-image';
 
+export const urls = [];
+
 export const supportsRanges = false;
 
 const parse = (version: string): any => ({ release: [parseInt(version, 10)] });
