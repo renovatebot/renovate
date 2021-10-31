@@ -1,9 +1,20 @@
 import { RenovateConfig, defaultConfig, git } from '../../../../../test/util';
+import { setGlobalConfig } from '../../../../config/global';
 import { rebaseOnboardingBranch } from './rebase';
 
 jest.mock('../../../../util/git');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
+  beforeAll(() => {
+    setGlobalConfig({
+      localDir: '',
+    });
+  });
+
+  afterAll(() => {
+    setGlobalConfig();
+  });
+
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
     beforeEach(() => {

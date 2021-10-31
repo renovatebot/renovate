@@ -1,4 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
+import { setGlobalConfig } from '../../../../config/global';
 import * as presets from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { getOnboardingConfig, getOnboardingConfigContents } from './config';
@@ -9,12 +10,24 @@ const mockedPresets = presets as jest.Mocked<typeof presets>;
 
 describe('workers/repository/onboarding/branch/config', () => {
   let config: RenovateConfig;
+
+  beforeAll(() => {
+    setGlobalConfig({
+      localDir: '',
+    });
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     config = getConfig();
     config.platform = 'github';
     config.repository = 'some/repo';
   });
+
+  afterAll(() => {
+    setGlobalConfig();
+  });
+
   describe('getOnboardingConfigContents', () => {
     it('returns the JSON stringified onboarding config', async () => {
       mockedPresets.getPreset.mockResolvedValueOnce({ enabled: true });

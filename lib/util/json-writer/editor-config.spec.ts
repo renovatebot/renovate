@@ -1,6 +1,8 @@
+import { afterAll } from '@jest/globals';
 import mockFs from 'mock-fs';
 import { loadFixture } from '../../../test/util';
 import { configFileNames } from '../../config/app-strings';
+import { setGlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 import { IndentationType } from './indentation-type';
 
@@ -11,8 +13,18 @@ const JSON_FILES_EDITOR_CONFIG = loadFixture('.json_editorconfig', '.');
 const NON_JSON_FILES_EDITOR_CONFIG = loadFixture('.non_json_editorconfig', '.');
 
 describe('util/json-writer/editor-config', () => {
+  beforeAll(() => {
+    setGlobalConfig({
+      localDir: '',
+    });
+  });
+
   afterEach(() => {
     mockFs.restore();
+  });
+
+  afterAll(() => {
+    setGlobalConfig();
   });
 
   it('should handle empty .editorconfig file', async () => {
