@@ -62,7 +62,8 @@ export function extractPackageFile(
       if (isSkipComment(comment)) {
         dep.skipReason = SkipReason.Ignored;
       }
-      const matches = pkgValRegex.exec(line.split(' \\')[0]);
+      const lineNoHashes = line.split(' \\')[0];
+      const matches = pkgValRegex.exec(lineNoHashes);
       if (!matches) {
         return null;
       }
