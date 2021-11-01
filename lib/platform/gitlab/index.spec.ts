@@ -1917,6 +1917,25 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+        `;
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json5?ref=HEAD'
+        )
+        .reply(200, {
+          content: Buffer.from(json5Data).toString('base64'),
+        });
+      const res = await gitlab.getJsonFile('dir/file.json5');
+      expect(res).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('throws on malformed JSON', async () => {
       const scope = await initRepo();
       scope

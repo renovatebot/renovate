@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import { PlatformId } from '../../constants';
 import {
@@ -19,7 +20,6 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getCache } from '../../util/cache/repository';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
@@ -167,6 +167,9 @@ export async function getJsonFile(
   repo: string = config.repository
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repo);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -246,6 +249,8 @@ export async function initRepo({
       // This happens if we don't have Administrator read access, it is not a critical error
       logger.debug('Could not find allowed merge methods for repo');
     }
+    config.autoMergeAllowed = repo.autoMergeAllowed;
+    config.hasIssuesEnabled = repo.hasIssuesEnabled;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -1005,6 +1010,10 @@ async function getIssues(): Promise<Issue[]> {
 }
 
 export async function getIssueList(): Promise<Issue[]> {
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    return null;
+  }
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
     config.issueList = await getIssues();
@@ -1016,6 +1025,10 @@ export async function getIssue(
   number: number,
   useCache = true
 ): Promise<Issue | null> {
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    return null;
+  }
   try {
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
@@ -1064,6 +1077,13 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    logger.info(
+      'Cannot ensure issue because issues are disabled in this repository'
+    );
+    return null;
+  }
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
@@ -1151,6 +1171,13 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    logger.info(
+      'Cannot ensure issue because issues are disabled in this repository'
+    );
+    return;
+  }
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1386,58 +1413,37 @@ async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
   platformOptions: PlatformPrOptions
-): Promise<boolean> {
+): Promise<void> {
   if (!platformOptions?.usePlatformAutomerge) {
     return;
   }
 
-  const repoCache = getCache();
-  const { lastPlatformAutomergeFailure } = repoCache;
-  if (lastPlatformAutomergeFailure) {
-    const lastFailedAt = DateTime.fromISO(lastPlatformAutomergeFailure);
-    const now = DateTime.local();
-    if (now < lastFailedAt.plus({ hours: 24 })) {
-      logger.debug(
-        { prNumber },
-        'GitHub-native automerge: skipping attempt due to earlier failure'
-      );
-      return;
-    }
-    delete repoCache.lastPlatformAutomergeFailure;
+  if (!config.autoMergeAllowed) {
+    logger.debug(
+      { prNumber },
+      'GitHub-native automerge: not enabled in repo settings'
+    );
+    return;
   }
 
   try {
-    const variables = { pullRequestId: prNodeId };
+    const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
+    const variables = { pullRequestId: prNodeId, mergeMethod };
     const queryOptions = { variables };
+
     const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
       queryOptions
     );
+
     if (errors) {
-      const disabledByPlatform = errors.find(
-        ({ type, message }) =>
-          type === 'UNPROCESSABLE' &&
-          message ===
-            'Pull request is not in the correct state to enable auto-merge'
-      );
-
-      // istanbul ignore else
-      if (disabledByPlatform) {
-        logger.debug(
-          { prNumber },
-          'GitHub automerge is not enabled for this repository'
-        );
-
-        const now = DateTime.local();
-        repoCache.lastPlatformAutomergeFailure = now.toISO();
-      } else {
-        logger.debug({ prNumber, errors }, 'GitHub automerge unknown error');
-      }
-    } else {
-      logger.debug('GitHub-native PR automerge enabled');
+      logger.debug({ prNumber, errors }, 'GitHub-native automerge: fail');
+      return;
     }
+
+    logger.debug({ prNumber }, 'GitHub-native automerge: success');
   } catch (err) {
-    logger.warn({ prNumber, err }, 'GitHub automerge: HTTP request error');
+    logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
 
