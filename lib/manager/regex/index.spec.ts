@@ -350,4 +350,22 @@ describe('manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res).toBeNull();
   });
+  it('extracts with recursive strategy and merged groups', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '"(?<first>[^"]*)":\\s*{[^}]*}',
+        '"(?<second>[^"]*)":\\s*\\{[^}]*}',
+        '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
+      ],
+      matchStringsStrategy: 'recursive',
+      depNameTemplate: '{{{ first }}}/{{{ second }}}/{{{ depName }}}',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(4);
+  });
 });

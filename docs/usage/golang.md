@@ -53,3 +53,24 @@ As an example, say you want Renovate to use the latest patch version of the `1.1
 
 We do not support patch level versions for the minimum `go` version.
 This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a constraint.
+
+### Custom registry support, and authentication
+
+This example shows how you can use a `hostRules` configuration to configure Renovate for use with a custom private Go module source using Git to pull the modules when updating `go.sum` and vendored modules.
+All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, ... ) and host rules without a `hostType` are setup for authentication.
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'github.enterprise.com',
+      token: process.env.GO_GITHUB_TOKEN,
+      hostType: 'github',
+    },
+    {
+      matchHost: 'someGitHost.enterprise.com',
+      token: process.env.GO_GIT_TOKEN,
+    },
+  ],
+};
+```
