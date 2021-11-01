@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { quote as pipCompile } from 'shlex';
+import { quote } from 'shlex';
 import { parse } from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -58,7 +58,7 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(outputFileName);
     }
-    const cmd = `pip-compile ${parse(inputFileName).base}`;
+    const cmd = `pip-compile ${quote(parse(inputFileName).base)}`;
     const tagConstraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
     const execOptions: ExecOptions = {
@@ -68,7 +68,7 @@ export async function updateArtifacts({
         tagConstraint,
         tagScheme: 'pep440',
         preCommands: [
-          `pip install --user ${pipCompile(`pip-tools${pipToolsConstraint}`)}`,
+          `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
         ],
       },
     };
