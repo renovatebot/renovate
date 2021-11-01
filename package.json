@@ -129,7 +129,7 @@
     "@renovatebot/ruby-semver": "1.0.0",
     "@sindresorhus/is": "4.2.0",
     "@yarnpkg/core": "2.4.0",
-    "@yarnpkg/parsers": "2.4.0",
+    "@yarnpkg/parsers": "2.4.1",
     "auth-header": "1.0.0",
     "azure-devops-node-api": "11.0.1",
     "bunyan": "1.8.15",
