@@ -1352,6 +1352,7 @@ const options: RenovateOptions[] = [
     description: 'Enable remediation of transitive dependencies.',
     type: 'boolean',
     default: false,
+    supportedManagers: ['npm'],
     supportedPlatforms: ['github'],
   },
   {
@@ -1637,7 +1638,6 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {},
     mergeable: true,
-    supportedManagers: ['npm', 'yarn', 'pnpm', 'meteor'],
   },
   {
     name: 'golang',
@@ -1649,7 +1649,6 @@ const options: RenovateOptions[] = [
     },
     mergeable: true,
     cli: false,
-    supportedManagers: ['gomod'],
   },
   {
     name: 'postUpdateOptions',
@@ -1707,7 +1706,6 @@ const options: RenovateOptions[] = [
     },
     mergeable: true,
     cli: false,
-    supportedManagers: ['docker', 'docker-compose'],
   },
   {
     name: 'php',
@@ -1728,7 +1726,6 @@ const options: RenovateOptions[] = [
     },
     mergeable: true,
     cli: false,
-    supportedManagers: ['pip'],
   },
   {
     name: 'constraints',
@@ -1739,14 +1736,10 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     supportedManagers: [
-      'ruby',
       'bundler',
       'composer',
-      'go',
+      'gomod',
       'npm',
-      'yarn',
-      'pnpm',
-      'python',
       'pipenv',
       'poetry',
     ],
@@ -1759,7 +1752,6 @@ const options: RenovateOptions[] = [
     default: {},
     mergeable: true,
     cli: false,
-    supportedManagers: ['gradle', 'maven'],
   },
   {
     name: 'dotnet',
