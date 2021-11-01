@@ -97,6 +97,7 @@ export async function generateLockFile(
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
           preCommands.push(getOptimizeCommand());
+          // istanbul ignore if
           if (yarnPath) {
             preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
           }
