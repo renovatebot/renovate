@@ -78,6 +78,7 @@ export interface LocalRepoConfig {
   ignorePrAuthor: boolean;
   branchPrs: Pr[];
   autoMergeAllowed: boolean;
+  hasIssuesEnabled: boolean;
 }
 
 export type BranchProtection = any;
@@ -89,6 +90,7 @@ export interface GhRepo {
   isArchived: boolean;
   nameWithOwner: string;
   autoMergeAllowed: boolean;
+  hasIssuesEnabled: boolean;
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;

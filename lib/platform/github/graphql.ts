@@ -5,6 +5,7 @@ query($owner: String!, $name: String!) {
     isFork
     isArchived
     nameWithOwner
+    hasIssuesEnabled
     autoMergeAllowed
     mergeCommitAllowed
     rebaseMergeAllowed
