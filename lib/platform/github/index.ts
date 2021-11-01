@@ -109,23 +109,25 @@ export async function initPlatform({
   }
   let discoveredGitAuthor: string;
   if (!gitAuthor) {
-    userDetails = await getUserDetails(defaults.endpoint, token);
-    if (platformCommit) {
-      const userId = userDetails.id.toString();
-      const userName = userDetails.username;
-      const userEmail = `${userId}+${userName}@users.noreply.github.com`;
-      discoveredGitAuthor = `${userDetails.username} <${userEmail}>`;
-    } else {
-      const userEmail = await getUserEmail(defaults.endpoint, token);
-      if (userEmail) {
-        discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
-      }
+    const userEmail = await getUserEmail(defaults.endpoint, token);
+    if (userEmail) {
+      discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
     }
+  }
+  const gitIgnoredAuthors = [];
+  if (platformCommit) {
+    userDetails = await getUserDetails(defaults.endpoint, token);
+    const userId = userDetails.id.toString();
+    const userName = userDetails.username;
+    const userEmail = `${userId}+${userName}@users.noreply.github.com`;
+    const platformAuthor = `${userDetails.username} <${userEmail}>`;
+    gitIgnoredAuthors.push(platformAuthor);
   }
   logger.debug('Authenticated as GitHub user: ' + renovateUsername);
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
     gitAuthor: gitAuthor || discoveredGitAuthor,
+    gitIgnoredAuthors,
     renovateUsername,
   };
 

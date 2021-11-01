@@ -23,6 +23,7 @@ export interface PlatformResult {
   endpoint: string;
   renovateUsername?: string;
   gitAuthor?: string;
+  gitIgnoredAuthors?: string[];
 }
 
 export interface RepoResult {
