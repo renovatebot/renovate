@@ -57,6 +57,10 @@ export function getOptimizeCommand(
   return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
 }
 
+export function isYarnUpdate(upgrade: Upgrade): boolean {
+  return upgrade.depType === 'packageManager' && upgrade.depName === 'yarn';
+}
+
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
@@ -67,7 +71,10 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
-    const yarnCompatibility = config.constraints?.yarn;
+    const yarnUpdate = upgrades.find(isYarnUpdate);
+    const yarnCompatibility = yarnUpdate
+      ? yarnUpdate.newValue
+      : config.constraints?.yarn;
     const minYarnVersion =
       validRange(yarnCompatibility) && minVersion(yarnCompatibility);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
@@ -148,6 +155,11 @@ export async function generateLockFile(
     if (getGlobalConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+    }
+
+    if (yarnUpdate && !isYarn1) {
+      logger.debug('Updating Yarn binary');
+      commands.push(`yarn set version ${yarnUpdate.newValue}`);
     }
 
     // This command updates the lock file based on package.json
