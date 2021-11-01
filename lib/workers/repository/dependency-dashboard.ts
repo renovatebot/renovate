@@ -4,6 +4,7 @@ import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
+import { regEx } from '../../util/regex';
 import { BranchConfig, BranchResult } from '../types';
 
 interface DependencyDashboard {
@@ -13,10 +14,10 @@ interface DependencyDashboard {
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(new RegExp(checkMatch, 'g'));
+  const checked = issueBody.match(regEx(checkMatch, 'g'));
   const dependencyDashboardChecks: Record<string, string> = {};
   if (checked?.length) {
-    const re = new RegExp(checkMatch);
+    const re = regEx(checkMatch);
     checked.forEach((check) => {
       const [, type, branchName] = re.exec(check);
       dependencyDashboardChecks[branchName] = type;
@@ -115,8 +116,8 @@ export async function ensureDependencyDashboard(
   ) {
     if (getGlobalConfig().dryRun) {
       logger.info(
-        'DRY-RUN: Would close Dependency Dashboard ' +
-          config.dependencyDashboardTitle
+        { title: config.dependencyDashboardTitle },
+        'DRY-RUN: Would close Dependency Dashboard'
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
@@ -136,8 +137,8 @@ export async function ensureDependencyDashboard(
   if (config.dependencyDashboardAutoclose && !hasBranches) {
     if (getGlobalConfig().dryRun) {
       logger.info(
-        'DRY-RUN: Would close Dependency Dashboard ' +
-          config.dependencyDashboardTitle
+        { title: config.dependencyDashboardTitle },
+        'DRY-RUN: Would close Dependency Dashboard'
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
@@ -349,8 +350,8 @@ export async function ensureDependencyDashboard(
 
   if (getGlobalConfig().dryRun) {
     logger.info(
-      'DRY-RUN: Would ensure Dependency Dashboard ' +
-        config.dependencyDashboardTitle
+      { title: config.dependencyDashboardTitle },
+      'DRY-RUN: Would ensure Dependency Dashboard'
     );
   } else {
     await platform.ensureIssue({

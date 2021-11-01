@@ -39,6 +39,7 @@ export interface GhRestPr extends GhPr {
   created_at: string;
   closed_at: string;
   user?: { login?: string };
+  node_id: string;
 }
 
 export interface GhGraphQlPr extends GhPr {
@@ -65,7 +66,7 @@ export interface LocalRepoConfig {
   openPrList: PrList | null;
   prList: GhPr[] | null;
   issueList: any[] | null;
-  mergeMethod: string;
+  mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
@@ -74,6 +75,8 @@ export interface LocalRepoConfig {
   productLinks: any;
   ignorePrAuthor: boolean;
   branchPrs: Pr[];
+  autoMergeAllowed: boolean;
+  hasIssuesEnabled: boolean;
 }
 
 export type BranchProtection = any;
@@ -83,6 +86,8 @@ export interface GhRepo {
   isFork: boolean;
   isArchived: boolean;
   nameWithOwner: string;
+  autoMergeAllowed: boolean;
+  hasIssuesEnabled: boolean;
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;
@@ -91,5 +96,11 @@ export interface GhRepo {
     target: {
       oid: string;
     };
+  };
+}
+
+export interface GhAutomergeResponse {
+  enablePullRequestAutoMerge: {
+    pullRequest: { number: number };
   };
 }

@@ -2,6 +2,14 @@
 
 This file documents the design choices as well as configuration options.
 
+## Intended use by end-users
+
+The Renovate repository/package is intended to be used as a CLI-based application.
+It should not be used downstream as a library, because it lacks a stable API.
+
+End users should only depend on the CLI or on the official hosted app.
+The Renovate npm package should only be used as a CLI tool.
+
 ## Stateless
 
 A key feature of Renovate is that it does not require any state storage (e.g. on disk or in a database).

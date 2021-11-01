@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { hasKey } from '../../util/object';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest } from './types';
 import { getConfiguredRegistries } from './util';
 
@@ -20,7 +21,7 @@ import { getConfiguredRegistries } from './util';
  * so we don't include it in the extracting regexp
  */
 const checkVersion =
-  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
+  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/; // TODO #12070
 const elemNames = new Set([
   'PackageReference',
   'PackageVersion',
@@ -110,6 +111,10 @@ export async function extractPackageFile(
     }
 
     return { deps };
+  }
+
+  if (packageFile.endsWith('global.json')) {
+    return extractMsbuildGlobalManifest(content, packageFile);
   }
 
   let deps: PackageDependency[] = [];

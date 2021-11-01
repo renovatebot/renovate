@@ -38,6 +38,6 @@ describe('platform/bitbucket/utils', () => {
   it('isConflicted', () => {
     expect(
       utils.isConflicted([{ chunks: [{ changes: [{ content: '+=======' }] }] }])
-    ).toBe(true);
+    ).toBeTrue();
   });
 });

@@ -3,8 +3,10 @@ import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { ensureTrailingSlash } from '../../util/url';
+import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { findSourceUrl } from './common';
 import type { HelmRepository, RepositoryData } from './types';
 
 export class HelmDatasource extends Datasource {
@@ -22,6 +24,8 @@ export class HelmDatasource extends Datasource {
       commitMessageTopic: '{{{groupName}}} Helm releases',
     },
   };
+
+  override readonly defaultVersioning = helmVersioning.id;
 
   @cache({
     namespace: `datasource-${HelmDatasource.id}`,
@@ -52,10 +56,10 @@ export class HelmDatasource extends Datasource {
       for (const [name, releases] of Object.entries(doc.entries)) {
         result[name] = {
           homepage: releases[0].home,
-          sourceUrl: releases[0].sources ? releases[0].sources[0] : undefined,
+          sourceUrl: findSourceUrl(releases[0]),
           releases: releases.map((release) => ({
             version: release.version,
-            releaseTimestamp: release.created ? release.created : null,
+            releaseTimestamp: release.created ?? null,
           })),
         };
       }

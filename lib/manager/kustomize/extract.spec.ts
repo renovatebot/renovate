@@ -1,9 +1,8 @@
 import { loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
-import * as dockerVersioning from '../../versioning/docker';
 import {
   extractBase,
   extractImage,
@@ -19,7 +18,9 @@ const kustomizeWithLocal = loadFixture('kustomizeWithLocal.yaml');
 const nonKustomize = loadFixture('service.yaml');
 const gitImages = loadFixture('gitImages.yaml');
 const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
-const sha = loadFixture('sha.yaml');
+const newTag = loadFixture('newTag.yaml');
+const newName = loadFixture('newName.yaml');
+const digest = loadFixture('digest.yaml');
 
 describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
@@ -53,7 +54,7 @@ describe('manager/kustomize/extract', () => {
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
-        datasource: datasourceGitTags.id,
+        datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com/user/test-repo',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
@@ -64,7 +65,7 @@ describe('manager/kustomize/extract', () => {
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
-        datasource: datasourceGitTags.id,
+        datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com:7999/user/test-repo',
         lookupName: 'ssh://git@bitbucket.com:7999/user/test-repo',
       });
@@ -75,7 +76,7 @@ describe('manager/kustomize/extract', () => {
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
-        datasource: datasourceGitTags.id,
+        datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com/user/test-repo',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
@@ -131,7 +132,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
-        versioning: dockerVersioning.id,
         depName: 'node',
       };
       const pkg = extractImage({
@@ -146,7 +146,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
-        versioning: dockerVersioning.id,
         depName: 'test/node',
       };
       const pkg = extractImage({
@@ -161,7 +160,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
-        versioning: dockerVersioning.id,
         depName: 'quay.io/repo/image',
       };
       const pkg = extractImage({
@@ -175,7 +173,6 @@ describe('manager/kustomize/extract', () => {
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
-        versioning: dockerVersioning.id,
         replaceString: 'v1.0.0',
         depName: 'localhost:5000/repo/image',
       };
@@ -191,7 +188,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         replaceString: 'v1.0.0',
         datasource: datasourceDocker.id,
-        versioning: dockerVersioning.id,
         depName: 'localhost:5000/repo/image/service',
       };
       const pkg = extractImage({
@@ -253,13 +249,76 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
       expect(res.deps[2].depName).toEqual('fluxcd/flux');
     });
-    it('extracts sha256 instead of tag', () => {
-      expect(extractPackageFile(sha)).toMatchSnapshot({
+
+    const postgresDigest =
+      'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c';
+
+    it('extracts from newTag', () => {
+      expect(extractPackageFile(newTag)).toMatchSnapshot({
         deps: [
           {
-            currentDigest:
-              'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c',
+            currentDigest: undefined,
+            currentValue: '11',
+            replaceString: '11',
+          },
+          {
+            currentDigest: postgresDigest,
+            currentValue: '11',
+            replaceString: `11@${postgresDigest}`,
+          },
+          {
+            skipReason: SkipReason.InvalidValue,
+          },
+        ],
+      });
+    });
+
+    it('extracts from digest', () => {
+      expect(extractPackageFile(digest)).toMatchSnapshot({
+        deps: [
+          {
+            currentDigest: postgresDigest,
             currentValue: undefined,
+            replaceString: postgresDigest,
+          },
+          {
+            currentDigest: postgresDigest,
+            currentValue: '11',
+            replaceString: postgresDigest,
+          },
+          {
+            skipReason: SkipReason.InvalidDependencySpecification,
+          },
+          {
+            skipReason: SkipReason.InvalidValue,
+          },
+          {
+            skipReason: SkipReason.InvalidValue,
+          },
+        ],
+      });
+    });
+
+    it('extracts newName', () => {
+      expect(extractPackageFile(newName)).toMatchSnapshot({
+        deps: [
+          {
+            depName: 'awesome/postgres',
+            currentDigest: postgresDigest,
+            currentValue: '11',
+            replaceString: `awesome/postgres:11@${postgresDigest}`,
+          },
+          {
+            depName: 'awesome/postgres',
+            currentDigest: undefined,
+            currentValue: '11',
+            replaceString: 'awesome/postgres:11',
+          },
+          {
+            depName: 'awesome/postgres',
+            currentDigest: postgresDigest,
+            currentValue: undefined,
+            replaceString: `awesome/postgres@${postgresDigest}`,
           },
         ],
       });

@@ -45,7 +45,7 @@ describe('workers/pr/code-owners', () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       git.getBranchFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
-      expect(codeOwners).toEqual([]);
+      expect(codeOwners).toBeEmptyArray();
     });
     it('returns empty array when no code owners match', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
@@ -60,7 +60,7 @@ describe('workers/pr/code-owners', () => {
         throw new Error();
       });
       const codeOwners = await codeOwnersForPr(pr);
-      expect(codeOwners).toEqual([]);
+      expect(codeOwners).toBeEmptyArray();
     });
     const codeOwnerFilePaths = [
       'CODEOWNERS',

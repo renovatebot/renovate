@@ -3,7 +3,9 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
+import { regEx } from '../util/regex';
 import { getGlobalConfig } from './global';
+import { applyMigrations } from './migrations';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
@@ -57,6 +59,7 @@ export function migrateConfig(
       'peerDependencies',
     ];
     const { migratePresets } = getGlobalConfig();
+    applyMigrations(config, migratedConfig);
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
         delete migratedConfig[key];
@@ -97,6 +100,11 @@ export function migrateConfig(
         } else if (val !== 'enabled' && val !== 'disabled') {
           migratedConfig.semanticCommits = 'auto';
         }
+      } else if (key === 'enabledManagers' && is.array(val)) {
+        // Replace yarn with npm, since yarn actually uses npm as package manager
+        migratedConfig.enabledManagers = migratedConfig.enabledManagers.map(
+          (element) => (element === 'yarn' ? 'npm' : element)
+        );
       } else if (parentKey === 'hostRules' && key === 'platform') {
         migratedConfig.hostType = val;
         delete migratedConfig.platform;
@@ -174,9 +182,15 @@ export function migrateConfig(
           migratedConfig.rangeStrategy = 'replace';
         }
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
-        migratedConfig[key] = val.replace(/{{baseDir}}/g, '{{packageFileDir}}');
+        migratedConfig[key] = val.replace(
+          regEx(/{{baseDir}}/g), // TODO #12071
+          '{{packageFileDir}}'
+        );
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
-        migratedConfig[key] = val.replace(/{{depNameShort}}/g, '{{depName}}');
+        migratedConfig[key] = val.replace(
+          regEx(/{{depNameShort}}/g), // TODO #12071
+          '{{depName}}'
+        );
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
       } else if (key === 'rebaseStalePrs') {
@@ -385,21 +399,25 @@ export function migrateConfig(
           ) {
             const parsedSchedule = later.parse.text(
               // We need to massage short hours first before we can parse it
-              schedules[i].replace(/( \d?\d)((a|p)m)/g, '$1:00$2')
+              schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2') // TODO #12071
             ).schedules[0];
             // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
             if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
               const toSplit = schedules[i];
               schedules[i] = toSplit
                 .replace(
-                  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
+                  regEx(
+                    /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
+                  ), // TODO #12071
                   '$1$2 $3 $7'
                 )
                 .trim();
               schedules.push(
                 toSplit
                   .replace(
-                    /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
+                    regEx(
+                      /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
+                    ), // TODO #12071
                     '$1$4 $5 $7'
                   )
                   .trim()
@@ -424,9 +442,14 @@ export function migrateConfig(
             schedules[i] = schedules[i].replace(' every day', '');
           }
           if (
-            /every (mon|tues|wednes|thurs|fri|satur|sun)day$/.test(schedules[i])
+            regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/).test(
+              schedules[i]
+            ) // TODO #12071
           ) {
-            schedules[i] = schedules[i].replace(/every ([a-z]*day)$/, 'on $1');
+            schedules[i] = schedules[i].replace(
+              regEx(/every ([a-z]*day)$/), // TODO #12071
+              'on $1'
+            );
           }
           if (schedules[i].endsWith('days')) {
             schedules[i] = schedules[i].replace('days', 'day');
@@ -488,16 +511,18 @@ export function migrateConfig(
           delete migratedConfig.node;
         }
       } else if (is.array(val)) {
-        const newArray = [];
-        for (const item of migratedConfig[key] as unknown[]) {
-          if (is.object(item) && !is.array(item)) {
-            const arrMigrate = migrateConfig(item as RenovateConfig, key);
-            newArray.push(arrMigrate.migratedConfig);
-          } else {
-            newArray.push(item);
+        if (is.array(migratedConfig?.[key])) {
+          const newArray = [];
+          for (const item of migratedConfig[key] as unknown[]) {
+            if (is.object(item) && !is.array(item)) {
+              const arrMigrate = migrateConfig(item as RenovateConfig, key);
+              newArray.push(arrMigrate.migratedConfig);
+            } else {
+              newArray.push(item);
+            }
           }
+          migratedConfig[key] = newArray;
         }
-        migratedConfig[key] = newArray;
       } else if (key === 'compatibility' && is.object(val)) {
         migratedConfig.constraints = migratedConfig.compatibility;
         delete migratedConfig.compatibility;
@@ -524,7 +549,13 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.composerIgnorePlatformReqs = null;
         }
+      } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
+        if (migratedConfig[key] !== undefined) {
+          migratedConfig.platformAutomerge = migratedConfig[key];
+        }
+        delete migratedConfig[key];
       }
+
       const migratedTemplates = {
         fromVersion: 'currentVersion',
         newValueMajor: 'newMajor',
@@ -536,7 +567,7 @@ export function migrateConfig(
       if (is.string(migratedConfig[key])) {
         for (const [from, to] of Object.entries(migratedTemplates)) {
           migratedConfig[key] = (migratedConfig[key] as string).replace(
-            new RegExp(from, 'g'),
+            regEx(from, 'g'), // TODO #12071
             to
           );
         }

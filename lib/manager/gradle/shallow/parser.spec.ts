@@ -1,5 +1,10 @@
 import { loadFixture } from '../../../../test/util';
-import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO } from './common';
+import {
+  GOOGLE_REPO,
+  GRADLE_PLUGIN_PORTAL_REPO,
+  JCENTER_REPO,
+  MAVEN_REPO,
+} from './common';
 import { parseGradle, parseProps } from './parser';
 
 describe('manager/gradle/shallow/parser', () => {
@@ -60,13 +65,14 @@ describe('manager/gradle/shallow/parser', () => {
     expect(urls).toStrictEqual(['https://example.com']);
 
     ({ urls } = parseGradle(
-      'mavenCentral(); uri("https://example.com"); jcenter(); google();'
+      'mavenCentral(); uri("https://example.com"); jcenter(); google(); gradlePluginPortal();'
     ));
     expect(urls).toStrictEqual([
       MAVEN_REPO,
       'https://example.com',
       JCENTER_REPO,
       GOOGLE_REPO,
+      GRADLE_PLUGIN_PORTAL_REPO,
     ]);
 
     ({ urls } = parseGradle(

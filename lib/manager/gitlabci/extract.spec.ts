@@ -64,9 +64,9 @@ describe('manager/gitlabci/extract', () => {
           deps.push(d);
         });
       });
-      expect(deps).toHaveLength(7);
+      expect(deps).toHaveLength(8);
 
-      expect(deps.some((dep) => dep.currentValue.includes("'"))).toBe(false);
+      expect(deps.some((dep) => dep.currentValue.includes("'"))).toBeFalse();
     });
 
     it('extracts multiple image lines with comments', async () => {

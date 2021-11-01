@@ -8,12 +8,14 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import delay from 'delay';
+import JSON5 from 'json5';
+import { PlatformId } from '../../constants';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
-import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
@@ -73,7 +75,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PLATFORM_TYPE_AZURE,
+  hostType: PlatformId.Azure,
 };
 
 export function initPlatform({
@@ -134,6 +136,9 @@ export async function getJsonFile(
   repoName?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -331,19 +336,9 @@ export async function getBranchStatusCheck(
 }
 
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks: string[]
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    return BranchStatus.green;
-  }
-  if (requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
   const statuses = await getStatusCheck(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
@@ -398,7 +393,7 @@ export async function createPr({
     },
     config.repoId
   );
-  if (platformOptions?.azureAutoComplete) {
+  if (platformOptions?.usePlatformAutomerge) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -688,11 +683,7 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace('<summary>', '**')
-    .replace('</summary>', '**')
-    .replace('<details>', '')
-    .replace('</details>', '');
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
 }
 
 /* istanbul ignore next */

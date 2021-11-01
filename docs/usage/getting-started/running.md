@@ -27,6 +27,8 @@ Therefore if you need Renovate to support any non-npm lock files like Bundler th
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
+Renovate requires Node.js >=14.15.0 as well as Git >=2.33.0.
+
 #### Docker image
 
 The `renovate` npm package is also distributed via pre-built Node.js images on Docker Hub (`renovate/renovate`).
@@ -161,9 +163,9 @@ Auto discovery does not work with a GitHub App.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
-#### GitLab CE/EE
+#### GitLab
 
-First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes).
+First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes, or `read_user`, `read_api` and `read_repository` for dry runs).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=gitlab` somewhere in config.
 

@@ -11,7 +11,8 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readFile, remove } from '../../../util/fs';
+import { exists, readFile, remove, writeFile } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import { GenerateLockFileResult } from './types';
@@ -32,7 +33,16 @@ export async function checkYarnrc(
         .split('\n')
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace(/^yarn-path\s+"?(.+?)"?$/, '$1');
+        yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
+      }
+      const yarnBinaryExists = await exists(yarnPath);
+      if (!yarnBinaryExists) {
+        const scrubbedYarnrc = yarnrc.replace(
+          regEx(/^yarn-path\s+"?.+?"?$/gm),
+          ''
+        );
+        await writeFile(`${cwd}/.yarnrc`, scrubbedYarnrc);
+        yarnPath = null;
       }
     }
   } catch (err) /* istanbul ignore next */ {
@@ -87,6 +97,7 @@ export async function generateLockFile(
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
           preCommands.push(getOptimizeCommand());
+          // istanbul ignore if
           if (yarnPath) {
             preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
           }
@@ -128,7 +139,7 @@ export async function generateLockFile(
       extraEnv,
       docker: {
         image: 'node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
         preCommands,
       },
