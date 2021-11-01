@@ -90,7 +90,7 @@ function getComposerArguments(config): string {
     args += ' --no-scripts --no-autoloader';
   }
 
-  if (getGlobalConfig().allowPlugins && !config.ignorePlugins) {
+  if (!getGlobalConfig().allowPlugins || config.ignorePlugins) {
     args += ' --no-plugins';
   }
 
