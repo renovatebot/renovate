@@ -51,7 +51,7 @@ An additional benefit of using source code hosting is that the same token/authen
 | Gitea default           | `gitea>abc/foo`            | `default` | `https://gitea.com/abc/foo`          | `default.json`  |
 | Gitea with preset name  | `gitea>abc/foo:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`      |
 | Local default           | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json`  |
-| Local with preset path  | `local>abc/foo//path/xyz`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` |
+| Local with preset path  | `local>abc/foo//path/xyz`  | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` |
 
 Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported. One workaround is to use distinct files instead of sub-presets.
 

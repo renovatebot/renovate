@@ -159,7 +159,7 @@ export function writeLockUpdates(
     providerBlockLines.forEach((providerBlockLine, providerBlockIndex) => {
       const versionLine = providerBlockLine.replace(
         versionLineRegex,
-        `$1${update.newVersion}$3`
+        `$<prefix>${update.newVersion}$<suffix>`
       );
       if (versionLine !== providerBlockLine) {
         newProviderBlockLines.push(versionLine);
@@ -168,7 +168,7 @@ export function writeLockUpdates(
 
       const constraintLine = providerBlockLine.replace(
         constraintLineRegex,
-        `$1${update.newConstraint}$3`
+        `$<prefix>${update.newConstraint}$<suffix>`
       );
       if (constraintLine !== providerBlockLine) {
         newProviderBlockLines.push(constraintLine);

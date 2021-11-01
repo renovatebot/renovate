@@ -21,6 +21,7 @@ Configuration-wise, it works like this:
 - You must have either a `depName` capture group or a `depNameTemplate` config field
 - You can optionally have a `lookupName` capture group or a `lookupNameTemplate` if it differs from `depName`
 - You must have either a `datasource` capture group or a `datasourceTemplate` config field
+- You can optionally have a `depType` capture group or a `depTypeTemplate` config field
 - You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver` will be used as the default
 - You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
 - You can optionally have a `currentDigest` capture group.

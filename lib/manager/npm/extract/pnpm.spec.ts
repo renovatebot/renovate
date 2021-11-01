@@ -126,7 +126,7 @@ describe('manager/npm/extract/pnpm', () => {
       expect(packageFiles).toMatchSnapshot();
       expect(
         packageFiles.every((packageFile) => packageFile.pnpmShrinkwrap)
-      ).toBe(true);
+      ).toBeTrue();
     });
 
     it('skips when pnpm shrinkwrap file has already been provided', async () => {

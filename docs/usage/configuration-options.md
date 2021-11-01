@@ -755,7 +755,7 @@ Example:
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true`, `automergeType=pr` and `platformAutomerge=true`.
-Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-overrides-of-default-approvals).
+Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## golang
 
@@ -1891,7 +1891,7 @@ Behavior:
 - `auto` = Renovate decides (this will be done on a manager-by-manager basis)
 - `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
-- `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
+- `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
 - `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
 
@@ -2027,6 +2027,8 @@ All matches of the first `matchStrings` pattern are detected, then each of these
 If the next `matchStrings` pattern has multiple matches then it will split again.
 This process will be followed as long there is a match plus a next `matchingStrings` pattern is available or a dependency is detected.
 
+Matched groups will be available in subsequent matching layers.
+
 This is an example how this can work.
 The first regex manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
 However, the second regex manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
@@ -2152,6 +2154,11 @@ It will be compiled using Handlebars and the regex `groups` result.
 ### datasourceTemplate
 
 If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### depTypeTemplate
+
+If `depType` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
 ### versioningTemplate
@@ -2467,7 +2474,7 @@ By exposing `versioning` to config, you can override the default versioning for 
 We do not recommend overriding the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
 Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
-Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, any leading parts are sorted alphanumerically.
+Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, all trailing parts are used for alphanumeric sorting.
 
 ## vulnerabilityAlerts
 
