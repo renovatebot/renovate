@@ -1,9 +1,6 @@
-import {
-  PLATFORM_TYPE_AZURE,
-  PLATFORM_TYPE_GITHUB,
-} from '../constants/platforms';
+import { PlatformId } from '../constants';
 import * as datasourceNuget from '../datasource/nuget';
-import { add, clear, find, findAll, hosts } from './host-rules';
+import { add, clear, find, findAll, getAll, hosts } from './host-rules';
 
 describe('util/host-rules', () => {
   beforeEach(() => {
@@ -13,7 +10,7 @@ describe('util/host-rules', () => {
     it('throws if both domainName and hostName', () => {
       expect(() =>
         add({
-          hostType: PLATFORM_TYPE_AZURE,
+          hostType: PlatformId.Azure,
           domainName: 'github.com',
           hostName: 'api.github.com',
         } as any)
@@ -22,7 +19,7 @@ describe('util/host-rules', () => {
     it('throws if both domainName and baseUrl', () => {
       expect(() =>
         add({
-          hostType: PLATFORM_TYPE_AZURE,
+          hostType: PlatformId.Azure,
           domainName: 'github.com',
           matchHost: 'https://api.github.com',
         } as any)
@@ -31,7 +28,7 @@ describe('util/host-rules', () => {
     it('throws if both hostName and baseUrl', () => {
       expect(() =>
         add({
-          hostType: PLATFORM_TYPE_AZURE,
+          hostType: PlatformId.Azure,
           hostName: 'api.github.com',
           matchHost: 'https://api.github.com',
         } as any)
@@ -113,25 +110,25 @@ describe('util/host-rules', () => {
     it('matches on specific path', () => {
       // Initialized platform holst rule
       add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
         matchHost: 'https://api.github.com',
         token: 'abc',
       });
       // Initialized generic host rule for github platform
       add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
         matchHost: 'https://api.github.com',
         token: 'abc',
       });
       // specific host rule for using other token in different org
       add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
         matchHost: 'https://api.github.com/repos/org-b/',
         token: 'def',
       });
       expect(
         find({
-          hostType: PLATFORM_TYPE_GITHUB,
+          hostType: PlatformId.Github,
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
         }).token
       ).toEqual('def');
@@ -144,7 +141,7 @@ describe('util/host-rules', () => {
       });
       expect(
         find({
-          hostType: PLATFORM_TYPE_GITHUB,
+          hostType: PlatformId.Github,
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
         }).token
       ).toEqual('abc');
@@ -158,7 +155,7 @@ describe('util/host-rules', () => {
 
     it('matches if hostType is configured and host rule is filtered with datasource', () => {
       add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
         matchHost: 'https://api.github.com',
         token: 'abc',
       });
@@ -288,6 +285,24 @@ describe('util/host-rules', () => {
       add(hostRule);
       expect(findAll({ hostType: 'nuget' })).toHaveLength(1);
       expect(findAll({ hostType: 'nuget' })[0]).toMatchSnapshot();
+    });
+  });
+  describe('getAll()', () => {
+    it('returns all host rules', () => {
+      const hostRule1 = {
+        hostType: 'nuget',
+        matchHost: 'nuget.org',
+        username: 'root',
+        password: 'p4$$w0rd',
+      };
+      const hostRule2 = {
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 'token',
+      };
+      add(hostRule1);
+      add(hostRule2);
+      expect(getAll()).toMatchObject([hostRule1, hostRule2]);
     });
   });
 });

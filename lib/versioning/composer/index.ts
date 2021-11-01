@@ -1,6 +1,7 @@
 import { coerce } from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -43,7 +44,7 @@ function convertStabilityModifier(input: string): string {
 
   // 1.0@beta2 to 1.0-beta.2
   const stability = versionParts[1].replace(
-    /(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi,
+    regEx(/(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi),
     '$1.$2'
   );
 
@@ -54,7 +55,7 @@ function convertStabilityModifier(input: string): string {
 
 function normalizeVersion(input: string): string {
   let output = input;
-  output = output.replace(/(^|>|>=|\^|~)v/i, '$1');
+  output = output.replace(regEx(/(^|>|>=|\^|~)v/i), '$1');
   return convertStabilityModifier(output);
 }
 
@@ -70,9 +71,15 @@ function composer2npm(input: string): string {
   let output = versionId;
 
   // ~4 to ^4 and ~4.1 to ^4.1
-  output = output.replace(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g, '^$1');
+  output = output.replace(
+    regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
+    '^$1'
+  );
   // ~0.4 to >=0.4 <1
-  output = output.replace(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g, '>=$1 <1');
+  output = output.replace(
+    regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
+    '>=$1 <1'
+  );
 
   return output + stability;
 }
@@ -141,7 +148,7 @@ function getNewValue({
   let newValue: string;
   if (isVersion(currentValue)) {
     newValue = newVersion;
-  } else if (/^[~^](0\.[1-9][0-9]*)$/.test(currentValue)) {
+  } else if (regEx(/^[~^](0\.[1-9][0-9]*)$/).test(currentValue)) {
     const operator = currentValue.substr(0, 1);
     // handle ~0.4 case first
     if (toMajor === 0) {
@@ -149,11 +156,11 @@ function getNewValue({
     } else {
       newValue = `${operator}${toMajor}.0`;
     }
-  } else if (/^[~^]([0-9]*)$/.test(currentValue)) {
+  } else if (regEx(/^[~^]([0-9]*)$/).test(currentValue)) {
     // handle ~4 case
     const operator = currentValue.substr(0, 1);
     newValue = `${operator}${toMajor}`;
-  } else if (/^[~^]([0-9]*(?:\.[0-9]*)?)$/.test(currentValue)) {
+  } else if (regEx(/^[~^]([0-9]*(?:\.[0-9]*)?)$/).test(currentValue)) {
     const operator = currentValue.substr(0, 1);
     // handle ~4.1 case
     if (currentVersion && toMajor > getMajor(currentVersion)) {
@@ -212,7 +219,7 @@ function getNewValue({
     newValue = newVersion;
   }
   if (currentValue.split('.')[0].includes('v')) {
-    newValue = newValue.replace(/([0-9])/, 'v$1');
+    newValue = newValue.replace(regEx(/([0-9])/), 'v$1');
   }
 
   // Preserve original min-stability specifier

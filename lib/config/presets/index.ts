@@ -42,7 +42,7 @@ export function replaceArgs(
   if (is.string(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
-      const re = regEx(`{{${arg}}}`, 'g');
+      const re = regEx(`{{${arg}}}`, 'g'); // TODO #12071
       returnStr = returnStr.replace(re, argVal);
     }
     return returnStr;
@@ -90,7 +90,7 @@ export function parsePreset(input: string): ParsedPreset {
   ) {
     presetSource = 'local';
   }
-  str = str.replace(/^npm>/, '');
+  str = str.replace(regEx(/^npm>/), '');
   presetSource = presetSource || 'npm';
   if (str.includes('(')) {
     params = str
@@ -126,7 +126,7 @@ export function parsePreset(input: string): ParsedPreset {
     presetName = str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
-    [, packageName] = /(@.*?)(:|$)/.exec(str);
+    [, packageName] = regEx(/(@.*?)(:|$)/).exec(str);
     str = str.slice(packageName.length);
     if (!packageName.includes('/')) {
       packageName += '/renovate-config';
@@ -138,7 +138,7 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
-    const re = /^([\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/;
+    const re = regEx(/^(~?[\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/);
 
     // Validation
     if (str.includes(':')) {
@@ -150,7 +150,7 @@ export function parsePreset(input: string): ParsedPreset {
     [, packageName, presetPath, presetName] = re.exec(str);
   } else {
     // non-scoped namespace
-    [, packageName] = /(.*?)(:|$)/.exec(str);
+    [, packageName] = regEx(/(.*?)(:|$)/).exec(str);
     presetName = str.slice(packageName.length + 1);
     if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;

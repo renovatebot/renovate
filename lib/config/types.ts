@@ -44,6 +44,7 @@ export interface RenovateSharedConfig {
   dependencyDashboardApproval?: boolean;
   hashedBranchLength?: number;
   npmrc?: string;
+  npmrcMerge?: boolean;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
@@ -116,6 +117,7 @@ export interface LegacyAdminConfig {
   onboarding?: boolean;
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
+  onboardingNoDeps?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
@@ -149,6 +151,7 @@ export interface CustomManager {
   datasourceTemplate?: string;
   lookupNameTemplate?: string;
   versioningTemplate?: string;
+  autoReplaceStringTemplate?: string;
 }
 
 // TODO: Proper typings

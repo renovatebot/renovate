@@ -3,6 +3,8 @@ import { readFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 
 jest.mock('../../../../datasource/npm');
+jest.mock('../../../../util/fs');
+
 try {
   jest.mock('../../config.js');
 } catch (err) {
@@ -117,6 +119,11 @@ describe('workers/global/config/parse/index', () => {
       ]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
+    });
+    it('parses global manager config', async () => {
+      defaultArgv = defaultArgv.concat(['--detect-global-manager-config=true']);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
+      expect(parsed.npmrc).toBeNull();
     });
   });
 });

@@ -231,7 +231,7 @@ describe('versioning/gradle/index', () => {
     a        | b      | expected
     ${'1.1'} | ${'1'} | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
-    expect(api.isGreaterThan('1.1', '1')).toBe(true);
+    expect(api.isGreaterThan(a, b)).toBe(expected);
   });
 
   test.each`

@@ -130,6 +130,15 @@ e.g.
 
 This configuration will be applied after all other environment variables so that it can be used to override defaults.
 
+## detectGlobalManagerConfig
+
+The purpose of this capability is to allow a bot admin to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
+
+This feature is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
+
+Currently this capability is supported for the `npm` manager only - specifically the `~/.npmrc` file.
+If found, it will be imported into `config.npmrc` with `config.npmrcMerge` will be set to `true`.
+
 ## dockerChildPrefix
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
@@ -289,6 +298,11 @@ Note that if `commitMessagePrefix` or `semanticCommits` values are defined then 
 If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
 
+## onboardingNoDeps
+
+Set this to true if you want Renovate to create an onboarding PR even if no dependencies are found.
+Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
+
 ## onboardingPrTitle
 
 Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
@@ -322,7 +336,7 @@ e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved c
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://renovatebot.com/encrypt>.
+If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
 
 To create the key pair with GPG use the following commands:
 
@@ -383,7 +397,7 @@ sub   rsa4096 2021-09-10 [E]
 - Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
 
 The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
-The public key can be used to replace the existing key in <https://renovatebot.com/encrypt> for your own use.
+The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
 
 Any encrypted secrets using GPG must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
@@ -487,3 +501,13 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 ## username
 
 Mandatory if a GitHub app token is in use using the CLI.
+
+## writeDiscoveredRepos
+
+Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+
+Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
+
+```json
+["myOrg/myRepo", "myOrg/anotherRepo"]
+```

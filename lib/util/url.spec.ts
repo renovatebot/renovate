@@ -54,12 +54,12 @@ describe('util/url', () => {
   });
 
   it('validates URLs', () => {
-    expect(validateUrl()).toBe(false);
-    expect(validateUrl(null)).toBe(false);
-    expect(validateUrl('foo')).toBe(false);
-    expect(validateUrl('ssh://github.com')).toBe(false);
-    expect(validateUrl('http://github.com')).toBe(true);
-    expect(validateUrl('https://github.com')).toBe(true);
+    expect(validateUrl()).toBeFalse();
+    expect(validateUrl(null)).toBeFalse();
+    expect(validateUrl('foo')).toBeFalse();
+    expect(validateUrl('ssh://github.com')).toBeFalse();
+    expect(validateUrl('http://github.com')).toBeTrue();
+    expect(validateUrl('https://github.com')).toBeTrue();
   });
 
   it('parses URL', () => {
@@ -81,7 +81,7 @@ describe('util/url', () => {
 
   it('ensures path prefix', () => {
     expect(ensurePathPrefix('https://index.docker.io', '/v2')).toBe(
-      'https://index.docker.io/v2'
+      'https://index.docker.io/v2/'
     );
     expect(ensurePathPrefix('https://index.docker.io/v2', '/v2')).toBe(
       'https://index.docker.io/v2'
@@ -89,6 +89,12 @@ describe('util/url', () => {
     expect(
       ensurePathPrefix('https://index.docker.io/v2/something', '/v2')
     ).toBe('https://index.docker.io/v2/something');
+    expect(ensurePathPrefix('https://index.docker.io:443', '/v2')).toBe(
+      'https://index.docker.io/v2/'
+    );
+    expect(
+      ensurePathPrefix('https://index.docker.io/something?with=query', '/v2')
+    ).toBe('https://index.docker.io/v2/something?with=query');
   });
 
   it('joinUrlParts', () => {

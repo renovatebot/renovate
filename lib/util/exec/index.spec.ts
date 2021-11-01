@@ -522,6 +522,28 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Explicit timeout',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          timeout: 20 * 60 * 1000,
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 20 * 60 * 1000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { binarySource: 'docker' },
+      },
+    ],
+
+    [
       'Explicit maxBuffer',
       {
         processEnv,
