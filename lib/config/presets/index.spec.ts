@@ -224,7 +224,7 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
-      expect(rule.automerge).toBe(true);
+      expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(4);
       expect(rule.matchPackagePatterns).toHaveLength(1);
       expect(rule.matchPackagePrefixes).toHaveLength(4);
@@ -234,7 +234,7 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.automerge).not.toBeDefined();
-      expect(res.minor.automerge).toBe(true);
+      expect(res.minor.automerge).toBeTrue();
     });
 
     it('ignores presets', async () => {
@@ -243,7 +243,7 @@ describe('config/presets/index', () => {
         'config:base',
       ]);
       expect(config).toMatchObject(res);
-      expect(res).toEqual({});
+      expect(res).toBeEmptyObject();
     });
 
     it('resolves self-hosted presets without baseConfig', async () => {
@@ -418,6 +418,15 @@ describe('config/presets/index', () => {
         packageName: 'some/repo',
         params: undefined,
         presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
+    it('parses local Bitbucket user repo', () => {
+      expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
+        packageName: '~john_doe/repo',
+        params: undefined,
+        presetName: 'somefile',
         presetPath: undefined,
         presetSource: 'local',
       });
@@ -601,6 +610,12 @@ Object {
         "monorepo:opentelemetry-js",
       ],
       "groupName": "opentelemetry-js monorepo",
+      "matchUpdateTypes": Array [
+        "digest",
+        "patch",
+        "minor",
+        "major",
+      ],
     },
   ],
 }
@@ -643,7 +658,7 @@ Object {
       const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toEqual({
         description: [
-          'Use version pinning (maintain a single version only and not semver ranges)',
+          'Use version pinning (maintain a single version only and not SemVer ranges)',
         ],
         rangeStrategy: 'pin',
       });

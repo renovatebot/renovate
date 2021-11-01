@@ -106,3 +106,14 @@ image-name-test:
       entrypoint: [""]
     script:
         - image-name-test Dockerfile
+
+image-name-with-entrypoint-as-list-test:
+  stage: build
+  <<: *executor-docker
+  image:
+    entrypoint:
+    - ""
+    # test comment
+    name: image-name-test:1.15
+  script:
+    - image-name-test Dockerfile

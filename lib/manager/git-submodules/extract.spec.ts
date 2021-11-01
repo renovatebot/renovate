@@ -45,7 +45,7 @@ describe('manager/git-submodules/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
       setGlobalConfig({ localDir: `${__dirname}/__fixtures__` });
-      hostRules.add({ matchHost: 'github.com', token: 'abc123' });
+      hostRules.add({ matchHost: 'github.com', token: '123test' });
       let res: PackageFile;
       expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', {});

@@ -6,7 +6,7 @@ description: Renovate's support for ESLint-like shareable configs
 # Shareable Config Presets
 
 Renovate's "config presets" are a convenient way to distribute config for reuse across multiple repositories.
-It is similar in design to `eslint`'s shareable configs, and can be used for whole repository configs and for individual rules.
+It is similar in design to ESLint's shareable configs, and can be used for whole repository configs and for individual rules.
 They are defined using the `extends` array within config and may also be nested.
 
 In short:
@@ -33,7 +33,7 @@ Renovate's configuration is self-documenting, because you can fill in the `"desc
 
 ## Implementation Approach
 
-In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an `eslint` config.
+In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an ESLint config.
 
 ## Preset Hosting
 
@@ -51,7 +51,7 @@ An additional benefit of using source code hosting is that the same token/authen
 | Gitea default           | `gitea>abc/foo`            | `default` | `https://gitea.com/abc/foo`          | `default.json`  |
 | Gitea with preset name  | `gitea>abc/foo:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`      |
 | Local default           | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json`  |
-| Local with preset path  | `local>abc/foo//path/xyz`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` |
+| Local with preset path  | `local>abc/foo//path/xyz`  | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` |
 
 Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported. One workaround is to use distinct files instead of sub-presets.
 

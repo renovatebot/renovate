@@ -1,5 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/helmv3/extract extractPackageFile() extract correctly oci references 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "0.1.0",
+      "datasource": "docker",
+      "depName": "library",
+      "lookupName": "ghcr.io/ankitabhopatkar13/library",
+      "registryUrls": Array [],
+    },
+    Object {
+      "currentValue": "0.8.1",
+      "depName": "postgresql",
+      "registryUrls": Array [
+        "https://charts.helm.sh/stable",
+      ],
+    },
+  ],
+  "packageFileVersion": "0.1.0",
+}
+`;
+
 exports[`manager/helmv3/extract extractPackageFile() parses simple Chart.yaml correctly 1`] = `
 Object {
   "datasource": "helm",

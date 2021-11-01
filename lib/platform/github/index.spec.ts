@@ -7,7 +7,7 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as _git from '../../util/git';
-import type { Platform } from '../types';
+import type { CreatePRConfig, Platform } from '../types';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -31,7 +31,7 @@ describe('platform/github/index', () => {
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     hostRules.find.mockReturnValue({
-      token: 'abc123',
+      token: '123test',
     });
   });
 
@@ -49,7 +49,7 @@ describe('platform/github/index', () => {
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(
-        github.initPlatform({ token: 'abc123' } as any)
+        github.initPlatform({ token: '123test' } as any)
       ).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -63,7 +63,7 @@ describe('platform/github/index', () => {
         .get('/user/emails')
         .reply(400);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -77,14 +77,14 @@ describe('platform/github/index', () => {
         .get('/user/emails')
         .reply(200, [{}]);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should support gitAuthor and username', async () => {
       expect(
         await github.initPlatform({
-          token: 'abc123',
+          token: '123test',
           username: 'renovate-bot',
           gitAuthor: 'renovate@whitesourcesoftware.com',
         } as any)
@@ -104,7 +104,7 @@ describe('platform/github/index', () => {
           },
         ]);
       expect(
-        await github.initPlatform({ token: 'abc123' } as any)
+        await github.initPlatform({ token: '123test' } as any)
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -124,21 +124,10 @@ describe('platform/github/index', () => {
       expect(
         await github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
-          token: 'abc123',
+          token: '123test',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('should add initialized platform with predefined generic host rule for github api', async () => {
-      expect(
-        await github.initPlatform({
-          token: 'abc123',
-          username: 'renovate-bot',
-          gitAuthor: 'renovate@whitesourcesoftware.com',
-        } as any)
-      ).toMatchSnapshot();
-      expect(hostRules.add).toMatchSnapshot();
     });
   });
 
@@ -161,13 +150,19 @@ describe('platform/github/index', () => {
     });
   });
 
-  function initRepoMock(scope: httpMock.Scope, repository: string): void {
+  function initRepoMock(
+    scope: httpMock.Scope,
+    repository: string,
+    other: any = {}
+  ): void {
     scope.post(`/graphql`).reply(200, {
       data: {
         repository: {
           isFork: false,
           isArchived: false,
           nameWithOwner: repository,
+          autoMergeAllowed: true,
+          hasIssuesEnabled: true,
           mergeCommitAllowed: true,
           rebaseMergeAllowed: true,
           squashMergeAllowed: true,
@@ -177,6 +172,7 @@ describe('platform/github/index', () => {
               oid: '1234',
             },
           },
+          ...other,
         },
       },
     });
@@ -197,6 +193,7 @@ describe('platform/github/index', () => {
             isFork: false,
             isArchived: false,
             nameWithOwner: repository,
+            hasIssuesEnabled: true,
             mergeCommitAllowed: true,
             rebaseMergeAllowed: true,
             squashMergeAllowed: true,
@@ -279,6 +276,7 @@ describe('platform/github/index', () => {
               isFork: false,
               isArchived: false,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               mergeCommitAllowed: true,
               rebaseMergeAllowed: false,
               squashMergeAllowed: true,
@@ -307,6 +305,7 @@ describe('platform/github/index', () => {
               isFork: false,
               isArchived: false,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               mergeCommitAllowed: true,
               rebaseMergeAllowed: false,
               squashMergeAllowed: false,
@@ -356,6 +355,7 @@ describe('platform/github/index', () => {
             repository: {
               isArchived: true,
               nameWithOwner: 'some/repo',
+              hasIssuesEnabled: true,
               defaultBranchRef: {
                 name: 'master',
                 target: {
@@ -389,6 +389,7 @@ describe('platform/github/index', () => {
           data: {
             repository: {
               nameWithOwner: 'some/other',
+              hasIssuesEnabled: true,
               defaultBranchRef: {
                 name: 'master',
                 target: {
@@ -433,7 +434,7 @@ describe('platform/github/index', () => {
           },
         });
       const res = await github.getRepoForceRebase();
-      expect(res).toBe(true);
+      expect(res).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle 404', async () => {
@@ -442,7 +443,7 @@ describe('platform/github/index', () => {
         .get('/repos/undefined/branches/undefined/protection')
         .reply(404);
       const res = await github.getRepoForceRebase();
-      expect(res).toBe(false);
+      expect(res).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle 403', async () => {
@@ -451,7 +452,7 @@ describe('platform/github/index', () => {
         .get('/repos/undefined/branches/undefined/protection')
         .reply(403);
       const res = await github.getRepoForceRebase();
-      expect(res).toBe(false);
+      expect(res).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw 401', async () => {
@@ -689,26 +690,13 @@ describe('platform/github/index', () => {
     });
   });
   describe('getBranchStatus()', () => {
-    it('returns success if requiredStatusChecks null', async () => {
+    it('returns success if ignoreTests true', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
 
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', null);
-      expect(res).toEqual(BranchStatus.green);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('return failed if unsupported requiredStatusChecks', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-
-      await github.initRepo({
-        repository: 'some/repo',
-      } as any);
-      const res = await github.getBranchStatus('somebranch', ['foo']);
-      expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should pass through success', async () => {
@@ -725,7 +713,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -743,7 +731,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -760,7 +748,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -794,7 +782,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -834,7 +822,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -867,7 +855,7 @@ describe('platform/github/index', () => {
       await github.initRepo({
         repository: 'some/repo',
       } as any);
-      const res = await github.getBranchStatus('somebranch', []);
+      const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(BranchStatus.yellow);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -1889,6 +1877,153 @@ describe('platform/github/index', () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    describe('automerge', () => {
+      const createdPrResp = {
+        number: 123,
+        node_id: 'abcd',
+        head: { repo: { full_name: 'some/repo' } },
+      };
+
+      const graphqlAutomergeResp = {
+        data: {
+          enablePullRequestAutoMerge: {
+            pullRequest: {
+              number: 123,
+            },
+          },
+        },
+      };
+
+      const graphqlAutomergeErrorResp = {
+        ...graphqlAutomergeResp,
+        errors: [
+          {
+            type: 'UNPROCESSABLE',
+            message:
+              'Pull request is not in the correct state to enable auto-merge',
+          },
+        ],
+      };
+
+      const prConfig: CreatePRConfig = {
+        sourceBranch: 'some-branch',
+        targetBranch: 'dev',
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        labels: ['deps', 'renovate'],
+        platformOptions: { usePlatformAutomerge: true },
+      };
+
+      const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo', repoOpts);
+        scope
+          .post('/repos/some/repo/pulls')
+          .reply(200, createdPrResp)
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, []);
+        await github.initRepo({
+          repository: 'some/repo',
+          token: 'token',
+        } as any);
+        return scope;
+      };
+
+      const graphqlGetRepo = {
+        method: 'POST',
+        url: 'https://api.github.com/graphql',
+        graphql: { query: { repository: {} } },
+      };
+
+      const restCreatePr = {
+        method: 'POST',
+        url: 'https://api.github.com/repos/some/repo/pulls',
+      };
+
+      const restAddLabels = {
+        method: 'POST',
+        url: 'https://api.github.com/repos/some/repo/issues/123/labels',
+      };
+
+      const graphqlAutomerge = {
+        method: 'POST',
+        url: 'https://api.github.com/graphql',
+        graphql: {
+          mutation: {
+            __vars: {
+              $pullRequestId: 'ID!',
+              $mergeMethod: 'PullRequestMergeMethod!',
+            },
+            enablePullRequestAutoMerge: {
+              __args: {
+                input: {
+                  pullRequestId: '$pullRequestId',
+                  mergeMethod: '$mergeMethod',
+                },
+              },
+            },
+          },
+          variables: {
+            pullRequestId: 'abcd',
+            mergeMethod: 'REBASE',
+          },
+        },
+      };
+
+      it('should skip automerge if disabled in repo settings', async () => {
+        await mockScope({ autoMergeAllowed: false });
+
+        const pr = await github.createPr(prConfig);
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+        ]);
+      });
+
+      it('should set automatic merge', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr(prConfig);
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          graphqlAutomerge,
+        ]);
+      });
+
+      it('should handle GraphQL errors', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
+        const pr = await github.createPr(prConfig);
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          graphqlAutomerge,
+        ]);
+      });
+
+      it('should handle REST API errors', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(500);
+        const pr = await github.createPr(prConfig);
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          graphqlAutomerge,
+        ]);
+      });
+    });
   });
   describe('getPr(prNo)', () => {
     it('should return null if no prNo is passed', async () => {
@@ -2051,7 +2186,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should handle merge error', async () => {
@@ -2072,7 +2207,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(false);
+      ).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -2094,10 +2229,10 @@ describe('platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initPlatform({
         endpoint: 'https://github.company.com',
-        token: 'abc123',
+        token: '123test',
       });
       hostRules.find.mockReturnValue({
-        token: 'abc123',
+        token: '123test',
       });
       await github.initRepo({
         repository: 'some/repo',
@@ -2125,7 +2260,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should try squash after rebase', async () => {
@@ -2169,7 +2304,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should give up', async () => {
@@ -2196,7 +2331,7 @@ describe('platform/github/index', () => {
           branchName: '',
           id: pr.number,
         })
-      ).toBe(false);
+      ).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -2268,6 +2403,23 @@ describe('platform/github/index', () => {
       });
       const res = await github.getJsonFile('file.json');
       expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.get('/repos/some/repo/contents/file.json5').reply(200, {
+        content: Buffer.from(json5Data).toString('base64'),
+      });
+      const res = await github.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws on malformed JSON', async () => {

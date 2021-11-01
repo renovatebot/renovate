@@ -22,6 +22,7 @@ const validMatchFields = [
   'versioning',
   'extractVersion',
   'registryUrl',
+  'depType',
 ];
 
 const mergeFields = ['registryUrls', ...validMatchFields];
@@ -120,21 +121,17 @@ function mergeGroups(
   mergedGroup: Record<string, string>,
   secondGroup: Record<string, string>
 ): Record<string, string> {
-  const resultGroup = {};
+  const resultGroup = Object.create(null); // prevent prototype pollution
 
-  Object.keys(mergedGroup)
-    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
-    .forEach(
-      // eslint-disable-next-line no-return-assign
-      (key) => (resultGroup[key] = mergedGroup[key])
-    );
-  Object.keys(secondGroup)
-    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
-    .forEach((key) => {
-      if (secondGroup[key] && secondGroup[key] !== '') {
-        resultGroup[key] = secondGroup[key];
-      }
-    });
+  Object.keys(mergedGroup).forEach(
+    // eslint-disable-next-line no-return-assign
+    (key) => (resultGroup[key] = mergedGroup[key])
+  );
+  Object.keys(secondGroup).forEach((key) => {
+    if (secondGroup[key] && secondGroup[key] !== '') {
+      resultGroup[key] = secondGroup[key];
+    }
+  });
   return resultGroup;
 }
 
@@ -171,7 +168,8 @@ function handleRecursive(
   content: string,
   packageFile: string,
   config: CustomExtractConfig,
-  index = 0
+  index = 0,
+  combinedGroups: Record<string, string> = {}
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
@@ -183,9 +181,20 @@ function handleRecursive(
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     // if we have a depName and a currentValue with have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
-      return createDependency(match, null, config);
+      return createDependency(
+        match,
+        mergeGroups(combinedGroups, match.groups),
+        config
+      );
     }
-    return handleRecursive(match[0], packageFile, config, index + 1);
+
+    return handleRecursive(
+      match[0],
+      packageFile,
+      config,
+      index + 1,
+      mergeGroups(combinedGroups, match.groups || {})
+    );
   });
 }
 
@@ -220,6 +229,9 @@ export function extractPackageFile(
       if (config[field]) {
         res[field] = config[field];
       }
+    }
+    if (config.autoReplaceStringTemplate) {
+      res.autoReplaceStringTemplate = config.autoReplaceStringTemplate;
     }
     return res;
   }

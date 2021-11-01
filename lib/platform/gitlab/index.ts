@@ -1,8 +1,10 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import pAll from 'p-all';
 import { lt } from 'semver';
+import { PlatformId } from '../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -15,13 +17,13 @@ import {
   REPOSITORY_NOT_FOUND,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
 import type {
@@ -66,7 +68,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: PLATFORM_TYPE_GITLAB,
+  hostType: PlatformId.Gitlab,
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };
@@ -150,7 +152,7 @@ export async function getRepos(): Promise<string[]> {
 }
 
 function urlEscape(str: string): string {
-  return str ? str.replace(/\//g, '%2F') : str;
+  return str ? str.replace(regEx(/\//g), '%2F') : str;
 }
 
 export async function getRawFile(
@@ -170,6 +172,9 @@ export async function getJsonFile(
   repo: string = config.repository
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repo);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -370,25 +375,23 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
+  branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    return BranchStatus.green;
-  }
-  if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return BranchStatus.red;
-  }
 
   if (!git.branchExists(branchName)) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
   const branchStatuses = await getStatus(branchName);
+  // istanbul ignore if
+  if (!is.array(branchStatuses)) {
+    logger.warn(
+      { branchName, branchStatuses },
+      'Empty or unexpected branch statuses'
+    );
+    return BranchStatus.yellow;
+  }
   logger.debug(`Got res with ${branchStatuses.length} results`);
   // ignore all skipped jobs
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
@@ -502,7 +505,7 @@ async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
-  if (platformOptions?.gitLabAutomerge) {
+  if (platformOptions?.usePlatformAutomerge) {
     try {
       if (platformOptions?.gitLabIgnoreApprovals) {
         await ignoreApprovals(pr);
@@ -563,7 +566,7 @@ export async function createPr({
         remove_source_branch: true,
         title,
         description,
-        labels: is.array(labels) ? labels.join(',') : null,
+        labels: (labels || []).join(','),
         squash: config.squash,
       },
     }
@@ -606,7 +609,7 @@ export async function getPr(iid: number): Promise<Pr> {
     pr.canMerge = false;
     pr.isConflicted = true;
   } else if (pr.state === PrState.Open) {
-    const branchStatus = await getBranchStatus(pr.sourceBranch, []);
+    const branchStatus = await getBranchStatus(pr.sourceBranch);
     if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
     }
@@ -671,9 +674,9 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
 
 export function massageMarkdown(input: string): string {
   let desc = input
-    .replace(/Pull Request/g, 'Merge Request')
-    .replace(/PR/g, 'MR')
-    .replace(/\]\(\.\.\/pull\//g, '](!');
+    .replace(regEx(/Pull Request/g), 'Merge Request')
+    .replace(regEx(/PR/g), 'MR')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
 
   if (lt(defaults.version, '13.4.0')) {
     logger.debug(
@@ -877,7 +880,11 @@ export async function ensureIssue({
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { title, description, labels: labels ?? issue.labels },
+            body: {
+              title,
+              description,
+              labels: (labels || issue.labels || []).join(','),
+            },
           }
         );
         return 'updated';
@@ -887,7 +894,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels: labels || [],
+          labels: (labels || []).join(','),
         },
       });
       logger.info('Issue created');
@@ -1005,7 +1012,9 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
     const pr = await getPr(issueNo);
-    const labels = (pr.labels || []).filter((l: string) => l !== label).join();
+    const labels = (pr.labels || [])
+      .filter((l: string) => l !== label)
+      .join(',');
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${issueNo}`,
       {
@@ -1069,7 +1078,9 @@ export async function ensureComment({
 }: EnsureCommentConfig): Promise<boolean> {
   const sanitizedContent = sanitize(content);
   const massagedTopic = topic
-    ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
+    ? topic
+        .replace(regEx(/Pull Request/g), 'Merge Request')
+        .replace(regEx(/PR/g), 'MR')
     : topic;
   const comments = await getComments(number);
   let body: string;
@@ -1078,7 +1089,9 @@ export async function ensureComment({
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
-    body = body.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR');
+    body = body
+      .replace(regEx(/Pull Request/g), 'Merge Request')
+      .replace(regEx(/PR/g), 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
         commentId = comment.id;

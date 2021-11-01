@@ -11,7 +11,7 @@ Object {
   "additionalYarnRcYml": Object {
     "npmRegistries": Object {
       "//registry.company.com/": Object {
-        "npmAuthIdent": "dXNlcjEyMzpwYXNzMTIz",
+        "npmAuthIdent": "user123:pass123",
       },
       "//registry.npmjs.org": Object {
         "npmAuthToken": "token123",
@@ -33,7 +33,7 @@ Object {
   "additionalYarnRcYml": Object {
     "npmRegistries": Object {
       "//registry.company.com/": Object {
-        "npmAuthIdent": "dXNlcjEyMzpwYXNzMTIz",
+        "npmAuthIdent": "user123:pass123",
       },
     },
   },

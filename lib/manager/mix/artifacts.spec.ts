@@ -84,7 +84,7 @@ describe('manager/mix/artifacts', () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
-    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
     expect(
@@ -102,10 +102,10 @@ describe('manager/mix/artifacts', () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
-    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    hostRules.find.mockReturnValueOnce({ token: 'valid_token' });
+    hostRules.find.mockReturnValueOnce({ token: 'valid_test_token' });
     hostRules.find.mockReturnValueOnce({});
 
     const result = await updateArtifacts({
@@ -134,14 +134,14 @@ describe('manager/mix/artifacts', () => {
 
     const [, packageUpdateCommand] = execSnapshots;
     expect(packageUpdateCommand.cmd).toInclude(
-      'mix hex.organization auth renovate_test --key valid_token && ' +
+      'mix hex.organization auth renovate_test --key valid_test_token && ' +
         'mix deps.update private_package other_package'
     );
   });
 
   it('returns updated mix.lock in subdir', async () => {
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
-    fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('subdir/mix.lock');
     mockExecAll(exec);
     expect(
       await updateArtifacts({
@@ -156,7 +156,7 @@ describe('manager/mix/artifacts', () => {
 
   it('catches write errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
-    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -174,7 +174,7 @@ describe('manager/mix/artifacts', () => {
 
   it('catches exec errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
-    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     exec.mockImplementationOnce(() => {
       throw new Error('exec-error');
     });

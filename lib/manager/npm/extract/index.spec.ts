@@ -122,7 +122,7 @@ describe('manager/npm/extract/index', () => {
       );
       expect(res.npmrc).toBeDefined();
     });
-    it('ignores .npmrc when config.npmrc is defined', async () => {
+    it('ignores .npmrc when config.npmrc is defined and npmrcMerge=false', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           return 'some-npmrc\n';
@@ -135,6 +135,20 @@ describe('manager/npm/extract/index', () => {
         { npmrc: 'some-configured-npmrc' }
       );
       expect(res.npmrc).toBeUndefined();
+    });
+    it('reads .npmrc when config.npmrc is merged', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.npmrc') {
+          return 'repo-npmrc\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { npmrc: 'config-npmrc', npmrcMerge: true }
+      );
+      expect(res.npmrc).toEqual(`config-npmrc\nrepo-npmrc\n`);
     });
     it('finds and filters .npmrc with variables', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
@@ -332,6 +346,7 @@ describe('manager/npm/extract/index', () => {
           l: 'github:owner/l.git#abcdef0',
           m: 'https://github.com/owner/m.git#v1.0.0',
           n: 'git+https://github.com/owner/n#v2.0.0',
+          o: 'git@github.com:owner/o.git#v2.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);

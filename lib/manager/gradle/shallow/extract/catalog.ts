@@ -1,7 +1,15 @@
 import { parse } from '@iarna/toml';
-import { PackageDependency } from '../../../types';
-import { GradleManagerData } from '../../types';
-import type { GradleCatalog, GradleCatalogPluginDescriptor } from '../types';
+import deepmerge from 'deepmerge';
+import { SkipReason } from '../../../../types';
+import { hasKey } from '../../../../util/object';
+import type { PackageDependency } from '../../../types';
+import type { GradleManagerData } from '../../types';
+import type {
+  GradleCatalog,
+  GradleCatalogArtifactDescriptor,
+  GradleCatalogModuleDescriptor,
+  VersionPointer,
+} from '../types';
 
 function findIndexAfter(
   content: string,
@@ -10,6 +18,123 @@ function findIndexAfter(
 ): number {
   const slicePoint = content.indexOf(sliceAfter) + sliceAfter.length;
   return slicePoint + content.slice(slicePoint).indexOf(find);
+}
+
+function isArtifactDescriptor(
+  obj: GradleCatalogArtifactDescriptor | GradleCatalogModuleDescriptor
+): obj is GradleCatalogArtifactDescriptor {
+  return hasKey('group', obj);
+}
+
+interface VersionExtract {
+  currentValue?: string;
+  fileReplacePosition?: number;
+}
+
+function extractVersion({
+  version,
+  versions,
+  depStartIndex,
+  depSubContent,
+  depName,
+  versionStartIndex,
+  versionSubContent,
+}: {
+  version: string | VersionPointer;
+  versions: Record<string, string>;
+  depStartIndex: number;
+  depSubContent: string;
+  depName: string;
+  versionStartIndex: number;
+  versionSubContent: string;
+}): VersionExtract {
+  if (!version) {
+    return {};
+  }
+  const currentValue =
+    typeof version === 'string' ? version : versions[version.ref];
+
+  const fileReplacePosition =
+    typeof version === 'string'
+      ? depStartIndex + findIndexAfter(depSubContent, depName, currentValue)
+      : versionStartIndex +
+        findIndexAfter(versionSubContent, version.ref, currentValue);
+  return { currentValue, fileReplacePosition };
+}
+
+function extractDependency({
+  descriptor,
+  versions,
+  depStartIndex,
+  depSubContent,
+  depName,
+  versionStartIndex,
+  versionSubContent,
+}: {
+  descriptor:
+    | string
+    | GradleCatalogModuleDescriptor
+    | GradleCatalogArtifactDescriptor;
+  versions: Record<string, string>;
+  depStartIndex: number;
+  depSubContent: string;
+  depName: string;
+  versionStartIndex: number;
+  versionSubContent: string;
+}): PackageDependency<GradleManagerData> {
+  if (typeof descriptor === 'string') {
+    const [groupName, name, currentValue] = descriptor.split(':');
+    if (!currentValue) {
+      return {
+        depName,
+        skipReason: SkipReason.NoVersion,
+      };
+    }
+    return {
+      depName: `${groupName}:${name}`,
+      groupName,
+      currentValue,
+      managerData: {
+        fileReplacePosition:
+          depStartIndex + findIndexAfter(depSubContent, depName, currentValue),
+      },
+    };
+  }
+
+  const { currentValue, fileReplacePosition } = extractVersion({
+    version: descriptor.version,
+    versions,
+    depStartIndex,
+    depSubContent,
+    depName,
+    versionStartIndex,
+    versionSubContent,
+  });
+
+  if (!currentValue) {
+    return {
+      depName,
+      skipReason: SkipReason.NoVersion,
+    };
+  }
+
+  if (isArtifactDescriptor(descriptor)) {
+    const { group: groupName, name } = descriptor;
+    return {
+      depName: `${groupName}:${name}`,
+      groupName,
+      currentValue,
+      managerData: { fileReplacePosition },
+    };
+  }
+  const [groupName, name] = descriptor.module.split(':');
+  const dependency = {
+    depName: `${groupName}:${name}`,
+    groupName,
+    currentValue,
+    managerData: { fileReplacePosition },
+  };
+  return dependency;
 }
 
 export function parseCatalog(
@@ -26,58 +151,46 @@ export function parseCatalog(
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   for (const libraryName of Object.keys(libs)) {
     const libDescriptor = libs[libraryName];
-    const group: string =
-      typeof libDescriptor === 'string'
-        ? libDescriptor.split(':')[0]
-        : libDescriptor.group || libDescriptor.module?.split(':')[0];
-    const name: string =
-      typeof libDescriptor === 'string'
-        ? libDescriptor.split(':')[1]
-        : libDescriptor.name || libDescriptor.module?.split(':')[1];
-    const version = libDescriptor.version || libDescriptor.split(':')[2];
-    const currentVersion =
-      typeof version === 'string' ? version : versions[version.ref];
-    const fileReplacePosition =
-      typeof version === 'string'
-        ? libStartIndex +
-          findIndexAfter(libSubContent, libraryName, currentVersion)
-        : versionStartIndex +
-          findIndexAfter(versionSubContent, version.ref, currentVersion);
-    const dependency = {
-      depName: `${group}:${name}`,
-      groupName: group,
-      currentValue: currentVersion,
-      managerData: { fileReplacePosition, packageFile },
-    };
+    const dependency = extractDependency({
+      descriptor: libDescriptor,
+      versions,
+      depStartIndex: libStartIndex,
+      depSubContent: libSubContent,
+      depName: libraryName,
+      versionStartIndex,
+      versionSubContent,
+    });
     extractedDeps.push(dependency);
   }
+
   const plugins = tomlContent.plugins || {};
   const pluginsStartIndex = content.indexOf('[plugins]');
   const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {
-    const pluginDescriptor = plugins[
-      pluginName
-    ] as GradleCatalogPluginDescriptor;
-    const pluginId = pluginDescriptor.id;
-    const version = pluginDescriptor.version;
-    const currentVersion: string =
-      typeof version === 'string' ? version : versions[version.ref];
-    const fileReplacePosition =
-      typeof version === 'string'
-        ? pluginsStartIndex +
-          findIndexAfter(pluginsSubContent, pluginId, currentVersion)
-        : versionStartIndex +
-          findIndexAfter(versionSubContent, version.ref, currentVersion);
+    const pluginDescriptor = plugins[pluginName];
+    const depName = pluginDescriptor.id;
+    const { currentValue, fileReplacePosition } = extractVersion({
+      version: pluginDescriptor.version,
+      versions,
+      depStartIndex: pluginsStartIndex,
+      depSubContent: pluginsSubContent,
+      depName,
+      versionStartIndex,
+      versionSubContent,
+    });
+
     const dependency = {
       depType: 'plugin',
-      depName: pluginId,
-      lookupName: `${pluginId}:${pluginId}.gradle.plugin`,
+      depName,
+      lookupName: `${depName}:${depName}.gradle.plugin`,
       registryUrls: ['https://plugins.gradle.org/m2/'],
-      currentValue: currentVersion,
+      currentValue,
       commitMessageTopic: `plugin ${pluginName}`,
-      managerData: { fileReplacePosition, packageFile },
+      managerData: { fileReplacePosition },
     };
     extractedDeps.push(dependency);
   }
-  return extractedDeps;
+  return extractedDeps.map((dep) =>
+    deepmerge(dep, { managerData: { packageFile } })
+  );
 }

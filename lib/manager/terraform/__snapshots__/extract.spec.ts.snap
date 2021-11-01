@@ -187,29 +187,39 @@ Object {
       "datasource": "terraform-provider",
       "depName": "azurerm",
       "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/azurerm",
     },
     Object {
       "currentValue": "=2.4",
       "datasource": "terraform-provider",
       "depName": "gitlab",
       "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/gitlab",
     },
     Object {
       "currentValue": "=1.3",
       "datasource": "terraform-provider",
       "depName": "gitlab",
       "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/gitlab",
     },
     Object {
       "datasource": "terraform-provider",
       "depName": "helm",
       "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/helm",
     },
     Object {
       "currentValue": "V1.9",
       "datasource": "terraform-provider",
       "depName": "newrelic",
       "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/newrelic",
     },
     Object {
       "currentValue": "v1.0.0",
@@ -258,12 +268,16 @@ Object {
       "datasource": "terraform-provider",
       "depName": "aws",
       "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/aws",
     },
     Object {
       "currentValue": ">= 2.0.0",
       "datasource": "terraform-provider",
       "depName": "azurerm",
       "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/azurerm",
     },
     Object {
       "currentValue": ">= 0.13",
@@ -278,6 +292,8 @@ Object {
       "datasource": "terraform-provider",
       "depName": "docker",
       "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/docker",
       "registryUrls": Array [
         "https://releases.hashicorp.com",
       ],
@@ -287,13 +303,16 @@ Object {
       "datasource": "terraform-provider",
       "depName": "aws",
       "depType": "required_provider",
-      "lookupName": "aws",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/aws",
     },
     Object {
       "currentValue": "=2.27.0",
       "datasource": "terraform-provider",
       "depName": "azurerm",
       "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/azurerm",
     },
     Object {
       "currentValue": "1.2.4",
@@ -307,6 +326,7 @@ Object {
       "datasource": "terraform-provider",
       "depName": "helm",
       "depType": "required_provider",
+      "lockedVersion": undefined,
       "lookupName": "hashicorp/helm",
     },
     Object {
@@ -314,6 +334,7 @@ Object {
       "datasource": "terraform-provider",
       "depName": "kubernetes",
       "depType": "required_provider",
+      "lockedVersion": undefined,
       "lookupName": "hashicorp/kubernetes",
       "registryUrls": Array [
         "https://terraform.example.com",
@@ -364,6 +385,55 @@ Object {
     },
     Object {
       "skipReason": "invalid-value",
+    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() test terraform block with only requirement_terraform_version 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.0",
+      "datasource": "github-tags",
+      "depName": "hashicorp/terraform",
+      "depType": "required_version",
+      "extractVersion": "v(?<version>.*)$",
+      "lineNumber": 1,
+    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() update lockfile constraints with range strategy update-lockfile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "~> 3.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depType": "required_provider",
+      "lockedVersion": "3.1.0",
+      "lookupName": "hashicorp/aws",
+    },
+    Object {
+      "currentValue": "~> 2.50.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depType": "required_provider",
+      "lockedVersion": "2.50.0",
+      "lookupName": "hashicorp/azurerm",
+    },
+    Object {
+      "currentValue": ">= 1.0",
+      "datasource": "terraform-provider",
+      "depName": "kubernetes",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "lookupName": "example/kubernetes",
+      "registryUrls": Array [
+        "https://terraform.example.com",
+      ],
     },
   ],
 }

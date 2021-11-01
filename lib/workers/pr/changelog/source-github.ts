@@ -1,10 +1,11 @@
 import URL from 'url';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants';
 import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import * as allVersioning from '../../../versioning';
 import type { BranchUpgradeConfig } from '../../types';
 import { getTags } from './github';
@@ -47,7 +48,7 @@ export async function getChangeLogJSON({
     ? 'https://api.github.com/'
     : sourceUrl;
   const config = hostRules.find({
-    hostType: PLATFORM_TYPE_GITHUB,
+    hostType: PlatformId.Github,
     url,
   });
   // istanbul ignore if
@@ -70,8 +71,8 @@ export async function getChangeLogJSON({
     : baseUrl + 'api/v3/';
   const repository = pathname
     .slice(1)
-    .replace(/\/$/, '')
-    .replace(/\.git$/, '');
+    .replace(regEx(/\/$/), '')
+    .replace(regEx(/\.git$/), '');
   if (repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
@@ -96,7 +97,7 @@ export async function getChangeLogJSON({
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = new RegExp(`(?:${depName}|release)[@-]`);
+    const regex = regEx(`(?:${depName}|release)[@-]`);
     const tagName = tags
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
       .find((tag) => version.equals(tag.replace(regex, ''), release.version));

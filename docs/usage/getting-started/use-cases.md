@@ -88,6 +88,8 @@ An example from Renovate itself is the use of submodule updating to automate the
 The above use case makes use of Renovate's "automerge" feature, which allows for fully automated updates without need for manual approval, merging, or even a PR at all if desired.
 Automerge is particularly useful for internal dependencies when it's best to use the approach of "if it passes tests then merge it".
 
+To learn more about "automerge" read the [key concepts, automerge](https://docs.renovatebot.com/key-concepts/automerge/) documentation.
+
 ## Advanced configuration
 
 The below capabilities are common across the above use cases.
