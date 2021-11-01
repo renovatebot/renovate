@@ -7043,6 +7043,7 @@ exports[`platform/github/index initPlatform() should support custom endpoint 1`]
 Object {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
+  "gitIgnoredAuthors": Array [],
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -7078,6 +7079,7 @@ exports[`platform/github/index initPlatform() should support default endpoint no
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
+  "gitIgnoredAuthors": Array [],
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -7113,6 +7115,7 @@ exports[`platform/github/index initPlatform() should support default endpoint no
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
+  "gitIgnoredAuthors": Array [],
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -7148,6 +7151,7 @@ exports[`platform/github/index initPlatform() should support default endpoint wi
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
+  "gitIgnoredAuthors": Array [],
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -7183,6 +7187,7 @@ exports[`platform/github/index initPlatform() should support gitAuthor and usern
 Object {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
+  "gitIgnoredAuthors": Array [],
   "renovateUsername": "renovate-bot",
 }
 `;

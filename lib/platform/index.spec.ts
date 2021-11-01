@@ -59,6 +59,7 @@ describe('platform/index', () => {
     expect(await platform.initPlatform(config)).toEqual({
       endpoint: 'https://api.bitbucket.org/',
       gitAuthor: 'user@domain.com',
+      gitIgnoredAuthors: [],
       hostRules: [
         {
           hostType: 'bitbucket',

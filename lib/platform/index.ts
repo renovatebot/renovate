@@ -46,8 +46,8 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   const platformInfo = await platform.initPlatform(config);
 
   platformInfo.gitIgnoredAuthors = [
-    ...(config.gitIgnoredAuthors ?? []),
-    ...(platformInfo.gitIgnoredAuthors ?? []),
+    ...(config?.gitIgnoredAuthors ?? []),
+    ...(platformInfo?.gitIgnoredAuthors ?? []),
   ];
 
   const returnConfig: any = { ...config, ...platformInfo };
