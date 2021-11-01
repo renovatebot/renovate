@@ -383,7 +383,7 @@ describe('workers/repository/updates/generate', () => {
           ...defaultConfig,
           depName: 'some-dep',
           prTitle: 'Upgrade {{depName}}',
-          toLowerCase: true,
+          semanticCommitCasing: true,
         }),
       ];
       const res = generateBranchConfig(branch);
