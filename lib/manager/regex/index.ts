@@ -8,6 +8,7 @@ import type {
   PackageFile,
   Result,
 } from '../types';
+import type { ExtractionTemplate } from './types';
 
 export const defaultConfig = {
   pinDigests: false,
@@ -24,11 +25,6 @@ const validMatchFields = [
   'registryUrl',
   'depType',
 ];
-
-interface ExtractionTemplate {
-  groups: Record<string, string>;
-  replaceString: string;
-}
 
 function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
