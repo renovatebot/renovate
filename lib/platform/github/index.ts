@@ -1012,7 +1012,7 @@ async function getIssues(): Promise<Issue[]> {
 export async function getIssueList(): Promise<Issue[]> {
   // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
-    return null;
+    return [];
   }
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
