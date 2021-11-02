@@ -80,7 +80,7 @@ describe('manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    git.getRepoStatus.mockResolvedValue(repoStatus);
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
     setGlobalConfig({ ...adminConfig, allowScripts: true, allowPlugins: true });
     expect(
       await composer.updateArtifacts({
@@ -133,7 +133,7 @@ describe('manager/composer/artifacts', () => {
       ...config,
       registryUrls: ['https://packagist.renovatebot.com'],
     };
-    git.getRepoStatus.mockResolvedValue(repoStatus);
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -149,7 +149,7 @@ describe('manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -201,7 +201,7 @@ describe('manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{  }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -237,7 +237,7 @@ describe('manager/composer/artifacts', () => {
       ],
     });
 
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -259,7 +259,7 @@ describe('manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{ }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -329,7 +329,7 @@ describe('manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{ }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -351,7 +351,7 @@ describe('manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{ }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -375,7 +375,7 @@ describe('manager/composer/artifacts', () => {
     );
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{ }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -399,7 +399,7 @@ describe('manager/composer/artifacts', () => {
     );
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{ }');
-    git.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValueOnce({
       ...repoStatus,
       modified: ['composer.lock'],
     });
@@ -421,7 +421,7 @@ describe('manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    git.getRepoStatus.mockResolvedValue(repoStatus);
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
     setGlobalConfig({ ...adminConfig, allowPlugins: true });
     expect(
       await composer.updateArtifacts({
@@ -438,7 +438,7 @@ describe('manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    git.getRepoStatus.mockResolvedValue(repoStatus);
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
     setGlobalConfig({ ...adminConfig, allowPlugins: true });
     expect(
       await composer.updateArtifacts({
