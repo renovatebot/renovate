@@ -43,7 +43,6 @@ export async function lookupUpdates(
     rollbackPrs,
     isVulnerabilityAlert,
     updatePinnedDependencies,
-    userAndChannel,
   } = config;
   const res: UpdateResult = {
     updates: [],
@@ -209,12 +208,6 @@ export async function lookupUpdates(
         // Leave only compatible versions
         versioning.isCompatible(v.version, currentValue)
       );
-
-      // filter conan user and channel
-      filteredReleases = filteredReleases.filter(
-        (v) => v.userAndChannel === userAndChannel
-      );
-
       if (isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
       }

@@ -49,10 +49,12 @@ export default function extractPackageFile(
             let dep: PackageDependency = {};
             const depName = matches.groups.name;
             const currentValue = matches.groups.version.trim();
+            // conan uses @_/_ as a place holder for no userChannel
             const userAndChannel = matches.groups.userChannel
               ? matches.groups.userAndChannel
               : '@_/_';
             let replaceString = `${depName}/${currentValue}`;
+            const lookupName = `${depName}/${currentValue}${userAndChannel}`;
 
             if (matches.groups.userChannel) {
               replaceString = `${depName}/${currentValue}${userAndChannel}`;
@@ -61,8 +63,8 @@ export default function extractPackageFile(
             dep = {
               ...dep,
               depName,
+              lookupName,
               currentValue,
-              userAndChannel,
               datasource: ConanDatasource.id,
               versioning: conan.id,
               rangeStrategy: 'bump',

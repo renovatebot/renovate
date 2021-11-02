@@ -34,6 +34,7 @@ describe('datasource/conan/index', () => {
           datasource,
           versioning,
           depName: 'fakepackage',
+          lookupName: 'fakepackage/1.2@_/_',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -51,6 +52,7 @@ describe('datasource/conan/index', () => {
           datasource,
           versioning,
           depName: 'poco',
+          lookupName: 'poco/1.2@_/_',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -68,6 +70,7 @@ describe('datasource/conan/index', () => {
           datasource,
           versioning,
           depName: 'fakepackage',
+          lookupName: 'fakepackage/1.2@_/_',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -85,6 +88,25 @@ describe('datasource/conan/index', () => {
           datasource,
           versioning,
           depName: 'poco',
+          lookupName: 'poco/1.2@_/_',
+        })
+      ).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('it handles mismatched userAndChannel versioned data', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get('/v2/conans/search?q=poco')
+        .reply(200, pocoJson);
+      config.registryUrls = [defaultRegistryUrl];
+      expect(
+        await getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          depName: 'poco',
+          lookupName: 'poco/1.2@un/matched',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -102,6 +124,7 @@ describe('datasource/conan/index', () => {
           datasource,
           versioning,
           depName: 'bad',
+          lookupName: 'bad/1.2@_/_',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -120,6 +143,7 @@ describe('datasource/conan/index', () => {
           datasource,
           versioning,
           depName: 'poco',
+          lookupName: 'poco/1.2@_/_',
         })
       ).toMatchSnapshot();
 
@@ -138,6 +162,7 @@ describe('datasource/conan/index', () => {
           datasource,
           versioning,
           depName: 'poco',
+          lookupName: 'poco/1.2@_/_',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

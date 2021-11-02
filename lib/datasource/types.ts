@@ -46,7 +46,6 @@ export interface Release {
   registryUrl?: string;
   sourceUrl?: string;
   sourceDirectory?: string;
-  userAndChannel?: string;
 }
 
 export interface ReleaseResult {
