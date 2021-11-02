@@ -10,6 +10,20 @@ import {
 } from '../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
+async function helmRepoAdd(alias: string, url: string): Promise<void> {
+  const cmd = `helm repo add ${alias} ${url}`;
+
+  const execOptions: ExecOptions = {
+    docker: {
+      image: 'helm',
+    },
+    extraEnv: {
+      HELM_EXPERIMENTAL_OCI: '1',
+    },
+  };
+  await exec(cmd, execOptions);
+}
+
 async function helmUpdate(manifestPath: string): Promise<void> {
   const cmd = `helm dependency update ${quote(getSubDirectory(manifestPath))}`;
 
@@ -49,6 +63,11 @@ export async function updateArtifacts({
     return null;
   }
   try {
+    if (config.aliases) {
+      const aliases = Object.entries(config.aliases);
+      await Promise.all(aliases.map(([alias, url]) => helmRepoAdd(alias, url)));
+    }
+
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
     await helmUpdate(packageFileName);
