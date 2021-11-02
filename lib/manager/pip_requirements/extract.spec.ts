@@ -40,7 +40,7 @@ describe('manager/pip_requirements/extract', () => {
       const res = extractPackageFile(requirements1, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toEqual(['http://example.com/private-pypi/']);
-      expect(res.deps).toHaveLength(3);
+      expect(res.deps).toHaveLength(4);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(
