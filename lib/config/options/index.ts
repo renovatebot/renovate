@@ -100,6 +100,13 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingNoDeps',
+    description: 'Onboard repository even if no dependencies found.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'onboardingPrTitle',
     description:
       'Change this value in order to override the default onboarding PR title.',
@@ -751,13 +758,6 @@ const options: RenovateOptions[] = [
     allowedValues: getVersioningList(),
     cli: false,
     env: false,
-  },
-  {
-    name: 'azureAutoComplete',
-    description:
-      'If set to true, Azure DevOps PRs will be set to auto-complete after all (if any) branch policies have been met.',
-    type: 'boolean',
-    default: false,
   },
   {
     name: 'azureWorkItemId',
@@ -1911,12 +1911,6 @@ const options: RenovateOptions[] = [
     default: true,
   },
   {
-    name: 'gitLabAutomerge',
-    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging MRs.`,
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'gitLabIgnoreApprovals',
     description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
@@ -1975,6 +1969,15 @@ const options: RenovateOptions[] = [
     name: 'datasourceTemplate',
     description:
       'Optional datasource for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'depTypeTemplate',
+    description:
+      'Optional depType for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
     cli: false,
@@ -2082,6 +2085,12 @@ const options: RenovateOptions[] = [
     type: 'string',
     globalOnly: true,
     env: false,
+  },
+  {
+    name: 'platformAutomerge',
+    description: `Enable or disable usage of platform-native auto-merge capabilities when available.`,
+    type: 'boolean',
+    default: true,
   },
 ];
 

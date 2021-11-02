@@ -4,6 +4,7 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
+import { regEx } from '../../util/regex';
 
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
@@ -114,13 +115,16 @@ export async function isHttpResourceExists(
     }
 
     const failedUrl = pkgUrl.toString();
-    logger.debug({ failedUrl }, `Can't check HTTP resource existence`);
+    logger.debug(
+      { failedUrl, statusCode: err.statusCode },
+      `Can't check HTTP resource existence`
+    );
     return null;
   }
 }
 
 function containsPlaceholder(str: string): boolean {
-  return /\${.*?}/g.test(str);
+  return regEx(/\${.*?}/g).test(str);
 }
 
 export function getMavenUrl(
@@ -140,12 +144,15 @@ export async function downloadMavenXml(
   }
   let rawContent: string;
   let authorization: boolean;
+  let statusCode: number;
   switch (pkgUrl.protocol) {
     case 'http:':
     case 'https:':
-      ({ authorization, body: rawContent } = await downloadHttpProtocol(
-        pkgUrl
-      ));
+      ({
+        authorization,
+        body: rawContent,
+        statusCode,
+      } = await downloadHttpProtocol(pkgUrl));
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
@@ -156,7 +163,10 @@ export async function downloadMavenXml(
   }
 
   if (!rawContent) {
-    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
+    logger.debug(
+      { url: pkgUrl.toString(), statusCode },
+      `Content is not found for Maven url`
+    );
     return {};
   }
 
@@ -165,7 +175,7 @@ export async function downloadMavenXml(
 
 export function getDependencyParts(lookupName: string): MavenDependency {
   const [group, name] = lookupName.split(':');
-  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
+  const dependencyUrl = `${group.replace(regEx(/\./g), '/')}/${name}`;
   return {
     display: lookupName,
     group,
@@ -198,11 +208,11 @@ export async function getDependencyInfo(
   const sourceUrl = pomContent.valueWithPath('scm.url');
   if (sourceUrl && !containsPlaceholder(sourceUrl)) {
     result.sourceUrl = sourceUrl
-      .replace(/^scm:/, '')
-      .replace(/^git:/, '')
-      .replace(/^git@github.com:/, 'https://github.com/')
-      .replace(/^git@github.com\//, 'https://github.com/')
-      .replace(/\.git$/, '');
+      .replace(regEx(/^scm:/), '')
+      .replace(regEx(/^git:/), '')
+      .replace(regEx(/^git@github.com:/), 'https://github.com/')
+      .replace(regEx(/^git@github.com\//), 'https://github.com/')
+      .replace(regEx(/\.git$/), '');
 
     if (result.sourceUrl.startsWith('//')) {
       // most likely the result of us stripping scm:, git: etc

@@ -1527,6 +1527,20 @@ describe('platform/gitea/index', () => {
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: json5Data,
+      } as never);
+      await initFakeRepo({ full_name: 'some/repo' });
+      const res = await gitea.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
+    });
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',

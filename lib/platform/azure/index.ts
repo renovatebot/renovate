@@ -8,6 +8,7 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import delay from 'delay';
+import JSON5 from 'json5';
 import { PlatformId } from '../../constants';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -15,6 +16,7 @@ import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { RepositoryError } from '../../util/errors';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import type {
@@ -135,6 +137,9 @@ export async function getJsonFile(
   repoName?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -389,7 +394,7 @@ export async function createPr({
     },
     config.repoId
   );
-  if (platformOptions?.azureAutoComplete) {
+  if (platformOptions?.usePlatformAutomerge) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -679,7 +684,7 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '');
 }
 
 /* istanbul ignore next */

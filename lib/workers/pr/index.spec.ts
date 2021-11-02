@@ -627,13 +627,13 @@ describe('workers/pr/index', () => {
     });
 
     it('should trigger GitLab automerge when configured', async () => {
-      config.gitLabAutomerge = true;
+      config.usePlatformAutomerge = true;
       config.gitLabIgnoreApprovals = true;
       config.automerge = true;
       await prWorker.ensurePr(config);
       const args = platform.createPr.mock.calls[0];
       expect(args[0].platformOptions).toMatchObject({
-        gitLabAutomerge: true,
+        usePlatformAutomerge: true,
         gitLabIgnoreApprovals: true,
       });
     });

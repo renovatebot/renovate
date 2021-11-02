@@ -1,5 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
+import JSON5 from 'json5';
 import { lt } from 'semver';
 import { PlatformId } from '../../constants';
 import {
@@ -222,6 +223,9 @@ const platform: Platform = {
     repo: string = config.repository
   ): Promise<any | null> {
     const raw = await platform.getRawFile(fileName, repo);
+    if (fileName.endsWith('.json5')) {
+      return JSON5.parse(raw);
+    }
     return JSON.parse(raw);
   },
 

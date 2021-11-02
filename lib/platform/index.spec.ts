@@ -31,7 +31,7 @@ describe('platform/index', () => {
 
     for (const name of platforms.keys()) {
       const value = platforms.get(name);
-      expect(validate(value, name)).toBe(true);
+      expect(validate(value, name)).toBeTrue();
     }
   });
 

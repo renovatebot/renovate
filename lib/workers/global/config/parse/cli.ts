@@ -2,27 +2,31 @@ import { Command } from 'commander';
 import { version } from '../../../../../package.json';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
+import { regEx } from '../../../../util/regex';
 
 export function getCliName(option: Partial<RenovateOptions>): string {
   if (option.cli === false) {
     return '';
   }
-  const nameWithHyphens = option.name.replace(/([A-Z])/g, '-$1');
+  const nameWithHyphens = option.name.replace(regEx(/([A-Z])/g), '-$1');
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
 export function getConfig(input: string[]): AllConfig {
   // massage migrated configuration keys
   const argv = input
-    .map((a) =>
-      a
-        .replace('--endpoints=', '--host-rules=')
-        .replace('--expose-env=true', '--trust-level=high')
-        .replace('--expose-env', '--trust-level=high')
-        .replace('--renovate-fork', '--include-forks')
-        .replace('"platform":"', '"hostType":"')
-        .replace('"endpoint":"', '"matchHost":"')
-        .replace('"host":"', '"matchHost":"')
+    .map(
+      (a) =>
+        a
+          .replace('--endpoints=', '--host-rules=')
+          .replace('--expose-env=true', '--trust-level=high')
+          .replace('--expose-env', '--trust-level=high')
+          .replace('--renovate-fork', '--include-forks')
+          .replace('"platform":"', '"hostType":"')
+          .replace('"endpoint":"', '"matchHost":"')
+          .replace('"host":"', '"matchHost":"')
+          .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
+          .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();

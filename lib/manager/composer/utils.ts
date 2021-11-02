@@ -1,9 +1,33 @@
+import { quote } from 'shlex';
+import { getGlobalConfig } from '../../config/global';
 import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import { api, id as composerVersioningId } from '../../versioning/composer';
+import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
+
+export function getComposerArguments(config: UpdateArtifactsConfig): string {
+  let args = '';
+
+  if (config.composerIgnorePlatformReqs) {
+    if (config.composerIgnorePlatformReqs.length === 0) {
+      args += ' --ignore-platform-reqs';
+    } else {
+      config.composerIgnorePlatformReqs.forEach((req) => {
+        args += ' --ignore-platform-req ' + quote(req);
+      });
+    }
+  }
+
+  args += ' --no-ansi --no-interaction';
+  if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
+    args += ' --no-scripts --no-autoloader --no-plugins';
+  }
+
+  return args;
+}
 
 export async function getComposerConstraint(
   constraints: Record<string, string>

@@ -4,7 +4,10 @@ import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 import type { HelmDockerImageDependency } from './types';
-import { matchesHelmValuesDockerHeuristic } from './util';
+import {
+  matchesHelmValuesDockerHeuristic,
+  matchesHelmValuesInlineImage,
+} from './util';
 
 function getHelmDep({
   registry,
@@ -45,6 +48,9 @@ function findDependencies(
       const repository = String(currentItem.repository);
       const tag = String(currentItem.tag);
       packageDependencies.push(getHelmDep({ repository, tag, registry }));
+    } else if (matchesHelmValuesInlineImage(key, parsedContent[key])) {
+      const currentItem = parsedContent[key];
+      packageDependencies.push(getDep(currentItem));
     } else {
       findDependencies(parsedContent[key], packageDependencies);
     }
@@ -69,7 +75,7 @@ export function extractPackageFile(content: string): PackageFile {
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ err }, 'Error parsing helm-values parsed content');
+    logger.warn({ err }, 'Error parsing helm-values parsed content');
   }
   return null;
 }
