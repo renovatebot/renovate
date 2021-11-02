@@ -23,7 +23,11 @@ export function getComposerArguments(config: UpdateArtifactsConfig): string {
 
   args += ' --no-ansi --no-interaction';
   if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
-    args += ' --no-scripts --no-autoloader --no-plugins';
+    args += ' --no-scripts --no-autoloader';
+  }
+
+  if (!getGlobalConfig().allowPlugins || config.ignorePlugins) {
+    args += ' --no-plugins';
   }
 
   return args;

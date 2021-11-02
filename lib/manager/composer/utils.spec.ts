@@ -128,19 +128,41 @@ describe('manager/composer/utils', () => {
         ' --ignore-platform-req ext-intl --ignore-platform-req ext-icu --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
     });
-    it('allows scripts/plugins when configured', () => {
+    it('allows scripts when configured', () => {
       setGlobalConfig({
         allowScripts: true,
       });
-      expect(getComposerArguments({})).toEqual(' --no-ansi --no-interaction');
+      expect(getComposerArguments({})).toEqual(
+        ' --no-ansi --no-interaction --no-plugins'
+      );
     });
-    it('disables scripts/plugins when configured locally', () => {
+    it('disables scripts when configured locally', () => {
       setGlobalConfig({
         allowScripts: true,
       });
       expect(
         getComposerArguments({
           ignoreScripts: true,
+        })
+      ).toEqual(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
+    });
+    it('allows plugins when configured', () => {
+      setGlobalConfig({
+        allowPlugins: true,
+      });
+      expect(getComposerArguments({})).toEqual(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader'
+      );
+    });
+    it('disables plugins when configured locally', () => {
+      setGlobalConfig({
+        allowPlugins: true,
+      });
+      expect(
+        getComposerArguments({
+          ignorePlugins: true,
         })
       ).toEqual(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
