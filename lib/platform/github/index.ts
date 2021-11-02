@@ -228,6 +228,7 @@ export async function initRepo({
     if (
       config.isGhe &&
       (!config.gheVersion ||
+        semverSatisfies(config.gheVersion, '>=3.2.0 <3.3.0') ||
         semverSatisfies(config.gheVersion, '>=3.0.0 <3.0.16') ||
         semverSatisfies(config.gheVersion, '>=3.1.0 <3.1.8'))
     ) {
