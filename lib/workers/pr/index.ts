@@ -58,6 +58,7 @@ export async function addAssigneesReviewers(
   pr: Pr
 ): Promise<void> {
   let assignees = config.assignees;
+  logger.debug(`addAssigneesReviewers(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(assignees, pr);
   }
