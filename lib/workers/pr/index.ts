@@ -118,7 +118,9 @@ export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
 ): PlatformPrOptions {
   const usePlatformAutomerge = Boolean(
-    config.automerge && config.platformAutomerge
+    config.automerge &&
+      (config.automergeType === 'pr' || config.automergeType === 'branch') &&
+      config.platformAutomerge
   );
 
   return {
