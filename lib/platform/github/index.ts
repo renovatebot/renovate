@@ -109,6 +109,7 @@ export async function initPlatform({
   }
   let discoveredGitAuthor: string;
   if (!gitAuthor) {
+    userDetails = await getUserDetails(defaults.endpoint, token);
     const userEmail = await getUserEmail(defaults.endpoint, token);
     if (userEmail) {
       discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
