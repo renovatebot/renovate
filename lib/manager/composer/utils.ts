@@ -3,7 +3,7 @@ import { getGlobalConfig } from '../../config/global';
 import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import { api, id as composerVersioningId } from '../../versioning/composer';
-import { UpdateArtifactsConfig } from '../types';
+import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
