@@ -1,4 +1,4 @@
-# Loal Development
+# Local Development
 
 This document gives tips and tricks on how to run Renovate locally to add features or fix bugs.
 You can improve this documentation by opening a pull request.
