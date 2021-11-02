@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
+import { lt } from 'semver';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -204,9 +205,27 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
+    let infoQuery = repoInfoQuery;
+    // istanbul ignore if
+    if (config.isGhe) {
+      const gheHeaderKey = 'x-github-enterprise-version';
+      const gheQueryRes = await githubApi.head('/');
+      const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
+      const [, gheVersion] =
+        Object.entries(gheHeaders).find(
+          ([k]) => k.toLowerCase() === gheHeaderKey
+        ) ?? [];
+      if (
+        !gheVersion ||
+        (gheVersion.startsWith('3.1') && lt(gheVersion, '3.1.8')) ||
+        lt(gheVersion, '3.0.16')
+      ) {
+        infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
+      }
+    }
     const res = await githubApi.requestGraphql<{
       repository: GhRepo;
-    }>(repoInfoQuery, {
+    }>(infoQuery, {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
@@ -1418,7 +1437,7 @@ async function tryPrAutomerge(
     return;
   }
 
-  if (!config.autoMergeAllowed) {
+  if (config.autoMergeAllowed === false) {
     logger.debug(
       { prNumber },
       'GitHub-native automerge: not enabled in repo settings'
