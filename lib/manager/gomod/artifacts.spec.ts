@@ -210,6 +210,279 @@ describe('manager/gomod/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
+  it('supports docker mode with 2 credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'github.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '2',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+              GIT_CONFIG_VALUE_1: 'https://github.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode with single credential', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-enterprise-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode with multiple credentials for different paths', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token-repo1',
+        matchHost: 'https://gitlab.enterprise.com/repo1',
+      },
+      {
+        token: 'some-enterprise-token-repo2',
+        matchHost: 'https://gitlab.enterprise.com/repo2',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '2',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/repo1',
+              GIT_CONFIG_VALUE_1: 'https://gitlab.enterprise.com/repo2',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode and ignores non http credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-token',
+        matchHost: 'ssh://github.enterprise.com',
+      },
+      {
+        token: 'some-gitlab-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode with many credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-token',
+        matchHost: 'api.github.com',
+      },
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'github.enterprise.com',
+      },
+      {
+        token: 'some-gitlab-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '4',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-token@api.github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_3:
+                'url.https://some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+              GIT_CONFIG_VALUE_1: 'https://api.github.com/',
+              GIT_CONFIG_VALUE_2: 'https://github.enterprise.com/',
+              GIT_CONFIG_VALUE_3: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode and ignores non git credentials', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'github.enterprise.com',
+        hostType: 'npm',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
   it('supports docker mode with goModTidy', async () => {
     setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({});
