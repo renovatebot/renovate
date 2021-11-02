@@ -622,39 +622,52 @@ describe('manager/dockerfile/extract', () => {
       // eslint-disable-next-line no-template-curly-in-string
       const res = getDep('${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}');
       expect(res).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentDigest": "sha256:abcd",
-  "currentValue": "5.0.0",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis:5.0.0@sha256:abcd",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": "sha256:abcd",
+          "currentValue": "5.0.0",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis:5.0.0@sha256:abcd",
+        }
+      `);
 
       // eslint-disable-next-line no-template-curly-in-string
       const res2 = getDep('${REDIS_IMAGE:-redis:5.0.0}');
       expect(res2).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentValue": "5.0.0",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis:5.0.0",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentValue": "5.0.0",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis:5.0.0",
+        }
+      `);
 
       // eslint-disable-next-line no-template-curly-in-string
       const res3 = getDep('${REDIS_IMAGE:-redis@sha256:abcd}');
       expect(res3).toMatchInlineSnapshot(`
-Object {
-  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-  "currentDigest": "sha256:abcd",
-  "datasource": "docker",
-  "depName": "redis",
-  "replaceString": "redis@sha256:abcd",
-}
-`);
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": "sha256:abcd",
+          "datasource": "docker",
+          "depName": "redis",
+          "replaceString": "redis@sha256:abcd",
+        }
+      `);
+    });
+
+    it('skips tag containing a variable', () => {
+      // eslint-disable-next-line no-template-curly-in-string
+      const res = getDep('mcr.microsoft.com/dotnet/sdk:5.0${IMAGESUFFIX}');
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "mcr.microsoft.com/dotnet/sdk:5.0\${IMAGESUFFIX}",
+          "skipReason": "contains-variable",
+        }
+      `);
     });
   });
 });
