@@ -13,7 +13,7 @@ This package will manage two parts of the `kustomization.yaml` file:
 
 **Limitations**
 
-- Needs to have `kind: Kustomization` defined
+- Needs to have `kind: Kustomization` or `kind: Component` defined
 - Currently this hasn't been tested using HTTPS to fetch the repos
 - The keys for the image tags can be in any order
 

@@ -118,7 +118,7 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  if (pkg.kind !== 'Kustomization') {
+  if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;
   }
 
