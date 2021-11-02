@@ -5,7 +5,7 @@ import {
   extractContraints,
   getComposerArguments,
   getComposerConstraint,
-  hasComposerDependencyInstalled,
+  requireComposerDependencyInstallation,
 } from './utils';
 
 jest.mock('../../../lib/datasource');
@@ -171,42 +171,29 @@ describe('manager/composer/utils', () => {
     });
   });
 
-  describe('hasComposerDependencyInstalled', () => {
-    it('detects a dependency', () => {
+  describe('requireComposerDependencyInstallation', () => {
+    it('returns true when symfony/flex has been installed', () => {
       expect(
-        hasComposerDependencyInstalled(
-          { packages: [{ name: 'symfony/flex', version: '1.17.1' }] },
-          'symfony/flex'
-        )
+        requireComposerDependencyInstallation({
+          packages: [{ name: 'symfony/flex', version: '1.17.1' }],
+        })
       ).toBeTrue();
     });
 
-    it('does not detect a dependency when not installed', () => {
+    it('returns true when symfony/flex has been installed as dev dependency', () => {
       expect(
-        hasComposerDependencyInstalled(
-          { packages: [{ name: 'symfony/flex', version: '1.17.1' }] },
-          'symfony/console'
-        )
-      ).toBeFalse();
-    });
-
-    it('ignores a dev dependency when requested', () => {
-      expect(
-        hasComposerDependencyInstalled(
-          { 'packages-dev': [{ name: 'symfony/flex', version: '1.17.1' }] },
-          'symfony/flex'
-        )
-      ).toBeFalse();
-    });
-
-    it('detects a dev dependency when requested', () => {
-      expect(
-        hasComposerDependencyInstalled(
-          { 'packages-dev': [{ name: 'symfony/flex', version: '1.17.1' }] },
-          'symfony/flex',
-          true
-        )
+        requireComposerDependencyInstallation({
+          'packages-dev': [{ name: 'symfony/flex', version: '1.17.1' }],
+        })
       ).toBeTrue();
+    });
+
+    it('returns false when symfony/flex has not been installed', () => {
+      expect(
+        requireComposerDependencyInstallation({
+          packages: [{ name: 'symfony/console', version: '5.4.0' }],
+        })
+      ).toBeFalse();
     });
   });
 });

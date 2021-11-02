@@ -8,6 +8,8 @@ import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
 
+const depRequireInstall = new Set(['symfony/flex']);
+
 export function getComposerArguments(config: UpdateArtifactsConfig): string {
   let args = '';
 
@@ -83,18 +85,12 @@ export function getPhpConstraint(constraints: Record<string, string>): string {
   return null;
 }
 
-export function hasComposerDependencyInstalled(
-  lock: ComposerLock,
-  dependency: string,
-  includeDev?: boolean
+export function requireComposerDependencyInstallation(
+  lock: ComposerLock
 ): boolean {
-  if (lock.packages?.some((p) => p.name === dependency)) {
-    return true;
-  }
-
   return (
-    includeDev === true &&
-    lock['packages-dev']?.some((p) => p.name === dependency) === true
+    lock.packages?.some((p) => depRequireInstall.has(p.name)) === true ||
+    lock['packages-dev']?.some((p) => depRequireInstall.has(p.name)) === true
   );
 }
 

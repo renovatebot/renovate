@@ -27,7 +27,7 @@ import {
   getComposerArguments,
   getComposerConstraint,
   getPhpConstraint,
-  hasComposerDependencyInstalled,
+  requireComposerDependencyInstallation,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -119,15 +119,10 @@ export async function updateArtifacts({
       },
     };
 
-    // Determine whether Symfony Flex has been installed
-    const requiresInstall = hasComposerDependencyInstalled(
-      existingLockFile,
-      'symfony/flex',
-      true
-    );
-
     const commands: string[] = [];
-    if (requiresInstall) {
+
+    // Determine whether install is required before update
+    if (requireComposerDependencyInstallation(existingLockFile)) {
       const preCmd = 'composer';
       const preArgs = 'install' + getComposerArguments(config);
       logger.debug({ preCmd, preArgs }, 'composer pre-update command');
