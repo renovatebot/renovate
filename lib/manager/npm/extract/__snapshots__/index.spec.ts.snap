@@ -377,6 +377,39 @@ Object {
 }
 `;
 
+exports[`manager/npm/extract/index .extractPackageFile() extracts packageManager 1`] = `
+Object {
+  "constraints": Object {
+    "yarn": "3.0.0",
+  },
+  "deps": Array [
+    Object {
+      "commitMessageTopic": "Yarn",
+      "currentValue": "3.0.0",
+      "datasource": "npm",
+      "depName": "yarn",
+      "depType": "packageManager",
+      "prettyDepType": "packageManager",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaPackages": undefined,
+  "managerData": Object {
+    "lernaJsonFile": undefined,
+    "yarnZeroInstall": false,
+  },
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageFileVersion": undefined,
+  "packageJsonName": undefined,
+  "packageJsonType": "app",
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+}
+`;
+
 exports[`manager/npm/extract/index .extractPackageFile() extracts volta 1`] = `
 Object {
   "constraints": Object {
