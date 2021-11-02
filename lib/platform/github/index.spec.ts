@@ -2224,7 +2224,7 @@ describe('platform/github/index', () => {
       const scope = httpMock
         .scope('https://github.company.com')
         .head('/')
-        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .reply(200, '', { 'x-github-enterprise-version': '3.1.7' })
         .get('/user')
         .reply(200, {
           login: 'renovate-bot',
