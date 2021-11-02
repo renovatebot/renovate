@@ -111,6 +111,9 @@ describe('platform/github/index', () => {
     it('should support custom endpoint', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+
         .get('/user')
         .reply(200, {
           login: 'renovate-bot',
@@ -2220,6 +2223,8 @@ describe('platform/github/index', () => {
     it('returns not-updated pr body for GHE', async () => {
       const scope = httpMock
         .scope('https://github.company.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.1.7' })
         .get('/user')
         .reply(200, {
           login: 'renovate-bot',
@@ -2407,9 +2412,9 @@ describe('platform/github/index', () => {
     });
     it('returns file content in json5 format', async () => {
       const json5Data = `
-        { 
+        {
           // json5 comment
-          foo: 'bar' 
+          foo: 'bar'
         }
       `;
       const scope = httpMock.scope(githubApiHost);

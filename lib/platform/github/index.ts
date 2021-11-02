@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
+import { valid as semverValid } from 'semver';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -97,6 +98,19 @@ export async function initPlatform({
   } else {
     logger.debug('Using default github endpoint: ' + defaults.endpoint);
   }
+
+  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
+  if (config.isGhe) {
+    const gheHeaderKey = 'x-github-enterprise-version';
+    const gheQueryRes = await githubApi.head('/', { throwHttpErrors: false });
+    const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
+    const [, gheVersion] =
+      Object.entries(gheHeaders).find(
+        ([k]) => k.toLowerCase() === gheHeaderKey
+      ) ?? [];
+    config.gheVersion = semverValid(gheVersion) ?? null;
+  }
+
   let userDetails: UserDetails;
   let renovateUsername: string;
   if (username) {
@@ -187,7 +201,13 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { repository, cloneSubmodules, ignorePrAuthor } as any;
+  config = {
+    repository,
+    cloneSubmodules,
+    ignorePrAuthor,
+    isGhe: config.isGhe,
+    gheVersion: config.gheVersion,
+  } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -199,14 +219,19 @@ export async function initRepo({
     hostType: PlatformId.Github,
     url: defaults.endpoint,
   });
-  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
+    let infoQuery = repoInfoQuery;
+
+    if (config.isGhe) {
+      infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
+    }
+
     const res = await githubApi.requestGraphql<{
       repository: GhRepo;
-    }>(repoInfoQuery, {
+    }>(infoQuery, {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
@@ -1418,7 +1443,7 @@ async function tryPrAutomerge(
     return;
   }
 
-  if (!config.autoMergeAllowed) {
+  if (config.autoMergeAllowed === false) {
     logger.debug(
       { prNumber },
       'GitHub-native automerge: not enabled in repo settings'
