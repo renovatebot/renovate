@@ -6,6 +6,7 @@ import { regEx } from '../../util/regex';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
+const variableMarker = '$';
 const variableOpen = '${';
 const variableClose = '}';
 const variableDefaultValueSplit = ':-';
@@ -54,6 +55,13 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   } else {
     currentValue = depTagSplit.pop();
     depName = depTagSplit.join(':');
+  }
+
+  if (currentValue && currentValue.indexOf(variableMarker) !== -1) {
+    // If tag contains a variable, e.g. "5.0${VERSION_SUFFIX}", we do not support this.
+    return {
+      skipReason: SkipReason.ContainsVariable,
+    };
   }
 
   if (isVariable) {
