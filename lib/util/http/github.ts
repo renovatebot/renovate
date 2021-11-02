@@ -284,6 +284,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       );
       result = res?.body;
     } catch (err) {
+      logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
       if (err instanceof ExternalHostError) {
         const gotError = err.err as GotLegacyError;
         const statusCode = gotError?.statusCode;
