@@ -250,7 +250,6 @@ export async function initRepo({
       logger.debug('Could not find allowed merge methods for repo');
     }
     config.autoMergeAllowed = repo.autoMergeAllowed;
-    config.hasIssuesEnabled = repo.hasIssuesEnabled;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -1010,10 +1009,6 @@ async function getIssues(): Promise<Issue[]> {
 }
 
 export async function getIssueList(): Promise<Issue[]> {
-  // istanbul ignore if
-  if (config.hasIssuesEnabled === false) {
-    return [];
-  }
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
     config.issueList = await getIssues();
@@ -1025,10 +1020,6 @@ export async function getIssue(
   number: number,
   useCache = true
 ): Promise<Issue | null> {
-  // istanbul ignore if
-  if (config.hasIssuesEnabled === false) {
-    return null;
-  }
   try {
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
@@ -1077,13 +1068,6 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
-  // istanbul ignore if
-  if (config.hasIssuesEnabled === false) {
-    logger.info(
-      'Cannot ensure issue because issues are disabled in this repository'
-    );
-    return null;
-  }
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
@@ -1171,13 +1155,6 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
-  // istanbul ignore if
-  if (config.hasIssuesEnabled === false) {
-    logger.info(
-      'Cannot ensure issue because issues are disabled in this repository'
-    );
-    return;
-  }
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
