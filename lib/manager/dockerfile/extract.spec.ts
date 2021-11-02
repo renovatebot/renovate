@@ -647,14 +647,14 @@ Object {
       // eslint-disable-next-line no-template-curly-in-string
       const res3 = getDep('${REDIS_IMAGE:-redis@sha256:abcd}');
       expect(res3).toMatchInlineSnapshot(`
-        Object {
-          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-          "currentDigest": "sha256:abcd",
-          "datasource": "docker",
-          "depName": "redis",
-          "replaceString": "redis@sha256:abcd",
-        }
-      `);
+Object {
+  "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+  "currentDigest": "sha256:abcd",
+  "datasource": "docker",
+  "depName": "redis",
+  "replaceString": "redis@sha256:abcd",
+}
+`);
     });
 
     it('skips tag containing a variable', () => {
