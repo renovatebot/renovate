@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { getGlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -25,6 +24,7 @@ import type { AuthJson } from './types';
 import {
   composerVersioningId,
   extractContraints,
+  getComposerArguments,
   getComposerConstraint,
   getPhpConstraint,
 } from './utils';
@@ -129,19 +129,7 @@ export async function updateArtifacts({
           'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
         ).trim() + ' --with-dependencies';
     }
-    if (config.composerIgnorePlatformReqs) {
-      if (config.composerIgnorePlatformReqs.length === 0) {
-        args += ' --ignore-platform-reqs';
-      } else {
-        config.composerIgnorePlatformReqs.forEach((req) => {
-          args += ' --ignore-platform-req ' + quote(req);
-        });
-      }
-    }
-    args += ' --no-ansi --no-interaction';
-    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
-      args += ' --no-scripts --no-autoloader --no-plugins';
-    }
+    args += getComposerArguments(config);
     logger.debug({ cmd, args }, 'composer command');
     await exec(`${cmd} ${args}`, execOptions);
     const status = await getRepoStatus();

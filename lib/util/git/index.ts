@@ -487,8 +487,8 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     ]);
     const isStale = !branches.all.map(localName).includes(branchName);
     logger.debug(
-      { isStale, branches, currentBranch, currentBranchSha },
-      `IsBranchStale=${isStale}`
+      { isStale, currentBranch, currentBranchSha },
+      `isBranchStale=${isStale}`
     );
     return isStale;
   } catch (err) /* istanbul ignore next */ {
