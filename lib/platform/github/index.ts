@@ -228,8 +228,8 @@ export async function initRepo({
     if (
       config.isGhe &&
       (!config.gheVersion ||
-        semverSatisfies(config.gheVersion, '>=3.1.0 <3.1.8') ||
-        semverSatisfies(config.gheVersion, '>=3.0.0 <3.0.16'))
+        semverSatisfies(config.gheVersion, '>=3.0.0 <3.0.16') ||
+        semverSatisfies(config.gheVersion, '>=3.1.0 <3.1.8'))
     ) {
       // Changelog: https://docs.github.com/en/github-ae@latest/graphql/overview/changelog?query=#schema-changes-for-2021-08-03
       // Release schedule: https://enterprise.github.com/releases
