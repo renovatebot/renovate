@@ -1,6 +1,11 @@
 import { mocked } from '../../../test/util';
+import { setGlobalConfig } from '../../config/global';
 import * as _datasource from '../../datasource';
-import { extractContraints, getComposerConstraint } from './utils';
+import {
+  extractContraints,
+  getComposerArguments,
+  getComposerConstraint,
+} from './utils';
 
 jest.mock('../../../lib/datasource');
 
@@ -83,6 +88,63 @@ describe('manager/composer/utils', () => {
 
     it('fallback to 1.*', () => {
       expect(extractContraints({}, {})).toEqual({ composer: '1.*' });
+    });
+  });
+
+  describe('getComposerArguments', () => {
+    afterEach(() => {
+      setGlobalConfig();
+    });
+
+    it('disables scripts and plugins by default', () => {
+      expect(getComposerArguments({})).toEqual(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
+    });
+    it('disables platform requirements', () => {
+      expect(
+        getComposerArguments({
+          composerIgnorePlatformReqs: [],
+        })
+      ).toEqual(
+        ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
+    });
+    it('disables single platform requirement', () => {
+      expect(
+        getComposerArguments({
+          composerIgnorePlatformReqs: ['ext-intl'],
+        })
+      ).toEqual(
+        ' --ignore-platform-req ext-intl --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
+    });
+    it('disables multiple platform requirement', () => {
+      expect(
+        getComposerArguments({
+          composerIgnorePlatformReqs: ['ext-intl', 'ext-icu'],
+        })
+      ).toEqual(
+        ' --ignore-platform-req ext-intl --ignore-platform-req ext-icu --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
+    });
+    it('allows scripts/plugins when configured', () => {
+      setGlobalConfig({
+        allowScripts: true,
+      });
+      expect(getComposerArguments({})).toEqual(' --no-ansi --no-interaction');
+    });
+    it('disables scripts/plugins when configured locally', () => {
+      setGlobalConfig({
+        allowScripts: true,
+      });
+      expect(
+        getComposerArguments({
+          ignoreScripts: true,
+        })
+      ).toEqual(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
     });
   });
 });
