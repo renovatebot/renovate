@@ -227,6 +227,7 @@ export async function initRepo({
 
     if (config.isGhe) {
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
+      infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
 
     const res = await githubApi.requestGraphql<{
