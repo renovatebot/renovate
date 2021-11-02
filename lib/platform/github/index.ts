@@ -102,7 +102,7 @@ export async function initPlatform({
   config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   if (config.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
-    const gheQueryRes = await githubApi.head('/');
+    const gheQueryRes = await githubApi.head('/', { throwHttpErrors: false });
     const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
