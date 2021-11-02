@@ -83,7 +83,8 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | Local with preset name with a tag          | `local>abc/foo:xyz#1.5.4`      | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 | Local with preset name and path with a tag | `local>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
 
-Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported.
+Note that you can't combine the path and sub-preset syntaxes.
+This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
 One workaround is to use distinct files instead of sub-presets.
 
 ## Example configs
