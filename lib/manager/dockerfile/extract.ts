@@ -6,13 +6,43 @@ import { regEx } from '../../util/regex';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
 
+const variableOpen = '${';
+const variableClose = '}';
+const variableDefaultValueSplit = ':-';
+
 export function splitImageParts(currentFrom: string): PackageDependency {
-  if (currentFrom.includes('$')) {
-    return {
-      skipReason: SkipReason.ContainsVariable,
-    };
+  // Check if we have a variable in format of "${VARIABLE:-<image>:<defaultVal>@<digest>}"
+  // If so, remove everything except the image, defaultVal and digest.
+  let isVariable = false;
+  let cleanedCurrentFrom: string = currentFrom;
+  if (
+    currentFrom.startsWith(variableOpen) &&
+    currentFrom.endsWith(variableClose)
+  ) {
+    isVariable = true;
+
+    // If the variable contains exactly one $ and has the default value, we consider it as a valid dependency;
+    // otherwise skip it.
+    if (
+      currentFrom.split('$').length !== 2 ||
+      currentFrom.indexOf(variableDefaultValueSplit) === -1
+    ) {
+      return {
+        skipReason: SkipReason.ContainsVariable,
+      };
+    }
+
+    cleanedCurrentFrom = currentFrom.substr(
+      variableOpen.length,
+      currentFrom.length - (variableClose.length + 2)
+    );
+    cleanedCurrentFrom = cleanedCurrentFrom.substr(
+      cleanedCurrentFrom.indexOf(variableDefaultValueSplit) +
+        variableDefaultValueSplit.length
+    );
   }
-  const [currentDepTag, currentDigest] = currentFrom.split('@');
+
+  const [currentDepTag, currentDigest] = cleanedCurrentFrom.split('@');
   const depTagSplit = currentDepTag.split(':');
   let depName: string;
   let currentValue: string;
@@ -25,6 +55,29 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     currentValue = depTagSplit.pop();
     depName = depTagSplit.join(':');
   }
+
+  if (isVariable) {
+    // If we have the variable and it contains the default value, we need to return
+    // it as a valid dependency.
+
+    const dep = {
+      depName,
+      currentValue,
+      currentDigest,
+      replaceString: cleanedCurrentFrom,
+    };
+
+    if (!dep.currentValue) {
+      delete dep.currentValue;
+    }
+
+    if (!dep.currentDigest) {
+      delete dep.currentDigest;
+    }
+
+    return dep;
+  }
+
   const dep: PackageDependency = {
     depName,
     currentValue,
@@ -46,7 +99,9 @@ export function getDep(
   }
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
-    dep.replaceString = currentFrom;
+    if (!dep.replaceString) {
+      dep.replaceString = currentFrom;
+    }
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }

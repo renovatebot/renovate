@@ -78,10 +78,10 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | name                                       | example use                    | preset    | resolves as                          | filename        | Git tag        |
 | ------------------------------------------ | ------------------------------ | --------- | ------------------------------------ | --------------- | -------------- |
 | Local default                              | `local>abc/foo`                | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
-| Local with preset path                     | `local>abc/foo:path/xyz`       | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
+| Local with preset path                     | `local>abc/foo:path/xyz`       | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
 | Local default with a tag                   | `local>abc/foo#1.5.4`          | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.5.4`        |
-| Local with preset name with a tag          | `local>abc/foo:xyz#1.5.4`      | `default` | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
-| Local with preset name and path with a tag | `local>abc/foo:path/xyz#1.5.4` | `default` | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| Local with preset name with a tag          | `local>abc/foo:xyz#1.5.4`      | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| Local with preset name and path with a tag | `local>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
 
 Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported.
 One workaround is to use distinct files instead of sub-presets.
