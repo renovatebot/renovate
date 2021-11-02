@@ -812,7 +812,7 @@ export async function commitFiles(
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
-    return commit ? commit.slice(0, 7) : 'unknown';
+    return commit?.slice(0, 7) ?? 'unknown';
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (err.message.includes(`'refs/heads/renovate' exists`)) {
