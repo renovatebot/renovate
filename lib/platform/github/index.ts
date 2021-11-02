@@ -1713,25 +1713,24 @@ export async function pushFiles({
   }));
   const fileChanges = { additions };
 
-  let result = null;
-  try {
-    const variables = {
-      repo: config.repository,
-      repositoryId: config.repositoryId,
-      branchName: `refs/heads/${branchName}`,
-      oid: config.defaultBranchOid,
-      fileChanges,
-      message,
-    };
+  const variables = {
+    repo: config.repository,
+    repositoryId: config.repositoryId,
+    branchName: `refs/heads/${branchName}`,
+    oid: config.defaultBranchOid,
+    fileChanges,
+    message,
+  };
 
-    const commitRes = await githubApi.requestGraphql<{
-      createCommitOnBranch: { commit: { oid: string } };
-    }>(commitFilesMutation, { variables });
+  const { data, errors } = await githubApi.requestGraphql<{
+    createCommitOnBranch: { commit: { oid: string } };
+  }>(commitFilesMutation, { variables });
 
-    result = commitRes.data?.createCommitOnBranch?.commit?.oid;
-  } catch (err) {
-    logger.debug({ err });
+  if (errors) {
+    const errorMessage = 'GraphQL commit error';
+    logger.debug({ branchName, errors }, errorMessage);
+    throw new Error(errorMessage);
   }
 
-  return result ?? null;
+  return data?.createCommitOnBranch?.commit?.oid;
 }
