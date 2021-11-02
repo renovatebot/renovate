@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { getGlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -25,6 +24,7 @@ import type { AuthJson, ComposerLock } from './types';
 import {
   composerVersioningId,
   extractContraints,
+  getComposerArguments,
   getComposerConstraint,
   getPhpConstraint,
 } from './utils';

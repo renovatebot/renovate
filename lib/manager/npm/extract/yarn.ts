@@ -44,7 +44,12 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
   const conf = parseSyml(yarnrcYml);
-  const paths = [conf.cacheFolder || './.yarn/cache', '.pnp.cjs', '.pnp.js'];
+  const paths = [
+    conf.cacheFolder || './.yarn/cache',
+    '.pnp.cjs',
+    '.pnp.js',
+    '.pnp.loader.mjs',
+  ];
   if (miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false) {
     paths.push(conf.pnpDataPath || './.pnp.data.json');
   }

@@ -16,6 +16,11 @@ Object {
       "depName": "some-other-package",
     },
     Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "sphinx",
+    },
+    Object {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
@@ -292,6 +297,31 @@ Object {
   ],
   "registryUrls": Array [
     "https://artifactory.company.com/artifactory/api/pypi/python/simple",
+  ],
+}
+`;
+
+exports[`manager/pip_requirements/extract extractPackageFile() should handle hashes 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "==1.9.1",
+      "currentVersion": "1.9.1",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    Object {
+      "currentValue": "==0.22.1",
+      "currentVersion": "0.22.1",
+      "datasource": "pypi",
+      "depName": "bgg",
+    },
+    Object {
+      "currentValue": "==2016.1.8",
+      "currentVersion": "2016.1.8",
+      "datasource": "pypi",
+      "depName": "html2text",
+    },
   ],
 }
 `;
