@@ -53,6 +53,7 @@ export function extractPackageFile(
   }
   registryUrls = registryUrls.concat(extraUrls);
 
+  const pkgRegex = regEx(`^(${packagePattern})$`);
   const pkgValRegex = regEx(`^${dependencyPattern}$`);
   const deps = content
     .split('\n')
@@ -63,7 +64,8 @@ export function extractPackageFile(
         dep.skipReason = SkipReason.Ignored;
       }
       const lineNoHashes = line.split(' \\')[0];
-      const matches = pkgValRegex.exec(lineNoHashes);
+      const matches =
+        pkgValRegex.exec(lineNoHashes) || pkgRegex.exec(lineNoHashes);
       if (!matches) {
         return null;
       }

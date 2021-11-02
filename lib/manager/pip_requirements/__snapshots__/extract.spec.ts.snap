@@ -16,6 +16,11 @@ Object {
       "depName": "some-other-package",
     },
     Object {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "sphinx",
+    },
+    Object {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
