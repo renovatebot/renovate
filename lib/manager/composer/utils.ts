@@ -83,6 +83,21 @@ export function getPhpConstraint(constraints: Record<string, string>): string {
   return null;
 }
 
+export function hasComposerDependencyInstalled(
+  lock: ComposerLock,
+  dependency: string,
+  includeDev?: boolean
+): boolean {
+  if (lock.packages?.some((p) => p.name === dependency)) {
+    return true;
+  }
+
+  return (
+    includeDev === true &&
+    lock['packages-dev']?.some((p) => p.name === dependency) === true
+  );
+}
+
 export function extractContraints(
   composerJson: ComposerConfig,
   lockParsed: ComposerLock

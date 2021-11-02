@@ -5,6 +5,7 @@ import {
   extractContraints,
   getComposerArguments,
   getComposerConstraint,
+  hasComposerDependencyInstalled,
 } from './utils';
 
 jest.mock('../../../lib/datasource');
@@ -167,6 +168,45 @@ describe('manager/composer/utils', () => {
       ).toEqual(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
+    });
+  });
+
+  describe('hasComposerDependencyInstalled', () => {
+    it('detects a dependency', () => {
+      expect(
+        hasComposerDependencyInstalled(
+          { packages: [{ name: 'symfony/flex', version: '1.17.1' }] },
+          'symfony/flex'
+        )
+      ).toBeTrue();
+    });
+
+    it('does not detect a dependency when not installed', () => {
+      expect(
+        hasComposerDependencyInstalled(
+          { packages: [{ name: 'symfony/flex', version: '1.17.1' }] },
+          'symfony/console'
+        )
+      ).toBeFalse();
+    });
+
+    it('ignores a dev dependency when requested', () => {
+      expect(
+        hasComposerDependencyInstalled(
+          { 'packages-dev': [{ name: 'symfony/flex', version: '1.17.1' }] },
+          'symfony/flex'
+        )
+      ).toBeFalse();
+    });
+
+    it('detects a dev dependency when requested', () => {
+      expect(
+        hasComposerDependencyInstalled(
+          { 'packages-dev': [{ name: 'symfony/flex', version: '1.17.1' }] },
+          'symfony/flex',
+          true
+        )
+      ).toBeTrue();
     });
   });
 });

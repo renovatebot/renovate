@@ -27,6 +27,7 @@ import {
   getComposerArguments,
   getComposerConstraint,
   getPhpConstraint,
+  hasComposerDependencyInstalled,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -119,12 +120,14 @@ export async function updateArtifacts({
     };
 
     // Determine whether Symfony Flex has been installed
-    const hasSymfonyFlex =
-      existingLockFile.packages?.some((p) => p.name === 'symfony/flex') ||
-      existingLockFile['packages-dev']?.some((p) => p.name === 'symfony/flex');
+    const requiresInstall = hasComposerDependencyInstalled(
+      existingLockFile,
+      'symfony/flex',
+      true
+    );
 
     const commands: string[] = [];
-    if (hasSymfonyFlex) {
+    if (requiresInstall) {
       const preCmd = 'composer';
       const preArgs = 'install' + getComposerArguments(config);
       logger.debug({ preCmd, preArgs }, 'composer pre-update command');
