@@ -271,7 +271,7 @@
     "semantic-release": "18.0.0",
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.1",
-    "tmp-promise": "3.0.2",
+    "tmp-promise": "3.0.3",
     "ts-jest": "27.0.7",
     "ts-node": "10.4.0",
     "type-fest": "2.5.1",
