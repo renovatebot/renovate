@@ -226,7 +226,10 @@ export async function initRepo({
     let infoQuery = repoInfoQuery;
     if (
       config.isGhe &&
-      (!config.gheVersion || semverLessThan(config.gheVersion, '3.1.8'))
+      (!config.gheVersion ||
+        (config.gheVersion.startsWith('3.1') &&
+          semverLessThan(config.gheVersion, '3.1.8')) ||
+        semverLessThan(config.gheVersion, '3.0.16'))
     ) {
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
     }
