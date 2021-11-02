@@ -7,9 +7,8 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
       postUpdateOptions: ['test'],
     });
 
-    expect(migratedConfig.gomodTidy).toBeUndefined();
-    expect(migratedConfig.postUpdateOptions).toContain('test');
-    expect(migratedConfig.postUpdateOptions).toContain('gomodTidy');
+    expect(migratedConfig).not.toHaveProperty('gomodTidy');
+    expect(migratedConfig.postUpdateOptions).toEqual(['test', 'gomodTidy']);
   });
 
   it('should handle case when postUpdateOptions is not defined ', () => {
@@ -17,8 +16,8 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
       gomodTidy: true,
     });
 
-    expect(migratedConfig.gomodTidy).toBeUndefined();
-    expect(migratedConfig.postUpdateOptions).toContain('gomodTidy');
+    expect(migratedConfig).not.toHaveProperty('gomodTidy');
+    expect(migratedConfig.postUpdateOptions).toEqual(['gomodTidy']);
   });
 
   it('should only remove when false', () => {
@@ -26,7 +25,7 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
       gomodTidy: false,
     });
 
-    expect(migratedConfig.gomodTidy).toBeUndefined();
-    expect(migratedConfig.postUpdateOptions).toBeUndefined();
+    expect(migratedConfig).not.toHaveProperty('gomodTidy');
+    expect(migratedConfig).not.toHaveProperty('postUpdateOptions');
   });
 });

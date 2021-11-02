@@ -9,7 +9,7 @@ describe('config/migrations/migrations-service', () => {
       };
 
       const migratedConfig = MigrationsService.run(originalConfig);
-      expect(migratedConfig[property]).toBeUndefined();
+      expect(migratedConfig).not.toHaveProperty(property);
     }
   });
 
@@ -23,7 +23,7 @@ describe('config/migrations/migrations-service', () => {
       };
 
       const migratedConfig = MigrationsService.run(originalConfig);
-      expect(migratedConfig[oldPropertyName]).toBeUndefined();
+      expect(migratedConfig).not.toHaveProperty(oldPropertyName);
       expect(migratedConfig[newPropertyName]).toBe('test');
     }
   });

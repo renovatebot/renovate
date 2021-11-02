@@ -6,7 +6,7 @@ describe('config/migrations/custom/required-status-checks-migration', () => {
       requiredStatusChecks: null,
     });
 
-    expect(migratedConfig.requiredStatusChecks).toBeUndefined();
+    expect(migratedConfig).not.toHaveProperty('requiredStatusChecks');
     expect(migratedConfig.ignoreTests).toBeTrue();
   });
 });
