@@ -49,7 +49,7 @@ export default function extractPackageFile(
             let dep: PackageDependency = {};
             const depName = matches.groups.name;
             const currentValue = matches.groups.version.trim();
-            // conan uses @_/_ as a place holder for no userChannel
+            // conan uses @_/_ as a placeholder for no userChannel
             const userAndChannel = matches.groups.userChannel
               ? matches.groups.userAndChannel
               : '@_/_';
