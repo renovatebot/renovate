@@ -206,7 +206,6 @@ export async function initRepo({
   let repo: GhRepo;
   try {
     let infoQuery = repoInfoQuery;
-    // istanbul ignore if
     if (config.isGhe) {
       const gheHeaderKey = 'x-github-enterprise-version';
       const gheQueryRes = await githubApi.head('/');
