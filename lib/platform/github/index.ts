@@ -74,13 +74,35 @@ const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig = {} as any;
 
-const platformConfig = {
+interface PlatformConfig {
+  hostType: string;
+  endpoint: string;
+  isGhe?: boolean;
+  gheVersion?: string | null;
+}
+
+const platformConfig: PlatformConfig = {
   hostType: PlatformId.Github,
   endpoint: 'https://api.github.com/',
 };
 
 const escapeHash = (input: string): string =>
   input ? input.replace(regEx(/#/g), '%23') : input;
+
+export async function detectPlatformConfig(): Promise<void> {
+  platformConfig.isGhe =
+    URL.parse(platformConfig.endpoint).host !== 'api.github.com';
+  if (platformConfig.isGhe) {
+    const gheHeaderKey = 'x-github-enterprise-version';
+    const gheQueryRes = await githubApi.head('/', { throwHttpErrors: false });
+    const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
+    const [, gheVersion] =
+      Object.entries(gheHeaders).find(
+        ([k]) => k.toLowerCase() === gheHeaderKey
+      ) ?? [];
+    platformConfig.gheVersion = semverValid(gheVersion) ?? null;
+  }
+}
 
 export async function initPlatform({
   endpoint,
@@ -99,17 +121,7 @@ export async function initPlatform({
     logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
 
-  config.isGhe = URL.parse(platformConfig.endpoint).host !== 'api.github.com';
-  if (config.isGhe) {
-    const gheHeaderKey = 'x-github-enterprise-version';
-    const gheQueryRes = await githubApi.head('/', { throwHttpErrors: false });
-    const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
-    const [, gheVersion] =
-      Object.entries(gheHeaders).find(
-        ([k]) => k.toLowerCase() === gheHeaderKey
-      ) ?? [];
-    config.gheVersion = semverValid(gheVersion) ?? null;
-  }
+  await detectPlatformConfig();
 
   let userDetails: UserDetails;
   let renovateUsername: string;
@@ -205,8 +217,6 @@ export async function initRepo({
     repository,
     cloneSubmodules,
     ignorePrAuthor,
-    isGhe: config.isGhe,
-    gheVersion: config.gheVersion,
   } as any;
   // istanbul ignore if
   if (endpoint) {
@@ -225,7 +235,7 @@ export async function initRepo({
   try {
     let infoQuery = repoInfoQuery;
 
-    if (config.isGhe) {
+    if (platformConfig.isGhe) {
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
@@ -1653,7 +1663,7 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
-  if (config.isGhe) {
+  if (platformConfig.isGhe) {
     return smartTruncate(input, 60000);
   }
   const massagedInput = massageMarkdownLinks(input)
