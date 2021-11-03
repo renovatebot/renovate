@@ -83,12 +83,12 @@ const platformConfig: PlatformConfig = {
 const escapeHash = (input: string): string =>
   input ? input.replace(regEx(/#/g), '%23') : input;
 
-export async function detectGhe(): Promise<void> {
+export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe =
     URL.parse(platformConfig.endpoint).host !== 'api.github.com';
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
-    const gheQueryRes = await githubApi.head('/', { throwHttpErrors: false });
+    const gheQueryRes = await githubApi.headJson('/', { token });
     const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
@@ -115,7 +115,7 @@ export async function initPlatform({
     logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
 
-  await detectGhe();
+  await detectGhe(token);
 
   let userDetails: UserDetails;
   let renovateUsername: string;
