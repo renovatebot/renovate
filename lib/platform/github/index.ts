@@ -74,7 +74,7 @@ const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig = {} as any;
 
-const defaults = {
+const platformConfig = {
   hostType: PlatformId.Github,
   endpoint: 'https://api.github.com/',
 };
@@ -93,13 +93,13 @@ export async function initPlatform({
   }
 
   if (endpoint) {
-    defaults.endpoint = ensureTrailingSlash(endpoint);
-    githubHttp.setBaseUrl(defaults.endpoint);
+    platformConfig.endpoint = ensureTrailingSlash(endpoint);
+    githubHttp.setBaseUrl(platformConfig.endpoint);
   } else {
-    logger.debug('Using default github endpoint: ' + defaults.endpoint);
+    logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
 
-  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
+  config.isGhe = URL.parse(platformConfig.endpoint).host !== 'api.github.com';
   if (config.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.head('/', { throwHttpErrors: false });
@@ -116,25 +116,25 @@ export async function initPlatform({
   if (username) {
     renovateUsername = username;
   } else {
-    userDetails = await getUserDetails(defaults.endpoint, token);
+    userDetails = await getUserDetails(platformConfig.endpoint, token);
     renovateUsername = userDetails.username;
   }
   let discoveredGitAuthor: string;
   if (!gitAuthor) {
-    userDetails = await getUserDetails(defaults.endpoint, token);
-    const userEmail = await getUserEmail(defaults.endpoint, token);
+    userDetails = await getUserDetails(platformConfig.endpoint, token);
+    const userEmail = await getUserEmail(platformConfig.endpoint, token);
     if (userEmail) {
       discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
     }
   }
   logger.debug('Authenticated as GitHub user: ' + renovateUsername);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
+  const platformResult: PlatformResult = {
+    endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
 
-  return platformConfig;
+  return platformResult;
 }
 
 // Get all repositories that the user has access to
@@ -212,12 +212,12 @@ export async function initRepo({
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
     logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
-    defaults.endpoint = endpoint;
+    platformConfig.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
     hostType: PlatformId.Github,
-    url: defaults.endpoint,
+    url: platformConfig.endpoint,
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
@@ -433,7 +433,7 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = URL.parse(defaults.endpoint);
+  const parsedEndpoint = URL.parse(platformConfig.endpoint);
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
