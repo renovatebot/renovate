@@ -3,7 +3,7 @@ import { lang, lexer, query as q } from '@renovatebot/parser-utils';
 import { PypiDatasource } from '../../datasource/pypi';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
-import { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 interface ManagerData {
   lineNumber: number;
