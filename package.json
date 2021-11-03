@@ -123,7 +123,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ecr": "3.25.0",
-    "@breejs/later": "4.0.2",
+    "@breejs/later": "4.1.0",
     "@iarna/toml": "2.2.5",
     "@renovate/pep440": "1.0.0",
     "@renovatebot/ruby-semver": "1.0.0",
