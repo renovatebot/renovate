@@ -4543,10 +4543,10 @@ grapheme-splitter@^1.0.4:
   resolved "https://registry.yarnpkg.com/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
   integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
 
-graphql@15.7.0:
-  version "15.7.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.7.0.tgz#caace26caf9b875b80982c45db58765d8a060e3e"
-  integrity sha512-1jvUsS5mSzcgXLTQNQyrP7eKkBZW+HUnmx2LYSnfvkyseVpij8wwO/sFBGgxbkZ+zzFwYQxrHsOana5oMXmMxg==
+graphql@15.7.1:
+  version "15.7.1"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.7.1.tgz#c821a1741e04e2bc2c91e138f34c06a86c0464f1"
+  integrity sha512-x34S6gC0/peBZnlK60zCJox/d45A7p6At9oN9EPA3qhoIAlR4LNZmXRLkICBckwwTMJzVdA8cx3QIQZMOl606A==
 
 handlebars@4.7.7, handlebars@^4.7.6:
   version "4.7.7"
@@ -8909,10 +8909,10 @@ type-detect@4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.5.1.tgz#17ba4f36a6abfabf0a92005d045dca77564607b0"
-  integrity sha512-JDcsxbLR6Z6OcL7TnGAAAGQrY4g7Q4EEALMT4Kp6FQuIc0JLQvOF3l7ejFvx8o5GmLlfMseTWUL++sYFP+o8kw==
+type-fest@2.5.2:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.5.2.tgz#d6a5247b8019716b300d9023fa7b1b02016dd864"
+  integrity sha512-WMbytmAs5PUTqwGJRE+WoRrD2S0bYFtHX8k4Y/1l18CG5kqA3keJud9pPQ/r30FE9n8XRFCXF9BbccHIZzRYJw==
 
 type-fest@^0.13.1:
   version "0.13.1"
