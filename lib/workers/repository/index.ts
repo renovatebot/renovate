@@ -1,6 +1,5 @@
 import fs from 'fs-extra';
 import { getGlobalConfig, setGlobalConfig } from '../../config/global';
-import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
@@ -31,7 +30,7 @@ export async function renovateRepository(
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = setGlobalConfig(applySecretsToConfig(repoConfig));
+  let config = setGlobalConfig(repoConfig);
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
