@@ -10,9 +10,10 @@ import {
 } from '../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-async function helmRepoAdd(alias: string, url: string): Promise<void> {
-  const cmd = `helm repo add ${alias} ${url}`;
-
+async function helmCommands(
+  manifestPath: string,
+  aliases?: Record<string, string>
+): Promise<void> {
   const execOptions: ExecOptions = {
     docker: {
       image: 'helm',
@@ -21,20 +22,15 @@ async function helmRepoAdd(alias: string, url: string): Promise<void> {
       HELM_EXPERIMENTAL_OCI: '1',
     },
   };
-  await exec(cmd, execOptions);
-}
+  const cmd = [
+    `helm dependency update ${quote(getSubDirectory(manifestPath))}`,
+  ];
 
-async function helmUpdate(manifestPath: string): Promise<void> {
-  const cmd = `helm dependency update ${quote(getSubDirectory(manifestPath))}`;
-
-  const execOptions: ExecOptions = {
-    docker: {
-      image: 'helm',
-    },
-    extraEnv: {
-      HELM_EXPERIMENTAL_OCI: '1',
-    },
-  };
+  if (aliases) {
+    Object.entries(aliases).forEach(([alias, url]) =>
+      cmd.push(`helm repo add ${quote(alias)} ${quote(url)}`)
+    );
+  }
   await exec(cmd, execOptions);
 }
 
@@ -63,14 +59,9 @@ export async function updateArtifacts({
     return null;
   }
   try {
-    if (config.aliases) {
-      const aliases = Object.entries(config.aliases);
-      await Promise.all(aliases.map(([alias, url]) => helmRepoAdd(alias, url)));
-    }
-
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    await helmUpdate(packageFileName);
+    await helmCommands(packageFileName, config.aliases);
     logger.debug('Returning updated Chart.lock');
     const newHelmLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newHelmLockContent) {
