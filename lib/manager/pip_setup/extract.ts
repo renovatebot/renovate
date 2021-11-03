@@ -3,7 +3,7 @@ import { lang, lexer, query as q } from '@renovatebot/parser-utils';
 import { PypiDatasource } from '../../datasource/pypi';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
-import { PackageDependency, PackageFile } from '../types';
+import { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 interface ManagerData {
   lineNumber: number;
@@ -13,6 +13,7 @@ type Context = PackageFile<ManagerData>;
 
 const python = lang.createLang('python');
 
+// Optimize regex memory usage when we don't need named groups
 function cleanupNamedGroups(regexSource: string): string {
   return regexSource.replace(/\(\?<\w+>/g, '(?:');
 }
@@ -29,6 +30,7 @@ const depPattern = [
 
 const extractRegex = regEx(depPattern);
 
+// Extract dependency string
 function depStringHandler(
   ctx: Context,
   token: lexer.StringValueToken
@@ -49,6 +51,8 @@ function depStringHandler(
   return { ...ctx, deps: [...ctx.deps, dep] };
 }
 
+// Add `skip-reason` for dependencies annotated
+// with "# renovate: ignore" comment
 function depSkipHandler(ctx: Context): Context {
   const dep = ctx.deps[ctx.deps.length - 1];
   const deps = ctx.deps.slice(0, -1);
@@ -70,7 +74,11 @@ const depString = q
 
 const query = q.alt(incompleteDepString, depString);
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  _packageFile: string,
+  _config: ExtractConfig
+): PackageFile | null {
   const res = python.query<Context>(content, query, { deps: [] });
   return res?.deps?.length ? res : null;
 }
