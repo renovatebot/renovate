@@ -72,7 +72,7 @@ async function readGradleReport(localDir: string): Promise<GradleProject[]> {
   try {
     return JSON.parse(contents);
   } catch (err) {
-    logger.error({ err }, 'Invalid JSON');
+    logger.error({ err }, 'Invalid Gradle extract JSON');
     return [];
   }
 }

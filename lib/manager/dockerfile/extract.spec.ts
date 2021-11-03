@@ -656,5 +656,18 @@ Object {
 }
 `);
     });
+
+    it('skips tag containing a variable', () => {
+      // eslint-disable-next-line no-template-curly-in-string
+      const res = getDep('mcr.microsoft.com/dotnet/sdk:5.0${IMAGESUFFIX}');
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "mcr.microsoft.com/dotnet/sdk:5.0\${IMAGESUFFIX}",
+          "skipReason": "contains-variable",
+        }
+      `);
+    });
   });
 });
