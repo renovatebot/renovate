@@ -2,7 +2,8 @@ import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import { lang, lexer, query as q } from '@renovatebot/parser-utils';
 import { PypiDatasource } from '../../datasource/pypi';
 import { SkipReason } from '../../types';
-import { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import { regEx } from '../../util/regex';
+import { PackageDependency, PackageFile } from '../types';
 
 interface ManagerData {
   lineNumber: number;
@@ -26,7 +27,7 @@ const depPattern = [
   `(?<currentValue>${versionPattern})`,
 ].join('\\s*');
 
-const extractRegex = new RegExp(depPattern);
+const extractRegex = regEx(depPattern);
 
 function depStringHandler(
   ctx: Context,
@@ -69,11 +70,7 @@ const depString = q
 
 const query = q.alt(incompleteDepString, depString);
 
-export function extractPackageFile(
-  content: string,
-  _packageFile: string,
-  _config: ExtractConfig
-): PackageFile | null {
+export function extractPackageFile(content: string): PackageFile | null {
   const res = python.query<Context>(content, query, { deps: [] });
   return res?.deps?.length ? res : null;
 }
