@@ -66,6 +66,7 @@ import {
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
+  PlatformConfig,
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
@@ -73,13 +74,6 @@ import { UserDetails, getUserDetails, getUserEmail } from './user';
 const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig = {} as any;
-
-interface PlatformConfig {
-  hostType: string;
-  endpoint: string;
-  isGhe?: boolean;
-  gheVersion?: string | null;
-}
 
 const platformConfig: PlatformConfig = {
   hostType: PlatformId.Github,
