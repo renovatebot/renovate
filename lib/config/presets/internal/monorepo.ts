@@ -31,6 +31,7 @@ const repoGroups = {
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
+  deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'dnd-kit': 'https://github.com/clauderic/dnd-kit',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',

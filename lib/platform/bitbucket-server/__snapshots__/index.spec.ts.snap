@@ -2068,6 +2068,47 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns file content in json5 format 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/file.json5?limit=20000",
+  },
+]
+`;
+
 exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() throws on errors 1`] = `
 Array [
   Object {
@@ -2746,7 +2787,7 @@ exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown()
 exports[`platform/bitbucket-server/index endpoint with no path massageMarkdown() sanitizes HTML comments in the body 1`] = `
 "---
 
-- [ ] If you want to rebase/retry this PR, check this box
+- [ ] If you want to rebase/retry this PR, click this checkbox
 - [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
 
 ---
@@ -6443,6 +6484,47 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns file content in json5 format 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/file.json5?limit=20000",
+  },
+]
+`;
+
 exports[`platform/bitbucket-server/index endpoint with path getJsonFile() throws on errors 1`] = `
 Array [
   Object {
@@ -7121,7 +7203,7 @@ exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() re
 exports[`platform/bitbucket-server/index endpoint with path massageMarkdown() sanitizes HTML comments in the body 1`] = `
 "---
 
-- [ ] If you want to rebase/retry this PR, check this box
+- [ ] If you want to rebase/retry this PR, click this checkbox
 - [ ] <a href=\\"/some/link\\">Update renovate/renovate to 16.1.2</a>
 
 ---

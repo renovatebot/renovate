@@ -1,7 +1,8 @@
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import {
   blockLineRegEx,
@@ -17,7 +18,7 @@ function interpretLine(
 ): void {
   const localDependency = dependency;
   const key = lineMatch[2];
-  const value = lineMatch[3].replace(/["']/g, '');
+  const value = lineMatch[3].replace(regEx(/["']/g), '');
   switch (key) {
     case 'name': {
       localDependency.managerData.name = value;
@@ -49,21 +50,24 @@ function handleGitDep(
   nameMatch: RegExpExecArray
 ): void {
   /* eslint-disable no-param-reassign */
-  dep.datasource = datasourceGitTags.id;
+  dep.datasource = GitTagsDatasource.id;
 
   if (nameMatch) {
     // if a github.com repository is referenced use github-tags instead of git-tags
     if (nameMatch.groups.hostname === 'github.com') {
       dep.datasource = datasourceGithubTags.id;
     } else {
-      dep.datasource = datasourceGitTags.id;
+      dep.datasource = GitTagsDatasource.id;
     }
     // source definition without version appendix
     const source = nameMatch.groups.source;
-    const massagedDepName = nameMatch.groups.depName.replace(/.git$/, '');
+    const massagedDepName = nameMatch.groups.depName.replace(
+      regEx(/.git$/),
+      ''
+    );
     dep.depName = `${nameMatch.groups.hostname}/${massagedDepName}`;
     // remove leading `git+` from URLs like `git+https://...`
-    dep.lookupName = source.replace(/git\+/, '');
+    dep.lookupName = source.replace(regEx(/git\+/), '');
 
     // if version is declared using version appendix `<source url>,v1.2.0`, use it
     if (nameMatch.groups.version) {

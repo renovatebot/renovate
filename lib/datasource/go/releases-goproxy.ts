@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import moo from 'moo';
 import pAll from 'p-all';
 import { logger } from '../../logger';
+import * as packageCache from '../../util/cache/package';
 import { regEx } from '../../util/regex';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GoproxyFallback, http } from './common';
@@ -34,9 +35,9 @@ export function parseGoproxy(
   }
 
   let result: GoproxyItem[] = input
-    .split(/([^,|]*(?:,|\|))/)
+    .split(/([^,|]*(?:,|\|))/) // TODO: #12070
     .filter(Boolean)
-    .map((s) => s.split(/(?=,|\|)/))
+    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12070
     .map(([url, separator]) => ({
       url,
       fallback:
@@ -62,7 +63,7 @@ export function parseGoproxy(
 const lexer = moo.states({
   main: {
     separator: {
-      match: /\s*?,\s*?/,
+      match: /\s*?,\s*?/, // TODO #12070
       value: (_: string) => '|',
     },
     asterisk: {
@@ -78,16 +79,19 @@ const lexer = moo.states({
       push: 'characterRange',
       value: (_: string) => '[',
     },
-    char: /[^*?\\[\n]/,
+    char: {
+      match: /[^*?\\[\n]/,
+      value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
+    },
     escapedChar: {
-      match: /\\./,
+      match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
     },
   },
   characterRange: {
-    char: /[^\\\]\n]/,
+    char: /[^\\\]\n]/, // TODO #12070
     escapedChar: {
-      match: /\\./,
+      match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
     },
     characterRangeEnd: {
@@ -121,7 +125,7 @@ export function parseNoproxy(
  * @see https://golang.org/ref/mod#goproxy-protocol
  */
 export function encodeCase(input: string): string {
-  return input.replace(/([A-Z])/g, (x) => `!${x.toLowerCase()}`);
+  return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
 }
 
 export async function listVersions(
@@ -131,7 +135,7 @@ export async function listVersions(
   const url = `${baseUrl}/${encodeCase(lookupName)}/@v/list`;
   const { body } = await http.get(url);
   return body
-    .split(/\s+/)
+    .split(regEx(/\s+/))
     .filter(Boolean)
     .filter((x) => x.indexOf('+') === -1);
 }
@@ -155,10 +159,10 @@ export async function versionInfo(
   return result;
 }
 
-export async function getReleases(
-  config: GetReleasesConfig
-): Promise<ReleaseResult | null> {
-  const { lookupName } = config;
+export async function getReleases({
+  lookupName,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
+  logger.trace(`goproxy.getReleases(${lookupName})`);
 
   const noproxy = parseNoproxy();
   if (noproxy?.test(lookupName)) {
@@ -166,7 +170,22 @@ export async function getReleases(
     return null;
   }
 
-  const proxyList = parseGoproxy();
+  const goproxy = process.env.GOPROXY;
+  const proxyList = parseGoproxy(goproxy);
+
+  const cacheNamespaces = 'datasource-go-proxy';
+  const cacheKey = `${lookupName}@@${goproxy}`;
+  const cacheMinutes = 60;
+  const cachedResult = await packageCache.get<ReleaseResult | null>(
+    cacheNamespaces,
+    cacheKey
+  );
+  // istanbul ignore if
+  if (cachedResult || cachedResult === null) {
+    return cachedResult;
+  }
+
+  let result: ReleaseResult | null = null;
 
   for (const { url, fallback } of proxyList) {
     try {
@@ -181,7 +200,8 @@ export async function getReleases(
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        return { releases };
+        result = { releases };
+        break;
       }
     } catch (err) {
       const statusCode = err?.response?.statusCode;
@@ -199,5 +219,6 @@ export async function getReleases(
     }
   }
 
-  return null;
+  await packageCache.set(cacheNamespaces, cacheKey, result, cacheMinutes);
+  return result;
 }

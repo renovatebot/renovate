@@ -24,7 +24,13 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     let installPnpm = 'npm i -g pnpm';
-    const pnpmCompatibility = config.constraints?.pnpm;
+    const pnpmUpdate = upgrades.find(
+      (upgrade) =>
+        upgrade.depType === 'packageManager' && upgrade.depName === 'pnpm'
+    );
+    const pnpmCompatibility = pnpmUpdate
+      ? pnpmUpdate.newValue
+      : config.constraints?.pnpm;
     if (validRange(pnpmCompatibility)) {
       installPnpm += `@${quote(pnpmCompatibility)}`;
     }
@@ -38,7 +44,7 @@ export async function generateLockFile(
       },
       docker: {
         image: 'node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
         preCommands,
       },

@@ -7,8 +7,9 @@ import { clone } from '../clone';
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
 // istanbul ignore next
-handlebars.registerHelper('replace', (find, replace, context) =>
-  context.replace(new RegExp(find, 'g'), replace)
+handlebars.registerHelper(
+  'replace',
+  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12070
 );
 
 export const exposedConfigOptions = [
@@ -139,7 +140,7 @@ function getFilteredObject(input: CompileInput): any {
   return res;
 }
 
-const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g;
+const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12070
 
 export function compile(
   template: string,

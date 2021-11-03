@@ -11,7 +11,7 @@ describe('workers/repository/onboarding/pr/base-branch', () => {
     });
     it('returns empty if no baseBranch', () => {
       const res = getBaseBranchDesc(config);
-      expect(res).toEqual('');
+      expect(res).toBeEmptyString();
     });
     it('describes baseBranch', () => {
       config.baseBranches = ['some-branch'];

@@ -13,7 +13,7 @@ describe('config/massage', () => {
         schedule: 'before 5am' as never,
       };
       const res = massage.massageConfig(config);
-      expect(Array.isArray(res.schedule)).toBe(true);
+      expect(Array.isArray(res.schedule)).toBeTrue();
     });
     it('massages npmToken', () => {
       const config: RenovateConfig = {

@@ -21,6 +21,7 @@ describe('manager/regex/index', () => {
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
+      depTypeTemplate: 'final',
     };
     const res = await extractPackageFile(
       dockerfileContent,
@@ -35,6 +36,7 @@ describe('manager/regex/index', () => {
     expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
       'maven'
     );
+    expect(res.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
   it('returns null if no dependencies found', async () => {
     const config = {
@@ -347,5 +349,23 @@ describe('manager/regex/index', () => {
     );
     expect(res).toMatchSnapshot();
     expect(res).toBeNull();
+  });
+  it('extracts with recursive strategy and merged groups', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '"(?<first>[^"]*)":\\s*{[^}]*}',
+        '"(?<second>[^"]*)":\\s*\\{[^}]*}',
+        '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
+      ],
+      matchStringsStrategy: 'recursive',
+      depNameTemplate: '{{{ first }}}/{{{ second }}}/{{{ depName }}}',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(4);
   });
 });
