@@ -89,7 +89,7 @@ const platformConfig: PlatformConfig = {
 const escapeHash = (input: string): string =>
   input ? input.replace(regEx(/#/g), '%23') : input;
 
-export async function detectPlatformConfig(): Promise<void> {
+export async function detectGhe(): Promise<void> {
   platformConfig.isGhe =
     URL.parse(platformConfig.endpoint).host !== 'api.github.com';
   if (platformConfig.isGhe) {
@@ -121,7 +121,7 @@ export async function initPlatform({
     logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
 
-  await detectPlatformConfig();
+  await detectGhe();
 
   let userDetails: UserDetails;
   let renovateUsername: string;
@@ -139,7 +139,7 @@ export async function initPlatform({
       discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
     }
   }
-  logger.debug('Authenticated as GitHub user: ' + renovateUsername);
+  logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor || discoveredGitAuthor,
