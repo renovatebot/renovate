@@ -2111,7 +2111,7 @@ const options: RenovateOptions[] = [
     name: 'platformAutomerge',
     description: `Enable or disable usage of platform-native auto-merge capabilities when available.`,
     type: 'boolean',
-    default: true,
+    default: false,
   },
 ];
 
