@@ -207,6 +207,7 @@ const options: RenovateOptions[] = [
     default: false,
     cli: false,
     env: false,
+    supportedManagers: ['gradle'],
   },
   {
     name: 'repositoryCache',
@@ -240,6 +241,7 @@ const options: RenovateOptions[] = [
     description: 'If enabled, the PR created by Renovate is set to a draft.',
     type: 'boolean',
     default: false,
+    supportedPlatforms: ['github', 'gitlab', 'azure'],
   },
   {
     name: 'dryRun',
@@ -568,6 +570,7 @@ const options: RenovateOptions[] = [
       'Configure this to true if allowScripts=true but you wish to skip running scripts when updating lock files.',
     type: 'boolean',
     default: false,
+    supportedManagers: ['npm', 'composer'],
   },
   {
     name: 'platform',
@@ -738,6 +741,7 @@ const options: RenovateOptions[] = [
       type: 'string',
       format: 'uri',
     },
+    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
   },
   {
     name: 'registryUrls',
@@ -773,6 +777,7 @@ const options: RenovateOptions[] = [
       'The id of an existing work item on Azure Boards to link to each PR.',
     type: 'integer',
     default: 0,
+    supportedPlatforms: ['azure'],
   },
   {
     name: 'azureAutoApprove',
@@ -780,6 +785,7 @@ const options: RenovateOptions[] = [
       'If set to true, Azure DevOps PRs will be automatically approved.',
     type: 'boolean',
     default: false,
+    supportedPlatforms: ['azure'],
   },
   // depType
   {
@@ -1115,6 +1121,7 @@ const options: RenovateOptions[] = [
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
+    supportedManagers: ['helmv3', 'npm', 'sbt'],
   },
   // Major/Minor/Patch
   {
@@ -1309,6 +1316,7 @@ const options: RenovateOptions[] = [
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
+    supportedPlatforms: ['bitbucket'],
   },
   // Automatic merging
   {
@@ -1332,6 +1340,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
+    supportedPlatforms: ['bitbucket'],
   },
   {
     name: 'automergeComment',
@@ -1351,6 +1360,8 @@ const options: RenovateOptions[] = [
     description: 'Enable remediation of transitive dependencies.',
     type: 'boolean',
     default: false,
+    supportedManagers: ['npm'],
+    supportedPlatforms: ['github'],
   },
   {
     name: 'vulnerabilityAlerts',
@@ -1369,6 +1380,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    supportedPlatforms: ['github'],
   },
   // Default templates
   {
@@ -1599,6 +1611,7 @@ const options: RenovateOptions[] = [
     description: 'Filter reviewers and assignees based on their availability.',
     type: 'boolean',
     default: false,
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'reviewersSampleSize',
@@ -1730,6 +1743,14 @@ const options: RenovateOptions[] = [
     default: {},
     mergeable: true,
     cli: false,
+    supportedManagers: [
+      'bundler',
+      'composer',
+      'gomod',
+      'npm',
+      'pipenv',
+      'poetry',
+    ],
   },
   {
     name: 'java',

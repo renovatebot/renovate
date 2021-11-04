@@ -373,6 +373,49 @@ async function updateYarnOffline(
   }
 }
 
+// exported for testing
+export async function updateYarnBinary(
+  lockFileDir: string,
+  updatedArtifacts: UpdatedArtifacts[],
+  existingYarnrcYmlContent: string | undefined
+): Promise<string | undefined> {
+  let yarnrcYml = existingYarnrcYmlContent;
+  try {
+    const yarnrcYmlFilename = upath.join(lockFileDir, '.yarnrc.yml');
+    yarnrcYml ||= await getFile(yarnrcYmlFilename);
+    const newYarnrcYml = await readLocalFile(yarnrcYmlFilename, 'utf8');
+    if (!is.string(yarnrcYml) || !is.string(newYarnrcYml)) {
+      return existingYarnrcYmlContent;
+    }
+
+    const oldYarnPath = (load(yarnrcYml) as Record<string, string>).yarnPath;
+    const newYarnPath = (load(newYarnrcYml) as Record<string, string>).yarnPath;
+    const oldYarnFullPath = upath.join(lockFileDir, oldYarnPath);
+    const newYarnFullPath = upath.join(lockFileDir, newYarnPath);
+    logger.debug({ oldYarnPath, newYarnPath }, 'Found updated Yarn binary');
+
+    yarnrcYml = yarnrcYml.replace(oldYarnPath, newYarnPath);
+    updatedArtifacts.push(
+      {
+        name: yarnrcYmlFilename,
+        contents: yarnrcYml,
+      },
+      {
+        name: '|delete|',
+        contents: oldYarnFullPath,
+      },
+      {
+        name: newYarnFullPath,
+        contents: await readLocalFile(newYarnFullPath, 'utf8'),
+        executable: true,
+      }
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Error updating Yarn binary');
+  }
+  return existingYarnrcYmlContent && yarnrcYml;
+}
+
 // istanbul ignore next
 export async function getAdditionalFiles(
   config: PostUpdateConfig,
@@ -581,6 +624,14 @@ export async function getAdditionalFiles(
           contents: res.lockFile,
         });
         await updateYarnOffline(lockFileDir, localDir, updatedArtifacts);
+      }
+
+      if (upgrades.some(yarn.isYarnUpdate)) {
+        existingYarnrcYmlContent = await updateYarnBinary(
+          lockFileDir,
+          updatedArtifacts,
+          existingYarnrcYmlContent
+        );
       }
     }
     await resetNpmrcContent(fullLockFileDir, npmrcContent);
