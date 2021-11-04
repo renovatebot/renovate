@@ -605,7 +605,7 @@ const staticGroups = {
         groupName: 'jest monorepo',
       },
     ],
-  }
+  },
 };
 
 const config: any = { ...staticGroups };
