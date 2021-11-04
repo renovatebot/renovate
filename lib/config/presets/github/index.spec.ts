@@ -180,13 +180,7 @@ describe('config/presets/github/index', () => {
           content: Buffer.from('{"from":"api"}').toString('base64'),
         });
       expect(
-        await github.getPresetFromEndpoint(
-          'some/repo',
-          'default',
-          undefined,
-          githubApiHost,
-          undefined
-        )
+        await github.getPresetFromEndpoint('some/repo', 'default', undefined)
       ).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
