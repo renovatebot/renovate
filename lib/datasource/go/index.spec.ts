@@ -19,7 +19,6 @@ describe('datasource/go/index', () => {
       jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-      process.env.GOPROXY = 'https://proxy.golang.org,direct';
     });
 
     afterEach(() => {
@@ -32,10 +31,10 @@ describe('datasource/go/index', () => {
       goproxy.getReleases.mockResolvedValue(null);
       direct.getReleases.mockResolvedValue(expected);
 
-      const res = await getReleases({ lookupName: 'golang.org/foo/something' });
+      const res = await getReleases({ lookupName: 'golang.org/foo/bar' });
 
       expect(res).toBe(expected);
-      expect(goproxy.getReleases).toHaveBeenCalled();
+      expect(goproxy.getReleases).not.toHaveBeenCalled();
       expect(direct.getReleases).toHaveBeenCalled();
     });
 
@@ -43,8 +42,9 @@ describe('datasource/go/index', () => {
       const expected = { releases: [{ version: '0.0.1' }] };
       goproxy.getReleases.mockResolvedValue(expected);
       direct.getReleases.mockResolvedValue(null);
+      process.env.GOPROXY = 'https://proxy.golang.org,direct';
 
-      const res = await getReleases({ lookupName: 'golang.org/foo/something' });
+      const res = await getReleases({ lookupName: 'golang.org/foo/bar' });
 
       expect(res).toBe(expected);
       expect(goproxy.getReleases).toHaveBeenCalled();
