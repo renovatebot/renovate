@@ -2,4 +2,4 @@ This datasource fetches the release note from a source repository specified acco
 
 Namely, it will extract the value of label `org.opencontainers.image.source` if it exist **on the latest stable tags**.
 
-The [Label Schema](https://label-schema.org/) is now superseded by OCI by annotations, and this datasource does not support the `org.label-schema.vcs-url` label.
+The [Label Schema](https://label-schema.org/) is now superseded by OCI annotations, and this datasource does not support the `org.label-schema.vcs-url` label.
