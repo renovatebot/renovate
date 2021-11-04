@@ -16,7 +16,10 @@ const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
 
-export function extractBase(base: string, kind: string): PackageDependency | null {
+export function extractBase(
+  base: string,
+  kind: string
+): PackageDependency | null {
   const match = gitUrl.exec(base);
 
   if (!match) {
@@ -42,7 +45,10 @@ export function extractBase(base: string, kind: string): PackageDependency | nul
   };
 }
 
-export function extractImage(image: Image, kind: string): PackageDependency | null {
+export function extractImage(
+  image: Image,
+  kind: string
+): PackageDependency | null {
   if (!image.name) {
     return null;
   }
