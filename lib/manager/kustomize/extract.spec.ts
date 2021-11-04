@@ -34,7 +34,7 @@ describe('manager/kustomize/extract', () => {
   });
   describe('extractBase', () => {
     it('should return null for a local base', () => {
-      const res = extractBase('./service-1');
+      const res = extractBase('./service-1', 'Kustomization');
       expect(res).toBeNull();
     });
     it('should extract out the version of an http base', () => {
@@ -44,41 +44,48 @@ describe('manager/kustomize/extract', () => {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
         depName: 'user/test-repo',
+        depType: 'Kustomization',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`);
+      const pkg = extractBase(`${base}?ref=${version}`, 'Kustomization');
       expect(pkg).toEqual(sample);
     });
     it('should extract the version of a non http base', () => {
       const pkg = extractBase(
-        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3'
+        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3',
+        'Kustomization'
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
         datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com/user/test-repo',
+        depType: 'Kustomization',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
     it('should extract the depName if the URL includes a port number', () => {
       const pkg = extractBase(
-        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3'
+        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3',
+        'Kustomization'
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
         datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com:7999/user/test-repo',
+        depType: 'Kustomization',
         lookupName: 'ssh://git@bitbucket.com:7999/user/test-repo',
       });
     });
     it('should extract the version of a non http base with subdir', () => {
       const pkg = extractBase(
-        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3'
+        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3',
+        'Kustomization'
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
         datasource: GitTagsDatasource.id,
         depName: 'bitbucket.com/user/test-repo',
+        depType: 'Kustomization',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
@@ -89,9 +96,10 @@ describe('manager/kustomize/extract', () => {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
         depName: 'fluxcd/flux',
+        depType: 'Kustomization',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`);
+      const pkg = extractBase(`${base}?ref=${version}`, 'Kustomization');
       expect(pkg).toEqual(sample);
     });
     it('should extract out the version of a git base', () => {
@@ -101,9 +109,10 @@ describe('manager/kustomize/extract', () => {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
         depName: 'user/repo',
+        depType: 'Kustomization',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`);
+      const pkg = extractBase(`${base}?ref=${version}`, 'Kustomization');
       expect(pkg).toEqual(sample);
     });
     it('should extract out the version of a git base with subdir', () => {
@@ -113,18 +122,22 @@ describe('manager/kustomize/extract', () => {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
         depName: 'user/repo',
+        depType: 'Kustomization',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`);
+      const pkg = extractBase(`${base}?ref=${version}`, 'Kustomization');
       expect(pkg).toEqual(sample);
     });
   });
   describe('image extraction', () => {
     it('should return null on a null input', () => {
-      const pkg = extractImage({
-        name: null,
-        newTag: null,
-      });
+      const pkg = extractImage(
+        {
+          name: null,
+          newTag: null,
+        },
+        'Kustomization'
+      );
       expect(pkg).toBeNull();
     });
     it('should correctly extract a default image', () => {
@@ -134,11 +147,15 @@ describe('manager/kustomize/extract', () => {
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
         depName: 'node',
+        depType: 'Kustomization',
       };
-      const pkg = extractImage({
-        name: sample.depName,
-        newTag: sample.currentValue,
-      });
+      const pkg = extractImage(
+        {
+          name: sample.depName,
+          newTag: sample.currentValue,
+        },
+        'Kustomization'
+      );
       expect(pkg).toEqual(sample);
     });
     it('should correctly extract an image in a repo', () => {
@@ -148,11 +165,15 @@ describe('manager/kustomize/extract', () => {
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
         depName: 'test/node',
+        depType: 'Kustomization',
       };
-      const pkg = extractImage({
-        name: sample.depName,
-        newTag: sample.currentValue,
-      });
+      const pkg = extractImage(
+        {
+          name: sample.depName,
+          newTag: sample.currentValue,
+        },
+        'Kustomization'
+      );
       expect(pkg).toEqual(sample);
     });
     it('should correctly extract from a different registry', () => {
@@ -162,11 +183,15 @@ describe('manager/kustomize/extract', () => {
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
         depName: 'quay.io/repo/image',
+        depType: 'Kustomization',
       };
-      const pkg = extractImage({
-        name: sample.depName,
-        newTag: sample.currentValue,
-      });
+      const pkg = extractImage(
+        {
+          name: sample.depName,
+          newTag: sample.currentValue,
+        },
+        'Kustomization'
+      );
       expect(pkg).toEqual(sample);
     });
     it('should correctly extract from a different port', () => {
@@ -176,11 +201,15 @@ describe('manager/kustomize/extract', () => {
         datasource: datasourceDocker.id,
         replaceString: 'v1.0.0',
         depName: 'localhost:5000/repo/image',
+        depType: 'Kustomization',
       };
-      const pkg = extractImage({
-        name: sample.depName,
-        newTag: sample.currentValue,
-      });
+      const pkg = extractImage(
+        {
+          name: sample.depName,
+          newTag: sample.currentValue,
+        },
+        'Kustomization'
+      );
       expect(pkg).toEqual(sample);
     });
     it('should correctly extract from a multi-depth registry', () => {
@@ -190,11 +219,15 @@ describe('manager/kustomize/extract', () => {
         replaceString: 'v1.0.0',
         datasource: datasourceDocker.id,
         depName: 'localhost:5000/repo/image/service',
+        depType: 'Kustomization',
       };
-      const pkg = extractImage({
-        name: sample.depName,
-        newTag: sample.currentValue,
-      });
+      const pkg = extractImage(
+        {
+          name: sample.depName,
+          newTag: sample.currentValue,
+        },
+        'Kustomization'
+      );
       expect(pkg).toEqual(sample);
     });
   });
@@ -322,18 +355,21 @@ describe('manager/kustomize/extract', () => {
         deps: [
           {
             depName: 'awesome/postgres',
+            depType: 'Kustomization',
             currentDigest: postgresDigest,
             currentValue: '11',
             replaceString: `awesome/postgres:11@${postgresDigest}`,
           },
           {
             depName: 'awesome/postgres',
+            depType: 'Kustomization',
             currentDigest: undefined,
             currentValue: '11',
             replaceString: 'awesome/postgres:11',
           },
           {
             depName: 'awesome/postgres',
+            depType: 'Kustomization',
             currentDigest: postgresDigest,
             currentValue: undefined,
             replaceString: `awesome/postgres@${postgresDigest}`,
