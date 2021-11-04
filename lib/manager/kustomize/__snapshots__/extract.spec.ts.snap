@@ -8,6 +8,7 @@ Object {
       "currentValue": undefined,
       "datasource": "docker",
       "depName": "postgres",
+      "depType": "Kustomization",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
     Object {
@@ -15,22 +16,26 @@ Object {
       "currentValue": "11",
       "datasource": "docker",
       "depName": "postgres",
+      "depType": "Kustomization",
       "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
     Object {
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "currentValue": 11,
       "depName": "postgres",
+      "depType": "Kustomization",
       "skipReason": "invalid-dependency-specification",
     },
     Object {
       "currentValue": 2641143766,
       "depName": "postgres",
+      "depType": "Kustomization",
       "skipReason": "invalid-value",
     },
     Object {
       "currentValue": "b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "depName": "postgres",
+      "depType": "Kustomization",
       "skipReason": "invalid-value",
     },
   ],
@@ -45,6 +50,7 @@ Object {
       "currentValue": "11",
       "datasource": "docker",
       "depName": "postgres",
+      "depType": "Kustomization",
       "replaceString": "11",
     },
     Object {
@@ -52,11 +58,13 @@ Object {
       "currentValue": "11",
       "datasource": "docker",
       "depName": "postgres",
+      "depType": "Kustomization",
       "replaceString": "11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
     Object {
       "currentValue": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "depName": "postgres",
+      "depType": "Kustomization",
       "skipReason": "invalid-value",
     },
   ],
@@ -69,11 +77,13 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "user/repo",
+    "depType": "Kustomization",
   },
   Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
+    "depType": "Kustomization",
   },
 ]
 `;
@@ -84,12 +94,14 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
     "depName": "moredhel/remote-kustomize",
+    "depType": "Kustomization",
     "lookupName": "https://moredhel/remote-kustomize.git",
   },
   Object {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
     "depName": "moredhel/remote-kustomize",
+    "depType": "Kustomization",
     "lookupName": "https://moredhel/remote-kustomize.git",
   },
 ]
@@ -103,6 +115,7 @@ Object {
       "currentValue": "11",
       "datasource": "docker",
       "depName": "awesome/postgres",
+      "depType": "Kustomization",
       "replaceString": "awesome/postgres:11@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
     Object {
@@ -110,6 +123,7 @@ Object {
       "currentValue": "11",
       "datasource": "docker",
       "depName": "awesome/postgres",
+      "depType": "Kustomization",
       "replaceString": "awesome/postgres:11",
     },
     Object {
@@ -117,6 +131,7 @@ Object {
       "currentValue": undefined,
       "datasource": "docker",
       "depName": "awesome/postgres",
+      "depType": "Kustomization",
       "replaceString": "awesome/postgres@sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
     },
   ],
@@ -129,6 +144,7 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "moredhel/remote-kustomize",
+    "depType": "Kustomization",
   },
 ]
 `;
@@ -139,6 +155,7 @@ Array [
     "currentValue": "v2.0.0",
     "datasource": "github-tags",
     "depName": "kubernetes-sigs/kustomize",
+    "depType": "Kustomization",
   },
 ]
 `;
@@ -149,16 +166,19 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "moredhel/remote-kustomize",
+    "depType": "Kustomization",
   },
   Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
+    "depType": "Kustomization",
   },
   Object {
     "currentValue": "1.18.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
+    "depType": "Kustomization",
   },
 ]
 `;
@@ -169,17 +189,20 @@ Array [
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
+    "depType": "Component",
   },
   Object {
     "currentValue": "1.18.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
+    "depType": "Component",
   },
   Object {
     "currentDigest": undefined,
     "currentValue": "v0.1.0",
     "datasource": "docker",
     "depName": "node",
+    "depType": "Component",
     "replaceString": "v0.1.0",
   },
 ]
@@ -192,6 +215,7 @@ Array [
     "currentValue": "v0.1.0",
     "datasource": "docker",
     "depName": "node",
+    "depType": "Kustomization",
     "replaceString": "v0.1.0",
   },
   Object {
@@ -199,6 +223,7 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "docker",
     "depName": "group/instance",
+    "depType": "Kustomization",
     "replaceString": "v0.0.1",
   },
   Object {
@@ -206,6 +231,7 @@ Array [
     "currentValue": "v0.0.2",
     "datasource": "docker",
     "depName": "quay.io/test/repo",
+    "depType": "Kustomization",
     "replaceString": "v0.0.2",
   },
   Object {
@@ -213,6 +239,7 @@ Array [
     "currentValue": "v0.0.3",
     "datasource": "docker",
     "depName": "gitlab.com/org/suborg/image",
+    "depType": "Kustomization",
     "replaceString": "v0.0.3",
   },
   Object {
@@ -220,11 +247,13 @@ Array [
     "currentValue": "v0.0.4",
     "datasource": "docker",
     "depName": "but.this.lives.on.local/private-registry",
+    "depType": "Kustomization",
     "replaceString": "v0.0.4",
   },
   Object {
     "currentValue": 2.5,
     "depName": "nginx",
+    "depType": "Kustomization",
     "skipReason": "invalid-value",
   },
 ]

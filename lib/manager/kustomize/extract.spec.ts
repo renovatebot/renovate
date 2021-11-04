@@ -249,6 +249,9 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[2].currentValue).toEqual('1.18.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
       expect(res.deps[2].depName).toEqual('fluxcd/flux');
+      expect(res.deps[0].depType).toEqual('Kustomization');
+      expect(res.deps[1].depType).toEqual('Kustomization');
+      expect(res.deps[2].depType).toEqual('Kustomization');
     });
     it('should extract dependencies when kind is Component', () => {
       const res = extractPackageFile(kustomizeComponent);
@@ -260,6 +263,9 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[2].currentValue).toEqual('v0.1.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
       expect(res.deps[2].depName).toEqual('node');
+      expect(res.deps[0].depType).toEqual('Component');
+      expect(res.deps[1].depType).toEqual('Component');
+      expect(res.deps[2].depType).toEqual('Component');
     });
 
     const postgresDigest =

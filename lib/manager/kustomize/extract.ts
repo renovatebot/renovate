@@ -16,7 +16,7 @@ const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
 
-export function extractBase(base: string): PackageDependency | null {
+export function extractBase(base: string, kind: string): PackageDependency | null {
   const match = gitUrl.exec(base);
 
   if (!match) {
@@ -29,18 +29,20 @@ export function extractBase(base: string): PackageDependency | null {
       currentValue: match.groups.currentValue,
       datasource: datasourceGitHubTags.id,
       depName: match.groups.project.replace('.git', ''),
+      depType: kind,
     };
   }
 
   return {
     datasource: GitTagsDatasource.id,
     depName: path.replace('.git', ''),
+    depType: kind,
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,
   };
 }
 
-export function extractImage(image: Image): PackageDependency | null {
+export function extractImage(image: Image, kind: string): PackageDependency | null {
   if (!image.name) {
     return null;
   }
@@ -54,6 +56,7 @@ export function extractImage(image: Image): PackageDependency | null {
     );
     return {
       depName,
+      depType: kind,
       currentValue: newTag,
       currentDigest: digest,
       skipReason: SkipReason.InvalidDependencySpecification,
@@ -64,6 +67,7 @@ export function extractImage(image: Image): PackageDependency | null {
     if (!is.string(digest) || !digest.startsWith('sha256:')) {
       return {
         depName,
+        depType: kind,
         currentValue: digest,
         skipReason: SkipReason.InvalidValue,
       };
@@ -72,6 +76,7 @@ export function extractImage(image: Image): PackageDependency | null {
     return {
       datasource: datasourceDocker.id,
       depName,
+      depType: kind,
       currentValue: nameDep.currentValue,
       currentDigest: digest,
       replaceString: digest,
@@ -82,6 +87,7 @@ export function extractImage(image: Image): PackageDependency | null {
     if (!is.string(newTag) || newTag.startsWith('sha256:')) {
       return {
         depName,
+        depType: kind,
         currentValue: newTag,
         skipReason: SkipReason.InvalidValue,
       };
@@ -90,6 +96,7 @@ export function extractImage(image: Image): PackageDependency | null {
     const dep = splitImageParts(`${depName}:${newTag}`);
     return {
       ...dep,
+      depType: kind,
       datasource: datasourceDocker.id,
       replaceString: newTag,
     };
@@ -98,6 +105,7 @@ export function extractImage(image: Image): PackageDependency | null {
   if (image.newName) {
     return {
       ...nameDep,
+      depType: kind,
       datasource: datasourceDocker.id,
       replaceString: image.newName,
     };
@@ -142,7 +150,7 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   // grab the remote bases
   for (const base of pkg.bases) {
-    const dep = extractBase(base);
+    const dep = extractBase(base, pkg.kind);
     if (dep) {
       deps.push(dep);
     }
@@ -150,7 +158,7 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   // grab the image tags
   for (const image of pkg.images) {
-    const dep = extractImage(image);
+    const dep = extractImage(image, pkg.kind);
     if (dep) {
       deps.push(dep);
     }

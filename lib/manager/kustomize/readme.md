@@ -11,6 +11,11 @@ This package will manage two parts of the `kustomization.yaml` file:
 3. Renovate will resolve the dependency's source repository and check for SemVer tags if found.
 4. If an update was found, Renovate will update `kustomization.yaml`
 
+This manager uses two `depType`s to allow a fine-grained control of which dependencies are upgraded:
+
+- Component
+- Kustomization
+
 **Limitations**
 
 - Needs to have `kind: Kustomization` or `kind: Component` defined
