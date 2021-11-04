@@ -126,7 +126,7 @@
     "@breejs/later": "4.1.0",
     "@iarna/toml": "2.2.5",
     "@renovate/pep440": "1.0.0",
-    "@renovatebot/parser-utils": "0.0.6",
+    "@renovatebot/parser-utils": "0.1.0",
     "@renovatebot/ruby-semver": "1.0.0",
     "@sindresorhus/is": "4.2.0",
     "@yarnpkg/core": "2.4.0",
