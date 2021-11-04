@@ -601,7 +601,7 @@ const staticGroups = {
     description: 'Add @types/jest update to Jest monorepo',
     packageRules: [
       {
-        matchPackageNames: '@types/jest',
+        matchPackageNames: ['@types/jest'],
         groupName: 'jest monorepo',
       },
     ],
