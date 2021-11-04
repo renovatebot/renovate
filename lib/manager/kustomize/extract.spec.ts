@@ -46,7 +46,7 @@ describe('manager/kustomize/extract', () => {
         depName: 'user/test-repo',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`, 'Kustomization');
+      const pkg = extractBase(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
     it('should extract the version of a non http base', () => {
