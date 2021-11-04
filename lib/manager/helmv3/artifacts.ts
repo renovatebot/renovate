@@ -22,15 +22,15 @@ async function helmCommands(
       HELM_EXPERIMENTAL_OCI: '1',
     },
   };
-  const cmd = [
-    `helm dependency update ${quote(getSubDirectory(manifestPath))}`,
-  ];
+  const cmd = [];
 
   if (aliases) {
     Object.entries(aliases).forEach(([alias, url]) =>
       cmd.push(`helm repo add ${quote(alias)} ${quote(url)}`)
     );
   }
+  cmd.push(`helm dependency update ${quote(getSubDirectory(manifestPath))}`);
+
   await exec(cmd, execOptions);
 }
 
