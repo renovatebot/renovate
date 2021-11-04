@@ -255,9 +255,9 @@ describe('manager/kustomize/extract', () => {
       expect(res).not.toBeNull();
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[1].currentValue).toEqual('1.19.0');
-      expect(res.deps[2].currentValue).toEqual('1.18.0');
-      expect(res.deps[3].currentValue).toEqual('v0.1.0');
+      expect(res.deps[0].currentValue).toEqual('1.19.0');
+      expect(res.deps[1].currentValue).toEqual('1.18.0');
+      expect(res.deps[2].currentValue).toEqual('v0.1.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
       expect(res.deps[2].depName).toEqual('node');
     });
