@@ -45,13 +45,15 @@ export function extractFromVectors(
     if (artifactId && version) {
       const depName = expandDepName(cleanStrLiteral(artifactId));
       if (version.startsWith('~')) {
-        const currentValue = vars[version.replace(regEx(/^~\s*/), '')];
+        const varName = version.replace(regEx(/^~\s*/), '');
+        const currentValue = vars[varName];
         if (currentValue) {
           result.push({
             ...ctx,
             datasource: ClojureDatasource.id,
             depName,
             currentValue,
+            groupName: varName,
           });
         }
       } else {
@@ -151,33 +153,34 @@ export function extractVariables(content: string): ExtractedVariables {
   return result;
 }
 
-export function extractPackageFile(content: string): PackageFile {
-  const collect = (
-    key: string,
-    registryUrls: string[],
-    vars: ExtractedVariables
-  ): PackageDependency[] => {
-    const ctx = {
-      depType: key,
-      registryUrls,
-    };
-    let result: PackageDependency[] = [];
-    let restContent = trimAtKey(content, key);
-    while (restContent) {
-      result = [...result, ...extractFromVectors(restContent, ctx, vars)];
-      restContent = trimAtKey(restContent, key);
-    }
-    return result;
+function collectDeps(
+  content: string,
+  key: string,
+  registryUrls: string[],
+  vars: ExtractedVariables
+): PackageDependency[] {
+  const ctx = {
+    depType: key,
+    registryUrls,
   };
+  let result: PackageDependency[] = [];
+  let restContent = trimAtKey(content, key);
+  while (restContent) {
+    result = [...result, ...extractFromVectors(restContent, ctx, vars)];
+    restContent = trimAtKey(restContent, key);
+  }
+  return result;
+}
 
+export function extractPackageFile(content: string): PackageFile {
   const registryUrls = extractLeinRepos(content);
   const vars = extractVariables(content);
 
   const deps: PackageDependency[] = [
-    ...collect('dependencies', registryUrls, vars),
-    ...collect('managed-dependencies', registryUrls, vars),
-    ...collect('plugins', registryUrls, vars),
-    ...collect('pom-plugins', registryUrls, vars),
+    ...collectDeps(content, 'dependencies', registryUrls, vars),
+    ...collectDeps(content, 'managed-dependencies', registryUrls, vars),
+    ...collectDeps(content, 'plugins', registryUrls, vars),
+    ...collectDeps(content, 'pom-plugins', registryUrls, vars),
   ];
 
   return { deps };
