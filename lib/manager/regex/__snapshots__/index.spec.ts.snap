@@ -257,6 +257,28 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts with combination strategy and non standard capture groups 1`] = `
+Object {
+  "datasourceTemplate": "docker",
+  "depNameTemplate": "{{{ registry }}}/{{{ repository }}}",
+  "deps": Array [
+    Object {
+      "currentValue": "v2.21.0",
+      "datasource": "docker",
+      "depName": "docker.io/prom/prometheus",
+      "replaceString": "prometheus_version: \\"v2.21.0\\" //",
+    },
+  ],
+  "matchStrings": Array [
+    "prometheus_registry:\\\\s*\\"(?<registry>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_repository:\\\\s*\\"(?<repository>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_tag:\\\\s*\\"(?<tag>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
 exports[`manager/regex/index extracts with combination strategy and registry url 1`] = `
 Object {
   "datasourceTemplate": "helm",

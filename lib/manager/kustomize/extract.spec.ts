@@ -18,6 +18,7 @@ const kustomizeWithLocal = loadFixture('kustomizeWithLocal.yaml');
 const nonKustomize = loadFixture('service.yaml');
 const gitImages = loadFixture('gitImages.yaml');
 const kustomizeDepsInResources = loadFixture('depsInResources.yaml');
+const kustomizeComponent = loadFixture('component.yaml');
 const newTag = loadFixture('newTag.yaml');
 const newName = loadFixture('newName.yaml');
 const digest = loadFixture('digest.yaml');
@@ -248,6 +249,23 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[2].currentValue).toEqual('1.18.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
       expect(res.deps[2].depName).toEqual('fluxcd/flux');
+      expect(res.deps[0].depType).toEqual('Kustomization');
+      expect(res.deps[1].depType).toEqual('Kustomization');
+      expect(res.deps[2].depType).toEqual('Kustomization');
+    });
+    it('should extract dependencies when kind is Component', () => {
+      const res = extractPackageFile(kustomizeComponent);
+      expect(res).not.toBeNull();
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(3);
+      expect(res.deps[0].currentValue).toEqual('1.19.0');
+      expect(res.deps[1].currentValue).toEqual('1.18.0');
+      expect(res.deps[2].currentValue).toEqual('v0.1.0');
+      expect(res.deps[1].depName).toEqual('fluxcd/flux');
+      expect(res.deps[2].depName).toEqual('node');
+      expect(res.deps[0].depType).toEqual('Component');
+      expect(res.deps[1].depType).toEqual('Component');
+      expect(res.deps[2].depType).toEqual('Component');
     });
 
     const postgresDigest =
@@ -304,18 +322,21 @@ describe('manager/kustomize/extract', () => {
         deps: [
           {
             depName: 'awesome/postgres',
+            depType: 'Kustomization',
             currentDigest: postgresDigest,
             currentValue: '11',
             replaceString: `awesome/postgres:11@${postgresDigest}`,
           },
           {
             depName: 'awesome/postgres',
+            depType: 'Kustomization',
             currentDigest: undefined,
             currentValue: '11',
             replaceString: 'awesome/postgres:11',
           },
           {
             depName: 'awesome/postgres',
+            depType: 'Kustomization',
             currentDigest: postgresDigest,
             currentValue: undefined,
             replaceString: `awesome/postgres@${postgresDigest}`,

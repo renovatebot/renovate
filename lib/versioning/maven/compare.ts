@@ -184,7 +184,7 @@ export function qualifierType(token: Token): number {
   if (val === 'milestone' || (token.isTransition && val === 'm')) {
     return QualifierTypes.Milestone;
   }
-  if (val === 'rc' || val === 'cr') {
+  if (val === 'rc' || val === 'cr' || val === 'preview') {
     return QualifierTypes.RC;
   }
   if (val === 'snapshot' || val === 'snap') {
