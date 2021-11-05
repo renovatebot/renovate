@@ -121,6 +121,7 @@ export async function getDatasource(
     const lookupName = pkg.includes('/') ? pkg : `go-${pkg}/${pkg}`;
     return { datasource: github.id, lookupName };
   }
+
   if (goModule.startsWith('github.com/')) {
     const split = goModule.split('/');
     const lookupName = split[1] + '/' + split[2];
