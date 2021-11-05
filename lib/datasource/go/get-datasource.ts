@@ -1,7 +1,6 @@
 import URL from 'url';
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
-import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
@@ -140,19 +139,6 @@ export async function getDatasource(
     };
   }
 
-  const cacheNamespace = 'datasource-go-get-datasource';
-  const cacheKey = goModule;
-  const cacheMinutes = 24 * 60;
-  const cachedGoGetResult = await packageCache.get<DataSource | null>(
-    cacheNamespace,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedGoGetResult || cachedGoGetResult === null) {
-    return cachedGoGetResult;
-  }
-
   const goGetResult = await goGetDatasource(goModule);
-  await packageCache.set(cacheNamespace, cacheKey, goGetResult, cacheMinutes);
   return goGetResult;
 }
