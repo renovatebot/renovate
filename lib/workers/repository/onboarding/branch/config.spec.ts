@@ -24,10 +24,6 @@ describe('workers/repository/onboarding/branch/config', () => {
     config.repository = 'some/repo';
   });
 
-  afterAll(() => {
-    setGlobalConfig();
-  });
-
   describe('getOnboardingConfigContents', () => {
     it('returns the JSON stringified onboarding config', async () => {
       mockedPresets.getPreset.mockResolvedValueOnce({ enabled: true });

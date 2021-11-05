@@ -23,10 +23,6 @@ describe('util/json-writer/editor-config', () => {
     mockFs.restore();
   });
 
-  afterAll(() => {
-    setGlobalConfig();
-  });
-
   it('should handle empty .editorconfig file', async () => {
     expect.assertions(2);
     mockFs({

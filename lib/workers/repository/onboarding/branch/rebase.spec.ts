@@ -11,10 +11,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
   });
 
-  afterAll(() => {
-    setGlobalConfig();
-  });
-
   describe('rebaseOnboardingBranch()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
