@@ -24,7 +24,7 @@ export async function fetchJSONFile(
     ref = `?ref=${packageTag}`;
   }
   const url = `${endpoint}repos/${repo}/contents/${fileName}${ref}`;
-  logger.trace(`Preset URL is: ${url}`);
+  logger.trace({ url }, `Preset URL`);
   let res: { body: { content: string } };
   try {
     res = await http.getJson(url);
