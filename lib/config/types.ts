@@ -234,7 +234,11 @@ export type UpdateType =
   | 'rollback'
   | 'bump';
 
-export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
+export enum MatchStringsStrategy {
+  ANY = 'any',
+  RECURSIVE = 'recursive',
+  COMBINATION = 'combination',
+}
 
 export type MergeStrategy =
   | 'auto'
