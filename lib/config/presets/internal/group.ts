@@ -62,6 +62,7 @@ const staticGroups = {
       'group:illuminate',
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
+      'group:jestPlusTypes',
       'group:polymer',
       'group:resilience4j',
       'group:rubyOmniauth',
@@ -592,6 +593,15 @@ const staticGroups = {
       {
         matchSourceUrlPrefixes: ['https://github.com/kulshekhar/ts-jest'],
         matchUpdateTypes: ['major'],
+        groupName: 'jest monorepo',
+      },
+    ],
+  },
+  jestPlusTypes: {
+    description: 'Add @types/jest update to Jest monorepo',
+    packageRules: [
+      {
+        matchPackageNames: ['@types/jest'],
         groupName: 'jest monorepo',
       },
     ],
