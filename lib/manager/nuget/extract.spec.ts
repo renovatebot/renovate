@@ -215,51 +215,5 @@ describe('manager/nuget/extract', () => {
         expect(await extractPackageFile('{{', packageFile, config)).toBeNull();
       });
     });
-
-    describe('dotnet-tools.json', () => {
-      const packageFile = 'dotnet-tools.json';
-      const contents = `{
-  "version": 1,
-  "isRoot": true,
-  "tools": {
-    "minver-cli": {
-      "version": "2.0.0",
-      "commands": ["minver"]
-    }
-  }
-}`;
-
-      it('works', async () => {
-        // FIXME: explicit assert condition
-        expect(
-          await extractPackageFile(contents, packageFile, config)
-        ).toMatchSnapshot();
-      });
-
-      it('with-config', async () => {
-        // FIXME: explicit assert condition
-        expect(
-          await extractPackageFile(
-            contents,
-            `with-config-file/${packageFile}`,
-            config
-          )
-        ).toMatchSnapshot();
-      });
-
-      it('wrong version', async () => {
-        expect(
-          await extractPackageFile(
-            contents.replace('"version": 1,', '"version": 2,'),
-            packageFile,
-            config
-          )
-        ).toBeNull();
-      });
-
-      it('does not throw', async () => {
-        expect(await extractPackageFile('{{', packageFile, config)).toBeNull();
-      });
-    });
   });
 });
