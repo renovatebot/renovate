@@ -122,7 +122,7 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ecr": "3.25.0",
+    "@aws-sdk/client-ecr": "3.38.0",
     "@breejs/later": "4.1.0",
     "@iarna/toml": "2.2.5",
     "@renovate/pep440": "1.0.0",
@@ -253,7 +253,7 @@
     "eslint-plugin-promise": "5.1.1",
     "expect-more-jest": "5.4.0",
     "glob": "7.2.0",
-    "graphql": "15.7.0",
+    "graphql": "15.7.2",
     "husky": "7.0.4",
     "jest": "27.3.1",
     "jest-extended": "1.1.0",
@@ -274,7 +274,7 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "27.0.7",
     "ts-node": "10.4.0",
-    "type-fest": "2.5.1",
+    "type-fest": "2.5.2",
     "typescript": "4.4.4",
     "unified": "9.2.2"
   },
