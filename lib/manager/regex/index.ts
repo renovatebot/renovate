@@ -154,7 +154,7 @@ function handleRecursive(
     return [];
   }
   return regexMatchAll(regexes[index], content).flatMap((match) => {
-    // if we have a depName and a currentValue with have the minimal viable definition
+    // if we have a depName and a currentValue which have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
       return createDependency(
         {
