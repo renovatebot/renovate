@@ -34,6 +34,12 @@ export class BitBucketTagsDatasource extends Datasource {
     )}:${repo}:${type}`;
   }
 
+  static getSourceUrl(lookupName: string, registryUrl?: string): string {
+    const url = BitBucketTagsDatasource.getRegistryURL(registryUrl);
+    const normalizedUrl = ensureTrailingSlash(url);
+    return `${normalizedUrl}${lookupName}`;
+  }
+
   // getReleases fetches list of tags for the repository
   @cache({
     namespace: BitBucketTagsDatasource.cacheNamespace,
@@ -51,9 +57,7 @@ export class BitBucketTagsDatasource extends Datasource {
     ).body;
 
     const dependency: ReleaseResult = {
-      sourceUrl: `${ensureTrailingSlash(
-        BitBucketTagsDatasource.getRegistryURL(registryUrl)
-      )}${repo}`,
+      sourceUrl: BitBucketTagsDatasource.getSourceUrl(repo, registryUrl),
       registryUrl: BitBucketTagsDatasource.getRegistryURL(registryUrl),
       releases: null,
     };
