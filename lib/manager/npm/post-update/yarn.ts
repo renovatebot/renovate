@@ -249,7 +249,7 @@ export async function generateLockFile(
         throw new ExternalHostError(err, npmId);
       }
     }
-    return { error: true, stderr: err.stderr };
+    return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
   return { lockFile };
 }
