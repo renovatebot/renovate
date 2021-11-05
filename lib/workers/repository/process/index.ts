@@ -2,6 +2,7 @@ import { mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
+import { platform } from '../../../platform';
 import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import type { BranchConfig } from '../../types';
@@ -12,13 +13,28 @@ import type { WriteUpdateResult } from './write';
 function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig
-): RenovateConfig {
+): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
-  const baseBranchConfig = mergeChildConfig(config, { baseBranch });
-  if (config.baseBranches.length > 1) {
+
+  let baseBranchConfig: RenovateConfig = config;
+
+  if (
+    config.useBaseBranchConfig === 'replace' &&
+    baseBranch !== config.defaultBranch
+  ) {
+    baseBranchConfig = await platform.getJsonFile(
+      config.onboardingConfigFileName,
+      config.repository,
+      baseBranch
+    );
+  }
+
+  baseBranchConfig = mergeChildConfig(baseBranchConfig, { baseBranch });
+  if (baseBranchConfig.baseBranches.length > 1) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
+
   return baseBranchConfig;
 }
 

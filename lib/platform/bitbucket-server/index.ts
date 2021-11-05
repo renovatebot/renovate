@@ -123,7 +123,8 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repo: string = config.repository,
+  branch: string | null = null
 ): Promise<string | null> {
   const [project, slug] = repo.split('/');
   const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
@@ -139,7 +140,8 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repo: string = config.repository,
+  branch: string | null = null
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repo);
   if (fileName.endsWith('.json5')) {

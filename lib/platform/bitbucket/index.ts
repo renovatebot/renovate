@@ -110,7 +110,8 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repo: string = config.repository,
+  branch: string | null = null
 ): Promise<string | null> {
   // See: https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/src/%7Bcommit%7D/%7Bpath%7D
   const path = fileName;
@@ -121,7 +122,8 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repo: string = config.repository,
+  branch: string | null = null
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repo);
   if (fileName.endsWith('.json5')) {

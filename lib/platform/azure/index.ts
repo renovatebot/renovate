@@ -113,7 +113,8 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repoName?: string
+  repoName?: string,
+  branch?: string | null
 ): Promise<string | null> {
   const azureApiGit = await azureApi.gitApi();
 
@@ -133,7 +134,8 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repoName?: string
+  repoName?: string,
+  branch?: string | null
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName);
   if (fileName.endsWith('.json5')) {
