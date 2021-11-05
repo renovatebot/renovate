@@ -11,7 +11,8 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readFile, remove } from '../../../util/fs';
+import { exists, readFile, remove, writeFile } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import { GenerateLockFileResult } from './types';
@@ -32,7 +33,16 @@ export async function checkYarnrc(
         .split('\n')
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace(/^yarn-path\s+"?(.+?)"?$/, '$1');
+        yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
+      }
+      const yarnBinaryExists = await exists(yarnPath);
+      if (!yarnBinaryExists) {
+        const scrubbedYarnrc = yarnrc.replace(
+          regEx(/^yarn-path\s+"?.+?"?$/gm),
+          ''
+        );
+        await writeFile(`${cwd}/.yarnrc`, scrubbedYarnrc);
+        yarnPath = null;
       }
     }
   } catch (err) /* istanbul ignore next */ {
@@ -47,6 +57,10 @@ export function getOptimizeCommand(
   return `sed -i 's/ steps,/ steps.slice(0,1),/' ${quote(fileName)}`;
 }
 
+export function isYarnUpdate(upgrade: Upgrade): boolean {
+  return upgrade.depType === 'packageManager' && upgrade.depName === 'yarn';
+}
+
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
@@ -57,7 +71,10 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
-    const yarnCompatibility = config.constraints?.yarn;
+    const yarnUpdate = upgrades.find(isYarnUpdate);
+    const yarnCompatibility = yarnUpdate
+      ? yarnUpdate.newValue
+      : config.constraints?.yarn;
     const minYarnVersion =
       validRange(yarnCompatibility) && minVersion(yarnCompatibility);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
@@ -87,6 +104,7 @@ export async function generateLockFile(
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
           preCommands.push(getOptimizeCommand());
+          // istanbul ignore if
           if (yarnPath) {
             preCommands.push(getOptimizeCommand(yarnPath) + ' || true');
           }
@@ -128,7 +146,7 @@ export async function generateLockFile(
       extraEnv,
       docker: {
         image: 'node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
         preCommands,
       },
@@ -137,6 +155,11 @@ export async function generateLockFile(
     if (getGlobalConfig().exposeAllEnv) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+    }
+
+    if (yarnUpdate && !isYarn1) {
+      logger.debug('Updating Yarn binary');
+      commands.push(`yarn set version ${yarnUpdate.newValue}`);
     }
 
     // This command updates the lock file based on package.json
@@ -226,7 +249,7 @@ export async function generateLockFile(
         throw new ExternalHostError(err, npmId);
       }
     }
-    return { error: true, stderr: err.stderr };
+    return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
   return { lockFile };
 }

@@ -7,6 +7,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
+import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
@@ -22,18 +23,18 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
     ? updateConfig.depName
         .replace('@types/', '')
         .replace('@', '')
-        .replace(/\//g, '-')
-        .replace(/\s+/g, '-')
-        .replace(/-+/, '-')
+        .replace(regEx(/\//g), '-') // TODO #12071
+        .replace(regEx(/\s+/g), '-') // TODO #12071
+        .replace(regEx(/-+/), '-')
         .toLowerCase()
     : undefined;
   if (updateConfig.sourceUrl) {
     const parsedSourceUrl = parseUrl(updateConfig.sourceUrl);
     if (parsedSourceUrl?.pathname) {
       updateConfig.sourceRepoSlug = parsedSourceUrl.pathname
-        .replace(/^\//, '') // remove leading slash
-        .replace(/\//g, '-') // change slashes to hyphens
-        .replace(/-+/g, '-'); // remove multiple hyphens
+        .replace(regEx(/^\//), '') // remove leading slash  // TODO #12071
+        .replace(regEx(/\//g), '-') // change slashes to hyphens   // TODO #12071
+        .replace(regEx(/-+/g), '-'); // remove multiple hyphens
     }
   }
   generateBranchName(updateConfig);

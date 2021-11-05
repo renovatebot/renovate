@@ -1,4 +1,4 @@
-import { dir } from 'tmp-promise';
+import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { loadFixture } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
@@ -19,10 +19,11 @@ describe('manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
     let config: ExtractConfig;
     let adminConfig: RepoGlobalConfig;
+    let tmpDir: DirectoryResult;
 
     beforeEach(async () => {
       config = {};
-      const tmpDir = await dir();
+      tmpDir = await dir({ unsafeCleanup: true });
       adminConfig = {
         localDir: join(tmpDir.path, 'local'),
         cacheDir: join(tmpDir.path, 'cache'),
@@ -30,7 +31,8 @@ describe('manager/cargo/extract', () => {
 
       setGlobalConfig(adminConfig);
     });
-    afterEach(() => {
+    afterEach(async () => {
+      await tmpDir.cleanup();
       setGlobalConfig();
     });
     it('returns null for invalid toml', async () => {

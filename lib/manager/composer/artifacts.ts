@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { getGlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -19,11 +18,13 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson } from './types';
 import {
   composerVersioningId,
   extractContraints,
+  getComposerArguments,
   getComposerConstraint,
   getPhpConstraint,
 } from './utils';
@@ -80,7 +81,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const lockFileName = packageFileName.replace(/\.json$/, '.lock');
+  const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
@@ -128,19 +129,7 @@ export async function updateArtifacts({
           'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
         ).trim() + ' --with-dependencies';
     }
-    if (config.composerIgnorePlatformReqs) {
-      if (config.composerIgnorePlatformReqs.length === 0) {
-        args += ' --ignore-platform-reqs';
-      } else {
-        config.composerIgnorePlatformReqs.forEach((req) => {
-          args += ' --ignore-platform-req ' + quote(req);
-        });
-      }
-    }
-    args += ' --no-ansi --no-interaction';
-    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
-      args += ' --no-scripts --no-autoloader --no-plugins';
-    }
+    args += getComposerArguments(config);
     logger.debug({ cmd, args }, 'composer command');
     await exec(`${cmd} ${args}`, execOptions);
     const status = await getRepoStatus();

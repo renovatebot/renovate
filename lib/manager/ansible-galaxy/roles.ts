@@ -1,6 +1,7 @@
 import { GalaxyDatasource } from '../../datasource/galaxy';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import {
   blockLineRegEx,
@@ -16,7 +17,7 @@ function interpretLine(
 ): PackageDependency {
   const localDependency: PackageDependency = dependency;
   const key = lineMatch[2];
-  const value = lineMatch[3].replace(/["']/g, '');
+  const value = lineMatch[3].replace(regEx(/["']/g), '');
   switch (key) {
     case 'name': {
       localDependency.managerData.name = value;
@@ -53,10 +54,10 @@ function finalize(dependency: PackageDependency): boolean {
   const source: string = dep.managerData.src;
   const sourceMatch = nameMatchRegex.exec(source);
   if (sourceMatch) {
-    dep.datasource = datasourceGitTags.id;
-    dep.depName = sourceMatch.groups.depName.replace(/.git$/, '');
+    dep.datasource = GitTagsDatasource.id;
+    dep.depName = sourceMatch.groups.depName.replace(regEx(/.git$/), '');
     // remove leading `git+` from URLs like `git+https://...`
-    dep.lookupName = source.replace(/git\+/, '');
+    dep.lookupName = source.replace(regEx(/git\+/), '');
   } else if (galaxyDepRegex.exec(source)) {
     dep.datasource = GalaxyDatasource.id;
     dep.depName = dep.managerData.src;

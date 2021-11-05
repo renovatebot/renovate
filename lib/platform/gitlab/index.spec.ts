@@ -377,7 +377,7 @@ describe('platform/gitlab/index', () => {
           merge_method: 'merge',
         }
       );
-      expect(await gitlab.getRepoForceRebase()).toBe(false);
+      expect(await gitlab.getRepoForceRebase()).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -392,7 +392,7 @@ describe('platform/gitlab/index', () => {
           merge_method: 'ff',
         }
       );
-      expect(await gitlab.getRepoForceRebase()).toBe(true);
+      expect(await gitlab.getRepoForceRebase()).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1633,7 +1633,7 @@ describe('platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBe(false);
+      expect(pr.hasAssignees).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('removes draft prefix from returned title', async () => {
@@ -1707,7 +1707,7 @@ describe('platform/gitlab/index', () => {
         .reply(200, [{ status: 'success' }]);
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBe(true);
+      expect(pr.hasAssignees).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the PR with nonexisting branch', async () => {
@@ -1734,7 +1734,7 @@ describe('platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr.hasAssignees).toBe(true);
+      expect(pr.hasAssignees).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1915,6 +1915,25 @@ These updates have all been created already. Click a checkbox below to force a r
         });
       const res = await gitlab.getJsonFile('dir/file.json');
       expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+        `;
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json5?ref=HEAD'
+        )
+        .reply(200, {
+          content: Buffer.from(json5Data).toString('base64'),
+        });
+      const res = await gitlab.getJsonFile('dir/file.json5');
+      expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws on malformed JSON', async () => {

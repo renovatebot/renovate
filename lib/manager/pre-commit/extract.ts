@@ -89,13 +89,13 @@ function extractDependency(
     // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
     // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
-    /^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/,
+    regEx(/^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/),
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
     if (match) {
       const hostname = match.groups.hostname;
-      const depName = match.groups.depName.replace(/\.git$/i, '');
+      const depName = match.groups.depName.replace(regEx(/\.git$/i), ''); // TODO 12071
       const sourceDef = determineDatasource(repository, hostname);
       return {
         ...sourceDef,
@@ -181,7 +181,7 @@ export function extractPackageFile(
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ filename, err }, 'Error scanning parsed pre-commit config');
+    logger.warn({ filename, err }, 'Error scanning parsed pre-commit config');
   }
   return null;
 }

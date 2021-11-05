@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import { isSingleVersion, parseRange, rangeToStr } from '../maven/compare';
 
 const REV_TYPE_LATEST = 'REV_TYPE_LATEST';
@@ -10,7 +11,7 @@ export interface Revision {
   value: string;
 }
 
-export const LATEST_REGEX = /^latest\.|^latest$/i;
+export const LATEST_REGEX = regEx(/^latest\.|^latest$/i);
 
 function parseDynamicRevision(str: string): Revision | null {
   if (!str) {
@@ -25,7 +26,7 @@ function parseDynamicRevision(str: string): Revision | null {
     };
   }
 
-  const SUBREV_REGEX = /\.\+$/;
+  const SUBREV_REGEX = regEx(/\.\+$/);
   if (str.endsWith('.+')) {
     const value = str.replace(SUBREV_REGEX, '');
     if (isSingleVersion(value)) {
