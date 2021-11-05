@@ -1,15 +1,15 @@
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
-import { regEx } from '../../util/regex';
 import { joinUrlParts } from '../../util/url';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitlabTag } from './types';
+import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util';
 
 export const id = 'gitlab-tags';
 const gitlabApi = new GitlabHttp(id);
 
 export const customRegistrySupport = true;
-export const defaultRegistryUrls = ['https://gitlab.com'];
+export const defaultRegistryUrls = [defaultRegistryUrl];
 export const registryStrategy = 'first';
 
 const cacheNamespace = 'datasource-gitlab';
@@ -23,7 +23,7 @@ export async function getReleases({
   registryUrl,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const depHost = registryUrl.replace(regEx(/\/api\/v4$/), '');
+  const depHost = getDepHost(registryUrl);
 
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
@@ -51,7 +51,7 @@ export async function getReleases({
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: joinUrlParts(depHost, repo),
+    sourceUrl: getSourceUrl(repo, registryUrl),
     releases: null,
   };
   dependency.releases = gitlabTags.map(({ name, commit }) => ({
