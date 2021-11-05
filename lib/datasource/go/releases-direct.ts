@@ -3,7 +3,8 @@ import { regEx } from '../../util/regex';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { bitbucket, getDatasource } from './util';
+import { bitbucket } from './common';
+import { getDatasource } from './get-datasource';
 
 /**
  * go.getReleases
