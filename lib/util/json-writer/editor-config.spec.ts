@@ -1,4 +1,3 @@
-import { afterAll } from '@jest/globals';
 import mockFs from 'mock-fs';
 import { loadFixture } from '../../../test/util';
 import { configFileNames } from '../../config/app-strings';
