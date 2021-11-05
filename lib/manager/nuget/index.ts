@@ -10,6 +10,6 @@ export const defaultConfig = {
     '\\.(?:cs|fs|vb)proj$',
     '\\.(?:props|targets)$',
     '(^|\\/)dotnet-tools\\.json$',
-    '(^|//)global\\.json$',
+    '(^|\\/)global\\.json$',
   ],
 };
