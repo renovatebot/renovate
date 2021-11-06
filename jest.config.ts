@@ -36,6 +36,7 @@ const config: InitialOptionsTsJest = {
   testRunner: 'jest-circus/runner',
   globals: {
     'ts-jest': {
+      tsconfig: '<rootDir>/tsconfig.spec.json',
       diagnostics: false,
       isolatedModules: true,
     },
