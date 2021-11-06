@@ -158,7 +158,7 @@ function urlEscape(str: string): string {
 export async function getRawFile(
   fileName: string,
   repo: string = config.repository,
-  branch: string | null = null
+  branch?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const url =
