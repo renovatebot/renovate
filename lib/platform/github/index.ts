@@ -66,6 +66,7 @@ import {
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
+  PlatformConfig,
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
@@ -74,13 +75,28 @@ const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig = {} as any;
 
-const defaults = {
+const platformConfig: PlatformConfig = {
   hostType: PlatformId.Github,
   endpoint: 'https://api.github.com/',
 };
 
 const escapeHash = (input: string): string =>
   input ? input.replace(regEx(/#/g), '%23') : input;
+
+export async function detectGhe(token: string): Promise<void> {
+  platformConfig.isGhe =
+    URL.parse(platformConfig.endpoint).host !== 'api.github.com';
+  if (platformConfig.isGhe) {
+    const gheHeaderKey = 'x-github-enterprise-version';
+    const gheQueryRes = await githubApi.headJson('/', { token });
+    const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
+    const [, gheVersion] =
+      Object.entries(gheHeaders).find(
+        ([k]) => k.toLowerCase() === gheHeaderKey
+      ) ?? [];
+    platformConfig.gheVersion = semverValid(gheVersion) ?? null;
+  }
+}
 
 export async function initPlatform({
   endpoint,
@@ -93,48 +109,38 @@ export async function initPlatform({
   }
 
   if (endpoint) {
-    defaults.endpoint = ensureTrailingSlash(endpoint);
-    githubHttp.setBaseUrl(defaults.endpoint);
+    platformConfig.endpoint = ensureTrailingSlash(endpoint);
+    githubHttp.setBaseUrl(platformConfig.endpoint);
   } else {
-    logger.debug('Using default github endpoint: ' + defaults.endpoint);
+    logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
 
-  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
-  if (config.isGhe) {
-    const gheHeaderKey = 'x-github-enterprise-version';
-    const gheQueryRes = await githubApi.head('/', { throwHttpErrors: false });
-    const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
-    const [, gheVersion] =
-      Object.entries(gheHeaders).find(
-        ([k]) => k.toLowerCase() === gheHeaderKey
-      ) ?? [];
-    config.gheVersion = semverValid(gheVersion) ?? null;
-  }
+  await detectGhe(token);
 
   let userDetails: UserDetails;
   let renovateUsername: string;
   if (username) {
     renovateUsername = username;
   } else {
-    userDetails = await getUserDetails(defaults.endpoint, token);
+    userDetails = await getUserDetails(platformConfig.endpoint, token);
     renovateUsername = userDetails.username;
   }
   let discoveredGitAuthor: string;
   if (!gitAuthor) {
-    userDetails = await getUserDetails(defaults.endpoint, token);
-    const userEmail = await getUserEmail(defaults.endpoint, token);
+    userDetails = await getUserDetails(platformConfig.endpoint, token);
+    const userEmail = await getUserEmail(platformConfig.endpoint, token);
     if (userEmail) {
       discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
     }
   }
-  logger.debug('Authenticated as GitHub user: ' + renovateUsername);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
+  logger.debug({ platformConfig, renovateUsername }, 'Platform config');
+  const platformResult: PlatformResult = {
+    endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
 
-  return platformConfig;
+  return platformResult;
 }
 
 // Get all repositories that the user has access to
@@ -210,19 +216,17 @@ export async function initRepo({
     repository,
     cloneSubmodules,
     ignorePrAuthor,
-    isGhe: config.isGhe,
-    gheVersion: config.gheVersion,
   } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
     logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
-    defaults.endpoint = endpoint;
+    platformConfig.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
     hostType: PlatformId.Github,
-    url: defaults.endpoint,
+    url: platformConfig.endpoint,
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
@@ -230,7 +234,7 @@ export async function initRepo({
   try {
     let infoQuery = repoInfoQuery;
 
-    if (config.isGhe) {
+    if (platformConfig.isGhe) {
       infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
@@ -438,7 +442,7 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = URL.parse(defaults.endpoint);
+  const parsedEndpoint = URL.parse(platformConfig.endpoint);
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
@@ -1445,11 +1449,11 @@ async function tryPrAutomerge(
   prNodeId: string,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
-  if (!platformOptions?.usePlatformAutomerge) {
+  if (platformConfig.isGhe || !platformOptions?.usePlatformAutomerge) {
     return;
   }
 
-  if (config.autoMergeAllowed === false) {
+  if (!config.autoMergeAllowed) {
     logger.debug(
       { prNumber },
       'GitHub-native automerge: not enabled in repo settings'
@@ -1658,7 +1662,7 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
-  if (config.isGhe) {
+  if (platformConfig.isGhe) {
     return smartTruncate(input, 60000);
   }
   const massagedInput = massageMarkdownLinks(input)
