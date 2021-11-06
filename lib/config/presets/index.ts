@@ -39,7 +39,7 @@ const nonScopedPresetWithSubdirRegex = regEx(
   /^(?<packageName>~?[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-.]+?))?$/
 );
 const gitPresetRegex = regEx(
-  /^(?<packageName>[\w\-./]+)(?::(?<presetPath>[\w-./]+\/))?(?::?(?<presetName>[\w\-.]+))?(?:#(?<packageTag>[\w\-.]+?))?$/
+  /^(?<packageName>[\w\-./]+)(?::(?<presetPath>[\w-./]+\/))?(?::?(?<presetName>[\w\-.+]+))?(?:#(?<packageTag>[\w\-.]+?))?$/
 );
 
 export function replaceArgs(

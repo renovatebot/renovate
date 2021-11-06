@@ -322,6 +322,15 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+    it('handles special chars', () => {
+      expect(presets.parsePreset('github>some/repo:foo+bar')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'foo+bar',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
+    });
     it('parses github subfiles', () => {
       expect(presets.parsePreset('github>some/repo:somefile')).toEqual({
         packageName: 'some/repo',
