@@ -8,6 +8,7 @@ import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
 import type {
@@ -19,8 +20,6 @@ import type {
 
 // TODO: refactor code to remove this (#9651)
 import './legacy';
-import { skipRetry } from './retry';
-import { hooks } from './hooks';
 
 export interface HttpOptions {
   body?: any;
