@@ -5,7 +5,8 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { regEx } from '../../util/regex';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GoproxyFallback, http } from './common';
+import { GoproxyFallback, getSourceUrl, http } from './common';
+import { getDatasource } from './get-datasource';
 import * as direct from './releases-direct';
 import type { GoproxyItem, VersionInfo } from './types';
 
@@ -202,7 +203,9 @@ export async function getReleases(
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        result = { releases };
+        const datasource = await getDatasource(lookupName);
+        const sourceUrl = getSourceUrl(datasource);
+        result = { releases, sourceUrl };
         break;
       }
     } catch (err) {

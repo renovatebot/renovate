@@ -3,7 +3,7 @@ import { regEx } from '../../util/regex';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { bitbucket } from './common';
+import { bitbucket, getSourceUrl } from './common';
 import { getDatasource } from './get-datasource';
 
 /**
@@ -59,6 +59,8 @@ export async function getReleases(
     return null;
   }
 
+  const sourceUrl = getSourceUrl(source);
+
   /**
    * github.com/org/mod/submodule should be tagged as submodule/va.b.c
    * and that tag should be used instead of just va.b.c, although for compatibility
@@ -91,7 +93,7 @@ export async function getReleases(
       (source.datasource === gitlab.id && submodReleases.length)
     ) {
       return {
-        sourceUrl: res.sourceUrl,
+        sourceUrl,
         releases: submodReleases,
       };
     }
@@ -103,5 +105,5 @@ export async function getReleases(
     );
   }
 
-  return res;
+  return { ...res, sourceUrl };
 }
