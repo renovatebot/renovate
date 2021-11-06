@@ -95,19 +95,23 @@ export function interpolateString(
   return resolvedSubstrings.join('');
 }
 
+const gradleVersionsFileRegex = regEx('^versions\\.gradle(?:\\.kts)?$', 'i');
+const gradleBuildFileRegex = regEx('^build\\.gradle(?:\\.kts)?$', 'i');
+const gradleFileRegex = regEx('\\.gradle(?:\\.kts)?$', 'i');
+
 export function isGradleVersionsFile(path: string): boolean {
-  const filename = upath.basename(path).toLowerCase();
-  return /^versions\.gradle(?:\.kts)?$/.test(filename);
+  const filename = upath.basename(path);
+  return gradleVersionsFileRegex.test(filename);
 }
 
 export function isGradleBuildFile(path: string): boolean {
-  const filename = upath.basename(path).toLowerCase();
-  return /^build\.gradle(?:\.kts)?$/.test(filename);
+  const filename = upath.basename(path);
+  return gradleBuildFileRegex.test(filename);
 }
 
 export function isGradleFile(path: string): boolean {
-  const filename = upath.basename(path).toLowerCase();
-  return /\.gradle(?:\.kts)?$/.test(filename);
+  const filename = upath.basename(path);
+  return gradleFileRegex.test(filename);
 }
 
 export function isPropsFile(path: string): boolean {
