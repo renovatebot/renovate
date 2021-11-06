@@ -19,6 +19,7 @@ import type {
 
 // TODO: refactor code to remove this (#9651)
 import './legacy';
+import { skipRetry } from './retry';
 
 export interface HttpOptions {
   body?: any;
@@ -134,7 +135,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       httpOptions
     );
 
-    if (process.env.NODE_ENV === 'test') {
+    if (skipRetry(url)) {
       options.retry = 0;
     }
     options.hooks = {
