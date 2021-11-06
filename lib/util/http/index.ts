@@ -20,6 +20,7 @@ import type {
 // TODO: refactor code to remove this (#9651)
 import './legacy';
 import { skipRetry } from './retry';
+import { hooks } from './hooks';
 
 export interface HttpOptions {
   body?: any;
@@ -99,7 +100,7 @@ async function gotRoutine<T>(
 
   // Cheat the TS compiler using `as` to pick a specific overload.
   // Otherwise it doesn't typecheck.
-  const resp = await got<T>(url, options as GotJSONOptions);
+  const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
   const duration =
     resp.timings.phases.total || /* istanbul ignore next: can't be tested */ 0;
 
@@ -135,7 +136,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       httpOptions
     );
 
-    if (skipRetry(url)) {
+    if (process.env.NODE_ENV === 'test') {
       options.retry = 0;
     }
     options.hooks = {
