@@ -129,8 +129,8 @@ export async function generateLockFile(
       // massage lock file for npm 7+
       try {
         const lockFileParsed = JSON.parse(await readFile(lockFileName, 'utf8'));
-        const packageNames = Object.keys(lockFileParsed.packages);
-        if (is.nonEmptyArray(packageNames)) {
+        if (is.plainObject(lockFileParsed.packages)) {
+          const packageNames = Object.keys(lockFileParsed.packages);
           let lockFileMassaged = false;
           for (const { depName } of upgrades) {
             for (const packageName of packageNames) {
