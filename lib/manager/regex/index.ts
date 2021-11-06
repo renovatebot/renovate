@@ -1,4 +1,3 @@
-import { MatchStringsStrategy } from '../../config/types';
 import type {
   CustomExtractConfig,
   PackageDependency,
@@ -20,13 +19,13 @@ export function extractPackageFile(
   let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {
     default:
-    case MatchStringsStrategy.ANY:
+    case 'any':
       deps = handleAny(content, packageFile, config);
       break;
-    case MatchStringsStrategy.COMBINATION:
+    case 'combination':
       deps = handleCombination(content, packageFile, config);
       break;
-    case MatchStringsStrategy.RECURSIVE:
+    case 'recursive':
       deps = handleRecursive(content, packageFile, config);
       break;
   }

@@ -1,5 +1,4 @@
 import { loadFixture } from '../../../test/util';
-import { MatchStringsStrategy } from '../../config/types';
 import { logger } from '../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, extractPackageFile } from '.';
@@ -196,7 +195,7 @@ describe('manager/regex/index', () => {
         'prometheus_image:\\s*"(?<depName>.*)"\\s*\\/\\/',
         'prometheus_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/',
       ],
-      matchStringsStrategy: MatchStringsStrategy.COMBINATION,
+      matchStringsStrategy: 'combination',
       datasourceTemplate: 'docker',
     };
     const res = await extractPackageFile(
@@ -216,7 +215,7 @@ describe('manager/regex/index', () => {
         'prometheus_tag:\\s*"(?<tag>.*)"\\s*\\/\\/',
         'prometheus_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/',
       ],
-      matchStringsStrategy: MatchStringsStrategy.COMBINATION,
+      matchStringsStrategy: 'combination',
       datasourceTemplate: 'docker',
       depNameTemplate: '{{{ registry }}}/{{{ repository }}}',
     };
@@ -236,7 +235,7 @@ describe('manager/regex/index', () => {
         '.*_image:\\s*"(?<depName>.*)"\\s*\\/\\/',
         '.*_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/',
       ],
-      matchStringsStrategy: MatchStringsStrategy.COMBINATION,
+      matchStringsStrategy: 'combination',
       datasourceTemplate: 'docker',
     };
     const res = await extractPackageFile(
@@ -249,7 +248,7 @@ describe('manager/regex/index', () => {
   });
   it('extracts with combination strategy and registry url', async () => {
     const config: CustomExtractConfig = {
-      matchStringsStrategy: MatchStringsStrategy.COMBINATION,
+      matchStringsStrategy: 'combination',
       matchStrings: [
         'CHART_VERSION: (?<currentValue>.*?)\n',
         'CHART_REPOSITORY_URL: "(?<registryUrl>.*?)"',
@@ -268,7 +267,7 @@ describe('manager/regex/index', () => {
 
   it('extracts with combination strategy and templates', async () => {
     const config: CustomExtractConfig = {
-      matchStringsStrategy: MatchStringsStrategy.COMBINATION,
+      matchStringsStrategy: 'combination',
       matchStrings: [
         'CHART_REPOSITORY_URL: "(?<registryUrl>.*)\\/(?<depName>[a-z]+)\\/"',
         'CHART_VERSION: (?<currentValue>.*?)\n',
@@ -287,7 +286,7 @@ describe('manager/regex/index', () => {
 
   it('extracts with combination strategy and empty file', async () => {
     const config: CustomExtractConfig = {
-      matchStringsStrategy: MatchStringsStrategy.COMBINATION,
+      matchStringsStrategy: 'combination',
       matchStrings: [
         'CHART_REPOSITORY_URL: "(?<registryUrl>.*)\\/(?<depName>[a-z]+)\\/"',
         'CHART_VERSION: (?<currentValue>.*?)\n',
@@ -305,7 +304,7 @@ describe('manager/regex/index', () => {
         '"group1":\\s*\\{[^}]*}',
         '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
       ],
-      matchStringsStrategy: MatchStringsStrategy.RECURSIVE,
+      matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(
       exampleJsonContent,
@@ -321,7 +320,7 @@ describe('manager/regex/index', () => {
         '"group.{1}":\\s*\\{[^}]*}',
         '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
       ],
-      matchStringsStrategy: MatchStringsStrategy.RECURSIVE,
+      matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(
       exampleJsonContent,
@@ -338,7 +337,7 @@ describe('manager/regex/index', () => {
         '"test":\\s*\\{[^}]*}',
         '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
       ],
-      matchStringsStrategy: MatchStringsStrategy.RECURSIVE,
+      matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(
       exampleJsonContent,
@@ -351,7 +350,7 @@ describe('manager/regex/index', () => {
   it('extracts with recursive strategy and fail because of not sufficient regexes', async () => {
     const config: CustomExtractConfig = {
       matchStrings: ['"group.{1}":\\s*\\{[^}]*}'],
-      matchStringsStrategy: MatchStringsStrategy.RECURSIVE,
+      matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(
       exampleJsonContent,
@@ -364,7 +363,7 @@ describe('manager/regex/index', () => {
   it('extracts with recursive strategy and fail because there is no match', async () => {
     const config: CustomExtractConfig = {
       matchStrings: ['"trunk.{1}":\\s*\\{[^}]*}'],
-      matchStringsStrategy: MatchStringsStrategy.RECURSIVE,
+      matchStringsStrategy: 'recursive',
     };
     const res = await extractPackageFile(
       exampleJsonContent,
@@ -381,7 +380,7 @@ describe('manager/regex/index', () => {
         '"(?<second>[^"]*)":\\s*\\{[^}]*}',
         '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
       ],
-      matchStringsStrategy: MatchStringsStrategy.RECURSIVE,
+      matchStringsStrategy: 'recursive',
       depNameTemplate: '{{{ first }}}/{{{ second }}}/{{{ depName }}}',
     };
     const res = await extractPackageFile(
