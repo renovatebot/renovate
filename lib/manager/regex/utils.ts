@@ -1,8 +1,8 @@
 import { URL } from 'url';
 import { logger } from '../../logger';
 import * as template from '../../util/template';
-import { CustomExtractConfig, PackageDependency } from '../types';
-import { ExtractionTemplate } from './types';
+import type { CustomExtractConfig, PackageDependency } from '../types';
+import type { ExtractionTemplate } from './types';
 
 export const validMatchFields = [
   'depName',

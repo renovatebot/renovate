@@ -1,5 +1,5 @@
 import { regEx } from '../../util/regex';
-import { CustomExtractConfig, PackageDependency } from '../types';
+import type { CustomExtractConfig, PackageDependency } from '../types';
 import {
   createDependency,
   mergeExtractionTemplate,
