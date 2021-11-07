@@ -564,29 +564,6 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'global timeout for all child_process exec',
-      {
-        processEnv,
-        inCmd,
-        inOpts: {},
-        outCmd,
-        outOpts: [
-          {
-            cwd,
-            encoding,
-            env: envMock.basic,
-            timeout: 10 * 60 * 1000,
-            maxBuffer: 10485760,
-          },
-        ],
-        adminConfig: {
-          executionTimeout: 10 * 60 * 1000,
-          binarySource: 'docker',
-        },
-      },
-    ],
-
-    [
       'Explicit maxBuffer',
       {
         processEnv,
