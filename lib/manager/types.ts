@@ -35,6 +35,7 @@ export interface CustomExtractConfig extends ExtractConfig {
   lookupNameTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
+  depTypeTemplate?: string;
 }
 
 export interface UpdateArtifactsConfig {
@@ -48,6 +49,7 @@ export interface UpdateArtifactsConfig {
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
+  aliases?: Record<string, string>;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {

@@ -151,7 +151,7 @@ describe('platform/bitbucket/index', () => {
   describe('getRepoForceRebase()', () => {
     it('always return false, since bitbucket does not support force rebase', async () => {
       const actual = await bitbucket.getRepoForceRebase();
-      expect(actual).toBe(false);
+      expect(actual).toBeFalse();
     });
   });
 
@@ -906,7 +906,7 @@ describe('platform/bitbucket/index', () => {
         id: 5,
         strategy: 'rebase',
       });
-      expect(httpMock.getTrace()).toEqual([]);
+      expect(httpMock.getTrace()).toBeEmptyArray();
     });
 
     it('posts Merge with fast-forward', async () => {
@@ -936,6 +936,21 @@ describe('platform/bitbucket/index', () => {
         .reply(200, JSON.stringify(data));
       const res = await bitbucket.getJsonFile('file.json');
       expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json5')
+        .reply(200, json5Data);
+      const res = await bitbucket.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws on malformed JSON', async () => {

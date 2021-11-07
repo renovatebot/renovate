@@ -35,6 +35,7 @@ describe('versioning/maven/compare', () => {
     ${'1.0beta-1'}          | ${'1.0-b1'}                | ${0}
     ${'1.0milestone1'}      | ${'1.0-m1'}                | ${0}
     ${'1.0milestone-1'}     | ${'1.0-m1'}                | ${0}
+    ${'1.0rc'}              | ${'1.0-preview'}           | ${0}
     ${'1.0rc1'}             | ${'1.0-cr1'}               | ${0}
     ${'1.0rc-1'}            | ${'1.0-cr1'}               | ${0}
     ${'1.0ga'}              | ${'1.0'}                   | ${0}
@@ -69,6 +70,7 @@ describe('versioning/maven/compare', () => {
     ${'0.0-1552'}           | ${'1.10.520'}              | ${-1}
     ${'0.0.1'}              | ${'999'}                   | ${-1}
     ${'1.3-RC1-groovy-2.5'} | ${'1.3-groovy-2.5'}        | ${-1}
+    ${'1-preview'}          | ${'1-snapshot'}            | ${-1}
     ${'1-abc'}              | ${'1-xyz'}                 | ${-1}
     ${'Hoxton.RELEASE'}     | ${'Hoxton.SR1'}            | ${-1}
     ${'1.1'}                | ${'1'}                     | ${1}
@@ -90,6 +92,7 @@ describe('versioning/maven/compare', () => {
     ${'1.10.520'}           | ${'0.0-1552'}              | ${1}
     ${'999'}                | ${'0.0.1'}                 | ${1}
     ${'1.3-groovy-2.5'}     | ${'1.3-RC1-groovy-2.5'}    | ${1}
+    ${'1-snapshot'}         | ${'1-milestone'}           | ${1}
     ${'1-xyz'}              | ${'1-abc'}                 | ${1}
     ${'Hoxton.SR1'}         | ${'Hoxton.RELEASE'}        | ${1}
   `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {

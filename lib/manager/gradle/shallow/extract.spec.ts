@@ -61,12 +61,12 @@ describe('manager/gradle/shallow/extract', () => {
           },
         ],
       },
-      { packageFile: 'build.gradle', deps: [] },
       {
         datasource: 'maven',
         deps: [],
         packageFile: 'settings.gradle',
       },
+      { packageFile: 'build.gradle', deps: [] },
     ]);
   });
 
@@ -89,6 +89,11 @@ describe('manager/gradle/shallow/extract', () => {
         deps: [],
       },
       {
+        datasource: 'maven',
+        deps: [],
+        packageFile: 'settings.gradle',
+      },
+      {
         packageFile: 'build.gradle',
         deps: [
           {
@@ -100,11 +105,6 @@ describe('manager/gradle/shallow/extract', () => {
             ],
           },
         ],
-      },
-      {
-        datasource: 'maven',
-        deps: [],
-        packageFile: 'settings.gradle',
       },
     ]);
   });
@@ -164,12 +164,12 @@ describe('manager/gradle/shallow/extract', () => {
           },
         ],
       },
-      { packageFile: 'build.gradle', deps: [] },
       {
         datasource: 'maven',
         deps: [],
         packageFile: 'settings.gradle',
       },
+      { packageFile: 'build.gradle', deps: [] },
     ]);
   });
 

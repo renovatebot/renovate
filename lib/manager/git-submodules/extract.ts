@@ -2,10 +2,11 @@ import URL from 'url';
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
 import { getGlobalConfig } from '../../config/global';
-import * as datasourceGitRefs from '../../datasource/git-refs';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { simpleGitConfig } from '../../util/git/config';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../util/git/url';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageFile } from '../types';
 import { GitModule } from './types';
 
@@ -32,7 +33,7 @@ async function getUrl(
   return URL.resolve(`${remoteUrl}/`, path);
 }
 
-const headRefRe = /ref: refs\/heads\/(?<branch>\w+)\s/;
+const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
 
 async function getDefaultBranch(subModuleUrl: string): Promise<string> {
   const val = await Git().listRemote(['--symref', subModuleUrl, 'HEAD']);
@@ -71,11 +72,11 @@ async function getModules(
       ])) ?? /* istanbul ignore next: should never happen */ ''
     )
       .trim()
-      .split(/\n/)
+      .split(regEx(/\n/))
       .filter((s) => !!s);
 
     for (const line of modules) {
-      const [, name, path] = line.split(/submodule\.(.+?)\.path\s(.+)/);
+      const [, name, path] = line.split(regEx(/submodule\.(.+?)\.path\s(.+)/)); // TODO #12071
       res.push({ name, path });
     }
   } catch (err) /* istanbul ignore next */ {
@@ -104,8 +105,8 @@ export default async function extractPackageFile(
     try {
       const [currentDigest] = (await git.subModule(['status', path]))
         .trim()
-        .replace(/^[-+]/, '')
-        .split(/\s/);
+        .replace(regEx(/^[-+]/), '') // TODO #12071
+        .split(regEx(/\s/)); // TODO #12071
       const subModuleUrl = await getUrl(git, gitModulesPath, name);
       // hostRules only understands HTTP URLs
       // Find HTTP URL, then apply token
@@ -127,5 +128,5 @@ export default async function extractPackageFile(
     }
   }
 
-  return { deps, datasource: datasourceGitRefs.id };
+  return { deps, datasource: GitRefsDatasource.id };
 }

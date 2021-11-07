@@ -33,16 +33,16 @@ describe('manager/gradle/shallow/utils', () => {
   });
 
   it('isDependencyString', () => {
-    expect(isDependencyString('foo:bar:1.2.3')).toBe(true);
-    expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBe(true);
-    expect(isDependencyString('foo:bar:baz:qux')).toBe(false);
-    expect(isDependencyString('foo.bar:baz:1.2.3')).toBe(true);
-    expect(isDependencyString('foo.bar:baz:1.2.+')).toBe(true);
-    expect(isDependencyString('foo.bar:baz:qux:quux')).toBe(false);
-    expect(isDependencyString("foo:bar:1.2.3'")).toBe(false);
-    expect(isDependencyString('foo:bar:1.2.3"')).toBe(false);
-    expect(isDependencyString('-Xep:ParameterName:OFF')).toBe(false);
-    expect(isDependencyString('foo$bar:baz:1.2.+')).toBe(false);
+    expect(isDependencyString('foo:bar:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo:bar:baz:qux')).toBeFalse();
+    expect(isDependencyString('foo.bar:baz:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:1.2.+')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:qux:quux')).toBeFalse();
+    expect(isDependencyString("foo:bar:1.2.3'")).toBeFalse();
+    expect(isDependencyString('foo:bar:1.2.3"')).toBeFalse();
+    expect(isDependencyString('-Xep:ParameterName:OFF')).toBeFalse();
+    expect(isDependencyString('foo$bar:baz:1.2.+')).toBeFalse();
   });
 
   it('parseDependencyString', () => {
@@ -70,7 +70,7 @@ describe('manager/gradle/shallow/utils', () => {
   });
 
   it('interpolateString', () => {
-    expect(interpolateString([], {})).toBe('');
+    expect(interpolateString([], {})).toBeEmptyString();
     expect(
       interpolateString(
         [
@@ -98,23 +98,41 @@ describe('manager/gradle/shallow/utils', () => {
   });
 
   it('reorderFiles', () => {
-    expect(reorderFiles(['a.gradle', 'b.gradle', 'a.gradle'])).toStrictEqual([
+    expect(
+      reorderFiles([
+        'build.gradle',
+        'a.gradle',
+        'b.gradle',
+        'a.gradle',
+        'versions.gradle',
+      ])
+    ).toStrictEqual([
+      'versions.gradle',
       'a.gradle',
       'a.gradle',
       'b.gradle',
+      'build.gradle',
     ]);
 
     expect(
       reorderFiles([
         'a/b/c/build.gradle',
+        'a/b/versions.gradle',
         'a/build.gradle',
+        'versions.gradle',
         'a/b/build.gradle',
+        'a/versions.gradle',
         'build.gradle',
+        'a/b/c/versions.gradle',
       ])
     ).toStrictEqual([
+      'versions.gradle',
       'build.gradle',
+      'a/versions.gradle',
       'a/build.gradle',
+      'a/b/versions.gradle',
       'a/b/build.gradle',
+      'a/b/c/versions.gradle',
       'a/b/c/build.gradle',
     ]);
 
@@ -146,8 +164,8 @@ describe('manager/gradle/shallow/utils', () => {
       'gradle.properties',
       'a.gradle',
       'b.gradle',
-      'build.gradle',
       'c.gradle',
+      'build.gradle',
       'a/gradle.properties',
       'a/build.gradle',
       'a/b/gradle.properties',

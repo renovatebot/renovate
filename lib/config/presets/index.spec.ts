@@ -224,7 +224,7 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
-      expect(rule.automerge).toBe(true);
+      expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(4);
       expect(rule.matchPackagePatterns).toHaveLength(1);
       expect(rule.matchPackagePrefixes).toHaveLength(4);
@@ -234,7 +234,7 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.automerge).not.toBeDefined();
-      expect(res.minor.automerge).toBe(true);
+      expect(res.minor.automerge).toBeTrue();
     });
 
     it('ignores presets', async () => {
@@ -243,7 +243,7 @@ describe('config/presets/index', () => {
         'config:base',
       ]);
       expect(config).toMatchObject(res);
-      expect(res).toEqual({});
+      expect(res).toBeEmptyObject();
     });
 
     it('resolves self-hosted presets without baseConfig', async () => {
@@ -322,6 +322,15 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+    it('handles special chars', () => {
+      expect(presets.parsePreset('github>some/repo:foo+bar')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'foo+bar',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
+    });
     it('parses github subfiles', () => {
       expect(presets.parsePreset('github>some/repo:somefile')).toEqual({
         packageName: 'some/repo',
@@ -337,8 +346,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somefile/somepreset',
-        presetPath: undefined,
+        presetName: 'somepreset',
+        presetPath: 'somefile',
         presetSource: 'github',
       });
     });
@@ -350,8 +359,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somefile/somepreset/somesubpreset',
-        presetPath: undefined,
+        presetName: 'somesubpreset',
+        presetPath: 'somefile/somepreset',
         presetSource: 'github',
       });
     });
@@ -418,6 +427,15 @@ describe('config/presets/index', () => {
         packageName: 'some/repo',
         params: undefined,
         presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
+    it('parses local Bitbucket user repo', () => {
+      expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
+        packageName: '~john_doe/repo',
+        params: undefined,
+        presetName: 'somefile',
         presetPath: undefined,
         presetSource: 'local',
       });

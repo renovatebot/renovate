@@ -10,15 +10,15 @@ describe('workers/global/config/parse/env', () => {
     });
     it('supports boolean true', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'true' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(true);
+      expect(env.getConfig(envParam).recreateClosed).toBeTrue();
     });
     it('supports boolean false', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'false' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(false);
+      expect(env.getConfig(envParam).recreateClosed).toBeFalse();
     });
     it('supports boolean nonsense as false', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'foo' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(false);
+      expect(env.getConfig(envParam).recreateClosed).toBeFalse();
     });
     delete process.env.RENOVATE_RECREATE_CLOSED;
     it('supports list single', () => {
@@ -158,79 +158,6 @@ describe('workers/global/config/parse/env', () => {
         token: 'an Azure DevOps token',
       });
     });
-    it('supports docker username/password', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        DOCKER_USERNAME: 'some-username',
-        DOCKER_PASSWORD: 'some-password',
-      };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
-        hostRules: [
-          {
-            hostType: 'docker',
-            password: 'some-password',
-            username: 'some-username',
-          },
-        ],
-      });
-    });
-    it('supports password-only', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        NPM_PASSWORD: 'some-password',
-      };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
-        hostRules: [{ hostType: 'npm', password: 'some-password' }],
-      });
-    });
-    it('supports domain and host names with case insensitivity', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        GITHUB__TAGS_GITHUB_COM_TOKEN: 'some-token',
-        pypi_my_CUSTOM_HOST_passWORD: 'some-password',
-      };
-      const res = env.getConfig(envParam);
-      expect(res).toMatchSnapshot({
-        hostRules: [
-          { matchHost: 'github.com', token: 'some-token' },
-          { matchHost: 'my.custom.host', password: 'some-password' },
-        ],
-      });
-    });
-    it('regression test for #10937', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_USERNAME: 'some-user',
-        GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_PASSWORD: 'some-password',
-      };
-      const res = env.getConfig(envParam);
-      expect(res).toMatchObject({
-        hostRules: [
-          {
-            hostType: 'git-tags',
-            matchHost: 'gitlab.example-domain.net',
-            password: 'some-password',
-            username: 'some-user',
-          },
-        ],
-      });
-    });
-    it('supports datasource env token', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        PYPI_TOKEN: 'some-token',
-      };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
-        hostRules: [{ hostType: 'pypi', token: 'some-token' }],
-      });
-    });
-    it('rejects incomplete datasource env token', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        PYPI_FOO_TOKEN: 'some-token',
-      };
-      expect(env.getConfig(envParam).hostRules).toHaveLength(0);
-    });
-    it('rejects npm env', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        npm_package_devDependencies__types_registry_auth_token: '4.2.0',
-      };
-      expect(env.getConfig(envParam).hostRules).toHaveLength(0);
-    });
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: PlatformId.Bitbucket,
@@ -266,7 +193,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_TOKEN: 'a',
       };
       const config = env.getConfig(envParam);
-      expect(config.enabled).toBe(false);
+      expect(config.enabled).toBeFalse();
       expect(config.token).toBe('a');
     });
     describe('malformed RENOVATE_CONFIG', () => {

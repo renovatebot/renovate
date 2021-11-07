@@ -139,6 +139,72 @@ This feature is disabled by default because it may prove surprising or undesirab
 Currently this capability is supported for the `npm` manager only - specifically the `~/.npmrc` file.
 If found, it will be imported into `config.npmrc` with `config.npmrcMerge` will be set to `true`.
 
+## detectHostRulesFromEnv
+
+The format of the environment variables must follow:
+
+- Datasource name (e.g. `NPM`, `PYPI`)
+- Underscore (`_`)
+- `matchHost`
+- Underscore (`_`)
+- Field name (`TOKEN`, `USER_NAME`, or `PASSWORD`)
+
+Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
+Periods (`.`) in host names must be replaced with a single underscore (`_`).
+
+Note: the following prefixes cannot be supported for this functionality: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+
+### npmjs registry token example
+
+`NPM_REGISTRY_NPMJS_ORG_TOKEN=abc123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "npm",
+      "matchHost": "registry.npmjs.org",
+      "token": "abc123"
+    }
+  ]
+}
+```
+
+### GitLab Tags username/password example
+
+`GITLAB__TAGS_CODE__HOST_COMPANY_COM_USERNAME=bot GITLAB__TAGS_CODE__HOST_COMPANY_COM_PASSWORD=botpass123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "gitlab-tags",
+      "matchHost": "code-host.company.com",
+      "username": "bot",
+      "password": "botpass123"
+    }
+  ]
+}
+```
+
+### Datasource and credentials only
+
+You can skip the host part, and use just the datasource and credentials.
+
+`DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "username": "bot",
+      "password": "botpass123"
+    }
+  ]
+}
+```
+
 ## dockerChildPrefix
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
@@ -297,6 +363,11 @@ Note that if `commitMessagePrefix` or `semanticCommits` values are defined then 
 
 If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
+
+## onboardingNoDeps
+
+Set this to true if you want Renovate to create an onboarding PR even if no dependencies are found.
+Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
 
 ## onboardingPrTitle
 

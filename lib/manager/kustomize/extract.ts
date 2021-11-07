@@ -1,18 +1,20 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import * as datasourceDocker from '../../datasource/docker';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import { splitImageParts } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 import type { Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format
-const gitUrl =
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/;
+const gitUrl = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+);
 
 export function extractBase(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
@@ -31,7 +33,7 @@ export function extractBase(base: string): PackageDependency | null {
   }
 
   return {
-    datasource: datasourceGitTags.id,
+    datasource: GitTagsDatasource.id,
     depName: path.replace('.git', ''),
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,
@@ -116,7 +118,7 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  if (pkg.kind !== 'Kustomization') {
+  if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;
   }
 
@@ -142,7 +144,10 @@ export function extractPackageFile(content: string): PackageFile | null {
   for (const base of pkg.bases) {
     const dep = extractBase(base);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
     }
   }
 
@@ -150,7 +155,10 @@ export function extractPackageFile(content: string): PackageFile | null {
   for (const image of pkg.images) {
     const dep = extractImage(image);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
     }
   }
 

@@ -6,6 +6,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import type {
   BuildDependency,
   GradleDependencyWithRepos,
@@ -71,7 +72,7 @@ async function readGradleReport(localDir: string): Promise<GradleProject[]> {
   try {
     return JSON.parse(contents);
   } catch (err) {
-    logger.error({ err }, 'Invalid JSON');
+    logger.error({ err }, 'Invalid Gradle extract JSON');
     return [];
   }
 }
@@ -144,11 +145,12 @@ export async function extractDependenciesFromUpdatesReport(
       if (depName.endsWith('_%%')) {
         return {
           ...dep,
-          depName: depName.replace(/_%%/, ''),
+          depName: depName.replace(regEx(/_%%/), ''), // TODO #12071
           datasource: datasourceSbtPackage.id,
         };
       }
-      if (/^%.*%$/.test(currentValue)) {
+      if (regEx(/^%.*%$/).test(currentValue)) {
+        // TODO #12071
         return { ...dep, skipReason: 'version-placeholder' };
       }
       return dep;
