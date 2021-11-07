@@ -33,20 +33,3 @@ Array [
   },
 ]
 `;
-
-exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractPackageFile 1`] = `
-Array [
-  Object {
-    "deps": Array [
-      Object {
-        "depIndex": 0,
-      },
-      Object {
-        "depIndex": 1,
-        "replaceString": "abc",
-      },
-    ],
-    "packageFile": "Dockerfile",
-  },
-]
-`;
