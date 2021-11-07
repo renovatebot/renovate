@@ -79,7 +79,10 @@ const isResolver = (str: string): boolean =>
   ).test(str);
 const getResolverUrl = (str: string): string =>
   str
-    .replace(regEx(/^\s*(resolvers\s*\+\+?=\s*(Seq|List|Stream\()?)?"[^"]*"\s*at\s*"/), '')
+    .replace(
+      regEx(/^\s*(resolvers\s*\+\+?=\s*(Seq|List|Stream\()?)?"[^"]*"\s*at\s*"/),
+      ''
+    )
     .replace(regEx(/"[\s,)]*$/), '');
 
 const isVarDependency = (str: string): boolean =>
