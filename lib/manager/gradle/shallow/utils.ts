@@ -95,9 +95,23 @@ export function interpolateString(
   return resolvedSubstrings.join('');
 }
 
+const gradleVersionsFileRegex = regEx('^versions\\.gradle(?:\\.kts)?$', 'i');
+const gradleBuildFileRegex = regEx('^build\\.gradle(?:\\.kts)?$', 'i');
+const gradleFileRegex = regEx('\\.gradle(?:\\.kts)?$', 'i');
+
+export function isGradleVersionsFile(path: string): boolean {
+  const filename = upath.basename(path);
+  return gradleVersionsFileRegex.test(filename);
+}
+
+export function isGradleBuildFile(path: string): boolean {
+  const filename = upath.basename(path);
+  return gradleBuildFileRegex.test(filename);
+}
+
 export function isGradleFile(path: string): boolean {
-  const filename = upath.basename(path).toLowerCase();
-  return filename.endsWith('.gradle') || filename.endsWith('.gradle.kts');
+  const filename = upath.basename(path);
+  return gradleFileRegex.test(filename);
 }
 
 export function isPropsFile(path: string): boolean {
@@ -114,6 +128,19 @@ export function toAbsolutePath(packageFile: string): string {
   return upath.join(packageFile.replace(regEx(/^[/\\]*/), '/'));
 }
 
+function getFileRank(filename: string): number {
+  if (isPropsFile(filename)) {
+    return 0;
+  }
+  if (isGradleVersionsFile(filename)) {
+    return 1;
+  }
+  if (isGradleBuildFile(filename)) {
+    return 3;
+  }
+  return 2;
+}
+
 export function reorderFiles(packageFiles: string[]): string[] {
   return packageFiles.sort((x, y) => {
     const xAbs = toAbsolutePath(x);
@@ -123,19 +150,18 @@ export function reorderFiles(packageFiles: string[]): string[] {
     const yDir = upath.dirname(yAbs);
 
     if (xDir === yDir) {
-      if (
-        (isGradleFile(xAbs) && isGradleFile(yAbs)) ||
-        (isPropsFile(xAbs) && isPropsFile(yAbs))
-      ) {
+      const xRank = getFileRank(xAbs);
+      const yRank = getFileRank(yAbs);
+      if (xRank === yRank) {
         if (xAbs > yAbs) {
           return 1;
         }
         if (xAbs < yAbs) {
           return -1;
         }
-      } else if (isGradleFile(xAbs)) {
+      } else if (xRank > yRank) {
         return 1;
-      } else if (isGradleFile(yAbs)) {
+      } else if (yRank > xRank) {
         return -1;
       }
     } else if (xDir.startsWith(yDir)) {

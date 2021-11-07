@@ -1,8 +1,8 @@
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
-import { ensureTrailingSlash } from '../../util/url';
 import * as githubReleases from '../github-releases';
+import { getApiBaseUrl, getSourceUrl } from '../github-releases/common';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { GitHubTag, TagResponse } from './types';
 
@@ -33,14 +33,7 @@ async function getTagCommit(
     return cachedResult;
   }
 
-  // default to GitHub.com if no GHE host is specified.
-  const sourceUrlBase = ensureTrailingSlash(
-    registryUrl ?? 'https://github.com/'
-  );
-  const apiBaseUrl =
-    sourceUrlBase === 'https://github.com/'
-      ? `https://api.github.com/`
-      : `${sourceUrlBase}api/v3/`;
+  const apiBaseUrl = getApiBaseUrl(registryUrl);
   let digest: string;
   try {
     const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
@@ -93,14 +86,7 @@ export async function getDigest(
   if (cachedResult) {
     return cachedResult;
   }
-  // default to GitHub.com if no GHE host is specified.
-  const sourceUrlBase = ensureTrailingSlash(
-    registryUrl ?? 'https://github.com/'
-  );
-  const apiBaseUrl =
-    sourceUrlBase === 'https://github.com/'
-      ? `https://api.github.com/`
-      : `${sourceUrlBase}api/v3/`;
+  const apiBaseUrl = getApiBaseUrl(registryUrl);
   let digest: string;
   try {
     const url = `${apiBaseUrl}repos/${repo}/commits?per_page=1`;
@@ -138,14 +124,7 @@ async function getTags({
     return cachedResult;
   }
 
-  // default to GitHub.com if no GHE host is specified.
-  const sourceUrlBase = ensureTrailingSlash(
-    registryUrl ?? 'https://github.com/'
-  );
-  const apiBaseUrl =
-    sourceUrlBase === 'https://github.com/'
-      ? `https://api.github.com/`
-      : `${sourceUrlBase}api/v3/`;
+  const apiBaseUrl = getApiBaseUrl(registryUrl);
   // tag
   const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
 
@@ -155,7 +134,7 @@ async function getTags({
     })
   ).body.map((o) => o.name);
   const dependency: ReleaseResult = {
-    sourceUrl: `${sourceUrlBase}${repo}`,
+    sourceUrl: getSourceUrl(repo, registryUrl),
     releases: null,
   };
   dependency.releases = versions.map((version) => ({

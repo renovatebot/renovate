@@ -58,6 +58,7 @@ export async function addAssigneesReviewers(
   pr: Pr
 ): Promise<void> {
   let assignees = config.assignees;
+  logger.debug(`addAssigneesReviewers(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(assignees, pr);
   }
@@ -119,7 +120,7 @@ export function getPlatformPrOptions(
 ): PlatformPrOptions {
   const usePlatformAutomerge = Boolean(
     config.automerge &&
-      config.automergeType === 'pr' &&
+      (config.automergeType === 'pr' || config.automergeType === 'branch') &&
       config.platformAutomerge
   );
 

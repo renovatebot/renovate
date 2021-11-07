@@ -8,6 +8,7 @@ import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
 import type {
@@ -98,7 +99,7 @@ async function gotRoutine<T>(
 
   // Cheat the TS compiler using `as` to pick a specific overload.
   // Otherwise it doesn't typecheck.
-  const resp = await got<T>(url, options as GotJSONOptions);
+  const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
   const duration =
     resp.timings.phases.total || /* istanbul ignore next: can't be tested */ 0;
 

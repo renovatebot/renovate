@@ -754,7 +754,7 @@ Example:
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` and `platformAutomerge=true`.
+This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch` and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## golang
@@ -763,7 +763,8 @@ Configuration added here applies for all Go-related updates, however currently t
 
 For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://golang.org/ref/mod#module-proxy)).
 
-But when you use the `direct` or `off` keywords Renovate will fallback to its own fetching strategy (i.e. directly from GitHub, etc).
+Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
+Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
 
@@ -1667,7 +1668,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 ## platformAutomerge
 
-If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then `platformAutomerge` is enabled by default to speed up merging via the platform's native automerge functionality.
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then you can also set `platformAutomerge` to `true` to speed up merging via the platform's native automerge functionality.
 
 Renovate tries platform-native automerge only when it initially creates the PR.
 Any PR that is being updated will be automerged with the Renovate-based automerge.
@@ -1676,7 +1677,12 @@ Any PR that is being updated will be automerged with the Renovate-based automerg
 This option is available for Azure, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
-Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
+You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
+
+Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=true`.
+Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
+This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
+For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
 ## postUpdateOptions
 
@@ -2235,7 +2241,15 @@ By default, `renovate` will update to a version greater than `latest` only if th
 ## reviewers
 
 Must be valid usernames.
-If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
+
+If on GitHub and assigning a team to review, you must use the prefix `team:` and add the _last part_ of the team name.
+Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
+
+```json
+{
+  "reviewers": "team:foo"
+}
+```
 
 ## reviewersFromCodeOwners
 

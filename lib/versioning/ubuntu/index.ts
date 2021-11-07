@@ -6,6 +6,9 @@ export const displayName = 'Ubuntu';
 export const urls = ['https://changelogs.ubuntu.com/meta-release'];
 export const supportsRanges = false;
 
+// #12509
+const temporarilyUnstable = ['22.04'];
+
 // validation
 
 function isValid(input: string): string | boolean | null {
@@ -32,6 +35,9 @@ function isSingleVersion(version: string): string | boolean | null {
 
 function isStable(version: string): boolean {
   if (!isValid(version)) {
+    return false;
+  }
+  if (temporarilyUnstable.includes(version)) {
     return false;
   }
   return regEx(/^\d?[02468]\.04/).test(version);

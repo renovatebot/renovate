@@ -1,4 +1,5 @@
 import { exec as _exec } from 'child_process';
+import * as fsExtra from 'fs-extra';
 import upath from 'upath';
 
 import { envMock, mockExecAll } from '../../../../test/exec-util';
@@ -37,9 +38,36 @@ describe('manager/npm/post-update/npm', () => {
       { skipInstalls, postUpdateOptions },
       updates
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('massages lock files', async () => {
+    const execSnapshots = mockExecAll(exec);
+    const lockContents = await fsExtra.readFile(
+      upath.join(__dirname, '/__fixtures__/massage1/package-lock.json'),
+      'utf8'
+    );
+    fs.readFile = jest.fn(() => lockContents) as never;
+    const skipInstalls = true;
+    const updates = [
+      {
+        depName: '@storybook/vue',
+        newVersion: '6.3.12',
+        isLockfileUpdate: false,
+      },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls },
+      updates
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(fs.outputFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lock file updates', async () => {
@@ -56,7 +84,7 @@ describe('manager/npm/post-update/npm', () => {
       { skipInstalls },
       updates
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
@@ -81,7 +109,7 @@ describe('manager/npm/post-update/npm', () => {
       upath.join('some-dir', 'package-lock.json'),
       upath.join('some-dir', 'npm-shrinkwrap.json')
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(fs.readFile).toHaveBeenCalledWith(
       upath.join('some-dir', 'npm-shrinkwrap.json'),
       'utf8'
@@ -106,7 +134,7 @@ describe('manager/npm/post-update/npm', () => {
       upath.join('some-dir', 'package-lock.json')
     );
     expect(fs.move).toHaveBeenCalledTimes(0);
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(fs.readFile).toHaveBeenCalledWith(
       upath.join('some-dir', 'npm-shrinkwrap.json'),
       'utf8'
@@ -126,7 +154,7 @@ describe('manager/npm/post-update/npm', () => {
       'package-lock.json',
       { skipInstalls, binarySource }
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
@@ -142,7 +170,7 @@ describe('manager/npm/post-update/npm', () => {
       { binarySource },
       [{ isRemediation: true }]
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toHaveLength(2);
@@ -157,7 +185,7 @@ describe('manager/npm/post-update/npm', () => {
       {},
       'package-lock.json'
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeTrue();
     expect(res.lockFile).not.toBeDefined();
     expect(execSnapshots).toMatchSnapshot();
@@ -170,7 +198,7 @@ describe('manager/npm/post-update/npm', () => {
       {},
       'package-lock.json'
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -183,7 +211,7 @@ describe('manager/npm/post-update/npm', () => {
       'package-lock.json',
       { binarySource: 'docker', constraints: { npm: '^6.0.0' } }
     );
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });

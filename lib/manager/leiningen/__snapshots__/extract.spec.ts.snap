@@ -116,6 +116,7 @@ Object {
       "datasource": "clojure",
       "depName": "clj-stacktrace:clj-stacktrace",
       "depType": "dependencies",
+      "groupName": "clj-stacktrace-version",
       "registryUrls": Array [
         "https://download.java.net/maven/2",
         "https://oss.sonatype.org/content/repositories/releases",
