@@ -71,10 +71,12 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
-      // FIXME: explicit assert condition
-      expect(
-        git.commitFiles.mock.calls[0][0].files[0].contents
-      ).toMatchSnapshot();
+      const contents =
+        git.commitFiles.mock.calls[0][0].files[0].contents?.toString();
+      expect(contents).toBeJsonString();
+      expect(JSON.parse(contents)).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      });
     });
     it('uses discovered onboarding config', async () => {
       configModule.getOnboardingConfig.mockResolvedValue({
@@ -83,7 +85,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       configModule.getOnboardingConfigContents.mockResolvedValue(
         '{\n' +
           '  "$schema": "https://docs.renovatebot.com/renovate-schema.json",\n' +
-          '  "extends: ["some/renovate-config"]\n' +
+          '  "extends": ["some/renovate-config"]\n' +
           '}\n'
       );
       git.getFileList.mockResolvedValue(['package.json']);
@@ -98,10 +100,13 @@ describe('workers/repository/onboarding/branch/index', () => {
         },
         configFileNames[0]
       );
-      // FIXME: explicit assert condition
-      expect(
-        git.commitFiles.mock.calls[0][0].files[0].contents
-      ).toMatchSnapshot();
+      const contents =
+        git.commitFiles.mock.calls[0][0].files[0].contents?.toString();
+      expect(contents).toBeJsonString();
+      expect(JSON.parse(contents)).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['some/renovate-config'],
+      });
     });
     it('handles skipped onboarding combined with requireConfig = false', async () => {
       config.requireConfig = false;

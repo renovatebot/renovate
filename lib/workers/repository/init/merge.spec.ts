@@ -41,8 +41,7 @@ describe('workers/repository/init/merge', () => {
     it('returns config if not found', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      // FIXME: explicit assert condition
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toEqual({});
     });
     it('uses package.json config if found', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
@@ -54,9 +53,14 @@ describe('workers/repository/init/merge', () => {
       });
       fs.readLocalFile.mockResolvedValue(pJson);
       platform.getJsonFile.mockResolvedValueOnce(pJson);
-      // FIXME: explicit assert condition
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { prHourlyLimit: 10 },
+      });
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: undefined,
+      });
     });
     it('massages package.json renovate string', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
@@ -66,38 +70,45 @@ describe('workers/repository/init/merge', () => {
       });
       fs.readLocalFile.mockResolvedValue(pJson);
       platform.getJsonFile.mockResolvedValueOnce(pJson);
-      expect(await detectRepoFileConfig()).toMatchInlineSnapshot(`
-        Object {
-          "configFileName": "package.json",
-          "configFileParsed": Object {
-            "extends": Array [
-              "github>renovatebot/renovate",
-            ],
-          },
-        }
-      `);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { extends: ['github>renovatebot/renovate'] },
+      });
     });
     it('returns error if cannot parse', async () => {
       git.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
       fs.readLocalFile.mockResolvedValue('cannot parse');
-      // FIXME: explicit assert condition
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.json',
+        configFileParseError: {
+          validationError: 'Invalid JSON (parsing failed)',
+          validationMessage: 'Syntax error near cannot par',
+        },
+      });
     });
     it('throws error if duplicate keys', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc']);
       fs.readLocalFile.mockResolvedValue(
         '{ "enabled": true, "enabled": false }'
       );
-      // FIXME: explicit assert condition
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc',
+        configFileParseError: {
+          validationError: 'Duplicate keys in JSON',
+          validationMessage:
+            '"Syntax error: duplicated keys \\"enabled\\" near \\": false }"',
+        },
+      });
     });
     it('finds and parse renovate.json5', async () => {
       git.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
       fs.readLocalFile.mockResolvedValue(`{
         // this is json5 format
       }`);
-      // FIXME: explicit assert condition
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.json5',
+        configFileParsed: {},
+      });
     });
     it('finds .github/renovate.json', async () => {
       git.getFileList.mockResolvedValue([
@@ -105,8 +116,10 @@ describe('workers/repository/init/merge', () => {
         '.github/renovate.json',
       ]);
       fs.readLocalFile.mockResolvedValue('{}');
-      // FIXME: explicit assert condition
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.github/renovate.json',
+        configFileParsed: {},
+      });
     });
     it('finds .gitlab/renovate.json', async () => {
       git.getFileList.mockResolvedValue([
@@ -114,16 +127,25 @@ describe('workers/repository/init/merge', () => {
         '.gitlab/renovate.json',
       ]);
       fs.readLocalFile.mockResolvedValue('{}');
-      // FIXME: explicit assert condition
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.gitlab/renovate.json',
+        configFileParsed: {},
+      });
     });
     it('finds .renovaterc.json', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       platform.getJsonFile.mockResolvedValueOnce('{"something":"new"}');
-      // FIXME: explicit assert condition
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
-      expect(await detectRepoFileConfig()).toMatchSnapshot();
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc.json',
+        configFileParsed: {},
+      });
+      expect(await detectRepoFileConfig()).toMatchInlineSnapshot(`
+        Object {
+          "configFileName": ".renovaterc.json",
+          "configFileParsed": "{\\"something\\":\\"new\\"}",
+        }
+      `);
     });
   });
   describe('checkForRepoConfigError', () => {
@@ -158,8 +180,7 @@ describe('workers/repository/init/merge', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      // FIXME: explicit assert condition
-      expect(e).toMatchSnapshot();
+      expect(e.toString()).toEqual('Error: config-validation');
     });
     it('migrates nested config', async () => {
       git.getFileList.mockResolvedValue(['renovate.json']);
