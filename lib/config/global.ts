@@ -20,6 +20,7 @@ const repoGlobalOptions = [
   'privateKeyOld',
   'localDir',
   'cacheDir',
+  'executionTimeout',
 ];
 
 export function setGlobalConfig(

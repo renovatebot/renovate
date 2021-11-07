@@ -63,7 +63,6 @@ export async function postUpgradeCommandsExecutor(
             logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
               cwd: getGlobalConfig().localDir,
-              timeout: upgrade.postUpgradeTasks?.executionTimeout,
             });
 
             logger.debug(

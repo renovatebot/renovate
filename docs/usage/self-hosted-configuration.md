@@ -577,3 +577,7 @@ Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 ```json
 ["myOrg/myRepo", "myOrg/anotherRepo"]
 ```
+
+### executionTimeout
+
+Timeout (in milliseconds) for execute child process calls. Defaults to 15 mins.

@@ -106,6 +106,7 @@ export interface RepoGlobalConfig {
   privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
+  executionTimeout?: number;
 }
 
 export interface LegacyAdminConfig {
@@ -132,7 +133,6 @@ export type PostUpgradeTasks = {
   commands?: string[];
   fileFilters?: string[];
   executionMode: ExecutionMode;
-  executionTimeout?: number;
 };
 
 type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =

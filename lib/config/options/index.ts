@@ -82,11 +82,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'executionTimeout',
-    description:
-      'Timeout (in milliseconds) for execute single post-upgrade command.',
+    description: 'Timeout (in milliseconds) for child process calls',
     type: 'integer',
-    parent: 'postUpgradeTasks',
     default: 15 * 60 * 1000,
+    globalOnly: true,
     cli: false,
   },
   {

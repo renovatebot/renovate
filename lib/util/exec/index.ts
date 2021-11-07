@@ -64,8 +64,11 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string {
   return paramCwd || defaultCwd;
 }
 
-function getRawExecOptions(opts: ExecOptions): RawExecOptions {
-  const execOptions: ExecOptions = { ...opts };
+function getRawExecOptions(
+  opts: ExecOptions,
+  defaultOpts: Partial<ExecOptions> = {}
+): RawExecOptions {
+  const execOptions: ExecOptions = { ...defaultOpts, ...opts };
   delete execOptions.extraEnv;
   delete execOptions.docker;
   delete execOptions.cwdFile;
@@ -78,8 +81,6 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
     env: childEnv,
     cwd,
   };
-  // Set default timeout to 15 minutes
-  rawExecOptions.timeout = rawExecOptions.timeout || 15 * 60 * 1000;
   // Set default max buffer size to 10MB
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
   return rawExecOptions;
@@ -100,9 +101,9 @@ async function prepareRawExec(
   opts: ExecOptions = {}
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const { customEnvVariables } = getGlobalConfig();
+  const { customEnvVariables, executionTimeout } = getGlobalConfig();
 
-  const rawOptions = getRawExecOptions(opts);
+  const rawOptions = getRawExecOptions(opts, { timeout: executionTimeout });
 
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
