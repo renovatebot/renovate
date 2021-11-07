@@ -16,7 +16,7 @@ import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
-import type { BranchConfig, PrBlockedBy } from '../types';
+import type { BranchConfig, BranchUpgradeConfig, PrBlockedBy } from '../types';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
@@ -256,6 +256,14 @@ export async function ensurePr(
   const processedUpgrades: string[] = [];
   const commitRepos: string[] = [];
 
+  function getRepoNameWithSourceDirectory(
+    upgrade: BranchUpgradeConfig
+  ): string {
+    return `${upgrade.repoName}${
+      upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
+    }`;
+  }
+
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
     const upgradeKey = `${upgrade.depType}-${upgrade.depName}-${
@@ -278,9 +286,9 @@ export async function ensurePr(
         if (
           upgrade.hasReleaseNotes &&
           upgrade.repoName &&
-          !commitRepos.includes(upgrade.repoName)
+          !commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
         ) {
-          commitRepos.push(upgrade.repoName);
+          commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
           if (logJSON.versions) {
             logJSON.versions.forEach((version) => {
               const release = { ...version };
@@ -305,17 +313,27 @@ export async function ensurePr(
 
   config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
 
+  function getRepoSourceUrlWithSourceDirectory(
+    upgrade: BranchUpgradeConfig
+  ): string {
+    return `${upgrade.sourceUrl}${
+      upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
+    }`;
+  }
+
   const releaseNoteRepos: string[] = [];
   for (const upgrade of config.upgrades) {
     if (upgrade.hasReleaseNotes) {
-      if (releaseNoteRepos.includes(upgrade.sourceUrl)) {
+      if (
+        releaseNoteRepos.includes(getRepoSourceUrlWithSourceDirectory(upgrade))
+      ) {
         logger.debug(
           { depName: upgrade.depName },
           'Removing duplicate release notes'
         );
         upgrade.hasReleaseNotes = false;
       } else {
-        releaseNoteRepos.push(upgrade.sourceUrl);
+        releaseNoteRepos.push(getRepoSourceUrlWithSourceDirectory(upgrade));
       }
     }
   }

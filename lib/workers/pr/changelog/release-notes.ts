@@ -207,7 +207,9 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
-  const cacheKey = `getReleaseNotesMdFile-${project.repository}-${project.apiBaseUrl}`;
+  const cacheKey = `getReleaseNotesMdFile-${project.repository}${
+    project.sourceDirectory ? `-${project.sourceDirectory}` : ''
+  }-${project.apiBaseUrl}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -320,10 +322,12 @@ export async function addReleaseNotes(
     return input;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
-  const repository = input.project.repository;
+  const { repository, sourceDirectory } = input.project;
   const cacheNamespace = `changelog-${input.project.type}-notes`;
   function getCacheKey(version: string): string {
-    return `${repository}:${version}`;
+    return `${repository}:${
+      sourceDirectory ? `${sourceDirectory}:` : ''
+    }${version}`;
   }
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes;
