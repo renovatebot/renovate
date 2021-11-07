@@ -248,6 +248,10 @@ e.g.
 
 ## endpoint
 
+## executionTimeout
+
+Timeout (in milliseconds) for execute child process calls. Defaults to 15 mins.
+
 ## exposeAllEnv
 
 By default, Renovate only passes a limited set of environment variables to package managers.
@@ -577,7 +581,3 @@ Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 ```json
 ["myOrg/myRepo", "myOrg/anotherRepo"]
 ```
-
-## executionTimeout
-
-Timeout (in milliseconds) for execute child process calls. Defaults to 15 mins.
