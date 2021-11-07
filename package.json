@@ -24,7 +24,7 @@
     "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal TZ=UTC node --expose-gc node_modules/jest/bin/jest.js --logHeapUsage",
     "jest-debug": "cross-env NODE_OPTIONS=--inspect-brk yarn jest --testTimeout=100000000",
     "jest-silent": "cross-env yarn jest --reporters jest-silent-reporter",
-    "lint": "run-s ls-lint eslint prettier markdown-lint git-check",
+    "lint": "run-s ls-lint eslint prettier markdown-lint git-check doc-fence-check",
     "lint-fix": "run-s eslint-fix prettier-fix markdown-lint-fix",
     "ls-lint": "ls-lint",
     "markdown-lint": "markdownlint-cli2",
