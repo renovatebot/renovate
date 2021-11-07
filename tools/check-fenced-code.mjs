@@ -8,7 +8,7 @@ const glob = promisify(g);
 
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =
-  'Fix this manually by ensuring each block is a valid, complete JSON document';
+  'Fix this manually by ensuring each block is a valid, complete JSON document.';
 const markdownGlob = 'docs/**/*.md';
 const markdown = new MarkdownIt('zero');
 
@@ -39,7 +39,7 @@ function checkValidJson(file, token) {
 async function processFile(file) {
   const text = await fs.readFile(file, 'utf8');
   const tokens = markdown.parse(text, undefined);
-  shell.echo(`Linting ${file}..`);
+  shell.echo(`Linting ${file}...`);
 
   tokens.forEach((token) => {
     if (token.type === 'fence' && token.info === 'json') {
@@ -58,7 +58,7 @@ async function processFile(file) {
 
   if (issues) {
     shell.echo(
-      `${issues} issues found. ${errorBody}. See above for lines affected.`
+      `${issues} issues found. ${errorBody} See above for lines affected.`
     );
     shell.exit(1);
   }
