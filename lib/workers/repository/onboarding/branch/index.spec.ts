@@ -7,6 +7,7 @@ import {
   mocked,
   platform,
 } from '../../../../../test/util';
+import { configFileNames } from '../../../../config/app-strings';
 import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
@@ -88,12 +89,15 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
-      expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith({
-        ...config,
-        onboardingBranch: 'test',
-        renovateJsonPresent: true,
-        warnings: [],
-      });
+      expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(
+        {
+          ...config,
+          onboardingBranch: 'test',
+          renovateJsonPresent: true,
+          warnings: [],
+        },
+        configFileNames[0]
+      );
       // FIXME: explicit assert condition
       expect(
         git.commitFiles.mock.calls[0][0].files[0].contents

@@ -121,6 +121,7 @@ describe('versioning/ubuntu/index', () => {
     ${'42.10'}   | ${false}
     ${'42.11'}   | ${false}
     ${'2020.04'} | ${false}
+    ${'22.04'}   | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
     const res = !!ubuntu.isStable(version);
     expect(res).toBe(expected);

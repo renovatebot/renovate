@@ -1,18 +1,15 @@
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { getReleases as directReleases } from './releases-direct';
+import * as direct from './releases-direct';
 import * as goproxy from './releases-goproxy';
 
 export { id } from './common';
 
 export const customRegistrySupport = false;
 
-export async function getReleases(
+export function getReleases(
   config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
-  const res = await goproxy.getReleases(config);
-  if (res) {
-    return res;
-  }
-
-  return directReleases(config);
+  return process.env.GOPROXY
+    ? goproxy.getReleases(config)
+    : direct.getReleases(config);
 }

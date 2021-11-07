@@ -1444,11 +1444,11 @@ async function tryPrAutomerge(
   prNodeId: string,
   platformOptions: PlatformPrOptions
 ): Promise<void> {
-  if (!platformOptions?.usePlatformAutomerge) {
+  if (platformConfig.isGhe || !platformOptions?.usePlatformAutomerge) {
     return;
   }
 
-  if (config.autoMergeAllowed === false) {
+  if (!config.autoMergeAllowed) {
     logger.debug(
       { prNumber },
       'GitHub-native automerge: not enabled in repo settings'
