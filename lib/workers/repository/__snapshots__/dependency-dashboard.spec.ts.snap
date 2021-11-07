@@ -59,15 +59,3 @@ These updates are awaiting their schedule. Click on a checkbox to get an update 
 
 "
 `;
-
-exports[`workers/repository/dependency-dashboard readDashboardBody() reads dashboard body 1`] = `
-Object {
-  "dependencyDashboardChecks": Object {
-    "branchName1": "approve",
-  },
-  "dependencyDashboardIssue": 1,
-  "dependencyDashboardRebaseAllOpen": true,
-  "dependencyDashboardTitle": "Dependency Dashboard",
-  "prCreation": "approval",
-}
-`;
