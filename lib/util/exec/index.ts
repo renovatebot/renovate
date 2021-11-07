@@ -65,8 +65,8 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string {
 }
 
 function getTimeout({ timeout }: ExecOptions): number {
-  const { executionTimeout: defaultTimeout } = getGlobalConfig();
-  return timeout ?? defaultTimeout;
+  const { executionTimeout } = getGlobalConfig();
+  return timeout ?? executionTimeout ?? 15 * 60 * 1000;
 }
 
 function getRawExecOptions(opts: ExecOptions): RawExecOptions {
