@@ -354,7 +354,7 @@ export async function getPkgReleases(
   }
   // Strip constraints from releases result
   res.releases.forEach((release) => {
-    delete release.constraints; // eslint-disable-line no-param-reassign
+    delete release.constraints;
   });
   return res;
 }

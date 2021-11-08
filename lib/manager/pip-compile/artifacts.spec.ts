@@ -111,7 +111,6 @@ describe('manager/pip-compile/artifacts', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await pipCompile.updateArtifacts({
         packageFileName: 'requirements.in',
@@ -119,7 +118,11 @@ describe('manager/pip-compile/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
+      },
+    ]);
   });
 
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {

@@ -122,7 +122,7 @@ export async function validateConfig(
         topic: 'Config security error',
         message: '__proto__',
       });
-      continue; // eslint-disable-line
+      continue;
     }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({

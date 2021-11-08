@@ -131,7 +131,6 @@ describe('manager/pipenv/artifacts', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
@@ -139,7 +138,9 @@ describe('manager/pipenv/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'Pipfile.lock', stderr: 'not found' } },
+    ]);
   });
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Current Pipfile.lock' as any);

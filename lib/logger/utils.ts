@@ -108,7 +108,6 @@ export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
   }
 
   if (value instanceof Error) {
-    // eslint-disable-next-line no-param-reassign
     value = prepareError(value);
   }
 

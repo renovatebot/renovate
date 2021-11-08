@@ -719,7 +719,6 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const members = await Promise.all(
     teams.map(
       async (t) =>
-        /* eslint-disable no-return-await,@typescript-eslint/return-await */
         await azureApiCore.getTeamMembersWithExtendedProperties(
           repo.project.id,
           t.id

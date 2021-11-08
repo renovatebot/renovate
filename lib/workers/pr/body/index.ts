@@ -12,7 +12,6 @@ import { getPrUpdatesTable } from './updates-table';
 
 function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach((upgrade) => {
-    /* eslint-disable no-param-reassign */
     const {
       homepage,
       sourceUrl,
