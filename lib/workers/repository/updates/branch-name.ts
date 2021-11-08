@@ -27,7 +27,6 @@ function cleanBranchName(branchName: string): string {
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
-/* eslint-disable no-param-reassign */
 export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {

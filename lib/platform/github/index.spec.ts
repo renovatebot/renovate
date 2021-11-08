@@ -111,6 +111,9 @@ describe('platform/github/index', () => {
     it('should support custom endpoint', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+
         .get('/user')
         .reply(200, {
           login: 'renovate-bot',
@@ -1101,7 +1104,7 @@ describe('platform/github/index', () => {
         title: 'new-title',
         body: 'new-content',
       });
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('creates issue if not ensuring only once', async () => {
@@ -1210,7 +1213,7 @@ describe('platform/github/index', () => {
         body: 'new-content',
         labels: ['Renovate', 'Maintenance'],
       });
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -1301,7 +1304,7 @@ describe('platform/github/index', () => {
         reuseTitle: 'title-2',
         body: 'newer-content',
       });
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -1346,7 +1349,7 @@ describe('platform/github/index', () => {
         body: 'newer-content',
         labels: ['Renovate', 'Maintenance'],
       });
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -1468,7 +1471,7 @@ describe('platform/github/index', () => {
         once: false,
         shouldReOpen: false,
       });
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('does not create issue if reopen flag false and issue is already open', async () => {
@@ -1813,7 +1816,7 @@ describe('platform/github/index', () => {
       });
       expect(res).toBeDefined();
       res = await github.findPr({ branchName: 'branch-b' });
-      expect(res).not.toBeDefined();
+      expect(res).toBeUndefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -2220,6 +2223,8 @@ describe('platform/github/index', () => {
     it('returns not-updated pr body for GHE', async () => {
       const scope = httpMock
         .scope('https://github.company.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.1.7' })
         .get('/user')
         .reply(200, {
           login: 'renovate-bot',
@@ -2407,9 +2412,9 @@ describe('platform/github/index', () => {
     });
     it('returns file content in json5 format', async () => {
       const json5Data = `
-        { 
+        {
           // json5 comment
-          foo: 'bar' 
+          foo: 'bar'
         }
       `;
       const scope = httpMock.scope(githubApiHost);

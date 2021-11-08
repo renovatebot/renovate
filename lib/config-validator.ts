@@ -11,8 +11,6 @@ import { validateConfig } from './config/validation';
 import { logger } from './logger';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file';
 
-/* eslint-disable no-console */
-
 let returnVal = 0;
 
 async function validate(

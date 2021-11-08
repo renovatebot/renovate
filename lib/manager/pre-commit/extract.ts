@@ -181,7 +181,7 @@ export function extractPackageFile(
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ filename, err }, 'Error scanning parsed pre-commit config');
+    logger.warn({ filename, err }, 'Error scanning parsed pre-commit config');
   }
   return null;
 }

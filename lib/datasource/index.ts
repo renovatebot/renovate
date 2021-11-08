@@ -206,7 +206,11 @@ function resolveRegistryUrls(
 
 export function getDefaultVersioning(datasourceName: string): string {
   const datasource = getDatasourceFor(datasourceName);
-  return datasource.defaultVersioning || 'semver';
+  // istanbul ignore if: wrong regex manager config?
+  if (!datasource) {
+    logger.warn({ datasourceName }, 'Missing datasource!');
+  }
+  return datasource?.defaultVersioning || 'semver';
 }
 
 async function fetchReleases(
@@ -350,7 +354,7 @@ export async function getPkgReleases(
   }
   // Strip constraints from releases result
   res.releases.forEach((release) => {
-    delete release.constraints; // eslint-disable-line no-param-reassign
+    delete release.constraints;
   });
   return res;
 }

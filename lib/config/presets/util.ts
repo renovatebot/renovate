@@ -15,9 +15,9 @@ export async function fetchPreset({
   filePreset,
   presetPath,
   endpoint,
+  packageTag = null,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
-  // eslint-disable-next-line no-param-reassign
   endpoint = ensureTrailingSlash(endpoint);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
@@ -28,7 +28,8 @@ export async function fetchPreset({
       jsonContent = await fetch(
         pkgName,
         buildFilePath('default.json'),
-        endpoint
+        endpoint,
+        packageTag
       );
     } catch (err) {
       if (err.message !== PRESET_DEP_NOT_FOUND) {
@@ -40,14 +41,16 @@ export async function fetchPreset({
       jsonContent = await fetch(
         pkgName,
         buildFilePath('renovate.json'),
-        endpoint
+        endpoint,
+        packageTag
       );
     }
   } else {
     jsonContent = await fetch(
       pkgName,
       buildFilePath(`${fileName}.json`),
-      endpoint
+      endpoint,
+      packageTag
     );
   }
 

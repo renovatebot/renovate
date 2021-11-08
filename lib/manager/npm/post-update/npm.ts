@@ -104,8 +104,10 @@ export async function generateLockFile(
       commands.push('npm dedupe');
     }
 
+    // TODO: don't assume package-lock.json is in the same directory
+    const lockFileName = join(cwd, filename);
+
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
-      const lockFileName = join(cwd, filename);
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );

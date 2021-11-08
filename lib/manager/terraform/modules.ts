@@ -24,7 +24,6 @@ export function extractTerraformModule(
 ): ExtractionResult {
   const result = extractTerraformProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line no-param-reassign
     dep.managerData.terraformDependencyType = TerraformDependencyTypes.module;
   });
   return result;
@@ -33,7 +32,7 @@ export function extractTerraformModule(
 export function analyseTerraformModule(dep: PackageDependency): void {
   const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
-  /* eslint-disable no-param-reassign */
+
   if (githubRefMatch) {
     dep.lookupName = githubRefMatch.groups.project.replace(regEx(/\.git$/), '');
     dep.depType = 'module';

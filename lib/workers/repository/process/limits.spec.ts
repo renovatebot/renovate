@@ -39,17 +39,17 @@ describe('workers/repository/process/limits', () => {
         branchPrefix: 'foo/',
         onboardingBranch: 'bar/configure',
       });
-      expect(res).toEqual(7);
+      expect(res).toBe(7);
     });
     it('returns prHourlyLimit if errored', async () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockRejectedValue('Unknown error');
       const res = await limits.getPrHourlyRemaining(config);
-      expect(res).toEqual(2);
+      expect(res).toBe(2);
     });
     it('returns 99 if no hourly limit', async () => {
       const res = await limits.getPrHourlyRemaining(config);
-      expect(res).toEqual(99);
+      expect(res).toBe(99);
     });
   });
   describe('getConcurrentPrsRemaining()', () => {
@@ -68,11 +68,11 @@ describe('workers/repository/process/limits', () => {
         { branchName: null },
       ] as never;
       const res = await limits.getConcurrentPrsRemaining(config, branches);
-      expect(res).toEqual(19);
+      expect(res).toBe(19);
     });
     it('returns 99 if no concurrent limit', async () => {
       const res = await limits.getConcurrentPrsRemaining(config, []);
-      expect(res).toEqual(99);
+      expect(res).toBe(99);
     });
   });
 
@@ -81,12 +81,12 @@ describe('workers/repository/process/limits', () => {
       config.prHourlyLimit = 5;
       platform.getPrList.mockResolvedValueOnce([]);
       const res = await limits.getPrsRemaining(config, []);
-      expect(res).toEqual(5);
+      expect(res).toBe(5);
     });
     it('returns concurrent limit', async () => {
       config.prConcurrentLimit = 5;
       const res = await limits.getPrsRemaining(config, []);
-      expect(res).toEqual(5);
+      expect(res).toBe(5);
     });
   });
 
@@ -97,7 +97,7 @@ describe('workers/repository/process/limits', () => {
       const res = limits.getConcurrentBranchesRemaining(config, [
         { branchName: 'foo' },
       ] as never);
-      expect(res).toEqual(19);
+      expect(res).toBe(19);
     });
     it('defaults to prConcurrentLimit', () => {
       config.branchConcurrentLimit = null;
@@ -106,22 +106,22 @@ describe('workers/repository/process/limits', () => {
       const res = limits.getConcurrentBranchesRemaining(config, [
         { branchName: 'foo' },
       ] as never);
-      expect(res).toEqual(19);
+      expect(res).toBe(19);
     });
     it('does not use prConcurrentLimit for explicit branchConcurrentLimit=0', () => {
       config.branchConcurrentLimit = 0;
       config.prConcurrentLimit = 20;
       const res = limits.getConcurrentBranchesRemaining(config, []);
-      expect(res).toEqual(99);
+      expect(res).toBe(99);
     });
     it('returns 99 if no limits are set', () => {
       const res = limits.getConcurrentBranchesRemaining(config, []);
-      expect(res).toEqual(99);
+      expect(res).toBe(99);
     });
     it('returns prConcurrentLimit if errored', () => {
       config.branchConcurrentLimit = 2;
       const res = limits.getConcurrentBranchesRemaining(config, null);
-      expect(res).toEqual(2);
+      expect(res).toBe(2);
     });
   });
 
@@ -138,7 +138,7 @@ describe('workers/repository/process/limits', () => {
           },
           []
         )
-      ).resolves.toEqual(3);
+      ).resolves.toBe(3);
 
       await expect(
         limits.getBranchesRemaining(
@@ -149,7 +149,7 @@ describe('workers/repository/process/limits', () => {
           },
           []
         )
-      ).resolves.toEqual(7);
+      ).resolves.toBe(7);
     });
   });
 });

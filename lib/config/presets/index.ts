@@ -35,6 +35,13 @@ const presetSources: Record<string, PresetApi> = {
   internal,
 };
 
+const nonScopedPresetWithSubdirRegex = regEx(
+  /^(?<packageName>~?[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-.]+?))?$/
+);
+const gitPresetRegex = regEx(
+  /^(?<packageName>[\w\-./]+)(?::(?<presetPath>[\w-./]+\/))?(?::?(?<presetName>[\w\-.+]+))?(?:#(?<packageTag>[\w\-.]+?))?$/
+);
+
 export function replaceArgs(
   obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>
@@ -70,6 +77,7 @@ export function parsePreset(input: string): ParsedPreset {
   let presetPath: string;
   let packageName: string;
   let presetName: string;
+  let packageTag: string;
   let params: string[];
   if (str.startsWith('github>')) {
     presetSource = 'github';
@@ -138,28 +146,40 @@ export function parsePreset(input: string): ParsedPreset {
     }
   } else if (str.includes('//')) {
     // non-scoped namespace with a subdirectory preset
-    const re = regEx(/^([\w\-./]+?)\/\/(?:([\w\-./]+)\/)?([\w\-.]+)$/);
 
     // Validation
     if (str.includes(':')) {
       throw new Error(PRESET_PROHIBITED_SUBPRESET);
     }
-    if (!re.test(str)) {
+    if (!nonScopedPresetWithSubdirRegex.test(str)) {
       throw new Error(PRESET_INVALID);
     }
-    [, packageName, presetPath, presetName] = re.exec(str);
+    ({ packageName, presetPath, presetName, packageTag } =
+      nonScopedPresetWithSubdirRegex.exec(str)?.groups || {});
   } else {
-    // non-scoped namespace
-    [, packageName] = regEx(/(.*?)(:|$)/).exec(str);
-    presetName = str.slice(packageName.length + 1);
+    ({ packageName, presetPath, presetName, packageTag } =
+      gitPresetRegex.exec(str)?.groups || {});
+
+    if (is.nonEmptyString(presetPath) && presetPath.endsWith('/')) {
+      presetPath = presetPath.slice(0, -1);
+    }
+
     if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;
     }
-    if (presetName === '') {
+    if (!is.nonEmptyString(presetName)) {
       presetName = 'default';
     }
   }
-  return { presetSource, presetPath, packageName, presetName, params };
+
+  return {
+    presetSource,
+    presetPath,
+    packageName,
+    presetName,
+    packageTag,
+    params,
+  };
 }
 
 export async function getPreset(
@@ -175,13 +195,20 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const { presetSource, packageName, presetPath, presetName, params } =
-    parsePreset(preset);
+  const {
+    presetSource,
+    packageName,
+    presetPath,
+    presetName,
+    packageTag,
+    params,
+  } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset({
     packageName,
     presetPath,
     presetName,
     baseConfig,
+    packageTag,
   });
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
@@ -228,7 +255,7 @@ export async function resolveConfigPresets(
   existingPresets: string[] = []
 ): Promise<AllConfig> {
   if (!ignorePresets || ignorePresets.length === 0) {
-    ignorePresets = inputConfig.ignorePresets || []; // eslint-disable-line
+    ignorePresets = inputConfig.ignorePresets || [];
   }
   logger.trace(
     { config: inputConfig, existingPresets },

@@ -58,6 +58,7 @@ export async function addAssigneesReviewers(
   pr: Pr
 ): Promise<void> {
   let assignees = config.assignees;
+  logger.debug(`addAssigneesReviewers(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(assignees, pr);
   }
@@ -119,7 +120,7 @@ export function getPlatformPrOptions(
 ): PlatformPrOptions {
   const usePlatformAutomerge = Boolean(
     config.automerge &&
-      config.automergeType === 'pr' &&
+      (config.automergeType === 'pr' || config.automergeType === 'branch') &&
       config.platformAutomerge
   );
 
@@ -261,7 +262,7 @@ export async function ensurePr(
       upgrade.manager
     }-${upgrade.currentVersion || upgrade.currentValue}-${upgrade.newVersion}`;
     if (processedUpgrades.includes(upgradeKey)) {
-      continue; // eslint-disable-line no-continue
+      continue;
     }
     processedUpgrades.push(upgradeKey);
 

@@ -17,7 +17,7 @@ export class CdnJsDatasource extends Datasource {
   override readonly caching = true;
 
   // this.handleErrors will always throw
-  // eslint-disable-next-line consistent-return
+
   async getReleases({
     lookupName,
     registryUrl,
