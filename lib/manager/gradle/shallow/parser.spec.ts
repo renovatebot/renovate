@@ -1,4 +1,5 @@
 import { loadFixture } from '../../../../test/util';
+import { SkipReason } from '../../../types';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
@@ -45,6 +46,52 @@ describe('manager/gradle/shallow/parser', () => {
 
     ({ deps } = parseGradle('version = "1.2.3"\n"foo:bar:$version@@@"'));
     expect(deps).toBeEmpty();
+
+    ({ deps } = parseGradle(
+      // eslint-disable-next-line no-template-curly-in-string
+      ['versions.foobar = "1.2.3"', '"foo:bar:${versions.foobar}"'].join('\n')
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'foo:bar',
+        currentValue: '1.2.3',
+        groupName: 'versions.foobar',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
+      ['versions.foobar = "1.2.3"', '"foo:bar:$versions.foobar"'].join('\n')
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'foo:bar',
+        currentValue: '1.2.3',
+        groupName: 'versions.foobar',
+      },
+    ]);
+
+    expect(
+      parseGradle('foo.bar = "foo:bar:1.2.3"', {}, 'versions.gradle')
+    ).toMatchObject({
+      vars: {
+        'foo.bar': {
+          fileReplacePosition: 11,
+          key: 'foo.bar',
+          packageFile: 'versions.gradle',
+          value: 'foo:bar:1.2.3',
+        },
+      },
+      deps: [
+        {
+          depName: 'foo:bar',
+          currentValue: '1.2.3',
+          groupName: 'foo.bar',
+          managerData: {
+            fileReplacePosition: 19,
+          },
+        },
+      ],
+    });
   });
   it('parses registryUrls', () => {
     let urls;
@@ -146,6 +193,17 @@ describe('manager/gradle/shallow/parser', () => {
       {
         depName: 'com.example:my.dependency',
         currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
+      'createXmlValueRemover("defaults", "integer", "integer")'
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'defaults:integer',
+        currentValue: 'integer',
+        skipReason: SkipReason.Ignored,
       },
     ]);
   });

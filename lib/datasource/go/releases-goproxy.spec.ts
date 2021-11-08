@@ -179,10 +179,13 @@ describe('datasource/go/releases-goproxy', () => {
 
       const res = await getReleases({ lookupName: 'github.com/google/btree' });
       expect(httpMock.getTrace()).toMatchSnapshot();
-      expect(res?.releases).toMatchObject([
-        { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-        { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
-      ]);
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+      });
     });
 
     it('handles timestamp fetch errors', async () => {
@@ -199,10 +202,10 @@ describe('datasource/go/releases-goproxy', () => {
 
       const res = await getReleases({ lookupName: 'github.com/google/btree' });
       expect(httpMock.getTrace()).toMatchSnapshot();
-      expect(res?.releases).toMatchObject([
-        { version: 'v1.0.0' },
-        { version: 'v1.0.1' },
-      ]);
+      expect(res).toEqual({
+        releases: [{ version: 'v1.0.0' }, { version: 'v1.0.1' }],
+        sourceUrl: 'https://github.com/google/btree',
+      });
     });
 
     it('handles pipe fallback', async () => {
@@ -224,10 +227,13 @@ describe('datasource/go/releases-goproxy', () => {
 
       const res = await getReleases({ lookupName: 'github.com/google/btree' });
       expect(httpMock.getTrace()).toMatchSnapshot();
-      expect(res?.releases).toMatchObject([
-        { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-        { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
-      ]);
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+      });
     });
 
     it('handles comma fallback', async () => {
@@ -258,10 +264,13 @@ describe('datasource/go/releases-goproxy', () => {
 
       const res = await getReleases({ lookupName: 'github.com/google/btree' });
       expect(httpMock.getTrace()).toMatchSnapshot();
-      expect(res?.releases).toMatchObject([
-        { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-        { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
-      ]);
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
+          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+      });
     });
 
     it('short-circuits for errors other than 404 or 410', async () => {
