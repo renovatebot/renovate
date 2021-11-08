@@ -5,14 +5,13 @@ module.exports = {
   },
   plugins: ['@renovate'],
   extends: [
-    'airbnb-typescript/base',
+    'eslint:recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
     'plugin:jest/recommended',
     'plugin:jest/style',
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin/src/configs
-    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
@@ -103,7 +102,13 @@ module.exports = {
     ],
     '@typescript-eslint/restrict-plus-operands': 2,
 
-    '@typescript-eslint/naming-convention': 2,
+    '@typescript-eslint/naming-convention': [
+      2,
+      {
+        selector: 'enumMember',
+        format: ['PascalCase'],
+      },
+    ],
 
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
