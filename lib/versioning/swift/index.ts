@@ -37,7 +37,7 @@ const getSatisfyingVersion = (versions: string[], range: string): string =>
   );
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   minSatisfying(
-    versions.map((v) => v.replace(regEx(/^v/), '')), // TODO #12071
+    versions.map((v) => v.replace(regEx(/^v/), '')), // TODO #12071 #12070
     toSemverRange(range)
   );
 const isLessThanRange = (version: string, range: string): boolean =>

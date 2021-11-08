@@ -1,6 +1,5 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
 import type { ExtractionResult } from './types';
@@ -21,8 +20,8 @@ export function extractTerraformRequiredVersion(
 
     const line = lines[lineNumber];
     // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-    const openBrackets = (regEx(/\{/g).exec(line) || []).length;
-    const closedBrackets = (regEx(/\}/g).exec(line) || []).length;
+    const openBrackets = (line.match(/\{/g) || []).length; // TODO #12070
+    const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12070
     braceCounter = braceCounter + openBrackets - closedBrackets;
 
     const kvMatch = keyValueExtractionRegex.exec(line);

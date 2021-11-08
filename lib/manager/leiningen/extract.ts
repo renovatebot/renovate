@@ -4,7 +4,7 @@ import type { PackageDependency, PackageFile } from '../types';
 import type { ExtractContext, ExtractedVariables } from './types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
-  const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12070 RE2 doesn't support lookahead assesrtion will have to change functionality
+  const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12070
   const keyOffset = str.search(regex);
   if (keyOffset < 0) {
     return null;
@@ -103,7 +103,7 @@ function extractLeinRepos(content: string): string[] {
   const result = [];
 
   const repoContent = trimAtKey(
-    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12070 need to change functionality due to lookahead assertion
+    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12070
     'repositories'
   );
 
@@ -123,9 +123,7 @@ function extractLeinRepos(content: string): string[] {
       }
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
-    const matches =
-      // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) || []; // using .exec gives diff results than expected
+    const matches = repoSectionContent.match(/"https?:\/\/[^"]*"/g) || []; // TODO #12070
     const urls = matches.map((x) =>
       x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
     ); // TODO #12071

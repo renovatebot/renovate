@@ -4,7 +4,6 @@ import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { hasKey } from '../../util/object';
-import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest } from './types';
@@ -21,9 +20,8 @@ import { getConfiguredRegistries } from './util';
  * The update of the right boundary does not make sense regarding to the lowest version restore rule,
  * so we don't include it in the extracting regexp
  */
-const checkVersion = regEx(
-  `^\\s*(?:[[])?(?:(?P<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`
-);
+const checkVersion =
+  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/; // TODO #12070
 const elemNames = new Set([
   'PackageReference',
   'PackageVersion',

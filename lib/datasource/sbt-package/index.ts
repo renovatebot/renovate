@@ -14,7 +14,7 @@ export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
 
-const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/'); // TODO #12070 asked to leave it for now
+const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/'); // TODO #12070
 
 export async function getArtifactSubdirs(
   searchRoot: string,

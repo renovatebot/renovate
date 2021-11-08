@@ -129,14 +129,11 @@ const getNewValue = ({
       .split(',')
       .map(
         (element) =>
-          element.replace(
-            regEx(`^(?P<whitespace>\\s*)`),
-            `$<whitespace>${delimiter}`
-          ) // TODO #12071
+          element.replace(/^(?<whitespace>\s*)/, `$<whitespace>${delimiter}`) // TODO #12071 #12070
       )
       .map(
         (element) =>
-          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12071 #69 adds ' at the front instead of back when RE2 is used
+          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12071 #12070
       )
       .join(',');
   }

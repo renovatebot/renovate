@@ -113,7 +113,7 @@ export function resolvePackage(packageName: string): PackageResolution {
     npmrc &&
     npmrc._authToken &&
     registryUrl.replace(regEx(/\/?$/), '/') ===
-      npmrc.registry?.replace(regEx(/\/?$/), '/')
+      npmrc.registry?.replace(/\/?$/, '/') // TODO #12070
   ) {
     authInfo = { type: 'Bearer', token: npmrc._authToken };
   }

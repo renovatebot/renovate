@@ -7,7 +7,6 @@ import * as memCache from '../../util/cache/memory';
 import { cache } from '../../util/cache/package/decorator';
 import { privateCacheDir, readFile } from '../../util/fs';
 import { simpleGitConfig } from '../../util/git/config';
-import { regEx } from '../../util/regex';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -144,7 +143,7 @@ export class CrateDatasource extends Datasource {
    * clone the repository.
    */
   private static cacheDirFromUrl(url: URL): string {
-    const proto = url.protocol.replace(regEx(/:$/), '');
+    const proto = url.protocol.replace(/:$/, ''); // TODO #12070
     const host = url.hostname;
     const hash = hasha(url.pathname, {
       algorithm: 'sha256',

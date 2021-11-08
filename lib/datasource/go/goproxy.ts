@@ -35,11 +35,9 @@ export function parseGoproxy(
   }
 
   let result: GoproxyItem[] = input
-    .split(regEx(/([^,|]*(?:,|\|))/))
+    .split(/([^,|]*(?:,|\|))/) // TODO: #12070
     .filter(Boolean)
-    .map((s) =>
-      [',', '|'].includes(s.slice(-1)) ? [s.slice(0, -1), s.slice(-1)] : [s]
-    )
+    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12070
     .map(([url, separator]) => ({
       url,
       fallback:
@@ -65,7 +63,7 @@ export function parseGoproxy(
 const lexer = moo.states({
   main: {
     separator: {
-      match: /\s*?,\s*?/, // TODO #12070 moo uses .toString() which creates problem when using RE2
+      match: /\s*?,\s*?/, // TODO #12070
       value: (_: string) => '|',
     },
     asterisk: {
@@ -86,14 +84,14 @@ const lexer = moo.states({
       value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
     },
     escapedChar: {
-      match: /\\./, // TODO #12070 moo uses .toString() which creates problem when using RE2
+      match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
     },
   },
   characterRange: {
-    char: /[^\\\]\n]/, // TODO #12070 moo uses .toString() which creates problem when using RE2
+    char: /[^\\\]\n]/, // TODO #12070
     escapedChar: {
-      match: /\\./, // TODO #12070 moo uses .toString() which creates problem when using RE2
+      match: /\\./, // TODO #12070
       value: (s: string) => s.slice(1),
     },
     characterRangeEnd: {

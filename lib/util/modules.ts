@@ -3,8 +3,8 @@ import { join, normalizeTrim } from 'upath';
 import { regEx } from './regex';
 
 function relatePath(here: string, there: string): string {
-  const thereParts = normalizeTrim(there).split(regEx(/[\\/]/));
-  const hereParts = normalizeTrim(here).split(regEx(/[\\/]/));
+  const thereParts = normalizeTrim(there).split(regEx(/[\\/]/)); // TODO #12070 needs to be tested manually
+  const hereParts = normalizeTrim(here).split(regEx(/[\\/]/)); // TODO #12070 needs to be tested manually
 
   let idx = 0;
   while (

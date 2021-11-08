@@ -1,6 +1,5 @@
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
 import type { BumpPackageVersionResult } from '../../../types';
 
 export function bumpPackageVersion(
@@ -32,7 +31,7 @@ export function bumpPackageVersion(
     }
     logger.debug({ newPjVersion });
     bumpedContent = content.replace(
-      regEx(`(?P<version>"version":\\s*")[^"]*`),
+      /(?<version>"version":\s*")[^"]*/, // TODO #12070
       `$<version>${newPjVersion}`
     );
     if (bumpedContent === content) {
