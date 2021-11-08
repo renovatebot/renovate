@@ -75,7 +75,6 @@ export function analyzeTerraformProvider(
   dep: PackageDependency,
   locks: ProviderLock[]
 ): void {
-  /* eslint-disable no-param-reassign */
   dep.depType = 'provider';
   dep.depName = dep.managerData.moduleName;
   dep.datasource = TerraformProviderDatasource.id;

@@ -619,7 +619,6 @@ describe('manager/dockerfile/extract', () => {
     });
 
     it('handles default environment variable values', () => {
-      // eslint-disable-next-line no-template-curly-in-string
       const res = getDep('${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}');
       expect(res).toMatchInlineSnapshot(`
 Object {
@@ -632,7 +631,6 @@ Object {
 }
 `);
 
-      // eslint-disable-next-line no-template-curly-in-string
       const res2 = getDep('${REDIS_IMAGE:-redis:5.0.0}');
       expect(res2).toMatchInlineSnapshot(`
 Object {
@@ -644,7 +642,6 @@ Object {
 }
 `);
 
-      // eslint-disable-next-line no-template-curly-in-string
       const res3 = getDep('${REDIS_IMAGE:-redis@sha256:abcd}');
       expect(res3).toMatchInlineSnapshot(`
 Object {
@@ -658,7 +655,6 @@ Object {
     });
 
     it('skips tag containing a variable', () => {
-      // eslint-disable-next-line no-template-curly-in-string
       const res = getDep('mcr.microsoft.com/dotnet/sdk:5.0${IMAGESUFFIX}');
       expect(res).toMatchInlineSnapshot(`
         Object {

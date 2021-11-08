@@ -87,7 +87,6 @@ export function getConfig(input: string[]): AllConfig {
 
   /* istanbul ignore next */
   function helpConsole(): void {
-    /* eslint-disable no-console */
     console.log('  Examples:');
     console.log('');
     console.log('    $ renovate --token 123test singapore/lint-condo');

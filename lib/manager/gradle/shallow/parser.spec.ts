@@ -48,7 +48,6 @@ describe('manager/gradle/shallow/parser', () => {
     expect(deps).toBeEmpty();
 
     ({ deps } = parseGradle(
-      // eslint-disable-next-line no-template-curly-in-string
       ['versions.foobar = "1.2.3"', '"foo:bar:${versions.foobar}"'].join('\n')
     ));
     expect(deps).toMatchObject([

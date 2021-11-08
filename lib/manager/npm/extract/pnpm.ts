@@ -85,13 +85,13 @@ export async function detectPnpmWorkspaces(
         { packageFile, pnpmShrinkwrap },
         'Found an existing pnpm shrinkwrap file; skipping pnpm monorepo check.'
       );
-      continue; // eslint-disable-line no-continue
+      continue;
     }
 
     // search for corresponding pnpm workspace
     const pnpmWorkspace = await findPnpmWorkspace(packageFile);
     if (pnpmWorkspace === null) {
-      continue; // eslint-disable-line no-continue
+      continue;
     }
     const { workspaceYamlPath, lockFilePath } = pnpmWorkspace;
 
