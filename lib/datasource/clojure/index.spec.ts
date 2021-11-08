@@ -311,6 +311,6 @@ describe('datasource/clojure/index', () => {
 
     const { sourceUrl } = await get();
 
-    expect(sourceUrl).toEqual('https://github.com/example/test');
+    expect(sourceUrl).toBe('https://github.com/example/test');
   });
 });

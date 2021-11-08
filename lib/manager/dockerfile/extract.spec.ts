@@ -191,8 +191,8 @@ describe('manager/dockerfile/extract', () => {
           },
         ]
       `);
-      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
-      expect(res[0].currentValue).toEqual('8');
+      expect(res[0].depName).toBe('registry2.something.info:5005/node');
+      expect(res[0].currentValue).toBe('8');
     });
 
     it('handles custom hosts with port without tag', () => {
@@ -212,7 +212,7 @@ describe('manager/dockerfile/extract', () => {
           },
         ]
       `);
-      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
+      expect(res[0].depName).toBe('registry2.something.info:5005/node');
     });
 
     it('handles quay hosts with port', () => {

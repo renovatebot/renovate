@@ -25,7 +25,7 @@ describe('logger/index', () => {
   });
   it('sets and gets context', () => {
     setContext('123test');
-    expect(getContext()).toEqual('123test');
+    expect(getContext()).toBe('123test');
   });
   it('supports logging with metadata', () => {
     expect(() => logger.debug({ some: 'meta' }, 'some meta')).not.toThrow();
@@ -108,7 +108,7 @@ describe('logger/index', () => {
 
     logger.error('foo');
 
-    expect(JSON.parse(chunk).msg).toEqual('foo');
+    expect(JSON.parse(chunk).msg).toBe('foo');
   });
 
   it('handles cycles', () => {
@@ -130,10 +130,10 @@ describe('logger/index', () => {
     meta.foo = meta;
     meta.bar.push(meta);
     logger.error(meta, 'foo');
-    expect(logged.msg).toEqual('foo');
-    expect(logged.foo.foo).toEqual('[Circular]');
+    expect(logged.msg).toBe('foo');
+    expect(logged.foo.foo).toBe('[Circular]');
     expect(logged.foo.bar).toEqual(['[Circular]']);
-    expect(logged.bar).toEqual('[Circular]');
+    expect(logged.bar).toBe('[Circular]');
   });
 
   it('sanitizes secrets', () => {
@@ -164,14 +164,14 @@ describe('logger/index', () => {
       },
     });
 
-    expect(logged.foo).not.toEqual('secret"password');
-    expect(logged.bar[0]).toEqual('somethingelse');
+    expect(logged.foo).not.toBe('secret"password');
+    expect(logged.bar[0]).toBe('somethingelse');
     expect(logged.foo).toContain('redacted');
     expect(logged.bar[1]).toContain('redacted');
-    expect(logged.npmToken).not.toEqual('token');
-    expect(logged.buffer).toEqual('[content]');
-    expect(logged.content).toEqual('[content]');
-    expect(logged.prBody).toEqual('[Template]');
-    expect(logged.secrets.foo).toEqual('***********');
+    expect(logged.npmToken).not.toBe('token');
+    expect(logged.buffer).toBe('[content]');
+    expect(logged.content).toBe('[content]');
+    expect(logged.prBody).toBe('[Template]');
+    expect(logged.secrets.foo).toBe('***********');
   });
 });

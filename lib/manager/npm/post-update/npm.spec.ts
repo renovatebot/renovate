@@ -40,7 +40,7 @@ describe('manager/npm/post-update/npm', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('massages lock files', async () => {
@@ -86,7 +86,7 @@ describe('manager/npm/post-update/npm', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates', async () => {
@@ -115,7 +115,7 @@ describe('manager/npm/post-update/npm', () => {
       'utf8'
     );
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
@@ -140,7 +140,7 @@ describe('manager/npm/post-update/npm', () => {
       'utf8'
     );
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs full install', async () => {
@@ -156,7 +156,7 @@ describe('manager/npm/post-update/npm', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('runs twice if remediating', async () => {
@@ -172,7 +172,7 @@ describe('manager/npm/post-update/npm', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeUndefined();
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toHaveLength(2);
   });
   it('catches errors', async () => {
@@ -187,7 +187,7 @@ describe('manager/npm/post-update/npm', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeTrue();
-    expect(res.lockFile).not.toBeDefined();
+    expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('finds npm globally', async () => {
@@ -199,7 +199,7 @@ describe('manager/npm/post-update/npm', () => {
       'package-lock.json'
     );
     expect(fs.readFile).toHaveBeenCalledTimes(2);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses docker npm', async () => {
@@ -212,7 +212,7 @@ describe('manager/npm/post-update/npm', () => {
       { binarySource: 'docker', constraints: { npm: '^6.0.0' } }
     );
     expect(fs.readFile).toHaveBeenCalledTimes(2);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lock file maintenance', async () => {
@@ -227,7 +227,7 @@ describe('manager/npm/post-update/npm', () => {
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(fs.remove).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
 });

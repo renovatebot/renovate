@@ -98,15 +98,15 @@ describe('datasource/go/releases-goproxy', () => {
       expect(parseNoproxy(undefined)).toBeNull();
       expect(parseNoproxy(null)).toBeNull();
       expect(parseNoproxy('')).toBeNull();
-      expect(parseNoproxy('*')?.source).toEqual('^(?:[^\\/]*)$');
-      expect(parseNoproxy('?')?.source).toEqual('^(?:[^\\/])$');
-      expect(parseNoproxy('foo')?.source).toEqual('^(?:foo)$');
-      expect(parseNoproxy('\\f\\o\\o')?.source).toEqual('^(?:foo)$');
-      expect(parseNoproxy('foo,bar')?.source).toEqual('^(?:foo|bar)$');
-      expect(parseNoproxy('[abc]')?.source).toEqual('^(?:[abc])$');
-      expect(parseNoproxy('[a-c]')?.source).toEqual('^(?:[a-c])$');
-      expect(parseNoproxy('[\\a-\\c]')?.source).toEqual('^(?:[a-c])$');
-      expect(parseNoproxy('a.b.c')?.source).toEqual('^(?:a\\.b\\.c)$');
+      expect(parseNoproxy('*')?.source).toBe('^(?:[^\\/]*)$');
+      expect(parseNoproxy('?')?.source).toBe('^(?:[^\\/])$');
+      expect(parseNoproxy('foo')?.source).toBe('^(?:foo)$');
+      expect(parseNoproxy('\\f\\o\\o')?.source).toBe('^(?:foo)$');
+      expect(parseNoproxy('foo,bar')?.source).toBe('^(?:foo|bar)$');
+      expect(parseNoproxy('[abc]')?.source).toBe('^(?:[abc])$');
+      expect(parseNoproxy('[a-c]')?.source).toBe('^(?:[a-c])$');
+      expect(parseNoproxy('[\\a-\\c]')?.source).toBe('^(?:[a-c])$');
+      expect(parseNoproxy('a.b.c')?.source).toBe('^(?:a\\.b\\.c)$');
     });
 
     it('matches on real package prefixes', () => {

@@ -99,22 +99,22 @@ describe('datasource/nuget/index', () => {
     it('extracts feed version from registry URL hash (v3)', () => {
       const parsed = parseRegistryUrl('https://my-registry#protocolVersion=3');
 
-      expect(parsed.feedUrl).toEqual('https://my-registry/');
-      expect(parsed.protocolVersion).toEqual(3);
+      expect(parsed.feedUrl).toBe('https://my-registry/');
+      expect(parsed.protocolVersion).toBe(3);
     });
 
     it('extracts feed version from registry URL hash (v2)', () => {
       const parsed = parseRegistryUrl('https://my-registry#protocolVersion=2');
 
-      expect(parsed.feedUrl).toEqual('https://my-registry/');
-      expect(parsed.protocolVersion).toEqual(2);
+      expect(parsed.feedUrl).toBe('https://my-registry/');
+      expect(parsed.protocolVersion).toBe(2);
     });
 
     it('defaults to v2', () => {
       const parsed = parseRegistryUrl('https://my-registry');
 
-      expect(parsed.feedUrl).toEqual('https://my-registry/');
-      expect(parsed.protocolVersion).toEqual(2);
+      expect(parsed.feedUrl).toBe('https://my-registry/');
+      expect(parsed.protocolVersion).toBe(2);
     });
 
     it('returns null for unparseable', () => {
@@ -122,9 +122,7 @@ describe('datasource/nuget/index', () => {
         'https://test:malfor%5Med@test.example.com'
       );
 
-      expect(parsed.feedUrl).toEqual(
-        'https://test:malfor%5Med@test.example.com'
-      );
+      expect(parsed.feedUrl).toBe('https://test:malfor%5Med@test.example.com');
       expect(parsed.protocolVersion).toBeNull();
     });
   });
@@ -163,7 +161,7 @@ describe('datasource/nuget/index', () => {
         ...config,
       });
       const trace = httpMock.getTrace();
-      expect(trace[0].url).toEqual('https://my-registry/');
+      expect(trace[0].url).toBe('https://my-registry/');
       expect(trace).toMatchSnapshot();
     });
 
@@ -445,7 +443,7 @@ describe('datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).not.toBeDefined();
+      expect(res.sourceUrl).toBeUndefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data (v3) nuspec fetch 404 error', async () => {
@@ -463,7 +461,7 @@ describe('datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).not.toBeDefined();
+      expect(res.sourceUrl).toBeUndefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data (v2)', async () => {
@@ -506,7 +504,7 @@ describe('datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).not.toBeDefined();
+      expect(res.sourceUrl).toBeUndefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data with no github project url (v2)', async () => {
