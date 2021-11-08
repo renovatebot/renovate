@@ -26,7 +26,7 @@ describe('workers/global/config/parse/file', () => {
       const configFile = upath.resolve(__dirname, './__fixtures__/file2.js');
       const res = file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(res).toMatchSnapshot();
-      expect(res.rangeStrategy).toEqual('bump');
+      expect(res.rangeStrategy).toBe('bump');
     });
 
     it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', () => {

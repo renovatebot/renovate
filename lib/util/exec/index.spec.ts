@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,

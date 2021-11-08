@@ -289,7 +289,7 @@ export async function processBranch(
               'Update has not passed stability days'
             );
             config.stabilityStatus = BranchStatus.yellow;
-            continue; // eslint-disable-line no-continue
+            continue;
           }
         }
         const {
@@ -316,7 +316,7 @@ export async function processBranch(
               'Update does not meet minimum confidence scores'
             );
             config.confidenceStatus = BranchStatus.yellow;
-            continue; // eslint-disable-line no-continue
+            continue;
           }
         }
       }

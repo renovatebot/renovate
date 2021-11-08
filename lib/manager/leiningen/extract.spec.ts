@@ -13,9 +13,7 @@ describe('manager/leiningen/extract', () => {
   it('trimAtKey', () => {
     expect(trimAtKey('foo', 'bar')).toBeNull();
     expect(trimAtKey(':dependencies    ', 'dependencies')).toBeNull();
-    expect(trimAtKey(':dependencies \nfoobar', 'dependencies')).toEqual(
-      'foobar'
-    );
+    expect(trimAtKey(':dependencies \nfoobar', 'dependencies')).toBe('foobar');
   });
   it('extractFromVectors', () => {
     expect(extractFromVectors('')).toBeEmptyArray();

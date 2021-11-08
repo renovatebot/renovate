@@ -5,7 +5,9 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { regEx } from '../../util/regex';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GoproxyFallback, http } from './common';
+import { GoproxyFallback, getSourceUrl, http } from './common';
+import { getDatasource } from './get-datasource';
+import * as direct from './releases-direct';
 import type { GoproxyItem, VersionInfo } from './types';
 
 const parsedGoproxy: Record<string, GoproxyItem[]> = {};
@@ -34,7 +36,7 @@ export function parseGoproxy(
     return parsedGoproxy[input];
   }
 
-  let result: GoproxyItem[] = input
+  const result: GoproxyItem[] = input
     .split(/([^,|]*(?:,|\|))/) // TODO: #12070
     .filter(Boolean)
     .map((s) => s.split(/(?=,|\|)/)) // TODO: #12070
@@ -45,15 +47,6 @@ export function parseGoproxy(
           ? GoproxyFallback.WhenNotFoundOrGone
           : GoproxyFallback.Always,
     }));
-
-  // Ignore hosts after any keyword
-  for (let idx = 0; idx < result.length; idx += 1) {
-    const { url } = result[idx];
-    if (['off', 'direct'].includes(url)) {
-      result = result.slice(0, idx);
-      break;
-    }
-  }
 
   parsedGoproxy[input] = result;
   return result;
@@ -159,22 +152,18 @@ export async function versionInfo(
   return result;
 }
 
-export async function getReleases({
-  lookupName,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { lookupName } = config;
   logger.trace(`goproxy.getReleases(${lookupName})`);
-
-  const noproxy = parseNoproxy();
-  if (noproxy?.test(lookupName)) {
-    logger.debug(`Skipping ${lookupName} via GONOPROXY match`);
-    return null;
-  }
 
   const goproxy = process.env.GOPROXY;
   const proxyList = parseGoproxy(goproxy);
+  const noproxy = parseNoproxy();
 
   const cacheNamespaces = 'datasource-go-proxy';
-  const cacheKey = `${lookupName}@@${goproxy}`;
+  const cacheKey = `${lookupName}@@${goproxy}@@${noproxy?.toString()}`;
   const cacheMinutes = 60;
   const cachedResult = await packageCache.get<ReleaseResult | null>(
     cacheNamespaces,
@@ -187,8 +176,22 @@ export async function getReleases({
 
   let result: ReleaseResult | null = null;
 
+  if (noproxy?.test(lookupName)) {
+    logger.debug(`Fetching ${lookupName} via GONOPROXY match`);
+    result = await direct.getReleases(config);
+    await packageCache.set(cacheNamespaces, cacheKey, result, cacheMinutes);
+    return result;
+  }
+
   for (const { url, fallback } of proxyList) {
     try {
+      if (url === 'off') {
+        break;
+      } else if (url === 'direct') {
+        result = await direct.getReleases(config);
+        break;
+      }
+
       const versions = await listVersions(url, lookupName);
       const queue = versions.map((version) => async (): Promise<Release> => {
         try {
@@ -200,7 +203,9 @@ export async function getReleases({
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        result = { releases };
+        const datasource = await getDatasource(lookupName);
+        const sourceUrl = getSourceUrl(datasource);
+        result = { releases, sourceUrl };
         break;
       }
     } catch (err) {
