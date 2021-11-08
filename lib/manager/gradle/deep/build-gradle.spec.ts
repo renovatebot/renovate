@@ -560,7 +560,7 @@ describe('manager/gradle/deep/build-gradle', () => {
 
   it('should replace a external groovy variable assigned to a specific dependency', () => {
     const gradleFile =
-      'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+      'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -580,7 +580,7 @@ describe('manager/gradle/deep/build-gradle', () => {
 
   it('should replace a external groovy map variable assigned to a specific dependency', () => {
     const gradleFile =
-      'runtime (  "mysql:mysql-connector-java:${versions.mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+      'runtime (  "mysql:mysql-connector-java:${versions.mysqlVersion}"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -600,7 +600,7 @@ describe('manager/gradle/deep/build-gradle', () => {
 
   it('should replace a external groovy map nested variable assigned to a specific dependency', () => {
     const gradleFile =
-      'runtime (  "mysql:mysql-connector-java:${versions.nested.mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+      'runtime (  "mysql:mysql-connector-java:${versions.nested.mysqlVersion}"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -623,7 +623,7 @@ describe('manager/gradle/deep/build-gradle', () => {
 
   it('should replace a external property variable assigned to a specific dependency', () => {
     const gradleFile =
-      'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+      'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -643,7 +643,7 @@ describe('manager/gradle/deep/build-gradle', () => {
 
   it('should replace a external property variable assigned to a specific dependency parenthesis syntax', () => {
     const gradleFile =
-      "implementation platform(group: 'mysql', name: 'mysql-connector-java', version: mysqlVersion)"; // eslint-disable-line no-template-curly-in-string
+      "implementation platform(group: 'mysql', name: 'mysql-connector-java', version: mysqlVersion)";
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',

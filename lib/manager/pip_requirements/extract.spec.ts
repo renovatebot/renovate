@@ -115,10 +115,10 @@ describe('manager/pip_requirements/extract', () => {
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',
         'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
-        // eslint-disable-next-line no-template-curly-in-string
+
         'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
         'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
-        // eslint-disable-next-line no-template-curly-in-string
+
         'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
       ]);
     });

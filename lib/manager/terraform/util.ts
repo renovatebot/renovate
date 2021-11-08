@@ -50,7 +50,6 @@ export function checkIfStringIsPath(path: string): boolean {
 }
 
 export function massageProviderLookupName(dep: PackageDependency): void {
-  /* eslint-disable no-param-reassign */
   if (!dep.lookupName) {
     dep.lookupName = dep.depName;
   }
