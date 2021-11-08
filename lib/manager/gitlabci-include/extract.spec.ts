@@ -44,7 +44,7 @@ describe('manager/gitlabci-include/extract', () => {
         const res = extractPackageFile(yamlFileMultiConfig, '.gitlab-ci.yml', {
           endpoint,
         });
-        expect(res.deps[0].registryUrls[0]).toEqual('http://gitlab.test');
+        expect(res.deps[0].registryUrls[0]).toBe('http://gitlab.test');
       }
     });
   });

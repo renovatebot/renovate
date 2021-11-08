@@ -35,7 +35,6 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
 }
 
 export async function readDashboardBody(config: RenovateConfig): Promise<void> {
-  /* eslint-disable no-param-reassign */
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (

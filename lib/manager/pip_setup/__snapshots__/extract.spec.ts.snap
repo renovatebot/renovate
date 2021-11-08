@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/pip_setup/extract getPythonAlias returns the python alias to use 1`] = `"python3.8"`;
-
-exports[`manager/pip_setup/extract getPythonAlias returns the python alias to use 2`] = `
+exports[`manager/pip_setup/extract getPythonAlias returns the python alias to use 1`] = `
 Array [
   Object {
     "cmd": "python --version",
