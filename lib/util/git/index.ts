@@ -79,6 +79,7 @@ function checkForPlatformFailure(err: Error): void {
     'Could not resolve host',
     'early EOF',
     'fatal: bad config', // .gitmodules problem
+    'expected flush after ref listing',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -146,6 +147,11 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     ) {
       throw new Error(REPOSITORY_EMPTY);
     }
+    // istanbul ignore if
+    if (err.message.includes("fatal: ambiguous argument 'origin/HEAD'")) {
+      logger.warn({ err }, 'Error getting default branch');
+      throw new Error(TEMPORARY_ERROR);
+    }
     throw err;
   }
 }
@@ -174,6 +180,7 @@ async function fetchBranchCommits(): Promise<void> {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
   } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
     logger.debug({ err }, 'git error');
     if (err.message?.includes('Please ask the owner to check their account')) {
       throw new Error(REPOSITORY_DISABLED);
@@ -482,8 +489,8 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     ]);
     const isStale = !branches.all.map(localName).includes(branchName);
     logger.debug(
-      { isStale, branches, currentBranch, currentBranchSha },
-      `IsBranchStale=${isStale}`
+      { isStale, currentBranch, currentBranchSha },
+      `isBranchStale=${isStale}`
     );
     return isStale;
   } catch (err) /* istanbul ignore next */ {

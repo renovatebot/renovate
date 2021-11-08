@@ -257,6 +257,28 @@ Object {
 }
 `;
 
+exports[`manager/regex/index extracts with combination strategy and non standard capture groups 1`] = `
+Object {
+  "datasourceTemplate": "docker",
+  "depNameTemplate": "{{{ registry }}}/{{{ repository }}}",
+  "deps": Array [
+    Object {
+      "currentValue": "v2.21.0",
+      "datasource": "docker",
+      "depName": "docker.io/prom/prometheus",
+      "replaceString": "prometheus_version: \\"v2.21.0\\" //",
+    },
+  ],
+  "matchStrings": Array [
+    "prometheus_registry:\\\\s*\\"(?<registry>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_repository:\\\\s*\\"(?<repository>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_tag:\\\\s*\\"(?<tag>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
 exports[`manager/regex/index extracts with combination strategy and registry url 1`] = `
 Object {
   "datasourceTemplate": "helm",
@@ -310,6 +332,52 @@ Object {
 exports[`manager/regex/index extracts with recursive strategy and fail because of not sufficient regexes 1`] = `null`;
 
 exports[`manager/regex/index extracts with recursive strategy and fail because there is no match 1`] = `null`;
+
+exports[`manager/regex/index extracts with recursive strategy and merged groups 1`] = `
+Object {
+  "depNameTemplate": "{{{ first }}}/{{{ second }}}/{{{ depName }}}",
+  "deps": Array [
+    Object {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "group1/group1/prom/prometheus",
+      "replaceString": "\\"name\\": \\"prom/prometheus\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"v2.19.0\\"",
+    },
+    Object {
+      "currentValue": "7.2.2",
+      "datasource": "docker",
+      "depName": "group2/group2/grafana/grafana",
+      "replaceString": "\\"name\\": \\"grafana/grafana\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"7.2.2\\"",
+    },
+    Object {
+      "currentValue": "1.6.1",
+      "datasource": "docker",
+      "depName": "backup/backup/grafana/loki",
+      "replaceString": "\\"name\\": \\"grafana/loki\\",
+      \\"type\\": \\"docker\\",
+      \\"value\\": \\"1.6.1\\"",
+    },
+    Object {
+      "currentValue": "3.9.0",
+      "datasource": "docker",
+      "depName": "setup/setup/python",
+      "replaceString": "\\"name\\": \\"python\\",
+      \\"type\\": \\"docker\\",
+      \\"value\\": \\"3.9.0\\"",
+    },
+  ],
+  "matchStrings": Array [
+    "\\"(?<first>[^\\"]*)\\":\\\\s*{[^}]*}",
+    "\\"(?<second>[^\\"]*)\\":\\\\s*\\\\{[^}]*}",
+    "\\"name\\":\\\\s*\\"(?<depName>.*)\\"[^\\"]*\\"type\\":\\\\s*\\"(?<datasource>.*)\\"[^\\"]*\\"value\\":\\\\s*\\"(?<currentValue>.*)\\"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
 
 exports[`manager/regex/index extracts with recursive strategy and multiple layers  1`] = `
 Object {

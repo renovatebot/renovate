@@ -53,8 +53,15 @@ describe('workers/repository/dependency-dashboard', () => {
           '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
-      // FIXME: explicit assert condition
-      expect(conf).toMatchSnapshot();
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName1: 'approve',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: true,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
     });
   });
 

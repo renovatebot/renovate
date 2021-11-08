@@ -206,6 +206,29 @@ describe('manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
   });
+
+  it('extracts with combination strategy and non standard capture groups', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        'prometheus_registry:\\s*"(?<registry>.*)"\\s*\\/\\/',
+        'prometheus_repository:\\s*"(?<repository>.*)"\\s*\\/\\/',
+        'prometheus_tag:\\s*"(?<tag>.*)"\\s*\\/\\/',
+        'prometheus_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/',
+      ],
+      matchStringsStrategy: 'combination',
+      datasourceTemplate: 'docker',
+      depNameTemplate: '{{{ registry }}}/{{{ repository }}}',
+    };
+    const res = await extractPackageFile(
+      ansibleYamlContent,
+      'ansible.yml',
+      config
+    );
+    expect(res.deps).toHaveLength(1);
+    expect(res.deps[0].depName).toEqual('docker.io/prom/prometheus');
+    expect(res).toMatchSnapshot();
+  });
+
   it('extracts with combination strategy and multiple matches', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
@@ -349,5 +372,23 @@ describe('manager/regex/index', () => {
     );
     expect(res).toMatchSnapshot();
     expect(res).toBeNull();
+  });
+  it('extracts with recursive strategy and merged groups', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '"(?<first>[^"]*)":\\s*{[^}]*}',
+        '"(?<second>[^"]*)":\\s*\\{[^}]*}',
+        '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
+      ],
+      matchStringsStrategy: 'recursive',
+      depNameTemplate: '{{{ first }}}/{{{ second }}}/{{{ depName }}}',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(4);
   });
 });

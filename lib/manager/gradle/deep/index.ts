@@ -140,6 +140,7 @@ export async function extractAllPackageFiles(
   const gradleFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
+    // istanbul ignore else
     if (content) {
       gradleFiles.push({
         packageFile,
@@ -149,7 +150,6 @@ export async function extractAllPackageFiles(
 
       collectVersionVariables(dependencies, content);
     } else {
-      // istanbul ignore next
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
