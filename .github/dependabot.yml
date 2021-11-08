@@ -1,0 +1,41 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: redis
+    versions:
+    - 3.1.2
+  - dependency-name: "@types/luxon"
+    versions:
+    - 1.25.2
+    - 1.25.3
+    - 1.26.0
+    - 1.26.1
+    - 1.26.2
+    - 1.26.3
+    - 1.26.4
+  - dependency-name: "@typescript-eslint/parser"
+    versions:
+    - 4.15.0
+    - 4.15.1
+    - 4.15.2
+    - 4.16.1
+    - 4.17.0
+    - 4.18.0
+    - 4.19.0
+    - 4.20.0
+    - 4.21.0
+  - dependency-name: "@babel/preset-typescript"
+    versions:
+    - 7.12.16
+    - 7.12.17
+  - dependency-name: crypto-random-string
+    versions:
+    - 3.3.1
+  - dependency-name: "@types/js-yaml"
+    versions:
+    - 4.0.0
