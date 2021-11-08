@@ -48,15 +48,24 @@ export class AwsMachineImageDataSource extends Datasource {
         Filters: JSON.parse(serializedAmiFilter),
       });
       const matchingImages = await this.ec2.send(cmd);
-      const latestImage = matchingImages.Images?.sort(
+      if (matchingImages.Images === undefined) {
+        return null;
+      }
+      const latestImage = matchingImages.Images.sort(
         (image1, image2) =>
           Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
       ).pop();
       const digest = latestImage.Name;
       return digest;
     }
-    return (await this.getReleases({ lookupName: serializedAmiFilter }))
-      .releases[0].newDigest;
+    const getReleasesResult = await this.getReleases({
+      lookupName: serializedAmiFilter,
+    });
+
+    if (getReleasesResult === null) {
+      return null;
+    }
+    return getReleasesResult.releases[0].newDigest ?? null;
   }
 
   @cache({
@@ -71,7 +80,10 @@ export class AwsMachineImageDataSource extends Datasource {
       Filters: JSON.parse(serializedAmiFilter),
     });
     const matchingImages = await this.ec2.send(cmd);
-    const latestImage = matchingImages.Images?.sort(
+    if (matchingImages.Images === undefined) {
+      return null;
+    }
+    const latestImage = matchingImages.Images.sort(
       (image1, image2) =>
         Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
     ).pop();

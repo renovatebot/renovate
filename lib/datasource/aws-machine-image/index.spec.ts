@@ -11,6 +11,18 @@ beforeEach(() => {
 });
 
 describe('datasource/aws-machine-image/index', () => {
+  describe('getDigest empty result', () => {
+    it('returns 1 image name from the aws api', async () => {
+      ec2Mock.on(DescribeImagesCommand).resolves({});
+      const res = await getDigest({
+        datasource,
+        depName:
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
+      });
+      expect(res).toMatchSnapshot();
+      expect(ec2Mock.calls()).toMatchSnapshot();
+    });
+  });
   describe('getDigest', () => {
     it('returns 1 image name from the aws api', async () => {
       ec2Mock.on(DescribeImagesCommand).resolves({
@@ -172,6 +184,18 @@ describe('datasource/aws-machine-image/index', () => {
         ],
       });
       const res = await getDigest({
+        datasource,
+        depName:
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
+      });
+      expect(res).toMatchSnapshot();
+      expect(ec2Mock.calls()).toMatchSnapshot();
+    });
+  });
+  describe('getReleases empty result', () => {
+    it('returns 1 image name from the aws api', async () => {
+      ec2Mock.on(DescribeImagesCommand).resolves({});
+      const res = await getPkgReleases({
         datasource,
         depName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
