@@ -94,7 +94,7 @@ describe('datasource/orb/index', () => {
         depName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
-      expect(res.homepage).toEqual('https://google.com');
+      expect(res.homepage).toBe('https://google.com');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

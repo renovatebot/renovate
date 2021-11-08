@@ -77,7 +77,7 @@ describe('manager/npm/update/locked-dependency/index', () => {
       });
       expect(
         JSON.parse(res['package-lock.json']).dependencies.mime.version
-      ).toEqual('1.2.12');
+      ).toBe('1.2.12');
     });
     it('fails to remediate if parent dep cannot support', async () => {
       const acceptsModified = clone(acceptsJson);
@@ -105,7 +105,7 @@ describe('manager/npm/update/locked-dependency/index', () => {
       const res = await updateLockedDependency(config);
       expect(res['package.json']).toContain('"express": "4.1.0"');
       const packageLock = JSON.parse(res['package-lock.json']);
-      expect(packageLock.dependencies.express.version).toEqual('4.1.0');
+      expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
     it('remediates mime', async () => {
       config.depName = 'mime';
@@ -129,8 +129,8 @@ describe('manager/npm/update/locked-dependency/index', () => {
         .reply(200, typeIsJson);
       const res = await updateLockedDependency(config);
       const packageLock = JSON.parse(res['package-lock.json']);
-      expect(packageLock.dependencies.mime.version).toEqual('1.4.1');
-      expect(packageLock.dependencies.express.version).toEqual('4.16.0');
+      expect(packageLock.dependencies.mime.version).toBe('1.4.1');
+      expect(packageLock.dependencies.express.version).toBe('4.16.0');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

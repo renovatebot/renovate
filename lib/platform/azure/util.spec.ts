@@ -117,7 +117,7 @@ describe('platform/azure/util', () => {
   describe('streamToString', () => {
     it('converts Readable stream to string', async () => {
       const res = await streamToString(Readable.from('foobar'));
-      expect(res).toEqual('foobar');
+      expect(res).toBe('foobar');
     });
     it('handles error', async () => {
       const stream = Readable.from('foobar');

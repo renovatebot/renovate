@@ -180,7 +180,7 @@ describe('workers/repository/init/merge', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e.toString()).toEqual('Error: config-validation');
+      expect(e.toString()).toBe('Error: config-validation');
     });
     it('migrates nested config', async () => {
       git.getFileList.mockResolvedValue(['renovate.json']);
@@ -194,7 +194,7 @@ describe('workers/repository/init/merge', () => {
         migratedConfig: {},
       });
       config.extends = [':automergeDisabled'];
-      expect(await mergeRenovateConfig(config)).not.toBeUndefined();
+      expect(await mergeRenovateConfig(config)).toBeDefined();
     });
     it('continues if no errors', async () => {
       git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
@@ -204,7 +204,7 @@ describe('workers/repository/init/merge', () => {
         errors: [],
       });
       config.extends = [':automergeDisabled'];
-      expect(await mergeRenovateConfig(config)).not.toBeUndefined();
+      expect(await mergeRenovateConfig(config)).toBeDefined();
     });
   });
 });
