@@ -16,7 +16,7 @@
     "debug": "node --inspect-brk -r ts-node/register/transpile-only  -- lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
     "eslint": "eslint --ext .js,.mjs,.ts lib/ test/ tools/ --report-unused-disable-directives",
-    "eslint-fix": "eslint --ext .js,.mjs,.ts --fix lib/ test/ tools/",
+    "eslint-fix": "eslint --ext .js,.mjs,.ts --fix lib/ test/ tools/ --report-unused-disable-directives",
     "generate": "run-s generate:*",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
