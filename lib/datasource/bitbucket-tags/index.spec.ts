@@ -73,7 +73,7 @@ describe('datasource/bitbucket-tags/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
-      expect(res).toEqual('123');
+      expect(res).toBe('123');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -123,7 +123,7 @@ describe('datasource/bitbucket-tags/index', () => {
       );
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
-      expect(res).toEqual('123');
+      expect(res).toBe('123');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

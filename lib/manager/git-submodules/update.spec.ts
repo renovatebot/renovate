@@ -50,7 +50,7 @@ describe('manager/git-submodules/update', () => {
         fileContent: '',
         upgrade,
       });
-      expect(update).toEqual('');
+      expect(update).toBe('');
     });
   });
 });

@@ -168,7 +168,7 @@ describe('manager/npm/extract/pnpm', () => {
           (packageFile) =>
             packageFile.packageFile === 'not-matching/b/package.json'
         ).pnpmShrinkwrap
-      ).not.toBeDefined();
+      ).toBeUndefined();
     });
   });
 });

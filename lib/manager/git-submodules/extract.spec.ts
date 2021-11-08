@@ -50,14 +50,14 @@ describe('manager/git-submodules/extract', () => {
       expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res.deps).toHaveLength(1);
-      expect(res.deps[0].currentValue).toEqual('main');
+      expect(res.deps[0].currentValue).toBe('main');
       res = await extractPackageFile('', '.gitmodules.3', {});
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.4', {});
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.5', {});
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[2].lookupName).toEqual(
+      expect(res.deps[2].lookupName).toBe(
         'https://github.com/renovatebot/renovate-config.git'
       );
     });

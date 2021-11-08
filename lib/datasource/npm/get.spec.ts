@@ -43,7 +43,7 @@ describe('datasource/npm/get', () => {
       await getDependency('@myco/test');
 
       const trace = httpMock.getTrace();
-      expect(trace[0].headers.authorization).toEqual('Bearer XXX');
+      expect(trace[0].headers.authorization).toBe('Bearer XXX');
       expect(trace).toMatchSnapshot();
     });
   });
@@ -75,7 +75,7 @@ describe('datasource/npm/get', () => {
       await getDependency('@myco/test');
 
       const trace = httpMock.getTrace();
-      expect(trace[0].headers.authorization).toEqual('Basic dGVzdDp0ZXN0');
+      expect(trace[0].headers.authorization).toBe('Basic dGVzdDp0ZXN0');
       expect(trace).toMatchSnapshot();
     });
   });
@@ -302,7 +302,7 @@ describe('datasource/npm/get', () => {
 
     expect(dep.sourceUrl).toBe('https://github.com/vuejs/vue.git');
     expect(dep.releases[0].sourceUrl).toBeUndefined();
-    expect(dep.releases[1].sourceUrl).toEqual(
+    expect(dep.releases[1].sourceUrl).toBe(
       'https://github.com/vuejs/vue-next.git'
     );
   });

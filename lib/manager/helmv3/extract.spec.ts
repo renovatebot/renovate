@@ -35,7 +35,7 @@ describe('manager/helmv3/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toEqual(true);
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
     });
     it('parses simple Chart.yaml correctly', async () => {
       const content = `
@@ -129,7 +129,7 @@ describe('manager/helmv3/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toEqual(false);
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(false);
     });
     it("doesn't fail if Chart.yaml is invalid", async () => {
       const content = `

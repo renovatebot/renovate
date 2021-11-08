@@ -17,14 +17,14 @@ describe('manager/bundler/host-rules', () => {
           username: 'test',
           password: 'password',
         })
-      ).toEqual('test:password');
+      ).toBe('test:password');
     });
     it('returns the authentication header with the token', () => {
       expect(
         getAuthenticationHeaderValue({
           token: 'token',
         })
-      ).toEqual('token');
+      ).toBe('token');
     });
   });
   describe('findAllAuthenticatable()', () => {
