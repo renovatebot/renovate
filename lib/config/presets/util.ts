@@ -18,7 +18,6 @@ export async function fetchPreset({
   packageTag = null,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
-  // eslint-disable-next-line no-param-reassign
   endpoint = ensureTrailingSlash(endpoint);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';

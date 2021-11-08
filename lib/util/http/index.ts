@@ -72,11 +72,11 @@ function applyDefaultHeaders(options: Options): void {
   let renovateVersion = 'unknown';
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
+    renovateVersion = require('../../../package.json').version;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error getting renovate version');
   }
-  // eslint-disable-next-line no-param-reassign
+
   options.headers = {
     ...options.headers,
     'user-agent':
@@ -295,7 +295,6 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     // istanbul ignore else: needs test
     if (options?.baseUrl) {
-      // eslint-disable-next-line no-param-reassign
       url = resolveBaseUrl(options.baseUrl, url);
     }
 

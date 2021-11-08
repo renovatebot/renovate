@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import RE2 from 're2';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { regEx } from './regex';

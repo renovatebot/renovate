@@ -49,7 +49,6 @@ function handleGitDep(
   dep: PackageDependency,
   nameMatch: RegExpExecArray
 ): void {
-  /* eslint-disable no-param-reassign */
   dep.datasource = GitTagsDatasource.id;
 
   if (nameMatch) {
@@ -80,7 +79,6 @@ function handleGitDep(
 }
 
 function handleGalaxyDep(dep: PackageDependency): void {
-  /* eslint-disable no-param-reassign */
   dep.datasource = GalaxyCollectionDatasource.id;
   dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];

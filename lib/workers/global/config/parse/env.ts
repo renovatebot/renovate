@@ -129,7 +129,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     'VSTS_ENDPOINT',
     'VSTS_TOKEN',
   ];
-  // eslint-disable-next-line no-param-reassign
+
   unsupportedEnv.forEach((val) => delete env[val]);
 
   return config;

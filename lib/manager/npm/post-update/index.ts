@@ -64,7 +64,7 @@ export function determineLockFileDirs(
         npmLockDirs.push(upgrade.npmLock);
         pnpmShrinkwrapDirs.push(upgrade.pnpmShrinkwrap);
       }
-      continue; // eslint-disable-line no-continue
+      continue;
     }
     if (upgrade.isLockfileUpdate) {
       yarnLockDirs.push(upgrade.yarnLock);
@@ -244,10 +244,10 @@ export async function writeUpdatedPackageFiles(
         upath.join(localDir, packageFile.name),
         packageFile.contents
       );
-      continue; // eslint-disable-line
+      continue;
     }
     if (!packageFile.name.endsWith('package.json')) {
-      continue; // eslint-disable-line
+      continue;
     }
     logger.debug(`Writing ${String(packageFile.name)}`);
     const massagedFile = JSON.parse(packageFile.contents.toString());

@@ -273,7 +273,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const urlsSet = new Set([...rawDep.registryUrls, ...registryUrls[name]]);
-      rawDep.registryUrls = [...urlsSet]; // eslint-disable-line no-param-reassign
+      rawDep.registryUrls = [...urlsSet];
     });
   });
 
@@ -297,9 +297,9 @@ function cleanResult(
   packageFiles: PackageFile<Record<string, any>>[]
 ): PackageFile<Record<string, any>>[] {
   packageFiles.forEach((packageFile) => {
-    delete packageFile.mavenProps; // eslint-disable-line no-param-reassign
+    delete packageFile.mavenProps;
     packageFile.deps.forEach((dep) => {
-      delete dep.propSource; // eslint-disable-line no-param-reassign
+      delete dep.propSource;
     });
   });
   return packageFiles;

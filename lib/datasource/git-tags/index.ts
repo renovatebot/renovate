@@ -18,7 +18,6 @@ export class GitTagsDatasource extends Datasource {
     namespace: `datasource-${GitTagsDatasource.id}`,
     key: ({ lookupName }: GetReleasesConfig) => lookupName,
   })
-  // eslint-disable-next-line class-methods-use-this
   async getReleases({
     lookupName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -48,7 +47,6 @@ export class GitTagsDatasource extends Datasource {
     return result;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   override async getDigest(
     { lookupName }: DigestConfig,
     newValue?: string
