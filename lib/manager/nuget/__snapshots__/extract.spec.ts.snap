@@ -1,35 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/nuget/extract extractPackageFile() .config/dotnet-tools.json with-config 1`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "2.0.0",
-      "datasource": "nuget",
-      "depName": "minver-cli",
-      "depType": "nuget",
-      "registryUrls": Array [
-        "https://api.nuget.org/v3/index.json#protocolVersion=3",
-        "https://contoso.com/packages/",
-      ],
-    },
-  ],
-}
-`;
-
-exports[`manager/nuget/extract extractPackageFile() .config/dotnet-tools.json works 1`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "2.0.0",
-      "datasource": "nuget",
-      "depName": "minver-cli",
-      "depType": "nuget",
-    },
-  ],
-}
-`;
-
 exports[`manager/nuget/extract extractPackageFile() considers NuGet.config 1`] = `
 Object {
   "deps": Array [
