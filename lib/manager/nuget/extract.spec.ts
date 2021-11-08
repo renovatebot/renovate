@@ -169,7 +169,7 @@ describe('manager/nuget/extract', () => {
       });
       expect(
         await extractPackageFile(otherContents, otherPackageFile, config)
-      ).toMatchInlineSnapshot({
+      ).toEqual({
         deps: [
           {
             currentValue: '4.5.0',
