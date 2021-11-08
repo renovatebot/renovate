@@ -3,7 +3,7 @@ export default function cmdSerializer(
   cmd: string | string[]
 ): string | string[] {
   if (typeof cmd === 'string') {
-    return cmd.replace(/https:\/\/[^@]*@/g, 'https://**redacted**@'); // TODO #12070
+    return cmd.replace(/https:\/\/[^@]*@/g, 'https://**redacted**@'); // TODO #12070 using RE2 here causes cyclic dependency
   }
   return cmd;
 }

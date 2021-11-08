@@ -51,7 +51,7 @@ function parseUrl(urlString: string): UrlParsedResult | null {
 
 const lexer = moo.states({
   main: {
-    lineComment: { match: /#.*?$/ }, // TODO #12070
+    lineComment: { match: /#.*?$/ }, // TODO #12070 moo state doesn't work properly with RE2 due to .toString() used inside it
     leftParen: { match: '(' },
     rightParen: { match: ')' },
     longDoubleQuoted: {

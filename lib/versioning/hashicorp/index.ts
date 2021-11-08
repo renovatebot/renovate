@@ -49,14 +49,14 @@ function getNewValue({
         replaceValue = `$<prefix>${npm.getMinor(newVersion)}$<suffix>`;
       }
       return currentValue.replace(
-        /(?<prefix>~>\s*0\.)\d+(?<suffix>.*)$/, // TODO #12070
+        regEx(`(?P<prefix>~>\\s*0\\.)\\d+(?<suffix>.*)$`),
         replaceValue
       );
     }
     // handle special ~> 1.2 case
     if (regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
       return currentValue.replace(
-        /(?<prefix>~>\s*)\d+\.\d+$/, // TODO #12070
+        regEx(`(?P<prefix>~>\\s*)\\d+\\.\\d+$`),
         `$<prefix>${npm.getMajor(newVersion)}.0`
       );
     }

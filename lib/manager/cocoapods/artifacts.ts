@@ -13,15 +13,12 @@ import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/; // TODO #12070
-
 function getPluginCommands(content: string): string[] {
   const result = new Set<string>();
   const lines: string[] = content.split('\n');
   lines.forEach((line) => {
-    const match = pluginRegex.exec(line);
-    if (match) {
-      const { plugin } = match.groups;
+    const plugin = line.split('plugin')[1]?.trim().slice(1, -1);
+    if (plugin) {
       result.add(`gem install ${quote(plugin)}`);
     }
   });

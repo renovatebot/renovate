@@ -4,7 +4,7 @@ import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {
-  baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12070 #12071
+  baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12071 #69
 };
 
 export interface GiteaHttpOptions extends InternalHttpOptions {

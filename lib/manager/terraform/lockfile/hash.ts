@@ -9,6 +9,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import { Http } from '../../../util/http';
+import { regEx } from '../../../util/regex';
 
 export class TerraformProviderHash {
   static http = new Http(TerraformProviderDatasource.id);
@@ -31,7 +32,7 @@ export class TerraformProviderHash {
 
       // add double space, the filename and a new line char
       rootHash.update('  ');
-      const fileName = file.replace(/^.*[\\/]/, ''); // TODO #12070
+      const fileName = file.replace(regEx(/^.*[\\/]/), '');
       rootHash.update(fileName);
       rootHash.update('\n');
     }
