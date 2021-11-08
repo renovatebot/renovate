@@ -128,7 +128,7 @@
     "@renovate/pep440": "1.0.0",
     "@renovatebot/ruby-semver": "1.0.0",
     "@sindresorhus/is": "4.0.1",
-    "@yarnpkg/core": "2.4.0",
+    "@yarnpkg/core": "3.1.0",
     "@yarnpkg/parsers": "2.3.0",
     "azure-devops-node-api": "10.2.2",
     "bunyan": "1.8.15",
