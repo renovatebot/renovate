@@ -263,7 +263,7 @@
     "rimraf": "3.0.2",
     "semantic-release": "17.4.4",
     "shelljs": "0.8.4",
-    "strip-ansi": "6.0.0",
+    "strip-ansi": "7.0.0",
     "tmp-promise": "3.0.2",
     "ts-jest": "27.0.3",
     "ts-node": "10.0.0",
