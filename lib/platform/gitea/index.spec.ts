@@ -1541,6 +1541,17 @@ describe('platform/gitea/index', () => {
       const res = await gitea.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
     });
+
+    it('returns file content from branch or tag', async () => {
+      const data = { foo: 'bar' };
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: JSON.stringify(data),
+      } as never);
+      await initFakeRepo({ full_name: 'some/repo' });
+      const res = await gitea.getJsonFile('file.json', 'some/repo', 'dev');
+      expect(res).toEqual(data);
+    });
+
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',

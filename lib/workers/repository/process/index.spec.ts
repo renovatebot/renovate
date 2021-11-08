@@ -1,6 +1,7 @@
 import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
 import * as _extractUpdate from './extract-update';
 import { extractDependencies, updateRepo } from '.';
+import { platform } from '../../../platform';
 
 jest.mock('../../../util/git');
 jest.mock('./extract-update');
@@ -31,6 +32,57 @@ describe('workers/repository/process/index', () => {
       await updateRepo(config, res.branches);
       // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
+    });
+
+    it('reads config from default branch if useBaseBranchConfig not specified', async () => {
+      git.branchExists.mockReturnValue(true);
+      config.baseBranches = ['master', 'dev'];
+      config.useBaseBranchConfig = 'none';
+      const res = await extractDependencies(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "branchList": Array [
+            undefined,
+            undefined,
+          ],
+          "branches": Array [
+            undefined,
+            undefined,
+          ],
+          "packageFiles": undefined,
+        }
+      `);
+      expect(platform.getJsonFile).not.toHaveBeenCalledWith(
+        'renovate.json',
+        undefined,
+        'dev'
+      );
+    });
+
+    it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
+      git.branchExists.mockReturnValue(true);
+      platform.getJsonFile.mockReturnValue({});
+      config.baseBranches = ['master', 'dev'];
+      config.useBaseBranchConfig = 'replace';
+      const res = await extractDependencies(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "branchList": Array [
+            undefined,
+            undefined,
+          ],
+          "branches": Array [
+            undefined,
+            undefined,
+          ],
+          "packageFiles": undefined,
+        }
+      `);
+      expect(platform.getJsonFile).toHaveBeenCalledWith(
+        'renovate.json',
+        undefined,
+        'dev'
+      );
     });
   });
 });

@@ -158,13 +158,12 @@ function urlEscape(str: string): string {
 export async function getRawFile(
   fileName: string,
   repo: string = config.repository,
-  branch?: string
+  branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const url =
-    `projects/${repo}/repository/files/${escapedFileName}?ref=` + branch
-      ? branch
-      : `HEAD`;
+    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
+    (branchOrTag || `HEAD`);
   const res = await gitlabApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -174,9 +173,9 @@ export async function getRawFile(
 export async function getJsonFile(
   fileName: string,
   repo: string = config.repository,
-  branch: string | null = null
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo, branch);
+  const raw = await getRawFile(fileName, repo, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }

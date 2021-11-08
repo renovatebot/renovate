@@ -10,7 +10,7 @@ import { readDashboardBody } from '../dependency-dashboard';
 import { ExtractResult, extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
-function getBaseBranchConfig(
+async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig
 ): Promise<RenovateConfig> {
@@ -27,6 +27,8 @@ function getBaseBranchConfig(
       config.repository,
       baseBranch
     );
+
+    baseBranchConfig.baseBranches = config.baseBranches;
   }
 
   baseBranchConfig = mergeChildConfig(baseBranchConfig, { baseBranch });
@@ -52,7 +54,7 @@ export async function extractDependencies(
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
-        const baseBranchConfig = getBaseBranchConfig(baseBranch, config);
+        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
       } else {
         logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
@@ -61,7 +63,7 @@ export async function extractDependencies(
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
-        const baseBranchConfig = getBaseBranchConfig(baseBranch, config);
+        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         const packageFiles = extracted[baseBranch];
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
         res.branches = res.branches.concat(baseBranchRes?.branches);

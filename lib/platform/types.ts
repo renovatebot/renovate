@@ -155,12 +155,12 @@ export interface Platform {
   getRawFile(
     fileName: string,
     repo?: string,
-    branch?: string
+    branchOrTag?: string
   ): Promise<string | null>;
   getJsonFile(
     fileName: string,
     repo?: string,
-    branch?: string
+    branchOrTag?: string
   ): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;

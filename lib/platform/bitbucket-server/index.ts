@@ -124,8 +124,14 @@ export async function getRepos(): Promise<string[]> {
 export async function getRawFile(
   fileName: string,
   repo: string = config.repository,
-  branch?: string
+  branchOrTag?: string
 ): Promise<string | null> {
+  if (branchOrTag) {
+    throw new Error(
+      `getJsonFile doesn't support branchOrTag for the Bitbucket Server platform`
+    );
+  }
+
   const [project, slug] = repo.split('/');
   const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
   const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
@@ -141,9 +147,15 @@ export async function getRawFile(
 export async function getJsonFile(
   fileName: string,
   repo: string = config.repository,
-  branch?: string
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  if (branchOrTag) {
+    throw new Error(
+      `getJsonFile doesn't support branchOrTag for the Bitbucket Server platform`
+    );
+  }
+
+  const raw = await getRawFile(fileName, repo, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }

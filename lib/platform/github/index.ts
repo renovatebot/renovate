@@ -174,11 +174,11 @@ async function getBranchProtection(
 export async function getRawFile(
   fileName: string,
   repo: string = config.repository,
-  branch: string | null = null
+  branchOrTag?: string
 ): Promise<string | null> {
   let url = `repos/${repo}/contents/${fileName}`;
-  if (branch !== null) {
-    url += `&ref=` + branch;
+  if (branchOrTag) {
+    url += `&ref=` + branchOrTag;
   }
   const res = await githubApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
@@ -189,9 +189,9 @@ export async function getRawFile(
 export async function getJsonFile(
   fileName: string,
   repo: string = config.repository,
-  branch: string | null = null
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo, branch);
+  const raw = await getRawFile(fileName, repo, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }

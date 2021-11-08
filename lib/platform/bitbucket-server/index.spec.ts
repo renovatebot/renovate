@@ -2129,6 +2129,13 @@ Followed by some information.
           expect(res).toEqual({ foo: 'bar' });
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
+
+        it('throws if branch or tag specified', async () => {
+          expect(
+            bitbucket.getJsonFile('file.json', 'some/repo', 'dev')
+          ).rejects.toThrow();
+        });
+
         it('throws on malformed JSON', async () => {
           const scope = await initRepo();
           scope
