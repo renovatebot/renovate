@@ -221,16 +221,16 @@ describe('manager/kustomize/extract', () => {
       const res = extractPackageFile(kustomizeHTTP);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
-      expect(res.deps[0].currentValue).toEqual('v0.0.1');
-      expect(res.deps[1].currentValue).toEqual('1.19.0');
-      expect(res.deps[1].depName).toEqual('fluxcd/flux');
+      expect(res.deps[0].currentValue).toBe('v0.0.1');
+      expect(res.deps[1].currentValue).toBe('1.19.0');
+      expect(res.deps[1].depName).toBe('fluxcd/flux');
     });
     it('should extract out image versions', () => {
       const res = extractPackageFile(gitImages);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
-      expect(res.deps[0].currentValue).toEqual('v0.1.0');
-      expect(res.deps[1].currentValue).toEqual('v0.0.1');
+      expect(res.deps[0].currentValue).toBe('v0.1.0');
+      expect(res.deps[1].currentValue).toBe('v0.0.1');
       expect(res.deps[5].skipReason).toEqual(SkipReason.InvalidValue);
     });
     it('ignores non-Kubernetes empty files', () => {
@@ -244,28 +244,28 @@ describe('manager/kustomize/extract', () => {
       expect(res).not.toBeNull();
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[0].currentValue).toEqual('v0.0.1');
-      expect(res.deps[1].currentValue).toEqual('1.19.0');
-      expect(res.deps[2].currentValue).toEqual('1.18.0');
-      expect(res.deps[1].depName).toEqual('fluxcd/flux');
-      expect(res.deps[2].depName).toEqual('fluxcd/flux');
-      expect(res.deps[0].depType).toEqual('Kustomization');
-      expect(res.deps[1].depType).toEqual('Kustomization');
-      expect(res.deps[2].depType).toEqual('Kustomization');
+      expect(res.deps[0].currentValue).toBe('v0.0.1');
+      expect(res.deps[1].currentValue).toBe('1.19.0');
+      expect(res.deps[2].currentValue).toBe('1.18.0');
+      expect(res.deps[1].depName).toBe('fluxcd/flux');
+      expect(res.deps[2].depName).toBe('fluxcd/flux');
+      expect(res.deps[0].depType).toBe('Kustomization');
+      expect(res.deps[1].depType).toBe('Kustomization');
+      expect(res.deps[2].depType).toBe('Kustomization');
     });
     it('should extract dependencies when kind is Component', () => {
       const res = extractPackageFile(kustomizeComponent);
       expect(res).not.toBeNull();
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[0].currentValue).toEqual('1.19.0');
-      expect(res.deps[1].currentValue).toEqual('1.18.0');
-      expect(res.deps[2].currentValue).toEqual('v0.1.0');
-      expect(res.deps[1].depName).toEqual('fluxcd/flux');
-      expect(res.deps[2].depName).toEqual('node');
-      expect(res.deps[0].depType).toEqual('Component');
-      expect(res.deps[1].depType).toEqual('Component');
-      expect(res.deps[2].depType).toEqual('Component');
+      expect(res.deps[0].currentValue).toBe('1.19.0');
+      expect(res.deps[1].currentValue).toBe('1.18.0');
+      expect(res.deps[2].currentValue).toBe('v0.1.0');
+      expect(res.deps[1].depName).toBe('fluxcd/flux');
+      expect(res.deps[2].depName).toBe('node');
+      expect(res.deps[0].depType).toBe('Component');
+      expect(res.deps[1].depType).toBe('Component');
+      expect(res.deps[2].depType).toBe('Component');
     });
 
     const postgresDigest =

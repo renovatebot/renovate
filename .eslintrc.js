@@ -95,6 +95,7 @@ module.exports = {
     // TODO: fix me
     '@typescript-eslint/no-unsafe-return': 0,
     '@typescript-eslint/no-unsafe-call': 0,
+    '@typescript-eslint/no-unsafe-argument': 0, // thousands of errors :-/
 
     '@typescript-eslint/restrict-template-expressions': [
       1,

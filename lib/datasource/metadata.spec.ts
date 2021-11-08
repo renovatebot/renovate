@@ -161,7 +161,7 @@ describe('datasource/metadata', () => {
     const lookupName = 'io.mockk:mockk';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep.sourceUrl).toEqual('https://github.com/mockk/mockk');
+    expect(dep.sourceUrl).toBe('https://github.com/mockk/mockk');
   });
 
   it('Should move github homepage to sourceUrl', () => {
@@ -174,7 +174,7 @@ describe('datasource/metadata', () => {
     const lookupName = 'io.mockk:mockk';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep.sourceUrl).toEqual('https://github.com/mockk/mockk');
+    expect(dep.sourceUrl).toBe('https://github.com/mockk/mockk');
     expect(dep.homepage).toBeUndefined();
   });
 
@@ -187,7 +187,7 @@ describe('datasource/metadata', () => {
     const lookupName = 'dropzone';
 
     addMetaData(dep, datasource, lookupName);
-    expect(dep.sourceUrl).toEqual('https://gitlab.com/meno/dropzone');
+    expect(dep.sourceUrl).toBe('https://gitlab.com/meno/dropzone');
   });
 
   it('Should normalize releaseTimestamp', () => {

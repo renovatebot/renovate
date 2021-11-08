@@ -163,7 +163,7 @@ describe('manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toEqual('registry=https://registry.npmjs.org\n');
+      expect(res.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
