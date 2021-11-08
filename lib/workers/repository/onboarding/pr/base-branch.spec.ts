@@ -16,14 +16,16 @@ describe('workers/repository/onboarding/pr/base-branch', () => {
     it('describes baseBranch', () => {
       config.baseBranches = ['some-branch'];
       const res = getBaseBranchDesc(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res.trim()).toEqual(
+        'You have configured Renovate to use branch `some-branch` as base branch.'
+      );
     });
     it('describes baseBranches', () => {
       config.baseBranches = ['some-branch', 'some-other-branch'];
       const res = getBaseBranchDesc(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res.trim()).toEqual(
+        'You have configured Renovate to use the following baseBranches: `some-branch`, `some-other-branch`.'
+      );
     });
   });
 });
