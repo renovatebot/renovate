@@ -15,7 +15,6 @@ function mockFs(files: Record<string, string>): void {
 }
 
 describe('manager/gradle/shallow/extract', () => {
-  beforeAll(() => {});
   afterAll(() => {
     jest.resetAllMocks();
   });
