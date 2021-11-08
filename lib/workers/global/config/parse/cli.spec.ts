@@ -13,14 +13,14 @@ describe('workers/global/config/parse/cli', () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
       };
-      expect(cli.getCliName(option)).toEqual('--one-two-three');
+      expect(cli.getCliName(option)).toBe('--one-two-three');
     });
     it('generates returns empty if CLI false', () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
         cli: false,
       };
-      expect(cli.getCliName(option)).toEqual('');
+      expect(cli.getCliName(option)).toBe('');
     });
   });
   describe('.getConfig(argv)', () => {

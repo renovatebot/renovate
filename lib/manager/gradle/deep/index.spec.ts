@@ -321,7 +321,7 @@ describe('manager/gradle/deep/index', () => {
           packageFile: 'build.gradle',
         },
       ]);
-      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
+      expect(execSnapshots[0].cmd).toBe('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -340,7 +340,7 @@ describe('manager/gradle/deep/index', () => {
           packageFile: 'build.gradle',
         },
       ]);
-      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
+      expect(execSnapshots[0].cmd).toBe('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -360,7 +360,7 @@ describe('manager/gradle/deep/index', () => {
           packageFile: 'build.gradle',
         },
       ]);
-      expect(execSnapshots[0].cmd).toEqual('docker pull renovate/java:11.0.12');
+      expect(execSnapshots[0].cmd).toBe('docker pull renovate/java:11.0.12');
       expect(execSnapshots).toMatchSnapshot();
     });
   });

@@ -28,7 +28,7 @@ describe('manager/npm/update/locked-dependency/parent-version', () => {
 
       expect(
         await findFirstParentVersion('express', '4.0.0', 'send', '0.11.1')
-      ).toEqual('4.11.1');
+      ).toBe('4.11.1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -52,7 +52,7 @@ describe('manager/npm/update/locked-dependency/parent-version', () => {
           'buffer-crc32',
           '10.0.0'
         )
-      ).toEqual('4.9.1');
+      ).toBe('4.9.1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -73,7 +73,7 @@ describe('manager/npm/update/locked-dependency/parent-version', () => {
 
       expect(
         await findFirstParentVersion('express', '4.0.0', 'qs', '6.0.4')
-      ).toEqual('4.14.0');
+      ).toBe('4.14.0');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -93,7 +93,7 @@ describe('manager/npm/update/locked-dependency/parent-version', () => {
 
       expect(
         await findFirstParentVersion('express', '4.16.1', 'type-is', '1.2.1')
-      ).toEqual('4.16.1');
+      ).toBe('4.16.1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 

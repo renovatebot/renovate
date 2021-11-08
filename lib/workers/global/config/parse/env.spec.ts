@@ -231,20 +231,20 @@ describe('workers/global/config/parse/env', () => {
         name: 'foo',
         env: false,
       };
-      expect(env.getEnvName(option)).toEqual('');
+      expect(env.getEnvName(option)).toBe('');
     });
     it('returns existing env', () => {
       const option: Partial<RenovateOptions> = {
         name: 'foo',
         env: 'FOO',
       };
-      expect(env.getEnvName(option)).toEqual('FOO');
+      expect(env.getEnvName(option)).toBe('FOO');
     });
     it('generates RENOVATE_ env', () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
       };
-      expect(env.getEnvName(option)).toEqual('RENOVATE_ONE_TWO_THREE');
+      expect(env.getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
     });
   });
 });

@@ -246,7 +246,7 @@ describe('manager/gradle/shallow/parser', () => {
         content
           .slice(dep.managerData.fileReplacePosition)
           .indexOf(dep.currentValue)
-      ).toEqual(0);
+      ).toBe(0);
     });
     expect(deps).toMatchSnapshot();
   });
@@ -256,7 +256,7 @@ describe('manager/gradle/shallow/parser', () => {
     const res = deps[0];
     expect(
       content.slice(res.managerData.fileReplacePosition).indexOf('1.2.3')
-    ).toEqual(0);
+    ).toBe(0);
   });
   it('gradle.properties', () => {
     expect(parseProps('foo=bar')).toMatchObject({
