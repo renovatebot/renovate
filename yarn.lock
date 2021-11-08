@@ -1888,10 +1888,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/registry-auth-token@4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@types/registry-auth-token/-/registry-auth-token-4.2.0.tgz#f21f86921b6bd9f9e80db2e31ba2d91c4119b341"
-  integrity sha512-6b24NtjE3tJUo1+qjCVIxHHJOMOtKNm4wJabxN6rrbmFJfQ6AckaS9eX08vYhD8L2KL8AQ5gC2NLWsu1spCWcQ==
+"@types/registry-auth-token@4.2.1":
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/@types/registry-auth-token/-/registry-auth-token-4.2.1.tgz#6e83d9353bdc2c7183eb9e86fd0bac5f33d3c368"
+  integrity sha512-VtTUcUaJGiJtlBKYwwFIOSvrcnuKmpPGO+x56XijNZnaDpnzKh2VwoTw5hewrOMW2BgjoU+uFbVAvSCW2FpWmA==
 
 "@types/responselike@*", "@types/responselike@^1.0.0":
   version "1.0.0"
