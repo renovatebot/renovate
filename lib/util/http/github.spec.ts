@@ -356,7 +356,7 @@ describe('util/http/github', () => {
       await githubApi.requestGraphql(graphqlQuery);
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
+      expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
     });
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });

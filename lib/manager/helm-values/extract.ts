@@ -75,7 +75,7 @@ export function extractPackageFile(content: string): PackageFile {
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ err }, 'Error parsing helm-values parsed content');
+    logger.warn({ err }, 'Error parsing helm-values parsed content');
   }
   return null;
 }

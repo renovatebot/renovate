@@ -692,7 +692,7 @@ describe('platform/gitea/gitea-helper', () => {
         mockRepo.full_name,
         mockBranch.name
       );
-      expect(res.worstStatus).not.toEqual('unknown');
+      expect(res.worstStatus).not.toBe('unknown');
       expect(res.statuses).toEqual([mockCommitStatus, otherMockCommitStatus]);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

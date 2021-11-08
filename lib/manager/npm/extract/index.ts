@@ -7,6 +7,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -48,7 +49,7 @@ export async function extractPackageFile(
     logger.debug({ fileName }, 'Invalid JSON');
     return null;
   }
-  // eslint-disable-next-line no-underscore-dangle
+
   if (packageJson._id && packageJson._args && packageJson._from) {
     logger.debug('Ignoring vendorised package.json');
     return null;
@@ -160,6 +161,7 @@ export async function extractPackageFile(
     engines: 'engine',
     volta: 'volta',
     resolutions: 'resolutions',
+    packageManager: 'packageManager',
   };
 
   const constraints: Record<string, any> = {};
@@ -179,7 +181,7 @@ export async function extractPackageFile(
       return dep;
     }
     dep.currentValue = input.trim();
-    if (depType === 'engines') {
+    if (depType === 'engines' || depType === 'packageManager') {
       if (depName === 'node') {
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
@@ -321,10 +323,19 @@ export async function extractPackageFile(
   }
 
   for (const depType of Object.keys(depTypes)) {
-    if (packageJson[depType]) {
+    let dependencies = packageJson[depType];
+    if (dependencies) {
       try {
+        if (depType === 'packageManager') {
+          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(dependencies);
+          // istanbul ignore next
+          if (!match) {
+            break;
+          }
+          dependencies = { [match.groups.name]: match.groups.range };
+        }
         for (const [key, val] of Object.entries(
-          packageJson[depType] as NpmPackageDependency
+          dependencies as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
           let dep: PackageDependency = {

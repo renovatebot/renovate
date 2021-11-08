@@ -731,6 +731,6 @@ describe('util/package-rules', () => {
       ],
     };
     const res = applyPackageRules(config);
-    expect(res.groupSlug).toEqual('b');
+    expect(res.groupSlug).toBe('b');
   });
 });

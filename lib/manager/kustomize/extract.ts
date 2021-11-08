@@ -118,7 +118,7 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  if (pkg.kind !== 'Kustomization') {
+  if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;
   }
 
@@ -144,7 +144,10 @@ export function extractPackageFile(content: string): PackageFile | null {
   for (const base of pkg.bases) {
     const dep = extractBase(base);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
     }
   }
 
@@ -152,7 +155,10 @@ export function extractPackageFile(content: string): PackageFile | null {
   for (const image of pkg.images) {
     const dep = extractImage(image);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
     }
   }
 

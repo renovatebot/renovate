@@ -3,7 +3,7 @@ export function sampleSize(array: string[], n: number): string[] {
   if (!length || n < 1) {
     return [];
   }
-  // eslint-disable-next-line no-param-reassign
+
   n = n > length ? length : n;
   let index = 0;
   const lastIndex = length - 1;

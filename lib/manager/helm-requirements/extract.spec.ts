@@ -37,7 +37,7 @@ describe('manager/helm-requirements/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toEqual(true);
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
     });
     it('parses simple requirements.yaml correctly', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
@@ -111,7 +111,7 @@ describe('manager/helm-requirements/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toEqual(false);
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(false);
     });
     it('skips local dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`

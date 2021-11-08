@@ -3,7 +3,6 @@ import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
-import { hostRulesFromEnv } from './host-rules-from-env';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -118,8 +117,6 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     });
   }
 
-  config.hostRules = [...config.hostRules, ...hostRulesFromEnv(env)];
-
   // These env vars are deprecated and deleted to make sure they're not used
   const unsupportedEnv = [
     'BITBUCKET_TOKEN',
@@ -132,7 +129,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     'VSTS_ENDPOINT',
     'VSTS_TOKEN',
   ];
-  // eslint-disable-next-line no-param-reassign
+
   unsupportedEnv.forEach((val) => delete env[val]);
 
   return config;

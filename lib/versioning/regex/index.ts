@@ -44,7 +44,6 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   constructor(new_config: string) {
     super();
     if (!new_config) {
-      // eslint-disable-next-line no-param-reassign
       new_config = '^(?<major>\\d+)?$';
     }
 
