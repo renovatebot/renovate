@@ -125,8 +125,8 @@ function extractLeinRepos(content: string): string[] {
       }
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
-    // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
     const matches =
+      // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
       repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) || []; // using .exec here gives unexpected results
     const urls = matches.map((x) =>
       x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
