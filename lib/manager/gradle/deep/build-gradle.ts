@@ -157,7 +157,7 @@ function dependencyStringVariableExpressionFormatMatch(
 ): RegExp {
   return regEx(
     `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:` +
-      '${([^}]*)}' +
+      '${([^}]*)}' + // eslint-disable-line no-template-curly-in-string
       `['"](?:\\s|;|})`
   );
 }

@@ -13,6 +13,8 @@ import { getConfig as getFileConfig } from './workers/global/config/parse/file';
 
 let returnVal = 0;
 
+/* eslint-disable no-console */
+
 async function validate(
   desc: string,
   config: RenovateConfig,
