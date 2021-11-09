@@ -120,7 +120,7 @@ function finalize(dependency: PackageDependency): boolean {
       return true;
   }
 
-  if (dependency.currentValue == null && dep.skipReason == null) {
+  if (!dependency.currentValue && !dep.skipReason) {
     dep.skipReason = SkipReason.NoVersion;
   }
   return true;

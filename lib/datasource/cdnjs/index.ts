@@ -25,6 +25,7 @@ export class CdnJsDatasource extends Datasource {
     // Each library contains multiple assets, so we cache at the library level instead of per-asset
     const library = lookupName.split('/')[0];
     const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
+    let result: ReleaseResult;
     try {
       const { assets, homepage, repository } = (
         await this.http.getJson<CdnjsResponse>(url)
@@ -37,7 +38,7 @@ export class CdnJsDatasource extends Datasource {
         .filter(({ files }) => files.includes(assetName))
         .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
 
-      const result: ReleaseResult = { releases };
+      result = { releases };
 
       if (homepage) {
         result.homepage = homepage;
@@ -45,12 +46,12 @@ export class CdnJsDatasource extends Datasource {
       if (repository?.url) {
         result.sourceUrl = repository.url;
       }
-      return result;
     } catch (err) {
       if (err.statusCode !== 404) {
         throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
     }
+    return result || null;
   }
 }
