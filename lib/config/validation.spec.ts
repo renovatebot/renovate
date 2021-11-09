@@ -7,12 +7,10 @@ describe('config/validation', () => {
       expect(configValidation.getParentName('encrypted')).toBeEmptyString();
     });
     it('handles array types', () => {
-      expect(configValidation.getParentName('hostRules[1]')).toEqual(
-        'hostRules'
-      );
+      expect(configValidation.getParentName('hostRules[1]')).toBe('hostRules');
     });
     it('handles encrypted within array types', () => {
-      expect(configValidation.getParentName('hostRules[0].encrypted')).toEqual(
+      expect(configValidation.getParentName('hostRules[0].encrypted')).toBe(
         'hostRules'
       );
     });

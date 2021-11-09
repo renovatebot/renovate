@@ -449,14 +449,14 @@ describe('util/git/index', () => {
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('https://user:pass@host/some/repo.git');
+      ).toBe('https://user:pass@host/some/repo.git');
       expect(
         getUrl({
           auth: 'user:pass',
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('https://user:pass@host/some/repo.git');
+      ).toBe('https://user:pass@host/some/repo.git');
     });
 
     it('returns ssh url', () => {
@@ -467,7 +467,7 @@ describe('util/git/index', () => {
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('git@host:some/repo.git');
+      ).toBe('git@host:some/repo.git');
     });
   });
 

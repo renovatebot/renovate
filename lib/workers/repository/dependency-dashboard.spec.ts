@@ -26,7 +26,7 @@ beforeEach(() => {
 
 async function dryRun(
   branches: BranchConfig[],
-  // eslint-disable-next-line @typescript-eslint/no-shadow
+
   platform: jest.Mocked<Platform>,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0

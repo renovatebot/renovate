@@ -56,14 +56,14 @@ export function parseDependencyString(
   if (!isDependencyString(input)) {
     return null;
   }
-  const [groupId, artifactId, FullValue] = input?.split(':');
+  const [groupId, artifactId, FullValue] = input.split(':');
   if (FullValue === versionLikeSubstring(FullValue)) {
     return {
       depName: `${groupId}:${artifactId}`,
       currentValue: FullValue,
     };
   }
-  const [currentValue, dataType] = FullValue?.split('@');
+  const [currentValue, dataType] = FullValue.split('@');
   return {
     depName: `${groupId}:${artifactId}`,
     currentValue,

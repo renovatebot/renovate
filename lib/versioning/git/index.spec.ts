@@ -18,7 +18,7 @@ describe('versioning/git/index', () => {
   });
   describe('valueToVersion(version)', () => {
     it('should return same as input', () => {
-      expect(git.valueToVersion('')).toEqual('');
+      expect(git.valueToVersion('')).toBe('');
     });
   });
 });

@@ -9,7 +9,7 @@ describe('util/json-writer/json-writer', () => {
   it('should apply 2 spaces indentation by default', () => {
     const jsonWriter = new JSONWriter();
 
-    expect(jsonWriter.write(DATA)).toStrictEqual('{\n  "value": 1\n}\n');
+    expect(jsonWriter.write(DATA)).toBe('{\n  "value": 1\n}\n');
   });
 
   it('should apply indentation size', () => {
@@ -18,9 +18,7 @@ describe('util/json-writer/json-writer', () => {
       indentationSize: 10,
     });
 
-    expect(jsonWriter.write(DATA)).toStrictEqual(
-      '{\n          "value": 1\n}\n'
-    );
+    expect(jsonWriter.write(DATA)).toBe('{\n          "value": 1\n}\n');
   });
 
   it('should apply indentation type', () => {
@@ -28,7 +26,7 @@ describe('util/json-writer/json-writer', () => {
       indentationType: IndentationType.Tab,
     });
 
-    expect(jsonWriter.write(DATA)).toStrictEqual('{\n\t"value": 1\n}\n');
+    expect(jsonWriter.write(DATA)).toBe('{\n\t"value": 1\n}\n');
   });
 
   it('new line at the end should be optional', () => {
@@ -37,8 +35,6 @@ describe('util/json-writer/json-writer', () => {
       indentationSize: 10,
     });
 
-    expect(jsonWriter.write(DATA, false)).toStrictEqual(
-      '{\n          "value": 1\n}'
-    );
+    expect(jsonWriter.write(DATA, false)).toBe('{\n          "value": 1\n}');
   });
 });

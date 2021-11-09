@@ -42,9 +42,15 @@
         <version>0.0.1</version>
       </dependency>
       <dependency>
-        <groupId>org.example</groupId>
-        <artifactId>bar</artifactId>
-        <version>1.0.0</version>
+        <groupId>
+          org.example
+        </groupId>
+        <artifactId>
+          bar
+        </artifactId>
+        <version>
+          1.0.0
+        </version>
       </dependency>
     </dependencies>
   </dependencyManagement>

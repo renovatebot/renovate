@@ -19,7 +19,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
   for (const line of content.split('\n')) {
     if (line.trim().startsWith('#')) {
-      continue; // eslint-disable-line no-continue
+      continue;
     }
 
     const dockerMatch = dockerRe.exec(line);
@@ -29,7 +29,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.depType = 'docker';
       dep.versioning = dockerVersioning.id;
       deps.push(dep);
-      continue; // eslint-disable-line no-continue
+      continue;
     }
 
     const tagMatch = actionRe.exec(line);

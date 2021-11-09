@@ -92,7 +92,6 @@ export function generateBranchConfig(
     toVersions.length > 1 ||
     (!toVersions[0] && newValue.length > 1);
   if (newValue.length > 1 && !groupEligible) {
-    // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
   }
   const typesGroup =
@@ -235,10 +234,10 @@ export function generateBranchConfig(
         const existingStamp = DateTime.fromISO(releaseTimestamp);
         const upgradeStamp = DateTime.fromISO(upgrade.releaseTimestamp);
         if (upgradeStamp > existingStamp) {
-          releaseTimestamp = upgrade.releaseTimestamp; // eslint-disable-line
+          releaseTimestamp = upgrade.releaseTimestamp;
         }
       } else {
-        releaseTimestamp = upgrade.releaseTimestamp; // eslint-disable-line
+        releaseTimestamp = upgrade.releaseTimestamp;
       }
     }
   }
