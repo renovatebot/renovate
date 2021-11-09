@@ -36,6 +36,7 @@ module.exports = {
     'import/prefer-default-export': 0, // no benefit
 
     // other rules
+    'consistent-return': 'error',
     'no-negated-condition': 'error',
     'no-param-reassign': 'error',
     'sort-imports': [
