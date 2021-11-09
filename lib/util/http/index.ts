@@ -293,12 +293,13 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       ...options,
     };
 
+    let resolvedUrl = url;
     // istanbul ignore else: needs test
     if (options?.baseUrl) {
-      url = resolveBaseUrl(options.baseUrl, url);
+      resolvedUrl = resolveBaseUrl(options.baseUrl, url);
     }
 
     applyDefaultHeaders(combinedOptions);
-    return got.stream(url, combinedOptions);
+    return got.stream(resolvedUrl, combinedOptions);
   }
 }
