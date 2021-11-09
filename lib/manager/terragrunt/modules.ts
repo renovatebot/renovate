@@ -70,5 +70,4 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
     logger.debug({ dep }, 'terragrunt dep has no source');
     dep.skipReason = SkipReason.NoSource;
   }
-  /* eslint-enable no-param-reassign */
 }

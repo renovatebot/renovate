@@ -49,5 +49,4 @@ export function analyseTerraformVersion(dep: PackageDependency): void {
   dep.datasource = datasourceGithubTags.id;
   dep.depName = 'hashicorp/terraform';
   dep.extractVersion = 'v(?<version>.*)$';
-  /* eslint-enable no-param-reassign */
 }
