@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
+import { logger } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
@@ -570,6 +571,68 @@ describe('util/git/index', () => {
   describe('setGitAuthor()', () => {
     it('throws for invalid', () => {
       expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
+    });
+  });
+
+  describe('isBranchConflicted', () => {
+    beforeAll(async () => {
+      const repo = Git(base.path);
+      await repo.init();
+
+      await repo.checkout(['-b', 'renovate/conflicted_branch', defaultBranch]);
+      await repo.checkout([
+        '-b',
+        'renovate/non_conflicted_branch',
+        defaultBranch,
+      ]);
+
+      await repo.checkout(defaultBranch);
+      await fs.writeFile(base.path + '/past_file', 'past (updated)');
+      await repo.add(['past_file']);
+      await repo.commit('past (updated) message');
+
+      await repo.checkout('renovate/conflicted_branch');
+      await fs.writeFile(base.path + '/past_file', 'past (updated branch)');
+      await repo.add(['past_file']);
+      await repo.commit('past (updated branch) message');
+
+      await repo.checkout('renovate/non_conflicted_branch');
+      await fs.writeFile(base.path + '/other_file', 'other');
+      await repo.add(['other_file']);
+      await repo.commit('other (updated branch) message');
+
+      await repo.checkout(defaultBranch);
+    });
+
+    afterAll(async () => {
+      const repo = Git(base.path);
+      await repo.init();
+      await repo.checkout(defaultBranch);
+      await repo.reset(['--hard', 'HEAD~1']);
+    });
+
+    it('short-circuits for non-existing branches', async () => {
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/non-existing-branch'
+      );
+      expect(res).toBeFalse();
+    });
+
+    it('detects conflicted branch', async () => {
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/conflicted_branch'
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('detects non-conflicted branch', async () => {
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/non_conflicted_branch'
+      );
+      expect(res).toBeFalse();
     });
   });
 });

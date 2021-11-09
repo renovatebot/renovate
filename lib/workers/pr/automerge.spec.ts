@@ -94,7 +94,7 @@ describe('workers/pr/automerge', () => {
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      pr.isConflicted = true;
+      git.isBranchConflicted.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();

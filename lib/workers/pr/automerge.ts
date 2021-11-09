@@ -2,7 +2,11 @@ import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { deleteBranch, isBranchModified } from '../../util/git';
+import {
+  deleteBranch,
+  isBranchConflicted,
+  isBranchModified,
+} from '../../util/git';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { BranchConfig } from '../types';
 
@@ -35,7 +39,11 @@ export async function checkAutoMerge(
     rebaseRequested,
   } = config;
   // Return if PR not ready for automerge
-  if (pr.isConflicted) {
+  const isConflicted = await isBranchConflicted(
+    config.baseBranch,
+    config.branchName
+  );
+  if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
       automerged: false,

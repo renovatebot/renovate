@@ -62,9 +62,9 @@ describe('workers/repository/onboarding/pr/index', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           body: createPrBody,
-          isConflicted: true,
         })
       );
+      git.isBranchConflicted.mockResolvedValueOnce(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -95,9 +95,9 @@ describe('workers/repository/onboarding/pr/index', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           body: createPrBody,
-          isConflicted: true,
         })
       );
+      git.isBranchConflicted.mockResolvedValueOnce(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(logger.info).toHaveBeenCalledWith(

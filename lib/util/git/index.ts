@@ -551,6 +551,30 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   return true;
 }
 
+export async function isBranchConflicted(
+  baseBranch: string,
+  branchName: string
+): Promise<boolean> {
+  if (!branchExists(branchName)) {
+    logger.debug(
+      { branchName },
+      'Branch does not exist - cannot check isBranchConflicted'
+    );
+    return false;
+  }
+  try {
+    await syncGit();
+    await git.reset(ResetMode.HARD);
+    await git.checkout(['-B', branchName, 'origin/' + branchName]);
+    await git.merge(['--no-commit', '--no-ff', baseBranch]);
+  } catch (err) {
+    if (err?.git?.conflicts?.length) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
   try {

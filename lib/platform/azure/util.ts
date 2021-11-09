@@ -2,7 +2,6 @@ import {
   GitPullRequest,
   GitRepository,
   GitStatusContext,
-  PullRequestAsyncStatus,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { logger } from '../../logger';
@@ -103,8 +102,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
 
   const sourceRefName = azurePr.sourceRefName;
 
-  const isConflicted = azurePr.mergeStatus === PullRequestAsyncStatus.Conflicts;
-
   return {
     ...azurePr,
     sourceBranch,
@@ -115,7 +112,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     sourceRefName,
     targetBranch,
     createdAt,
-    ...(isConflicted && { isConflicted }),
   } as AzurePr;
 }
 

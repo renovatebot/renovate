@@ -25,6 +25,7 @@ import {
   deleteBranch,
   getBranchCommit,
   branchExists as gitBranchExists,
+  isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
 import {
@@ -440,7 +441,11 @@ export async function processBranch(
         result: BranchResult.NoWork,
       };
     }
-    config.forceCommit = forcedManually || branchPr?.isConflicted;
+    const isConflicted = await isBranchConflicted(
+      config.baseBranch,
+      config.branchName
+    );
+    config.forceCommit = forcedManually || isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
