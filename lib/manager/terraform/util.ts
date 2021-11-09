@@ -59,7 +59,6 @@ export function massageProviderLookupName(dep: PackageDependency): void {
 
   // handle cases like `Telmate/proxmox`
   dep.lookupName = dep.lookupName.toLowerCase();
-  /* eslint-enable no-param-reassign */
 }
 
 export function getLockedVersion(

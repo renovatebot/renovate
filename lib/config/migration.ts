@@ -277,11 +277,11 @@ export function migrateConfig(
         migratedConfig.automergeType = 'branch';
       } else if (key === 'automergeMinor') {
         migratedConfig.minor = migratedConfig.minor || {};
-        migratedConfig.minor.automerge = val == true;
+        migratedConfig.minor.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'automergeMajor') {
         migratedConfig.major = migratedConfig.major || {};
-        migratedConfig.major.automerge = val == true;
+        migratedConfig.major.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'renovateFork' && is.boolean(val)) {
         delete migratedConfig.renovateFork;
@@ -291,7 +291,7 @@ export function migrateConfig(
         migratedConfig.separateMajorMinor = val;
       } else if (key === 'automergePatch') {
         migratedConfig.patch = migratedConfig.patch || {};
-        migratedConfig.patch.automerge = val == true;
+        migratedConfig.patch.automerge = !!val;
         delete migratedConfig[key];
       } else if (
         key === 'automerge' &&

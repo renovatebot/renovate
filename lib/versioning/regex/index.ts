@@ -41,11 +41,9 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$');
   private _config: RegExp = null;
 
-  constructor(new_config: string) {
+  constructor(_new_config: string) {
     super();
-    if (!new_config) {
-      new_config = '^(?<major>\\d+)?$';
-    }
+    const new_config = _new_config || '^(?<major>\\d+)?$';
 
     // without at least one of {major, minor, patch} specified in the regex,
     // this versioner will not work properly

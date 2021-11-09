@@ -69,5 +69,4 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     logger.debug({ dep }, 'terraform dep has no source');
     dep.skipReason = SkipReason.NoSource;
   }
-  /* eslint-enable no-param-reassign */
 }

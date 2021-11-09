@@ -121,5 +121,4 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
 
 export const onboardingPrExists = async (
   config: RenovateConfig
-): Promise<boolean> =>
-  (await platform.getBranchPr(config.onboardingBranch)) != null;
+): Promise<boolean> => !!(await platform.getBranchPr(config.onboardingBranch));
