@@ -40,6 +40,7 @@ module.exports = {
     'no-console': 'error',
     'no-negated-condition': 'error',
     'no-param-reassign': 'error',
+    'no-template-curly-in-string': 'error',
     'sort-imports': [
       'error',
       {
@@ -124,6 +125,7 @@ module.exports = {
         jest: true,
       },
       rules: {
+        'no-template-curly-in-string': 0,
         'prefer-destructuring': 0,
         'prefer-promise-reject-errors': 0,
         'import/no-dynamic-require': 0,
