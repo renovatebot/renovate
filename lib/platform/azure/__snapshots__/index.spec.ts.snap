@@ -214,6 +214,13 @@ Array [
   Array [
     "123456",
     "file.json",
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
   ],
 ]
 `;

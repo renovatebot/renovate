@@ -1,7 +1,7 @@
 import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
+import { platform } from '../../../platform';
 import * as _extractUpdate from './extract-update';
 import { extractDependencies, updateRepo } from '.';
-import { platform } from '../../../platform';
 
 jest.mock('../../../util/git');
 jest.mock('./extract-update');
@@ -36,6 +36,7 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from default branch if useBaseBranchConfig not specified', async () => {
       git.branchExists.mockReturnValue(true);
+      platform.getJsonFile = jest.fn().mockResolvedValue({});
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'none';
       const res = await extractDependencies(config);
@@ -61,7 +62,7 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
       git.branchExists.mockReturnValue(true);
-      platform.getJsonFile.mockReturnValue({});
+      platform.getJsonFile = jest.fn().mockResolvedValue({});
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'replace';
       const res = await extractDependencies(config);

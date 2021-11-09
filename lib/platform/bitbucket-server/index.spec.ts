@@ -2109,6 +2109,7 @@ Followed by some information.
           expect(res).toEqual(data);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
+
         it('returns file content in json5 format', async () => {
           const json5Data = `
           { 
@@ -2130,10 +2131,24 @@ Followed by some information.
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
-        it('throws if branch or tag specified', async () => {
-          expect(
-            bitbucket.getJsonFile('file.json', 'some/repo', 'dev')
-          ).rejects.toThrow();
+        it('returns file content from branch or tag', async () => {
+          const data = { foo: 'bar' };
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000&at=dev`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: JSON.stringify(data) }],
+            });
+          const res = await bitbucket.getJsonFile(
+            'file.json',
+            'SOME/repo',
+            'dev'
+          );
+          expect(res).toEqual(data);
+          expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('throws on malformed JSON', async () => {
@@ -2149,6 +2164,7 @@ Followed by some information.
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
+
         it('throws on long content', async () => {
           const scope = await initRepo();
           scope
@@ -2162,6 +2178,7 @@ Followed by some information.
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
+
         it('throws on errors', async () => {
           const scope = await initRepo();
           scope

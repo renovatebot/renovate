@@ -938,6 +938,7 @@ describe('platform/bitbucket/index', () => {
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         { 
@@ -953,6 +954,18 @@ describe('platform/bitbucket/index', () => {
       expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('returns file content from branch or tag', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/dev/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile('file.json', 'some/repo', 'dev');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('throws on malformed JSON', async () => {
       const scope = await initRepoMock();
       scope
@@ -961,6 +974,7 @@ describe('platform/bitbucket/index', () => {
       await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws on errors', async () => {
       const scope = await initRepoMock();
       scope

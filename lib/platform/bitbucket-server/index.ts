@@ -126,14 +126,10 @@ export async function getRawFile(
   repo: string = config.repository,
   branchOrTag?: string
 ): Promise<string | null> {
-  if (branchOrTag) {
-    throw new Error(
-      `getJsonFile doesn't support branchOrTag for the Bitbucket Server platform`
-    );
-  }
-
   const [project, slug] = repo.split('/');
-  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
+  const fileUrl =
+    `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
+    (branchOrTag ? '&at=' + branchOrTag : '');
   const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
@@ -149,12 +145,6 @@ export async function getJsonFile(
   repo: string = config.repository,
   branchOrTag?: string
 ): Promise<any | null> {
-  if (branchOrTag) {
-    throw new Error(
-      `getJsonFile doesn't support branchOrTag for the Bitbucket Server platform`
-    );
-  }
-
   const raw = await getRawFile(fileName, repo, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);

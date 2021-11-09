@@ -1527,6 +1527,7 @@ describe('platform/gitea/index', () => {
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         { 
@@ -1559,6 +1560,7 @@ describe('platform/gitea/index', () => {
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
+
     it('throws on errors', async () => {
       helper.getRepoContents.mockRejectedValueOnce(new Error('some error'));
       await initFakeRepo({ full_name: 'some/repo' });
