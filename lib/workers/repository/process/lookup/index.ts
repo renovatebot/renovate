@@ -112,7 +112,7 @@ export async function lookupUpdates(
       // Reapply package rules in case we missed something from sourceUrl
       config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
       if (followTag) {
-        const taggedVersion = dependency.tags[followTag];
+        const taggedVersion = dependency.tags?.[followTag];
         if (!taggedVersion) {
           res.warnings.push({
             topic: depName,
