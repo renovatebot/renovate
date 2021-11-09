@@ -77,7 +77,7 @@ export async function shouldReuseExistingBranch(
   // Now check if PR is unmergeable. If so then we also rebase
   const isConflicted = await isBranchConflicted(baseBranch, branchName);
   if (isConflicted) {
-    logger.debug('PR is conflicted');
+    logger.debug('Branch is conflicted');
 
     if ((await isBranchModified(branchName)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
