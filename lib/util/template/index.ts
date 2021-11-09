@@ -3,13 +3,13 @@ import * as handlebars from 'handlebars';
 import { getGlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { clone } from '../clone';
+import { regEx } from '../regex';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
 // istanbul ignore next
-handlebars.registerHelper(
-  'replace',
-  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12070
+handlebars.registerHelper('replace', (find, replace, context) =>
+  context.replace(regEx(find, 'g'), replace)
 );
 
 export const exposedConfigOptions = [
@@ -140,7 +140,7 @@ function getFilteredObject(input: CompileInput): any {
   return res;
 }
 
-const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12070
+const templateRegex = regEx(/{{(#(if|unless) )?([a-zA-Z]+)}}/g);
 
 export function compile(
   template: string,

@@ -13,7 +13,7 @@ import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/; // TODO #12070
+const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?P<plugin>[^'"]+)(['"])`);
 
 function getPluginCommands(content: string): string[] {
   const result = new Set<string>();

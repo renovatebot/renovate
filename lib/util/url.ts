@@ -15,7 +15,7 @@ export function ensurePathPrefix(url: string, prefix: string): string {
 }
 
 export function ensureTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '/'); // TODO #12070 #12071 add tests for this one
+  return url.replace(/\/?$/, '/'); // TODO #12070 #12071 adds / in the front when used with re2
 }
 
 export function trimTrailingSlash(url: string): string {
