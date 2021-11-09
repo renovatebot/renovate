@@ -151,7 +151,7 @@ describe('manager/composer/utils', () => {
       setGlobalConfig({
         allowPlugins: true,
       });
-      expect(getComposerArguments({})).toEqual(
+      expect(getComposerArguments({})).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader'
       );
     });
@@ -163,7 +163,7 @@ describe('manager/composer/utils', () => {
         getComposerArguments({
           ignorePlugins: true,
         })
-      ).toEqual(
+      ).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
     });
