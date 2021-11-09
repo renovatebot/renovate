@@ -9,7 +9,7 @@ export const defaultConfig = {
   fileMatch: [
     '\\.(?:cs|fs|vb)proj$',
     '\\.(?:props|targets)$',
-    '\\.config\\/dotnet-tools\\.json$',
-    '(^|//)global\\.json$',
+    '(^|\\/)dotnet-tools\\.json$',
+    '(^|\\/)global\\.json$',
   ],
 };

@@ -97,10 +97,10 @@ describe('util/host-rules', () => {
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://api.github.com' })
           .token
-      ).toEqual('def');
+      ).toBe('def');
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://github.com' }).token
-      ).toEqual('def');
+      ).toBe('def');
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://apigithub.com' })
           .token
@@ -131,7 +131,7 @@ describe('util/host-rules', () => {
           hostType: PlatformId.Github,
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
         }).token
-      ).toEqual('def');
+      ).toBe('def');
     });
 
     it('matches for several hostTypes when no hostType rule is configured', () => {
@@ -144,13 +144,13 @@ describe('util/host-rules', () => {
           hostType: PlatformId.Github,
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
         }).token
-      ).toEqual('abc');
+      ).toBe('abc');
       expect(
         find({
           hostType: 'github-releases',
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
         }).token
-      ).toEqual('abc');
+      ).toBe('abc');
     });
 
     it('matches if hostType is configured and host rule is filtered with datasource', () => {
@@ -169,7 +169,7 @@ describe('util/host-rules', () => {
           hostType: 'github-tags',
           url: 'https://api.github.com/repos/org-b/someRepo/tags?per_page=100',
         }).token
-      ).toEqual('def');
+      ).toBe('def');
     });
 
     it('matches on hostName', () => {
@@ -188,21 +188,21 @@ describe('util/host-rules', () => {
         token: 'def',
       });
       expect(find({ url: 'https://api.domain.com' }).token).toBeUndefined();
-      expect(find({ url: 'https://domain.com' }).token).toEqual('def');
+      expect(find({ url: 'https://domain.com' }).token).toBe('def');
       expect(
         find({
           hostType: datasourceNuget.id,
           url: 'https://domain.com/renovatebot',
         }).token
-      ).toEqual('def');
+      ).toBe('def');
     });
     it('matches on matchHost without protocol', () => {
       add({
         matchHost: 'domain.com',
         token: 'def',
       });
-      expect(find({ url: 'https://api.domain.com' }).token).toEqual('def');
-      expect(find({ url: 'https://domain.com' }).token).toEqual('def');
+      expect(find({ url: 'https://api.domain.com' }).token).toBe('def');
+      expect(find({ url: 'https://domain.com' }).token).toBe('def');
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
     it('matches on matchHost with dot prefix', () => {
@@ -210,7 +210,7 @@ describe('util/host-rules', () => {
         matchHost: '.domain.com',
         token: 'def',
       });
-      expect(find({ url: 'https://api.domain.com' }).token).toEqual('def');
+      expect(find({ url: 'https://api.domain.com' }).token).toBe('def');
       expect(find({ url: 'https://domain.com' }).token).toBeUndefined();
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
@@ -223,7 +223,7 @@ describe('util/host-rules', () => {
       expect(
         find({ hostType: datasourceNuget.id, url: 'https://nuget.local/api' })
           .token
-      ).toEqual('abc');
+      ).toBe('abc');
     });
     it('matches on endpoint subresource', () => {
       add({

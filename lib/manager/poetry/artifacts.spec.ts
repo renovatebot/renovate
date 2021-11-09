@@ -184,7 +184,6 @@ describe('manager/poetry/artifacts', () => {
       throw new Error('not found');
     });
     const updatedDeps = [{ depName: 'dep1' }];
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -192,7 +191,7 @@ describe('manager/poetry/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([{ artifactError: { lockFile: 'poetry.lock' } }]);
   });
   it('returns updated poetry.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);

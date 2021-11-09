@@ -14,10 +14,8 @@ function replaceAsString(
 ): string | null {
   // Update the file = this is what we want
   if (depType === 'packageManager') {
-    // eslint-disable-next-line no-param-reassign
     parsedContents[depType] = newValue;
   } else {
-    // eslint-disable-next-line no-param-reassign
     parsedContents[depType][depName] = newValue;
   }
   // Look for the old version number

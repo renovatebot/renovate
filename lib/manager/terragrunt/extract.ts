@@ -61,7 +61,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       /* istanbul ignore next */
       default:
     }
-    // eslint-disable-next-line no-param-reassign
+
     delete dep.managerData;
   });
   return { deps };

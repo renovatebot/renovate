@@ -209,8 +209,8 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(2);
-      expect(res.updates[0].updateType).toEqual('patch');
-      expect(res.updates[1].updateType).toEqual('major');
+      expect(res.updates[0].updateType).toBe('patch');
+      expect(res.updates[1].updateType).toBe('major');
     });
     it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
@@ -226,7 +226,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].updateType).toEqual('patch');
+      expect(res.updates[0].updateType).toBe('patch');
     });
     it('returns patch update if separateMinorPatch', async () => {
       config.separateMinorPatch = true;
@@ -315,7 +315,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].updateType).toEqual('minor');
+      expect(res.updates[0].updateType).toBe('minor');
     });
     it('widens minor ranged versions if configured', async () => {
       config.currentValue = '~1.3.0';
@@ -624,7 +624,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].newValue).toEqual('<= 1.4.1');
+      expect(res.updates[0].newValue).toBe('<= 1.4.1');
     });
     it('upgrades major less than ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -634,7 +634,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].newValue).toEqual('< 2.0.0');
+      expect(res.updates[0].newValue).toBe('< 2.0.0');
     });
     it('upgrades major greater than less than ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
@@ -644,7 +644,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].newValue).toEqual('>= 0.5.0 < 2.0.0');
+      expect(res.updates[0].newValue).toBe('>= 0.5.0 < 2.0.0');
     });
     it('upgrades minor greater than less than ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
@@ -654,8 +654,8 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].newValue).toEqual('>= 0.5.0 <0.10');
-      expect(res.updates[1].newValue).toEqual('>= 0.5.0 <1.5');
+      expect(res.updates[0].newValue).toBe('>= 0.5.0 <0.10');
+      expect(res.updates[1].newValue).toBe('>= 0.5.0 <1.5');
     });
     it('upgrades minor greater than less than equals ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
@@ -665,8 +665,8 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].newValue).toEqual('>= 0.5.0 <= 0.9.7');
-      expect(res.updates[1].newValue).toEqual('>= 0.5.0 <= 1.4.1');
+      expect(res.updates[0].newValue).toBe('>= 0.5.0 <= 0.9.7');
+      expect(res.updates[1].newValue).toBe('>= 0.5.0 <= 1.4.1');
     });
     it('rejects reverse ordered less than greater than', async () => {
       config.rangeStrategy = 'widen';
@@ -746,7 +746,7 @@ describe('workers/repository/process/lookup/index', () => {
       });
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newVersion).toEqual('1.4.6');
+      expect(res.updates[0].newVersion).toBe('1.4.6');
       expect(res.updates[0].pendingChecks).toBeTrue();
     });
 
@@ -777,7 +777,7 @@ describe('workers/repository/process/lookup/index', () => {
       });
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newVersion).toEqual('1.4.5');
+      expect(res.updates[0].newVersion).toBe('1.4.5');
       expect(res.updates[0].pendingVersions).toHaveLength(1);
     });
 
@@ -794,7 +794,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('2.5.17-beta.0');
+      expect(res.updates[0].newValue).toBe('2.5.17-beta.0');
     });
     it('should allow unstable versions if the current version is unstable', async () => {
       config.currentValue = '3.1.0-dev.20180731';
@@ -807,7 +807,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('3.1.0-dev.20180813');
+      expect(res.updates[0].newValue).toBe('3.1.0-dev.20180813');
     });
     it('should not jump unstable versions', async () => {
       config.currentValue = '3.0.1-insiders.20180726';
@@ -820,7 +820,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('3.0.1');
+      expect(res.updates[0].newValue).toBe('3.0.1');
     });
 
     it('should update pinned versions if updatePinnedDependencies=true', async () => {
@@ -835,7 +835,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('0.0.35');
+      expect(res.updates[0].newValue).toBe('0.0.35');
     });
 
     it('should not update pinned versions if updatePinnedDependencies=false', async () => {
@@ -863,7 +863,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('3.0.1-insiders.20180726');
+      expect(res.updates[0].newValue).toBe('3.0.1-insiders.20180726');
     });
     it('should roll back to dist-tag if current version is higher', async () => {
       config.currentValue = '3.1.0-dev.20180813';
@@ -878,7 +878,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('3.0.1-insiders.20180726');
+      expect(res.updates[0].newValue).toBe('3.0.1-insiders.20180726');
     });
     it('should jump unstable versions if followTag', async () => {
       config.currentValue = '3.0.0-insiders.20180706';
@@ -892,7 +892,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('3.0.1-insiders.20180726');
+      expect(res.updates[0].newValue).toBe('3.0.1-insiders.20180726');
     });
     it('should update nothing if current version is dist-tag', async () => {
       config.currentValue = '3.0.1-insiders.20180726';
@@ -919,7 +919,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(0);
       expect(res.warnings).toHaveLength(1);
-      expect(res.warnings[0].message).toEqual(
+      expect(res.warnings[0].message).toBe(
         "Can't find version with tag foo for typescript"
       );
     });
@@ -1159,7 +1159,7 @@ describe('workers/repository/process/lookup/index', () => {
         .reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.updates[0].newVersion).toEqual('1.4.0');
+      expect(res.updates[0].newVersion).toBe('1.4.0');
     });
     it('is deprecated', async () => {
       config.currentValue = '1.3.0';
@@ -1178,7 +1178,7 @@ describe('workers/repository/process/lookup/index', () => {
         .reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res.updates[0].newVersion).toEqual('1.4.1');
+      expect(res.updates[0].newVersion).toBe('1.4.1');
     });
     it('skips unsupported values', async () => {
       config.currentValue = 'alpine';

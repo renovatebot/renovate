@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
-// eslint-disable-next-line import/no-cycle
+
 import { logger } from '../logger';
 
 let RegEx: RegExpConstructor;

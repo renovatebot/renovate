@@ -49,7 +49,7 @@ export async function extractPackageFile(
     logger.debug({ fileName }, 'Invalid JSON');
     return null;
   }
-  // eslint-disable-next-line no-underscore-dangle
+
   if (packageJson._id && packageJson._args && packageJson._from) {
     logger.debug('Ignoring vendorised package.json');
     return null;

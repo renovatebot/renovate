@@ -78,8 +78,7 @@ describe('platform/azure/azure-helper', () => {
       let eventCount = 0;
       const mockEventStream = new Readable({
         objectMode: true,
-        /* eslint-disable func-names */
-        /* eslint-disable object-shorthand */
+
         read: function () {
           if (eventCount < 1) {
             eventCount += 1;
@@ -108,8 +107,7 @@ describe('platform/azure/azure-helper', () => {
       let eventCount = 0;
       const mockEventStream = new Readable({
         objectMode: true,
-        /* eslint-disable func-names */
-        /* eslint-disable object-shorthand */
+
         read: function () {
           if (eventCount < 1) {
             eventCount += 1;
@@ -138,8 +136,7 @@ describe('platform/azure/azure-helper', () => {
       let eventCount = 0;
       const mockEventStream = new Readable({
         objectMode: true,
-        /* eslint-disable func-names */
-        /* eslint-disable object-shorthand */
+
         read: function () {
           if (eventCount < 1) {
             eventCount += 1;
