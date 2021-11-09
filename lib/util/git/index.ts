@@ -565,8 +565,10 @@ export async function isBranchConflicted(
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
-    await git.checkout(['-B', branchName, 'origin/' + branchName]);
+    await git.checkout(branchName);
     await git.merge(['--no-commit', '--no-ff', baseBranch]);
+    await git.reset(ResetMode.HARD);
+    await git.checkout(baseBranch);
   } catch (err) {
     if (err?.git?.conflicts?.length) {
       return true;
