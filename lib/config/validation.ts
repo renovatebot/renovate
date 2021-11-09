@@ -228,7 +228,7 @@ export async function validateConfig(
             message: `${currentPath}: ${errorMessage}`,
           });
         }
-      } else if (val != null) {
+      } else if (val !== null) {
         const type = optionTypes[key];
         if (type === 'boolean') {
           if (val !== true && val !== false) {
