@@ -37,6 +37,7 @@ module.exports = {
 
     // other rules
     'consistent-return': 'error',
+    'no-console': 'error',
     'no-negated-condition': 'error',
     'no-param-reassign': 'error',
     'sort-imports': [
