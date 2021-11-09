@@ -23,7 +23,6 @@ describe('versioning/loose/utils', () => {
           props.push(prop);
         }
       });
-      // eslint-disable-next-line no-cond-assign
     } while ((o = Object.getPrototypeOf(o)));
 
     return props;
@@ -31,12 +30,10 @@ describe('versioning/loose/utils', () => {
 
   describe('GenericVersioningApi', () => {
     class DummyScheme extends GenericVersioningApi {
-      // eslint-disable-next-line class-methods-use-this
       protected override _compare(_version: string, _other: string): number {
         return _version ? _version.localeCompare(_other) : 0;
       }
 
-      // eslint-disable-next-line class-methods-use-this
       protected _parse(_version: string): GenericVersion {
         return _version === 'test' ? null : { release: [1, 0, 0] };
       }

@@ -22,7 +22,6 @@ export class GitRefsDatasource extends Datasource {
     namespace: `datasource-${GitRefsDatasource.id}`,
     key: ({ lookupName }: GetReleasesConfig) => lookupName,
   })
-  // eslint-disable-next-line class-methods-use-this
   override async getReleases({
     lookupName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -54,7 +53,6 @@ export class GitRefsDatasource extends Datasource {
     return result;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   override async getDigest(
     { lookupName }: DigestConfig,
     newValue?: string

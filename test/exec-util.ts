@@ -27,7 +27,6 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
 
   const cwd = toUnix(process.cwd());
 
-  // eslint-disable-next-line array-callback-return
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {
       const val = v

@@ -38,8 +38,7 @@ describe('workers/repository/init/index', () => {
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
       const renovateConfig = await initRepo({});
-      // FIXME: explicit assert condition
-      expect(renovateConfig).toMatchSnapshot();
+      expect(renovateConfig).toEqual({});
     });
     it('warns on unsupported options', async () => {
       apis.initApis.mockResolvedValue({} as never);

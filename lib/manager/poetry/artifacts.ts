@@ -117,10 +117,11 @@ export async function updateArtifacts({
       await deleteLocalFile(lockFileName);
       cmd.push('poetry update --lock --no-interaction');
     } else {
-      for (let i = 0; i < updatedDeps.length; i += 1) {
-        const dep = updatedDeps[i];
-        cmd.push(`poetry update --lock --no-interaction ${quote(dep.depName)}`);
-      }
+      cmd.push(
+        `poetry update --lock --no-interaction ${updatedDeps
+          .map((dep) => quote(dep.depName))
+          .join(' ')}`
+      );
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.constraints?.poetry || 'poetry';

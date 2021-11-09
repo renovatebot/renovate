@@ -50,6 +50,7 @@ export interface UpdateArtifactsConfig {
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
+  aliases?: Record<string, string>;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {

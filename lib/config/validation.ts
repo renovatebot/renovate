@@ -122,7 +122,7 @@ export async function validateConfig(
         topic: 'Config security error',
         message: '__proto__',
       });
-      continue; // eslint-disable-line
+      continue;
     }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({
@@ -228,7 +228,7 @@ export async function validateConfig(
             message: `${currentPath}: ${errorMessage}`,
           });
         }
-      } else if (val != null) {
+      } else if (val !== null) {
         const type = optionTypes[key];
         if (type === 'boolean') {
           if (val !== true && val !== false) {

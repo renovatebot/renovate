@@ -151,10 +151,10 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         config,
       });
 
-      expect(res[0].artifactError.lockFile).toEqual(
+      expect(res[0].artifactError.lockFile).toBe(
         'gradle/wrapper/gradle-wrapper.properties'
       );
-      expect(res[0].artifactError.stderr).toEqual('failed');
+      expect(res[0].artifactError.stderr).toBe('failed');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
       ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
@@ -178,11 +178,11 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         config,
       });
 
-      expect(res[0].artifactError.lockFile).toEqual(
+      expect(res[0].artifactError.lockFile).toBe(
         'gradle/wrapper/gradle-wrapper.properties'
       );
       expect(res[0].artifactError.stderr).not.toBeNull();
-      expect(res[0].artifactError.stderr).not.toEqual('');
+      expect(res[0].artifactError.stderr).not.toBe('');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
       ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {

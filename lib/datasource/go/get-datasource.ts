@@ -4,13 +4,10 @@ import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
-import { http } from './common';
+import { bitbucket, http } from './common';
 import type { DataSource } from './types';
-
-export const bitbucket = new BitBucketTagsDatasource();
 
 const gitlabHttpsRegExp = regEx(
   /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)[/]?$/
@@ -19,37 +16,7 @@ const gitlabRegExp = regEx(
   /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)[/]?$/
 );
 
-export async function getDatasource(
-  goModule: string
-): Promise<DataSource | null> {
-  if (goModule.startsWith('gopkg.in/')) {
-    const [pkg] = goModule.replace('gopkg.in/', '').split('.');
-    if (pkg.includes('/')) {
-      return { datasource: github.id, lookupName: pkg };
-    }
-    return {
-      datasource: github.id,
-      lookupName: `go-${pkg}/${pkg}`,
-    };
-  }
-  if (goModule.startsWith('github.com/')) {
-    const split = goModule.split('/');
-    const lookupName = split[1] + '/' + split[2];
-    return {
-      datasource: github.id,
-      lookupName,
-    };
-  }
-
-  if (goModule.startsWith('bitbucket.org/')) {
-    const split = goModule.split('/');
-    const lookupName = split[1] + '/' + split[2];
-    return {
-      datasource: bitbucket.id,
-      lookupName,
-    };
-  }
-
+async function goGetDatasource(goModule: string): Promise<DataSource | null> {
   const pkgUrl = `https://${goModule}?go-get=1`;
   const res = (await http.get(pkgUrl)).body;
   const sourceMatch = regEx(
@@ -144,4 +111,35 @@ export async function getDatasource(
     logger.trace({ goModule }, 'No go-source or go-import header found');
   }
   return null;
+}
+
+export async function getDatasource(
+  goModule: string
+): Promise<DataSource | null> {
+  if (goModule.startsWith('gopkg.in/')) {
+    const [pkg] = goModule.replace('gopkg.in/', '').split('.');
+    const lookupName = pkg.includes('/') ? pkg : `go-${pkg}/${pkg}`;
+    return { datasource: github.id, lookupName };
+  }
+
+  if (goModule.startsWith('github.com/')) {
+    const split = goModule.split('/');
+    const lookupName = split[1] + '/' + split[2];
+    return {
+      datasource: github.id,
+      lookupName,
+    };
+  }
+
+  if (goModule.startsWith('bitbucket.org/')) {
+    const split = goModule.split('/');
+    const lookupName = split[1] + '/' + split[2];
+    return {
+      datasource: bitbucket.id,
+      lookupName,
+    };
+  }
+
+  const goGetResult = await goGetDatasource(goModule);
+  return goGetResult;
 }

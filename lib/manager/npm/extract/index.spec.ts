@@ -153,7 +153,6 @@ describe('manager/npm/extract/index', () => {
     it('finds and filters .npmrc with variables', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
-          // eslint-disable-next-line
           return 'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
         }
         return null;
@@ -163,7 +162,7 @@ describe('manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toEqual('registry=https://registry.npmjs.org\n');
+      expect(res.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {

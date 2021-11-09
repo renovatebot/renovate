@@ -63,9 +63,7 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
-        "Cannot find preset's package (notfound)"
-      );
+      expect(e.validationError).toBe("Cannot find preset's package (notfound)");
       expect(e.validationMessage).toBeUndefined();
     });
     it('throws if invalid preset', async () => {
@@ -79,7 +77,7 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
+      expect(e.validationError).toBe(
         'Preset name not found within published preset config (wrongpreset:invalid-preset)'
       );
       expect(e.validationMessage).toBeUndefined();
@@ -96,9 +94,7 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
-        'Preset is invalid (github>user/repo//)'
-      );
+      expect(e.validationError).toBe('Preset is invalid (github>user/repo//)');
       expect(e.validationMessage).toBeUndefined();
     });
 
@@ -113,7 +109,7 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
+      expect(e.validationError).toBe(
         'Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)'
       );
       expect(e.validationMessage).toBeUndefined();
@@ -130,7 +126,7 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
+      expect(e.validationError).toBe(
         'Preset package is missing a renovate-config entry (noconfig:base)'
       );
       expect(e.validationMessage).toBeUndefined();
@@ -161,7 +157,7 @@ describe('config/presets/index', () => {
         ignoreDeps: [],
         rangeStrategy: 'pin',
       });
-      expect(res.rangeStrategy).toEqual('pin');
+      expect(res.rangeStrategy).toBe('pin');
     });
     it('throws if valid and invalid', async () => {
       config.foo = 1;
@@ -174,7 +170,7 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e.validationSource).toBeUndefined();
-      expect(e.validationError).toEqual(
+      expect(e.validationError).toBe(
         'Preset name not found within published preset config (wrongpreset:invalid-preset)'
       );
       expect(e.validationMessage).toBeUndefined();
@@ -233,7 +229,7 @@ describe('config/presets/index', () => {
       config.extends = ['ikatyang:library'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.automerge).not.toBeDefined();
+      expect(res.automerge).toBeUndefined();
       expect(res.minor.automerge).toBeTrue();
     });
 
@@ -256,7 +252,7 @@ describe('config/presets/index', () => {
 
       expect(res.labels).toEqual(['self-hosted resolved']);
       expect(local.getPreset.mock.calls).toHaveLength(1);
-      expect(local.getPreset.mock.calls[0][0].baseConfig).not.toBeUndefined();
+      expect(local.getPreset.mock.calls[0][0].baseConfig).toBeDefined();
       expect(res).toMatchSnapshot();
     });
   });
@@ -269,12 +265,12 @@ describe('config/presets/index', () => {
     it('replaces args in strings', () => {
       const str = '{{arg2}} foo {{arg0}}{{arg1}}';
       const res = presets.replaceArgs(str, argMappings);
-      expect(res).toEqual('c foo ab');
+      expect(res).toBe('c foo ab');
     });
     it('replaces args twice in same string', () => {
       const str = '{{arg2}}{{arg0}} foo {{arg0}}{{arg1}}';
       const res = presets.replaceArgs(str, argMappings);
-      expect(res).toEqual('ca foo ab');
+      expect(res).toBe('ca foo ab');
     });
     it('replaces objects', () => {
       const obj = {
@@ -322,6 +318,15 @@ describe('config/presets/index', () => {
         presetSource: 'github',
       });
     });
+    it('handles special chars', () => {
+      expect(presets.parsePreset('github>some/repo:foo+bar')).toEqual({
+        packageName: 'some/repo',
+        params: undefined,
+        presetName: 'foo+bar',
+        presetPath: undefined,
+        presetSource: 'github',
+      });
+    });
     it('parses github subfiles', () => {
       expect(presets.parsePreset('github>some/repo:somefile')).toEqual({
         packageName: 'some/repo',
@@ -337,8 +342,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somefile/somepreset',
-        presetPath: undefined,
+        presetName: 'somepreset',
+        presetPath: 'somefile',
         presetSource: 'github',
       });
     });
@@ -350,8 +355,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somefile/somepreset/somesubpreset',
-        presetPath: undefined,
+        presetName: 'somesubpreset',
+        presetPath: 'somefile/somepreset',
         presetSource: 'github',
       });
     });
