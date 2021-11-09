@@ -89,7 +89,8 @@ export default function prepareError(err: Error): Record<string, unknown> {
   return response;
 }
 
-export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
+export function sanitizeValue(_value: unknown, seen = new WeakMap()): any {
+  let value = _value;
   if (Array.isArray(value)) {
     const length = value.length;
     const arrayResult = Array(length);

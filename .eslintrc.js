@@ -36,6 +36,7 @@ module.exports = {
 
     // other rules
     'import/prefer-default-export': 0, // no benefit
+    'no-param-reassign': 'error',
     'no-restricted-syntax': 0,
     'no-await-in-loop': 0,
     'prefer-destructuring': 0,

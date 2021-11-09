@@ -75,7 +75,6 @@ function handleGitDep(
       dep.currentValue = dep.managerData.version;
     }
   }
-  /* eslint-enable no-param-reassign */
 }
 
 function handleGalaxyDep(dep: PackageDependency): void {
@@ -83,7 +82,6 @@ function handleGalaxyDep(dep: PackageDependency): void {
   dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
   dep.currentValue = dep.managerData.version;
-  /* eslint-enable no-param-reassign */
 }
 
 function finalize(dependency: PackageDependency): boolean {
