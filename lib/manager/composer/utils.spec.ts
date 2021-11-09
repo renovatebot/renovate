@@ -131,7 +131,9 @@ describe('manager/composer/utils', () => {
       setGlobalConfig({
         allowScripts: true,
       });
-      expect(getComposerArguments({})).toBe(' --no-ansi --no-interaction');
+      expect(getComposerArguments({})).toBe(
+        ' --no-ansi --no-interaction --no-plugins'
+      );
     });
     it('disables scripts when configured locally', () => {
       setGlobalConfig({
