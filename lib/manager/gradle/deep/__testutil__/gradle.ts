@@ -28,7 +28,7 @@ ${javaVersionOutput}`);
 let cachedJavaVersion: number | null = null;
 
 function determineJavaVersion(): number {
-  if (cachedJavaVersion == null) {
+  if (!cachedJavaVersion) {
     let javaVersionCommand: SpawnSyncReturns<string>;
     let error: Error;
     try {

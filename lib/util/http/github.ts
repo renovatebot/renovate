@@ -55,11 +55,10 @@ function handleGotError(
     message = String(err.response.body.message);
   }
   if (
-    err.name === 'RequestError' &&
-    (err.code === 'ENOTFOUND' ||
-      err.code === 'ETIMEDOUT' ||
-      err.code === 'EAI_AGAIN' ||
-      err.code === 'ECONNRESET')
+    err.code === 'ENOTFOUND' ||
+    err.code === 'ETIMEDOUT' ||
+    err.code === 'EAI_AGAIN' ||
+    err.code === 'ECONNRESET'
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
     throw new ExternalHostError(err, PlatformId.Github);

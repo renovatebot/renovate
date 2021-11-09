@@ -33,7 +33,6 @@ function extractBlock(
         default:
           break;
       }
-      /* eslint-enable no-param-reassign */
     }
   } while (line.trim() !== '}');
   return lineNumber;
@@ -79,5 +78,4 @@ export function analyzeTerraformRequiredProvider(
 ): void {
   analyzeTerraformProvider(dep, locks);
   dep.depType = `required_provider`;
-  /* eslint-enable no-param-reassign */
 }

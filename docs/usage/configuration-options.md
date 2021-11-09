@@ -2218,7 +2218,7 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
-In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageUrls` like so:
+In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageRules` like so:
 
 ```json
 {
