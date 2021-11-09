@@ -1,5 +1,5 @@
 export function sampleSize(array: string[], n: number): string[] {
-  const length = array == null ? 0 : array.length;
+  const length = array ? array.length : 0;
   if (!length || n < 1) {
     return [];
   }

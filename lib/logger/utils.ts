@@ -114,7 +114,7 @@ export function sanitizeValue(_value: unknown, seen = new WeakMap()): any {
 
   const valueType = typeof value;
 
-  if (value != null && valueType !== 'function' && valueType === 'object') {
+  if (value && valueType !== 'function' && valueType === 'object') {
     if (value instanceof Date) {
       return value;
     }

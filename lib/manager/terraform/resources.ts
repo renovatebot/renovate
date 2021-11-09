@@ -94,7 +94,7 @@ export function analyseTerraformResource(
       break;
 
     case TerraformResourceTypes.helm_release:
-      if (dep.managerData.chart == null) {
+      if (!dep.managerData.chart) {
         dep.skipReason = SkipReason.InvalidName;
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
         dep.skipReason = SkipReason.LocalChart;
