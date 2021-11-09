@@ -294,7 +294,7 @@ describe('datasource/clojure/index', () => {
   it('returns null for invalid registryUrls', async () => {
     const res = await get(
       'org.example:package',
-      // eslint-disable-next-line no-template-curly-in-string
+
       '${project.baseUri}../../repository/'
     );
     expect(res).toBeNull();
@@ -311,6 +311,6 @@ describe('datasource/clojure/index', () => {
 
     const { sourceUrl } = await get();
 
-    expect(sourceUrl).toEqual('https://github.com/example/test');
+    expect(sourceUrl).toBe('https://github.com/example/test');
   });
 });

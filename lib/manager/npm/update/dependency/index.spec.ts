@@ -113,8 +113,8 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
-      expect(JSON.parse(testContent).resolutions.config).toEqual('1.22.0');
+      expect(JSON.parse(testContent).dependencies.config).toBe('1.22.0');
+      expect(JSON.parse(testContent).resolutions.config).toBe('1.22.0');
     });
     it('updates glob resolutions', () => {
       const upgrade = {
@@ -126,10 +126,8 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input01GlobContent,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
-      expect(JSON.parse(testContent).resolutions['**/config']).toEqual(
-        '1.22.0'
-      );
+      expect(JSON.parse(testContent).dependencies.config).toBe('1.22.0');
+      expect(JSON.parse(testContent).resolutions['**/config']).toBe('1.22.0');
     });
     it('updates glob resolutions without dep', () => {
       const upgrade = {
@@ -142,7 +140,7 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toEqual(
+      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toBe(
         '8.1.0'
       );
     });

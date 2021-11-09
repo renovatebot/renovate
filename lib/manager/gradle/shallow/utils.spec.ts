@@ -98,23 +98,41 @@ describe('manager/gradle/shallow/utils', () => {
   });
 
   it('reorderFiles', () => {
-    expect(reorderFiles(['a.gradle', 'b.gradle', 'a.gradle'])).toStrictEqual([
+    expect(
+      reorderFiles([
+        'build.gradle',
+        'a.gradle',
+        'b.gradle',
+        'a.gradle',
+        'versions.gradle',
+      ])
+    ).toStrictEqual([
+      'versions.gradle',
       'a.gradle',
       'a.gradle',
       'b.gradle',
+      'build.gradle',
     ]);
 
     expect(
       reorderFiles([
         'a/b/c/build.gradle',
+        'a/b/versions.gradle',
         'a/build.gradle',
+        'versions.gradle',
         'a/b/build.gradle',
+        'a/versions.gradle',
         'build.gradle',
+        'a/b/c/versions.gradle',
       ])
     ).toStrictEqual([
+      'versions.gradle',
       'build.gradle',
+      'a/versions.gradle',
       'a/build.gradle',
+      'a/b/versions.gradle',
       'a/b/build.gradle',
+      'a/b/c/versions.gradle',
       'a/b/c/build.gradle',
     ]);
 
@@ -146,8 +164,8 @@ describe('manager/gradle/shallow/utils', () => {
       'gradle.properties',
       'a.gradle',
       'b.gradle',
-      'build.gradle',
       'c.gradle',
+      'build.gradle',
       'a/gradle.properties',
       'a/build.gradle',
       'a/b/gradle.properties',

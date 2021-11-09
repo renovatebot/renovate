@@ -66,17 +66,6 @@ Array [
 ]
 `;
 
-exports[`manager/nuget/artifacts catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "packages.lock.json",
-      "stderr": "not found",
-    },
-  },
-]
-`;
-
 exports[`manager/nuget/artifacts does not update lock file when no deps changed 1`] = `Array []`;
 
 exports[`manager/nuget/artifacts does not update lock file when non-proj file is changed 1`] = `Array []`;

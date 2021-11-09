@@ -83,7 +83,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     return dep;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   override handleSpecificErrors(err: HttpError): void {
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if

@@ -175,7 +175,6 @@ function massageTimestamps(dep: ReleaseResult): void {
   }
 }
 
-/* eslint-disable no-param-reassign */
 export function addMetaData(
   dep?: ReleaseResult,
   datasource?: string,
