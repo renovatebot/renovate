@@ -120,6 +120,7 @@ The following details the most common/popular manager artifacts updating and how
 
 Any `hostRules` token for `github.com` or `gitlab.com` are found and written out to `COMPOSER_AUTH` in env for Composer to parse.
 Any `hostRules` with `hostType=packagist` are also included.
+When `COMPOSER_AUTH` env variable is provided, it will be used and the `hostRules` will be appended to the final `COMPOSER_AUTH`.
 
 ### gomod
 

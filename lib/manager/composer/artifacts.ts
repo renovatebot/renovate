@@ -31,7 +31,17 @@ import {
 } from './utils';
 
 function getAuthJson(): string | null {
-  const authJson: AuthJson = {};
+  let authJson: AuthJson = {};
+
+  if (process.env.COMPOSER_AUTH) {
+    try {
+      authJson = JSON.parse(process.env.COMPOSER_AUTH);
+    } catch (err) {
+      throw new Error(
+        `Failed to parse COMPOSER_AUTH: ${err.message as string}`
+      );
+    }
+  }
 
   const githubCredentials = hostRules.find({
     hostType: PlatformId.Github,

@@ -63,6 +63,7 @@ describe('manager/composer/artifacts', () => {
 
   afterEach(() => {
     GlobalConfig.reset();
+    delete process.env.COMPOSER_AUTH;
   });
 
   it('returns if no composer.lock found', async () => {
@@ -95,6 +96,93 @@ describe('manager/composer/artifacts', () => {
       })
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('uses provided COMPOSER_AUTH', async () => {
+    process.env.COMPOSER_AUTH = `
+    {
+      "github-oauth": {
+        "github.com": "abcdef012345678"
+      },
+      "http-basic": {
+        "gitlab.my-domain.com": {
+          "username": "my-user",
+          "password": "my-password"
+        }
+      }
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValue(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('updates provided COMPOSER_AUTH', async () => {
+    process.env.COMPOSER_AUTH = `
+    {
+      "github-oauth": {
+        "github.com": "abcdef012345678"
+      },
+      "http-basic": {
+        "gitlab.my-domain.com": {
+          "username": "my-user",
+          "password": "my-password"
+        }
+      }
+    }`;
+    hostRules.add({
+      hostType: PlatformId.Github,
+      matchHost: 'api.github.com',
+      token: 'new-token',
+    });
+    hostRules.add({
+      hostType: PlatformId.Gitlab,
+      matchHost: 'gitlab.com',
+      token: 'gitlab-token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValue(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('breaks on invalid provided COMPOSER_AUTH', async () => {
+    process.env.COMPOSER_AUTH = 'nojson';
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: config,
+      })
+    ).toMatchSnapshot();
   });
 
   it('uses hostRules to set COMPOSER_AUTH', async () => {
