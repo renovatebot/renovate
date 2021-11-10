@@ -610,10 +610,18 @@ describe('util/git/index', () => {
       await repo.reset(['--hard', 'HEAD~1']);
     });
 
-    it('short-circuits for non-existing branches', async () => {
+    it('returns false for non-existing branch', async () => {
       const res = await git.isBranchConflicted(
         defaultBranch,
-        'renovate/non-existing-branch'
+        'renovate/non_existing_branch'
+      );
+      expect(res).toBeFalse();
+    });
+
+    it('returns false for non-existing base branch', async () => {
+      const res = await git.isBranchConflicted(
+        'renovate/non_existing_branch',
+        'renovate/non_conflicted_branch'
       );
       expect(res).toBeFalse();
     });

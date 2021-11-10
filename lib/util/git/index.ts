@@ -566,7 +566,6 @@ export async function isBranchConflicted(
     await git.merge(['--no-commit', '--no-ff', baseBranch]);
     await git.reset(ResetMode.HARD);
     await git.checkout(baseBranch);
-    return false;
   } catch (err) {
     if (err?.git?.conflicts?.length) {
       return true;
