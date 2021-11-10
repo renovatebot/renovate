@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
+import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import * as conan from '../../versioning/conan';
 import { Datasource } from '../datasource';
@@ -39,18 +40,18 @@ export class ConanDatasource extends Datasource {
         const dep: ReleaseResult = { releases: [] };
 
         for (const resultString of Object.values(versions.results)) {
-          const fromMatches = resultString.matchAll(
-            /^(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)?/gim
+          const regex = regEx(
+            /(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)/,
+            'gim'
           );
-          for (const fromMatch of fromMatches) {
-            if (fromMatch.groups.version && fromMatch.groups.userChannel) {
-              const version = fromMatch.groups.version;
-              if (fromMatch.groups.userChannel === userAndChannel) {
-                const result: Release = {
-                  version,
-                };
-                dep.releases.push(result);
-              }
+          const fromMatch = regex.exec(resultString);
+          if (fromMatch) {
+            const version = fromMatch.groups.version;
+            if (fromMatch.groups.userChannel === userAndChannel) {
+              const result: Release = {
+                version,
+              };
+              dep.releases.push(result);
             }
           }
         }
