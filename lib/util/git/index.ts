@@ -556,10 +556,7 @@ export async function isBranchConflicted(
   branchName: string
 ): Promise<boolean> {
   if (!branchExists(branchName)) {
-    logger.debug(
-      { branchName },
-      'Branch does not exist - cannot check isBranchConflicted'
-    );
+    logger.debug({ branchName }, 'Conflict detection: branch does not exist');
     return false;
   }
   try {
@@ -569,10 +566,12 @@ export async function isBranchConflicted(
     await git.merge(['--no-commit', '--no-ff', baseBranch]);
     await git.reset(ResetMode.HARD);
     await git.checkout(baseBranch);
+    return false;
   } catch (err) {
     if (err?.git?.conflicts?.length) {
       return true;
     }
+    logger.debug({ branchName, err }, 'Conflict detection: unknown error');
   }
   return false;
 }
