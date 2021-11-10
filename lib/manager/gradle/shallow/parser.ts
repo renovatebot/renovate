@@ -90,7 +90,11 @@ const endOfInstruction: SyntaxMatcher = {
   lookahead: true,
 };
 
-const potentialStringTypes = [TokenType.String, TokenType.Word];
+const potentialStringTypes = [
+  TokenType.String,
+  TokenType.Word,
+  TokenType.StringInterpolation,
+];
 
 function coercePotentialString(
   token: Token,
@@ -105,6 +109,13 @@ function coercePotentialString(
     typeof variables[token?.value] !== 'undefined'
   ) {
     return variables[token.value].value;
+  }
+  if (tokenType === TokenType.StringInterpolation) {
+    const tokenI = token as StringInterpolation;
+    const interpolationResult = interpolateString(tokenI.children, variables);
+    if (interpolationResult) {
+      return interpolationResult;
+    }
   }
   return null;
 }
@@ -191,6 +202,7 @@ function processDepInterpolation({
 
 function processPlugin({
   tokenMap,
+  variables,
   packageFile,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const { pluginName, pluginVersion, methodName } = tokenMap;
@@ -201,7 +213,7 @@ function processPlugin({
     methodName.value === 'kotlin'
       ? `org.jetbrains.kotlin.${plugin}:org.jetbrains.kotlin.${plugin}.gradle.plugin`
       : `${plugin}:${plugin}.gradle.plugin`;
-  const currentValue = pluginVersion.value;
+  const currentValue = coercePotentialString(tokenMap.pluginVersion, variables);
   const fileReplacePosition = pluginVersion.offset;
   const dep = {
     depType: 'plugin',
@@ -220,8 +232,9 @@ function processPlugin({
 
 function processCustomRegistryUrl({
   tokenMap,
+  variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
-  const registryUrl = tokenMap.registryUrl?.value;
+  const registryUrl = coercePotentialString(tokenMap.registryUrl, variables);
   try {
     if (registryUrl) {
       const { host, protocol } = url.parse(registryUrl);
@@ -351,7 +364,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       },
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      { matchType: potentialStringTypes, tokenMapKey: 'pluginVersion' },
       endOfInstruction,
     ],
     handler: processPlugin,
@@ -368,7 +381,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.RightParen },
       { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      { matchType: potentialStringTypes, tokenMapKey: 'pluginVersion' },
       endOfInstruction,
     ],
     handler: processPlugin,
@@ -395,8 +408,20 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'maven',
       },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: potentialStringTypes, tokenMapKey: 'registryUrl' },
       { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: processCustomRegistryUrl,
+  },
+  {
+    // maven "https://repository.mycompany.com/m2/repository"
+    matchers: [
+      {
+        matchType: TokenType.Word,
+        matchValue: 'maven',
+      },
+      { matchType: potentialStringTypes, tokenMapKey: 'registryUrl' },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -419,7 +444,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchValue: 'uri',
       },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: potentialStringTypes, tokenMapKey: 'registryUrl' },
       { matchType: TokenType.RightParen },
       { matchType: TokenType.RightBrace },
       endOfInstruction,
@@ -438,7 +463,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         matchType: TokenType.Word,
         matchValue: 'url',
       },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: potentialStringTypes, tokenMapKey: 'registryUrl' },
       { matchType: TokenType.RightBrace },
       endOfInstruction,
     ],
@@ -448,7 +473,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: potentialStringTypes, tokenMapKey: 'registryUrl' },
       endOfInstruction,
     ],
     handler: processCustomRegistryUrl,
@@ -458,7 +483,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     matchers: [
       { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
       { matchType: TokenType.LeftParen },
-      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: potentialStringTypes, tokenMapKey: 'registryUrl' },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],

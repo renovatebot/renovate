@@ -8,235 +8,224 @@ import {
 } from './common';
 import { parseGradle, parseProps } from './parser';
 
-describe('manager/gradle/shallow/parser', () => {
-  it('handles end of input', () => {
-    expect(parseGradle('version = ').deps).toBeEmpty();
-    expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
-  });
-  it('parses variables', () => {
-    let deps;
-
-    ({ deps } = parseGradle(
+let testData = [
+  {
+    name: 'parses variables',
+    inputs: [
+      ['version = "1.2.3"', '"foo:bar_$version:$version"', 'version = "3.2.1"'],
       [
-        'version = "1.2.3"',
+        'set("version", "1.2.3")',
         '"foo:bar_$version:$version"',
-        'version = "3.2.1"',
-      ].join('\n')
-    ));
-    expect(deps).toMatchObject([
+        'set("version", "3.2.1")',
+      ],
+    ],
+    output: [
       {
         depName: 'foo:bar_1.2.3',
         currentValue: '1.2.3',
       },
-    ]);
-
-    ({ deps } = parseGradle(
-      [
-        'set("version", "1.2.3")',
-        '"foo:bar:$version"',
-        'set("version", "3.2.1")',
-      ].join('\n')
-    ));
-    expect(deps).toMatchObject([
-      {
-        depName: 'foo:bar',
-        currentValue: '1.2.3',
-      },
-    ]);
-
-    ({ deps } = parseGradle('version = "1.2.3"\n"foo:bar:$version@@@"'));
-    expect(deps).toBeEmpty();
-
-    ({ deps } = parseGradle(
-      ['versions.foobar = "1.2.3"', '"foo:bar:${versions.foobar}"'].join('\n')
-    ));
-    expect(deps).toMatchObject([
+    ],
+  },
+  {
+    name: 'parses variables not working',
+    inputs: [['version = "1.2.3"', '"foo:bar:$version@@@"']],
+    output: [],
+  },
+  {
+    name: 'parses variables',
+    inputs: [
+      ['versions.foobar = "1.2.3"', '"foo:bar:${versions.foobar}"'],
+      ['versions.foobar = "1.2.3"', '"foo:bar:$versions.foobar"'],
+    ],
+    output: [
       {
         depName: 'foo:bar',
         currentValue: '1.2.3',
         groupName: 'versions.foobar',
       },
-    ]);
+    ],
+  },
 
-    ({ deps } = parseGradle(
-      ['versions.foobar = "1.2.3"', '"foo:bar:$versions.foobar"'].join('\n')
-    ));
-    expect(deps).toMatchObject([
-      {
-        depName: 'foo:bar',
-        currentValue: '1.2.3',
-        groupName: 'versions.foobar',
-      },
-    ]);
-
-    expect(
-      parseGradle('foo.bar = "foo:bar:1.2.3"', {}, 'versions.gradle')
-    ).toMatchObject({
-      vars: {
-        'foo.bar': {
-          fileReplacePosition: 11,
-          key: 'foo.bar',
-          packageFile: 'versions.gradle',
-          value: 'foo:bar:1.2.3',
-        },
-      },
-      deps: [
-        {
-          depName: 'foo:bar',
-          currentValue: '1.2.3',
-          groupName: 'foo.bar',
-          managerData: {
-            fileReplacePosition: 19,
-          },
-        },
-      ],
-    });
-  });
-  it('parses registryUrls', () => {
-    let urls;
-
-    ({ urls } = parseGradle('url ""'));
-    expect(urls).toBeEmpty();
-
-    ({ urls } = parseGradle('url "#!@"'));
-    expect(urls).toBeEmpty();
-
-    ({ urls } = parseGradle('url "https://example.com"'));
-    expect(urls).toStrictEqual(['https://example.com']);
-
-    ({ urls } = parseGradle('url("https://example.com")'));
-    expect(urls).toStrictEqual(['https://example.com']);
-
-    ({ urls } = parseGradle('uri "https://example.com"'));
-    expect(urls).toStrictEqual(['https://example.com']);
-
-    ({ urls } = parseGradle(
-      'mavenCentral(); uri("https://example.com"); jcenter(); google(); gradlePluginPortal();'
-    ));
-    expect(urls).toStrictEqual([
-      MAVEN_REPO,
-      'https://example.com',
-      JCENTER_REPO,
-      GOOGLE_REPO,
-      GRADLE_PLUGIN_PORTAL_REPO,
-    ]);
-
-    ({ urls } = parseGradle(
-      'maven("https://repository.mycompany.com/m2/repository")'
-    ));
-    expect(urls).toStrictEqual([
-      'https://repository.mycompany.com/m2/repository',
-    ]);
-
-    ({ urls } = parseGradle(
-      'maven { url = uri("https://maven.springframework.org/release") }'
-    ));
-    expect(urls).toStrictEqual(['https://maven.springframework.org/release']);
-
-    ({ urls } = parseGradle(
-      "maven { url 'https://repository.mycompany.com/m2/repository' }"
-    ));
-    expect(urls).toStrictEqual([
-      'https://repository.mycompany.com/m2/repository',
-    ]);
-  });
-  it('parses long form deps', () => {
-    let deps;
-    ({ deps } = parseGradle(
-      'group: "com.example", name: "my.dependency", version: "1.2.3"'
-    ));
-    expect(deps).toMatchObject([
-      {
-        depName: 'com.example:my.dependency',
-        currentValue: '1.2.3',
-      },
-    ]);
-
-    ({ deps } = parseGradle(
-      "implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"
-    ));
-    expect(deps).toMatchObject([
+  // Long form deps
+  {
+    name: 'parse long form deps',
+    inputs: [
+      ['group: "foo", name: "bar", version: "1.2.3"'],
+      ["implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"],
+      ['depVersion = "1.2.3"\ngroup: "foo", name: "bar", version: depVersion'],
+      ['("foo", "bar", "1.2.3")'],
+      ['(group = "foo", name = "bar", version = "1.2.3")'],
+    ],
+    output: [
       {
         depName: 'foo:bar',
         currentValue: '1.2.3',
       },
-    ]);
-
-    ({ deps } = parseGradle(
-      'group: "com.example", name: "my.dependency", version: depVersion'
-    ));
-    expect(deps).toBeEmpty();
-
-    ({ deps } = parseGradle(
-      'depVersion = "1.2.3"\ngroup: "com.example", name: "my.dependency", version: depVersion'
-    ));
-    expect(deps).toMatchObject([
-      {
-        depName: 'com.example:my.dependency',
-        currentValue: '1.2.3',
-      },
-    ]);
-
-    ({ deps } = parseGradle('("com.example", "my.dependency", "1.2.3")'));
-    expect(deps).toMatchObject([
-      {
-        depName: 'com.example:my.dependency',
-        currentValue: '1.2.3',
-      },
-    ]);
-
-    ({ deps } = parseGradle(
-      '(group = "com.example", name = "my.dependency", version = "1.2.3")'
-    ));
-    expect(deps).toMatchObject([
-      {
-        depName: 'com.example:my.dependency',
-        currentValue: '1.2.3',
-      },
-    ]);
-
-    ({ deps } = parseGradle(
-      'createXmlValueRemover("defaults", "integer", "integer")'
-    ));
-    expect(deps).toMatchObject([
+    ],
+  },
+  {
+    name: 'parse long form deps',
+    inputs: [['createXmlValueRemover("defaults", "integer", "integer")']],
+    output: [
       {
         depName: 'defaults:integer',
         currentValue: 'integer',
         skipReason: SkipReason.Ignored,
       },
-    ]);
-  });
-  it('parses plugin', () => {
-    let deps;
+    ],
+  },
+  {
+    name: 'parse long form deps',
+    inputs: [
+      ['group: "com.example", name: "my.dependency", version: depVersion'],
+    ],
+    output: [],
+  },
 
-    ({ deps } = parseGradle('id "foo.bar" version "1.2.3"'));
-    expect(deps).toMatchObject([
+  // Plugins
+  {
+    name: 'parses plugins',
+    inputs: [
+      ['id "foo.bar" version "1.2.3"'],
+      ['id "foo.bar" version "1.2.3" apply false'],
+      ['id("foo.bar") version "1.2.3"'],
+      ['id("foo.bar") version "1.2.3" apply false'],
+      ['version = "1.2.3"', 'id "foo.bar" version "$version"'],
+      ['version = "1.2.3"', 'id "foo.bar" version "$version" apply false'],
+      ['version = "1.2.3"', 'id "foo.bar" version "${version}"'],
+      ['version = "1.2.3"', 'id "foo.bar" version "${version}" apply false'],
+      ['version = "1.2.3"', 'id("foo.bar") version "${version}"'],
+      ['version = "2.3"', 'id "foo.bar" version "1.${version}"'],
+      ['version = "2.3"', 'id("foo.bar") version "1.${version}"'],
+    ],
+    output: [
       {
         depName: 'foo.bar',
         lookupName: 'foo.bar:foo.bar.gradle.plugin',
         currentValue: '1.2.3',
       },
-    ]);
-
-    ({ deps } = parseGradle('id("foo.bar") version "1.2.3"'));
-    expect(deps).toMatchObject([
-      {
-        depName: 'foo.bar',
-        lookupName: 'foo.bar:foo.bar.gradle.plugin',
-        currentValue: '1.2.3',
-      },
-    ]);
-
-    ({ deps } = parseGradle('kotlin("jvm") version "1.3.71"'));
-    expect(deps).toMatchObject([
+    ],
+  },
+  {
+    name: 'parses plugins',
+    inputs: [
+      ['kotlin("jvm") version "1.2.3"'],
+      ['version = "1.2.3"', 'kotlin("jvm") version "${version}"'],
+      ['version = "1.2.3"', 'kotlin("jvm") version "$version"'],
+      ['version = "2.3"', 'kotlin("jvm") version "1.${version}"'],
+    ],
+    output: [
       {
         depName: 'org.jetbrains.kotlin.jvm',
         lookupName:
           'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
-        currentValue: '1.3.71',
+        currentValue: '1.2.3',
       },
-    ]);
+    ],
+  },
+];
+
+describe('manager/gradle/shallow/parser', () => {
+  it('handles end of input', () => {
+    expect(parseGradle('version = ').deps).toBeEmpty();
+    expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
   });
+  let deps;
+  testData.forEach((test) => {
+    describe(test.name, () => {
+      test.inputs.forEach((input) => {
+        it(`${input.join(' \t ')}`, () => {
+          ({ deps } = parseGradle(input.join('\n')));
+          expect(deps).toMatchObject(test.output);
+        });
+      });
+    });
+  });
+  describe('parses variables', () => {
+    it('in long dep strings', () => {
+      expect(
+        parseGradle('foo.bar = "foo:bar:1.2.3"', {}, 'versions.gradle')
+      ).toMatchObject({
+        vars: {
+          'foo.bar': {
+            fileReplacePosition: 11,
+            key: 'foo.bar',
+            packageFile: 'versions.gradle',
+            value: 'foo:bar:1.2.3',
+          },
+        },
+        deps: [
+          {
+            depName: 'foo:bar',
+            currentValue: '1.2.3',
+            groupName: 'foo.bar',
+            managerData: {
+              fileReplacePosition: 19,
+            },
+          },
+        ],
+      });
+    });
+  });
+
+  let testUrls = [
+    {
+      name: 'parses registryUrls',
+      inputs: [
+        'url "https://example.com"',
+        'url("https://example.com")',
+        'uri "https://example.com"',
+        'maven("https://example.com")',
+        'maven { url = uri("https://example.com") }',
+        "maven { url 'https://example.com' }",
+        'maven "https://example.com"',
+        'var="https://example.com"\nmaven("$var")',
+        'var="https://example.com"\nmaven(var)',
+        'var=".com"\nmaven("https://example${var}")',
+      ],
+      output: ['https://example.com'],
+    },
+    {
+      name: 'parses registryUrls not working',
+      inputs: [
+        'url ""',
+        'url "#!@"',
+        'url("")',
+        'uri ""',
+        'maven("")',
+        'maven { url = uri("") }',
+        "maven { url '' }",
+      ],
+      output: [],
+    },
+  ];
+  let urls;
+
+  testUrls.forEach((test) => {
+    describe(test.name, () => {
+      test.inputs.forEach((input) => {
+        it(`${input}`, () => {
+          ({ urls } = parseGradle(input));
+          expect(urls).toStrictEqual(test.output);
+        });
+      });
+    });
+  });
+  describe('parses registryUrls', () => {
+    test('registry order', () => {
+      ({ urls } = parseGradle(
+        'mavenCentral(); uri("https://example.com"); jcenter(); google(); gradlePluginPortal();'
+      ));
+      expect(urls).toStrictEqual([
+        MAVEN_REPO,
+        'https://example.com',
+        JCENTER_REPO,
+        GOOGLE_REPO,
+        GRADLE_PLUGIN_PORTAL_REPO,
+      ]);
+    });
+  });
+
   it('parses fixture from "gradle" manager', () => {
     const content = loadFixture('build.gradle.example1', '../deep/');
     const { deps } = parseGradle(content, {}, 'build.gradle');
