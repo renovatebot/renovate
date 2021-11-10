@@ -21,7 +21,6 @@ describe('datasource/npm/npmrc', () => {
   });
 
   it('sanitize _authtoken', () => {
-    // eslint-disable-next-line no-template-curly-in-string
     setNpmrc('//registry.test.com:_authToken=test\n_authToken=${NPM_TOKEN}');
     expect(sanitize.add).toHaveBeenCalledWith('test');
     expect(sanitize.add).toHaveBeenCalledTimes(1);
@@ -41,7 +40,6 @@ describe('datasource/npm/npmrc', () => {
     setGlobalConfig({ exposeAllEnv: true });
     process.env.TEST_TOKEN = 'test';
     setNpmrc(
-      // eslint-disable-next-line no-template-curly-in-string
       '//registry.test.com:_authToken=${TEST_TOKEN}\n_authToken=\nregistry=http://localhost'
     );
     expect(sanitize.add).toHaveBeenCalledWith('test');

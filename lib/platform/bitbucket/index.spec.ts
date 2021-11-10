@@ -431,7 +431,7 @@ describe('platform/bitbucket/index', () => {
         .reply(200);
       expect(
         await bitbucket.ensureIssue({ title: 'title', body: 'body' })
-      ).toEqual('updated');
+      ).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('creates new issue', async () => {
@@ -456,7 +456,7 @@ describe('platform/bitbucket/index', () => {
           reuseTitle: 'old-title',
           body: 'body',
         })
-      ).toEqual('created');
+      ).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('noop for existing issue', async () => {

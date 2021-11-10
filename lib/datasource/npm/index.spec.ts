@@ -358,7 +358,7 @@ describe('datasource/npm/index', () => {
     process.env.REGISTRY = 'https://registry.from-env.com';
     process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
     setGlobalConfig({ exposeAllEnv: true });
-    // eslint-disable-next-line no-template-curly-in-string
+
     const npmrc = 'registry=${REGISTRY}';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
@@ -367,7 +367,7 @@ describe('datasource/npm/index', () => {
 
   it('should throw error if necessary env var is not present', () => {
     setGlobalConfig({ exposeAllEnv: true });
-    // eslint-disable-next-line no-template-curly-in-string
+
     expect(() => setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
       Error('env-replace')
     );

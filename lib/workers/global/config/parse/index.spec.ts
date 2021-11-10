@@ -121,7 +121,7 @@ describe('workers/global/config/parse/index', () => {
         '--endpoint=https://github.renovatebot.com/api/v3',
       ]);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
-      expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
+      expect(parsed.endpoint).toBe('https://github.renovatebot.com/api/v3/');
     });
     it('parses global manager config', async () => {
       defaultArgv = defaultArgv.concat(['--detect-global-manager-config=true']);

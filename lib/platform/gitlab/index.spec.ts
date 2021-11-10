@@ -786,7 +786,7 @@ describe('platform/gitlab/index', () => {
         title: 'new-title',
         body: 'new-content',
       });
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -804,7 +804,7 @@ describe('platform/gitlab/index', () => {
         body: 'new-content',
         labels: ['Renovate', 'Maintenance'],
       });
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -832,7 +832,7 @@ describe('platform/gitlab/index', () => {
         title: 'title-2',
         body: 'newer-content',
       });
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -861,7 +861,7 @@ describe('platform/gitlab/index', () => {
         body: 'newer-content',
         labels: ['Renovate', 'Maintenance'],
       });
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 

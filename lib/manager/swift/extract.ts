@@ -166,7 +166,7 @@ export function extractPackageFile(
 
   while (match) {
     const { idx, len, label, substr } = match;
-    // eslint-disable-next-line default-case
+
     switch (state) {
       case null:
         if (deps.length) {

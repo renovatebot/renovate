@@ -50,7 +50,7 @@ describe('manager/npm/extract/monorepo', () => {
       ] as any;
       await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
+      expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.skipReason)
@@ -104,7 +104,7 @@ describe('manager/npm/extract/monorepo', () => {
       ] as any;
       await detectMonorepos(packageFiles, true);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
+      expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.skipReason)
@@ -134,7 +134,7 @@ describe('manager/npm/extract/monorepo', () => {
       ];
       await detectMonorepos(packageFiles, false);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].managerData.lernaJsonFile).toEqual('lerna.json');
+      expect(packageFiles[1].managerData.lernaJsonFile).toBe('lerna.json');
     });
 
     it('uses yarn workspaces package settings without lerna', async () => {

@@ -50,7 +50,6 @@ export function checkIfStringIsPath(path: string): boolean {
 }
 
 export function massageProviderLookupName(dep: PackageDependency): void {
-  /* eslint-disable no-param-reassign */
   if (!dep.lookupName) {
     dep.lookupName = dep.depName;
   }
@@ -60,7 +59,6 @@ export function massageProviderLookupName(dep: PackageDependency): void {
 
   // handle cases like `Telmate/proxmox`
   dep.lookupName = dep.lookupName.toLowerCase();
-  /* eslint-enable no-param-reassign */
 }
 
 export function getLockedVersion(

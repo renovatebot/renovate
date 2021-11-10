@@ -1,12 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/poetry/extract extractPackageFile() dedupes registries 1`] = `
-Array [
-  "https://pypi.org/pypi/",
-  "https://bar.baz/+simple/",
-]
-`;
-
 exports[`manager/poetry/extract extractPackageFile() extracts mixed versioning types 1`] = `
 Object {
   "constraints": Object {},

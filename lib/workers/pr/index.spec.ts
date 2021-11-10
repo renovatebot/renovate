@@ -214,14 +214,14 @@ describe('workers/pr/index', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.red);
       config.prCreation = 'status-success';
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('AwaitingTests');
+      expect(prBlockedBy).toBe('AwaitingTests');
       expect(pr).toBeUndefined();
     });
     it('should return needs-approval if prCreation set to approval', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'approval';
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('NeedsApproval');
+      expect(prBlockedBy).toBe('NeedsApproval');
       expect(pr).toBeUndefined();
     });
     it('should create PR if success for gitlab deps', async () => {
@@ -265,7 +265,7 @@ describe('workers/pr/index', () => {
       config.schedule = ['before 5am'];
       limits.isLimitReached.mockReturnValueOnce(true);
       const { prBlockedBy } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('RateLimited');
+      expect(prBlockedBy).toBe('RateLimited');
       expect(platform.createPr.mock.calls).toBeEmpty();
     });
     it('should create PR if limit is reached but dashboard checked', async () => {
@@ -341,7 +341,7 @@ describe('workers/pr/index', () => {
       });
       config.prCreation = 'status-success';
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('Error');
+      expect(prBlockedBy).toBe('Error');
       expect(pr).toBeUndefined();
     });
     it('should return null if waiting for not pending', async () => {
@@ -351,7 +351,7 @@ describe('workers/pr/index', () => {
       );
       config.prCreation = 'not-pending';
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('AwaitingTests');
+      expect(prBlockedBy).toBe('AwaitingTests');
       expect(pr).toBeUndefined();
     });
     it('should not create PR if waiting for not pending with stabilityStatus yellow', async () => {
@@ -362,7 +362,7 @@ describe('workers/pr/index', () => {
       config.prCreation = 'not-pending';
       config.stabilityStatus = BranchStatus.yellow;
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('AwaitingTests');
+      expect(prBlockedBy).toBe('AwaitingTests');
       expect(pr).toBeUndefined();
     });
     it('should create PR if pending timeout hit', async () => {
@@ -579,7 +579,7 @@ describe('workers/pr/index', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('BranchAutomerge');
+      expect(prBlockedBy).toBe('BranchAutomerge');
       expect(pr).toBeUndefined();
     });
     it('should return PR if branch automerging taking too long', async () => {
@@ -597,7 +597,7 @@ describe('workers/pr/index', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date('2018-01-01'));
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('BranchAutomerge');
+      expect(prBlockedBy).toBe('BranchAutomerge');
       expect(pr).toBeUndefined();
     });
     it('handles duplicate upgrades', async () => {

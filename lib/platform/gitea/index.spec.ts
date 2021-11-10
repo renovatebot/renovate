@@ -892,7 +892,7 @@ describe('platform/gitea/index', () => {
           branchName: 'some-branch',
           id: 1,
         })
-      ).toEqual(true);
+      ).toBe(true);
       expect(helper.mergePR).toHaveBeenCalledTimes(1);
       expect(helper.mergePR).toHaveBeenCalledWith(
         mockRepo.full_name,
@@ -910,7 +910,7 @@ describe('platform/gitea/index', () => {
           branchName: 'some-branch',
           id: 1,
         })
-      ).toEqual(false);
+      ).toBe(false);
     });
   });
 
@@ -973,7 +973,7 @@ describe('platform/gitea/index', () => {
       await initFakeRepo();
       const res = await gitea.ensureIssue(mockIssue);
 
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(helper.createIssue).toHaveBeenCalledTimes(1);
       expect(helper.createIssue).toHaveBeenCalledWith(mockRepo.full_name, {
         body: mockIssue.body,
@@ -1005,7 +1005,7 @@ describe('platform/gitea/index', () => {
       await initFakeRepo();
       const res = await gitea.ensureIssue(mockIssue);
 
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(helper.createIssue).toHaveBeenCalledTimes(1);
       expect(helper.createIssue).toHaveBeenCalledWith(mockRepo.full_name, {
         body: mockIssue.body,
@@ -1027,7 +1027,7 @@ describe('platform/gitea/index', () => {
         once: false,
       });
 
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(helper.updateIssue).toHaveBeenCalledTimes(1);
       expect(helper.updateIssue).toHaveBeenCalledWith(
         mockRepo.full_name,
@@ -1066,7 +1066,7 @@ describe('platform/gitea/index', () => {
         labels: ['Renovate', 'Maintenance'],
       });
 
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(helper.updateIssue).toHaveBeenCalledTimes(1);
       expect(helper.updateIssueLabels).toHaveBeenCalledTimes(0);
     });
@@ -1097,7 +1097,7 @@ describe('platform/gitea/index', () => {
         labels: ['Renovate', 'Maintenance'],
       });
 
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(helper.updateIssue).toHaveBeenCalledTimes(1);
       expect(helper.updateIssueLabels).toHaveBeenCalledTimes(1);
       expect(helper.updateIssueLabels).toHaveBeenCalledWith(
@@ -1136,7 +1136,7 @@ describe('platform/gitea/index', () => {
         labels: ['Renovate', 'Maintenance'],
       });
 
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(helper.updateIssue).toHaveBeenCalledTimes(1);
       expect(helper.updateIssueLabels).toHaveBeenCalledTimes(1);
       expect(helper.updateIssueLabels).toHaveBeenCalledWith(
@@ -1161,7 +1161,7 @@ describe('platform/gitea/index', () => {
         once: false,
       });
 
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(helper.updateIssue).toHaveBeenCalledTimes(1);
       expect(helper.updateIssue).toHaveBeenCalledWith(
         mockRepo.full_name,
@@ -1296,7 +1296,7 @@ describe('platform/gitea/index', () => {
 
   describe('getRepoForceRebase', () => {
     it('should return false - unsupported by platform', async () => {
-      expect(await gitea.getRepoForceRebase()).toEqual(false);
+      expect(await gitea.getRepoForceRebase()).toBe(false);
     });
   });
 
@@ -1315,7 +1315,7 @@ describe('platform/gitea/index', () => {
       });
       const body = '### other-topic\n\nother-content';
 
-      expect(res).toEqual(true);
+      expect(res).toBe(true);
       expect(helper.updateComment).not.toHaveBeenCalled();
       expect(helper.createComment).toHaveBeenCalledTimes(1);
       expect(helper.createComment).toHaveBeenCalledWith(
@@ -1338,7 +1338,7 @@ describe('platform/gitea/index', () => {
         topic: undefined,
       });
 
-      expect(res).toEqual(true);
+      expect(res).toBe(true);
       expect(helper.updateComment).not.toHaveBeenCalled();
       expect(helper.createComment).toHaveBeenCalledTimes(1);
       expect(helper.createComment).toHaveBeenCalledWith(
@@ -1362,7 +1362,7 @@ describe('platform/gitea/index', () => {
       });
       const body = '### some-topic\n\nsome-new-content';
 
-      expect(res).toEqual(true);
+      expect(res).toBe(true);
       expect(helper.createComment).not.toHaveBeenCalled();
       expect(helper.updateComment).toHaveBeenCalledTimes(1);
       expect(helper.updateComment).toHaveBeenCalledWith(
@@ -1381,7 +1381,7 @@ describe('platform/gitea/index', () => {
         content: 'some-content',
       });
 
-      expect(res).toEqual(true);
+      expect(res).toBe(true);
       expect(helper.createComment).not.toHaveBeenCalled();
       expect(helper.updateComment).not.toHaveBeenCalled();
     });
@@ -1395,7 +1395,7 @@ describe('platform/gitea/index', () => {
         content: 'some-content',
       });
 
-      expect(res).toEqual(false);
+      expect(res).toBe(false);
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
   });

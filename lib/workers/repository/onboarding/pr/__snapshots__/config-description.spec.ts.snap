@@ -1,20 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() assignees, labels and schedule 1`] = `
-"
-### Configuration Summary
-
-Based on the default config's presets, Renovate will:
-
-  - Start dependency updates only once this onboarding PR is merged
-  - Run Renovate on following schedule: before 5am
-
-🔡 Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch with your custom config and the list of Pull Requests in the \\"What to Expect\\" section below will be updated the next time Renovate runs.
-
----
-"
-`;
-
 exports[`workers/repository/onboarding/pr/config-description getConfigDesc() contains the onboardingConfigFileName if set 1`] = `
 "
 ### Configuration Summary
@@ -77,5 +62,3 @@ Based on the default config's presets, Renovate will:
 ---
 "
 `;
-
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() returns empty 1`] = `""`;
