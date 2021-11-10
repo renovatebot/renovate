@@ -53,7 +53,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
-    /* eslint-enable no-param-reassign */
   });
 }
 

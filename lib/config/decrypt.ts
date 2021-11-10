@@ -179,6 +179,7 @@ export async function decryptConfig(
               'Migrating npmToken to npmrc'
             );
             if (is.string(decryptedConfig.npmrc)) {
+              /* eslint-disable no-template-curly-in-string */
               if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
                 logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
                 decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
