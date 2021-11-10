@@ -258,9 +258,9 @@ export async function getReleases({
   );
 
   const latestStableVersion = getLatestStableVersion(releases);
-  const dependencyInfo = latestStableVersion
-    ? await getDependencyInfo(dependency, repoUrl, latestStableVersion)
-    : null;
+  const dependencyInfo =
+    latestStableVersion &&
+    (await getDependencyInfo(dependency, repoUrl, latestStableVersion));
 
   return {
     ...dependency,
