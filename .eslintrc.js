@@ -5,14 +5,13 @@ module.exports = {
   },
   plugins: ['@renovate'],
   extends: [
-    'airbnb-typescript/base',
+    'eslint:recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
     'plugin:jest/recommended',
     'plugin:jest/style',
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin/src/configs
-    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
@@ -34,15 +33,15 @@ module.exports = {
     'import/named': 0,
     'import/namespace': 0,
     'import/no-named-as-default-member': 0,
+    'import/prefer-default-export': 0, // no benefit
 
     // other rules
-    'import/prefer-default-export': 0, // no benefit
-    'no-restricted-syntax': 0,
-    'no-await-in-loop': 0,
-    'prefer-destructuring': 0,
-    'prefer-template': 0,
-    'no-underscore-dangle': 0,
+    'consistent-return': 'error',
+    eqeqeq: 'error',
+    'no-console': 'error',
     'no-negated-condition': 'error',
+    'no-param-reassign': 'error',
+    'no-template-curly-in-string': 'error',
     'sort-imports': [
       'error',
       {
@@ -95,6 +94,7 @@ module.exports = {
     // TODO: fix me
     '@typescript-eslint/no-unsafe-return': 0,
     '@typescript-eslint/no-unsafe-call': 0,
+    '@typescript-eslint/no-unsafe-argument': 0, // thousands of errors :-/
 
     '@typescript-eslint/restrict-template-expressions': [
       1,
@@ -102,7 +102,13 @@ module.exports = {
     ],
     '@typescript-eslint/restrict-plus-operands': 2,
 
-    '@typescript-eslint/naming-convention': 2,
+    '@typescript-eslint/naming-convention': [
+      2,
+      {
+        selector: 'enumMember',
+        format: ['PascalCase'],
+      },
+    ],
 
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
@@ -120,6 +126,7 @@ module.exports = {
         jest: true,
       },
       rules: {
+        'no-template-curly-in-string': 0,
         'prefer-destructuring': 0,
         'prefer-promise-reject-errors': 0,
         'import/no-dynamic-require': 0,

@@ -65,8 +65,6 @@ export function extractTerraformResource(
 export function analyseTerraformResource(
   dep: PackageDependency<ResourceManagerData>
 ): void {
-  /* eslint-disable no-param-reassign */
-
   switch (dep.managerData.resourceType) {
     case TerraformResourceTypes.docker_container:
       if (dep.managerData.image) {
@@ -96,7 +94,7 @@ export function analyseTerraformResource(
       break;
 
     case TerraformResourceTypes.helm_release:
-      if (dep.managerData.chart == null) {
+      if (!dep.managerData.chart) {
         dep.skipReason = SkipReason.InvalidName;
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
         dep.skipReason = SkipReason.LocalChart;
@@ -111,5 +109,4 @@ export function analyseTerraformResource(
       dep.skipReason = SkipReason.InvalidValue;
       break;
   }
-  /* eslint-enable no-param-reassign */
 }

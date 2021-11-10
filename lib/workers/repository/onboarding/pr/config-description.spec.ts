@@ -12,7 +12,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     it('returns empty', () => {
       delete config.description;
       const res = getConfigDesc(config);
-      expect(res).toEqual('');
+      expect(res).toBe('');
     });
     it('returns a full list', () => {
       const packageFiles: Record<string, PackageFile[]> = {

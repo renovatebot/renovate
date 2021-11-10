@@ -221,7 +221,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.14.2-2+deb10u1');
+      expect(res.releases[0].version).toBe('1.14.2-2+deb10u1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -241,7 +241,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.181');
+      expect(res.releases[0].version).toBe('1.181');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -258,7 +258,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.181');
+      expect(res.releases[0].version).toBe('1.181');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -275,7 +275,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('9.3.0-r2');
+      expect(res.releases[0].version).toBe('9.3.0-r2');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -292,7 +292,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('12.2-4+deb10u1');
+      expect(res.releases[0].version).toBe('12.2-4+deb10u1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -312,8 +312,8 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(6);
-      expect(res.releases[0].version).toEqual('1:11.0.7.10-1.el8_1');
-      expect(res.releases[5].version).toEqual('1:11.0.9.11-3.el8_3');
+      expect(res.releases[0].version).toBe('1:11.0.7.10-1.el8_1');
+      expect(res.releases[5].version).toBe('1:11.0.9.11-3.el8_3');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 

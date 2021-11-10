@@ -112,7 +112,7 @@ export async function lookupUpdates(
       // Reapply package rules in case we missed something from sourceUrl
       config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
       if (followTag) {
-        const taggedVersion = dependency.tags[followTag];
+        const taggedVersion = dependency.tags?.[followTag];
         if (!taggedVersion) {
           res.warnings.push({
             topic: depName,
@@ -258,7 +258,7 @@ export async function lookupUpdates(
         }
         if (!update.newValue || update.newValue === currentValue) {
           if (!lockedVersion) {
-            continue; // eslint-disable-line no-continue
+            continue;
           }
           // istanbul ignore if
           if (rangeStrategy === 'bump') {
@@ -266,7 +266,7 @@ export async function lookupUpdates(
               { depName, currentValue, lockedVersion, newVersion },
               'Skipping bump because newValue is the same'
             );
-            continue; // eslint-disable-line no-continue
+            continue;
           }
           res.isSingleVersion = true;
         }

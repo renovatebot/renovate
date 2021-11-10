@@ -187,7 +187,6 @@ describe('manager/nuget/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -195,7 +194,14 @@ describe('manager/nuget/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'packages.lock.json',
+          stderr: 'not found',
+        },
+      },
+    ]);
   });
   it('authenticates at registries', async () => {
     const execSnapshots = mockExecAll(exec);

@@ -16,14 +16,14 @@ describe('workers/repository/onboarding/pr/base-branch', () => {
     it('describes baseBranch', () => {
       config.baseBranches = ['some-branch'];
       const res = getBaseBranchDesc(config);
-      expect(res.trim()).toEqual(
+      expect(res.trim()).toBe(
         'You have configured Renovate to use branch `some-branch` as base branch.'
       );
     });
     it('describes baseBranches', () => {
       config.baseBranches = ['some-branch', 'some-other-branch'];
       const res = getBaseBranchDesc(config);
-      expect(res.trim()).toEqual(
+      expect(res.trim()).toBe(
         'You have configured Renovate to use the following baseBranches: `some-branch`, `some-other-branch`.'
       );
     });

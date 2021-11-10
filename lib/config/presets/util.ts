@@ -14,12 +14,11 @@ export async function fetchPreset({
   pkgName,
   filePreset,
   presetPath,
-  endpoint,
+  endpoint: _endpoint,
   packageTag = null,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
-  // eslint-disable-next-line no-param-reassign
-  endpoint = ensureTrailingSlash(endpoint);
+  const endpoint = ensureTrailingSlash(_endpoint);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
   const buildFilePath = (name: string): string => `${pathPrefix}${name}`;

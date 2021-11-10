@@ -35,7 +35,6 @@ export function get(versioning: string): VersioningApi {
     return versionings.get('semver') as VersioningApi;
   }
   if (isVersioningApiConstructor(theVersioning)) {
-    // eslint-disable-next-line new-cap
     return new theVersioning(versioningConfig);
   }
   return theVersioning;

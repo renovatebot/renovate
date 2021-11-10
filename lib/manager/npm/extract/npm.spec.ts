@@ -23,7 +23,7 @@ describe('manager/npm/extract/npm', () => {
       const res = await getNpmLock('package.json');
       expect(res).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(7);
-      expect(res.lockfileVersion).toEqual(2);
+      expect(res.lockfileVersion).toBe(2);
     });
     it('returns empty if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
