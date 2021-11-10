@@ -9,7 +9,7 @@ const glob = promisify(g);
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =
   'Fix this manually by ensuring each block is a valid, complete JSON document.';
-const markdownGlob = 'docs/**/*.md';
+const markdownGlob = '{docs,lib}/**/*.md';
 const markdown = new MarkdownIt('zero');
 
 let issues = 0;
