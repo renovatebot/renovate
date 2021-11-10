@@ -257,11 +257,10 @@ export async function getReleases({
     `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`
   );
 
-  const dependencyInfo = await getDependencyInfo(
-    dependency,
-    repoUrl,
-    getLatestStableVersion(releases)
-  );
+  const latestStableVersion = getLatestStableVersion(releases);
+  const dependencyInfo = latestStableVersion
+    ? await getDependencyInfo(dependency, repoUrl, latestStableVersion)
+    : null;
 
   return {
     ...dependency,
