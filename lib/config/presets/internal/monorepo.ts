@@ -182,6 +182,7 @@ const repoGroups = {
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
+  xterm: 'https://github.com/xtermjs/xterm.js',
 };
 
 const patternGroups = {
