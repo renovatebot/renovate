@@ -955,6 +955,17 @@ describe('platform/bitbucket/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('returns file content from given repo', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/different/repo/src/HEAD/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile('file.json', 'different/repo');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('returns file content from branch or tag', async () => {
       const data = { foo: 'bar' };
       const scope = await initRepoMock();
