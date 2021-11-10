@@ -1497,7 +1497,17 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 ### matchCurrentVersion
 
-`matchCurrentVersion` can be an exact SemVer version or a SemVer range.
+`matchCurrentVersion` can be an exact SemVer version or a SemVer range:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCurrentVersion": ">=1.0.0"
+    }
+  ]
+}
+```
 
 This field also supports Regular Expressions which must begin and end with `/`.
 For example, the following enforces that only `1.*` versions will be used:
