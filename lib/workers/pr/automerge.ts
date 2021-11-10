@@ -39,10 +39,9 @@ export async function checkAutoMerge(
     rebaseRequested,
   } = config;
   // Return if PR not ready for automerge
-  const isConflicted = await isBranchConflicted(
-    config.baseBranch,
-    config.branchName
-  );
+  const isConflicted =
+    config.isConflicted ??
+    (await isBranchConflicted(config.baseBranch, config.branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
