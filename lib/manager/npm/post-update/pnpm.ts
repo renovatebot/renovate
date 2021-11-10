@@ -23,7 +23,7 @@ export async function generateLockFile(
   let stderr: string;
   let cmd = 'pnpm';
   try {
-    let installPnpm = 'npm i -g pnpm';
+    let installPnpm = 'install-tool pnpm';
     const pnpmUpdate = upgrades.find(
       (upgrade) =>
         upgrade.depType === 'packageManager' && upgrade.depName === 'pnpm'
@@ -32,7 +32,7 @@ export async function generateLockFile(
       ? pnpmUpdate.newValue
       : config.constraints?.pnpm;
     if (validRange(pnpmCompatibility)) {
-      installPnpm += `@${quote(pnpmCompatibility)}`;
+      installPnpm += ` ${quote(pnpmCompatibility)}`;
     }
     const preCommands = [installPnpm];
     const tagConstraint = await getNodeConstraint(config);

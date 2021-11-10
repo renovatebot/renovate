@@ -41,10 +41,10 @@ export async function generateLockFiles(
   let cmdOptions = '';
   try {
     if (lernaClient === 'yarn') {
-      let installYarn = 'npm i -g yarn';
+      let installYarn = 'install-tool yarn';
       const yarnCompatibility = config.constraints?.yarn;
       if (validRange(yarnCompatibility)) {
-        installYarn += `@${quote(yarnCompatibility)}`;
+        installYarn += ` ${quote(yarnCompatibility)}`;
       }
       preCommands.push(installYarn);
       if (skipInstalls !== false) {
@@ -52,12 +52,12 @@ export async function generateLockFiles(
       }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
-      let installNpm = 'npm i -g npm';
+      let installNpm = 'install-tool npm';
       const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
-        installNpm += `@${quote(npmCompatibility)} || true`;
+        installNpm += ` ${quote(npmCompatibility)}`;
       }
-      preCommands.push(installNpm, 'hash -d npm');
+      preCommands.push(installNpm);
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';

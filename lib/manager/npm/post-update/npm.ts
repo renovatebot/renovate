@@ -25,13 +25,13 @@ export async function generateLockFile(
 
   let lockFile = null;
   try {
-    let installNpm = 'npm i -g npm';
+    let installNpm = 'install-tool npm';
     const npmCompatibility = config.constraints?.npm as string;
     // istanbul ignore else
     if (npmCompatibility) {
       // istanbul ignore else
       if (validRange(npmCompatibility)) {
-        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)} || true`;
+        installNpm = `install-tool npm ${quote(npmCompatibility)}`;
       } else {
         logger.debug(
           { npmCompatibility },
@@ -41,7 +41,7 @@ export async function generateLockFile(
     } else {
       logger.debug('No npm compatibility range found - installing npm latest');
     }
-    const preCommands = [installNpm, 'hash -d npm'];
+    const preCommands = [installNpm, 'npm --version'];
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {

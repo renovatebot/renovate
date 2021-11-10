@@ -82,9 +82,9 @@ export async function generateLockFile(
       minYarnVersion && gte(minYarnVersion, '2.2.0');
     const isYarnModeAvailable = minYarnVersion && gte(minYarnVersion, '3.0.0');
 
-    let installYarn = 'npm i -g yarn';
+    let installYarn = 'install-tool yarn';
     if (isYarn1 && minYarnVersion) {
-      installYarn += `@${quote(yarnCompatibility)}`;
+      installYarn += ` ${quote(yarnCompatibility)}`;
     }
 
     const preCommands = [installYarn];
