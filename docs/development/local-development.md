@@ -184,7 +184,7 @@ You can use a command like this to put the log messages in a file:
 LOG_LEVEL=debug yarn start myaccount/therepo > debug.log
 ```
 
-The example command save Renovate's output to the `debug.log` file (and overwrite `debug.log` if it already exists).
+The example command will redirect/save Renovate's output to the `debug.log` file (and overwrite `debug.log` if it already exists).
 
 ### Adding configuration options
 
