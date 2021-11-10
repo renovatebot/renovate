@@ -47,7 +47,7 @@ describe('platform/azure/index', () => {
   });
 
   // do we need the args?
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   function getRepos(_token: string, _endpoint: string) {
     azureApi.gitApi.mockImplementationOnce(
       () =>

@@ -148,4 +148,47 @@ describe('manager/helmv3/artifacts', () => {
       },
     ]);
   });
+
+  it('sets repositories from aliases', async () => {
+    fs.readFile.mockResolvedValueOnce('Old Chart.lock' as never);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockResolvedValueOnce('New Chart.lock' as never);
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          updateType: 'lockFileMaintenance',
+          aliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
+        },
+      })
+    ).toMatchSnapshot([
+      { file: { contents: 'New Chart.lock', name: 'Chart.lock' } },
+    ]);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('sets repositories from aliases with docker', async () => {
+    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    fs.readFile.mockResolvedValueOnce('Old Chart.lock' as never);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockResolvedValueOnce('New Chart.lock' as never);
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          updateType: 'lockFileMaintenance',
+          aliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
+        },
+      })
+    ).toMatchSnapshot([
+      { file: { contents: 'New Chart.lock', name: 'Chart.lock' } },
+    ]);
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });

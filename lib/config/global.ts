@@ -29,7 +29,7 @@ export function setGlobalConfig(
   const result = { ...config };
   for (const option of repoGlobalOptions) {
     repoGlobalConfig[option] = config[option];
-    delete result[option]; // eslint-disable-line no-param-reassign
+    delete result[option];
   }
   return result;
 }

@@ -55,11 +55,10 @@ function handleGotError(
     message = String(err.response.body.message);
   }
   if (
-    err.name === 'RequestError' &&
-    (err.code === 'ENOTFOUND' ||
-      err.code === 'ETIMEDOUT' ||
-      err.code === 'EAI_AGAIN' ||
-      err.code === 'ECONNRESET')
+    err.code === 'ENOTFOUND' ||
+    err.code === 'ETIMEDOUT' ||
+    err.code === 'EAI_AGAIN' ||
+    err.code === 'ECONNRESET'
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
     throw new ExternalHostError(err, PlatformId.Github);
@@ -284,6 +283,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       );
       result = res?.body;
     } catch (err) {
+      logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
       if (err instanceof ExternalHostError) {
         const gotError = err.err as GotLegacyError;
         const statusCode = gotError?.statusCode;
@@ -344,7 +344,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error({ query, options, res }, 'Error fetching GraphQL nodes');
+          logger.warn({ query, options, res }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }

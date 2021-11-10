@@ -71,7 +71,7 @@ describe('manager/npm/post-update/yarn', () => {
       );
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
-      expect(res.lockFile).toEqual('package-lock-contents');
+      expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
@@ -90,7 +90,7 @@ describe('manager/npm/post-update/yarn', () => {
       skipInstalls: false,
     };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
 
@@ -108,7 +108,7 @@ describe('manager/npm/post-update/yarn', () => {
       managerData: { yarnZeroInstall: true },
     };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
 
@@ -143,7 +143,7 @@ describe('manager/npm/post-update/yarn', () => {
           isLockfileUpdate: true,
         },
       ]);
-      expect(res.lockFile).toEqual('package-lock-contents');
+      expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
@@ -166,7 +166,7 @@ describe('manager/npm/post-update/yarn', () => {
           isLockfileUpdate: true,
         },
       ]);
-      expect(res.lockFile).toEqual('package-lock-contents');
+      expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
@@ -201,7 +201,42 @@ describe('manager/npm/post-update/yarn', () => {
       ]);
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(1);
-      expect(res.lockFile).toEqual('package-lock-contents');
+      expect(res.lockFile).toBe('package-lock-contents');
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    }
+  );
+
+  it.each([
+    ['1.22.0', '^1.10.0'],
+    ['2.1.0', '>= 2.0.0'],
+  ])(
+    'performs yarn binary update using yarn v%s',
+    async (yarnVersion, yarnCompatibility) => {
+      const execSnapshots = mockExecAll(exec, {
+        stdout: yarnVersion,
+        stderr: '',
+      });
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) => resolve(null));
+        }
+        return new Promise<string>((resolve) =>
+          resolve('package-lock-contents')
+        );
+      });
+      const config = {
+        constraints: {
+          yarn: yarnCompatibility,
+        },
+      };
+      const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+        {
+          depName: 'yarn',
+          depType: 'packageManager',
+          newValue: '3.0.1',
+        },
+      ]);
+      expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
@@ -217,7 +252,7 @@ describe('manager/npm/post-update/yarn', () => {
     const res = await yarnHelper.generateLockFile('some-dir', {});
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeTrue();
-    expect(res.lockFile).not.toBeDefined();
+    expect(res.lockFile).toBeUndefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
 

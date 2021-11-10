@@ -1,6 +1,7 @@
 import * as github from '../github-tags';
 import type { DigestConfig } from '../types';
-import { bitbucket, getDatasource } from './util';
+import { bitbucket } from './common';
+import { getDatasource } from './get-datasource';
 
 /**
  * go.getDigest

@@ -1196,7 +1196,7 @@ describe('workers/branch/index', () => {
           (f) =>
             f.contents === 'modified_then_deleted_file' && f.name === '|delete|'
         )
-      ).not.toBeUndefined();
+      ).toBeDefined();
     });
 
     it('executes post-upgrade tasks once when set to branch mode', async () => {

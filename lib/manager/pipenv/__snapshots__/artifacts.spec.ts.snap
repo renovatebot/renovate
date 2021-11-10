@@ -1,16 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/pipenv/artifacts catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "Pipfile.lock",
-      "stderr": "not found",
-    },
-  },
-]
-`;
-
 exports[`manager/pipenv/artifacts handles no constraint 1`] = `
 Array [
   Object {

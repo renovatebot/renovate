@@ -78,7 +78,7 @@ export async function extractPackageFile(
     ? registries.map((registry) => registry.url)
     : undefined;
 
-  if (packageFile.endsWith('.config/dotnet-tools.json')) {
+  if (packageFile.endsWith('dotnet-tools.json')) {
     const deps: PackageDependency[] = [];
     let manifest: DotnetToolsManifest;
 

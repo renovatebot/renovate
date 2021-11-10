@@ -582,7 +582,6 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function addAssignees(
   _prNr: number,
   _assignees: string[]

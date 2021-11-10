@@ -5,7 +5,7 @@ import {
   cacheNamespace,
   getApiBaseUrl,
   getGithubRelease,
-  getSourceUrlBase,
+  getSourceUrl,
   http,
   id,
 } from './common';
@@ -45,15 +45,14 @@ export async function getReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  const sourceUrlBase = getSourceUrlBase(registryUrl);
-  const apiBaseUrl = getApiBaseUrl(sourceUrlBase);
+  const apiBaseUrl = getApiBaseUrl(registryUrl);
   const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
   const res = await http.getJson<GithubRelease[]>(url, {
     paginate: true,
   });
   const githubReleases = res.body;
   const dependency: ReleaseResult = {
-    sourceUrl: `${sourceUrlBase}${repo}`,
+    sourceUrl: getSourceUrl(repo, registryUrl),
     releases: null,
   };
   dependency.releases = githubReleases.map(
@@ -113,7 +112,7 @@ export async function getDigest(
     return cachedResult;
   }
 
-  const apiBaseUrl = getApiBaseUrl(getSourceUrlBase(registryUrl));
+  const apiBaseUrl = getApiBaseUrl(registryUrl);
   const currentRelease = await getGithubRelease(apiBaseUrl, repo, currentValue);
   const digestAsset = await findDigestAsset(currentRelease, currentDigest);
   let newDigest: string;

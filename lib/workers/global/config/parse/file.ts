@@ -11,7 +11,6 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   }
   let config: AllConfig = {};
   try {
-    // eslint-disable-next-line global-require,import/no-dynamic-require
     config = require(configFile);
   } catch (err) {
     // istanbul ignore if

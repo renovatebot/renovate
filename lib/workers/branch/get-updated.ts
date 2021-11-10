@@ -120,7 +120,7 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
           }
-          continue; // eslint-disable-line no-continue
+          continue;
         } else if (reuseExistingBranch) {
           return getUpdatedPackageFiles({
             ...config,

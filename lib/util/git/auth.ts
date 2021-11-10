@@ -1,9 +1,10 @@
 import { logger } from '../../logger';
 import { getHttpUrl } from './url';
 
-/*
-    Add authorization to a Git Url and returns the updated environment variables
-*/
+/**
+ * Add authorization to a Git Url and returns a new environment variables object
+ * @returns a new NodeJS.ProcessEnv object without modifying any input parameters
+ */
 export function getGitAuthenticatedEnvironmentVariables(
   gitUrl: string,
   token: string,

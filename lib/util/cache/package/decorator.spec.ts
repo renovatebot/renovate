@@ -29,7 +29,7 @@ describe('util/cache/package/decorator', () => {
     }
     const myClass = new MyClass();
     expect(await myClass.getNumber()).toEqual(await myClass.getNumber());
-    expect(await myClass.getNumber()).not.toBeUndefined();
+    expect(await myClass.getNumber()).toBeDefined();
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
@@ -44,8 +44,8 @@ describe('util/cache/package/decorator', () => {
     const myClass = new MyClass();
     expect(await myClass.getString('null', null)).toBeNull();
     expect(await myClass.getString('null', null)).toBeNull();
-    expect(await myClass.getString('test', 'test')).toEqual('test');
-    expect(await myClass.getString('test', 'test')).not.toBeUndefined();
+    expect(await myClass.getString('test', 'test')).toBe('test');
+    expect(await myClass.getString('test', 'test')).toBeDefined();
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
@@ -82,7 +82,7 @@ describe('util/cache/package/decorator', () => {
     expect(await myClass.getNumber(getReleasesConfig)).toEqual(
       await myClass.getNumber(getReleasesConfig)
     );
-    expect(await myClass.getNumber(getReleasesConfig)).not.toBeUndefined();
+    expect(await myClass.getNumber(getReleasesConfig)).toBeDefined();
     expect(spy).toHaveBeenCalledTimes(1);
   });
 });

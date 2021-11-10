@@ -35,8 +35,7 @@ describe('manager/pip_setup/extract', () => {
       ]);
       const result = await getPythonAlias();
       expect(pythonVersions).toContain(result);
-      // FIXME: explicit assert condition
-      expect(result).toMatchSnapshot();
+      expect(result).toBe('python3.8');
       expect(await getPythonAlias()).toEqual(result);
       expect(execSnapshots).toMatchSnapshot();
       expect(execSnapshots).toHaveLength(3);
