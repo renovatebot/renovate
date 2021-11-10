@@ -441,10 +441,9 @@ export async function processBranch(
         result: BranchResult.NoWork,
       };
     }
-    const isConflicted = await isBranchConflicted(
-      config.baseBranch,
-      config.branchName
-    );
+    const isConflicted =
+      config.isConflicted ??
+      (await isBranchConflicted(config.baseBranch, config.branchName));
     config.forceCommit = forcedManually || isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
