@@ -130,36 +130,14 @@ describe('manager/gradle/shallow/parser', () => {
         ].forEach((version: String) => {
           describe(`with group: ${group}, artifact: ${artifact}, version: ${version}`, () => {
             
-            test.each([
-              `"${group.replace(/['"]+/g, '')}:${artifact.replace(/['"]+/g,'')}:${version.replace(/['"]+/g, '')}"`,
-              `"${group.replace(/['"]+/g, '')}:${artifact.replace(/['"]+/g,'')}:${version.replace(/['"]+/g, '')}@ext"`
-            ])('%s', (input) => {
-              let testString = `
-                      set("foo", "foo")
-                      set("f", "f")
-                      set("o", "o")
-                      set("bar", "bar")
-                      set("b", "b")
-                      set("a", "a")
-                      set("r", "r")
-                      set("version", "version")
-                      set("ver", "ver")
-                      set("sion", "sion")
-                      ${input}`;
-
-              expect(parseGradle(testString).deps).toMatchObject([
-                {
-                  depName: 'foo:bar',
-                  currentValue: 'version',
-                },
-              ]);
-            });
-
+            let longDep = `${group.replace(/['"]+/g, '')}:${artifact.replace(/['"]+/g,'')}:${version.replace(/['"]+/g, '')}`
             test.each([
               `group: ${group}, name: ${artifact}, version: ${version}`,
               `implementation platform(group: ${group}, name: ${artifact}, version: ${version})`,
               `(${group}, ${artifact}, ${version})`,
               `(group = ${group}, name = ${artifact}, version = ${version})`,
+              `"${longDep}"`,
+              `"${longDep}@ext"`
             ])('%s', (input) => {
               let testString = `
                 set("foo", "foo")
