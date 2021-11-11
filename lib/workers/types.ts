@@ -61,6 +61,7 @@ export interface BranchUpgradeConfig
 
   logJSON?: ChangeLogResult;
 
+  hasReleaseNotes?: boolean;
   homepage?: string;
   changelogUrl?: string;
   dependencyUrl?: string;

@@ -313,27 +313,20 @@ export async function ensurePr(
 
   config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
 
-  function getRepoSourceUrlWithSourceDirectory(
-    upgrade: BranchUpgradeConfig
-  ): string {
-    return `${upgrade.sourceUrl}${
-      upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
-    }`;
-  }
-
-  const releaseNoteRepos: string[] = [];
+  const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
-    if (upgrade.hasReleaseNotes) {
-      if (
-        releaseNoteRepos.includes(getRepoSourceUrlWithSourceDirectory(upgrade))
-      ) {
+    const notesSourceUrl =
+      upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl || upgrade.sourceUrl;
+
+    if (upgrade.hasReleaseNotes && notesSourceUrl.length > 0) {
+      if (releaseNotesSources.includes(notesSourceUrl)) {
         logger.debug(
           { depName: upgrade.depName },
           'Removing duplicate release notes'
         );
         upgrade.hasReleaseNotes = false;
       } else {
-        releaseNoteRepos.push(getRepoSourceUrlWithSourceDirectory(upgrade));
+        releaseNotesSources.push(notesSourceUrl);
       }
     }
   }
