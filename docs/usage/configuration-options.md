@@ -628,6 +628,11 @@ Example:
 
 The above would mean Renovate would not include files matching the above glob pattern in the commit, even if it thinks they should be updated.
 
+## executionTimeout
+
+Default execution timeout in minutes for child processes Renovate creates.
+If this option is not set, Renovate will fallback to 15 minutes.
+
 ## extends
 
 See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.

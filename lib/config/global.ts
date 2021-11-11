@@ -15,6 +15,7 @@ const repoGlobalOptions = [
   'dockerUser',
   'dryRun',
   'exposeAllEnv',
+  'executionTimeout',
   'migratePresets',
   'privateKey',
   'privateKeyOld',
