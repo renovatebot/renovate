@@ -1,10 +1,7 @@
 import { mocked } from '../../../test/util';
 import * as _datasource from '../../datasource';
-import {
-  ToolConstraint,
-  generateInstallCommands,
-  resolveConstraint,
-} from './buildpack';
+import { generateInstallCommands, resolveConstraint } from './buildpack';
+import type { ToolConstraint } from './types';
 
 jest.mock('../../../lib/datasource');
 

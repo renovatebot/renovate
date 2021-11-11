@@ -3,16 +3,12 @@ import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import * as allVersioning from '../../versioning';
 import { id as composerVersioningId } from '../../versioning/composer';
+import type { ToolConfig, ToolConstraint } from './types';
 
-export interface ToolConstraint {
-  toolName: string;
-  constraint?: string;
-}
-
-const allToolConfig = {
+const allToolConfig: Record<string, ToolConfig> = {
   composer: {
-    depName: 'composer/composer',
     datasource: 'github-releases',
+    depName: 'composer/composer',
     versioning: composerVersioningId,
   },
 };

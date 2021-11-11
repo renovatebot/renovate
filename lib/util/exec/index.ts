@@ -3,7 +3,7 @@ import { dirname, join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ToolConstraint, generateInstallCommands } from './buildpack';
+import { generateInstallCommands } from './buildpack';
 import {
   DockerOptions,
   ExecResult,
@@ -13,6 +13,7 @@ import {
 } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
+import type { ToolConstraint } from './types';
 
 type ExtraEnv<T = unknown> = Record<string, T>;
 
