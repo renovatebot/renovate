@@ -318,7 +318,7 @@ export async function ensurePr(
     const notesSourceUrl =
       upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl || upgrade.sourceUrl;
 
-    if (upgrade.hasReleaseNotes && notesSourceUrl.length > 0) {
+    if (upgrade.hasReleaseNotes && notesSourceUrl) {
       if (releaseNotesSources.includes(notesSourceUrl)) {
         logger.debug(
           { depName: upgrade.depName },
