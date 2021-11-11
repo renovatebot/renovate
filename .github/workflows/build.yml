@@ -154,6 +154,7 @@ jobs:
           yarn prettier
           yarn markdown-lint
           yarn git-check
+          yarn doc-fence-check
 
       - name: Test schema
         run: yarn test-schema
