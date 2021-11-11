@@ -212,9 +212,9 @@ export const isCompatible = (version: string, range: string): boolean => {
   return false;
 };
 
-export const isStable = (input: string): boolean => true;
+export const isStable = (_: string): boolean => true;
 
-export const findSatisfiyingVersion = (
+export const findSatisfyingVersion = (
   versions: string[],
   range: string,
   compareRt: number
@@ -226,7 +226,7 @@ export const findSatisfiyingVersion = (
   let curIndex = -1;
 
   versions.forEach((v) => {
-    const versionfromlist = makeVersion(v, options);
+    const versionFromList = makeVersion(v, options);
     if (typeof versionfromlist === 'string') {
       if (matches(versionfromlist, range)) {
         if (
@@ -258,7 +258,7 @@ export const getSatisfyingVersion = (
 ): string | null => findSatisfiyingVersion(versions, range, MAX);
 
 export function containsOperators(input: string): boolean {
-  return input.replace(/<|=|>|\^|~/g, 'found').includes('found');
+  return regEx('[<=>^~]').test(input);
 }
 
 export function fixParsedRange(range: string): any {
@@ -327,7 +327,6 @@ export function fixParsedRange(range: string): any {
 
 export function replaceRange({
   currentValue,
-  currentVersion,
   newVersion,
 }: NewValueConfig): string {
   const parsedRange = parseRange(currentValue);

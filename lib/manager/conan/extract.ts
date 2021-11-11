@@ -34,7 +34,7 @@ export default function extractPackageFile(
   const deps = [];
   for (const section of sections) {
     let depType = setDepType(section, 'requires');
-    const rawlines = section.split('\n').filter((line) => line.length !== 0);
+    const rawLines = section.split('\n').filter((line) => line.length !== 0);
 
     for (const rawline of rawlines) {
       // don't process after a comment
@@ -42,7 +42,7 @@ export default function extractPackageFile(
       if (sanitizedLine) {
         depType = setDepType(sanitizedLine, depType);
         // extract all dependencies from each line
-        const lines = sanitizedLine.split(/("|'),/);
+        const lines = sanitizedLine.split(/["'],/);
         for (const line of lines) {
           const matches = regex.exec(line.trim());
           if (matches) {
