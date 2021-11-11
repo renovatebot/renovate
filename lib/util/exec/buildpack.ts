@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import * as allVersioning from '../../versioning';
@@ -68,7 +69,9 @@ export async function generateInstallCommands(
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);
-      const installCommand = `install-tool ${toolConstraint.toolName} ${toolVersion}`;
+      const installCommand = `install-tool ${toolConstraint.toolName} ${quote(
+        toolVersion
+      )}`;
       installCommands.push(installCommand);
     }
   }
