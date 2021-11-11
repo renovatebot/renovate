@@ -1,6 +1,7 @@
 import * as semver from 'semver';
 import { SemVer, parseRange } from 'semver-utils';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { api as looseAPI } from '../loose';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -227,13 +228,13 @@ export const findSatisfyingVersion = (
 
   versions.forEach((v) => {
     const versionFromList = makeVersion(v, options);
-    if (typeof versionfromlist === 'string') {
-      if (matches(versionfromlist, range)) {
+    if (typeof versionFromList === 'string') {
+      if (matches(versionFromList, range)) {
         if (
           !cur ||
-          semver.compare(curSV, versionfromlist, options) === compareRt
+          semver.compare(curSV, versionFromList, options) === compareRt
         ) {
-          cur = versionfromlist;
+          cur = versionFromList;
           curIndex = index;
           curSV = new semver.SemVer(cur, options);
         }
@@ -250,12 +251,12 @@ export const findSatisfyingVersion = (
 export const minSatisfyingVersion = (
   versions: string[],
   range: string
-): string | null => findSatisfiyingVersion(versions, range, MIN);
+): string | null => findSatisfyingVersion(versions, range, MIN);
 
 export const getSatisfyingVersion = (
   versions: string[],
   range: string
-): string | null => findSatisfiyingVersion(versions, range, MAX);
+): string | null => findSatisfyingVersion(versions, range, MAX);
 
 export function containsOperators(input: string): boolean {
   return regEx('[<=>^~]').test(input);
@@ -282,7 +283,8 @@ export function fixParsedRange(range: string): any {
   }
 
   const parsedRange = parseRange(range);
-  const cleanRange = range.replace(/(<|=|>|\^|~)( )?/g, '');
+  const regex = regEx(/([<=>^~])( )?/, 'g');
+  const cleanRange = range.replace(regex, '');
   const splitRange = cleanRange.split(' ');
   const semverRange: SemVer[] = [];
 

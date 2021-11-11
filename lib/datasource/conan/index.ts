@@ -28,6 +28,7 @@ export class ConanDatasource extends Datasource {
     userAndChannel: string
   ): Promise<ReleaseResult | null> {
     logger.trace({ packageName, hostUrl }, 'Looking up conan api dependency');
+
     try {
       const url = ensureTrailingSlash(hostUrl);
       const lookupUrl = `${url}v2/conans/search?q=${packageName}`;
@@ -38,12 +39,11 @@ export class ConanDatasource extends Datasource {
       if (versions) {
         logger.trace({ lookupUrl }, 'Got conan api result');
         const dep: ReleaseResult = { releases: [] };
-
+        const regex = regEx(
+          /(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)/,
+          'gim'
+        );
         for (const resultString of Object.values(versions.results)) {
-          const regex = regEx(
-            /(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)/,
-            'gim'
-          );
           const fromMatch = regex.exec(resultString);
           if (fromMatch) {
             const version = fromMatch.groups.version;

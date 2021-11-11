@@ -36,7 +36,7 @@ export default function extractPackageFile(
     let depType = setDepType(section, 'requires');
     const rawLines = section.split('\n').filter((line) => line.length !== 0);
 
-    for (const rawline of rawlines) {
+    for (const rawline of rawLines) {
       // don't process after a comment
       const sanitizedLine = rawline.split('#')[0].split('//')[0];
       if (sanitizedLine) {
