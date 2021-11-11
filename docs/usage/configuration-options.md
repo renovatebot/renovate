@@ -1234,7 +1234,7 @@ See [Private npm module support](https://docs.renovatebot.com/getting-started/pr
 ## npmrcMerge
 
 This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
-In some situations you need the ability to force override `.npmrc` contents in a repo (`npmMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmMerge=true`).
+In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
 A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and therefore its values ignored.
