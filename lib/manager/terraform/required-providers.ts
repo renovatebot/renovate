@@ -20,7 +20,6 @@ function extractBlock(
     line = lines[lineNumber];
     const kvMatch = keyValueExtractionRegex.exec(line);
     if (kvMatch) {
-      /* eslint-disable no-param-reassign */
       switch (kvMatch.groups.key) {
         case 'source':
           dep.managerData.source = kvMatch.groups.value;
@@ -34,7 +33,6 @@ function extractBlock(
         default:
           break;
       }
-      /* eslint-enable no-param-reassign */
     }
   } while (line.trim() !== '}');
   return lineNumber;
@@ -78,8 +76,6 @@ export function analyzeTerraformRequiredProvider(
   dep: PackageDependency,
   locks: ProviderLock[]
 ): void {
-  /* eslint-disable no-param-reassign */
   analyzeTerraformProvider(dep, locks);
   dep.depType = `required_provider`;
-  /* eslint-enable no-param-reassign */
 }

@@ -270,7 +270,7 @@ export async function ensurePr(
       upgrade.manager
     }-${upgrade.currentVersion || upgrade.currentValue}-${upgrade.newVersion}`;
     if (processedUpgrades.includes(upgradeKey)) {
-      continue; // eslint-disable-line no-continue
+      continue;
     }
     processedUpgrades.push(upgradeKey);
 

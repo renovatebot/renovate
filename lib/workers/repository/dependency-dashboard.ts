@@ -29,13 +29,11 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   let dependencyDashboardRebaseAllOpen = false;
   if (checkedRebaseAll) {
     dependencyDashboardRebaseAllOpen = true;
-    /* eslint-enable no-param-reassign */
   }
   return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
 }
 
 export async function readDashboardBody(config: RenovateConfig): Promise<void> {
-  /* eslint-disable no-param-reassign */
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
@@ -51,7 +49,6 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
       Object.assign(config, parseDashboardIssue(issue.body));
     }
   }
-  /* eslint-enable no-param-reassign */
 }
 
 function getListItem(branch: BranchConfig, type: string): string {

@@ -30,7 +30,6 @@ export async function prepareGradleCommand(
   gradlew: Stats | null,
   args: string | null
 ): Promise<string> {
-  /* eslint-disable no-bitwise */
   // istanbul ignore if
   if (gradlew?.isFile() === true) {
     // if the file is not executable by others

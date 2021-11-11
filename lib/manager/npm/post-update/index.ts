@@ -64,7 +64,7 @@ export function determineLockFileDirs(
         npmLockDirs.push(upgrade.npmLock);
         pnpmShrinkwrapDirs.push(upgrade.pnpmShrinkwrap);
       }
-      continue; // eslint-disable-line no-continue
+      continue;
     }
     if (upgrade.isLockfileUpdate) {
       yarnLockDirs.push(upgrade.yarnLock);
@@ -166,36 +166,61 @@ export async function writeExistingFiles(
         await remove(npmLockPath);
       } else {
         logger.debug(`Writing ${npmLock}`);
-        let existingNpmLock = await getFile(npmLock);
-        const widens = [];
-        for (const upgrade of config.upgrades) {
-          if (
-            upgrade.rangeStrategy === 'widen' &&
-            upgrade.npmLock === npmLock
-          ) {
-            widens.push(upgrade.depName);
-          }
+        let existingNpmLock: string;
+        let npmLockParsed: any;
+        try {
+          existingNpmLock = await getFile(npmLock);
+          npmLockParsed = JSON.parse(existingNpmLock);
+        } catch (err) {
+          logger.warn({ err }, 'Error parsing npm lock file');
         }
-        if (widens.length) {
-          logger.debug(
-            `Removing ${String(widens)} from ${npmLock} to force an update`
-          );
-          try {
-            const npmLockParsed = JSON.parse(existingNpmLock);
-            if (npmLockParsed.dependencies) {
-              widens.forEach((depName) => {
-                delete npmLockParsed.dependencies[depName];
-              });
+        if (npmLockParsed) {
+          const packageNames = Object.keys(npmLockParsed?.packages || {}); // lockfileVersion=2
+          const widens = [];
+          let lockFileChanged = false;
+          for (const upgrade of config.upgrades) {
+            if (
+              upgrade.rangeStrategy === 'widen' &&
+              upgrade.npmLock === npmLock
+            ) {
+              widens.push(upgrade.depName);
             }
-            existingNpmLock = JSON.stringify(npmLockParsed, null, 2);
-          } catch (err) {
-            logger.warn(
-              { npmLock },
-              'Error massaging package-lock.json for widen'
-            );
+            const { depName } = upgrade;
+            for (const packageName of packageNames) {
+              if (
+                packageName === `node_modules/${depName}` ||
+                packageName.startsWith(`node_modules/${depName}/`)
+              ) {
+                logger.trace({ packageName }, 'Massaging out package name');
+                lockFileChanged = true;
+                delete npmLockParsed.packages[packageName];
+              }
+            }
           }
+          if (widens.length) {
+            logger.debug(
+              `Removing ${String(widens)} from ${npmLock} to force an update`
+            );
+            lockFileChanged = true;
+            try {
+              if (npmLockParsed.dependencies) {
+                widens.forEach((depName) => {
+                  delete npmLockParsed.dependencies[depName];
+                });
+              }
+            } catch (err) {
+              logger.warn(
+                { npmLock },
+                'Error massaging package-lock.json for widen'
+              );
+            }
+          }
+          if (lockFileChanged) {
+            logger.debug('Massaging npm lock file before writing to disk');
+            existingNpmLock = JSON.stringify(npmLockParsed, null, 2);
+          }
+          await outputFile(npmLockPath, existingNpmLock);
         }
-        await outputFile(npmLockPath, existingNpmLock);
       }
     }
     const { yarnLock } = packageFile;
@@ -227,10 +252,10 @@ export async function writeUpdatedPackageFiles(
         upath.join(localDir, packageFile.name),
         packageFile.contents
       );
-      continue; // eslint-disable-line
+      continue;
     }
     if (!packageFile.name.endsWith('package.json')) {
-      continue; // eslint-disable-line
+      continue;
     }
     logger.debug(`Writing ${String(packageFile.name)}`);
     const massagedFile = JSON.parse(packageFile.contents.toString());

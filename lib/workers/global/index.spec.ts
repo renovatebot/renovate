@@ -31,7 +31,7 @@ describe('workers/global/index', () => {
       maintainYarnLock: true,
       foo: 1,
     });
-    await expect(globalWorker.start()).resolves.toEqual(0);
+    await expect(globalWorker.start()).resolves.toBe(0);
   });
   it('handles zero repos', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
@@ -39,7 +39,7 @@ describe('workers/global/index', () => {
       cacheDir: '/tmp/cache',
       repositories: [],
     });
-    await expect(globalWorker.start()).resolves.toEqual(0);
+    await expect(globalWorker.start()).resolves.toBe(0);
   });
   it('processes repositories', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
@@ -90,7 +90,7 @@ describe('workers/global/index', () => {
         msg: 'meh',
       },
     ]);
-    await expect(globalWorker.start()).resolves.not.toEqual(0);
+    await expect(globalWorker.start()).resolves.not.toBe(0);
   });
   it('exits with zero when warnings are logged', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
@@ -105,7 +105,7 @@ describe('workers/global/index', () => {
         msg: 'meh',
       },
     ]);
-    await expect(globalWorker.start()).resolves.toEqual(0);
+    await expect(globalWorker.start()).resolves.toBe(0);
   });
   describe('processes platforms', () => {
     it('github', async () => {
@@ -140,7 +140,7 @@ describe('workers/global/index', () => {
       });
       fs.writeFile.mockReturnValueOnce(null);
 
-      expect(await globalWorker.start()).toEqual(0);
+      expect(await globalWorker.start()).toBe(0);
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
       expect(fs.writeFile).toHaveBeenCalledWith(
         '/tmp/renovate-output.json',

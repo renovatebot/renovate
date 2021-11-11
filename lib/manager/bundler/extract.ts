@@ -1,4 +1,4 @@
-import * as datasourceRubygems from '../../datasource/rubygems';
+import { RubyGemsDatasource } from '../../datasource/rubygems';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
@@ -56,7 +56,7 @@ export async function extractPackageFile(
         dep.skipReason = SkipReason.NoVersion;
       }
       if (!dep.skipReason) {
-        dep.datasource = datasourceRubygems.id;
+        dep.datasource = RubyGemsDatasource.id;
       }
       res.deps.push(dep);
     }
@@ -141,7 +141,6 @@ export async function extractPackageFile(
       const platformsRes = await extractPackageFile(platformsContent);
       if (platformsRes) {
         res.deps = res.deps.concat(
-          // eslint-disable-next-line no-loop-func
           platformsRes.deps.map((dep) => ({
             ...dep,
             managerData: {
@@ -167,7 +166,6 @@ export async function extractPackageFile(
       const ifRes = await extractPackageFile(ifContent);
       if (ifRes) {
         res.deps = res.deps.concat(
-          // eslint-disable-next-line no-loop-func
           ifRes.deps.map((dep) => ({
             ...dep,
             managerData: {
