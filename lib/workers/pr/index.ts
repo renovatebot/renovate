@@ -318,6 +318,7 @@ export async function ensurePr(
     const notesSourceUrl =
       upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl || upgrade.sourceUrl;
 
+    // istanbul ignore if
     if (upgrade.hasReleaseNotes && notesSourceUrl) {
       if (releaseNotesSources.includes(notesSourceUrl)) {
         logger.debug(
