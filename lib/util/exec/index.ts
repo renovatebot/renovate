@@ -81,7 +81,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   };
   // Set default timeout to 15 minutes
   rawExecOptions.timeout =
-    rawExecOptions.timeout || defaultExecutionTimeout || 15 * 60 * 1000;
+    rawExecOptions.timeout ?? defaultExecutionTimeout ?? 15 * 60 * 1000;
   // Set default max buffer size to 10MB
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
   return rawExecOptions;
