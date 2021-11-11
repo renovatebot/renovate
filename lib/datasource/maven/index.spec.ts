@@ -23,6 +23,7 @@ interface MockOpts {
   latest?: string;
   jars?: Record<string, number> | null;
   snapshots?: SnapshotOpts[] | null;
+  html?: string;
 }
 
 function mockGenericPackage(opts: MockOpts = {}) {
@@ -30,6 +31,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
     dep = 'org.example:package',
     base = baseUrl,
     latest = '2.0.0',
+    html,
   } = opts;
   const meta =
     opts.meta === undefined ? loadFixture('metadata.xml') : opts.meta;
@@ -69,6 +71,12 @@ function mockGenericPackage(opts: MockOpts = {}) {
 
   if (meta) {
     scope.get(`/${packagePath}/maven-metadata.xml`).reply(200, meta);
+  }
+
+  if (html) {
+    scope.get(`/${packagePath}/index.html`).reply(200, html);
+  } else if (html === null) {
+    scope.get(`/${packagePath}/index.html`).reply(404);
   }
 
   if (pom) {
@@ -157,6 +165,8 @@ describe('datasource/maven/index', () => {
   it('returns null when metadata is not found', async () => {
     httpMock
       .scope(baseUrl)
+      .get('/org/example/package/index.html')
+      .reply(404)
       .get('/org/example/package/maven-metadata.xml')
       .reply(404);
 
@@ -167,11 +177,37 @@ describe('datasource/maven/index', () => {
   });
 
   it('returns releases', async () => {
-    mockGenericPackage();
+    mockGenericPackage({ html: null });
 
     const res = await get();
 
     expect(res).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
+  });
+
+  it('returns html-based releases', async () => {
+    mockGenericPackage({
+      meta: null,
+      snapshots: null,
+      latest: '1.0.2',
+      jars: null,
+      html: loadFixture('index.html'),
+    });
+
+    const res = await get();
+
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl: 'https://repo.maven.apache.org/maven2',
+      releases: [
+        { version: '1.0.0', releaseTimestamp: '2021-02-22T14:43:00.000Z' },
+        { version: '1.0.1', releaseTimestamp: '2021-04-12T15:51:00.000Z' },
+        { version: '1.0.2', releaseTimestamp: '2021-06-16T12:47:00.000Z' },
+      ],
+    });
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
 
@@ -185,7 +221,7 @@ describe('datasource/maven/index', () => {
   });
 
   it('collects releases from all registry urls', async () => {
-    mockGenericPackage();
+    mockGenericPackage({ html: null });
     mockGenericPackage({
       base: baseUrlCustom,
       meta: loadFixture('metadata-extra.xml'),
@@ -210,7 +246,7 @@ describe('datasource/maven/index', () => {
   });
 
   it('falls back to next registry url', async () => {
-    mockGenericPackage();
+    mockGenericPackage({ html: null });
     httpMock
       .scope('https://failed_repo')
       .get('/org/example/package/maven-metadata.xml')
@@ -244,6 +280,8 @@ describe('datasource/maven/index', () => {
   it('throws EXTERNAL_HOST_ERROR for 50x', async () => {
     httpMock
       .scope(baseUrl)
+      .get('/org/example/package/index.html')
+      .reply(503)
       .get('/org/example/package/maven-metadata.xml')
       .reply(503);
 
@@ -268,7 +306,7 @@ describe('datasource/maven/index', () => {
   });
 
   it('skips registry with invalid metadata structure', async () => {
-    mockGenericPackage();
+    mockGenericPackage({ html: null });
     httpMock
       .scope('https://invalid_metadata_repo')
       .get('/org/example/package/maven-metadata.xml')
@@ -285,7 +323,7 @@ describe('datasource/maven/index', () => {
   });
 
   it('skips registry with invalid XML', async () => {
-    mockGenericPackage();
+    mockGenericPackage({ html: null });
     httpMock
       .scope('https://invalid_metadata_repo')
       .get('/org/example/package/maven-metadata.xml')
@@ -302,9 +340,9 @@ describe('datasource/maven/index', () => {
   });
 
   it('handles optional slash at the end of registry url', async () => {
-    mockGenericPackage();
+    mockGenericPackage({ html: null });
     const resA = await get('org.example:package', baseUrl.replace(/\/+$/, ''));
-    mockGenericPackage();
+    mockGenericPackage({ html: null });
     const resB = await get('org.example:package', baseUrl.replace(/\/*$/, '/'));
     expect(resA).not.toBeNull();
     expect(resB).not.toBeNull();
@@ -323,7 +361,7 @@ describe('datasource/maven/index', () => {
 
   it('supports scm.url values prefixed with "scm:"', async () => {
     const pom = loadFixture('pom.scm-prefix.xml');
-    mockGenericPackage({ pom });
+    mockGenericPackage({ pom, html: null });
 
     const { sourceUrl } = await get();
 
@@ -390,6 +428,7 @@ describe('datasource/maven/index', () => {
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
       mockGenericPackage(parentPackage);
 
@@ -409,6 +448,7 @@ describe('datasource/maven/index', () => {
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
 
       const res = await get();
@@ -450,6 +490,7 @@ describe('datasource/maven/index', () => {
         meta: childMeta,
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
       mockGenericPackage(parentPomMock);
       mockGenericPackage(childPomMock);
@@ -472,6 +513,7 @@ describe('datasource/maven/index', () => {
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
       mockGenericPackage(parentPackage);
 
@@ -491,6 +533,7 @@ describe('datasource/maven/index', () => {
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
       mockGenericPackage(parentPackage);
 
@@ -510,6 +553,7 @@ describe('datasource/maven/index', () => {
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
 
       const res = await get();
@@ -528,6 +572,7 @@ describe('datasource/maven/index', () => {
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
 
       const res = await get();
@@ -545,6 +590,7 @@ describe('datasource/maven/index', () => {
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
 
       const res = await get();
@@ -561,6 +607,7 @@ describe('datasource/maven/index', () => {
         latest: '2.0.0',
         jars: { '2.0.0': 200 },
         snapshots: [],
+        html: null,
       });
 
       const res = await get();
