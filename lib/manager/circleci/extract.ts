@@ -24,7 +24,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             logger.debug('orbNoop');
             foundOrbOrNoop = true;
             lineNumber += 1;
-            continue; // eslint-disable-line no-continue
+            continue;
           }
           const orbMatch = regEx(/^\s+([^:]+):\s(.+)$/).exec(orbLine); // TODO #12071
           if (orbMatch) {

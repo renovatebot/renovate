@@ -4,6 +4,7 @@ import { getGlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
+import { regEx } from '../../util/regex';
 import { BranchConfig, BranchResult } from '../types';
 
 interface DependencyDashboard {
@@ -13,10 +14,10 @@ interface DependencyDashboard {
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-  const checked = issueBody.match(new RegExp(checkMatch, 'g'));
+  const checked = issueBody.match(regEx(checkMatch, 'g'));
   const dependencyDashboardChecks: Record<string, string> = {};
   if (checked?.length) {
-    const re = new RegExp(checkMatch);
+    const re = regEx(checkMatch);
     checked.forEach((check) => {
       const [, type, branchName] = re.exec(check);
       dependencyDashboardChecks[branchName] = type;
@@ -28,13 +29,11 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   let dependencyDashboardRebaseAllOpen = false;
   if (checkedRebaseAll) {
     dependencyDashboardRebaseAllOpen = true;
-    /* eslint-enable no-param-reassign */
   }
   return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
 }
 
 export async function readDashboardBody(config: RenovateConfig): Promise<void> {
-  /* eslint-disable no-param-reassign */
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
@@ -50,7 +49,6 @@ export async function readDashboardBody(config: RenovateConfig): Promise<void> {
       Object.assign(config, parseDashboardIssue(issue.body));
     }
   }
-  /* eslint-enable no-param-reassign */
 }
 
 function getListItem(branch: BranchConfig, type: string): string {

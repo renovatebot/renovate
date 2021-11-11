@@ -8,6 +8,7 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import delay from 'delay';
+import JSON5 from 'json5';
 import { PlatformId } from '../../constants';
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -135,6 +136,9 @@ export async function getJsonFile(
   repoName?: string
 ): Promise<any | null> {
   const raw = await getRawFile(fileName, repoName);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -715,7 +719,6 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const members = await Promise.all(
     teams.map(
       async (t) =>
-        /* eslint-disable no-return-await,@typescript-eslint/return-await */
         await azureApiCore.getTeamMembersWithExtendedProperties(
           repo.project.id,
           t.id

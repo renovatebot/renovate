@@ -316,11 +316,11 @@ export function migrateConfig(
         migratedConfig.automergeType = 'branch';
       } else if (key === 'automergeMinor') {
         migratedConfig.minor = migratedConfig.minor || {};
-        migratedConfig.minor.automerge = val == true; // eslint-disable-line eqeqeq
+        migratedConfig.minor.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'automergeMajor') {
         migratedConfig.major = migratedConfig.major || {};
-        migratedConfig.major.automerge = val == true; // eslint-disable-line eqeqeq
+        migratedConfig.major.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'multipleMajorPrs') {
         delete migratedConfig.multipleMajorPrs;
@@ -336,7 +336,7 @@ export function migrateConfig(
         migratedConfig.separateMinorPatch = val;
       } else if (key === 'automergePatch') {
         migratedConfig.patch = migratedConfig.patch || {};
-        migratedConfig.patch.automerge = val == true; // eslint-disable-line eqeqeq
+        migratedConfig.patch.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'ignoreNodeModules') {
         delete migratedConfig.ignoreNodeModules;

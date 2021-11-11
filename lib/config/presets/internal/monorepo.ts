@@ -155,7 +155,10 @@ const repoGroups = {
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
   react: 'https://github.com/facebook/react',
-  'react-router': 'https://github.com/ReactTraining/react-router',
+  'react-router': [
+    'https://github.com/ReactTraining/react-router', // old repo
+    'https://github.com/remix-run/react-router',
+  ],
   reakit: 'https://github.com/reakit/reakit',
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
@@ -179,6 +182,7 @@ const repoGroups = {
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
+  xterm: 'https://github.com/xtermjs/xterm.js',
 };
 
 const patternGroups = {

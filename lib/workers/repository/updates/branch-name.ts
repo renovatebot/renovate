@@ -3,11 +3,12 @@ import hasha from 'hasha';
 import slugify from 'slugify';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
 
 const MIN_HASH_LENGTH = 6;
 
-const RE_MULTIPLE_DASH = /--+/g;
+const RE_MULTIPLE_DASH = regEx(/--+/g);
 /**
  * Clean git branch name
  *
@@ -19,13 +20,13 @@ const RE_MULTIPLE_DASH = /--+/g;
  */
 function cleanBranchName(branchName: string): string {
   return cleanGitRef(branchName)
-    .replace(/^\.|\.$/, '') // leading or trailing dot
-    .replace(/\/\./g, '/') // leading dot after slash
-    .replace(/\s/g, '') // whitespace
+    .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
+    .replace(regEx(/\/\./g), '/') // leading dot after slash
+    .replace(regEx(/\s/g), '') // whitespace
+    .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: : ? [ \ ^ ~
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
-/* eslint-disable no-param-reassign */
 export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {

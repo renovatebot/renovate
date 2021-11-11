@@ -24,6 +24,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
@@ -78,6 +79,7 @@ function checkForPlatformFailure(err: Error): void {
     'Could not resolve host',
     'early EOF',
     'fatal: bad config', // .gitmodules problem
+    'expected flush after ref listing',
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -120,7 +122,7 @@ function checkForPlatformFailure(err: Error): void {
 }
 
 function localName(branchName: string): string {
-  return branchName.replace(/^origin\//, '');
+  return branchName.replace(regEx(/^origin\//), ''); // TODO #12071
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -145,6 +147,11 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     ) {
       throw new Error(REPOSITORY_EMPTY);
     }
+    // istanbul ignore if
+    if (err.message.includes("fatal: ambiguous argument 'origin/HEAD'")) {
+      logger.warn({ err }, 'Error getting default branch');
+      throw new Error(TEMPORARY_ERROR);
+    }
     throw err;
   }
 }
@@ -168,11 +175,12 @@ async function fetchBranchCommits(): Promise<void> {
     (await git.raw(opts))
       .split('\n')
       .filter(Boolean)
-      .map((line) => line.trim().split(/\s+/))
+      .map((line) => line.trim().split(regEx(/\s+/))) // TODO #12071
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
   } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
     logger.debug({ err }, 'git error');
     if (err.message?.includes('Please ask the owner to check their account')) {
       throw new Error(REPOSITORY_DISABLED);
@@ -272,7 +280,7 @@ export async function getSubmodules(): Promise<string[]> {
       ])) || ''
     )
       .trim()
-      .split(/[\n\s]/)
+      .split(regEx(/[\n\s]/))
       .filter((_e: string, i: number) => i % 2);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error getting submodules');
@@ -459,7 +467,7 @@ export async function getFileList(): Promise<string[]> {
     .split('\n')
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(/\t/).pop())
+    .map((line) => line.split(regEx(/\t/)).pop()) // TODO #12071
     .filter((file: string) =>
       submodules.every((submodule: string) => !file.startsWith(submodule))
     );
@@ -481,8 +489,8 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     ]);
     const isStale = !branches.all.map(localName).includes(branchName);
     logger.debug(
-      { isStale, branches, currentBranch, currentBranchSha },
-      `IsBranchStale=${isStale}`
+      { isStale, currentBranch, currentBranchSha },
+      `isBranchStale=${isStale}`
     );
     return isStale;
   } catch (err) /* istanbul ignore next */ {

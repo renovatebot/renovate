@@ -62,7 +62,7 @@ jobs:
       SKIP_JAVA_TESTS: ${{ matrix.node-version != 14 || (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) }}
 
     steps:
-      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
         with:
           fetch-depth: 2
 
@@ -124,7 +124,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
         with:
           fetch-depth: 2
 
@@ -154,6 +154,7 @@ jobs:
           yarn prettier
           yarn markdown-lint
           yarn git-check
+          yarn doc-fence-check
 
       - name: Test schema
         run: yarn test-schema
@@ -170,7 +171,7 @@ jobs:
 
     steps:
       # full checkout for semantic-release
-      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
         with:
           fetch-depth: 0
 

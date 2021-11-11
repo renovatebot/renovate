@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,
@@ -514,6 +513,28 @@ describe('util/exec/index', () => {
             encoding,
             env: envMock.basic,
             timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { binarySource: 'docker' },
+      },
+    ],
+
+    [
+      'Explicit timeout',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          timeout: 20 * 60 * 1000,
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 20 * 60 * 1000,
             maxBuffer: 10485760,
           },
         ],

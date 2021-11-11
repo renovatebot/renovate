@@ -109,7 +109,7 @@ export class GalaxyCollectionDatasource extends Datasource {
       { concurrency: 5 } // allow 5 requests at maximum in parallel
     );
     // filter failed versions
-    const filteredReleases = enrichedReleases.filter((value) => value != null);
+    const filteredReleases = enrichedReleases.filter(Boolean);
     // extract base information which are only provided on the release from the newest release
     const result: ReleaseResult = {
       releases: filteredReleases,

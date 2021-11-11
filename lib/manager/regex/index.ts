@@ -8,6 +8,7 @@ import type {
   PackageFile,
   Result,
 } from '../types';
+import type { ExtractionTemplate } from './types';
 
 export const defaultConfig = {
   pinDigests: false,
@@ -25,8 +26,6 @@ const validMatchFields = [
   'depType',
 ];
 
-const mergeFields = ['registryUrls', ...validMatchFields];
-
 function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
   let matchResult;
@@ -40,13 +39,12 @@ function regexMatchAll(regex: RegExp, content: string): RegExpMatchArray[] {
 }
 
 function createDependency(
-  matchResult: RegExpMatchArray,
-  combinedGroups: Record<string, string>,
+  extractionTemplate: ExtractionTemplate,
   config: CustomExtractConfig,
   dep?: PackageDependency
 ): PackageDependency {
   const dependency = dep || {};
-  const { groups } = matchResult;
+  const { groups, replaceString } = extractionTemplate;
 
   function updateDependency(field: string, value: string): void {
     switch (field) {
@@ -69,11 +67,7 @@ function createDependency(
     const fieldTemplate = `${field}Template`;
     if (config[fieldTemplate]) {
       try {
-        const compiled = template.compile(
-          config[fieldTemplate],
-          combinedGroups ?? groups,
-          false
-        );
+        const compiled = template.compile(config[fieldTemplate], groups, false);
         updateDependency(field, compiled);
       } catch (err) {
         logger.warn(
@@ -86,24 +80,8 @@ function createDependency(
       updateDependency(field, groups[field]);
     }
   }
-  dependency.replaceString = String(matchResult[0]);
+  dependency.replaceString = replaceString;
   return dependency;
-}
-
-function mergeDependency(deps: PackageDependency[]): PackageDependency {
-  const result: PackageDependency = {};
-  deps.forEach((dep) => {
-    mergeFields.forEach((field) => {
-      if (dep[field]) {
-        result[field] = dep[field];
-        // save the line replaceString of the section which contains the current Value for a speed up lookup during the replace phase
-        if (field === 'currentValue') {
-          result.replaceString = dep.replaceString;
-        }
-      }
-    });
-  });
-  return result;
 }
 
 function handleAny(
@@ -114,29 +92,29 @@ function handleAny(
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
-    .map((matchResult) => createDependency(matchResult, null, config));
+    .map((matchResult) =>
+      createDependency(
+        { groups: matchResult.groups, replaceString: matchResult[0] },
+        config
+      )
+    );
 }
 
 function mergeGroups(
   mergedGroup: Record<string, string>,
   secondGroup: Record<string, string>
 ): Record<string, string> {
-  const resultGroup = {};
+  return { ...mergedGroup, ...secondGroup };
+}
 
-  Object.keys(mergedGroup)
-    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
-    .forEach(
-      // eslint-disable-next-line no-return-assign
-      (key) => (resultGroup[key] = mergedGroup[key])
-    );
-  Object.keys(secondGroup)
-    .filter((key) => validMatchFields.includes(key)) // prevent prototype pollution
-    .forEach((key) => {
-      if (secondGroup[key] && secondGroup[key] !== '') {
-        resultGroup[key] = secondGroup[key];
-      }
-    });
-  return resultGroup;
+export function mergeExtractionTemplate(
+  base: ExtractionTemplate,
+  addition: ExtractionTemplate
+): ExtractionTemplate {
+  return {
+    groups: mergeGroups(base.groups, addition.groups),
+    replaceString: addition.replaceString ?? base.replaceString,
+  };
 }
 
 function handleCombination(
@@ -152,41 +130,48 @@ function handleCombination(
     return [];
   }
 
-  const combinedGroup = matches
-    .map((match) => match.groups)
-    .reduce((mergedGroup, currentGroup) =>
-      mergeGroups(mergedGroup, currentGroup)
-    );
-
-  // TODO: this seems to be buggy behavior, needs to be checked #11387
-  const dep = matches
-    .map((match) => createDependency(match, combinedGroup, config))
-    .reduce(
-      (mergedDep, currentDep) => mergeDependency([mergedDep, currentDep]),
-      {}
-    ); // merge fields of dependencies
-  return [dep];
+  const extraction = matches
+    .map((match) => ({
+      groups: match.groups,
+      replaceString: match?.groups?.currentValue ? match[0] : undefined,
+    }))
+    .reduce((base, addition) => mergeExtractionTemplate(base, addition));
+  return [createDependency(extraction, config)];
 }
 
 function handleRecursive(
   content: string,
   packageFile: string,
   config: CustomExtractConfig,
-  index = 0
+  index = 0,
+  combinedGroups: Record<string, string> = {}
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
     regEx(matchString, 'g')
   );
   // abort if we have no matchString anymore
-  if (regexes[index] == null) {
+  if (!regexes[index]) {
     return [];
   }
   return regexMatchAll(regexes[index], content).flatMap((match) => {
-    // if we have a depName and a currentValue with have the minimal viable definition
+    // if we have a depName and a currentValue which have the minimal viable definition
     if (match?.groups?.depName && match?.groups?.currentValue) {
-      return createDependency(match, null, config);
+      return createDependency(
+        {
+          groups: mergeGroups(combinedGroups, match.groups),
+          replaceString: match[0],
+        },
+        config
+      );
     }
-    return handleRecursive(match[0], packageFile, config, index + 1);
+
+    return handleRecursive(
+      match[0],
+      packageFile,
+      config,
+      index + 1,
+      mergeGroups(combinedGroups, match.groups || {})
+    );
   });
 }
 

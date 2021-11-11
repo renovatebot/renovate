@@ -11,6 +11,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -54,11 +55,10 @@ function handleGotError(
     message = String(err.response.body.message);
   }
   if (
-    err.name === 'RequestError' &&
-    (err.code === 'ENOTFOUND' ||
-      err.code === 'ETIMEDOUT' ||
-      err.code === 'EAI_AGAIN' ||
-      err.code === 'ECONNRESET')
+    err.code === 'ENOTFOUND' ||
+    err.code === 'ETIMEDOUT' ||
+    err.code === 'EAI_AGAIN' ||
+    err.code === 'ECONNRESET'
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
     throw new ExternalHostError(err, PlatformId.Github);
@@ -153,7 +153,8 @@ interface GraphqlOptions {
 
 function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
-  const acceptStrings = typeof input === 'string' ? input.split(/\s*,\s*/) : [];
+  const acceptStrings =
+    typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
   if (
     !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
     acceptStrings.length < 2
@@ -282,6 +283,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       );
       result = res?.body;
     } catch (err) {
+      logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
       if (err instanceof ExternalHostError) {
         const gotError = err.err as GotLegacyError;
         const statusCode = gotError?.statusCode;
@@ -342,7 +344,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error({ res }, 'Error fetching GraphQL nodes');
+          logger.warn({ query, options, res }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }

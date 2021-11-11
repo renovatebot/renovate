@@ -13,8 +13,11 @@ function replaceAsString(
   newValue: string
 ): string | null {
   // Update the file = this is what we want
-  // eslint-disable-next-line no-param-reassign
-  parsedContents[depType][depName] = newValue;
+  if (depType === 'packageManager') {
+    parsedContents[depType] = newValue;
+  } else {
+    parsedContents[depType][depName] = newValue;
+  }
   // Look for the old version number
   const searchString = `"${oldVersion}"`;
   const newString = `"${newValue}"`;
@@ -72,7 +75,13 @@ export function updateDependency({
   try {
     const parsedContents: PackageJson = JSON.parse(fileContent);
     // Save the old version
-    const oldVersion: string = parsedContents[depType][depName];
+    let oldVersion: string;
+    if (depType === 'packageManager') {
+      oldVersion = parsedContents[depType];
+      newValue = `${depName}@${newValue}`;
+    } else {
+      oldVersion = parsedContents[depType][depName];
+    }
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
       return fileContent;

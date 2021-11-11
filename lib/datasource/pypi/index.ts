@@ -36,6 +36,7 @@ export class PypiDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let dependency: ReleaseResult = null;
     const hostUrl = ensureTrailingSlash(registryUrl);
+    const normalizedLookupName = PypiDatasource.normalizeName(lookupName);
 
     // not all simple indexes use this identifier, but most do
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
@@ -43,12 +44,15 @@ export class PypiDatasource extends Datasource {
         { lookupName, hostUrl },
         'Looking up pypi simple dependency'
       );
-      dependency = await this.getSimpleDependency(lookupName, hostUrl);
+      dependency = await this.getSimpleDependency(
+        normalizedLookupName,
+        hostUrl
+      );
     } else {
       logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
       try {
         // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
-        dependency = await this.getDependency(lookupName, hostUrl);
+        dependency = await this.getDependency(normalizedLookupName, hostUrl);
       } catch (err) {
         if (err.statusCode !== 404) {
           throw err;
@@ -59,14 +63,17 @@ export class PypiDatasource extends Datasource {
           { lookupName, hostUrl },
           'Looking up pypi simple dependency via fallback'
         );
-        dependency = await this.getSimpleDependency(lookupName, hostUrl);
+        dependency = await this.getSimpleDependency(
+          normalizedLookupName,
+          hostUrl
+        );
       }
     }
     return dependency;
   }
 
   private static normalizeName(input: string): string {
-    return input.toLowerCase().replace(regEx(/(-|\.)/g), '_');
+    return input.toLowerCase().replace(regEx(/(_|\.|-)+/g), '-');
   }
 
   private async getDependency(
@@ -86,19 +93,6 @@ export class PypiDatasource extends Datasource {
       dependency.isPrivate = true;
     }
     logger.trace({ lookupUrl }, 'Got pypi api result');
-    if (
-      !(
-        dep.info &&
-        PypiDatasource.normalizeName(dep.info.name) ===
-          PypiDatasource.normalizeName(packageName)
-      )
-    ) {
-      logger.warn(
-        { lookupUrl, lookupName: packageName, returnedName: dep.info.name },
-        'Returned name does not match with requested name'
-      );
-      return null;
-    }
 
     if (dep.info?.home_page) {
       dependency.homepage = dep.info.home_page;

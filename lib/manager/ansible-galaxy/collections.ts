@@ -49,7 +49,6 @@ function handleGitDep(
   dep: PackageDependency,
   nameMatch: RegExpExecArray
 ): void {
-  /* eslint-disable no-param-reassign */
   dep.datasource = GitTagsDatasource.id;
 
   if (nameMatch) {
@@ -76,16 +75,13 @@ function handleGitDep(
       dep.currentValue = dep.managerData.version;
     }
   }
-  /* eslint-enable no-param-reassign */
 }
 
 function handleGalaxyDep(dep: PackageDependency): void {
-  /* eslint-disable no-param-reassign */
   dep.datasource = GalaxyCollectionDatasource.id;
   dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
   dep.currentValue = dep.managerData.version;
-  /* eslint-enable no-param-reassign */
 }
 
 function finalize(dependency: PackageDependency): boolean {
@@ -124,7 +120,7 @@ function finalize(dependency: PackageDependency): boolean {
       return true;
   }
 
-  if (dependency.currentValue == null && dep.skipReason == null) {
+  if (!dependency.currentValue && !dep.skipReason) {
     dep.skipReason = SkipReason.NoVersion;
   }
   return true;

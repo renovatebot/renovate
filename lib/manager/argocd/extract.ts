@@ -12,7 +12,7 @@ function createDependency(
   const source = definition.spec?.source;
 
   if (
-    source == null ||
+    !source ||
     !is.nonEmptyString(source.repoURL) ||
     !is.nonEmptyString(source.targetRevision)
   ) {

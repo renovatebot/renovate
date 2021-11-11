@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import { toUnix } from 'upath';
 import { ExecOptions } from '../lib/util/exec';
+import { regEx } from '../lib/util/regex';
 
 type CallOptions = ExecOptions | null | undefined;
 
@@ -26,10 +27,11 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
 
   const cwd = toUnix(process.cwd());
 
-  // eslint-disable-next-line array-callback-return
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {
-      const val = v.replace(/\\(\w)/g, '/$1').replace(cwd, '/root/project');
+      const val = v
+        .replace(regEx(/\\(\w)/g), '/$1')
+        .replace(cwd, '/root/project'); // TODO #12071
       this.update(val);
     }
   });

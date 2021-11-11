@@ -172,23 +172,52 @@ describe('datasource/pypi/index', () => {
       expect(result.changelogUrl).toBe(info.project_urls.changelog);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('returns null if mismatched name', async () => {
+    it('normalizes the package name according to PEP 503', async () => {
+      const expectedHttpCall = httpMock
+        .scope(baseUrl)
+        .get('/not-normalized-package/json')
+        .reply(200, htmlResponse);
+
+      await getPkgReleases({
+        datasource,
+        registryUrls: [baseUrl],
+        depName: 'not_normalized.Package',
+      });
+
+      expect(expectedHttpCall.isDone()).toBeTrue();
+    });
+    it('normalizes the package name according to PEP 503 when falling back to simple endpoint', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/something/json')
-        .reply(200, {
-          info: {
-            name: 'something-else',
-            home_page: 'https://microsoft.com',
-          },
-        });
-      expect(
-        await getPkgReleases({
-          datasource,
-          depName: 'something',
-        })
-      ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+        .get('/not-normalized-package/json')
+        .reply(404, '');
+      const expectedFallbackHttpCall = httpMock
+        .scope(baseUrl)
+        .get('/not-normalized-package/')
+        .reply(200, htmlResponse);
+
+      await getPkgReleases({
+        datasource,
+        registryUrls: [baseUrl],
+        depName: 'not_normalized.Package',
+      });
+
+      expect(expectedFallbackHttpCall.isDone()).toBeTrue();
+    });
+    it('normalizes the package name according to PEP 503 querying a simple endpoint', async () => {
+      const simpleRegistryUrl = 'https://pypi.org/simple/';
+      const expectedHttpCall = httpMock
+        .scope(simpleRegistryUrl)
+        .get('/not-normalized-package/')
+        .reply(200, htmlResponse);
+
+      await getPkgReleases({
+        datasource,
+        registryUrls: [simpleRegistryUrl],
+        depName: 'not_normalized.Package',
+      });
+
+      expect(expectedHttpCall.isDone()).toBeTrue();
     });
 
     it('respects constraints', async () => {

@@ -13,10 +13,16 @@ export function getSourceUrlBase(registryUrl: string): string {
   return ensureTrailingSlash(registryUrl ?? defaultSourceUrlBase);
 }
 
-export function getApiBaseUrl(sourceUrlBase: string): string {
+export function getApiBaseUrl(registryUrl: string): string {
+  const sourceUrlBase = getSourceUrlBase(registryUrl);
   return sourceUrlBase === defaultSourceUrlBase
     ? `https://api.github.com/`
     : `${sourceUrlBase}api/v3/`;
+}
+
+export function getSourceUrl(lookupName: string, registryUrl?: string): string {
+  const sourceUrlBase = getSourceUrlBase(registryUrl);
+  return `${sourceUrlBase}${lookupName}`;
 }
 
 export async function getGithubRelease(

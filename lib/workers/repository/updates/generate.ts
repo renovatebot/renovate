@@ -4,6 +4,7 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
@@ -91,7 +92,6 @@ export function generateBranchConfig(
     toVersions.length > 1 ||
     (!toVersions[0] && newValue.length > 1);
   if (newValue.length > 1 && !groupEligible) {
-    // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
   }
   const typesGroup =
@@ -160,8 +160,7 @@ export function generateBranchConfig(
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix);
       upgrade.toLowerCase =
-        // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-        upgrade.semanticCommitType.match(/[A-Z]/) === null &&
+        regEx(/[A-Z]/).exec(upgrade.semanticCommitType) === null && // TODO #12071
         !upgrade.semanticCommitType.startsWith(':');
     }
     // Compile a few times in case there are nested templates
@@ -176,9 +175,9 @@ export function generateBranchConfig(
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
-    upgrade.commitMessage = upgrade.commitMessage.replace(/\s+/g, ' '); // Trim extra whitespace inside string
+    upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string // TODO #12071
     upgrade.commitMessage = upgrade.commitMessage.replace(
-      /to vv(\d)/,
+      regEx(/to vv(\d)/), // TODO #12071
       'to v$1'
     );
     if (upgrade.toLowerCase) {
@@ -200,7 +199,7 @@ export function generateBranchConfig(
       upgrade.prTitle = template
         .compile(upgrade.prTitle, upgrade)
         .trim()
-        .replace(/\s+/g, ' ');
+        .replace(regEx(/\s+/g), ' '); // TODO #12071
       // istanbul ignore if
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
         throw new Error(CONFIG_SECRETS_EXPOSED);
@@ -235,10 +234,10 @@ export function generateBranchConfig(
         const existingStamp = DateTime.fromISO(releaseTimestamp);
         const upgradeStamp = DateTime.fromISO(upgrade.releaseTimestamp);
         if (upgradeStamp > existingStamp) {
-          releaseTimestamp = upgrade.releaseTimestamp; // eslint-disable-line
+          releaseTimestamp = upgrade.releaseTimestamp;
         }
       } else {
-        releaseTimestamp = upgrade.releaseTimestamp; // eslint-disable-line
+        releaseTimestamp = upgrade.releaseTimestamp;
       }
     }
   }

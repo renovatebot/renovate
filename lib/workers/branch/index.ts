@@ -32,6 +32,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../util/merge-confidence';
+import { regEx } from '../../util/regex';
 import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -57,7 +58,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   return titleRebase || labelRebase || prRebaseChecked;
 }
 
-const rebasingRegex = /\*\*Rebasing\*\*: .*/;
+const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
@@ -288,7 +289,7 @@ export async function processBranch(
               'Update has not passed stability days'
             );
             config.stabilityStatus = BranchStatus.yellow;
-            continue; // eslint-disable-line no-continue
+            continue;
           }
         }
         const {
@@ -315,7 +316,7 @@ export async function processBranch(
               'Update does not meet minimum confidence scores'
             );
             config.confidenceStatus = BranchStatus.yellow;
-            continue; // eslint-disable-line no-continue
+            continue;
           }
         }
       }

@@ -180,7 +180,7 @@ describe('datasource/helm/index', () => {
         registryUrls: ['https://example-repository.com/subdir'],
       });
       const trace = httpMock.getTrace();
-      expect(trace[0].url).toEqual(
+      expect(trace[0].url).toBe(
         'https://example-repository.com/subdir/index.yaml'
       );
       expect(trace).toMatchSnapshot();

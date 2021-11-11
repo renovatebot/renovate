@@ -431,7 +431,7 @@ describe('platform/bitbucket/index', () => {
         .reply(200);
       expect(
         await bitbucket.ensureIssue({ title: 'title', body: 'body' })
-      ).toEqual('updated');
+      ).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('creates new issue', async () => {
@@ -456,7 +456,7 @@ describe('platform/bitbucket/index', () => {
           reuseTitle: 'old-title',
           body: 'body',
         })
-      ).toEqual('created');
+      ).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('noop for existing issue', async () => {
@@ -936,6 +936,21 @@ describe('platform/bitbucket/index', () => {
         .reply(200, JSON.stringify(data));
       const res = await bitbucket.getJsonFile('file.json');
       expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json5')
+        .reply(200, json5Data);
+      const res = await bitbucket.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws on malformed JSON', async () => {
