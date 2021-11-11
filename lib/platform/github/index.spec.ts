@@ -2449,7 +2449,7 @@ describe('platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      scope.get('/repos/some/repo/contents/file.json&ref=dev').reply(200, {
+      scope.get('/repos/some/repo/contents/file.json?ref=dev').reply(200, {
         content: Buffer.from(JSON.stringify(data)).toString('base64'),
       });
       const res = await github.getJsonFile('file.json', 'some/repo', 'dev');

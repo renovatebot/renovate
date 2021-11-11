@@ -22,6 +22,10 @@ async function getBaseBranchConfig(
     config.useBaseBranchConfig === 'replace' &&
     baseBranch !== config.defaultBranch
   ) {
+    logger.debug(
+      `Using config from branch ${baseBranch} because useBaseBranchConfig option specified`
+    );
+
     baseBranchConfig = await platform.getJsonFile(
       config.onboardingConfigFileName,
       config.repository,
