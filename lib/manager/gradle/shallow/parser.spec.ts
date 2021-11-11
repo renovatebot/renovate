@@ -1,3 +1,4 @@
+import { TestApi } from 'azure-devops-node-api/TestApi';
 import { loadFixture } from '../../../../test/util';
 import { SkipReason } from '../../../types';
 import {
@@ -8,140 +9,42 @@ import {
 } from './common';
 import { parseGradle, parseProps } from './parser';
 
-let testData = [
-  {
-    name: 'parses variables',
-    inputs: [
-      ['version = "1.2.3"', '"foo:bar_$version:$version"', 'version = "3.2.1"'],
-      [
-        'set("version", "1.2.3")',
-        '"foo:bar_$version:$version"',
-        'set("version", "3.2.1")',
-      ],
-    ],
-    output: [
-      {
-        depName: 'foo:bar_1.2.3',
-        currentValue: '1.2.3',
-      },
-    ],
-  },
-  {
-    name: 'parses variables not working',
-    inputs: [['version = "1.2.3"', '"foo:bar:$version@@@"']],
-    output: [],
-  },
-  {
-    name: 'parses variables',
-    inputs: [
-      ['versions.foobar = "1.2.3"', '"foo:bar:${versions.foobar}"'],
-      ['versions.foobar = "1.2.3"', '"foo:bar:$versions.foobar"'],
-    ],
-    output: [
-      {
-        depName: 'foo:bar',
-        currentValue: '1.2.3',
-        groupName: 'versions.foobar',
-      },
-    ],
-  },
-
-  // Long form deps
-  {
-    name: 'parse long form deps',
-    inputs: [
-      ['group: "foo", name: "bar", version: "1.2.3"'],
-      ["implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"],
-      ['depVersion = "1.2.3"\ngroup: "foo", name: "bar", version: depVersion'],
-      ['("foo", "bar", "1.2.3")'],
-      ['(group = "foo", name = "bar", version = "1.2.3")'],
-    ],
-    output: [
-      {
-        depName: 'foo:bar',
-        currentValue: '1.2.3',
-      },
-    ],
-  },
-  {
-    name: 'parse long form deps',
-    inputs: [['createXmlValueRemover("defaults", "integer", "integer")']],
-    output: [
-      {
-        depName: 'defaults:integer',
-        currentValue: 'integer',
-        skipReason: SkipReason.Ignored,
-      },
-    ],
-  },
-  {
-    name: 'parse long form deps',
-    inputs: [
-      ['group: "com.example", name: "my.dependency", version: depVersion'],
-    ],
-    output: [],
-  },
-
-  // Plugins
-  {
-    name: 'parses plugins',
-    inputs: [
-      ['id "foo.bar" version "1.2.3"'],
-      ['id "foo.bar" version "1.2.3" apply false'],
-      ['id("foo.bar") version "1.2.3"'],
-      ['id("foo.bar") version "1.2.3" apply false'],
-      ['version = "1.2.3"', 'id "foo.bar" version "$version"'],
-      ['version = "1.2.3"', 'id "foo.bar" version "$version" apply false'],
-      ['version = "1.2.3"', 'id "foo.bar" version "${version}"'],
-      ['version = "1.2.3"', 'id "foo.bar" version "${version}" apply false'],
-      ['version = "1.2.3"', 'id("foo.bar") version "${version}"'],
-      ['version = "2.3"', 'id "foo.bar" version "1.${version}"'],
-      ['version = "2.3"', 'id("foo.bar") version "1.${version}"'],
-    ],
-    output: [
-      {
-        depName: 'foo.bar',
-        lookupName: 'foo.bar:foo.bar.gradle.plugin',
-        currentValue: '1.2.3',
-      },
-    ],
-  },
-  {
-    name: 'parses plugins',
-    inputs: [
-      ['kotlin("jvm") version "1.2.3"'],
-      ['version = "1.2.3"', 'kotlin("jvm") version "${version}"'],
-      ['version = "1.2.3"', 'kotlin("jvm") version "$version"'],
-      ['version = "2.3"', 'kotlin("jvm") version "1.${version}"'],
-    ],
-    output: [
-      {
-        depName: 'org.jetbrains.kotlin.jvm',
-        lookupName:
-          'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
-        currentValue: '1.2.3',
-      },
-    ],
-  },
-];
-
 describe('manager/gradle/shallow/parser', () => {
   it('handles end of input', () => {
     expect(parseGradle('version = ').deps).toBeEmpty();
     expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
   });
-  let deps;
-  testData.forEach((test) => {
-    describe(test.name, () => {
-      test.inputs.forEach((input) => {
-        it(`${input.join(' \t ')}`, () => {
-          ({ deps } = parseGradle(input.join('\n')));
-          expect(deps).toMatchObject(test.output);
-        });
-      });
-    });
-  });
-  describe('parses variables', () => {
+  it('handles unparseable strings', () => {
+    expect(parseGradle('"foo:bar:version@@@"').deps).toBeEmpty();
+  })
+
+  describe('variables', () => {
+    // TODO: nested variables
+    test.each(['version = "1.2.3"', 'set("version", "1.2.3")'])(
+      'detection when set like `%s`',
+      (input) => {
+        let { vars } = parseGradle(input);
+        expect(vars.version.value).toEqual('1.2.3');
+      }
+    );
+    test.each(['"foo:bar_$version:$version"'])(
+      'using the proper variable altough it got reassigned %s',
+      (input) => {
+        let testString = `
+          set("version", "1.2.3")
+          ${input}
+          set("version", "3.2.1")`;
+        let { deps, vars } = parseGradle(testString);
+        expect(deps).toMatchObject([
+          {
+            depName: 'foo:bar_1.2.3',
+            currentValue: '1.2.3',
+          },
+        ]);
+        expect(vars.version.value).toEqual('3.2.1');
+      }
+    );
+
     it('in long dep strings', () => {
       expect(
         parseGradle('foo.bar = "foo:bar:1.2.3"', {}, 'versions.gradle')
@@ -168,54 +71,263 @@ describe('manager/gradle/shallow/parser', () => {
     });
   });
 
-  let testUrls = [
-    {
-      name: 'parses registryUrls',
-      inputs: [
-        'url "https://example.com"',
-        'url("https://example.com")',
-        'uri "https://example.com"',
-        'maven("https://example.com")',
-        'maven { url = uri("https://example.com") }',
-        "maven { url 'https://example.com' }",
-        'maven "https://example.com"',
-        'var="https://example.com"\nmaven("$var")',
-        'var="https://example.com"\nmaven(var)',
-        'var=".com"\nmaven("https://example${var}")',
-      ],
-      output: ['https://example.com'],
-    },
-    {
-      name: 'parses registryUrls not working',
-      inputs: [
+  describe('dependencies', () => {
+    test.each([
+      ["'foo'", 'bar', "'version'"],
+      ['foo', "'bar'", "'version'"],
+      ["'foo'", "'bar'", 'version'],
+    ])(
+      'without proper variables we will not get a dependency - %s - %s - %s',
+      (group, artifact, version) => {
+        expect(
+          parseGradle(`group: ${group}, name: ${artifact}, version: ${version}`)
+            .deps
+        ).toBeEmpty();
+        expect(
+          parseGradle(
+            `implementation platform(group: ${group}, name: ${artifact}, version: ${version})`
+          ).deps
+        ).toBeEmpty();
+        expect(
+          parseGradle(
+            `(group = ${group}, name = ${artifact}, version = ${version}`
+          ).deps
+        ).toBeEmpty();
+        expect(
+          parseGradle(`(${group}, ${artifact}, ${version}`).deps
+        ).toBeEmpty();
+      }
+    );
+
+    [
+      'foo',
+      '"foo"',
+      "'foo'",
+      '"$foo"',
+      '"${foo}"',
+      '"${f}${o}${o}"',
+      '"$f$o$o"',
+      '"$f${o}o"',
+    ].forEach((group: String) => {
+      [
+        'bar',
+        '"bar"',
+        "'bar'",
+        '"$bar"',
+        '"${bar}"',
+        '"${b}${a}${r}"',
+        '"$b$a$r"',
+        '"$b${a}r"',
+      ].forEach((artifact: String) => {
+        [
+          'version',
+          '"version"',
+          "'version'",
+          '"$version"',
+          '"${version}"',
+          //'"${ver}${sion}"',
+          '"${ver}sion"',
+        ].forEach((version: String) => {
+          describe(`with group: ${group}, artifact: ${artifact}, version: ${version}`, () => {
+            
+            test.each([
+              `"${group.replace(/['"]+/g, '')}:${artifact.replace(/['"]+/g,'')}:${version.replace(/['"]+/g, '')}"`,
+              `"${group.replace(/['"]+/g, '')}:${artifact.replace(/['"]+/g,'')}:${version.replace(/['"]+/g, '')}@ext"`
+            ])('%s', (input) => {
+              let testString = `
+                      set("foo", "foo")
+                      set("f", "f")
+                      set("o", "o")
+                      set("bar", "bar")
+                      set("b", "b")
+                      set("a", "a")
+                      set("r", "r")
+                      set("version", "version")
+                      set("ver", "ver")
+                      set("sion", "sion")
+                      ${input}`;
+
+              expect(parseGradle(testString).deps).toMatchObject([
+                {
+                  depName: 'foo:bar',
+                  currentValue: 'version',
+                },
+              ]);
+            });
+
+            test.each([
+              `group: ${group}, name: ${artifact}, version: ${version}`,
+              `implementation platform(group: ${group}, name: ${artifact}, version: ${version})`,
+              `(${group}, ${artifact}, ${version})`,
+              `(group = ${group}, name = ${artifact}, version = ${version})`,
+            ])('%s', (input) => {
+              let testString = `
+                set("foo", "foo")
+                set("f", "f")
+                set("o", "o")
+                set("bar", "bar")
+                set("b", "b")
+                set("a", "a")
+                set("r", "r")
+                set("version", "version")
+                set("ver", "ver")
+                set("sion", "sion")
+                ${input}`;
+
+              expect(parseGradle(testString).deps).toMatchObject([
+                {
+                  depName: 'foo:bar',
+                  currentValue: 'version',
+                },
+              ]);
+            });
+
+            it('createXmlValueRemover(...)', () => {
+              let testString = `
+                      set("foo", "foo")
+                      set("f", "f")
+                      set("o", "o")
+                      set("bar", "bar")
+                      set("b", "b")
+                      set("a", "a")
+                      set("r", "r")
+                      set("version", "version")
+                      set("ver", "ver")
+                      set("sion", "sion")
+                      createXmlValueRemover(${group}, ${artifact}, ${version})"`;
+
+              expect(parseGradle(testString).deps).toMatchObject([
+                {
+                  depName: 'foo:bar',
+                  currentValue: 'version',
+                  skipReason: SkipReason.Ignored,
+                },
+              ]);
+            });
+          });
+        });
+      });
+    });
+  });
+
+  describe('plugins', () => {
+    [
+      '"foo"',
+      "'foo'",
+    ].forEach((id: String) => {
+        [
+          '"version"',
+          "'version'",
+          '"$version"',
+          '"${version}"',
+          '"${ver}${sion}"',
+          '"${ver}sion"',
+          '"ver${sion}"',
+        ].forEach((version: String) => {
+          [
+            '',
+            'apply true',
+            'apply false',
+          ].forEach((apply: String) => {
+            test.each([
+              `id ${id} version ${version} ${apply}`,
+              `id(${id}) version ${version} ${apply}`,
+            ])("checking `%s`", (input) => {
+              let testString = `
+                set("version", "version")
+                set("ver", "ver")
+                set("sion", "sion")
+                ${input}`;
+                expect(parseGradle(testString).deps).toMatchObject([
+                  {
+                    depName: 'foo',
+                    lookupName: 'foo:foo.gradle.plugin',
+                    currentValue: 'version',
+                  },
+                ])
+            })
+
+            test.each([
+              `kotlin(${id}) version ${version} ${apply}`,
+            ])("checking `%s`", (input) => {
+              let testString = `
+                set("version", "version")
+                set("ver", "ver")
+                set("sion", "sion")
+                ${input}`;
+                expect(parseGradle(testString).deps).toMatchObject([
+                  {
+                    depName: 'org.jetbrains.kotlin.foo',
+                    lookupName:
+                      'org.jetbrains.kotlin.foo:org.jetbrains.kotlin.foo.gradle.plugin',
+                    currentValue: 'version',
+                  },
+                ])
+            })
+          })
+        })
+      })
+  });
+  describe('urls', () => {
+    test.each([
+      'url "https://example.com"',
+      'url "$var"',
+      'url "${var}"',
+      'url var',
+      'url "https://example${com}"',
+      'url("https://example.com")',
+      'url("$var")',
+      'url("${var}")',
+      'url(var)',
+      'url("https://example${com}")',
+      'uri "https://example.com"',
+      'maven { url = uri("https://example.com") }',
+      "maven { url 'https://example.com' }",
+      'maven "https://example.com"',
+      'maven "$var"',
+      'maven "${var}"',
+      'maven var',
+      'maven "https://example${com}"',
+      'maven("https://example.com")',
+      'maven("$var")',
+      'maven("${var}")',
+      'maven(var)',
+      'maven("https://example${com}")',
+    ])('parsing for `%s`', (input) => {
+      let testString = `
+          set("var", "https://example.com")
+          set("com", ".com")
+          ${input}
+          `;
+      expect(parseGradle(testString).urls).toStrictEqual(['https://example.com']);
+    });
+ 
+    test.each([
         'url ""',
         'url "#!@"',
+        'url \'$var\'',
+        'url \'${var}\'',
+        'url "sadfasdfasdfasdf"',
         'url("")',
         'uri ""',
         'maven("")',
         'maven { url = uri("") }',
         "maven { url '' }",
-      ],
-      output: [],
-    },
-  ];
-  let urls;
-
-  testUrls.forEach((test) => {
-    describe(test.name, () => {
-      test.inputs.forEach((input) => {
-        it(`${input}`, () => {
-          ({ urls } = parseGradle(input));
-          expect(urls).toStrictEqual(test.output);
-        });
-      });
+      ])('parsing for non-valid `%s`', (input) => {
+      let testString = `
+          set("var", "https://example.com")
+          set("com", ".com")
+          ${input}
+          `;
+      expect(parseGradle(testString).urls).toBeEmpty();
     });
-  });
-  describe('parses registryUrls', () => {
-    test('registry order', () => {
-      ({ urls } = parseGradle(
-        'mavenCentral(); uri("https://example.com"); jcenter(); google(); gradlePluginPortal();'
-      ));
+
+    test.each([
+      'mavenCentral(); uri("https://example.com"); jcenter(); google(); gradlePluginPortal();',
+      'mavenCentral();\nuri("https://example.com");\njcenter();\ngoogle();\ngradlePluginPortal();',
+    ])('registry order $#', (input) => {
+      let urls;
+      ({ urls } = parseGradle(input));
       expect(urls).toStrictEqual([
         MAVEN_REPO,
         'https://example.com',
@@ -223,6 +335,104 @@ describe('manager/gradle/shallow/parser', () => {
         GOOGLE_REPO,
         GRADLE_PLUGIN_PORTAL_REPO,
       ]);
+    });
+  });
+
+  describe('properties', () => {
+    test.each([
+      {
+        input: ['foo=bar'],
+        output: {
+          deps: [],
+          vars: {
+            foo: {
+              fileReplacePosition: 4,
+              key: 'foo',
+              value: 'bar',
+              packageFile: undefined,
+            },
+          },
+        },
+      },
+      {
+        input: [' foo = bar '],
+        output: {
+          deps: [],
+          vars: {
+            foo: {
+              key: 'foo',
+              value: 'bar',
+              fileReplacePosition: 7,
+              packageFile: undefined,
+            },
+          },
+        },
+      },
+      {
+        input: ['foo.bar=baz'],
+        output: {
+          deps: [],
+          vars: {
+            'foo.bar': {
+              key: 'foo.bar',
+              value: 'baz',
+              fileReplacePosition: 8,
+              packageFile: undefined,
+            },
+          },
+        },
+      },
+      {
+        input: ['foo=foo\nbar=bar'],
+        output: {
+          deps: [],
+          vars: {
+            foo: {
+              key: 'foo',
+              value: 'foo',
+              fileReplacePosition: 4,
+              packageFile: undefined,
+            },
+            bar: {
+              key: 'bar',
+              value: 'bar',
+              fileReplacePosition: 12,
+              packageFile: undefined,
+            },
+          },
+        },
+      },
+      {
+        input: ['x=foo', 'x/gradle.properties'],
+        output: {
+          deps: [],
+          vars: {
+            x: {
+              fileReplacePosition: 2,
+              key: 'x',
+              packageFile: 'x/gradle.properties',
+            },
+          },
+        },
+      },
+      {
+        input: ['x=foo:bar:baz', 'x/gradle.properties'],
+        output: {
+          vars: {},
+          deps: [
+            {
+              currentValue: 'baz',
+              depName: 'foo:bar',
+              managerData: {
+                fileReplacePosition: 10,
+                packageFile: 'x/gradle.properties',
+              },
+            },
+          ],
+        },
+      },
+    ])('testing for $input', ({ input, output }) => {
+      expect(parseProps(...(input as [string, string]))).toMatchObject(output);
     });
   });
 
@@ -245,49 +455,5 @@ describe('manager/gradle/shallow/parser', () => {
     expect(
       content.slice(res.managerData.fileReplacePosition).indexOf('1.2.3')
     ).toBe(0);
-  });
-  it('gradle.properties', () => {
-    expect(parseProps('foo=bar')).toMatchObject({
-      vars: {
-        foo: {
-          fileReplacePosition: 4,
-          key: 'foo',
-          value: 'bar',
-        },
-      },
-      deps: [],
-    });
-    expect(parseProps(' foo = bar ')).toMatchObject({
-      vars: {
-        foo: { key: 'foo', value: 'bar', fileReplacePosition: 7 },
-      },
-      deps: [],
-    });
-    expect(parseProps('foo.bar=baz')).toMatchObject({
-      vars: {
-        'foo.bar': { key: 'foo.bar', value: 'baz', fileReplacePosition: 8 },
-      },
-      deps: [],
-    });
-    expect(parseProps('foo=foo\nbar=bar')).toMatchObject({
-      vars: {
-        foo: { key: 'foo', value: 'foo', fileReplacePosition: 4 },
-        bar: { key: 'bar', value: 'bar', fileReplacePosition: 12 },
-      },
-      deps: [],
-    });
-    expect(parseProps('x=foo:bar:baz', 'x/gradle.properties')).toMatchObject({
-      vars: {},
-      deps: [
-        {
-          currentValue: 'baz',
-          depName: 'foo:bar',
-          managerData: {
-            fileReplacePosition: 10,
-            packageFile: 'x/gradle.properties',
-          },
-        },
-      ],
-    });
   });
 });
