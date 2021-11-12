@@ -100,6 +100,10 @@ export async function downloadHttpProtocol(
   }
 }
 
+// true - exists
+// string - release timestamp
+// false - not found
+// null - error
 export async function isHttpResourceExists(
   pkgUrl: url.URL | string,
   hostType = id
