@@ -1,9 +1,10 @@
-import semver, { validRange } from 'semver';
+import semver from 'semver';
 import { quote } from 'shlex';
 import { getGlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import { ToolConstraint } from '../../../util/exec/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -40,24 +41,21 @@ export async function generateLockFiles(
   const cmd = [];
   let cmdOptions = '';
   try {
+    const toolConstraints: ToolConstraint[] = [];
     if (lernaClient === 'yarn') {
-      let installYarn = 'npm i -g yarn';
-      const yarnCompatibility = config.constraints?.yarn;
-      if (validRange(yarnCompatibility)) {
-        installYarn += `@${quote(yarnCompatibility)}`;
-      }
-      preCommands.push(installYarn);
+      toolConstraints.push({
+        toolName: 'yarn',
+        constraint: config.constraints?.yarn,
+      });
       if (skipInstalls !== false) {
         preCommands.push(getOptimizeCommand());
       }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
-      let installNpm = 'npm i -g npm';
-      const npmCompatibility = config.constraints?.npm;
-      if (validRange(npmCompatibility)) {
-        installNpm += `@${quote(npmCompatibility)} || true`;
-      }
-      preCommands.push(installNpm, 'hash -d npm');
+      toolConstraints.push({
+        toolName: 'npm',
+        constraint: config.constraints?.npm,
+      });
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
@@ -79,6 +77,7 @@ export async function generateLockFiles(
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
       },
+      toolConstraints,
       docker: {
         image: 'node',
         tagScheme: 'node',

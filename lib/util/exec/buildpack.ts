@@ -11,6 +11,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'composer/composer',
     versioning: composerVersioningId,
   },
+  npm: {
+    datasource: 'npm',
+    depName: 'npm',
+    versioning: 'npm',
+  },
 };
 
 export async function resolveConstraint(

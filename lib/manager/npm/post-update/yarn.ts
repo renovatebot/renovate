@@ -11,6 +11,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
+import { ToolConstraint } from '../../../util/exec/types';
 import { exists, readFile, remove, writeFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
@@ -81,13 +82,12 @@ export async function generateLockFile(
     const isYarnDedupeAvailable =
       minYarnVersion && gte(minYarnVersion, '2.2.0');
     const isYarnModeAvailable = minYarnVersion && gte(minYarnVersion, '3.0.0');
-
-    let installYarn = 'npm i -g yarn';
+    const toolConstraint: ToolConstraint = {
+      toolName: 'yarn',
+    };
     if (isYarn1 && minYarnVersion) {
-      installYarn += `@${quote(yarnCompatibility)}`;
+      toolConstraint.constraint = yarnCompatibility;
     }
-
-    const preCommands = [installYarn];
 
     const extraEnv: ExecOptions['extraEnv'] = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
@@ -96,6 +96,7 @@ export async function generateLockFile(
     };
 
     const commands = [];
+    const preCommands = [];
     let cmdOptions = ''; // should have a leading space
     if (config.skipInstalls !== false) {
       if (isYarn1) {

@@ -1,10 +1,9 @@
-import { validRange } from 'semver';
-import { quote } from 'shlex';
 import { join } from 'upath';
 import { getGlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import { ToolConstraint } from '../../../util/exec/types';
 import { readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -23,7 +22,6 @@ export async function generateLockFile(
   let stderr: string;
   let cmd = 'pnpm';
   try {
-    let installPnpm = 'npm i -g pnpm';
     const pnpmUpdate = upgrades.find(
       (upgrade) =>
         upgrade.depType === 'packageManager' && upgrade.depName === 'pnpm'
@@ -31,10 +29,12 @@ export async function generateLockFile(
     const pnpmCompatibility = pnpmUpdate
       ? pnpmUpdate.newValue
       : config.constraints?.pnpm;
-    if (validRange(pnpmCompatibility)) {
-      installPnpm += `@${quote(pnpmCompatibility)}`;
-    }
-    const preCommands = [installPnpm];
+    const toolConstraints: ToolConstraint[] = [
+      {
+        toolName: 'npm',
+        constraint: pnpmCompatibility,
+      },
+    ];
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
@@ -42,11 +42,11 @@ export async function generateLockFile(
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
       },
+      toolConstraints,
       docker: {
         image: 'node',
         tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
     };
     // istanbul ignore if
