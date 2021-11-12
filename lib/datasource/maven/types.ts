@@ -11,7 +11,3 @@ export interface MavenXml {
   authorization?: boolean;
   xml?: XmlDocument;
 }
-
-export type ArtifactsInfo = Record<string, boolean | null>;
-
-export type ArtifactInfoResult = [string, boolean | string | null];
