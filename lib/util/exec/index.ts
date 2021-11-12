@@ -3,6 +3,7 @@ import { dirname, join } from 'upath';
 import { getGlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { generateInstallCommands } from './buildpack';
 import {
   DockerOptions,
   ExecResult,
@@ -12,6 +13,7 @@ import {
 } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
+import type { ToolConstraint } from './types';
 
 type ExtraEnv<T = unknown> = Record<string, T>;
 
@@ -19,6 +21,7 @@ export interface ExecOptions extends ChildProcessExecOptions {
   cwdFile?: string;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
+  toolConstraints?: Opt<ToolConstraint[]>;
 }
 
 function getChildEnv({
@@ -69,6 +72,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   delete execOptions.extraEnv;
   delete execOptions.docker;
   delete execOptions.cwdFile;
+  delete execOptions.toolConstraints;
 
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
@@ -113,7 +117,10 @@ async function prepareRawExec(
     const envVars = dockerEnvVars(extraEnv, childEnv);
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
-
+    dockerOptions.preCommands = [
+      ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(dockerOptions.preCommands || []),
+    ];
     const dockerCommand = await generateDockerCommand(
       rawCommands,
       dockerOptions
