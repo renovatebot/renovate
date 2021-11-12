@@ -4,8 +4,16 @@ export interface Image {
   newName?: string;
   digest?: string;
 }
+
+export interface HelmChart {
+  name: string;
+  repo: string;
+  version: string;
+}
+
 export interface Kustomize {
   kind: string;
   bases: string[];
   images: Image[];
+  helmCharts: HelmChart[];
 }

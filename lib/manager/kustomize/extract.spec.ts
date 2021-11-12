@@ -2,9 +2,11 @@ import { loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
+import { HelmDatasource } from '../../datasource/helm';
 import { SkipReason } from '../../types';
 import {
   extractBase,
+  extractHelmChart,
   extractImage,
   extractPackageFile,
   parseKustomize,
@@ -22,6 +24,7 @@ const kustomizeComponent = loadFixture('component.yaml');
 const newTag = loadFixture('newTag.yaml');
 const newName = loadFixture('newName.yaml');
 const digest = loadFixture('digest.yaml');
+const kustomizeHelmChart = loadFixture('kustomizeHelmChart.yaml');
 
 describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
@@ -116,6 +119,30 @@ describe('manager/kustomize/extract', () => {
       };
 
       const pkg = extractBase(`${base}?ref=${version}`);
+      expect(pkg).toEqual(sample);
+    });
+  });
+  describe('extractHelmChart', () => {
+    it('should return null on a null input', () => {
+      const pkg = extractHelmChart({
+        name: null,
+        repo: null,
+        version: null,
+      });
+      expect(pkg).toBeNull();
+    });
+    it('should correctly extract a chart', () => {
+      const sample = {
+        depName: 'renovate',
+        currentValue: '29.6.0',
+        repo: 'https://docs.renovatebot.com/helm-charts',
+        datasource: HelmDatasource.id,
+      };
+      const pkg = extractHelmChart({
+        name: sample.depName,
+        version: sample.currentValue,
+        repo: sample.repo,
+      });
       expect(pkg).toEqual(sample);
     });
   });
@@ -343,6 +370,16 @@ describe('manager/kustomize/extract', () => {
           },
         ],
       });
+    });
+
+    it('parses helmChart field', () => {
+      const res = extractPackageFile(kustomizeHelmChart);
+      expect(res.deps[0].depType).toBe('HelmChart');
+      expect(res.deps[0].depName).toBe('minecraft');
+      expect(res.deps[0].currentValue).toBe('3.1.3');
+      expect(res.deps[0].repo).toBe(
+        'https://itzg.github.io/minecraft-server-charts'
+      );
     });
   });
 });

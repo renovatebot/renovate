@@ -3,12 +3,13 @@ import { load } from 'js-yaml';
 import * as datasourceDocker from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { splitImageParts } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import type { Image, Kustomize } from './types';
+import type { HelmChart, Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format
@@ -106,6 +107,22 @@ export function extractImage(image: Image): PackageDependency | null {
   return null;
 }
 
+export function extractHelmChart(
+  helmChart: HelmChart
+): PackageDependency | null {
+  if (!helmChart.name) {
+    return null;
+  }
+
+  const dep: PackageDependency = {
+    depName: helmChart.name,
+    currentValue: helmChart.version,
+    repo: helmChart.repo,
+    datasource: HelmDatasource.id,
+  };
+  return dep;
+}
+
 export function parseKustomize(content: string): Kustomize | null {
   let pkg = null;
   try {
@@ -127,7 +144,7 @@ export function parseKustomize(content: string): Kustomize | null {
     pkg.components || []
   );
   pkg.images = pkg.images || [];
-
+  pkg.helmCharts = pkg.helmCharts || [];
   return pkg;
 }
 
@@ -158,6 +175,17 @@ export function extractPackageFile(content: string): PackageFile | null {
       deps.push({
         ...dep,
         depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the helm charts
+  for (const helmChart of pkg.helmCharts) {
+    const dep = extractHelmChart(helmChart);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: 'HelmChart',
       });
     }
   }
