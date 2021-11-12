@@ -8,6 +8,7 @@ import {
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
+import type { ToolConstraint } from '../../util/exec/types';
 import {
   ensureCacheDir,
   ensureLocalDir,
@@ -25,7 +26,6 @@ import {
   composerVersioningId,
   extractContraints,
   getComposerArguments,
-  getComposerConstraint,
   getPhpConstraint,
 } from './utils';
 
@@ -102,9 +102,10 @@ export async function updateArtifacts({
       ...config.constraints,
     };
 
-    const preCommands: string[] = [
-      `install-tool composer ${await getComposerConstraint(constraints)}`,
-    ];
+    const composerToolConstraint: ToolConstraint = {
+      toolName: 'composer',
+      constraint: constraints.composer,
+    };
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -112,8 +113,8 @@ export async function updateArtifacts({
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
       },
+      toolConstraints: [composerToolConstraint],
       docker: {
-        preCommands,
         image: 'php',
         tagConstraint: getPhpConstraint(constraints),
         tagScheme: composerVersioningId,

@@ -195,6 +195,26 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles packag
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles pypi 404 1`] = `Array []`;
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles replacements 1`] = `
+Object {
+  "changelogUrl": undefined,
+  "currentVersion": "1.4.1",
+  "dependencyUrl": undefined,
+  "fixedVersion": "1.4.1",
+  "homepage": undefined,
+  "sourceUrl": "https://github.com/kriskowal/q",
+  "updates": Array [
+    Object {
+      "newName": "r",
+      "newValue": "2.0.0",
+      "updateType": "replacement",
+    },
+  ],
+  "versioning": "npm",
+  "warnings": Array [],
+}
+`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
 Object {
   "changelogUrl": undefined,
