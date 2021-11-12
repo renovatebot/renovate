@@ -1,4 +1,3 @@
-import { mocked } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import * as _datasource from '../../datasource';
 import {
@@ -13,47 +12,6 @@ jest.mock('../../../lib/datasource');
 const datasource = mocked(_datasource);
 
 describe('manager/composer/utils', () => {
-  describe('getComposerConstraint', () => {
-    beforeEach(() => {
-      datasource.getPkgReleases.mockResolvedValueOnce({
-        releases: [
-          { version: '1.0.0' },
-          { version: '1.1.0' },
-          { version: '1.3.0' },
-          { version: '2.0.14' },
-          { version: '2.1.0' },
-        ],
-      });
-    });
-    it('returns from config', async () => {
-      expect(await getComposerConstraint({ composer: '1.1.0' })).toBe('1.1.0');
-    });
-
-    it('returns from latest', async () => {
-      expect(await getComposerConstraint({})).toBe('2.1.0');
-    });
-
-    it('throws no releases', async () => {
-      datasource.getPkgReleases.mockReset();
-      datasource.getPkgReleases.mockResolvedValueOnce({
-        releases: [],
-      });
-      await expect(getComposerConstraint({})).rejects.toThrow(
-        'No composer releases found.'
-      );
-    });
-
-    it('throws no compatible releases', async () => {
-      datasource.getPkgReleases.mockReset();
-      datasource.getPkgReleases.mockResolvedValueOnce({
-        releases: [{ version: '1.2.3' }],
-      });
-      await expect(
-        getComposerConstraint({ composer: '^3.1.0' })
-      ).rejects.toThrow('No compatible composer releases found.');
-    });
-  });
-
   describe('extractContraints', () => {
     it('returns from require', () => {
       expect(

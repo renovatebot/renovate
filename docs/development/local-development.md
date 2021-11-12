@@ -80,7 +80,7 @@ To ensure everything is working properly on your end, you must:
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`
 1. Verify the installation by running `yarn start`. You must see this error: `You must configure a GitHub personal access token`
 
-You only need to do these 5 steps this one time.
+You only need to do these steps once.
 
 Before you submit a pull request you should:
 
@@ -181,10 +181,10 @@ It's usually easier to have the logs in a file that you can open with a text edi
 You can use a command like this to put the log messages in a file:
 
 ```
-rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
+LOG_LEVEL=debug yarn start myaccount/therepo > debug.log
 ```
 
-The example command will delete any existing `debug.log` and then save Renovate's output to a new `debug.log` file.
+The example command will redirect/save Renovate's output to the `debug.log` file (and overwrite `debug.log` if it already exists).
 
 ### Adding configuration options
 
