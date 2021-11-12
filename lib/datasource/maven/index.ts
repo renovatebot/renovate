@@ -36,10 +36,10 @@ function extractVersions(metadata: XmlDocument): string[] {
 }
 
 async function fetchReleasesFromMetadata(
-  mvnDep: MavenDependency,
+  dependency: MavenDependency,
   repoUrl: string
 ): Promise<ReleaseMap> {
-  const metadataUrl = getMavenUrl(mvnDep, repoUrl, 'maven-metadata.xml');
+  const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
 
   const cacheNamespace = 'datasource-maven-metadata@v2';
   const cacheKey = metadataUrl.toString();
@@ -103,13 +103,13 @@ function extractSnapshotVersion(metadata: XmlDocument): string | null {
 
 async function getSnapshotFullVersion(
   version: string,
-  mvnDep: MavenDependency,
+  dependency: MavenDependency,
   repoUrl: string
 ): Promise<string | null> {
   // To determine what actual files are available for the snapshot, first we have to fetch and parse
   // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
   const metadataUrl = getMavenUrl(
-    mvnDep,
+    dependency,
     repoUrl,
     `${version}/maven-metadata.xml`
   );
@@ -124,26 +124,30 @@ async function getSnapshotFullVersion(
 
 async function createUrlForDependencyPom(
   version: string,
-  mvnDep: MavenDependency,
+  dependency: MavenDependency,
   repoUrl: string
 ): Promise<string> {
   if (isSnapshotVersion(version)) {
     // By default, Maven snapshots are deployed to the repository with fixed file names.
     // Resolve the full, actual pom file name for the version.
-    const fullVersion = await getSnapshotFullVersion(version, mvnDep, repoUrl);
+    const fullVersion = await getSnapshotFullVersion(
+      version,
+      dependency,
+      repoUrl
+    );
 
     // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
     if (fullVersion !== null) {
-      return `${version}/${mvnDep.name}-${fullVersion}.pom`;
+      return `${version}/${dependency.name}-${fullVersion}.pom`;
     }
   }
 
-  return `${version}/${mvnDep.name}-${version}.pom`;
+  return `${version}/${dependency.name}-${version}.pom`;
 }
 
 async function addReleasesUsingHeadRequests(
   inputReleaseMap: ReleaseMap,
-  mvnDep: MavenDependency,
+  dependency: MavenDependency,
   repoUrl: string
 ): Promise<ReleaseMap> {
   const releaseMap = { ...inputReleaseMap };
@@ -153,7 +157,7 @@ async function addReleasesUsingHeadRequests(
   }
 
   const cacheNs = 'datasource-maven-metadata@v2';
-  const cacheKey = `${repoUrl}${mvnDep.dependencyUrl}`;
+  const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
   let workingReleaseMap: ReleaseMap = await packageCache.get<ReleaseMap>(
     cacheNs,
     cacheKey
@@ -179,10 +183,10 @@ async function addReleasesUsingHeadRequests(
         (version) => async (): Promise<void> => {
           const pomUrl = await createUrlForDependencyPom(
             version,
-            mvnDep,
+            dependency,
             repoUrl
           );
-          const artifactUrl = getMavenUrl(mvnDep, repoUrl, pomUrl);
+          const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
           const res = await isHttpResourceExists(artifactUrl);
           const release: Release = { version };
 
@@ -237,26 +241,30 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const mvnDep = getDependencyParts(lookupName);
+  const dependency = getDependencyParts(lookupName);
   const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12070
 
-  logger.debug(`Looking up ${mvnDep.display} in repository ${repoUrl}`);
+  logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 
-  let releaseMap = await fetchReleasesFromMetadata(mvnDep, repoUrl);
-  releaseMap = await addReleasesUsingHeadRequests(releaseMap, mvnDep, repoUrl);
+  let releaseMap = await fetchReleasesFromMetadata(dependency, repoUrl);
+  releaseMap = await addReleasesUsingHeadRequests(
+    releaseMap,
+    dependency,
+    repoUrl
+  );
   const releases = getReleasesFromMap(releaseMap);
   if (!releases?.length) {
     return null;
   }
 
   logger.debug(
-    `Found ${releases.length} new releases for ${mvnDep.display} in repository ${repoUrl}`
+    `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`
   );
 
   const latestStableVersion = getLatestStableVersion(releases);
-  const depInfo =
+  const dependencyInfo =
     latestStableVersion &&
-    (await getDependencyInfo(mvnDep, repoUrl, latestStableVersion));
+    (await getDependencyInfo(dependency, repoUrl, latestStableVersion));
 
-  return { ...mvnDep, ...depInfo, releases };
+  return { ...dependency, ...dependencyInfo, releases };
 }
