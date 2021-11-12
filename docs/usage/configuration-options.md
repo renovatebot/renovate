@@ -1660,8 +1660,8 @@ You can suggest a new community package rule by editing [the `replacements.ts` f
 
 ### replacementVersion
 
-Use this field to define the name of a replacement package.
-Must be used with `replacementVersion`.
+Use this field to define the version of a replacement package.
+Must be used with `replacementName`.
 For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
 
 ```json
