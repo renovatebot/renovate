@@ -1,5 +1,3 @@
-import { validRange } from 'semver';
-import { quote } from 'shlex';
 import { join } from 'upath';
 import { getGlobalConfig } from '../../../config/global';
 import {
@@ -8,7 +6,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import { ToolConstraint } from '../../../util/exec/buildpack';
+import type { ToolConstraint } from '../../../util/exec/types';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
