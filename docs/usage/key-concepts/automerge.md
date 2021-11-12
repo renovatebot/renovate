@@ -73,7 +73,7 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": ">=1.0.0",
+      "matchCurrentVersion": "!/^0/",
       "automerge": true
     }
   ]
