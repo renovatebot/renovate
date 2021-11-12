@@ -36,6 +36,7 @@ const updateTypeConfidenceMapping: Record<UpdateType, MergeConfidence> = {
   lockFileMaintenance: 'neutral',
   lockfileUpdate: 'neutral',
   rollback: 'neutral',
+  replacement: 'neutral',
   major: null,
   minor: null,
   patch: null,
