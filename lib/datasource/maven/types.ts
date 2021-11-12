@@ -11,3 +11,5 @@ export interface MavenXml {
   authorization?: boolean;
   xml?: XmlDocument;
 }
+
+export type ReleaseMap = Record<string, Release | null>;

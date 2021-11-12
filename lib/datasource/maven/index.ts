@@ -8,7 +8,7 @@ import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
-import type { MavenDependency } from './types';
+import type { MavenDependency, ReleaseMap } from './types';
 import {
   downloadMavenXml,
   getDependencyInfo,
@@ -23,8 +23,6 @@ export const customRegistrySupport = true;
 export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = mavenVersioning.id;
 export const registryStrategy = 'merge';
-
-type ReleaseMap = Record<string, Release | null>;
 
 function isStableVersion(x: string): boolean {
   return mavenVersion.isStable(x);
