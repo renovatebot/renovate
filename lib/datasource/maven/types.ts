@@ -1,4 +1,5 @@
 import type { XmlDocument } from 'xmldoc';
+import type { Release } from '../types';
 
 export interface MavenDependency {
   display: string;
