@@ -193,7 +193,7 @@ async function addReleasesUsingHeadRequests(
     cacheKey
   );
 
-  if (workingReleaseMap) {
+  if (!workingReleaseMap) {
     workingReleaseMap = {};
 
     const unknownVersions = Object.entries(releaseMap)
@@ -246,13 +246,12 @@ async function addReleasesUsingHeadRequests(
   return releaseMap;
 }
 
-function getReleasesFromMap(inputReleaseMap: ReleaseMap): Release[] {
-  const releaseMap = { ...inputReleaseMap };
-  for (const version of Object.keys(releaseMap)) {
-    releaseMap[version] ||= { version };
-  }
+function getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
   const releases = Object.values(releaseMap).filter(Boolean);
-  return releases;
+  if (releases.length) {
+    return releases;
+  }
+  return Object.keys(releaseMap).map((version) => ({ version }));
 }
 
 function isStableVersion(x: string): boolean {
