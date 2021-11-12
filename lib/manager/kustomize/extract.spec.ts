@@ -132,16 +132,17 @@ describe('manager/kustomize/extract', () => {
       expect(pkg).toBeNull();
     });
     it('should correctly extract a chart', () => {
+      const registryUrl = 'https://docs.renovatebot.com/helm-charts';
       const sample = {
         depName: 'renovate',
         currentValue: '29.6.0',
-        repo: 'https://docs.renovatebot.com/helm-charts',
+        registryUrls: [registryUrl],
         datasource: HelmDatasource.id,
       };
       const pkg = extractHelmChart({
         name: sample.depName,
         version: sample.currentValue,
-        repo: sample.repo,
+        repo: registryUrl,
       });
       expect(pkg).toEqual(sample);
     });
@@ -377,9 +378,9 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[0].depType).toBe('HelmChart');
       expect(res.deps[0].depName).toBe('minecraft');
       expect(res.deps[0].currentValue).toBe('3.1.3');
-      expect(res.deps[0].repo).toBe(
-        'https://itzg.github.io/minecraft-server-charts'
-      );
+      expect(res.deps[0].registryUrls).toStrictEqual([
+        'https://itzg.github.io/minecraft-server-charts',
+      ]);
     });
   });
 });

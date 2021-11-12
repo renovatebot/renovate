@@ -117,7 +117,7 @@ export function extractHelmChart(
   const dep: PackageDependency = {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    repo: helmChart.repo,
+    registryUrls: [helmChart.repo],
     datasource: HelmDatasource.id,
   };
   return dep;
