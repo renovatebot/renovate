@@ -208,5 +208,48 @@ describe('manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(outputContent);
     });
+
+    it('returns null if empty file', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'angular-touch-not',
+        newValue: '1.5.8',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: null,
+        upgrade,
+      });
+      expect(testContent).toBeNull();
+    });
+
+    it('replaces package', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'abc',
+        newValue: '2.0.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
+      expect(JSON.parse(testContent).dependencies.config).toBeUndefined();
+      expect(JSON.parse(testContent).dependencies.abc).toBe('2.0.0');
+    });
+
+    it('replaces glob package resolutions', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'abc',
+        newValue: '2.0.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01GlobContent,
+        upgrade,
+      });
+      expect(JSON.parse(testContent).resolutions.config).toBeUndefined();
+      expect(JSON.parse(testContent).resolutions['**/abc']).toBe('2.0.0');
+    });
   });
 });
