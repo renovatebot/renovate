@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
@@ -87,9 +88,15 @@ async function addReleasesFromIndexPage(
       const { body } = res;
       const matches = Array.from(body.matchAll(mavenCentralHtmlVersionRegex));
       for (const match of matches) {
-        const { version, releaseTimestamp } = match?.groups || {};
-        if (version && releaseTimestamp) {
-          releaseMap[version] = { version, releaseTimestamp };
+        const { version, releaseTimestamp: timestamp } = match?.groups || {};
+        if (version && timestamp) {
+          const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
+            zone: 'UTC',
+          });
+          if (date.isValid) {
+            const releaseTimestamp = date.toISO();
+            releaseMap[version] = { version, releaseTimestamp };
+          }
         }
       }
     }

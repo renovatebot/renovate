@@ -187,9 +187,7 @@ describe('datasource/maven/index', () => {
 
   it('returns html-based releases', async () => {
     mockGenericPackage({
-      meta: null,
-      snapshots: null,
-      latest: '1.0.2',
+      latest: '2.0.0',
       jars: null,
       html: loadFixture('index.html'),
     });
@@ -206,6 +204,11 @@ describe('datasource/maven/index', () => {
         { version: '1.0.0', releaseTimestamp: '2021-02-22T14:43:00.000Z' },
         { version: '1.0.1', releaseTimestamp: '2021-04-12T15:51:00.000Z' },
         { version: '1.0.2', releaseTimestamp: '2021-06-16T12:47:00.000Z' },
+        {
+          version: '1.0.3-SNAPSHOT',
+          releaseTimestamp: '2020-01-01T01:00:03.000Z',
+        },
+        { version: '2.0.0', releaseTimestamp: '2021-06-18T16:24:00.000Z' },
       ],
     });
     expect(httpMock.getTrace()).toMatchSnapshot();
@@ -280,8 +283,6 @@ describe('datasource/maven/index', () => {
   it('throws EXTERNAL_HOST_ERROR for 50x', async () => {
     httpMock
       .scope(baseUrl)
-      .get('/org/example/package/index.html')
-      .reply(503)
       .get('/org/example/package/maven-metadata.xml')
       .reply(503);
 
