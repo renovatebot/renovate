@@ -1,6 +1,5 @@
 import { quote } from 'shlex';
 import { getGlobalConfig } from '../../config/global';
-import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
@@ -27,45 +26,6 @@ export function getComposerArguments(config: UpdateArtifactsConfig): string {
   }
 
   return args;
-}
-
-export async function getComposerConstraint(
-  constraints: Record<string, string>
-): Promise<string> {
-  const { composer } = constraints;
-
-  if (api.isSingleVersion(composer)) {
-    logger.debug(
-      { version: composer },
-      'Using composer constraint from config'
-    );
-    return composer;
-  }
-
-  const release = await getPkgReleases({
-    depName: 'composer/composer',
-    datasource: 'github-releases',
-    versioning: composerVersioningId,
-  });
-
-  if (!release?.releases?.length) {
-    throw new Error('No composer releases found.');
-  }
-  let versions = release.releases.map((r) => r.version);
-
-  if (composer) {
-    versions = versions.filter(
-      (v) => api.isValid(v) && api.matches(v, composer)
-    );
-  }
-
-  if (!versions.length) {
-    throw new Error('No compatible composer releases found.');
-  }
-
-  const version = versions.pop();
-  logger.debug({ range: composer, version }, 'Using composer constraint');
-  return version;
 }
 
 export function getPhpConstraint(constraints: Record<string, string>): string {
