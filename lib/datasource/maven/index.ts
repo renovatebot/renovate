@@ -12,7 +12,7 @@ import type { MavenDependency } from './types';
 import {
   downloadHttpProtocol,
   downloadMavenXml,
-  getDependencyInfo as getDepInfo,
+  getDependencyInfo,
   getDependencyParts,
   getMavenUrl,
   isHttpResourceExists,
@@ -37,10 +37,10 @@ function extractVersions(metadata: XmlDocument): string[] {
 }
 
 async function fetchReleasesFromMetadata(
-  dependency: MavenDependency,
+  mvnDep: MavenDependency,
   repoUrl: string
 ): Promise<ReleaseMap> {
-  const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
+  const metadataUrl = getMavenUrl(mvnDep, repoUrl, 'maven-metadata.xml');
 
   const cacheNamespace = 'datasource-maven-metadata@v2';
   const cacheKey = metadataUrl.toString();
@@ -133,13 +133,13 @@ function extractSnapshotVersion(metadata: XmlDocument): string | null {
 
 async function getSnapshotFullVersion(
   version: string,
-  dependency: MavenDependency,
+  mvnDep: MavenDependency,
   repoUrl: string
 ): Promise<string | null> {
   // To determine what actual files are available for the snapshot, first we have to fetch and parse
   // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
   const metadataUrl = getMavenUrl(
-    dependency,
+    mvnDep,
     repoUrl,
     `${version}/maven-metadata.xml`
   );
@@ -154,25 +154,21 @@ async function getSnapshotFullVersion(
 
 async function createUrlForDependencyPom(
   version: string,
-  dependency: MavenDependency,
+  mvnDep: MavenDependency,
   repoUrl: string
 ): Promise<string> {
   if (isSnapshotVersion(version)) {
     // By default, Maven snapshots are deployed to the repository with fixed file names.
     // Resolve the full, actual pom file name for the version.
-    const fullVersion = await getSnapshotFullVersion(
-      version,
-      dependency,
-      repoUrl
-    );
+    const fullVersion = await getSnapshotFullVersion(version, mvnDep, repoUrl);
 
     // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
     if (fullVersion !== null) {
-      return `${version}/${dependency.name}-${fullVersion}.pom`;
+      return `${version}/${mvnDep.name}-${fullVersion}.pom`;
     }
   }
 
-  return `${version}/${dependency.name}-${version}.pom`;
+  return `${version}/${mvnDep.name}-${version}.pom`;
 }
 
 async function addReleasesUsingHeadRequests(
@@ -291,7 +287,7 @@ export async function getReleases({
   const latestStableVersion = getLatestStableVersion(releases);
   const depInfo =
     latestStableVersion &&
-    (await getDepInfo(mvnDep, repoUrl, latestStableVersion));
+    (await getDependencyInfo(mvnDep, repoUrl, latestStableVersion));
 
   return { ...mvnDep, ...depInfo, releases };
 }
