@@ -52,7 +52,7 @@ async function fetchReleasesFromMetadata(
 ): Promise<ReleaseMap> {
   const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
 
-  const cacheNamespace = 'datasource-maven-metadata@v2';
+  const cacheNamespace = 'datasource-maven:metadata-xml';
   const cacheKey = metadataUrl.toString();
   const cachedVersions = await packageCache.get<ReleaseMap>(
     cacheNamespace,
@@ -167,7 +167,7 @@ async function addReleasesUsingHeadRequests(
     return releaseMap;
   }
 
-  const cacheNs = 'datasource-maven-metadata@v2';
+  const cacheNs = 'datasource-maven:head-requests';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
   let workingReleaseMap: ReleaseMap = await packageCache.get<ReleaseMap>(
     cacheNs,
