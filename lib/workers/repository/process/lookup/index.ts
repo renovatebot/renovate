@@ -88,6 +88,7 @@ export async function lookupUpdates(
         logger.debug({ dependency: depName }, 'Found deprecationMessage');
         res.deprecationMessage = dependency.deprecationMessage;
       }
+
       res.sourceUrl = dependency?.sourceUrl;
       if (dependency.sourceDirectory) {
         res.sourceDirectory = dependency.sourceDirectory;
@@ -144,6 +145,17 @@ export async function lookupUpdates(
         res.updates.push(rollback);
       }
       let rangeStrategy = getRangeStrategy(config);
+      if (dependency.replacementName && dependency.replacementVersion) {
+        res.updates.push({
+          updateType: 'replacement',
+          newName: dependency.replacementName,
+          newValue: versioning.getNewValue({
+            currentValue,
+            newVersion: dependency.replacementVersion,
+            rangeStrategy,
+          }),
+        });
+      }
       // istanbul ignore next
       if (
         isVulnerabilityAlert &&
