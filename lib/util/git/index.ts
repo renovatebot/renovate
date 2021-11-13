@@ -554,21 +554,25 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
 
 export async function isBranchConflicted(
   baseBranch: string,
-  branchName: string
+  branch: string
 ): Promise<boolean> {
-  if (!branchExists(branchName)) {
-    logger.debug({ branchName }, 'Conflict detection: branch does not exist');
-    return false;
+  await syncGit();
+
+  if (!branchExists(baseBranch) || !branchExists(branch)) {
+    logger.debug(
+      { baseBranch, branch },
+      'isBranchConflicted: branch does not exist'
+    );
+    return null;
   }
 
-  const baseBranchSha = getBranchCommit(baseBranch);
-  const targetBranchSha = getBranchCommit(branchName);
   const cacheNs = 'git-conflicts';
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branch);
   const cacheKey =
-    baseBranchSha && targetBranchSha
-      ? `${baseBranchSha} <- ${targetBranchSha}`
-      : null;
+    baseBranchSha && branch ? `${baseBranchSha} <- ${branchSha}` : null;
 
+  // istanbul ignore if
   if (cacheKey) {
     const cachedResult = await packageCache.get<boolean>(cacheNs, cacheKey);
     if (cachedResult !== undefined) {
@@ -578,24 +582,37 @@ export async function isBranchConflicted(
 
   let result = false;
 
+  let origBranch: string;
   try {
-    await syncGit();
+    origBranch = config.currentBranch;
     await git.reset(ResetMode.HARD);
-    await git.checkout(branchName);
+    if (origBranch !== branch) {
+      await git.checkout(branch);
+    }
     await git.merge(['--no-commit', '--no-ff', baseBranch]);
-    await git.reset(ResetMode.HARD);
-    await git.checkout(baseBranch);
   } catch (err) {
+    // istanbul ignore else: not easy testable
     if (err?.git?.conflicts?.length) {
       result = true;
     } else {
-      logger.debug({ branchName, err }, 'Conflict detection: unknown error');
+      logger.debug(
+        { baseBranch, branch, err },
+        'Conflict detection: unknown error'
+      );
       result = null;
+    }
+  } finally {
+    if (origBranch) {
+      await git.reset(ResetMode.HARD);
+      await git.checkout(origBranch);
     }
   }
 
+  // istanbul ignore if
   if (cacheKey) {
-    await packageCache.set(cacheNs, cacheKey, result, 7 * 24 * 60);
+    const cacheDays = result === null ? 1 : 7;
+    const cacheTTL = cacheDays * 24 * 60;
+    await packageCache.set(cacheNs, cacheKey, result, cacheTTL);
   }
 
   return result;

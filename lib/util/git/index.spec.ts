@@ -610,20 +610,20 @@ describe('util/git/index', () => {
       await repo.reset(['--hard', 'HEAD~1']);
     });
 
-    it('returns false for non-existing branch', async () => {
+    it('returns null for non-existing source branch', async () => {
       const res = await git.isBranchConflicted(
         defaultBranch,
         'renovate/non_existing_branch'
       );
-      expect(res).toBeFalse();
+      expect(res).toBeNull();
     });
 
-    it('returns false for non-existing base branch', async () => {
+    it('returns null for non-existing target branch', async () => {
       const res = await git.isBranchConflicted(
         'renovate/non_existing_branch',
         'renovate/non_conflicted_branch'
       );
-      expect(res).toBeFalse();
+      expect(res).toBeNull();
     });
 
     it('detects conflicted branch', async () => {
