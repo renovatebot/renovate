@@ -24,6 +24,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
+import * as packageCache from '../cache/package';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
@@ -559,6 +560,24 @@ export async function isBranchConflicted(
     logger.debug({ branchName }, 'Conflict detection: branch does not exist');
     return false;
   }
+
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const targetBranchSha = getBranchCommit(branchName);
+  const cacheNs = 'git-conflicts';
+  const cacheKey =
+    baseBranchSha && targetBranchSha
+      ? `${baseBranchSha} <- ${targetBranchSha}`
+      : null;
+
+  if (cacheKey) {
+    const cachedResult = await packageCache.get<boolean>(cacheNs, cacheKey);
+    if (cachedResult !== undefined) {
+      return cachedResult;
+    }
+  }
+
+  let result = false;
+
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
@@ -568,11 +587,18 @@ export async function isBranchConflicted(
     await git.checkout(baseBranch);
   } catch (err) {
     if (err?.git?.conflicts?.length) {
-      return true;
+      result = true;
+    } else {
+      logger.debug({ branchName, err }, 'Conflict detection: unknown error');
+      result = null;
     }
-    logger.debug({ branchName, err }, 'Conflict detection: unknown error');
   }
-  return false;
+
+  if (cacheKey) {
+    await packageCache.set(cacheNs, cacheKey, result, 7 * 24 * 60);
+  }
+
+  return result;
 }
 
 export async function deleteBranch(branchName: string): Promise<void> {
