@@ -220,7 +220,7 @@ describe('workers/repository/updates/branch-name', () => {
         },
         {
           upgrade: { branchName: 'renovate/~bad-branch-name2' },
-          expectedBranchName: 'renovate/-bad-branch-name2',
+          expectedBranchName: 'renovate/bad-branch-name2',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-^-name3' },
@@ -257,6 +257,10 @@ describe('workers/repository/updates/branch-name', () => {
         {
           upgrade: { branchName: 'renovate/bad--branch---name11' },
           expectedBranchName: 'renovate/bad-branch-name11',
+        },
+        {
+          upgrade: { branchName: 'renovate-/[start]-something-[end]' },
+          expectedBranchName: 'renovate/start-something-end',
         },
       ];
       fixtures.forEach((fixture) => {
