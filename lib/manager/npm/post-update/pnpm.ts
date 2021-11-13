@@ -31,7 +31,7 @@ export async function generateLockFile(
       : config.constraints?.pnpm;
     const toolConstraints: ToolConstraint[] = [
       {
-        toolName: 'npm',
+        toolName: 'pnpm',
         constraint: pnpmCompatibility,
       },
     ];
