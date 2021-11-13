@@ -3,6 +3,7 @@ import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import * as allVersioning from '../../versioning';
 import { id as composerVersioningId } from '../../versioning/composer';
+import { id as npmVersioningId } from '../../versioning/npm';
 import type { ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
@@ -14,7 +15,17 @@ const allToolConfig: Record<string, ToolConfig> = {
   npm: {
     datasource: 'npm',
     depName: 'npm',
-    versioning: 'npm',
+    versioning: npmVersioningId,
+  },
+  pnpm: {
+    datasource: 'npm',
+    depName: 'pnpm',
+    versioning: npmVersioningId,
+  },
+  yarn: {
+    datasource: 'npm',
+    depName: 'yarn',
+    versioning: npmVersioningId,
   },
 };
 
