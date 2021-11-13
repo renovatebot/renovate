@@ -375,12 +375,16 @@ describe('manager/kustomize/extract', () => {
 
     it('parses helmChart field', () => {
       const res = extractPackageFile(kustomizeHelmChart);
-      expect(res.deps[0].depType).toBe('HelmChart');
-      expect(res.deps[0].depName).toBe('minecraft');
-      expect(res.deps[0].currentValue).toBe('3.1.3');
-      expect(res.deps[0].registryUrls).toStrictEqual([
-        'https://itzg.github.io/minecraft-server-charts',
-      ]);
+      expect(res).toMatchSnapshot({
+        deps: [
+          {
+            depType: 'HelmChart',
+            depName: 'minecraft',
+            currentValue: '3.1.3',
+            registryUrls: ['https://itzg.github.io/minecraft-server-charts'],
+          },
+        ],
+      });
     });
   });
 });
