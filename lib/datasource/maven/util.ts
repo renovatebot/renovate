@@ -1,14 +1,20 @@
 import url from 'url';
+import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
 import { regEx } from '../../util/regex';
+import { normalizeDate } from '../metadata';
 
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
-import type { MavenDependency, MavenXml } from './types';
+import type {
+  HttpResourceCheckResult,
+  MavenDependency,
+  MavenXml,
+} from './types';
 
 const http: Record<string, Http> = {};
 
@@ -100,18 +106,27 @@ export async function downloadHttpProtocol(
   }
 }
 
-export async function isHttpResourceExists(
+export async function checkHttpResource(
   pkgUrl: url.URL | string,
   hostType = id
-): Promise<boolean | string | null> {
+): Promise<HttpResourceCheckResult> {
   try {
     const httpClient = httpByHostType(hostType);
     const res = await httpClient.head(pkgUrl.toString());
     const timestamp = res?.headers?.['last-modified'] as string;
-    return timestamp || true;
+    if (timestamp) {
+      const isoTimestamp = normalizeDate(timestamp);
+      if (isoTimestamp) {
+        const releaseDate = DateTime.fromISO(isoTimestamp, {
+          zone: 'UTC',
+        }).toJSDate();
+        return releaseDate;
+      }
+    }
+    return 'found';
   } catch (err) {
     if (isNotFoundError(err)) {
-      return false;
+      return 'not-found';
     }
 
     const failedUrl = pkgUrl.toString();
@@ -119,7 +134,7 @@ export async function isHttpResourceExists(
       { failedUrl, statusCode: err.statusCode },
       `Can't check HTTP resource existence`
     );
-    return null;
+    return 'error';
   }
 }
 
