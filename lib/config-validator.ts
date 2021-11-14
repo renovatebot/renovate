@@ -88,7 +88,7 @@ type PackageJson = {
     // ignore
   }
   try {
-    const fileConfig = getFileConfig(process.env);
+    const fileConfig = await getFileConfig(process.env);
     if (!dequal(fileConfig, {})) {
       const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
       logger.info(`Validating ${file}`);
