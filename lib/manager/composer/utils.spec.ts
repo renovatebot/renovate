@@ -1,5 +1,11 @@
 import { setGlobalConfig } from '../../config/global';
-import { extractContraints, getComposerArguments } from './utils';
+import {
+  extractContraints,
+  getComposerArguments,
+  requireComposerDependencyInstallation,
+} from './utils';
+
+jest.mock('../../../lib/datasource');
 
 describe('manager/composer/utils', () => {
   describe('extractContraints', () => {
@@ -75,13 +81,15 @@ describe('manager/composer/utils', () => {
         ' --ignore-platform-req ext-intl --ignore-platform-req ext-icu --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
     });
-    it('allows scripts/plugins when configured', () => {
+    it('allows scripts when configured', () => {
       setGlobalConfig({
         allowScripts: true,
       });
-      expect(getComposerArguments({})).toBe(' --no-ansi --no-interaction');
+      expect(getComposerArguments({})).toBe(
+        ' --no-ansi --no-interaction --no-plugins'
+      );
     });
-    it('disables scripts/plugins when configured locally', () => {
+    it('disables scripts when configured locally', () => {
       setGlobalConfig({
         allowScripts: true,
       });
@@ -92,6 +100,52 @@ describe('manager/composer/utils', () => {
       ).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
+    });
+    it('allows plugins when configured', () => {
+      setGlobalConfig({
+        allowPlugins: true,
+      });
+      expect(getComposerArguments({})).toBe(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader'
+      );
+    });
+    it('disables plugins when configured locally', () => {
+      setGlobalConfig({
+        allowPlugins: true,
+      });
+      expect(
+        getComposerArguments({
+          ignorePlugins: true,
+        })
+      ).toBe(
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
+    });
+  });
+
+  describe('requireComposerDependencyInstallation', () => {
+    it('returns true when symfony/flex has been installed', () => {
+      expect(
+        requireComposerDependencyInstallation({
+          packages: [{ name: 'symfony/flex', version: '1.17.1' }],
+        })
+      ).toBeTrue();
+    });
+
+    it('returns true when symfony/flex has been installed as dev dependency', () => {
+      expect(
+        requireComposerDependencyInstallation({
+          'packages-dev': [{ name: 'symfony/flex', version: '1.17.1' }],
+        })
+      ).toBeTrue();
+    });
+
+    it('returns false when symfony/flex has not been installed', () => {
+      expect(
+        requireComposerDependencyInstallation({
+          packages: [{ name: 'symfony/console', version: '5.4.0' }],
+        })
+      ).toBeFalse();
     });
   });
 });
