@@ -6,10 +6,6 @@ import { clone } from '../clone';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
-handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
-  JSON.stringify(JSON.parse(input), null, 2)
-);
-
 // istanbul ignore next
 handlebars.registerHelper(
   'replace',

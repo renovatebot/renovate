@@ -18,10 +18,4 @@ describe('util/template/index', () => {
     expect(output).toContain('github');
     expect(output).not.toContain('123test');
   });
-  it('string to pretty JSON ', () => {
-    const userTemplate =
-      '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
-    const output = template.compile(userTemplate, undefined);
-    expect(output).toMatchSnapshot();
-  });
 });
