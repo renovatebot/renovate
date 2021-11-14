@@ -4,6 +4,7 @@ import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
+import { regEx } from '../../util/regex';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
@@ -18,7 +19,6 @@ import {
   getDependencyParts,
   getMavenUrl,
 } from './util';
-import { regEx } from '../../util/regex';
 
 export { id } from './common';
 
