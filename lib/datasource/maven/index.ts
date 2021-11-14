@@ -29,14 +29,16 @@ function isStableVersion(x: string): boolean {
 }
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
+  // istanbul ignore if
+  if (!releases?.length) {
+    return null;
+  }
   const allVersions = releases.map(({ version }) => version);
   const stableVersions = allVersions.filter(isStableVersion);
   const versions = stableVersions.length ? stableVersions : allVersions;
-  return versions.length
-    ? versions.reduce((latestVersion, version) =>
-        compare(version, latestVersion) === 1 ? version : latestVersion
-      )
-    : null;
+  return versions.reduce((latestVersion, version) =>
+    compare(version, latestVersion) === 1 ? version : latestVersion
+  );
 }
 
 function extractVersions(metadata: XmlDocument): string[] {
