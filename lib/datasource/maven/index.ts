@@ -28,6 +28,19 @@ export const registryStrategy = 'merge';
 
 type ReleaseMap = Record<string, Release | null>;
 
+function isStableVersion(x: string): boolean {
+  return mavenVersion.isStable(x);
+}
+
+function getLatestStableVersion(releases: Release[]): string | undefined {
+  return releases
+    .map(({ version }) => version)
+    .filter(isStableVersion)
+    .reduce((latestVersion, version) =>
+      compare(version, latestVersion) === 1 ? version : latestVersion
+    );
+}
+
 function extractVersions(metadata: XmlDocument): string[] {
   const versions = metadata.descendantWithPath('versioning.versions');
   const elements = versions?.childrenNamed('version');
@@ -259,19 +272,6 @@ function getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
     return releases;
   }
   return Object.keys(releaseMap).map((version) => ({ version }));
-}
-
-function isStableVersion(x: string): boolean {
-  return mavenVersion.isStable(x);
-}
-
-function getLatestStableVersion(releases: Release[]): string | undefined {
-  return releases
-    .map(({ version }) => version)
-    .filter(isStableVersion)
-    .reduce((latestVersion, version) =>
-      compare(version, latestVersion) === 1 ? version : latestVersion
-    );
 }
 
 export async function getReleases({
