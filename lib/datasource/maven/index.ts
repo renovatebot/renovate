@@ -18,6 +18,7 @@ import {
   getDependencyParts,
   getMavenUrl,
 } from './util';
+import { regEx } from '../../util/regex';
 
 export { id } from './common';
 
@@ -87,8 +88,10 @@ async function fetchReleasesFromMetadata(
   return releaseMap;
 }
 
-const mavenCentralHtmlVersionRegex =
-  /<a href="(?<version>[^"]+)\/" title="\k<version>\/">\k<version>\/<\/a>\s+(?<releaseTimestamp>\d\d\d\d-\d\d-\d\d \d\d:\d\d)\s+-/gi;
+const mavenCentralHtmlVersionRegex = regEx(
+  '^<a href="(?<version>[^"]+)\\/" title="(?:[^"]+)\\/">(?:[^"]+)\\/<\\/a>\\s+(?<releaseTimestamp>\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d)\\s+-\\s+$',
+  'i'
+);
 
 async function addReleasesFromIndexPage(
   inputReleaseMap: ReleaseMap,
@@ -106,16 +109,19 @@ async function addReleasesFromIndexPage(
         const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
         const res = await downloadHttpProtocol(indexUrl);
         const { body } = res;
-        const matches = Array.from(body.matchAll(mavenCentralHtmlVersionRegex));
-        for (const match of matches) {
-          const { version, releaseTimestamp: timestamp } = match?.groups || {};
-          if (version && timestamp) {
-            const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
-              zone: 'UTC',
-            });
-            if (date.isValid) {
-              const releaseTimestamp = date.toISO();
-              workingReleaseMap[version] = { version, releaseTimestamp };
+        for (const line of body.split('\n')) {
+          const match = line.match(mavenCentralHtmlVersionRegex);
+          if (match) {
+            const { version, releaseTimestamp: timestamp } =
+              match?.groups || {};
+            if (version && timestamp) {
+              const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
+                zone: 'UTC',
+              });
+              if (date.isValid) {
+                const releaseTimestamp = date.toISO();
+                workingReleaseMap[version] = { version, releaseTimestamp };
+              }
             }
           }
         }
