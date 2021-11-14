@@ -201,12 +201,16 @@ async function addReleasesUsingHeadRequests(
           const release: Release = { version };
 
           const res = await checkHttpResource(artifactUrl);
+
           if (res === 'error') {
             retryEarlier = true;
-          } else if (is.date(res)) {
+          }
+
+          if (is.date(res)) {
             release.releaseTimestamp = res.toISOString();
-            workingReleaseMap[version] = release;
-          } else if (res !== 'not-found') {
+          }
+
+          if (res !== 'not-found' && res !== 'error') {
             workingReleaseMap[version] = release;
           }
         }
