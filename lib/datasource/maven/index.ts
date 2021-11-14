@@ -91,28 +91,45 @@ async function addReleasesFromIndexPage(
   dependency: MavenDependency,
   repoUrl: string
 ): Promise<ReleaseMap> {
-  const releaseMap = { ...inputReleaseMap };
-  try {
-    if (repoUrl.startsWith(MAVEN_REPO)) {
-      const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
-      const res = await downloadHttpProtocol(indexUrl);
-      const { body } = res;
-      const matches = Array.from(body.matchAll(mavenCentralHtmlVersionRegex));
-      for (const match of matches) {
-        const { version, releaseTimestamp: timestamp } = match?.groups || {};
-        if (version && timestamp) {
-          const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
-            zone: 'UTC',
-          });
-          if (date.isValid) {
-            const releaseTimestamp = date.toISO();
-            releaseMap[version] = { version, releaseTimestamp };
+  const cacheNs = 'datasource-maven:index-html-releases';
+  const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
+  let workingReleaseMap = await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
+  if (!workingReleaseMap) {
+    workingReleaseMap = {};
+    let retryEarlier = false;
+    try {
+      if (repoUrl.startsWith(MAVEN_REPO)) {
+        const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
+        const res = await downloadHttpProtocol(indexUrl);
+        const { body } = res;
+        const matches = Array.from(body.matchAll(mavenCentralHtmlVersionRegex));
+        for (const match of matches) {
+          const { version, releaseTimestamp: timestamp } = match?.groups || {};
+          if (version && timestamp) {
+            const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
+              zone: 'UTC',
+            });
+            if (date.isValid) {
+              const releaseTimestamp = date.toISO();
+              workingReleaseMap[version] = { version, releaseTimestamp };
+            }
           }
         }
       }
+    } catch (err) {
+      retryEarlier = true;
+      logger.debug(
+        { dependency, err },
+        'Failed to get releases from index.html'
+      );
     }
-  } catch (err) {
-    logger.debug({ dependency, err }, 'Failed to get releases');
+    const cacheTTL = retryEarlier ? 60 : 24 * 60;
+    await packageCache.set(cacheNs, cacheKey, workingReleaseMap, cacheTTL);
+  }
+
+  const releaseMap = { ...inputReleaseMap };
+  for (const version of Object.keys(releaseMap)) {
+    releaseMap[version] ||= workingReleaseMap[version] ?? null;
   }
 
   return releaseMap;
