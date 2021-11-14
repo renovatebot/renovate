@@ -29,12 +29,12 @@ function isStableVersion(x: string): boolean {
 }
 
 function getLatestSuitableVersion(releases: Release[]): string | undefined {
-  return releases
-    .map(({ version }) => version)
-    .filter(isStableVersion)
-    .reduce((latestVersion, version) =>
-      compare(version, latestVersion) === 1 ? version : latestVersion
-    );
+  const allVersions = releases.map(({ version }) => version);
+  const stableVersions = allVersions.filter(isStableVersion);
+  const versions = stableVersions.length ? stableVersions : allVersions;
+  return versions.reduce((latestVersion, version) =>
+    compare(version, latestVersion) === 1 ? version : latestVersion
+  );
 }
 
 function extractVersions(metadata: XmlDocument): string[] {
@@ -261,10 +261,10 @@ export async function getReleases({
     `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`
   );
 
-  const latestStableVersion = getLatestSuitableVersion(releases);
+  const latestSuitableVersion = getLatestSuitableVersion(releases);
   const dependencyInfo =
-    latestStableVersion &&
-    (await getDependencyInfo(dependency, repoUrl, latestStableVersion));
+    latestSuitableVersion &&
+    (await getDependencyInfo(dependency, repoUrl, latestSuitableVersion));
 
   return { ...dependency, ...dependencyInfo, releases };
 }
