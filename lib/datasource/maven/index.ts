@@ -126,7 +126,7 @@ async function addReleasesFromIndexPage(
           }
         }
       }
-    } catch (err) {
+    } catch (err) /* istanbul ignore next */ {
       retryEarlier = true;
       logger.debug(
         { dependency, err },
