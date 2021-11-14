@@ -247,7 +247,211 @@ Array [
         },
       },
     ],
-    "callId": 1,
+    "callId": 5,
+    "callback": undefined,
+    "errorWithCallStack": [Error],
+    "exception": undefined,
+    "firstArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "lastArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "proxy": [Function],
+    "returnValue": Promise {},
+    "thisValue": EC2Client {
+      "config": Object {
+        "apiVersion": "2016-11-15",
+        "base64Decoder": [Function],
+        "base64Encoder": [Function],
+        "bodyLengthChecker": [Function],
+        "credentialDefaultProvider": [Function],
+        "credentials": [Function],
+        "customUserAgent": undefined,
+        "defaultUserAgentProvider": [Function],
+        "disableHostPrefix": false,
+        "endpoint": [Function],
+        "isCustomEndpoint": false,
+        "logger": Object {},
+        "maxAttempts": [Function],
+        "region": [Function],
+        "regionInfoProvider": [Function],
+        "requestHandler": NodeHttpHandler {
+          "connectionTimeout": undefined,
+          "httpAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "defaultPort": 80,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "http:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "httpsAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "_sessionCache": Object {
+              "list": Array [],
+              "map": Object {},
+            },
+            "defaultPort": 443,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxCachedSessions": 100,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "https:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "metadata": Object {
+            "handlerProtocol": "http/1.1",
+          },
+          "socketTimeout": undefined,
+        },
+        "retryMode": [Function],
+        "retryStrategy": [Function],
+        "runtime": "node",
+        "serviceId": "EC2",
+        "sha256": [Function],
+        "signer": [Function],
+        "signingEscapePath": true,
+        "streamCollector": [Function],
+        "systemClockOffset": 0,
+        "tls": true,
+        "urlParser": [Function],
+        "utf8Decoder": [Function],
+        "utf8Encoder": [Function],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+  },
+  Object {
+    "args": Array [
+      DescribeImagesCommand {
+        "input": Object {
+          "Filters": Array [
+            Object {
+              "Name": "owner-id",
+              "Values": Array [
+                "602401143452",
+              ],
+            },
+            Object {
+              "Name": "name",
+              "Values": Array [
+                "amazon-eks-node-1.21-*",
+              ],
+            },
+          ],
+        },
+        "middlewareStack": Object {
+          "add": [Function],
+          "addRelativeTo": [Function],
+          "applyToStack": [Function],
+          "clone": [Function],
+          "concat": [Function],
+          "remove": [Function],
+          "removeByTag": [Function],
+          "resolve": [Function],
+          "use": [Function],
+        },
+      },
+    ],
+    "callId": 6,
     "callback": undefined,
     "errorWithCallStack": [Error],
     "exception": undefined,
@@ -444,9 +648,6 @@ Array [
               ],
             },
           ],
-          "ImageIds": Array [
-            "ami-020d418c09883b165",
-          ],
         },
         "middlewareStack": Object {
           "add": [Function],
@@ -461,7 +662,7 @@ Array [
         },
       },
     ],
-    "callId": 2,
+    "callId": 7,
     "callback": undefined,
     "errorWithCallStack": [Error],
     "exception": undefined,
@@ -480,9 +681,6 @@ Array [
               "amazon-eks-node-1.21-*",
             ],
           },
-        ],
-        "ImageIds": Array [
-          "ami-020d418c09883b165",
         ],
       },
       "middlewareStack": Object {
@@ -512,9 +710,6 @@ Array [
               "amazon-eks-node-1.21-*",
             ],
           },
-        ],
-        "ImageIds": Array [
-          "ami-020d418c09883b165",
         ],
       },
       "middlewareStack": Object {
@@ -642,7 +837,7 @@ Array [
 ]
 `;
 
-exports[`datasource/aws-machine-image/index getDigest one ami, one result from aws returns 1 image name from the aws api 1`] = `"amazon-eks-node-1.21-v20210826"`;
+exports[`datasource/aws-machine-image/index getDigest one ami, one result from aws returns 1 image name from the aws api 1`] = `null`;
 
 exports[`datasource/aws-machine-image/index getDigest one ami, one result from aws returns 1 image name from the aws api 2`] = `
 Array [
@@ -664,9 +859,6 @@ Array [
               ],
             },
           ],
-          "ImageIds": Array [
-            "ami-020d418c09883b165",
-          ],
         },
         "middlewareStack": Object {
           "add": [Function],
@@ -681,7 +873,7 @@ Array [
         },
       },
     ],
-    "callId": 3,
+    "callId": 8,
     "callback": undefined,
     "errorWithCallStack": [Error],
     "exception": undefined,
@@ -700,9 +892,6 @@ Array [
               "amazon-eks-node-1.21-*",
             ],
           },
-        ],
-        "ImageIds": Array [
-          "ami-020d418c09883b165",
         ],
       },
       "middlewareStack": Object {
@@ -732,9 +921,6 @@ Array [
               "amazon-eks-node-1.21-*",
             ],
           },
-        ],
-        "ImageIds": Array [
-          "ami-020d418c09883b165",
         ],
       },
       "middlewareStack": Object {
@@ -862,7 +1048,7 @@ Array [
 ]
 `;
 
-exports[`datasource/aws-machine-image/index getDigest one ami, several results from aws returns 3 image name from the aws api 1`] = `"amazon-eks-node-1.21-v20210914"`;
+exports[`datasource/aws-machine-image/index getDigest one ami, several results from aws returns 3 image name from the aws api 1`] = `null`;
 
 exports[`datasource/aws-machine-image/index getDigest one ami, several results from aws returns 3 image name from the aws api 2`] = `
 Array [
@@ -884,9 +1070,6 @@ Array [
               ],
             },
           ],
-          "ImageIds": Array [
-            "ami-020d418c09883b165",
-          ],
         },
         "middlewareStack": Object {
           "add": [Function],
@@ -901,7 +1084,7 @@ Array [
         },
       },
     ],
-    "callId": 4,
+    "callId": 9,
     "callback": undefined,
     "errorWithCallStack": [Error],
     "exception": undefined,
@@ -920,9 +1103,6 @@ Array [
               "amazon-eks-node-1.21-*",
             ],
           },
-        ],
-        "ImageIds": Array [
-          "ami-020d418c09883b165",
         ],
       },
       "middlewareStack": Object {
@@ -952,9 +1132,6 @@ Array [
               "amazon-eks-node-1.21-*",
             ],
           },
-        ],
-        "ImageIds": Array [
-          "ami-020d418c09883b165",
         ],
       },
       "middlewareStack": Object {
@@ -1082,7 +1259,7 @@ Array [
 ]
 `;
 
-exports[`datasource/aws-machine-image/index getDigestWithoutAmi returns 1 image name from the aws api 1`] = `"amazon-eks-node-1.21-v20210914"`;
+exports[`datasource/aws-machine-image/index getDigestWithoutAmi returns 1 image name from the aws api 1`] = `"amazon-eks-node-1.21-v20210826"`;
 
 exports[`datasource/aws-machine-image/index getDigestWithoutAmi returns 1 image name from the aws api 2`] = `
 Array [
@@ -1118,7 +1295,211 @@ Array [
         },
       },
     ],
-    "callId": 5,
+    "callId": 10,
+    "callback": undefined,
+    "errorWithCallStack": [Error],
+    "exception": undefined,
+    "firstArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "lastArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "proxy": [Function],
+    "returnValue": Promise {},
+    "thisValue": EC2Client {
+      "config": Object {
+        "apiVersion": "2016-11-15",
+        "base64Decoder": [Function],
+        "base64Encoder": [Function],
+        "bodyLengthChecker": [Function],
+        "credentialDefaultProvider": [Function],
+        "credentials": [Function],
+        "customUserAgent": undefined,
+        "defaultUserAgentProvider": [Function],
+        "disableHostPrefix": false,
+        "endpoint": [Function],
+        "isCustomEndpoint": false,
+        "logger": Object {},
+        "maxAttempts": [Function],
+        "region": [Function],
+        "regionInfoProvider": [Function],
+        "requestHandler": NodeHttpHandler {
+          "connectionTimeout": undefined,
+          "httpAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "defaultPort": 80,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "http:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "httpsAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "_sessionCache": Object {
+              "list": Array [],
+              "map": Object {},
+            },
+            "defaultPort": 443,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxCachedSessions": 100,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "https:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "metadata": Object {
+            "handlerProtocol": "http/1.1",
+          },
+          "socketTimeout": undefined,
+        },
+        "retryMode": [Function],
+        "retryStrategy": [Function],
+        "runtime": "node",
+        "serviceId": "EC2",
+        "sha256": [Function],
+        "signer": [Function],
+        "signingEscapePath": true,
+        "streamCollector": [Function],
+        "systemClockOffset": 0,
+        "tls": true,
+        "urlParser": [Function],
+        "utf8Decoder": [Function],
+        "utf8Encoder": [Function],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+  },
+  Object {
+    "args": Array [
+      DescribeImagesCommand {
+        "input": Object {
+          "Filters": Array [
+            Object {
+              "Name": "owner-id",
+              "Values": Array [
+                "602401143452",
+              ],
+            },
+            Object {
+              "Name": "name",
+              "Values": Array [
+                "amazon-eks-node-1.21-*",
+              ],
+            },
+          ],
+        },
+        "middlewareStack": Object {
+          "add": [Function],
+          "addRelativeTo": [Function],
+          "applyToStack": [Function],
+          "clone": [Function],
+          "concat": [Function],
+          "remove": [Function],
+          "removeByTag": [Function],
+          "resolve": [Function],
+          "use": [Function],
+        },
+      },
+    ],
+    "callId": 11,
     "callback": undefined,
     "errorWithCallStack": [Error],
     "exception": undefined,
@@ -1329,7 +1710,7 @@ Array [
         },
       },
     ],
-    "callId": 6,
+    "callId": 12,
     "callback": undefined,
     "errorWithCallStack": [Error],
     "exception": undefined,
@@ -1551,7 +1932,880 @@ Array [
         },
       },
     ],
-    "callId": 7,
+    "callId": 13,
+    "callback": undefined,
+    "errorWithCallStack": [Error],
+    "exception": undefined,
+    "firstArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "lastArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "proxy": [Function],
+    "returnValue": Promise {},
+    "thisValue": EC2Client {
+      "config": Object {
+        "apiVersion": "2016-11-15",
+        "base64Decoder": [Function],
+        "base64Encoder": [Function],
+        "bodyLengthChecker": [Function],
+        "credentialDefaultProvider": [Function],
+        "credentials": [Function],
+        "customUserAgent": undefined,
+        "defaultUserAgentProvider": [Function],
+        "disableHostPrefix": false,
+        "endpoint": [Function],
+        "isCustomEndpoint": false,
+        "logger": Object {},
+        "maxAttempts": [Function],
+        "region": [Function],
+        "regionInfoProvider": [Function],
+        "requestHandler": NodeHttpHandler {
+          "connectionTimeout": undefined,
+          "httpAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "defaultPort": 80,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "http:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "httpsAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "_sessionCache": Object {
+              "list": Array [],
+              "map": Object {},
+            },
+            "defaultPort": 443,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxCachedSessions": 100,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "https:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "metadata": Object {
+            "handlerProtocol": "http/1.1",
+          },
+          "socketTimeout": undefined,
+        },
+        "retryMode": [Function],
+        "retryStrategy": [Function],
+        "runtime": "node",
+        "serviceId": "EC2",
+        "sha256": [Function],
+        "signer": [Function],
+        "signingEscapePath": true,
+        "streamCollector": [Function],
+        "systemClockOffset": 0,
+        "tls": true,
+        "urlParser": [Function],
+        "utf8Decoder": [Function],
+        "utf8Encoder": [Function],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+  },
+]
+`;
+
+exports[`datasource/aws-machine-image/index getSortedAwsMachineImages() with 1 returned image 1`] = `
+Array [
+  Object {
+    "Architecture": "x86_64",
+    "BlockDeviceMappings": Array [
+      Object {
+        "DeviceName": "/dev/xvda",
+        "Ebs": Object {
+          "DeleteOnTermination": true,
+          "Encrypted": false,
+          "SnapshotId": "snap-01ba16a8ec8087603",
+          "VolumeSize": 20,
+          "VolumeType": "gp2",
+        },
+      },
+    ],
+    "CreationDate": "2021-08-26T19:31:41.000Z",
+    "Description": "EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)",
+    "EnaSupport": true,
+    "Hypervisor": "xen",
+    "ImageId": "ami-020d418c09883b165",
+    "ImageLocation": "amazon/amazon-eks-node-1.21-v20210826",
+    "ImageOwnerAlias": "amazon",
+    "ImageType": "machine",
+    "Name": "amazon-eks-node-1.21-v20210826",
+    "OwnerId": "602401143452",
+    "PlatformDetails": "Linux/UNIX",
+    "Public": true,
+    "RootDeviceName": "/dev/xvda",
+    "RootDeviceType": "ebs",
+    "SriovNetSupport": "simple",
+    "State": "available",
+    "UsageOperation": "RunInstances",
+    "VirtualizationType": "hvm",
+  },
+]
+`;
+
+exports[`datasource/aws-machine-image/index getSortedAwsMachineImages() with 1 returned image 2`] = `
+Array [
+  Object {
+    "args": Array [
+      DescribeImagesCommand {
+        "input": Object {
+          "Filters": Array [
+            Object {
+              "Name": "owner-id",
+              "Values": Array [
+                "602401143452",
+              ],
+            },
+            Object {
+              "Name": "name",
+              "Values": Array [
+                "amazon-eks-node-1.21-*",
+              ],
+            },
+          ],
+        },
+        "middlewareStack": Object {
+          "add": [Function],
+          "addRelativeTo": [Function],
+          "applyToStack": [Function],
+          "clone": [Function],
+          "concat": [Function],
+          "remove": [Function],
+          "removeByTag": [Function],
+          "resolve": [Function],
+          "use": [Function],
+        },
+      },
+    ],
+    "callId": 1,
+    "callback": undefined,
+    "errorWithCallStack": [Error],
+    "exception": undefined,
+    "firstArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "lastArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "proxy": [Function],
+    "returnValue": Promise {},
+    "thisValue": EC2Client {
+      "config": Object {
+        "apiVersion": "2016-11-15",
+        "base64Decoder": [Function],
+        "base64Encoder": [Function],
+        "bodyLengthChecker": [Function],
+        "credentialDefaultProvider": [Function],
+        "credentials": [Function],
+        "customUserAgent": undefined,
+        "defaultUserAgentProvider": [Function],
+        "disableHostPrefix": false,
+        "endpoint": [Function],
+        "isCustomEndpoint": false,
+        "logger": Object {},
+        "maxAttempts": [Function],
+        "region": [Function],
+        "regionInfoProvider": [Function],
+        "requestHandler": NodeHttpHandler {
+          "connectionTimeout": undefined,
+          "httpAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "defaultPort": 80,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "http:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "httpsAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "_sessionCache": Object {
+              "list": Array [],
+              "map": Object {},
+            },
+            "defaultPort": 443,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxCachedSessions": 100,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "https:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "metadata": Object {
+            "handlerProtocol": "http/1.1",
+          },
+          "socketTimeout": undefined,
+        },
+        "retryMode": [Function],
+        "retryStrategy": [Function],
+        "runtime": "node",
+        "serviceId": "EC2",
+        "sha256": [Function],
+        "signer": [Function],
+        "signingEscapePath": true,
+        "streamCollector": [Function],
+        "systemClockOffset": 0,
+        "tls": true,
+        "urlParser": [Function],
+        "utf8Decoder": [Function],
+        "utf8Encoder": [Function],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+  },
+]
+`;
+
+exports[`datasource/aws-machine-image/index getSortedAwsMachineImages() with 3 returned images 1`] = `
+Array [
+  Object {
+    "Architecture": "x86_64",
+    "BlockDeviceMappings": Array [
+      Object {
+        "DeviceName": "/dev/xvda",
+        "Ebs": Object {
+          "DeleteOnTermination": true,
+          "Encrypted": false,
+          "SnapshotId": "snap-0546beb61976e8017",
+          "VolumeSize": 20,
+          "VolumeType": "gp2",
+        },
+      },
+    ],
+    "CreationDate": "2021-08-13T17:47:12.000Z",
+    "Description": "EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)",
+    "EnaSupport": true,
+    "Hypervisor": "xen",
+    "ImageId": "ami-02ce3d9008cab69cb",
+    "ImageLocation": "amazon/amazon-eks-node-1.21-v20210813",
+    "ImageOwnerAlias": "amazon",
+    "ImageType": "machine",
+    "Name": "amazon-eks-node-1.21-v20210813",
+    "OwnerId": "602401143452",
+    "PlatformDetails": "Linux/UNIX",
+    "Public": true,
+    "RootDeviceName": "/dev/xvda",
+    "RootDeviceType": "ebs",
+    "SriovNetSupport": "simple",
+    "State": "available",
+    "UsageOperation": "RunInstances",
+    "VirtualizationType": "hvm",
+  },
+  Object {
+    "Architecture": "x86_64",
+    "BlockDeviceMappings": Array [
+      Object {
+        "DeviceName": "/dev/xvda",
+        "Ebs": Object {
+          "DeleteOnTermination": true,
+          "Encrypted": false,
+          "SnapshotId": "snap-01ba16a8ec8087603",
+          "VolumeSize": 20,
+          "VolumeType": "gp2",
+        },
+      },
+    ],
+    "CreationDate": "2021-08-26T19:31:41.000Z",
+    "Description": "EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)",
+    "EnaSupport": true,
+    "Hypervisor": "xen",
+    "ImageId": "ami-020d418c09883b165",
+    "ImageLocation": "amazon/amazon-eks-node-1.21-v20210826",
+    "ImageOwnerAlias": "amazon",
+    "ImageType": "machine",
+    "Name": "amazon-eks-node-1.21-v20210826",
+    "OwnerId": "602401143452",
+    "PlatformDetails": "Linux/UNIX",
+    "Public": true,
+    "RootDeviceName": "/dev/xvda",
+    "RootDeviceType": "ebs",
+    "SriovNetSupport": "simple",
+    "State": "available",
+    "UsageOperation": "RunInstances",
+    "VirtualizationType": "hvm",
+  },
+  Object {
+    "Architecture": "x86_64",
+    "BlockDeviceMappings": Array [
+      Object {
+        "DeviceName": "/dev/xvda",
+        "Ebs": Object {
+          "DeleteOnTermination": true,
+          "Encrypted": false,
+          "SnapshotId": "snap-0c6f79c3983fd8e1a",
+          "VolumeSize": 20,
+          "VolumeType": "gp2",
+        },
+      },
+    ],
+    "CreationDate": "2021-09-14T22:00:24.000Z",
+    "Description": "EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)",
+    "EnaSupport": true,
+    "Hypervisor": "xen",
+    "ImageId": "ami-05f83986b0fe58ada",
+    "ImageLocation": "amazon/amazon-eks-node-1.21-v20210914",
+    "ImageOwnerAlias": "amazon",
+    "ImageType": "machine",
+    "Name": "amazon-eks-node-1.21-v20210914",
+    "OwnerId": "602401143452",
+    "PlatformDetails": "Linux/UNIX",
+    "Public": true,
+    "RootDeviceName": "/dev/xvda",
+    "RootDeviceType": "ebs",
+    "SriovNetSupport": "simple",
+    "State": "available",
+    "UsageOperation": "RunInstances",
+    "VirtualizationType": "hvm",
+  },
+]
+`;
+
+exports[`datasource/aws-machine-image/index getSortedAwsMachineImages() with 3 returned images 2`] = `
+Array [
+  Object {
+    "args": Array [
+      DescribeImagesCommand {
+        "input": Object {
+          "Filters": Array [
+            Object {
+              "Name": "owner-id",
+              "Values": Array [
+                "602401143452",
+              ],
+            },
+            Object {
+              "Name": "name",
+              "Values": Array [
+                "amazon-eks-node-1.21-*",
+              ],
+            },
+          ],
+        },
+        "middlewareStack": Object {
+          "add": [Function],
+          "addRelativeTo": [Function],
+          "applyToStack": [Function],
+          "clone": [Function],
+          "concat": [Function],
+          "remove": [Function],
+          "removeByTag": [Function],
+          "resolve": [Function],
+          "use": [Function],
+        },
+      },
+    ],
+    "callId": 0,
+    "callback": undefined,
+    "errorWithCallStack": [Error],
+    "exception": undefined,
+    "firstArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "lastArg": DescribeImagesCommand {
+      "input": Object {
+        "Filters": Array [
+          Object {
+            "Name": "owner-id",
+            "Values": Array [
+              "602401143452",
+            ],
+          },
+          Object {
+            "Name": "name",
+            "Values": Array [
+              "amazon-eks-node-1.21-*",
+            ],
+          },
+        ],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+    "proxy": [Function],
+    "returnValue": Promise {},
+    "thisValue": EC2Client {
+      "config": Object {
+        "apiVersion": "2016-11-15",
+        "base64Decoder": [Function],
+        "base64Encoder": [Function],
+        "bodyLengthChecker": [Function],
+        "credentialDefaultProvider": [Function],
+        "credentials": [Function],
+        "customUserAgent": undefined,
+        "defaultUserAgentProvider": [Function],
+        "disableHostPrefix": false,
+        "endpoint": [Function],
+        "isCustomEndpoint": false,
+        "logger": Object {},
+        "maxAttempts": [Function],
+        "region": [Function],
+        "regionInfoProvider": [Function],
+        "requestHandler": NodeHttpHandler {
+          "connectionTimeout": undefined,
+          "httpAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "defaultPort": 80,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "http:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "httpsAgent": Agent {
+            "_events": Object {
+              "free": [Function],
+              "newListener": [Function],
+            },
+            "_eventsCount": 2,
+            "_maxListeners": undefined,
+            "_sessionCache": Object {
+              "list": Array [],
+              "map": Object {},
+            },
+            "defaultPort": 443,
+            "freeSockets": Object {},
+            "keepAlive": true,
+            "keepAliveMsecs": 1000,
+            "maxCachedSessions": 100,
+            "maxFreeSockets": 256,
+            "maxSockets": 50,
+            "maxTotalSockets": Infinity,
+            "options": Object {
+              "keepAlive": true,
+              "maxSockets": 50,
+              "path": null,
+            },
+            "protocol": "https:",
+            "requests": Object {},
+            "scheduling": "lifo",
+            "sockets": Object {},
+            "totalSocketCount": 0,
+            Symbol(kCapture): false,
+          },
+          "metadata": Object {
+            "handlerProtocol": "http/1.1",
+          },
+          "socketTimeout": undefined,
+        },
+        "retryMode": [Function],
+        "retryStrategy": [Function],
+        "runtime": "node",
+        "serviceId": "EC2",
+        "sha256": [Function],
+        "signer": [Function],
+        "signingEscapePath": true,
+        "streamCollector": [Function],
+        "systemClockOffset": 0,
+        "tls": true,
+        "urlParser": [Function],
+        "utf8Decoder": [Function],
+        "utf8Encoder": [Function],
+      },
+      "middlewareStack": Object {
+        "add": [Function],
+        "addRelativeTo": [Function],
+        "applyToStack": [Function],
+        "clone": [Function],
+        "concat": [Function],
+        "remove": [Function],
+        "removeByTag": [Function],
+        "resolve": [Function],
+        "use": [Function],
+      },
+    },
+  },
+]
+`;
+
+exports[`datasource/aws-machine-image/index getSortedAwsMachineImages() without returned images 1`] = `
+Array [
+  Object {
+    "Architecture": "x86_64",
+    "BlockDeviceMappings": Array [
+      Object {
+        "DeviceName": "/dev/xvda",
+        "Ebs": Object {
+          "DeleteOnTermination": true,
+          "Encrypted": false,
+          "SnapshotId": "snap-0546beb61976e8017",
+          "VolumeSize": 20,
+          "VolumeType": "gp2",
+        },
+      },
+    ],
+    "CreationDate": "2021-08-13T17:47:12.000Z",
+    "Description": "EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)",
+    "EnaSupport": true,
+    "Hypervisor": "xen",
+    "ImageId": "ami-02ce3d9008cab69cb",
+    "ImageLocation": "amazon/amazon-eks-node-1.21-v20210813",
+    "ImageOwnerAlias": "amazon",
+    "ImageType": "machine",
+    "Name": "amazon-eks-node-1.21-v20210813",
+    "OwnerId": "602401143452",
+    "PlatformDetails": "Linux/UNIX",
+    "Public": true,
+    "RootDeviceName": "/dev/xvda",
+    "RootDeviceType": "ebs",
+    "SriovNetSupport": "simple",
+    "State": "available",
+    "UsageOperation": "RunInstances",
+    "VirtualizationType": "hvm",
+  },
+  Object {
+    "Architecture": "x86_64",
+    "BlockDeviceMappings": Array [
+      Object {
+        "DeviceName": "/dev/xvda",
+        "Ebs": Object {
+          "DeleteOnTermination": true,
+          "Encrypted": false,
+          "SnapshotId": "snap-01ba16a8ec8087603",
+          "VolumeSize": 20,
+          "VolumeType": "gp2",
+        },
+      },
+    ],
+    "CreationDate": "2021-08-26T19:31:41.000Z",
+    "Description": "EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)",
+    "EnaSupport": true,
+    "Hypervisor": "xen",
+    "ImageId": "ami-020d418c09883b165",
+    "ImageLocation": "amazon/amazon-eks-node-1.21-v20210826",
+    "ImageOwnerAlias": "amazon",
+    "ImageType": "machine",
+    "Name": "amazon-eks-node-1.21-v20210826",
+    "OwnerId": "602401143452",
+    "PlatformDetails": "Linux/UNIX",
+    "Public": true,
+    "RootDeviceName": "/dev/xvda",
+    "RootDeviceType": "ebs",
+    "SriovNetSupport": "simple",
+    "State": "available",
+    "UsageOperation": "RunInstances",
+    "VirtualizationType": "hvm",
+  },
+  Object {
+    "Architecture": "x86_64",
+    "BlockDeviceMappings": Array [
+      Object {
+        "DeviceName": "/dev/xvda",
+        "Ebs": Object {
+          "DeleteOnTermination": true,
+          "Encrypted": false,
+          "SnapshotId": "snap-0c6f79c3983fd8e1a",
+          "VolumeSize": 20,
+          "VolumeType": "gp2",
+        },
+      },
+    ],
+    "CreationDate": "2021-09-14T22:00:24.000Z",
+    "Description": "EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)",
+    "EnaSupport": true,
+    "Hypervisor": "xen",
+    "ImageId": "ami-05f83986b0fe58ada",
+    "ImageLocation": "amazon/amazon-eks-node-1.21-v20210914",
+    "ImageOwnerAlias": "amazon",
+    "ImageType": "machine",
+    "Name": "amazon-eks-node-1.21-v20210914",
+    "OwnerId": "602401143452",
+    "PlatformDetails": "Linux/UNIX",
+    "Public": true,
+    "RootDeviceName": "/dev/xvda",
+    "RootDeviceType": "ebs",
+    "SriovNetSupport": "simple",
+    "State": "available",
+    "UsageOperation": "RunInstances",
+    "VirtualizationType": "hvm",
+  },
+]
+`;
+
+exports[`datasource/aws-machine-image/index getSortedAwsMachineImages() without returned images 2`] = `
+Array [
+  Object {
+    "args": Array [
+      DescribeImagesCommand {
+        "input": Object {
+          "Filters": Array [
+            Object {
+              "Name": "owner-id",
+              "Values": Array [
+                "602401143452",
+              ],
+            },
+            Object {
+              "Name": "name",
+              "Values": Array [
+                "amazon-eks-node-1.21-*",
+              ],
+            },
+          ],
+        },
+        "middlewareStack": Object {
+          "add": [Function],
+          "addRelativeTo": [Function],
+          "applyToStack": [Function],
+          "clone": [Function],
+          "concat": [Function],
+          "remove": [Function],
+          "removeByTag": [Function],
+          "resolve": [Function],
+          "use": [Function],
+        },
+      },
+    ],
+    "callId": 2,
     "callback": undefined,
     "errorWithCallStack": [Error],
     "exception": undefined,

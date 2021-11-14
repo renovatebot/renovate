@@ -1,4 +1,4 @@
-import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
+import { DescribeImagesCommand, EC2Client, Image } from '@aws-sdk/client-ec2';
 import { cache } from '../../util/cache/package/decorator';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
@@ -38,34 +38,44 @@ export class AwsMachineImageDataSource extends Datasource {
     this.now = Date.now();
   }
 
+  @cache({
+    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    key: (serializedAmiFilter: string) => serializedAmiFilter,
+  })
+  async getSortedAwsMachineImages(
+    serializedAmiFilter: string
+  ): Promise<Image[]> {
+    const cmd = new DescribeImagesCommand({
+      Filters: JSON.parse(serializedAmiFilter),
+    });
+    const matchingImages = await this.ec2.send(cmd);
+    if (matchingImages.Images === undefined) {
+      return null;
+    }
+    return matchingImages.Images.sort(
+      (image1, image2) =>
+        Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
+    );
+  }
+
   override async getDigest(
     { lookupName: serializedAmiFilter }: GetReleasesConfig,
     newValue?: string
   ): Promise<string | null> {
-    if (newValue) {
-      const cmd = new DescribeImagesCommand({
-        ImageIds: [newValue],
-        Filters: JSON.parse(serializedAmiFilter),
-      });
-      const matchingImages = await this.ec2.send(cmd);
-      if (matchingImages.Images === undefined) {
-        return null;
-      }
-      const latestImage = matchingImages.Images.sort(
-        (image1, image2) =>
-          Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
-      ).pop();
-      const digest = latestImage.Name;
-      return digest;
-    }
-    const getReleasesResult = await this.getReleases({
-      lookupName: serializedAmiFilter,
-    });
+    const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
 
-    if (getReleasesResult === null) {
+    if (newValue) {
+      const newValueMatchingImages = images.filter((image) => {
+        image.ImageId === newValue;
+      });
+      if (newValueMatchingImages.length == 1) {
+        return newValueMatchingImages[0].Name;
+      }
       return null;
     }
-    return getReleasesResult.releases[0].newDigest ?? null;
+
+    return (await this.getReleases({ lookupName: serializedAmiFilter }))
+      .releases[0].newDigest;
   }
 
   @cache({
@@ -76,16 +86,8 @@ export class AwsMachineImageDataSource extends Datasource {
   async getReleases({
     lookupName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const cmd = new DescribeImagesCommand({
-      Filters: JSON.parse(serializedAmiFilter),
-    });
-    const matchingImages = await this.ec2.send(cmd);
-    if (matchingImages.Images === undefined) {
-      return null;
-    }
-    const latestImage = matchingImages.Images.sort(
-      (image1, image2) =>
-        Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
+    const latestImage = (
+      await this.getSortedAwsMachineImages(serializedAmiFilter)
     ).pop();
     return {
       releases: [
