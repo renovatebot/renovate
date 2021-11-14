@@ -192,7 +192,7 @@ describe('datasource/maven/index', () => {
   it('returns html-based releases', async () => {
     mockGenericPackage({
       latest: '2.0.0',
-      jars: null,
+      jars: { '0.0.1': 200 }, // Would be the only POM we check via HEAD request
       html: loadFixture('index.html'),
     });
 
@@ -205,6 +205,7 @@ describe('datasource/maven/index', () => {
       name: 'package',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [
+        { version: '0.0.1' },
         { version: '1.0.0', releaseTimestamp: '2021-02-22T14:43:00.000Z' },
         { version: '1.0.1', releaseTimestamp: '2021-04-12T15:51:00.000Z' },
         { version: '1.0.2', releaseTimestamp: '2021-06-16T12:47:00.000Z' },

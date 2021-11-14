@@ -311,8 +311,6 @@ describe('datasource/clojure/index', () => {
 
     httpMock
       .scope('https://repo.maven.apache.org')
-      .get('/maven2/org/example/package/index.html')
-      .reply(404)
       .get('/maven2/org/example/package/maven-metadata.xml')
       .reply(200, '###');
 
