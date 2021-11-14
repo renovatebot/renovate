@@ -28,7 +28,7 @@ function isStableVersion(x: string): boolean {
   return mavenVersion.isStable(x);
 }
 
-function getLatestStableVersion(releases: Release[]): string | undefined {
+function getLatestSuitableVersion(releases: Release[]): string | undefined {
   return releases
     .map(({ version }) => version)
     .filter(isStableVersion)
@@ -261,7 +261,7 @@ export async function getReleases({
     `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`
   );
 
-  const latestStableVersion = getLatestStableVersion(releases);
+  const latestStableVersion = getLatestSuitableVersion(releases);
   const dependencyInfo =
     latestStableVersion &&
     (await getDependencyInfo(dependency, repoUrl, latestStableVersion));
