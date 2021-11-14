@@ -1652,6 +1652,31 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### replacementName
+
+Use this field to define the name of a replacement package.
+Must be used with `replacementVersion` (see example below).
+You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+
+### replacementVersion
+
+Use this field to define the version of a replacement package.
+Must be used with `replacementName`.
+For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["jade"],
+      "replacementName": "pug",
+      "replacementVersion": "2.0.0"
+    }
+  ]
+}
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
@@ -2232,6 +2257,10 @@ In case there is a need to configure them manually, it can be done using this `r
 ```
 
 The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
+
+## replacement
+
+Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
 
 ## respectLatest
 

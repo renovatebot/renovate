@@ -9,7 +9,7 @@ import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
-import type { MavenDependency } from './types';
+import type { MavenDependency, ReleaseMap } from './types';
 import {
   downloadHttpProtocol,
   downloadMavenXml,
@@ -25,8 +25,6 @@ export const customRegistrySupport = true;
 export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = mavenVersioning.id;
 export const registryStrategy = 'merge';
-
-type ReleaseMap = Record<string, Release | null>;
 
 function isStableVersion(x: string): boolean {
   return mavenVersion.isStable(x);
@@ -56,7 +54,7 @@ async function fetchReleasesFromMetadata(
 ): Promise<ReleaseMap> {
   const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
 
-  const cacheNamespace = 'datasource-maven-metadata@v2';
+  const cacheNamespace = 'datasource-maven:metadata-xml';
   const cacheKey = metadataUrl.toString();
   const cachedVersions = await packageCache.get<ReleaseMap>(
     cacheNamespace,
@@ -206,7 +204,7 @@ async function addReleasesUsingHeadRequests(
     return releaseMap;
   }
 
-  const cacheNs = 'datasource-maven-metadata@v2';
+  const cacheNs = 'datasource-maven:head-requests';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
   let workingReleaseMap: ReleaseMap = await packageCache.get<ReleaseMap>(
     cacheNs,
@@ -300,9 +298,9 @@ export async function getReleases({
   );
 
   const latestStableVersion = getLatestStableVersion(releases);
-  const depInfo =
+  const dependencyInfo =
     latestStableVersion &&
     (await getDependencyInfo(dependency, repoUrl, latestStableVersion));
 
-  return { ...dependency, ...depInfo, releases };
+  return { ...dependency, ...dependencyInfo, releases };
 }
