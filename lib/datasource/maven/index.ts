@@ -108,7 +108,7 @@ async function addReleasesFromIndexPage(
       if (repoUrl.startsWith(MAVEN_REPO)) {
         const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
         const res = await downloadHttpProtocol(indexUrl);
-        const { body } = res;
+        const { body = '' } = res;
         for (const line of body.split('\n')) {
           const match = line.trim().match(mavenCentralHtmlVersionRegex);
           if (match) {
