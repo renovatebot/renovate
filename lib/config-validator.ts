@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // istanbul ignore file
 import { dequal } from 'dequal';
-import { readFileSync } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import JSON5 from 'json5';
 import { configFileNames } from './config/app-strings';
 import { massageConfig } from './config/massage';
@@ -52,7 +52,7 @@ type PackageJson = {
     (name) => name !== 'package.json'
   )) {
     try {
-      const rawContent = readFileSync(file, 'utf8');
+      const rawContent = await readFile(file, 'utf8');
       logger.info(`Validating ${file}`);
       try {
         let jsonContent: RenovateConfig;
@@ -71,9 +71,9 @@ type PackageJson = {
     }
   }
   try {
-    const pkgJson = JSON.parse(
-      readFileSync('package.json', 'utf8')
-    ) as PackageJson;
+    const pkgJson = (await JSON.parse(
+      await readFile('package.json', 'utf8')
+    )) as PackageJson;
     if (pkgJson.renovate) {
       logger.info(`Validating package.json > renovate`);
       await validate('package.json > renovate', pkgJson.renovate);
