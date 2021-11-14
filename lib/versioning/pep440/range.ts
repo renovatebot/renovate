@@ -44,7 +44,7 @@ export function getNewValue({
 }: NewValueConfig): string {
   // easy pin
   if (rangeStrategy === 'pin') {
-    return '==' + newVersion;
+    return (currentValue.startsWith('==') ? '==' : '') + newVersion;
   }
   if (currentValue === currentVersion) {
     return newVersion;
