@@ -28,13 +28,15 @@ function isStableVersion(x: string): boolean {
   return mavenVersion.isStable(x);
 }
 
-function getLatestSuitableVersion(releases: Release[]): string | undefined {
+function getLatestSuitableVersion(releases: Release[]): string | null {
   const allVersions = releases.map(({ version }) => version);
   const stableVersions = allVersions.filter(isStableVersion);
   const versions = stableVersions.length ? stableVersions : allVersions;
-  return versions.reduce((latestVersion, version) =>
-    compare(version, latestVersion) === 1 ? version : latestVersion
-  );
+  return versions.length
+    ? versions.reduce((latestVersion, version) =>
+        compare(version, latestVersion) === 1 ? version : latestVersion
+      )
+    : null;
 }
 
 function extractVersions(metadata: XmlDocument): string[] {
