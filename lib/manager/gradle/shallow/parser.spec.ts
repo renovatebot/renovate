@@ -205,6 +205,21 @@ describe('manager/gradle/shallow/parser', () => {
         skipReason: SkipReason.Ignored,
       },
     ]);
+
+    ({ deps } = parseGradle('url "https://example.com"; "foo:bar:1.2.3@zip"'));
+    expect(deps).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "currentValue": "1.2.3",
+          "dataType": "zip",
+          "depName": "foo:bar",
+          "managerData": Object {
+            "fileReplacePosition": 36,
+            "packageFile": undefined,
+          },
+        },
+      ]
+    `);
   });
   it('parses plugin', () => {
     let deps;
