@@ -8,7 +8,9 @@ export const urls = [];
 
 export const supportsRanges = false;
 
-const parse = (version: string): any => ({ release: [parseInt(version, 10)] });
+function parse(version: string): any {
+  return { release: [1, 0, 0] };
+}
 
 function compare(version1: string, version2: string): number {
   return 1;
