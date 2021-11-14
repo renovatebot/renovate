@@ -42,9 +42,14 @@ export function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
+  const prependOperator = ['==', '===', '!=', '~=', '>=', '<=', '>', '<'].some(
+    function (element, index, array) {
+      return currentValue.startsWith(element);
+    }
+  );
   // easy pin
   if (rangeStrategy === 'pin') {
-    return (currentValue.startsWith('==') ? '==' : '') + newVersion;
+    return (prependOperator ? '==' : '') + newVersion;
   }
   if (currentValue === currentVersion) {
     return newVersion;
