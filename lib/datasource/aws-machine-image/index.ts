@@ -40,7 +40,8 @@ export class AwsMachineImageDataSource extends Datasource {
 
   @cache({
     namespace: `datasource-${AwsMachineImageDataSource.id}`,
-    key: (serializedAmiFilter: string) => serializedAmiFilter,
+    key: (serializedAmiFilter: string) =>
+      `getSortedAwsMachineImages:${serializedAmiFilter}`,
   })
   async getSortedAwsMachineImages(
     serializedAmiFilter: string
@@ -49,25 +50,31 @@ export class AwsMachineImageDataSource extends Datasource {
       Filters: JSON.parse(serializedAmiFilter),
     });
     const matchingImages = await this.ec2.send(cmd);
-    if (matchingImages.Images === undefined) {
-      return null;
-    }
+    matchingImages.Images = matchingImages.Images ?? [];
     return matchingImages.Images.sort(
       (image1, image2) =>
         Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
     );
   }
 
+  @cache({
+    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig, newValue: string) =>
+      `getDigest:${registryUrl}:${lookupName}:${newValue ?? ''}`,
+  })
   override async getDigest(
     { lookupName: serializedAmiFilter }: GetReleasesConfig,
     newValue?: string
   ): Promise<string | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
+    if (images.length < 1) {
+      return null;
+    }
 
     if (newValue) {
-      const newValueMatchingImages = images.filter((image) => {
-        image.ImageId === newValue;
-      });
+      const newValueMatchingImages = images.filter(
+        (image) => image.ImageId === newValue
+      );
       if (newValueMatchingImages.length == 1) {
         return newValueMatchingImages[0].Name;
       }
@@ -81,21 +88,24 @@ export class AwsMachineImageDataSource extends Datasource {
   @cache({
     namespace: `datasource-${AwsMachineImageDataSource.id}`,
     key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `${registryUrl}:${lookupName}`,
+      `getReleases:${registryUrl}:${lookupName}`,
   })
   async getReleases({
     lookupName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const latestImage = (
-      await this.getSortedAwsMachineImages(serializedAmiFilter)
-    ).pop();
+    const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
+    if (images.length === 0) {
+      return null;
+    }
+    const latestImage = images[images.length - 1];
     return {
       releases: [
         {
           version: latestImage.ImageId,
           releaseTimestamp: latestImage.CreationDate,
           isDeprecated:
-            (Date.parse(latestImage.DeprecationTime) ?? this.now) < this.now,
+            Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
+            this.now,
           newDigest: latestImage.Name,
         },
       ],

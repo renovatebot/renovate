@@ -1,4 +1,9 @@
-import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
+import {
+  DescribeImagesCommand,
+  EC2Client,
+  Image,
+  DescribeImagesResult,
+} from '@aws-sdk/client-ec2';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
 import { AwsMachineImageDataSource } from '.';
@@ -6,159 +11,125 @@ import { AwsMachineImageDataSource } from '.';
 const datasource = AwsMachineImageDataSource.id;
 const ec2Mock = mockClient(EC2Client);
 
-const mock3Images = {
-  Images: [
+/**
+ * Testdata for mock implementation of EC2Client
+ * image1 to image3 from oldest to newest image
+ */
+const image1: Image = {
+  Architecture: 'x86_64',
+  CreationDate: '2021-08-13T17:47:12.000Z',
+  ImageId: 'ami-02ce3d9008cab69cb',
+  ImageLocation: 'amazon/amazon-eks-node-1.21-v20210813',
+  ImageType: 'machine',
+  Public: true,
+  OwnerId: '602401143452',
+  PlatformDetails: 'Linux/UNIX',
+  UsageOperation: 'RunInstances',
+  State: 'available',
+  BlockDeviceMappings: [
     {
-      Architecture: 'x86_64',
-      CreationDate: '2021-08-26T19:31:41.000Z',
-      ImageId: 'ami-020d418c09883b165',
-      ImageLocation: 'amazon/amazon-eks-node-1.21-v20210826',
-      ImageType: 'machine',
-      Public: true,
-      OwnerId: '602401143452',
-      PlatformDetails: 'Linux/UNIX',
-      UsageOperation: 'RunInstances',
-      State: 'available',
-      BlockDeviceMappings: [
-        {
-          DeviceName: '/dev/xvda',
-          Ebs: {
-            DeleteOnTermination: true,
-            SnapshotId: 'snap-01ba16a8ec8087603',
-            VolumeSize: 20,
-            VolumeType: 'gp2',
-            Encrypted: false,
-          },
-        },
-      ],
-      Description:
-        'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
-      EnaSupport: true,
-      Hypervisor: 'xen',
-      ImageOwnerAlias: 'amazon',
-      Name: 'amazon-eks-node-1.21-v20210826',
-      RootDeviceName: '/dev/xvda',
-      RootDeviceType: 'ebs',
-      SriovNetSupport: 'simple',
-      VirtualizationType: 'hvm',
-    },
-    {
-      Architecture: 'x86_64',
-      CreationDate: '2021-08-13T17:47:12.000Z',
-      ImageId: 'ami-02ce3d9008cab69cb',
-      ImageLocation: 'amazon/amazon-eks-node-1.21-v20210813',
-      ImageType: 'machine',
-      Public: true,
-      OwnerId: '602401143452',
-      PlatformDetails: 'Linux/UNIX',
-      UsageOperation: 'RunInstances',
-      State: 'available',
-      BlockDeviceMappings: [
-        {
-          DeviceName: '/dev/xvda',
-          Ebs: {
-            DeleteOnTermination: true,
-            SnapshotId: 'snap-0546beb61976e8017',
-            VolumeSize: 20,
-            VolumeType: 'gp2',
-            Encrypted: false,
-          },
-        },
-      ],
-      Description:
-        'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
-      EnaSupport: true,
-      Hypervisor: 'xen',
-      ImageOwnerAlias: 'amazon',
-      Name: 'amazon-eks-node-1.21-v20210813',
-      RootDeviceName: '/dev/xvda',
-      RootDeviceType: 'ebs',
-      SriovNetSupport: 'simple',
-      VirtualizationType: 'hvm',
-    },
-    {
-      Architecture: 'x86_64',
-      CreationDate: '2021-09-14T22:00:24.000Z',
-      ImageId: 'ami-05f83986b0fe58ada',
-      ImageLocation: 'amazon/amazon-eks-node-1.21-v20210914',
-      ImageType: 'machine',
-      Public: true,
-      OwnerId: '602401143452',
-      PlatformDetails: 'Linux/UNIX',
-      UsageOperation: 'RunInstances',
-      State: 'available',
-      BlockDeviceMappings: [
-        {
-          DeviceName: '/dev/xvda',
-          Ebs: {
-            DeleteOnTermination: true,
-            SnapshotId: 'snap-0c6f79c3983fd8e1a',
-            VolumeSize: 20,
-            VolumeType: 'gp2',
-            Encrypted: false,
-          },
-        },
-      ],
-      Description:
-        'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
-      EnaSupport: true,
-      Hypervisor: 'xen',
-      ImageOwnerAlias: 'amazon',
-      Name: 'amazon-eks-node-1.21-v20210914',
-      RootDeviceName: '/dev/xvda',
-      RootDeviceType: 'ebs',
-      SriovNetSupport: 'simple',
-      VirtualizationType: 'hvm',
+      DeviceName: '/dev/xvda',
+      Ebs: {
+        DeleteOnTermination: true,
+        SnapshotId: 'snap-0546beb61976e8017',
+        VolumeSize: 20,
+        VolumeType: 'gp2',
+        Encrypted: false,
+      },
     },
   ],
+  Description:
+    'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
+  EnaSupport: true,
+  Hypervisor: 'xen',
+  ImageOwnerAlias: 'amazon',
+  Name: 'amazon-eks-node-1.21-v20210813',
+  RootDeviceName: '/dev/xvda',
+  RootDeviceType: 'ebs',
+  SriovNetSupport: 'simple',
+  VirtualizationType: 'hvm',
 };
 
-const mock1Image = {
-  Images: [
+const image2: Image = {
+  Architecture: 'x86_64',
+  CreationDate: '2021-08-26T19:31:41.000Z',
+  DeprecationTime: '2021-08-14T17:47:12.000Z',
+  ImageId: 'ami-020d418c09883b165',
+  ImageLocation: 'amazon/amazon-eks-node-1.21-v20210826',
+  ImageType: 'machine',
+  Public: true,
+  OwnerId: '602401143452',
+  PlatformDetails: 'Linux/UNIX',
+  UsageOperation: 'RunInstances',
+  State: 'available',
+  BlockDeviceMappings: [
     {
-      Architecture: 'x86_64',
-      CreationDate: '2021-08-26T19:31:41.000Z',
-      ImageId: 'ami-020d418c09883b165',
-      ImageLocation: 'amazon/amazon-eks-node-1.21-v20210826',
-      ImageType: 'machine',
-      Public: true,
-      OwnerId: '602401143452',
-      PlatformDetails: 'Linux/UNIX',
-      UsageOperation: 'RunInstances',
-      State: 'available',
-      BlockDeviceMappings: [
-        {
-          DeviceName: '/dev/xvda',
-          Ebs: {
-            DeleteOnTermination: true,
-            SnapshotId: 'snap-01ba16a8ec8087603',
-            VolumeSize: 20,
-            VolumeType: 'gp2',
-            Encrypted: false,
-          },
-        },
-      ],
-      Description:
-        'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
-      EnaSupport: true,
-      Hypervisor: 'xen',
-      ImageOwnerAlias: 'amazon',
-      Name: 'amazon-eks-node-1.21-v20210826',
-      RootDeviceName: '/dev/xvda',
-      RootDeviceType: 'ebs',
-      SriovNetSupport: 'simple',
-      VirtualizationType: 'hvm',
+      DeviceName: '/dev/xvda',
+      Ebs: {
+        DeleteOnTermination: true,
+        SnapshotId: 'snap-01ba16a8ec8087603',
+        VolumeSize: 20,
+        VolumeType: 'gp2',
+        Encrypted: false,
+      },
     },
   ],
+  Description:
+    'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
+  EnaSupport: true,
+  Hypervisor: 'xen',
+  ImageOwnerAlias: 'amazon',
+  Name: 'amazon-eks-node-1.21-v20210826',
+  RootDeviceName: '/dev/xvda',
+  RootDeviceType: 'ebs',
+  SriovNetSupport: 'simple',
+  VirtualizationType: 'hvm',
 };
 
-const mockEmpty = {
-  Images: [],
+const image3: Image = {
+  Architecture: 'x86_64',
+  CreationDate: '2021-09-14T22:00:24.000Z',
+  ImageId: 'ami-05f83986b0fe58ada',
+  ImageLocation: 'amazon/amazon-eks-node-1.21-v20210914',
+  ImageType: 'machine',
+  Public: true,
+  OwnerId: '602401143452',
+  PlatformDetails: 'Linux/UNIX',
+  UsageOperation: 'RunInstances',
+  State: 'available',
+  BlockDeviceMappings: [
+    {
+      DeviceName: '/dev/xvda',
+      Ebs: {
+        DeleteOnTermination: true,
+        SnapshotId: 'snap-0c6f79c3983fd8e1a',
+        VolumeSize: 20,
+        VolumeType: 'gp2',
+        Encrypted: false,
+      },
+    },
+  ],
+  Description:
+    'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
+  EnaSupport: true,
+  Hypervisor: 'xen',
+  ImageOwnerAlias: 'amazon',
+  Name: 'amazon-eks-node-1.21-v20210914',
+  RootDeviceName: '/dev/xvda',
+  RootDeviceType: 'ebs',
+  SriovNetSupport: 'simple',
+  VirtualizationType: 'hvm',
 };
 
-beforeEach(() => {
-  ec2Mock.reset();
-});
+const mock3Images: DescribeImagesResult = {
+  Images: [image3, image1, image2],
+};
+
+const mock1Image: DescribeImagesResult = {
+  Images: [image3],
+};
+
+const mockEmpty: DescribeImagesResult = {};
 
 describe('datasource/aws-machine-image/index', () => {
   describe('getSortedAwsMachineImages()', () => {
@@ -167,9 +138,9 @@ describe('datasource/aws-machine-image/index', () => {
       ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
       const ec2DataSource = new AwsMachineImageDataSource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
-        '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]'
+        '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["3images"]}]'
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual([image1, image2, image3]);
       expect(ec2Mock.calls()).toMatchSnapshot();
     });
     it('with 1 returned image', async () => {
@@ -177,232 +148,149 @@ describe('datasource/aws-machine-image/index', () => {
       ec2Mock.on(DescribeImagesCommand).resolves(mock1Image);
       const ec2DataSource = new AwsMachineImageDataSource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
-        '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]'
+        '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["1image"]}]'
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual([image3]);
       expect(ec2Mock.calls()).toMatchSnapshot();
     });
     it('without returned images', async () => {
       ec2Mock.reset();
-      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      ec2Mock.on(DescribeImagesCommand).resolves(mockEmpty);
       const ec2DataSource = new AwsMachineImageDataSource();
       const res = await ec2DataSource.getSortedAwsMachineImages(
-        '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]'
+        '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["noiamge"]}]'
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual([]);
       expect(ec2Mock.calls()).toMatchSnapshot();
     });
   });
 
-  describe('getDigest empty ami, empty result from aws', () => {
-    it('returns 0 image name from the aws api', async () => {
+  describe('getDigest()', () => {
+    it('without newValue, without returned images to be null', async () => {
+      ec2Mock.reset();
       ec2Mock.on(DescribeImagesCommand).resolves(mockEmpty);
       const res = await getDigest({
         datasource,
         depName:
-          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without newValue, without returned images to be null"]}]',
       });
-      expect(res).toMatchSnapshot();
-      expect(ec2Mock.calls()).toMatchSnapshot();
+      expect(res).toStrictEqual(null);
     });
-  });
-  describe('getDigest empty ami, several results from aws', () => {
-    it('returns 3 image name from the aws api', async () => {
-      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
-      const res = await getDigest({
-        datasource,
-        depName:
-          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
-      });
-      expect(res).toMatchSnapshot();
-      expect(ec2Mock.calls()).toMatchSnapshot();
-    });
-  });
-  describe('getDigest one ami, empty result from aws', () => {
-    it('returns 1 image name from the aws api', async () => {
-      ec2Mock.on(DescribeImagesCommand).resolves(mockEmpty);
-      const res = await getDigest(
-        {
-          datasource,
-          depName:
-            '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
-        },
-        'ami-020d418c09883b165'
-      );
-      expect(res).toMatchSnapshot();
-      expect(ec2Mock.calls()).toMatchSnapshot();
-    });
-  });
-  describe('getDigest one ami, one result from aws', () => {
-    it('returns 1 image name from the aws api', async () => {
+    it('without newValue, with one matching image to return that image', async () => {
+      ec2Mock.reset();
       ec2Mock.on(DescribeImagesCommand).resolves(mock1Image);
-      const res = await getDigest(
-        {
-          datasource,
-          depName:
-            '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
-        },
-        'ami-020d418c09883b165'
-      );
-      expect(res).toMatchSnapshot();
-      expect(ec2Mock.calls()).toMatchSnapshot();
+      const res = await getDigest({
+        datasource,
+        depName:
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without newValue, with one matching image to return that image"]}]',
+      });
+      expect(res).toStrictEqual(image3.Name);
     });
-  });
-  describe('getDigest one ami, several results from aws', () => {
-    it('returns 3 image name from the aws api', async () => {
-      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
-      const res = await getDigest(
-        {
-          datasource,
-          depName:
-            '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
-        },
-        'ami-020d418c09883b165'
-      );
-      expect(res).toMatchSnapshot();
-      expect(ec2Mock.calls()).toMatchSnapshot();
-    });
-  });
-  describe('getDigestWithoutAmi', () => {
-    it('returns 1 image name from the aws api', async () => {
+    it('without newValue, with 3 matching image to return the newest image', async () => {
+      ec2Mock.reset();
       ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
       const res = await getDigest({
         datasource,
         depName:
-          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without newValue, with 3 matching image to return the newest image"]}]',
       });
-      expect(res).toMatchSnapshot();
-      expect(ec2Mock.calls()).toMatchSnapshot();
+      expect(res).toStrictEqual(image3.Name);
+    });
+    it('with matching newValue, with 3 matching image to return the matching image', async () => {
+      ec2Mock.reset();
+      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      const res = await getDigest(
+        {
+          datasource,
+          depName:
+            '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with matching newValue, with 3 matching image to return the matching image"]}]',
+        },
+        image1.ImageId
+      );
+      expect(res).toStrictEqual(image1.Name);
+    });
+    it('with not matching newValue, with 3 matching images to return the matching image', async () => {
+      ec2Mock.reset();
+      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      const res = await getDigest(
+        {
+          datasource,
+          depName:
+            '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with not matching newValue, with 3 matching images to return the matching image"]}]',
+        },
+        'will never match'
+      );
+      expect(res).toStrictEqual(null);
     });
   });
-  describe('getReleases empty result', () => {
-    it('returns 1 image name from the aws api', async () => {
-      ec2Mock.on(DescribeImagesCommand).resolves({});
+
+  describe('getPkgReleases()', () => {
+    it('without returned images to be null', async () => {
+      ec2Mock.reset();
+      ec2Mock.on(DescribeImagesCommand).resolves(mockEmpty);
       const res = await getPkgReleases({
         datasource,
         depName:
-          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without returned images to be null"]}]',
       });
-      expect(res).toMatchSnapshot();
-      expect(ec2Mock.calls()).toMatchSnapshot();
+      expect(res).toStrictEqual(null);
     });
-  });
-  describe('getReleases', () => {
-    it('returns 1 image from the aws api', async () => {
-      ec2Mock.on(DescribeImagesCommand).resolves({
-        Images: [
+    it('with one matching image to return that image', async () => {
+      ec2Mock.reset();
+      ec2Mock.on(DescribeImagesCommand).resolves(mock1Image);
+      const res = await getPkgReleases({
+        datasource,
+        depName:
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with one matching image to return that image"]}]',
+      });
+      expect(res).toStrictEqual({
+        releases: [
           {
-            Architecture: 'x86_64',
-            CreationDate: '2021-08-26T19:31:41.000Z',
-            ImageId: 'ami-020d418c09883b165',
-            ImageLocation: 'amazon/amazon-eks-node-1.21-v20210826',
-            ImageType: 'machine',
-            Public: true,
-            OwnerId: '602401143452',
-            PlatformDetails: 'Linux/UNIX',
-            UsageOperation: 'RunInstances',
-            State: 'available',
-            BlockDeviceMappings: [
-              {
-                DeviceName: '/dev/xvda',
-                Ebs: {
-                  DeleteOnTermination: true,
-                  SnapshotId: 'snap-01ba16a8ec8087603',
-                  VolumeSize: 20,
-                  VolumeType: 'gp2',
-                  Encrypted: false,
-                },
-              },
-            ],
-            Description:
-              'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
-            EnaSupport: true,
-            Hypervisor: 'xen',
-            ImageOwnerAlias: 'amazon',
-            Name: 'amazon-eks-node-1.21-v20210826',
-            RootDeviceName: '/dev/xvda',
-            RootDeviceType: 'ebs',
-            SriovNetSupport: 'simple',
-            VirtualizationType: 'hvm',
-          },
-          {
-            Architecture: 'x86_64',
-            CreationDate: '2021-08-13T17:47:12.000Z',
-            ImageId: 'ami-02ce3d9008cab69cb',
-            ImageLocation: 'amazon/amazon-eks-node-1.21-v20210813',
-            ImageType: 'machine',
-            Public: true,
-            OwnerId: '602401143452',
-            PlatformDetails: 'Linux/UNIX',
-            UsageOperation: 'RunInstances',
-            State: 'available',
-            BlockDeviceMappings: [
-              {
-                DeviceName: '/dev/xvda',
-                Ebs: {
-                  DeleteOnTermination: true,
-                  SnapshotId: 'snap-0546beb61976e8017',
-                  VolumeSize: 20,
-                  VolumeType: 'gp2',
-                  Encrypted: false,
-                },
-              },
-            ],
-            Description:
-              'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
-            EnaSupport: true,
-            Hypervisor: 'xen',
-            ImageOwnerAlias: 'amazon',
-            Name: 'amazon-eks-node-1.21-v20210813',
-            RootDeviceName: '/dev/xvda',
-            RootDeviceType: 'ebs',
-            SriovNetSupport: 'simple',
-            VirtualizationType: 'hvm',
-          },
-          {
-            Architecture: 'x86_64',
-            CreationDate: '2021-09-14T22:00:24.000Z',
-            ImageId: 'ami-05f83986b0fe58ada',
-            ImageLocation: 'amazon/amazon-eks-node-1.21-v20210914',
-            ImageType: 'machine',
-            Public: true,
-            OwnerId: '602401143452',
-            PlatformDetails: 'Linux/UNIX',
-            UsageOperation: 'RunInstances',
-            State: 'available',
-            BlockDeviceMappings: [
-              {
-                DeviceName: '/dev/xvda',
-                Ebs: {
-                  DeleteOnTermination: true,
-                  SnapshotId: 'snap-0c6f79c3983fd8e1a',
-                  VolumeSize: 20,
-                  VolumeType: 'gp2',
-                  Encrypted: false,
-                },
-              },
-            ],
-            Description:
-              'EKS Kubernetes Worker AMI with AmazonLinux2 image, (k8s: 1.21.2, docker: 19.03.13ce-1.amzn2, containerd: 1.4.6-2.amzn2)',
-            EnaSupport: true,
-            Hypervisor: 'xen',
-            ImageOwnerAlias: 'amazon',
-            Name: 'amazon-eks-node-1.21-v20210914',
-            RootDeviceName: '/dev/xvda',
-            RootDeviceType: 'ebs',
-            SriovNetSupport: 'simple',
-            VirtualizationType: 'hvm',
+            isDeprecated: false,
+            newDigest: image3.Name,
+            releaseTimestamp: image3.CreationDate,
+            version: image3.ImageId,
           },
         ],
       });
+    });
+    it('with one deprecated matching image to return that image', async () => {
+      ec2Mock.reset();
+      ec2Mock.on(DescribeImagesCommand).resolves({ Images: [image2] });
       const res = await getPkgReleases({
         datasource,
         depName:
-          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.21-*"]}]',
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with one deprecated matching image to return that image"]}]',
       });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(1);
-      expect(ec2Mock.calls()).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        releases: [
+          {
+            isDeprecated: true,
+            newDigest: image2.Name,
+            releaseTimestamp: image2.CreationDate,
+            version: image2.ImageId,
+          },
+        ],
+      });
+    });
+    it('with 3 matching image to return the newest image', async () => {
+      ec2Mock.reset();
+      ec2Mock.on(DescribeImagesCommand).resolves(mock3Images);
+      const res = await getPkgReleases({
+        datasource,
+        depName:
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with 3 matching image to return the newest image"]}]',
+      });
+      expect(res).toStrictEqual({
+        releases: [
+          {
+            isDeprecated: false,
+            newDigest: image3.Name,
+            releaseTimestamp: image3.CreationDate,
+            version: image3.ImageId,
+          },
+        ],
+      });
     });
   });
 });
