@@ -1,6 +1,6 @@
 import type { PathLike } from 'fs';
 import callsite from 'callsite';
-import { DirectoryJSON, IFs, fs, vol } from 'memfs';
+import { DirectoryJSON, fs, vol } from 'memfs';
 import upath from 'upath';
 
 export class Fixtures {
@@ -28,10 +28,6 @@ export class Fixtures {
   }
 
   // Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder
-  static fs(): IFs {
-    return fs;
-  }
-
   static fsExtra(): unknown {
     function pathExists(path: string): boolean {
       try {

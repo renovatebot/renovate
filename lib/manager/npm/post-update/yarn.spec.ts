@@ -9,7 +9,7 @@ import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as yarnHelper from './yarn';
 
-jest.mock('fs', () => Fixtures.fs());
+jest.mock('fs');
 jest.mock('fs-extra', () => Fixtures.fsExtra());
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');

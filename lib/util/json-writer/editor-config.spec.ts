@@ -4,7 +4,7 @@ import { setGlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 import { IndentationType } from './indentation-type';
 
-jest.mock('fs', () => Fixtures.fs());
+jest.mock('fs');
 const defaultConfigFile = configFileNames[0];
 
 describe('util/json-writer/editor-config', () => {
