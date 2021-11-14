@@ -71,9 +71,9 @@ type PackageJson = {
     }
   }
   try {
-    const pkgJson = (await JSON.parse(
+    const pkgJson = JSON.parse(
       await readFile('package.json', 'utf8')
-    )) as PackageJson;
+    ) as PackageJson;
     if (pkgJson.renovate) {
       logger.info(`Validating package.json > renovate`);
       await validate('package.json > renovate', pkgJson.renovate);
