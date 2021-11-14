@@ -4,7 +4,7 @@ import { getGlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import { ToolConstraint } from '../../../util/exec/types';
+import type { ToolConstraint } from '../../../util/exec/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
