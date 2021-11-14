@@ -89,7 +89,7 @@ async function fetchReleasesFromMetadata(
 }
 
 const mavenCentralHtmlVersionRegex = regEx(
-  '^<a href="(?<version>[^"]+)\\/" title="(?:[^"]+)\\/">(?:[^"]+)\\/<\\/a>\\s+(?<releaseTimestamp>\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d)\\s+-\\s+$',
+  '^<a href="(?<version>[^"]+)\\/" title="(?:[^"]+)\\/">(?:[^"]+)\\/<\\/a>\\s+(?<releaseTimestamp>\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d)\\s+-$',
   'i'
 );
 
@@ -110,7 +110,7 @@ async function addReleasesFromIndexPage(
         const res = await downloadHttpProtocol(indexUrl);
         const { body } = res;
         for (const line of body.split('\n')) {
-          const match = line.match(mavenCentralHtmlVersionRegex);
+          const match = line.trim().match(mavenCentralHtmlVersionRegex);
           if (match) {
             const { version, releaseTimestamp: timestamp } =
               match?.groups || {};
