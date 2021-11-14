@@ -10,11 +10,11 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import type { MavenDependency, ReleaseMap } from './types';
 import {
+  checkHttpResource,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,
   getMavenUrl,
-  isHttpResourceExists,
 } from './util';
 
 export { id } from './common';
@@ -198,19 +198,17 @@ async function addReleasesUsingHeadRequests(
             repoUrl
           );
           const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
-          const res = await isHttpResourceExists(artifactUrl);
           const release: Release = { version };
 
-          if (is.string(res)) {
-            release.releaseTimestamp = res;
-          }
-
-          // Retry earlier for error status other than 404
-          if (res === null) {
+          const res = await checkHttpResource(artifactUrl);
+          if (res === 'error') {
             retryEarlier = true;
+          } else if (is.date(res)) {
+            release.releaseTimestamp = res.toISOString();
+            workingReleaseMap[version] = release;
+          } else if (res !== 'not-found') {
+            workingReleaseMap[version] = release;
           }
-
-          workingReleaseMap[version] = res ? release : null;
         }
       );
 
