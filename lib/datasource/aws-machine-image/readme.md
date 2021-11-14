@@ -42,13 +42,32 @@ module.exports = {
     {
       fileMatch: ['.*'],
       matchStrings: [
-        '._amiFilter=(?<lookupName>._?)\n(._currentImageName=(?<currentDigest>._?)\n)?(._\n)?._?(?<depName>[a-zA-Z0-9-_:]_)[ ]_?[:|=][ ]_?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?._',
+        '.*amiFilter=(?<lookupName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
       ],
       datasourceTemplate: 'aws-machine-image',
       versioningTemplate: 'aws-machine-image',
     },
   ],
 };
+```
+
+or as JSON ...
+
+```yaml
+{
+  'regexManagers':
+    [
+      {
+        'fileMatch': ['.*'],
+        'matchStrings':
+          [
+            ".*amiFilter=(?<lookupName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
+          ],
+        'datasourceTemplate': 'aws-machine-image',
+        'versioningTemplate': 'aws-machine-image',
+      },
+    ],
+}
 ```
 
 This would match every file, and would recognize the following lines:
