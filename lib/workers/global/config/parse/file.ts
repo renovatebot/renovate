@@ -1,7 +1,24 @@
+import { readFileSync } from 'fs-extra';
+import { load } from 'js-yaml';
+import JSON5 from 'json5';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
-import type { AllConfig } from '../../../../config/types';
+import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+
+export function getParsedContent(file: string): RenovateConfig {
+  const rawContent = readFileSync(file, 'utf8');
+  switch (upath.extname(file)) {
+    case '.yaml':
+    case '.yml':
+      return load(rawContent, { json: true }) as RenovateConfig;
+    case '.json5':
+      return JSON5.parse(rawContent);
+    default:
+      // .json and .js
+      return require(file);
+  }
+}
 
 export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config';
@@ -11,7 +28,7 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   }
   let config: AllConfig = {};
   try {
-    config = require(configFile);
+    config = getParsedContent(configFile);
   } catch (err) {
     // istanbul ignore if
     if (err instanceof SyntaxError || err instanceof TypeError) {
