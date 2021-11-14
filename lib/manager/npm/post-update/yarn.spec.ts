@@ -7,7 +7,7 @@ import {
 import { Fixtures } from '../../../../test/fixtures';
 import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
-import * as _yarnHelper from './yarn';
+import * as yarnHelper from './yarn';
 
 jest.mock('fs', () => Fixtures.fs());
 jest.mock('fs-extra', () => Fixtures.fsExtra());
@@ -17,7 +17,6 @@ jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const yarnHelper = mocked(_yarnHelper);
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -264,7 +263,7 @@ describe('manager/npm/post-update/yarn', () => {
         },
         '/'
       );
-      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
+      expect(await yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
         offlineMirror: true,
         yarnPath: '/.yarn/cli.js',
       });
@@ -278,7 +277,7 @@ describe('manager/npm/post-update/yarn', () => {
         },
         '/'
       );
-      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
+      expect(await yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
         offlineMirror: false,
         yarnPath: '/.yarn/cli.js',
       });
@@ -291,7 +290,7 @@ describe('manager/npm/post-update/yarn', () => {
         },
         '/tmp/renovate'
       );
-      const { offlineMirror, yarnPath } = await _yarnHelper.checkYarnrc(
+      const { offlineMirror, yarnPath } = await yarnHelper.checkYarnrc(
         '/tmp/renovate'
       );
       expect(offlineMirror).toBeFalse();
