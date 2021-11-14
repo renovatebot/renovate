@@ -75,7 +75,7 @@ export class AwsMachineImageDataSource extends Datasource {
       const newValueMatchingImages = images.filter(
         (image) => image.ImageId === newValue
       );
-      if (newValueMatchingImages.length == 1) {
+      if (newValueMatchingImages.length === 1) {
         return newValueMatchingImages[0].Name;
       }
       return null;

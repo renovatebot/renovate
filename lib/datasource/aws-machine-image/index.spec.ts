@@ -1,8 +1,8 @@
 import {
   DescribeImagesCommand,
+  DescribeImagesResult,
   EC2Client,
   Image,
-  DescribeImagesResult,
 } from '@aws-sdk/client-ec2';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
@@ -174,7 +174,7 @@ describe('datasource/aws-machine-image/index', () => {
         depName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without newValue, without returned images to be null"]}]',
       });
-      expect(res).toStrictEqual(null);
+      expect(res).toBeNull();
     });
     it('without newValue, with one matching image to return that image', async () => {
       ec2Mock.reset();
@@ -220,7 +220,7 @@ describe('datasource/aws-machine-image/index', () => {
         },
         'will never match'
       );
-      expect(res).toStrictEqual(null);
+      expect(res).toBeNull();
     });
   });
 
@@ -233,7 +233,7 @@ describe('datasource/aws-machine-image/index', () => {
         depName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without returned images to be null"]}]',
       });
-      expect(res).toStrictEqual(null);
+      expect(res).toBeNull();
     });
     it('with one matching image to return that image', async () => {
       ec2Mock.reset();
