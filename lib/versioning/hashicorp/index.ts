@@ -49,7 +49,7 @@ function getNewValue({
         replaceValue = `$<prefix>${npm.getMinor(newVersion)}$<suffix>`;
       }
       return currentValue.replace(
-        regEx(`(?P<prefix>~>\\s*0\\.)\\d+(?P<suffix>.*)$`),
+        regEx(`(?<prefix>~>\\s*0\\.)\\d+(?<suffix>.*)$`),
         replaceValue
       );
     }
