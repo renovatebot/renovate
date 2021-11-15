@@ -9,7 +9,7 @@ handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 // istanbul ignore next
 handlebars.registerHelper(
   'replace',
-  (find, replace, context) => context.replace(find, 'g', replace) // adding regex here causes coverage issues
+  (find, replace, context) => context.replace(find, 'g', replace) // TODO #12070 adding regex here causes coverage issues
 );
 
 export const exposedConfigOptions = [
