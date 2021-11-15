@@ -22,17 +22,17 @@ Terraform range constraints are supported:
 - `~> 1.2`: any non-beta version >= 1.2.0 and < 2.0.0, e.g. 1.X.Y
 - `>= 1.0.0, <= 2.0.0`: any version between 1.0.0 and 2.0.0 inclusive
 
-For fine-grained control, e.g. to turn off only parts of this manager, there are following `depTypes` provided:
+For fine-grained control, e.g. to turn off only parts of this manager, you can use the following `depTypes`:
 
-| resource                    |      depType      |
-| --------------------------- | :---------------: |
-| terraform provider          |     provider      |
-| required terraform provider | required_provider |
-| required terraform version  | required_version  |
-| terraform module            |      module       |
-| helm release                |   helm_release    |
-| docker container            | docker_container  |
-| docker image                |   docker_image    |
-| docker service              |  docker_service   |
+| resource                    |       depType       |
+| --------------------------- | :-----------------: |
+| Terraform provider          |     `provider`      |
+| required Terraform provider | `required_provider` |
+| required Terraform version  | `required_version`  |
+| Terraform module            |      `module`       |
+| Helm release                |   `helm_release`    |
+| Docker container            | `docker_container`  |
+| Docker image                |   `docker_image`    |
+| Docker service              |  `docker_service`   |
 
 If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
