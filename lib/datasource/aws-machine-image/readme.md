@@ -10,18 +10,14 @@ Example:
 # Getting the latest official EKS image from AWS (account '602401143452' for eu-central-1) for EKS 1.21 (name matches 'amazon-eks-node-1.21-*') would look as a describe images filter like:
 
 [
-    {
-        "Name": "owner-id",
-        "Values": [
-            "602401143452"
-        ]
-    },
-    {
-        "Name": "name",
-        "Values": [
-            "amazon-eks-node-1.21-*"
-        ]
-    }
+  {
+    "Name": "owner-id",
+    "Values": [ "602401143452" ]
+  },
+  {
+    "Name": "name",
+    "Values": [ "amazon-eks-node-1.21-*" ]
+  }
 ]
 
 # In order to use it with this datasource, you have to minify it:
