@@ -10,14 +10,14 @@ import type { PackageDependency, PackageFile } from '../types';
 import type { ParsedLine } from './types';
 
 const regexMappings = [
-  regEx(`^\\s*pod\\s+(['"])(?P<spec>[^'"/]+)(\\/(?P<subspec>[^'"]+))?(['"])`),
+  regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(\\/(?<subspec>[^'"]+))?(['"])`),
   regEx(
-    `^\\s*pod\\s+(['"])[^'"]+(['"])\\s*,\\s*(['"])(?P<currentValue>[^'"]+)(['"])\\s*$`
+    `^\\s*pod\\s+(['"])[^'"]+(['"])\\s*,\\s*(['"])(?<currentValue>[^'"]+)(['"])\\s*$`
   ),
-  regEx(`,\\s*:git\\s*=>\\s*(['"])(?P<git>[^'"]+)(['"])`),
-  regEx(`,\\s*:tag\\s*=>\\s*(['"])(?P<tag>[^'"]+)(['"])`),
-  regEx(`,\\s*:path\\s*=>\\s*(['"])(?P<path>[^'"]+)(['"])`),
-  regEx(`^\\s*source\\s*(['"])(?P<source>[^'"]+)(['"])`),
+  regEx(`,\\s*:git\\s*=>\\s*(['"])(?<git>[^'"]+)(['"])`),
+  regEx(`,\\s*:tag\\s*=>\\s*(['"])(?<tag>[^'"]+)(['"])`),
+  regEx(`,\\s*:path\\s*=>\\s*(['"])(?<path>[^'"]+)(['"])`),
+  regEx(`^\\s*source\\s*(['"])(?<source>[^'"]+)(['"])`),
 ];
 
 export function parseLine(line: string): ParsedLine {
