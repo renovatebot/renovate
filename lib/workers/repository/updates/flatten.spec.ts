@@ -66,6 +66,16 @@ describe('workers/repository/updates/flatten', () => {
                 updateTypes: ['pin'],
                 updates: [{ newValue: '2.0.0' }],
               },
+              {
+                depName: 'abc',
+                updates: [
+                  {
+                    newName: 'def',
+                    newValue: '2.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
             ],
           },
           {
@@ -131,7 +141,7 @@ describe('workers/repository/updates/flatten', () => {
         ],
       };
       const res = await flattenUpdates(config, packageFiles);
-      expect(res).toHaveLength(13);
+      expect(res).toHaveLength(14);
       expect(res.filter((update) => update.sourceRepoSlug)).toHaveLength(3);
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')

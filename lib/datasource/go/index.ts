@@ -4,6 +4,8 @@ import * as goproxy from './releases-goproxy';
 
 export { id } from './common';
 
+export { getDigest } from './digest';
+
 export const customRegistrySupport = false;
 
 export function getReleases(
