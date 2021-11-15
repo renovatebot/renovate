@@ -3,6 +3,7 @@ import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
+import { trimLeadingSlash } from '../../util/url';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline } from './types';
@@ -124,7 +125,7 @@ export async function extractAllPackageFiles(
     if (is.array(doc?.include)) {
       for (const includeObj of doc.include) {
         if (is.string(includeObj.local)) {
-          const fileObj = includeObj.local.replace(/^\//, ''); // TODO #12071 #12070 left for now sameas ensureTrailingSlash
+          const fileObj = trimLeadingSlash(includeObj.local); // TODO #12071
           if (!seen.has(fileObj)) {
             seen.add(fileObj);
             filesToExamine.push(fileObj);
@@ -132,7 +133,7 @@ export async function extractAllPackageFiles(
         }
       }
     } else if (is.string(doc?.include)) {
-      const fileObj = doc.include.replace(/^\//, ''); // TODO #12071  #12070 left for now same as ensureTrailingSlash
+      const fileObj = trimLeadingSlash(doc.include); // TODO #12071
       if (!seen.has(fileObj)) {
         seen.add(fileObj);
         filesToExamine.push(fileObj);

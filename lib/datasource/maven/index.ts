@@ -3,6 +3,7 @@ import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
+import { ensureTrailingSlash } from '../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
@@ -246,31 +247,7 @@ export async function getReleases({
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const dependency = getDependencyParts(lookupName);
-
-  let releases: Release[] = null;
-  const repoForVersions = {};
-  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12070 asked to leave it for now
-  logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
-  const metadataVersions = await getVersionsFromMetadata(dependency, repoUrl);
-  if (metadataVersions) {
-    if (!process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK) {
-      releases = await filterMissingArtifacts(
-        dependency,
-        repoUrl,
-        metadataVersions
-      );
-    }
-
-    /* istanbul ignore next */
-    releases = releases || metadataVersions.map((version) => ({ version }));
-
-    const latestVersion = getLatestStableVersion(releases);
-    if (latestVersion) {
-      repoForVersions[latestVersion] = repoUrl;
-    }
-
-  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12070
-
+  const repoUrl = ensureTrailingSlash(registryUrl);
 
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 

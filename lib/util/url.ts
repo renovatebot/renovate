@@ -79,3 +79,7 @@ export function parseUrl(url: string): URL | null {
 export function createURLFromHostOrURL(url: string): URL | null {
   return parseUrl(url) || parseUrl(`https://${url}`);
 }
+
+export function trimLeadingSlash(url: string): string {
+  return url.replace(regEx(/^\//), '');
+}

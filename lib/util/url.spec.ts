@@ -1,8 +1,10 @@
 import {
   ensurePathPrefix,
+  ensureTrailingSlash,
   joinUrlParts,
   parseUrl,
   resolveBaseUrl,
+  trimLeadingSlash,
   trimTrailingSlash,
   validateUrl,
 } from './url';
@@ -79,6 +81,13 @@ describe('util/url', () => {
     expect(trimTrailingSlash('foo//////')).toBe('foo');
   });
 
+  it('ensureTrailingSlash', () => {
+    expect(ensureTrailingSlash('foo')).toBe('foo/');
+    expect(ensureTrailingSlash('/foo/bar')).toBe('/foo/bar/');
+    expect(ensureTrailingSlash('foo/')).toBe('foo/');
+    expect(ensureTrailingSlash('foo//////')).toBe('foo//////');
+  });
+
   it('ensures path prefix', () => {
     expect(ensurePathPrefix('https://index.docker.io', '/v2')).toBe(
       'https://index.docker.io/v2/'
@@ -112,4 +121,11 @@ describe('util/url', () => {
     );
     expect(joinUrlParts('foo//////')).toBe('foo/');
   });
+});
+
+it('trimLeadingSlash', () => {
+  expect(trimLeadingSlash('foo')).toBe('foo');
+  expect(trimLeadingSlash('/foo/bar/')).toBe('foo/bar/');
+  expect(trimLeadingSlash('foo/')).toBe('foo/');
+  expect(trimLeadingSlash('foo//////')).toBe('foo//////');
 });

@@ -1,10 +1,10 @@
 import { PlatformId } from '../../constants';
-import { resolveBaseUrl } from '../url';
+import { ensureTrailingSlash, resolveBaseUrl } from '../url';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {
-  baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12070 #12071 adds slash at front when re2 is used
+  baseUrl = ensureTrailingSlash(newBaseUrl);
 };
 
 export interface GiteaHttpOptions extends InternalHttpOptions {

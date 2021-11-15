@@ -18,9 +18,7 @@ const versionLineRegex = regEx(
 const constraintLineRegex = regEx(
   `^(?<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?<constraint>[^"']+)(?<suffix>".*)$`
 );
-const hashLineRegex = regEx(
-  `^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`
-);
+const hashLineRegex = regEx(`^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`);
 
 const lockFile = '.terraform.lock.hcl';
 
