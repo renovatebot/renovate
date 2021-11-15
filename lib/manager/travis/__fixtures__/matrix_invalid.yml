@@ -1,0 +1,3 @@
+matrix:
+  include:
+    - invalid : 1.0

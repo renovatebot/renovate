@@ -22,6 +22,41 @@ export function extractPackageFile(content: string): PackageFile | null {
       currentValue: currentValue.toString(),
     }));
   }
+
+  // Handle the matrix syntax
+  let matrix_include: any;
+  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+  if (doc && doc?.jobs?.include) {
+    matrix_include = doc?.jobs?.include;
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+  } else if (doc && doc?.matrix?.include) {
+    matrix_include = doc.matrix.include;
+  }
+
+  if (is.array(matrix_include)) {
+    matrix_include
+      .filter((item: any) => item?.node_js)
+      .forEach((item: any) => {
+        if (is.array(item.node_js)) {
+          item.node_js.forEach((currentValue) => {
+            deps.push({
+              depName: 'node',
+              datasource: datasourceGithubTags.id,
+              lookupName: 'nodejs/node',
+              currentValue: currentValue.toString(),
+            });
+          });
+        } else if (is.string(item.node_js)) {
+          deps.push({
+            depName: 'node',
+            datasource: datasourceGithubTags.id,
+            lookupName: 'nodejs/node',
+            currentValue: item.node_js.toString(),
+          });
+        }
+      });
+  }
+
   if (!deps.length) {
     return null;
   }
