@@ -40,7 +40,7 @@ export async function extractPackageFile(
       res.constraints = { ruby: rubyMatch[1] };
     }
     const gemMatchRegex = regEx(
-      `^\\s*gem\\s+(['"])(?P<depName>[^'"]+)(['"])(\\s*,\\s*(?P<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`
+      `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`
     ); // TODO #12071
     const gemMatch = gemMatchRegex.exec(line);
     if (gemMatch) {
