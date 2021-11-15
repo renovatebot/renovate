@@ -140,7 +140,7 @@ function getFilteredObject(input: CompileInput): any {
   return res;
 }
 
-const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // adding regex here causes coverage issues
+const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12070 adding regex here causes coverage issues
 
 export function compile(
   template: string,
