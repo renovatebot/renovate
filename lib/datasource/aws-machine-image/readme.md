@@ -51,7 +51,7 @@ module.exports = {
 };
 ```
 
-or as JSON ...
+Or as JSON:
 
 ```yaml
 {
