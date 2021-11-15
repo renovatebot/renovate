@@ -1,13 +1,12 @@
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { getDigest as _getDigest } from './digest';
 import * as direct from './releases-direct';
 import * as goproxy from './releases-goproxy';
 
 export { id } from './common';
 
-export const customRegistrySupport = false;
+export { getDigest } from './digest';
 
-export const getDigest = _getDigest;
+export const customRegistrySupport = false;
 
 export function getReleases(
   config: GetReleasesConfig
