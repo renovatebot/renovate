@@ -3,7 +3,7 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
@@ -33,11 +33,11 @@ describe('manager/cargo/artifacts', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
   it('returns null if no Cargo.lock found', async () => {
     fs.stat.mockRejectedValue(new Error('not found!'));
@@ -171,7 +171,7 @@ describe('manager/cargo/artifacts', () => {
 
   it('returns updated Cargo.lock with docker', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);

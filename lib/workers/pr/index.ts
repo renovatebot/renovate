@@ -1,4 +1,4 @@
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -70,7 +70,7 @@ export async function addAssigneesReviewers(
       }
       if (assignees.length > 0) {
         // istanbul ignore if
-        if (getGlobalConfig().dryRun) {
+        if (GlobalConfig.isDryRun) {
           logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
         } else {
           await platform.addAssignees(pr.number, assignees);
@@ -99,7 +99,7 @@ export async function addAssigneesReviewers(
       }
       if (reviewers.length > 0) {
         // istanbul ignore if
-        if (getGlobalConfig().dryRun) {
+        if (GlobalConfig.isDryRun) {
           logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
         } else {
           await platform.addReviewers(pr.number, reviewers);
@@ -378,7 +378,7 @@ export async function ensurePr(
         );
       }
       // istanbul ignore if
-      if (getGlobalConfig().dryRun) {
+      if (GlobalConfig.isDryRun) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
         await platform.updatePr({
@@ -401,7 +401,7 @@ export async function ensurePr(
     let pr: Pr;
     try {
       // istanbul ignore if
-      if (getGlobalConfig().dryRun) {
+      if (GlobalConfig.isDryRun) {
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
@@ -444,7 +444,7 @@ export async function ensurePr(
           { branch: branchName },
           'Deleting branch due to server error'
         );
-        if (getGlobalConfig().dryRun) {
+        if (GlobalConfig.isDryRun) {
           logger.info('DRY-RUN: Would delete branch: ' + config.branchName);
         } else {
           await deleteBranch(branchName);
@@ -465,7 +465,7 @@ export async function ensurePr(
       content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
-      if (getGlobalConfig().dryRun) {
+      if (GlobalConfig.isDryRun) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
         await platform.ensureComment({

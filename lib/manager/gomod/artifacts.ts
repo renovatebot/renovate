@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { dirname, join } from 'upath';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -171,7 +171,7 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
-        CGO_ENABLED: getGlobalConfig().binarySource === 'docker' ? '0' : null,
+        CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
       },
       docker: {

@@ -10,7 +10,7 @@ import Git, {
 } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -199,7 +199,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   git = Git(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
@@ -298,7 +298,7 @@ export async function syncGit(): Promise<void> {
     return;
   }
   gitInitialized = true;
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   logger.debug('Initializing git repository into ' + localDir);
   const gitHead = join(localDir, '.git/HEAD');
   let clone = true;
@@ -699,7 +699,7 @@ export async function commitFiles({
     await writePrivateKey();
     privateKeySet = true;
   }
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   await configSigningKey(localDir);
   await writeGitAuthor();
   try {

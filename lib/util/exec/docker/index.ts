@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
@@ -156,7 +156,7 @@ export async function removeDockerContainer(
 }
 
 export async function removeDanglingContainers(): Promise<void> {
-  const { binarySource, dockerChildPrefix } = getGlobalConfig();
+  const { binarySource, dockerChildPrefix } = GlobalConfig.get();
   if (binarySource !== 'docker') {
     return;
   }
@@ -209,7 +209,7 @@ export async function generateDockerCommand(
     dockerUser,
     dockerChildPrefix,
     dockerImagePrefix,
-  } = getGlobalConfig();
+  } = GlobalConfig.get();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);

@@ -5,7 +5,7 @@ import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { add } from '../util/sanitize';
-import { getGlobalConfig } from './global';
+import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 
 export async function tryDecryptPgp(
@@ -153,7 +153,7 @@ export async function decryptConfig(
 ): Promise<RenovateConfig> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
-  const { privateKey, privateKeyOld } = getGlobalConfig();
+  const { privateKey, privateKeyOld } = GlobalConfig.get();
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');
