@@ -34,7 +34,7 @@ You have to use the regex manager for this.
 
 **Usage Example**
 
-An example how a regex manager could look like:
+Here's an example of using the regex manager:
 
 ```javascript
 module.exports = {
