@@ -41,9 +41,10 @@ export class Fixtures {
     return {
       ...fs,
       pathExists,
-      readFile: (path: string) => fs.readFileSync(path, 'utf-8'),
-      writeFile: (name: string, content: string) =>
-        fs.writeFileSync(name, content),
+      remove: fs.promises.rm,
+      readFile: (fileName: string, encoding?: string) =>
+        fs.promises.readFile(fileName, encoding ?? 'utf8'),
+      writeFile: fs.promises.writeFile,
     };
   }
 

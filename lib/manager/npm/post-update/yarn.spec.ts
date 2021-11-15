@@ -9,7 +9,6 @@ import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as yarnHelper from './yarn';
 
-jest.mock('fs');
 jest.mock('fs-extra', () => Fixtures.fsExtra());
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
@@ -203,7 +202,7 @@ describe('manager/npm/post-update/yarn', () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         { isLockFileMaintenance: true },
       ]);
-      expect(res.lockFile).toBe('package-lock-contents');
+      expect(res.lockFile).toBeUndefined();
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
