@@ -32,7 +32,7 @@ export function bumpPackageVersion(
     }
     logger.debug({ newPjVersion });
     bumpedContent = content.replace(
-      regEx(`(?P<version>"version":\\s*")[^"]*`),
+      regEx(`(?<version>"version":\\s*")[^"]*`),
       `$<version>${newPjVersion}`
     );
     if (bumpedContent === content) {
