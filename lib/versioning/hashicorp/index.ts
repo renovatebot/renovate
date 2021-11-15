@@ -56,7 +56,7 @@ function getNewValue({
     // handle special ~> 1.2 case
     if (regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
       return currentValue.replace(
-        regEx(`(?P<prefix>~>\\s*)\\d+\\.\\d+$`),
+        regEx(`(?<prefix>~>\\s*)\\d+\\.\\d+$`),
         `$<prefix>${npm.getMajor(newVersion)}.0`
       );
     }
