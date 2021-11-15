@@ -7,6 +7,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
+import { joinUrlParts } from '../../../util/url';
 import type { PackageFile } from '../../types';
 import type { PnpmWorkspaceFile } from './types';
 import { matchesAnyPattern } from './utils';
@@ -105,7 +106,7 @@ export async function detectPnpmWorkspaces(
       packageFilters !== null &&
       matchesAnyPattern(
         packageFile,
-        packageFilters.map((filter) => filter.replace(/\/?$/, '/package.json')) // TODO #12071
+        packageFilters.map((filter) => joinUrlParts(filter, '/package.json'))
       );
     if (isPackageInWorkspace) {
       p.pnpmShrinkwrap = lockFilePath;
