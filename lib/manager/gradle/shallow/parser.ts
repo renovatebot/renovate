@@ -263,6 +263,7 @@ function processLongFormDep({
     const versionToken: Token = tokenMap.version;
     if (versionToken.type === TokenType.Word) {
       const variable = variables[versionToken.value];
+      dep.groupName = variable.key;
       dep.managerData = {
         fileReplacePosition: variable.fileReplacePosition,
         packageFile: variable.packageFile,
