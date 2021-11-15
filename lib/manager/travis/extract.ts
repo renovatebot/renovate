@@ -25,11 +25,9 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   // Handle the matrix syntax
   let matrix_include: any;
-  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-  if (doc && doc?.jobs?.include) {
-    matrix_include = doc?.jobs?.include;
-    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-  } else if (doc && doc?.matrix?.include) {
+  if (doc?.jobs?.include) {
+    matrix_include = doc.jobs.include;
+  } else if (doc?.matrix?.include) {
     matrix_include = doc.matrix.include;
   }
 
