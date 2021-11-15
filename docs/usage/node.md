@@ -24,12 +24,12 @@ When `binarySource=docker`, such as in the hosted WhiteSource Renovate App, Reno
 To control which version or constraint is installed, you should use the `engines.npm` property in your `package.json` file.
 Renovate bot will then use that version constraint for npm when it creates a pull request.
 
-For example, if you want to use at least npm `6.14.11` and also allow newer versions of npm in the `6.x` range, you would put this in your `package.json` file:
+For example, if you want to use at least npm `8.1.0` and also allow newer versions of npm in the `8.x` range, you would put this in your `package.json` file:
 
 ```json
 {
   "engines": {
-    "npm": "^6.14.11"
+    "npm": "^8.1.0"
   }
 }
 ```
