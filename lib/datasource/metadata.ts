@@ -126,7 +126,7 @@ function massageGitlabUrl(url: string): string {
     .replace('.git', '');
 }
 
-function normalizeDate(input: any): string | null {
+export function normalizeDate(input: any): string | null {
   if (
     typeof input === 'number' &&
     !Number.isNaN(input) &&
