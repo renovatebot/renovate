@@ -1,7 +1,7 @@
 import * as httpMock from '../../../test/http-mock';
 import { mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
-import { getDigest } from './digest';
+import { getDigest } from '.';
 
 jest.mock('../../util/host-rules');
 

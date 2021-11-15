@@ -1,4 +1,5 @@
-import pMap from 'p-map';
+import is from '@sindresorhus/is';
+import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
@@ -7,17 +8,13 @@ import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
-import type {
-  ArtifactInfoResult,
-  ArtifactsInfo,
-  MavenDependency,
-} from './types';
+import type { MavenDependency, ReleaseMap } from './types';
 import {
+  checkHttpResource,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,
   getMavenUrl,
-  isHttpResourceExists,
 } from './util';
 
 export { id } from './common';
@@ -31,13 +28,17 @@ function isStableVersion(x: string): boolean {
   return mavenVersion.isStable(x);
 }
 
-function getLatestStableVersion(releases: Release[]): string | undefined {
-  return releases
-    .map(({ version }) => version)
-    .filter(isStableVersion)
-    .reduce((latestVersion, version) =>
-      compare(version, latestVersion) === 1 ? version : latestVersion
-    );
+function getLatestSuitableVersion(releases: Release[]): string | null {
+  // istanbul ignore if
+  if (!releases?.length) {
+    return null;
+  }
+  const allVersions = releases.map(({ version }) => version);
+  const stableVersions = allVersions.filter(isStableVersion);
+  const versions = stableVersions.length ? stableVersions : allVersions;
+  return versions.reduce((latestVersion, version) =>
+    compare(version, latestVersion) === 1 ? version : latestVersion
+  );
 }
 
 function extractVersions(metadata: XmlDocument): string[] {
@@ -49,15 +50,15 @@ function extractVersions(metadata: XmlDocument): string[] {
   return elements.map((el) => el.val);
 }
 
-async function getVersionsFromMetadata(
+async function fetchReleasesFromMetadata(
   dependency: MavenDependency,
   repoUrl: string
-): Promise<string[] | null> {
+): Promise<ReleaseMap> {
   const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
 
-  const cacheNamespace = 'datasource-maven-metadata';
+  const cacheNamespace = 'datasource-maven:metadata-xml';
   const cacheKey = metadataUrl.toString();
-  const cachedVersions = await packageCache.get<string[]>(
+  const cachedVersions = await packageCache.get<ReleaseMap>(
     cacheNamespace,
     cacheKey
   );
@@ -70,25 +71,18 @@ async function getVersionsFromMetadata(
     metadataUrl
   );
   if (!mavenMetadata) {
-    return null;
+    return {};
   }
 
   const versions = extractVersions(mavenMetadata);
+  const releaseMap = versions.reduce(
+    (acc, version) => ({ ...acc, [version]: null }),
+    {}
+  );
   if (!authorization) {
-    await packageCache.set(cacheNamespace, cacheKey, versions, 30);
+    await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
   }
-  return versions;
-}
-
-// istanbul ignore next
-function isValidArtifactsInfo(
-  info: ArtifactsInfo | null,
-  versions: string[]
-): boolean {
-  if (!info) {
-    return false;
-  }
-  return versions.every((v) => info[v] !== undefined);
+  return releaseMap;
 }
 
 function isSnapshotVersion(version: string): boolean {
@@ -166,74 +160,85 @@ async function createUrlForDependencyPom(
   return `${version}/${dependency.name}-${version}.pom`;
 }
 
-async function getReleasesFromHeadRequests(
+async function addReleasesUsingHeadRequests(
+  inputReleaseMap: ReleaseMap,
   dependency: MavenDependency,
-  repoUrl: string,
-  versions: string[]
-): Promise<Release[] | null> {
+  repoUrl: string
+): Promise<ReleaseMap> {
+  const releaseMap = { ...inputReleaseMap };
+
   if (process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK) {
-    return null;
+    return releaseMap;
   }
 
-  const cacheNamespace = 'datasource-maven-metadata';
+  const cacheNs = 'datasource-maven:head-requests';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-  let artifactsInfo: ArtifactsInfo | null =
-    await packageCache.get<ArtifactsInfo>(cacheNamespace, cacheKey);
+  let workingReleaseMap: ReleaseMap = await packageCache.get<ReleaseMap>(
+    cacheNs,
+    cacheKey
+  );
 
-  // If the cache contains any artifacts that we were previously unable to determine if they exist,
-  // retry the existence checks on them.
-  if (!isValidArtifactsInfo(artifactsInfo, versions)) {
-    // For each version, determine if there is a POM file available for it
-    const results: ArtifactInfoResult[] = await pMap(
-      versions,
-      async (version): Promise<ArtifactInfoResult | null> => {
-        // Create the URL that the POM file should be available at
-        const artifactUrl = getMavenUrl(
-          dependency,
-          repoUrl,
-          await createUrlForDependencyPom(version, dependency, repoUrl)
+  if (!workingReleaseMap) {
+    workingReleaseMap = {};
+
+    const unknownVersions = Object.entries(releaseMap)
+      .filter(([version, release]) => {
+        const isDiscoveredOutside = !!release;
+        const isDiscoveredInsideAndCached = !is.undefined(
+          workingReleaseMap[version]
         );
+        const isDiscovered = isDiscoveredOutside || isDiscoveredInsideAndCached;
+        return !isDiscovered;
+      })
+      .map(([k]) => k);
 
-        // Return an ArtifactInfoResult that maps the version to the result of the check if the POM file exists in the repo
-        return [version, await isHttpResourceExists(artifactUrl)];
-      },
-      { concurrency: 5 }
-    );
+    if (unknownVersions.length) {
+      let retryEarlier = false;
+      const queue = unknownVersions.map(
+        (version) => async (): Promise<void> => {
+          const pomUrl = await createUrlForDependencyPom(
+            version,
+            dependency,
+            repoUrl
+          );
+          const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
+          const release: Release = { version };
 
-    artifactsInfo = results.reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: value,
-      }),
-      {}
-    );
+          const res = await checkHttpResource(artifactUrl);
 
-    // Retry earlier for status other than 404
-    const cacheTTL = Object.values(artifactsInfo).some((x) => x === null)
-      ? 60
-      : 24 * 60;
+          if (res === 'error') {
+            retryEarlier = true;
+          }
 
-    await packageCache.set(cacheNamespace, cacheKey, artifactsInfo, cacheTTL);
+          if (is.date(res)) {
+            release.releaseTimestamp = res.toISOString();
+          }
+
+          if (res !== 'not-found' && res !== 'error') {
+            workingReleaseMap[version] = release;
+          }
+        }
+      );
+
+      await pAll(queue, { concurrency: 5 });
+      const cacheTTL = retryEarlier ? 60 : 24 * 60;
+      await packageCache.set(cacheNs, cacheKey, workingReleaseMap, cacheTTL);
+    }
   }
 
-  // Create releases for every version that exists in the repository
-  return versions
-    .filter((v) => artifactsInfo[v])
-    .map((version) => {
-      const release: Release = { version };
-      const releaseTimestamp = artifactsInfo[version];
-      if (releaseTimestamp && typeof releaseTimestamp === 'string') {
-        release.releaseTimestamp = releaseTimestamp;
-      }
-      return release;
-    });
+  for (const version of Object.keys(releaseMap)) {
+    releaseMap[version] ||= workingReleaseMap[version] ?? null;
+  }
+
+  return releaseMap;
 }
 
-function getFallbackReleases(versions: string[]): Release[] | null {
-  const result = versions?.map((version) => ({
-    version,
-  }));
-  return result ?? null;
+function getReleasesFromMap(releaseMap: ReleaseMap): Release[] {
+  const releases = Object.values(releaseMap).filter(Boolean);
+  if (releases.length) {
+    return releases;
+  }
+  return Object.keys(releaseMap).map((version) => ({ version }));
 }
 
 export async function getReleases({
@@ -245,26 +250,25 @@ export async function getReleases({
 
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 
-  let releases: Release[] = null;
-  const versions = await getVersionsFromMetadata(dependency, repoUrl);
-  releases ||= await getReleasesFromHeadRequests(dependency, repoUrl, versions);
-  releases ||= getFallbackReleases(versions);
-
+  let releaseMap = await fetchReleasesFromMetadata(dependency, repoUrl);
+  releaseMap = await addReleasesUsingHeadRequests(
+    releaseMap,
+    dependency,
+    repoUrl
+  );
+  const releases = getReleasesFromMap(releaseMap);
   if (!releases?.length) {
     return null;
   }
+
   logger.debug(
     `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`
   );
 
-  const latestStableVersion = getLatestStableVersion(releases);
+  const latestSuitableVersion = getLatestSuitableVersion(releases);
   const dependencyInfo =
-    latestStableVersion &&
-    (await getDependencyInfo(dependency, repoUrl, latestStableVersion));
+    latestSuitableVersion &&
+    (await getDependencyInfo(dependency, repoUrl, latestSuitableVersion));
 
-  return {
-    ...dependency,
-    ...dependencyInfo,
-    releases,
-  };
+  return { ...dependency, ...dependencyInfo, releases };
 }
