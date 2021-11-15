@@ -327,7 +327,7 @@ export async function addReleaseNotes(
   }
   const output: ChangeLogResult = { ...input, versions: [] };
   const { repository, sourceDirectory } = input.project;
-  const cacheNamespace = `changelog-${input.project.type}-notes`;
+  const cacheNamespace = `changelog-${input.project.type}-notes@v2`;
   function getCacheKey(version: string): string {
     return `${repository}:${
       sourceDirectory ? `${sourceDirectory}:` : ''
