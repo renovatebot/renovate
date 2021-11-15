@@ -22,7 +22,7 @@ import { getConfiguredRegistries } from './util';
  * so we don't include it in the extracting regexp
  */
 const checkVersion = regEx(
-  `^\\s*(?:[[])?(?:(?P<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`
+  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`
 );
 const elemNames = new Set([
   'PackageReference',
