@@ -21,7 +21,7 @@ export function bumpPackageVersion(
     }
     logger.debug({ newChartVersion });
     bumpedContent = content.replace(
-      regEx(`^(?P<version>version:\\s*).*$`, 'm'),
+      regEx(`^(?<version>version:\\s*).*$`, 'm'),
       `$<version>${newChartVersion}`
     );
     if (bumpedContent === content) {
