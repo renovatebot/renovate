@@ -130,7 +130,7 @@ const getNewValue = ({
       .map(
         (element) =>
           element.replace(
-            regEx(`^(?P<whitespace>\\s*)`),
+            regEx(`^(?<whitespace>\\s*)`),
             `$<whitespace>${delimiter}`
           ) // TODO #12071
       )
