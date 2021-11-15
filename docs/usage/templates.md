@@ -30,3 +30,11 @@ If you want to print pretty JSON with Handlebars you can use the built-in functi
 `{{{stringToPrettyJSON myvar}}}`
 
 In the example above `myvar` is a variable/field, that contains valid JSON.
+
+### encodeURIComponent
+
+If you want to ..., use the built-in function `encodeURIComponent` like this:
+
+### replace
+
+If you want to ..., use the built-in function `replace` like this:
