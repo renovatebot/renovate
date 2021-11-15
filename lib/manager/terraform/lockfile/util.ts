@@ -10,16 +10,16 @@ import type {
 } from './types';
 
 const providerStartLineRegex = regEx(
-  `^provider "(?P<registryUrl>[^/]*)\\/(?P<namespace>[^/]*)\\/(?P<depName>[^/]*)"`
+  `^provider "(?<registryUrl>[^/]*)\\/(?<namespace>[^/]*)\\/(?<depName>[^/]*)"`
 );
 const versionLineRegex = regEx(
-  `^(?P<prefix>[\\s]*version[\\s]*=[\\s]*")(?P<version>[^"']+)(?P<suffix>".*)$`
+  `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`
 );
 const constraintLineRegex = regEx(
-  `^(?P<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?P<constraint>[^"']+)(?P<suffix>".*)$`
+  `^(?<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?<constraint>[^"']+)(?<suffix>".*)$`
 );
 const hashLineRegex = regEx(
-  `^(?P<prefix>\\s*")(?P<hash>[^"]+)(?P<suffix>",.*)$`
+  `^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`
 );
 
 const lockFile = '.terraform.lock.hcl';
