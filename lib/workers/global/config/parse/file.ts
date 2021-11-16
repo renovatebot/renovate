@@ -11,7 +11,8 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   }
   let config: AllConfig = {};
   try {
-    config = (await import(configFile)).default;
+    const tmpConfig = await import(configFile);
+    config = tmpConfig.default ? tmpConfig.default : tmpConfig;
   } catch (err) {
     // istanbul ignore if
     if (err instanceof SyntaxError || err instanceof TypeError) {
