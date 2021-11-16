@@ -163,15 +163,15 @@ Array [
 exports[`manager/kustomize/extract extractPackageFile() should extract bases resources and components from their respective blocks 1`] = `
 Array [
   Object {
-    "currentValue": "v0.0.1",
-    "datasource": "github-tags",
-    "depName": "moredhel/remote-kustomize",
-    "depType": "Kustomization",
-  },
-  Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
+    "depType": "Kustomization",
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "github-tags",
+    "depName": "moredhel/remote-kustomize",
     "depType": "Kustomization",
   },
   Object {
