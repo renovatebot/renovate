@@ -3,12 +3,15 @@ import { load } from 'js-yaml';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
+import type { TravisMatrixItem, TravisYaml } from './types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   // TODO: fix type
-  let doc: any;
+  let doc: TravisYaml | null;
   try {
-    doc = load(content, { json: true });
+    doc = load(content, {
+      json: true,
+    });
   } catch (err) {
     logger.warn({ err, content }, 'Failed to parse .travis.yml file.');
     return null;
@@ -24,7 +27,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // Handle the matrix syntax
-  let matrix_include: any;
+  let matrix_include: Array<TravisMatrixItem> | null;
   if (doc?.jobs?.include) {
     matrix_include = doc.jobs.include;
   } else if (doc?.matrix?.include) {
@@ -33,8 +36,8 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   if (is.array(matrix_include)) {
     matrix_include
-      .filter((item: any) => item?.node_js)
-      .forEach((item: any) => {
+      .filter((item: TravisMatrixItem) => item?.node_js)
+      .forEach((item: TravisMatrixItem) => {
         if (is.array(item.node_js)) {
           item.node_js.forEach((currentValue) => {
             deps.push({
