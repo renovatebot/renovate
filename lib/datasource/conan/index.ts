@@ -5,7 +5,7 @@ import * as conan from '../../versioning/conan';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
-import { ConanJSON } from './types';
+import type { ConanJSON } from './types';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
