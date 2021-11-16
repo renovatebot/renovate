@@ -30,7 +30,7 @@ export class AwsMachineImageDataSource extends Datasource {
 
   private readonly ec2: EC2Client;
 
-  readonly now: number;
+  private readonly now: number;
 
   constructor() {
     super(AwsMachineImageDataSource.id);
