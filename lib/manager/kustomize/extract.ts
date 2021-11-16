@@ -16,7 +16,7 @@ const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
 
-export function extractBase(base: string): PackageDependency | null {
+export function extractResource(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
 
   if (!match) {
@@ -122,11 +122,10 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  pkg.bases = (pkg.bases || []).concat(
-    pkg.resources || [],
-    pkg.components || []
+  pkg.resources = (pkg.resources ?? []).concat(
+    pkg.bases ?? [], // bases is deprecated since Kustomize v2.1.0
+    pkg.components ?? []
   );
-  pkg.images = pkg.images || [];
 
   return pkg;
 }
@@ -140,9 +139,9 @@ export function extractPackageFile(content: string): PackageFile | null {
     return null;
   }
 
-  // grab the remote bases
-  for (const base of pkg.bases) {
-    const dep = extractBase(base);
+  // grab the remote resources
+  for (const resource of pkg.resources ?? []) {
+    const dep = extractResource(resource);
     if (dep) {
       deps.push({
         ...dep,
@@ -152,7 +151,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the image tags
-  for (const image of pkg.images) {
+  for (const image of pkg.images ?? []) {
     const dep = extractImage(image);
     if (dep) {
       deps.push({

@@ -6,6 +6,6 @@ export interface Image {
 }
 export interface Kustomize {
   kind: string;
-  bases: string[];
-  images: Image[];
+  resources?: string[];
+  images?: Image[];
 }
