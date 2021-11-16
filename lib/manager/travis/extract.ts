@@ -34,9 +34,8 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   if (is.array(matrix_include)) {
-    matrix_include
-      .filter((item: TravisMatrixItem) => item?.node_js)
-      .forEach((item: TravisMatrixItem) => {
+    for (const item of matrix_include) {
+      if (item?.node_js) {
         if (is.array(item.node_js)) {
           item.node_js.forEach((currentValue) => {
             deps.push({
@@ -54,7 +53,8 @@ export function extractPackageFile(content: string): PackageFile | null {
             currentValue: item.node_js.toString(),
           });
         }
-      });
+      }
+    }
   }
 
   if (!deps.length) {

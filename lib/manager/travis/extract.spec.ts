@@ -66,7 +66,24 @@ describe('manager/travis/extract', () => {
 
     it('handles matrix node_js syntax with node_js array 2', () => {
       const res = extractPackageFile(matrixYAMLwithNodeSyntaxArray2);
-      expect(res).toMatchInlineSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "deps": Array [
+            Object {
+              "currentValue": "11.10.1",
+              "datasource": "github-tags",
+              "depName": "node",
+              "lookupName": "nodejs/node",
+            },
+            Object {
+              "currentValue": "11.10.2",
+              "datasource": "github-tags",
+              "depName": "node",
+              "lookupName": "nodejs/node",
+            },
+          ],
+        }
+      `);
     });
 
     it('handles matrix node_js syntax with alias', () => {
