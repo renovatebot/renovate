@@ -2,14 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "strictNullChecks": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "lib": ["es2019"]
   },
   "files": [
-    "./lib/constants/error-messages.ts",
-    "./lib/util/clone.ts",
-    "./lib/util/sanitize.ts",
     "./lib/config/app-strings.ts",
     "./lib/config/presets/common.ts",
+    "./lib/constants/error-messages.ts",
     "./lib/constants/platforms.ts",
     "./lib/constants/programming-language.ts",
     "./lib/data-files.generated.ts",
@@ -99,6 +98,7 @@
     "./lib/types/vulnerability-alert.ts",
     "./lib/util/cache/memory/index.ts",
     "./lib/util/cache/package/types.ts",
+    "./lib/util/clone.ts",
     "./lib/util/date.ts",
     "./lib/util/exec/common.ts",
     "./lib/util/exec/types.ts",
@@ -109,6 +109,7 @@
     "./lib/util/index.ts",
     "./lib/util/json-writer/indentation-type.ts",
     "./lib/util/object.ts",
+    "./lib/util/sanitize.ts",
     "./lib/util/split.ts",
     "./lib/workers/pr/changelog/hbs-template.ts",
     "./lib/workers/pr/changelog/types.ts",
