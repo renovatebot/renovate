@@ -160,7 +160,9 @@ jobs:
         run: yarn test-schema
 
       - name: Type check
-        run: yarn type-check
+        run: |
+          yarn type-check
+          yarn null-check
 
   release:
     needs: [lint, test]
