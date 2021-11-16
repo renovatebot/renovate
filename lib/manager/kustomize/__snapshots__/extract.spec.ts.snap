@@ -169,13 +169,13 @@ Array [
     "depType": "Kustomization",
   },
   Object {
-    "currentValue": "1.18.0",
+    "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
     "depType": "Kustomization",
   },
   Object {
-    "currentValue": "1.19.0",
+    "currentValue": "1.18.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
     "depType": "Kustomization",
@@ -186,13 +186,13 @@ Array [
 exports[`manager/kustomize/extract extractPackageFile() should extract dependencies when kind is Component 1`] = `
 Array [
   Object {
-    "currentValue": "1.18.0",
+    "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
     "depType": "Component",
   },
   Object {
-    "currentValue": "1.19.0",
+    "currentValue": "1.18.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
     "depType": "Component",

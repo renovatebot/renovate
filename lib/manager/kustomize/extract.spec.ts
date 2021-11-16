@@ -245,8 +245,8 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
       expect(res.deps[0].currentValue).toBe('v0.0.1');
-      expect(res.deps[1].currentValue).toBe('1.18.0');
-      expect(res.deps[2].currentValue).toBe('1.19.0');
+      expect(res.deps[1].currentValue).toBe('1.19.0');
+      expect(res.deps[2].currentValue).toBe('1.18.0');
       expect(res.deps[0].depName).toBe('moredhel/remote-kustomize');
       expect(res.deps[1].depName).toBe('fluxcd/flux');
       expect(res.deps[2].depName).toBe('fluxcd/flux');
@@ -259,9 +259,10 @@ describe('manager/kustomize/extract', () => {
       expect(res).not.toBeNull();
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[0].currentValue).toBe('1.18.0');
-      expect(res.deps[1].currentValue).toBe('1.19.0');
+      expect(res.deps[0].currentValue).toBe('1.19.0');
+      expect(res.deps[1].currentValue).toBe('1.18.0');
       expect(res.deps[2].currentValue).toBe('v0.1.0');
+      expect(res.deps[0].depName).toBe('fluxcd/flux');
       expect(res.deps[1].depName).toBe('fluxcd/flux');
       expect(res.deps[2].depName).toBe('node');
       expect(res.deps[0].depType).toBe('Component');

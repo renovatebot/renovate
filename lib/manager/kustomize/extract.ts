@@ -145,9 +145,9 @@ export function extractPackageFile(content: string): PackageFile | null {
     }
   }
 
-  // grab the remote components
-  for (const component of pkg.components ?? []) {
-    const dep = extractResource(component);
+  // grab the remote resources
+  for (const resource of pkg.resources ?? []) {
+    const dep = extractResource(resource);
     if (dep) {
       deps.push({
         ...dep,
@@ -156,9 +156,9 @@ export function extractPackageFile(content: string): PackageFile | null {
     }
   }
 
-  // grab the remote resources
-  for (const resource of pkg.resources ?? []) {
-    const dep = extractResource(resource);
+  // grab the remote components
+  for (const component of pkg.components ?? []) {
+    const dep = extractResource(component);
     if (dep) {
       deps.push({
         ...dep,
