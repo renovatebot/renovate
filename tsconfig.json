@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noImplicitAny": false /* required for js files */,
-    "strictNullChecks": false /* required for js files */,
+    "noImplicitAny": true /* required for js files */,
+    "strictNullChecks": true /* required for js files */,
     "outDir": "./dist",
     "target": "es2018",
     "module": "commonjs",

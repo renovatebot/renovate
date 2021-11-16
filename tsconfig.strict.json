@@ -120,6 +120,7 @@
     "./lib/versioning/types.ts",
     "./lib/types/errors/external-host-error.ts",
     "./test/graphql-snapshot.ts",
-    "./lib/util/mask.ts"
+    "./lib/util/mask.ts",
+    "./lib/util/mask.spec.ts"
   ]
 }
