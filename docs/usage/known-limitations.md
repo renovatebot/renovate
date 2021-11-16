@@ -36,8 +36,8 @@ It also means that Renovate's knowledge about dependencies in the base branch is
 
 The limitation to only automerge branches which are up-to-date is a decision due to this example:
 
-- Two dependencies are in use: `a@1.0.0` and `b@1.0.0`
-- PRs exist for `a@2.0.0` and `b@2.0.0` and both pass tests
-- The PR for `a@2.0.0` is automerged
-- The PR for `b@2.0.0` remains open, does not have conflicts, and has all tests passing
-- However, `a@2.0.0` and `b@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch
+- Two dependencies are in use: `alice@1.0.0` and `bob@1.0.0`
+- PRs exist for `alice@2.0.0` and `bob@2.0.0` and both pass tests
+- The PR for `alice@2.0.0` is automerged
+- The PR for `bob@2.0.0` remains open, does not have conflicts, and has all tests passing
+- However, `alice@2.0.0` and `bob@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch
