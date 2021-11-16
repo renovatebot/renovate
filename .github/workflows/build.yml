@@ -37,26 +37,22 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node-version: [14]
-        python-version: [3.9]
         java-version: [11]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
             "os": "macos-latest",
             "node-version": 14,
-            "python-version": 3.9,
             "java-version": 11
           }, {
             "os": "windows-latest",
             "node-version": 14,
-            "python-version": 3.9,
             "java-version": 11
           }]' || '[]') }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
       NODE_VERSION: ${{ matrix.node-version }}
-      PYTHON_VERSION: ${{ matrix.python-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
       # skip Java tests on pull requests without 'ci:fulltest' label
       SKIP_JAVA_TESTS: ${{ matrix.node-version != 14 || (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) }}
@@ -71,11 +67,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
-
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@dc73133d4da04e56a135ae2246682783cc7c7cb6 # renovate: tag=v2.2.2
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
         if: env.SKIP_JAVA_TESTS == 'false'
@@ -96,7 +87,6 @@ jobs:
           npm config set scripts-prepend-node-path true
           git --version
           echo "Node $(node --version)"
-          python --version
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
