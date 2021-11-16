@@ -116,6 +116,9 @@
     "./test/json-schema.ts",
     "./test/newline-snapshot-serializer.ts",
     "./test/static-files.spec.ts",
-    "./tools/utils/index.ts"
+    "./tools/utils/index.ts",
+    "./lib/versioning/types.ts",
+    "./lib/types/errors/external-host-error.ts",
+    "./test/graphql-snapshot.ts"
   ]
 }
