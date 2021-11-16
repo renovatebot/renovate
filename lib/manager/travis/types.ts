@@ -1,4 +1,4 @@
-export type TravisNodeJs = string | Array<string>;
+export type TravisNodeJs = string | string[];
 
 export interface TravisYaml {
   node_js?: TravisNodeJs;
@@ -11,5 +11,5 @@ export interface TravisMatrixItem {
 }
 
 export interface TravisMatrix {
-  include?: Array<TravisMatrixItem>;
+  include?: TravisMatrixItem[];
 }

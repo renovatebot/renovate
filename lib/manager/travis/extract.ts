@@ -6,7 +6,6 @@ import type { PackageDependency, PackageFile } from '../types';
 import type { TravisMatrixItem, TravisYaml } from './types';
 
 export function extractPackageFile(content: string): PackageFile | null {
-  // TODO: fix type
   let doc: TravisYaml | null;
   try {
     doc = load(content, {
@@ -27,7 +26,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // Handle the matrix syntax
-  let matrix_include: Array<TravisMatrixItem> | null;
+  let matrix_include: TravisMatrixItem[] | null;
   if (doc?.jobs?.include) {
     matrix_include = doc.jobs.include;
   } else if (doc?.matrix?.include) {
