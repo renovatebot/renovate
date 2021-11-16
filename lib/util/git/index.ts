@@ -24,7 +24,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import * as packageCache from '../cache/package';
+import { getCache } from '../cache/repository';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
@@ -566,18 +566,21 @@ export async function isBranchConflicted(
     return null;
   }
 
-  const cacheNs = 'git-conflicts';
   const baseBranchSha = getBranchCommit(baseBranch);
   const branchSha = getBranchCommit(branch);
-  const cacheKey =
-    baseBranchSha && branch ? `${baseBranchSha} <- ${branchSha}` : null;
 
+  const cache = getCache();
+  const olderBranchSha = cache.baseBranchSha;
+  if (olderBranchSha !== baseBranchSha) {
+    cache.baseBranchSha = baseBranchSha;
+    cache.branchConflicts = {};
+  }
+  cache.branchConflicts ||= {};
+
+  const cachedResult = cache.branchConflicts[branchSha];
   // istanbul ignore if
-  if (cacheKey) {
-    const cachedResult = await packageCache.get<boolean>(cacheNs, cacheKey);
-    if (cachedResult !== undefined) {
-      return cachedResult;
-    }
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
 
   let result = false;
@@ -608,13 +611,7 @@ export async function isBranchConflicted(
     }
   }
 
-  // istanbul ignore if
-  if (cacheKey) {
-    const cacheDays = result === null ? 1 : 7;
-    const cacheTTL = cacheDays * 24 * 60;
-    await packageCache.set(cacheNs, cacheKey, result, cacheTTL);
-  }
-
+  cache.branchConflicts[branchSha] = result;
   return result;
 }
 
