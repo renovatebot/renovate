@@ -122,11 +122,6 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  pkg.resources = (pkg.resources ?? []).concat(
-    pkg.bases ?? [], // bases is deprecated since Kustomize v2.1.0
-    pkg.components ?? []
-  );
-
   return pkg;
 }
 
@@ -137,6 +132,28 @@ export function extractPackageFile(content: string): PackageFile | null {
   const pkg = parseKustomize(content);
   if (!pkg) {
     return null;
+  }
+
+  // grab the remote bases
+  for (const base of pkg.bases ?? []) {
+    const dep = extractResource(base);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote components
+  for (const component of pkg.components ?? []) {
+    const dep = extractResource(component);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
   }
 
   // grab the remote resources

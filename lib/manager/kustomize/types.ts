@@ -6,6 +6,7 @@ export interface Image {
 }
 export interface Kustomize {
   kind: string;
+  bases?: string[]; // deprecated since kustomize v2.1.0
   resources?: string[];
   images?: Image[];
 }
