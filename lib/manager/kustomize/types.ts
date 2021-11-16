@@ -15,5 +15,5 @@ export interface Kustomize {
   kind: string;
   bases: string[];
   images: Image[];
-  helmCharts: HelmChart[];
+  helmCharts?: HelmChart[];
 }

@@ -114,13 +114,12 @@ export function extractHelmChart(
     return null;
   }
 
-  const dep: PackageDependency = {
+  return {
     depName: helmChart.name,
     currentValue: helmChart.version,
     registryUrls: [helmChart.repo],
     datasource: HelmDatasource.id,
   };
-  return dep;
 }
 
 export function parseKustomize(content: string): Kustomize | null {
@@ -144,7 +143,7 @@ export function parseKustomize(content: string): Kustomize | null {
     pkg.components || []
   );
   pkg.images = pkg.images || [];
-  pkg.helmCharts = pkg.helmCharts || [];
+
   return pkg;
 }
 
@@ -180,7 +179,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the helm charts
-  for (const helmChart of pkg.helmCharts) {
+  for (const helmChart of pkg.helmCharts ?? []) {
     const dep = extractHelmChart(helmChart);
     if (dep) {
       deps.push({
