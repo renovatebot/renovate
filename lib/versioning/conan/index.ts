@@ -1,9 +1,15 @@
 import * as semver from 'semver';
-import { SemVer, parseRange } from 'semver-utils';
+import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
 import { api as looseAPI } from '../loose';
 import type { NewValueConfig, VersioningApi } from '../types';
+import {
+  cleanVersion,
+  containsOperators,
+  fixParsedRange,
+  getOptions,
+  matchesWithOptions,
+} from './common';
 
 export const id = 'conan';
 export const displayName = 'conan';
@@ -19,30 +25,7 @@ export const supportedRangeStrategies = ['auto', 'bump', 'widen', 'replace'];
 const MIN = 1;
 const MAX = -1;
 
-export function cleanVersion(version: string): string {
-  if (version) {
-    return version
-      .replace(/,|\[|\]|"|include_prerelease=|loose=|True|False/g, '')
-      .trim();
-  }
-  return version;
-}
-
-export const getOptions = (
-  input: string
-): { loose: boolean; includePrerelease: boolean } => {
-  let includePrerelease = false;
-  let loose = true;
-  if (input) {
-    includePrerelease =
-      input.includes('include_prerelease=True') &&
-      !input.includes('include_prerelease=False');
-    loose = input.includes('loose=True') || !input.includes('loose=False');
-  }
-  return { loose, includePrerelease };
-};
-
-export const makeVersion = (
+const makeVersion = (
   version: string,
   options: semver.Options
 ): string | boolean => {
@@ -68,7 +51,7 @@ export const makeVersion = (
   return semver.valid(version, options);
 };
 
-export const isVersion = (input: string): string | boolean => {
+const isVersion = (input: string): string | boolean => {
   if (input && !input.includes('[')) {
     const qualifiers = getOptions(input);
     const version = cleanVersion(input);
@@ -81,7 +64,7 @@ export const isVersion = (input: string): string | boolean => {
   return false;
 };
 
-export const isValid = (input: string): string | boolean => {
+const isValid = (input: string): string | boolean => {
   const version = cleanVersion(input);
   const qualifiers = getOptions(input);
   if (makeVersion(version, qualifiers)) {
@@ -92,7 +75,7 @@ export const isValid = (input: string): string | boolean => {
 };
 
 // always include prereleases
-export const getMajor = (version: string): null | number => {
+const getMajor = (version: string): null | number => {
   const cleanedVersion = cleanVersion(version);
   const options = getOptions(version);
   options.includePrerelease = true;
@@ -104,7 +87,7 @@ export const getMajor = (version: string): null | number => {
 };
 
 // always include prereleases
-export const getMinor = (version: string): null | number => {
+const getMinor = (version: string): null | number => {
   const cleanedVersion = cleanVersion(version);
   const options = getOptions(version);
   options.includePrerelease = true;
@@ -116,7 +99,7 @@ export const getMinor = (version: string): null | number => {
 };
 
 // always include prereleases
-export const getPatch = (version: string): null | number => {
+const getPatch = (version: string): null | number => {
   const cleanedVersion = cleanVersion(version);
   const options = getOptions(version);
   options.includePrerelease = true;
@@ -132,7 +115,7 @@ export const getPatch = (version: string): null | number => {
   return null;
 };
 
-export const equals = (version: string, other: string): boolean => {
+const equals = (version: string, other: string): boolean => {
   const cleanedVersion = cleanVersion(version);
   const cleanOther = cleanVersion(other);
   const options = { loose: true, includePrerelease: true };
@@ -144,7 +127,7 @@ export const equals = (version: string, other: string): boolean => {
   }
 };
 
-export const isGreaterThan = (version: string, other: string): boolean => {
+const isGreaterThan = (version: string, other: string): boolean => {
   const cleanedVersion = cleanVersion(version);
   const cleanOther = cleanVersion(other);
   const options = { loose: true, includePrerelease: true };
@@ -156,7 +139,7 @@ export const isGreaterThan = (version: string, other: string): boolean => {
   }
 };
 
-export const isLessThanRange = (version: string, range: string): boolean => {
+const isLessThanRange = (version: string, range: string): boolean => {
   const cleanedVersion = cleanVersion(version);
   const cleanRange = cleanVersion(range);
   const options = getOptions(range);
@@ -168,7 +151,7 @@ export const isLessThanRange = (version: string, range: string): boolean => {
   }
 };
 
-export const sortVersions = (version: string, other: string): number => {
+const sortVersions = (version: string, other: string): number => {
   const cleanedVersion = cleanVersion(version);
   const cleanOther = cleanVersion(other);
   const options = { loose: true, includePrerelease: true };
@@ -179,19 +162,7 @@ export const sortVersions = (version: string, other: string): number => {
   }
 };
 
-export const matchesWithOptions = (
-  version: string,
-  cleanRange: string,
-  options: semver.Options
-): boolean => {
-  let cleanedVersion = version;
-  if (semver.prerelease(cleanedVersion) && options.includePrerelease) {
-    cleanedVersion = semver.coerce(cleanedVersion).raw;
-  }
-  return semver.satisfies(cleanedVersion, cleanRange, options);
-};
-
-export const matches = (version: string, range: string): boolean => {
+const matches = (version: string, range: string): boolean => {
   if (isVersion(version) && isVersion(range)) {
     return true;
   }
@@ -201,7 +172,7 @@ export const matches = (version: string, range: string): boolean => {
   return matchesWithOptions(cleanedVersion, cleanRange, options);
 };
 
-export const isCompatible = (version: string, range: string): boolean => {
+const isCompatible = (version: string, range: string): boolean => {
   if (isVersion(version) && isVersion(range)) {
     return true;
   }
@@ -213,9 +184,9 @@ export const isCompatible = (version: string, range: string): boolean => {
   return false;
 };
 
-export const isStable = (_: string): boolean => true;
+const isStable = (_: string): boolean => true;
 
-export const findSatisfyingVersion = (
+const findSatisfyingVersion = (
   versions: string[],
   range: string,
   compareRt: number
@@ -248,88 +219,17 @@ export const findSatisfyingVersion = (
   return null;
 };
 
-export const minSatisfyingVersion = (
+const minSatisfyingVersion = (
   versions: string[],
   range: string
 ): string | null => findSatisfyingVersion(versions, range, MIN);
 
-export const getSatisfyingVersion = (
+const getSatisfyingVersion = (
   versions: string[],
   range: string
 ): string | null => findSatisfyingVersion(versions, range, MAX);
 
-export function containsOperators(input: string): boolean {
-  return regEx('[<=>^~]').test(input);
-}
-
-export function fixParsedRange(range: string): any {
-  const ordValues = [];
-
-  // don't bump or'd single version values
-  const originalSplit = range.split(' ');
-  for (let i = 0; i < originalSplit.length; i += 1) {
-    if (
-      !containsOperators(originalSplit[i]) &&
-      !originalSplit[i].includes('||')
-    ) {
-      if (i !== 0 && originalSplit[i - 1].includes('||')) {
-        ordValues.push(`|| ${originalSplit[i]}`);
-      } else if (i !== originalSplit.length && originalSplit[i + 1] === '||') {
-        ordValues.push(`${originalSplit[i]} ||`);
-      }
-    } else {
-      ordValues.push(originalSplit[i]);
-    }
-  }
-
-  const parsedRange = parseRange(range);
-  const cleanRange = range.replace(/([<=>^~])( )?/g, '');
-  const splitRange = cleanRange.split(' ');
-  const semverRange: SemVer[] = [];
-
-  for (let i = 0; i < splitRange.length; i += 1) {
-    if (!splitRange[i].includes('||')) {
-      const splitVersion = splitRange[i].split('.');
-      const major = splitVersion[0];
-      const minor = splitVersion[1];
-      const patch = splitVersion[2];
-      const operator = ordValues[i].includes('||')
-        ? '||'
-        : parsedRange[i].operator;
-      const NewSemVer: SemVer = {
-        major,
-      };
-
-      let full = `${operator || ''}${major}`;
-      if (minor) {
-        NewSemVer.minor = minor;
-        full = `${full}.${minor}`;
-        if (patch) {
-          NewSemVer.patch = patch;
-          full = `${full}.${patch}`;
-        }
-      }
-      if (operator) {
-        NewSemVer.operator = operator;
-        full = range.includes(`${operator} `)
-          ? `${operator} ${full.replace(operator, '')}`
-          : `${operator}${full.replace(operator, '')}`;
-      }
-
-      full = ordValues[i].includes('||') ? ordValues[i] : full;
-
-      NewSemVer.semver = full;
-
-      semverRange.push(NewSemVer);
-    }
-  }
-  return semverRange;
-}
-
-export function replaceRange({
-  currentValue,
-  newVersion,
-}: NewValueConfig): string {
+function replaceRange({ currentValue, newVersion }: NewValueConfig): string {
   const parsedRange = parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
   const toVersionMajor = getMajor(newVersion);
@@ -420,7 +320,7 @@ export function replaceRange({
   return newVersion;
 }
 
-export function widenRange(
+function widenRange(
   { currentValue, currentVersion, newVersion }: NewValueConfig,
   options: semver.Options
 ): string {
@@ -456,7 +356,7 @@ export function widenRange(
   return `${currentValue} || ${newValue}`;
 }
 
-export function bumpRange(
+function bumpRange(
   { currentValue, currentVersion, newVersion }: NewValueConfig,
   options: semver.Options
 ): string {
@@ -552,7 +452,7 @@ export function bumpRange(
   return null;
 }
 
-export function getNewValue({
+function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,

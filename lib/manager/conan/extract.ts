@@ -1,7 +1,5 @@
-import { ConanDatasource } from '../../datasource/conan';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-import * as conan from '../../versioning/conan';
 import type { PackageDependency, PackageFile } from '../types';
 
 const regex = regEx(
@@ -20,9 +18,7 @@ function setDepType(content: string, originalType: string): string {
   return depType;
 }
 
-export default function extractPackageFile(
-  content: string
-): PackageFile | null {
+export function extractPackageFile(content: string): PackageFile | null {
   // only process sections where requirements are defined
   const sections = content.split(/def |\n\[/).filter(
     (part) =>
@@ -65,9 +61,6 @@ export default function extractPackageFile(
               depName,
               lookupName,
               currentValue,
-              datasource: ConanDatasource.id,
-              versioning: conan.id,
-              rangeStrategy: 'bump',
               replaceString,
               depType,
             };

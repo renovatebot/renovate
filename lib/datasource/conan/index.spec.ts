@@ -6,22 +6,18 @@ import { id as versioning } from '../../versioning/loose';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
-const pocoJson: any = loadJsonFixture('poco');
-const malformedJson: any = loadJsonFixture('malformed');
-const fakeJson: any = loadJsonFixture('fake');
+const pocoJson: any = loadJsonFixture('poco.json');
+const malformedJson: any = loadJsonFixture('malformed.json');
+const fakeJson: any = loadJsonFixture('fake.json');
 const datasource = ConanDatasource.id;
+
+const config = {
+  versioning: loose.id,
+  registryUrls: [defaultRegistryUrl],
+};
 
 describe('datasource/conan/index', () => {
   describe('getReleases', () => {
-    let config: any;
-    beforeEach(() => {
-      jest.resetAllMocks();
-      config = {
-        versioning: loose.id,
-        registryUrls: [defaultRegistryUrl],
-      };
-    });
-
     it('handles bad return', async () => {
       httpMock
         .scope(defaultRegistryUrl)

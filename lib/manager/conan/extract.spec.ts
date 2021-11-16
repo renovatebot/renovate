@@ -1,11 +1,12 @@
 import { loadFixture } from '../../../test/util';
-import extractPackageFile from './extract';
+import { extractPackageFile } from '.';
 
-jest.mock('../../util/fs');
+// jest.mock('../../util/fs');
 
 const conanfile1 = loadFixture('conanfile.txt');
 const conanfile2 = loadFixture('conanfile2.txt');
 const conanfile3 = loadFixture('conanfile.py');
+
 describe('manager/conan/extract', () => {
   describe('extractPackageFile', () => {
     it('returns null for empty', () => {

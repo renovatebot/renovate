@@ -1,11 +1,11 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
-import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import * as conan from '../../versioning/conan';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { ConanJSON, datasource, defaultRegistryUrl } from './common';
+import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
+import { ConanJSON } from './types';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -39,12 +39,9 @@ export class ConanDatasource extends Datasource {
       if (versions) {
         logger.trace({ lookupUrl }, 'Got conan api result');
         const dep: ReleaseResult = { releases: [] };
-        const regex = regEx(
-          /(?<name>[a-z\-_0-9]+)\/(?<version>[^@/\n]+)(?<userChannel>@\S+\/\S+)/,
-          'gim'
-        );
+
         for (const resultString of Object.values(versions.results)) {
-          const fromMatch = regex.exec(resultString);
+          const fromMatch = conanDatasourceRegex.exec(resultString);
           if (fromMatch) {
             const version = fromMatch.groups.version;
             if (fromMatch.groups.userChannel === userAndChannel) {
@@ -75,12 +72,12 @@ export class ConanDatasource extends Datasource {
     const depName = lookupName.split('/')[0];
     const userAndChannel = '@' + lookupName.split('@')[1];
 
-    const result: ReleaseResult = await this.lookupConanPackage(
+    const result = await this.lookupConanPackage(
       depName,
       registryUrl,
       userAndChannel
     );
 
-    return result.releases.length ? result : null;
+    return result?.releases.length ? result : null;
   }
 }
