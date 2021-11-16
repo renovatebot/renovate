@@ -28,7 +28,7 @@ export class AwsMachineImageDataSource extends Datasource {
     },
   };
 
-  readonly ec2: EC2Client;
+  private readonly ec2: EC2Client;
 
   readonly now: number;
 
