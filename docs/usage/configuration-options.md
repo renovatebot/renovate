@@ -1090,6 +1090,11 @@ For instance if you have a project with an `"examples/"` directory you wish to i
 
 Useful to know: Renovate's default ignore is `node_modules` and `bower_components` only, however if you are extending the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
+## ignorePlugins
+
+Set this to `true` if running plugins causes problems.
+Applicable for Composer only for now.
+
 ## ignorePrAuthor
 
 This is usually needed if someone needs to migrate bot accounts, including from hosted app to self-hosted.

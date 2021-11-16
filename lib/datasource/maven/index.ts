@@ -10,11 +10,11 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { MAVEN_REPO } from './common';
 import type { MavenDependency, ReleaseMap } from './types';
 import {
+  checkHttpResource,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,
   getMavenUrl,
-  isHttpResourceExists,
 } from './util';
 
 export { id } from './common';
@@ -28,13 +28,17 @@ function isStableVersion(x: string): boolean {
   return mavenVersion.isStable(x);
 }
 
-function getLatestStableVersion(releases: Release[]): string | undefined {
-  return releases
-    .map(({ version }) => version)
-    .filter(isStableVersion)
-    .reduce((latestVersion, version) =>
-      compare(version, latestVersion) === 1 ? version : latestVersion
-    );
+function getLatestSuitableVersion(releases: Release[]): string | null {
+  // istanbul ignore if
+  if (!releases?.length) {
+    return null;
+  }
+  const allVersions = releases.map(({ version }) => version);
+  const stableVersions = allVersions.filter(isStableVersion);
+  const versions = stableVersions.length ? stableVersions : allVersions;
+  return versions.reduce((latestVersion, version) =>
+    compare(version, latestVersion) === 1 ? version : latestVersion
+  );
 }
 
 function extractVersions(metadata: XmlDocument): string[] {
@@ -198,19 +202,21 @@ async function addReleasesUsingHeadRequests(
             repoUrl
           );
           const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
-          const res = await isHttpResourceExists(artifactUrl);
           const release: Release = { version };
 
-          if (is.string(res)) {
-            release.releaseTimestamp = res;
-          }
+          const res = await checkHttpResource(artifactUrl);
 
-          // Retry earlier for error status other than 404
-          if (res === null) {
+          if (res === 'error') {
             retryEarlier = true;
           }
 
-          workingReleaseMap[version] = res ? release : null;
+          if (is.date(res)) {
+            release.releaseTimestamp = res.toISOString();
+          }
+
+          if (res !== 'not-found' && res !== 'error') {
+            workingReleaseMap[version] = release;
+          }
         }
       );
 
@@ -259,10 +265,10 @@ export async function getReleases({
     `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`
   );
 
-  const latestStableVersion = getLatestStableVersion(releases);
+  const latestSuitableVersion = getLatestSuitableVersion(releases);
   const dependencyInfo =
-    latestStableVersion &&
-    (await getDependencyInfo(dependency, repoUrl, latestStableVersion));
+    latestSuitableVersion &&
+    (await getDependencyInfo(dependency, repoUrl, latestSuitableVersion));
 
   return { ...dependency, ...dependencyInfo, releases };
 }
