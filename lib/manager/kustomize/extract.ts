@@ -17,7 +17,7 @@ const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
 
-export function extractBase(base: string): PackageDependency | null {
+export function extractResource(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
 
   if (!match) {
@@ -123,9 +123,9 @@ export function extractHelmChart(
 }
 
 export function parseKustomize(content: string): Kustomize | null {
-  let pkg = null;
+  let pkg: Kustomize | null = null;
   try {
-    pkg = load(content, { json: true });
+    pkg = load(content, { json: true }) as Kustomize;
   } catch (e) /* istanbul ignore next */ {
     return null;
   }
@@ -137,12 +137,6 @@ export function parseKustomize(content: string): Kustomize | null {
   if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;
   }
-
-  pkg.bases = (pkg.bases || []).concat(
-    pkg.resources || [],
-    pkg.components || []
-  );
-  pkg.images = pkg.images || [];
 
   return pkg;
 }
@@ -157,8 +151,30 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote bases
-  for (const base of pkg.bases) {
-    const dep = extractBase(base);
+  for (const base of pkg.bases ?? []) {
+    const dep = extractResource(base);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote resources
+  for (const resource of pkg.resources ?? []) {
+    const dep = extractResource(resource);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote components
+  for (const component of pkg.components ?? []) {
+    const dep = extractResource(component);
     if (dep) {
       deps.push({
         ...dep,
@@ -168,7 +184,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the image tags
-  for (const image of pkg.images) {
+  for (const image of pkg.images ?? []) {
     const dep = extractImage(image);
     if (dep) {
       deps.push({
