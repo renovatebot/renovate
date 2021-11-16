@@ -26,7 +26,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // Handle the matrix syntax
-  let matrix_include: TravisMatrixItem[] | null;
+  let matrix_include: TravisMatrixItem[] | undefined;
   if (doc?.jobs?.include) {
     matrix_include = doc.jobs.include;
   } else if (doc?.matrix?.include) {
