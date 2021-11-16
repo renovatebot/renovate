@@ -7,6 +7,8 @@ import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
 
+const depRequireInstall = new Set(['symfony/flex']);
+
 export function getComposerArguments(config: UpdateArtifactsConfig): string {
   let args = '';
 
@@ -22,7 +24,11 @@ export function getComposerArguments(config: UpdateArtifactsConfig): string {
 
   args += ' --no-ansi --no-interaction';
   if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
-    args += ' --no-scripts --no-autoloader --no-plugins';
+    args += ' --no-scripts --no-autoloader';
+  }
+
+  if (!getGlobalConfig().allowPlugins || config.ignorePlugins) {
+    args += ' --no-plugins';
   }
 
   return args;
@@ -37,6 +43,15 @@ export function getPhpConstraint(constraints: Record<string, string>): string {
   }
 
   return null;
+}
+
+export function requireComposerDependencyInstallation(
+  lock: ComposerLock
+): boolean {
+  return (
+    lock.packages?.some((p) => depRequireInstall.has(p.name)) === true ||
+    lock['packages-dev']?.some((p) => depRequireInstall.has(p.name)) === true
+  );
 }
 
 export function extractContraints(
