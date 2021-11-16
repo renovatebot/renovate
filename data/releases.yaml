@@ -1,0 +1,54 @@
+latest:
+  slug: ImpishIndri
+  name: "Impish Indri"
+  short_version: "21.10"
+  full_version: "21.10"
+  core_version: "20"
+  release_date: "October 2021"
+  eol: "July 2022"
+  past_eol_date: false
+  release_notes_url: "https://discourse.ubuntu.com/t/impish-indri-release-notes/21951"
+lts:
+  slug: FocalFossa
+  name: "Focal Fossa"
+  short_version: "20.04"
+  full_version: "20.04.3"
+  release_date: "April 2020"
+  eol: "April 2025"
+  release_notes_url: "https://wiki.ubuntu.com/FocalFossa/ReleaseNotes"
+openstack_lts:
+  slug: Ussuri
+previous_lts:
+  name: "Bionic Beaver"
+  short_version: "18.04"
+  full_version: "18.04.6"
+  release_date: "April 2018"
+  eol: "April 2023"
+previous_previous_lts:
+  name: "Xenial Xerus"
+  short_version: "16.04"
+  full_version: "16.04.7"
+
+checksums:
+  desktop:
+    "21.10": "f8d3ab0faeaecb5d26628ae1aa21c9a13e0a242c381aa08157db8624d574b830 *ubuntu-21.10-desktop-amd64.iso"
+    "20.04.3": "5fdebc435ded46ae99136ca875afc6f05bde217be7dd018e1841924f71db46b5 *ubuntu-20.04.3-desktop-amd64.iso"
+  live-server:
+    "21.10": "e84f546dfc6743f24e8b1e15db9cc2d2c698ec57d9adfb852971772d1ce692d4 *ubuntu-21.10-live-server-amd64.iso"
+    "20.04.3": "f8e3086f3cea0fb3fefb29937ab5ed9d19e767079633960ccb50e76153effc98 *ubuntu-20.04.3-live-server-amd64.iso"
+    "18.04.6": "6c647b1ab4318e8c560d5748f908e108be654bad1e165f7cf4f3c1fc43995934 *ubuntu-18.04.6-live-server-amd64.iso"
+  desktop-arm64+raspi:
+    "21.10": "5187d507099f26bc4d8218085109af498fae5ff93b40c668f83bab5c7574d954 *ubuntu-21.10-preinstalled-desktop-arm64+raspi.img.xz"
+    "21.04": "d89ee327a00b98d7166b1a8cc95d17762aaacd3b4d0fc756c5b6b65df1708f48 *ubuntu-21.04-preinstalled-desktop-arm64+raspi.img.xz"
+  server-arm64+raspi:
+    "21.10": "126f940d3b270a6c1fc5a183ac8a3d193805fead4f517296a7df9d3e7d691a03 *ubuntu-21.10-preinstalled-server-arm64+raspi.img.xz"
+    "20.04.3": "7e405f473d8a9e3254cd702edaeecd5509a85cde1e9e99e120f6c82156c6958f *ubuntu-20.04.3-preinstalled-server-arm64+raspi.img.xz"
+  server-armhf+raspi:
+    "21.10": "341593c9607ed20744cd86941d94d73e3ba4f74e8ef2633eec63ce9b0cfac5a1 *ubuntu-21.10-preinstalled-server-armhf+raspi.img.xz"
+    "20.04.3": "1984c349d5d6b74279402325b6985587d1d32c01695f2946819ce25b638baa0e *ubuntu-20.04.3-preinstalled-server-armhf+raspi.img.xz"
+  server-riscv64:
+    "21.10": "8067892fa627eb219b31dc629f31f3bda6b015dfeabf2fdc9b0ed150bf7984b8 *ubuntu-21.10-preinstalled-server-riscv64+unmatched.img.xz"
+  core-20-arm64+raspi:
+    "20": "6a6f0dc12c4670d608fc9ca8ae3550167f129c6a1a027e638548bee1b4f8b238 *ubuntu-core-20-arm64+raspi.img.xz"
+  core-20-armhf+raspi:
+    "20": "434a497754d6a975d40ac97422a8425d46cdf198cd9bf5304f04e58fb8f4308f *ubuntu-core-20-armhf+raspi.img.xz"
