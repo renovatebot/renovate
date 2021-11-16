@@ -8868,15 +8868,15 @@ tslib@2.1.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
   integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
 
+tslib@2.3.1, tslib@^2.3.0, tslib@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
+  integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
+
 tslib@^1.11.1, tslib@^1.13.0, tslib@^1.8.1:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
-
-tslib@^2.3.0, tslib@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
-  integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
 
 tsutils@^3.21.0:
   version "3.21.0"
@@ -8921,10 +8921,10 @@ type-detect@4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@2.5.2:
-  version "2.5.2"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.5.2.tgz#d6a5247b8019716b300d9023fa7b1b02016dd864"
-  integrity sha512-WMbytmAs5PUTqwGJRE+WoRrD2S0bYFtHX8k4Y/1l18CG5kqA3keJud9pPQ/r30FE9n8XRFCXF9BbccHIZzRYJw==
+type-fest@2.5.3:
+  version "2.5.3"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.5.3.tgz#2538287381b24d0c1d4911279934f28aaa10d620"
+  integrity sha512-7VNmE7FlsrdcWjKbtuRuynZz96Gmf35p5DvoR2tbceNP0vd58ISx87PvUUInlhtRC49vSX6qlxEKc7AoiHRirg==
 
 type-fest@^0.13.1:
   version "0.13.1"
