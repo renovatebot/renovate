@@ -109,7 +109,7 @@ export function extractImage(image: Image): PackageDependency | null {
 export function parseKustomize(content: string): Kustomize | null {
   let pkg: Kustomize | null = null;
   try {
-    pkg = load(content, { json: true });
+    pkg = load(content, { json: true }) as Kustomize;
   } catch (e) /* istanbul ignore next */ {
     return null;
   }
