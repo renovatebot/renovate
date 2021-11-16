@@ -2,9 +2,10 @@ import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const invalidYAML = loadFixture('invalid.yml');
-const matrixYAML = loadFixture('matrix.yml');
-const matrixYAML2 = loadFixture('matrix2.yml');
-const matrixYAML3 = loadFixture('matrix3.yml');
+const matrixYAMLwithNodeSyntaxString = loadFixture('matrix_jobs.yml');
+const matrixYAMLwithNodeSyntaxArray = loadFixture('matrix_jobs_array.yml');
+const matrixYAMLwithNodeSyntaxArray2 = loadFixture('matrix_jobs_array2.yml');
+const matrixYAMLwithNodeSyntaxAlias = loadFixture('matrix_alias.yml');
 const invalidMatrixYAML = loadFixture('matrix_invalid.yml');
 
 describe('manager/travis/extract', () => {
@@ -26,7 +27,7 @@ describe('manager/travis/extract', () => {
     });
 
     it('handles matrix node_js syntax with node_js string', () => {
-      const res = extractPackageFile(matrixYAML);
+      const res = extractPackageFile(matrixYAMLwithNodeSyntaxString);
       expect(res).toMatchInlineSnapshot(`
         Object {
           "deps": Array [
@@ -42,7 +43,7 @@ describe('manager/travis/extract', () => {
     });
 
     it('handles matrix node_js syntax with node_js array', () => {
-      const res = extractPackageFile(matrixYAML2);
+      const res = extractPackageFile(matrixYAMLwithNodeSyntaxArray);
       expect(res).toMatchInlineSnapshot(`
         Object {
           "deps": Array [
@@ -63,8 +64,13 @@ describe('manager/travis/extract', () => {
       `);
     });
 
+    it('handles matrix node_js syntax with node_js array 2', () => {
+      const res = extractPackageFile(matrixYAMLwithNodeSyntaxArray2);
+      expect(res).toMatchInlineSnapshot();
+    });
+
     it('handles matrix node_js syntax with alias', () => {
-      const res = extractPackageFile(matrixYAML3);
+      const res = extractPackageFile(matrixYAMLwithNodeSyntaxAlias);
       expect(res).toMatchInlineSnapshot(`
         Object {
           "deps": Array [
