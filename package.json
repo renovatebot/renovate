@@ -209,7 +209,7 @@
     "@jest/reporters": "27.3.1",
     "@jest/test-result": "27.3.1",
     "@ls-lint/ls-lint": "1.10.0",
-    "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.3",
+    "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.4",
     "@semantic-release/exec": "6.0.2",
     "@types/auth-header": "1.0.2",
     "@types/bunyan": "1.8.7",
