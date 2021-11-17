@@ -61,11 +61,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     return info;
   }
 
-  @cache({
-    namespace: JenkinsPluginsDatasource.id,
-    key: 'versions',
-    ttlMinutes: 60,
-  })
+  @cache({ namespace: JenkinsPluginsDatasource.id, key: 'versions' })
   async getJenkinsPluginVersions(): Promise<Record<string, Release[]>> {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsVersionsResponse>(
