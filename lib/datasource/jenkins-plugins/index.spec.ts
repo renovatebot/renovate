@@ -16,10 +16,6 @@ describe('datasource/jenkins-plugins/index', () => {
       registryUrls: ['https://updates.jenkins.io/'],
     };
 
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     afterEach(() => {
       if (!httpMock.allUsed()) {
         throw new Error('Not all http mocks have been used!');

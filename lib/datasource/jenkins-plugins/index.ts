@@ -3,7 +3,7 @@ import { cache } from '../../util/cache/package/decorator';
 import { clone } from '../../util/clone';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import {
+import type {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
 } from './types';

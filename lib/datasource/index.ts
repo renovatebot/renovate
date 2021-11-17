@@ -214,7 +214,7 @@ export function getDefaultVersioning(datasourceName: string): string {
 }
 
 function applyReplacements(
-  config: GetPkgReleasesConfig
+  config: GetReleasesInternalConfig
 ): Pick<ReleaseResult, 'replacementName' | 'replacementVersion'> | undefined {
   if (config.replacementName && config.replacementVersion) {
     return {
