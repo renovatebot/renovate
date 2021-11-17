@@ -24,7 +24,8 @@ export const presets: Record<string, Preset> = {
     ],
   },
   ignoreSpringCloudNumeric: {
-    description: 'Ignore spring cloud 1.x releases',
+    description:
+      'DEPRECATED: Ignore old spring cloud 1.x releases, but also newer releases using Calendar Versioning.',
     packageRules: [
       {
         matchDatasources: ['maven'],
