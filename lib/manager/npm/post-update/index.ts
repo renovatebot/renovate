@@ -265,6 +265,8 @@ export async function writeUpdatedPackageFiles(
       continue;
     }
     logger.debug(`Writing ${String(packageFile.name)}`);
+    const detectedIndent =
+      detectIndent(packageFile.contents.toString()).indent || '  ';
     const massagedFile = JSON.parse(packageFile.contents.toString());
     try {
       const { token } = hostRules.find({
@@ -286,7 +288,7 @@ export async function writeUpdatedPackageFiles(
     }
     await outputFile(
       upath.join(localDir, packageFile.name),
-      JSON.stringify(massagedFile)
+      JSON.stringify(massagedFile, null, detectedIndent)
     );
   }
 }
