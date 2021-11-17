@@ -8,6 +8,7 @@ export const presets: Record<string, Preset> = {
     extends: [
       'workarounds:mavenCommonsAncientVersion',
       'workarounds:ignoreHttp4sDigestMilestones',
+      'workarounds:ignoreSpringCloudAlphabetic',
       'workarounds:typesNodeVersioning',
       'workarounds:reduceRepologyServerLoad',
     ],
