@@ -33,8 +33,20 @@ In the example above `myvar` is a variable/field, that contains valid JSON.
 
 ### encodeURIComponent
 
-If you want to ..., use the built-in function `encodeURIComponent` like this:
+If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
+
+`{{{encodeURIComponent myvar}}}`
+
+In the example above `myvar` is the string you want to transform into a valid URI.
+
+Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to learn more.
 
 ### replace
 
-If you want to ..., use the built-in function `replace` like this:
+If you want to replace some characters in a string, use the built-in function `replace` like this:
+
+`{{{replace find, replace, context}}}`
+
+In the example above ...
+
+Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
