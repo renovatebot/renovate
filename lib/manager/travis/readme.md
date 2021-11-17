@@ -7,8 +7,8 @@ Renovate "understands" [Travis's Build Matrix concept](https://docs.travis-ci.co
 node_js:
 -  - 8.10.0
 -  - 10.10.0
-+  - 14.17.4
-+  - 14.17.4
++  - 16.13.0
++  - 16.13.0
 ```
 
 Due to this, major updates for Travis are disabled by default.
