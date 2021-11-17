@@ -6,12 +6,12 @@ This package will manage the following parts of the `kustomization.yaml` file:
 4. [helm charts](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/chart.md)
 5. [remote bases](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md) (deprecated since kustomize v2.1.0)
 
-   **How It Works**
+**How It Works**
 
-6. Renovate will search each repository for any `kustomization.yaml` files.
-7. Existing dependencies will be extracted from remote bases, image tags & helm charts
-8. Renovate will resolve the dependency's source repository and check for SemVer tags if found.
-9. If an update was found, Renovate will update `kustomization.yaml`
+1. Renovate will search each repository for any `kustomization.yaml` files.
+2. Existing dependencies will be extracted from remote bases, image tags & helm charts
+3. Renovate will resolve the dependency's source repository and check for SemVer tags if found.
+4. If an update was found, Renovate will update `kustomization.yaml`
 
 This manager uses three `depType`s to allow a fine-grained control of which dependencies are upgraded:
 
