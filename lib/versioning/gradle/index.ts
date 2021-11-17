@@ -83,6 +83,7 @@ const unstable = new Set([
   'milestone',
   'rc',
   'cr',
+  'preview',
   'snapshot',
 ]);
 

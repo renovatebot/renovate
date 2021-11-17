@@ -549,6 +549,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowPlugins',
+    description:
+      'Configure this to true if repositories are allowed to run install plugins.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'allowScripts',
     description:
       'Configure this to true if repositories are allowed to run install scripts.',
@@ -561,6 +569,13 @@ const options: RenovateOptions[] = [
     description:
       'Configure this to true if custom crate registries are allowed.',
     globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'ignorePlugins',
+    description:
+      'Configure this to true if allowPlugins=true but you wish to skip running plugins when updating lock files.',
     type: 'boolean',
     default: false,
   },
@@ -991,6 +1006,28 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementName',
+    description:
+      'The name of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replacementVersion',
+    description:
+      'The version of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchUpdateTypes',
     description:
       'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',
@@ -1200,6 +1237,23 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-rollback',
       commitMessageAction: 'Roll back',
       semanticCommitType: 'fix',
+    },
+    cli: false,
+    mergeable: true,
+  },
+  {
+    name: 'replacement',
+    description: 'Configuration to apply when replacing a dependency.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      branchTopic: '{{{depNameSanitized}}}-replacement',
+      commitMessageAction: 'Replace',
+      commitMessageExtra:
+        'with {{newName}} {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      prBodyNotes: [
+        'This is a special PR that replaces `{{{depNameSanitized}}}` with the community suggested minimal stable replacement version.',
+      ],
     },
     cli: false,
     mergeable: true,

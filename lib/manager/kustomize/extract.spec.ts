@@ -4,9 +4,9 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
 import {
-  extractBase,
   extractImage,
   extractPackageFile,
+  extractResource,
   parseKustomize,
 } from './extract';
 
@@ -34,7 +34,7 @@ describe('manager/kustomize/extract', () => {
   });
   describe('extractBase', () => {
     it('should return null for a local base', () => {
-      const res = extractBase('./service-1');
+      const res = extractResource('./service-1');
       expect(res).toBeNull();
     });
     it('should extract out the version of an http base', () => {
@@ -46,11 +46,11 @@ describe('manager/kustomize/extract', () => {
         depName: 'user/test-repo',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`);
+      const pkg = extractResource(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
     it('should extract the version of a non http base', () => {
-      const pkg = extractBase(
+      const pkg = extractResource(
         'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3'
       );
       expect(pkg).toEqual({
@@ -61,7 +61,7 @@ describe('manager/kustomize/extract', () => {
       });
     });
     it('should extract the depName if the URL includes a port number', () => {
-      const pkg = extractBase(
+      const pkg = extractResource(
         'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3'
       );
       expect(pkg).toEqual({
@@ -72,7 +72,7 @@ describe('manager/kustomize/extract', () => {
       });
     });
     it('should extract the version of a non http base with subdir', () => {
-      const pkg = extractBase(
+      const pkg = extractResource(
         'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3'
       );
       expect(pkg).toEqual({
@@ -91,7 +91,7 @@ describe('manager/kustomize/extract', () => {
         depName: 'fluxcd/flux',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`);
+      const pkg = extractResource(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
     it('should extract out the version of a git base', () => {
@@ -103,7 +103,7 @@ describe('manager/kustomize/extract', () => {
         depName: 'user/repo',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`);
+      const pkg = extractResource(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
     it('should extract out the version of a git base with subdir', () => {
@@ -115,7 +115,7 @@ describe('manager/kustomize/extract', () => {
         depName: 'user/repo',
       };
 
-      const pkg = extractBase(`${base}?ref=${version}`);
+      const pkg = extractResource(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
   });
@@ -247,6 +247,7 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[0].currentValue).toBe('v0.0.1');
       expect(res.deps[1].currentValue).toBe('1.19.0');
       expect(res.deps[2].currentValue).toBe('1.18.0');
+      expect(res.deps[0].depName).toBe('moredhel/remote-kustomize');
       expect(res.deps[1].depName).toBe('fluxcd/flux');
       expect(res.deps[2].depName).toBe('fluxcd/flux');
       expect(res.deps[0].depType).toBe('Kustomization');
@@ -261,6 +262,7 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[0].currentValue).toBe('1.19.0');
       expect(res.deps[1].currentValue).toBe('1.18.0');
       expect(res.deps[2].currentValue).toBe('v0.1.0');
+      expect(res.deps[0].depName).toBe('fluxcd/flux');
       expect(res.deps[1].depName).toBe('fluxcd/flux');
       expect(res.deps[2].depName).toBe('node');
       expect(res.deps[0].depType).toBe('Component');

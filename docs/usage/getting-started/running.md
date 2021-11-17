@@ -5,7 +5,7 @@ As a Renovate end user, there are two main categories of use:
 - You self-host Renovate, e.g. by running the pre-built Docker image, or
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
-If someone else is hosting Renovate for you, or you are using the WhiteSource Renovate App on GitHub, then you can skip ahead to the Installing Renovate into Repositories section.
+If someone else is hosting Renovate for you, or you are using the WhiteSource Renovate App on GitHub, then you can skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
 ## Self-Hosting Renovate
 
