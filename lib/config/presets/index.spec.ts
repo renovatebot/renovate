@@ -342,8 +342,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somepreset',
-        presetPath: 'somefile',
+        presetName: 'somefile/somepreset',
+        presetPath: undefined,
         presetSource: 'github',
       });
     });
@@ -355,8 +355,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somesubpreset',
-        presetPath: 'somefile/somepreset',
+        presetName: 'somefile/somepreset/somesubpreset',
+        presetPath: undefined,
         presetSource: 'github',
       });
     });

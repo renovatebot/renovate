@@ -15,7 +15,6 @@ export async function fetchPreset({
   filePreset,
   presetPath,
   endpoint: _endpoint,
-  packageTag = null,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
   const endpoint = ensureTrailingSlash(_endpoint);
@@ -28,8 +27,7 @@ export async function fetchPreset({
       jsonContent = await fetch(
         pkgName,
         buildFilePath('default.json'),
-        endpoint,
-        packageTag
+        endpoint
       );
     } catch (err) {
       if (err.message !== PRESET_DEP_NOT_FOUND) {
@@ -41,16 +39,14 @@ export async function fetchPreset({
       jsonContent = await fetch(
         pkgName,
         buildFilePath('renovate.json'),
-        endpoint,
-        packageTag
+        endpoint
       );
     }
   } else {
     jsonContent = await fetch(
       pkgName,
       buildFilePath(`${fileName}.json`),
-      endpoint,
-      packageTag
+      endpoint
     );
   }
 

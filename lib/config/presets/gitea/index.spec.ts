@@ -30,8 +30,7 @@ describe('config/presets/gitea/index', () => {
       const res = await gitea.fetchJSONFile(
         'some/repo',
         'some-filename.json',
-        giteaApiHost,
-        null
+        giteaApiHost
       );
       expect(res).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -201,45 +200,6 @@ describe('config/presets/gitea/index', () => {
             'default',
             undefined,
             'https://api.gitea.example.org'
-          )
-          .catch(() => ({ from: 'api' }))
-      ).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('uses default endpoint with a tag', async () => {
-      httpMock
-        .scope(giteaApiHost)
-        .get(`${basePath}/default.json?ref=someTag`)
-        .reply(200, {
-          content: Buffer.from('{"from":"api"}').toString('base64'),
-        });
-      expect(
-        await gitea.getPresetFromEndpoint(
-          'some/repo',
-          'default',
-          undefined,
-          giteaApiHost,
-          'someTag'
-        )
-      ).toEqual({ from: 'api' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('uses custom endpoint with a tag', async () => {
-      httpMock
-        .scope('https://api.gitea.example.org')
-        .get(`${basePath}/default.json?ref=someTag`)
-        .reply(200, {
-          content: Buffer.from('{"from":"api"}').toString('base64'),
-        });
-      expect(
-        await gitea
-          .getPresetFromEndpoint(
-            'some/repo',
-            'default',
-            undefined,
-            'https://api.gitea.example.org',
-            'someTag'
           )
           .catch(() => ({ from: 'api' }))
       ).toEqual({ from: 'api' });

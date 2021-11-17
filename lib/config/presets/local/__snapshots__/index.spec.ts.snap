@@ -7,7 +7,6 @@ Array [
     "default",
     undefined,
     undefined,
-    undefined,
   ],
 ]
 `;
@@ -17,7 +16,6 @@ Array [
   Array [
     "some/repo",
     "default",
-    undefined,
     undefined,
     undefined,
   ],
@@ -31,7 +29,6 @@ Array [
     "default",
     undefined,
     "https://git.example.com",
-    undefined,
   ],
 ]
 `;
@@ -43,7 +40,6 @@ Array [
     "default",
     undefined,
     "https://api.gitea.example.com",
-    undefined,
   ],
 ]
 `;
@@ -55,19 +51,6 @@ Array [
     "default",
     undefined,
     "https://api.github.example.com",
-    undefined,
-  ],
-]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to custom github with a tag 1`] = `
-Array [
-  Array [
-    "some/repo",
-    "default",
-    undefined,
-    "https://api.github.example.com",
-    "someTag",
   ],
 ]
 `;
@@ -79,19 +62,6 @@ Array [
     "default",
     undefined,
     "https://gitlab.example.com/api/v4",
-    undefined,
-  ],
-]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to custom gitlab with a tag 1`] = `
-Array [
-  Array [
-    "some/repo",
-    "default",
-    undefined,
-    "https://gitlab.example.com/api/v4",
-    "someTag",
   ],
 ]
 `;
@@ -101,7 +71,6 @@ Array [
   Array [
     "some/repo",
     "default",
-    undefined,
     undefined,
     undefined,
   ],
@@ -115,19 +84,6 @@ Array [
     "default",
     undefined,
     undefined,
-    undefined,
-  ],
-]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to github with a tag 1`] = `
-Array [
-  Array [
-    "some/repo",
-    "default",
-    undefined,
-    undefined,
-    "someTag",
   ],
 ]
 `;
@@ -139,19 +95,6 @@ Array [
     "default",
     undefined,
     undefined,
-    undefined,
-  ],
-]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to gitlab with a tag 1`] = `
-Array [
-  Array [
-    "some/repo",
-    "default",
-    undefined,
-    undefined,
-    "someTag",
   ],
 ]
 `;

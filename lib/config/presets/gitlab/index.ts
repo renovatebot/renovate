@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitLabBranch } from '../../../types/platform/gitlab';
@@ -31,25 +30,17 @@ async function getDefaultBranchName(
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
-  endpoint: string,
-  packageTag?: string
+  endpoint: string
 ): Promise<Preset> {
   let url = endpoint;
-  let ref = '';
   try {
     const urlEncodedRepo = encodeURIComponent(repo);
     const urlEncodedPkgName = encodeURIComponent(fileName);
-    if (is.nonEmptyString(packageTag)) {
-      ref = `?ref=${packageTag}`;
-    } else {
-      const defaultBranchName = await getDefaultBranchName(
-        urlEncodedRepo,
-        endpoint
-      );
-      ref = `?ref=${defaultBranchName}`;
-    }
-    url += `projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw${ref}`;
-    logger.trace({ url }, `Preset URL`);
+    const defaultBranchName = await getDefaultBranchName(
+      urlEncodedRepo,
+      endpoint
+    );
+    url += `projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw?ref=${defaultBranchName}`;
     return (await gitlabApi.getJson<Preset>(url)).body;
   } catch (err) {
     if (err instanceof ExternalHostError) {
@@ -67,15 +58,13 @@ export function getPresetFromEndpoint(
   pkgName: string,
   presetName: string,
   presetPath: string,
-  endpoint = Endpoint,
-  packageTag?: string
+  endpoint = Endpoint
 ): Promise<Preset> {
   return fetchPreset({
     pkgName,
     filePreset: presetName,
     presetPath,
     endpoint,
-    packageTag,
     fetch: fetchJSONFile,
   });
 }
@@ -84,13 +73,6 @@ export function getPreset({
   packageName: pkgName,
   presetPath,
   presetName = 'default',
-  packageTag = null,
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(
-    pkgName,
-    presetName,
-    presetPath,
-    Endpoint,
-    packageTag
-  );
+  return getPresetFromEndpoint(pkgName, presetName, presetPath, Endpoint);
 }

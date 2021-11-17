@@ -140,30 +140,6 @@ describe('config/presets/local/index', () => {
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toEqual({ resolved: 'preset' });
     });
-    it('forwards to github with a tag', async () => {
-      const content = await local.getPreset({
-        packageName: 'some/repo',
-        packageTag: 'someTag',
-        baseConfig: {
-          platform: 'github',
-        },
-      });
-      expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      expect(content).toEqual({ resolved: 'preset' });
-    });
-    it('forwards to custom github with a tag', async () => {
-      const content = await local.getPreset({
-        packageName: 'some/repo',
-        presetName: 'default',
-        packageTag: 'someTag',
-        baseConfig: {
-          platform: 'github',
-          endpoint: 'https://api.github.example.com',
-        },
-      });
-      expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      expect(content).toEqual({ resolved: 'preset' });
-    });
 
     it('forwards to gitlab', async () => {
       const content = await local.getPreset({
@@ -180,31 +156,6 @@ describe('config/presets/local/index', () => {
       const content = await local.getPreset({
         packageName: 'some/repo',
         presetName: 'default',
-        baseConfig: {
-          platform: 'gitlab',
-          endpoint: 'https://gitlab.example.com/api/v4',
-        },
-      });
-      expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      expect(content).toEqual({ resolved: 'preset' });
-    });
-    it('forwards to gitlab with a tag', async () => {
-      const content = await local.getPreset({
-        packageName: 'some/repo',
-        presetName: 'default',
-        packageTag: 'someTag',
-        baseConfig: {
-          platform: 'GitLab',
-        },
-      });
-      expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
-      expect(content).toEqual({ resolved: 'preset' });
-    });
-    it('forwards to custom gitlab with a tag', async () => {
-      const content = await local.getPreset({
-        packageName: 'some/repo',
-        presetName: 'default',
-        packageTag: 'someTag',
         baseConfig: {
           platform: 'gitlab',
           endpoint: 'https://gitlab.example.com/api/v4',
