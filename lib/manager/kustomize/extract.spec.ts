@@ -2,8 +2,10 @@ import { loadFixture } from '../../../test/util';
 import * as datasourceDocker from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
+import { HelmDatasource } from '../../datasource/helm';
 import { SkipReason } from '../../types';
 import {
+  extractHelmChart,
   extractImage,
   extractPackageFile,
   extractResource,
@@ -22,6 +24,7 @@ const kustomizeComponent = loadFixture('component.yaml');
 const newTag = loadFixture('newTag.yaml');
 const newName = loadFixture('newName.yaml');
 const digest = loadFixture('digest.yaml');
+const kustomizeHelmChart = loadFixture('kustomizeHelmChart.yaml');
 
 describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
@@ -116,6 +119,31 @@ describe('manager/kustomize/extract', () => {
       };
 
       const pkg = extractResource(`${base}?ref=${version}`);
+      expect(pkg).toEqual(sample);
+    });
+  });
+  describe('extractHelmChart', () => {
+    it('should return null on a null input', () => {
+      const pkg = extractHelmChart({
+        name: null,
+        repo: null,
+        version: null,
+      });
+      expect(pkg).toBeNull();
+    });
+    it('should correctly extract a chart', () => {
+      const registryUrl = 'https://docs.renovatebot.com/helm-charts';
+      const sample = {
+        depName: 'renovate',
+        currentValue: '29.6.0',
+        registryUrls: [registryUrl],
+        datasource: HelmDatasource.id,
+      };
+      const pkg = extractHelmChart({
+        name: sample.depName,
+        version: sample.currentValue,
+        repo: registryUrl,
+      });
       expect(pkg).toEqual(sample);
     });
   });
@@ -342,6 +370,20 @@ describe('manager/kustomize/extract', () => {
             currentDigest: postgresDigest,
             currentValue: undefined,
             replaceString: `awesome/postgres@${postgresDigest}`,
+          },
+        ],
+      });
+    });
+
+    it('parses helmChart field', () => {
+      const res = extractPackageFile(kustomizeHelmChart);
+      expect(res).toMatchSnapshot({
+        deps: [
+          {
+            depType: 'HelmChart',
+            depName: 'minecraft',
+            currentValue: '3.1.3',
+            registryUrls: ['https://itzg.github.io/minecraft-server-charts'],
           },
         ],
       });
