@@ -220,7 +220,11 @@ export async function writeExistingFiles(
           }
           if (lockFileChanged) {
             logger.debug('Massaging npm lock file before writing to disk');
-            existingNpmLock = JSON.stringify(npmLockParsed, null, 2);
+            existingNpmLock = JSON.stringify(
+              npmLockParsed,
+              null,
+              detectedIndent
+            );
           }
           await outputFile(npmLockPath, existingNpmLock);
         }
