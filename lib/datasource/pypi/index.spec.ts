@@ -315,14 +315,16 @@ describe('datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
-          datasource,
-          ...config,
-          depName: 'package--with-hyphens',
-        })
-      ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'package--with-hyphens',
+      });
+      expect(res.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
     });
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock
@@ -350,14 +352,16 @@ describe('datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
-          datasource,
-          ...config,
-          depName: 'PackageWithMixedCase',
-        })
-      ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'PackageWithMixedCase',
+      });
+      expect(res.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
     });
     it('process data from simple endpoint with mixed-case characters when using lower case dependency name', async () => {
       httpMock
@@ -367,14 +371,16 @@ describe('datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
-          datasource,
-          ...config,
-          depName: 'packagewithmixedcase',
-        })
-      ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'packagewithmixedcase',
+      });
+      expect(res.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
     });
     it('process data from simple endpoint with periods', async () => {
       httpMock
@@ -384,14 +390,16 @@ describe('datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
-          datasource,
-          ...config,
-          depName: 'package.with.periods',
-        })
-      ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'package.with.periods',
+      });
+      expect(res.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
     });
     it('returns null for empty response', async () => {
       httpMock
