@@ -303,6 +303,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const { paginate = true } = options;
 
+    let optimalCount: null | number = null;
     const initialCount = options.count || 100;
     let count = initialCount;
     let limit = options.limit || 1000;
@@ -310,27 +311,15 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     let isIterating = true;
     while (isIterating) {
-      const actualCount = Math.min(count, limit);
       const res = await this.requestGraphql<GithubGraphqlRepoData<T>>(query, {
         ...options,
-        count: actualCount,
+        count: Math.min(count, limit),
         cursor,
         paginate,
       });
       const fieldData = res?.data?.repository?.[fieldName];
       if (fieldData) {
-        // See: https://github.com/renovatebot/renovate/issues/12703
-        // istanbul ignore if
-        if (
-          count < initialCount &&
-          count === actualCount &&
-          baseUrl === githubBaseUrl
-        ) {
-          logger.debug(
-            { count },
-            'Successful GraphQL query with shrinked pagination size'
-          );
-        }
+        optimalCount = count;
 
         const { nodes = [], edges = [], pageInfo } = fieldData;
         result.push(...nodes);
@@ -359,6 +348,19 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       if (!paginate) {
         isIterating = false;
       }
+    }
+
+    // See: https://github.com/renovatebot/renovate/issues/12703
+    // istanbul ignore if
+    if (
+      optimalCount &&
+      optimalCount < initialCount && // log only shrinked results
+      baseUrl === githubBaseUrl
+    ) {
+      logger.debug(
+        { optimalCount },
+        'Successful GraphQL query with shrinked pagination size'
+      );
     }
 
     return result;
