@@ -40,4 +40,5 @@ export interface Cache {
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
+  graphqlPageSize?: number;
 }

@@ -15,7 +15,8 @@ import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
-let baseUrl = 'https://api.github.com/';
+const githubBaseUrl = 'https://api.github.com/';
+let baseUrl = githubBaseUrl;
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
@@ -301,20 +302,40 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const result: T[] = [];
 
     const { paginate = true } = options;
-    let count = options.count || 100;
+
+    const initialCount = options.count || 100;
+    let count = initialCount;
     let limit = options.limit || 1000;
     let cursor: string = null;
 
     let isIterating = true;
     while (isIterating) {
+      const actualCount = Math.min(count, limit);
       const res = await this.requestGraphql<GithubGraphqlRepoData<T>>(query, {
         ...options,
-        count: Math.min(count, limit),
+        count: actualCount,
         cursor,
         paginate,
       });
       const fieldData = res?.data?.repository?.[fieldName];
       if (fieldData) {
+        // See: https://github.com/renovatebot/renovate/issues/12703
+        // istanbul ignore if
+        if (
+          count < initialCount &&
+          count === actualCount &&
+          baseUrl === githubBaseUrl
+        ) {
+          const { owner, name } = options?.variables || {};
+          const repo = owner && name ? `${owner}/${name}` : null;
+          if (repo) {
+            logger.debug(
+              { repo, count },
+              'Successful GraphQL query with shrinked pagination size'
+            );
+          }
+        }
+
         const { nodes = [], edges = [], pageInfo } = fieldData;
         result.push(...nodes);
         result.push(...edges);
