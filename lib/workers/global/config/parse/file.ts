@@ -1,5 +1,6 @@
 import { readFile } from 'fs-extra';
 import { load } from 'js-yaml';
+import fs from 'fs-extra';
 import JSON5 from 'json5';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
@@ -14,21 +15,35 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         json: true,
       }) as RenovateConfig;
     case '.json5':
+    case '.json':
       return JSON5.parse(await readFile(file, 'utf8'));
-    default: {
-      // .json and .js
+    case '.js': {
       const tmpConfig = await import(file);
       return tmpConfig.default ? tmpConfig.default : tmpConfig;
     }
+    default:
+      throw new Error(`Unsupported file type: ${file}`);
   }
 }
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
-  let configFile = env.RENOVATE_CONFIG_FILE || 'config';
+  let configFile = env.RENOVATE_CONFIG_FILE || 'config.js';
   if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
-    logger.debug('Checking for config file in ' + configFile);
   }
+  if (!upath.extname(configFile)) {
+    logger.info(
+      'Providing a config file without an extension is deprecated. Please use explicit file extensions.'
+    );
+    for (const ext of ['.js', '.json']) {
+      const resolved = upath.addExt(configFile, ext);
+      if (fs.exists(resolved)) {
+        configFile = resolved;
+        break;
+      }
+    }
+  }
+  logger.debug('Checking for config file in ' + configFile);
   let config: AllConfig = {};
   try {
     config = await getParsedContent(configFile);
