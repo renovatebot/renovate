@@ -157,7 +157,8 @@ function urlEscape(str: string): string {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repo?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const url = `projects/${repo}/repository/files/${escapedFileName}?ref=HEAD`;
@@ -169,9 +170,14 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repo?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(
+    fileName,
+    repo ?? config.repository,
+    branchOrTag
+  );
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
