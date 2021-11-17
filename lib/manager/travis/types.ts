@@ -1,3 +1,7 @@
+// travis.yml syntax description:
+//  - regular: https://docs.travis-ci.com/user/tutorial/
+//  - matrix: https://docs.travis-ci.com/user/build-matrix/
+
 export type TravisNodeJs = string | string[];
 
 export interface TravisYaml {
