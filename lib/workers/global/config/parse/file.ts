@@ -1,6 +1,5 @@
-import { readFile } from 'fs-extra';
+import fs, { readFile } from 'fs-extra';
 import { load } from 'js-yaml';
-import fs from 'fs-extra';
 import JSON5 from 'json5';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
@@ -37,7 +36,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     );
     for (const ext of ['.js', '.json']) {
       const resolved = upath.addExt(configFile, ext);
-      if (fs.exists(resolved)) {
+      if (await fs.exists(resolved)) {
         configFile = resolved;
         break;
       }
