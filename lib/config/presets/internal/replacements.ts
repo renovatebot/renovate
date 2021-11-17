@@ -17,7 +17,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['pypi'],
         matchPackageNames: ['flake8-pathlib'],
         replacementName: 'flake8-use-pathlib',
-        replacementVersion: '0.2.1',
+        replacementVersion: '0.2.0',
       },
     ],
   },
