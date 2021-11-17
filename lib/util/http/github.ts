@@ -326,14 +326,10 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           count === actualCount &&
           baseUrl === githubBaseUrl
         ) {
-          const { owner, name } = options?.variables || {};
-          const repo = owner && name ? `${owner}/${name}` : null;
-          if (repo) {
-            logger.debug(
-              { repo, count },
-              'Successful GraphQL query with shrinked pagination size'
-            );
-          }
+          logger.debug(
+            { count },
+            'Successful GraphQL query with shrinked pagination size'
+          );
         }
 
         const { nodes = [], edges = [], pageInfo } = fieldData;
