@@ -407,6 +407,15 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+    it('parses local with spaces', () => {
+      expect(presets.parsePreset('local>A2B CD/A2B_Renovate')).toEqual({
+        packageName: 'A2B CD/A2B_Renovate',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
     it('parses local with subdirectory', () => {
       expect(
         presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
