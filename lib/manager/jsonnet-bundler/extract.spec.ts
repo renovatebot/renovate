@@ -3,12 +3,28 @@ import { extractPackageFile } from './extract';
 
 const jsonnetfile = loadFixture('jsonnetfile.json');
 const jsonnetfileWithName = loadFixture('jsonnetfile-with-name.json');
+const jsonnetfileNoDependencies = loadFixture(
+  'jsonnetfile-no-dependencies.json'
+);
+const jsonnetfileLocalDependencies = loadFixture(
+  'jsonnetfile-local-dependencies.json'
+);
 
 describe('manager/jsonnet-bundler/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for invalid file', () => {
+    it('returns null for invalid jsonnetfile', () => {
       expect(
-        extractPackageFile('this is not a jsonnetfile.json', 'jsonnetfile.json')
+        extractPackageFile('this is not a jsonnetfile', 'jsonnetfile.json')
+      ).toBeNull();
+    });
+    it('returns null for jsonnetfile with no dependencies', () => {
+      expect(
+        extractPackageFile(jsonnetfileNoDependencies, 'jsonnetfile.json')
+      ).toBeNull();
+    });
+    it('returns null for local dependencies', () => {
+      expect(
+        extractPackageFile(jsonnetfileLocalDependencies, 'jsonnetfile.json')
       ).toBeNull();
     });
     it('extracts dependency', () => {
