@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/jsonnet-bundler extractPackageFile() extracts dependency 1`] = `
+exports[`manager/jsonnet-bundler/extract extractPackageFile() extracts dependency 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -19,7 +19,7 @@ Object {
 }
 `;
 
-exports[`manager/jsonnet-bundler extractPackageFile() extracts dependency with custom name 1`] = `
+exports[`manager/jsonnet-bundler/extract extractPackageFile() extracts dependency with custom name 1`] = `
 Object {
   "deps": Array [
     Object {
