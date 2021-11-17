@@ -7,6 +7,18 @@ export const presets: Record<string, Preset> = {
       'replacements:jade-to-pug',
       'replacements:cucumber-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:flake8-pathlib-to-flake8-use-pathlib',
+    ],
+  },
+  'flake8-pathlib-to-flake8-use-pathlib': {
+    description: 'flake8-pathlib was renamed to flake8-use-pathlib',
+    packageRules: [
+      {
+        matchDatasources: ['pypi'],
+        matchPackageNames: ['flake8-pathlib'],
+        replacementName: 'flake8-use-pathlib',
+        replacementVersion: '0.2.1',
+      },
     ],
   },
   'jade-to-pug': {
