@@ -17,25 +17,25 @@ describe('workers/global/config/parse/file', () => {
 
   describe('.getConfig()', () => {
     it.each([
-      ['custom file', 'file.js'],
+      ['custom config file', 'file.js'],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
-    ])('parses %s', (fileType, filePath) => {
+    ])('parses %s', async (fileType, filePath) => {
       const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
-      expect(file.getConfig({ RENOVATE_CONFIG_FILE: configFile })).toEqual(
-        customConfig
-      );
+      expect(
+        await file.getConfig({ RENOVATE_CONFIG_FILE: configFile })
+      ).toEqual(customConfig);
     });
 
-    it('migrates', () => {
+    it('migrates', async () => {
       const configFile = upath.resolve(__dirname, './__fixtures__/file2.js');
-      const res = file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      const res = await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toBe('bump');
     });
 
-    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', () => {
-      expect(file.getConfig({})).toBeDefined();
+    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
+      expect(await file.getConfig({})).toBeDefined();
     });
 
     it.each([
@@ -57,26 +57,26 @@ describe('workers/global/config/parse/file', () => {
       ['config.yaml', `invalid: -`],
     ])(
       'fatal error and exit if error in parsing %s',
-      (fileName, fileContent) => {
+      async (fileName, fileContent) => {
         const mockProcessExit = jest
           .spyOn(process, 'exit')
           .mockImplementation(() => undefined as never);
         const configFile = upath.resolve(tmp.path, fileName);
         fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
-        file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+        await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
         expect(mockProcessExit).toHaveBeenCalledWith(1);
         mockProcessExit.mockRestore();
         fs.unlinkSync(configFile);
       }
     );
 
-    it('fatal error and exit if custom config file does not exist', () => {
+    it('fatal error and exit if custom config file does not exist', async () => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
         .mockImplementation(() => undefined as never);
 
       const configFile = upath.resolve(tmp.path, './file4.js');
-      file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
 
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });

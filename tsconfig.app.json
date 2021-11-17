@@ -6,6 +6,7 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "inlineSources": true,
+    "importHelpers": true,
     "allowJs": false,
     "checkJs": false,
     "types": ["node"]

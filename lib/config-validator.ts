@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // istanbul ignore file
 import { dequal } from 'dequal';
-import { readFileSync } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import { configFileNames } from './config/app-strings';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
@@ -54,7 +54,7 @@ type PackageJson = {
     (name) => name !== 'package.json'
   )) {
     try {
-      const parsedContent = getParsedContent(file);
+      const parsedContent = await getParsedContent(file);
       try {
         logger.info(`Validating ${file}`);
         await validate(file, parsedContent);
@@ -69,7 +69,7 @@ type PackageJson = {
   }
   try {
     const pkgJson = JSON.parse(
-      readFileSync('package.json', 'utf8')
+      await readFile('package.json', 'utf8')
     ) as PackageJson;
     if (pkgJson.renovate) {
       logger.info(`Validating package.json > renovate`);
@@ -85,7 +85,7 @@ type PackageJson = {
     // ignore
   }
   try {
-    const fileConfig = getFileConfig(process.env);
+    const fileConfig = await getFileConfig(process.env);
     if (!dequal(fileConfig, {})) {
       const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
       logger.info(`Validating ${file}`);
