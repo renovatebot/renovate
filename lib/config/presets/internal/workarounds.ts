@@ -34,6 +34,19 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  ignoreSpringCloudAlphabetic: {
+    description:
+      'Ignore spring cloud releases older than the 2020 release train',
+    packageRules: [
+      {
+        matchDatasources: ['maven'],
+        matchPackageNames: [
+          'org.springframework.cloud:spring-cloud-starter-parent',
+        ],
+        allowedVersions: '/^[0-9]/',
+      },
+    ],
+  },
   ignoreHttp4sDigestMilestones: {
     description: 'Ignore http4s digest-based 1.x milestones',
     packageRules: [
