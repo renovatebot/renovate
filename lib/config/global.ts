@@ -5,6 +5,7 @@ let repoGlobalConfig: RepoGlobalConfig = {};
 // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
 const repoGlobalOptions = [
   'allowCustomCrateRegistries',
+  'allowPlugins',
   'allowPostUpgradeCommandTemplating',
   'allowScripts',
   'allowedPostUpgradeCommands',
@@ -29,7 +30,7 @@ export function setGlobalConfig(
   const result = { ...config };
   for (const option of repoGlobalOptions) {
     repoGlobalConfig[option] = config[option];
-    delete result[option]; // eslint-disable-line no-param-reassign
+    delete result[option];
   }
   return result;
 }

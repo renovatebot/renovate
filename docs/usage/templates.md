@@ -20,3 +20,13 @@ Some are configuration options passed through, while others are generated as par
 ## Other available fields
 
 <!-- Insert runtime fields here -->
+
+## Additional Handlebars helpers
+
+### stringToPrettyJSON
+
+If you want to print pretty JSON with Handlebars you can use the built-in function `stringToPrettyJSON` like this:
+
+`{{{stringToPrettyJSON myvar}}}`
+
+In the example above `myvar` is a variable/field, that contains valid JSON.

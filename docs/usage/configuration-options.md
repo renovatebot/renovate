@@ -763,7 +763,8 @@ Configuration added here applies for all Go-related updates, however currently t
 
 For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://golang.org/ref/mod#module-proxy)).
 
-But when you use the `direct` or `off` keywords Renovate will fallback to its own fetching strategy (i.e. directly from GitHub, etc).
+Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
+Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
 
@@ -1089,6 +1090,11 @@ For instance if you have a project with an `"examples/"` directory you wish to i
 
 Useful to know: Renovate's default ignore is `node_modules` and `bower_components` only, however if you are extending the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
+## ignorePlugins
+
+Set this to `true` if running plugins causes problems.
+Applicable for Composer only for now.
+
 ## ignorePrAuthor
 
 This is usually needed if someone needs to migrate bot accounts, including from hosted app to self-hosted.
@@ -1233,7 +1239,7 @@ See [Private npm module support](https://docs.renovatebot.com/getting-started/pr
 ## npmrcMerge
 
 This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
-In some situations you need the ability to force override `.npmrc` contents in a repo (`npmMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmMerge=true`).
+In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
 A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and therefore its values ignored.
@@ -1651,6 +1657,31 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### replacementName
+
+Use this field to define the name of a replacement package.
+Must be used with `replacementVersion` (see example below).
+You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+
+### replacementVersion
+
+Use this field to define the version of a replacement package.
+Must be used with `replacementName`.
+For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["jade"],
+      "replacementName": "pug",
+      "replacementVersion": "2.0.0"
+    }
+  ]
+}
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
@@ -1667,7 +1698,7 @@ If enabled Renovate will pin Docker images by means of their SHA256 digest and n
 
 ## platformAutomerge
 
-If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then `platformAutomerge` is enabled by default to speed up merging via the platform's native automerge functionality.
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then you can also set `platformAutomerge` to `true` to speed up merging via the platform's native automerge functionality.
 
 Renovate tries platform-native automerge only when it initially creates the PR.
 Any PR that is being updated will be automerged with the Renovate-based automerge.
@@ -1676,7 +1707,12 @@ Any PR that is being updated will be automerged with the Renovate-based automerg
 This option is available for Azure, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
-Though this option is enabled by default, you can fine tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
+You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
+
+Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=true`.
+Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
+This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
+For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
 ## postUpdateOptions
 
@@ -2212,7 +2248,7 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
-In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageUrls` like so:
+In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageRules` like so:
 
 ```json
 {
@@ -2227,6 +2263,10 @@ In case there is a need to configure them manually, it can be done using this `r
 
 The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
 
+## replacement
+
+Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
+
 ## respectLatest
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
@@ -2235,7 +2275,15 @@ By default, `renovate` will update to a version greater than `latest` only if th
 ## reviewers
 
 Must be valid usernames.
-If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
+
+If on GitHub and assigning a team to review, you must use the prefix `team:` and add the _last part_ of the team name.
+Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
+
+```json
+{
+  "reviewers": "team:foo"
+}
+```
 
 ## reviewersFromCodeOwners
 

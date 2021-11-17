@@ -17,7 +17,6 @@ export class ClojureDatasource extends Datasource {
     MAVEN_REPO,
   ];
 
-  // eslint-disable-next-line class-methods-use-this
   getReleases({
     lookupName,
     registryUrl,

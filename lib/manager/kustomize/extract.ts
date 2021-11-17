@@ -16,10 +16,7 @@ const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
 
-export function extractBase(
-  base: string,
-  kind: string
-): PackageDependency | null {
+export function extractResource(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
 
   if (!match) {
@@ -32,23 +29,18 @@ export function extractBase(
       currentValue: match.groups.currentValue,
       datasource: datasourceGitHubTags.id,
       depName: match.groups.project.replace('.git', ''),
-      depType: kind,
     };
   }
 
   return {
     datasource: GitTagsDatasource.id,
     depName: path.replace('.git', ''),
-    depType: kind,
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,
   };
 }
 
-export function extractImage(
-  image: Image,
-  kind: string
-): PackageDependency | null {
+export function extractImage(image: Image): PackageDependency | null {
   if (!image.name) {
     return null;
   }
@@ -62,7 +54,6 @@ export function extractImage(
     );
     return {
       depName,
-      depType: kind,
       currentValue: newTag,
       currentDigest: digest,
       skipReason: SkipReason.InvalidDependencySpecification,
@@ -73,7 +64,6 @@ export function extractImage(
     if (!is.string(digest) || !digest.startsWith('sha256:')) {
       return {
         depName,
-        depType: kind,
         currentValue: digest,
         skipReason: SkipReason.InvalidValue,
       };
@@ -82,7 +72,6 @@ export function extractImage(
     return {
       datasource: datasourceDocker.id,
       depName,
-      depType: kind,
       currentValue: nameDep.currentValue,
       currentDigest: digest,
       replaceString: digest,
@@ -93,7 +82,6 @@ export function extractImage(
     if (!is.string(newTag) || newTag.startsWith('sha256:')) {
       return {
         depName,
-        depType: kind,
         currentValue: newTag,
         skipReason: SkipReason.InvalidValue,
       };
@@ -102,7 +90,6 @@ export function extractImage(
     const dep = splitImageParts(`${depName}:${newTag}`);
     return {
       ...dep,
-      depType: kind,
       datasource: datasourceDocker.id,
       replaceString: newTag,
     };
@@ -111,7 +98,6 @@ export function extractImage(
   if (image.newName) {
     return {
       ...nameDep,
-      depType: kind,
       datasource: datasourceDocker.id,
       replaceString: image.newName,
     };
@@ -121,9 +107,9 @@ export function extractImage(
 }
 
 export function parseKustomize(content: string): Kustomize | null {
-  let pkg = null;
+  let pkg: Kustomize | null = null;
   try {
-    pkg = load(content, { json: true });
+    pkg = load(content, { json: true }) as Kustomize;
   } catch (e) /* istanbul ignore next */ {
     return null;
   }
@@ -135,12 +121,6 @@ export function parseKustomize(content: string): Kustomize | null {
   if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;
   }
-
-  pkg.bases = (pkg.bases || []).concat(
-    pkg.resources || [],
-    pkg.components || []
-  );
-  pkg.images = pkg.images || [];
 
   return pkg;
 }
@@ -155,18 +135,46 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote bases
-  for (const base of pkg.bases) {
-    const dep = extractBase(base, pkg.kind);
+  for (const base of pkg.bases ?? []) {
+    const dep = extractResource(base);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote resources
+  for (const resource of pkg.resources ?? []) {
+    const dep = extractResource(resource);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote components
+  for (const component of pkg.components ?? []) {
+    const dep = extractResource(component);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
     }
   }
 
   // grab the image tags
-  for (const image of pkg.images) {
-    const dep = extractImage(image, pkg.kind);
+  for (const image of pkg.images ?? []) {
+    const dep = extractImage(image);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
     }
   }
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 import { fs, loadFixture } from '../../../test/util';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractPackage, resolveParents } from './extract';

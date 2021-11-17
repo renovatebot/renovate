@@ -175,7 +175,7 @@ export abstract class GenericVersioningApi<
   /*
    * virtual
    */
-  // eslint-disable-next-line class-methods-use-this
+
   protected _compareOther(_left: T, _right: T): number {
     return 0;
   }
@@ -235,7 +235,6 @@ export abstract class GenericVersioningApi<
     return versions.find((v) => this.equals(v, range)) || null;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getNewValue(newValueConfig: NewValueConfig): string {
     const { newVersion } = newValueConfig || {};
     return newVersion;

@@ -26,8 +26,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -71,8 +71,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -91,6 +91,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://clojars.org/repo/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "clojars.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -148,6 +157,9 @@ Object {
   "name": "package",
   "registryUrl": "https://clojars.org/repo",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -226,8 +238,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -271,8 +283,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -291,6 +303,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://clojars.org/repo/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "clojars.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -339,8 +360,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -384,8 +405,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -404,6 +425,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://clojars.org/repo/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "clojars.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -447,8 +477,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -492,8 +522,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -520,6 +550,15 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "clojars.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
     "url": "https://clojars.org/repo/org/example/package/1.0.5-SNAPSHOT/package-1.0.5-SNAPSHOT.pom",
   },
   Object {
@@ -536,6 +575,9 @@ Array [
 
 exports[`datasource/clojure/index ignores unsupported protocols 1`] = `
 Array [
+  Object {
+    "version": "0.0.1",
+  },
   Object {
     "releaseTimestamp": "2020-01-01T01:00:00.000Z",
     "version": "1.0.0",
@@ -577,8 +619,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "http://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "http://clojars.org/repo/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -622,8 +664,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "http://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "http://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -642,6 +684,15 @@ Array [
     },
     "method": "HEAD",
     "url": "http://clojars.org/repo/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "clojars.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "http://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -672,6 +723,9 @@ Object {
   "name": "package",
   "registryUrl": "https://custom.registry.renovatebot.com",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -714,8 +768,8 @@ Array [
       "host": "custom.registry.renovatebot.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "https://custom.registry.renovatebot.com/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "https://custom.registry.renovatebot.com/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -759,8 +813,8 @@ Array [
       "host": "custom.registry.renovatebot.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://custom.registry.renovatebot.com/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://custom.registry.renovatebot.com/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -779,6 +833,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://custom.registry.renovatebot.com/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "custom.registry.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://custom.registry.renovatebot.com/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -809,6 +872,9 @@ Object {
   "name": "package",
   "registryUrl": "https://clojars.org/repo",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -860,8 +926,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -905,8 +971,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -925,6 +991,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://clojars.org/repo/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "clojars.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -955,6 +1030,9 @@ Object {
   "name": "package",
   "registryUrl": "https://clojars.org/repo",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -1006,8 +1084,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -1051,8 +1129,8 @@ Array [
       "host": "clojars.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -1071,6 +1149,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://clojars.org/repo/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "clojars.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://clojars.org/repo/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {

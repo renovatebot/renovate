@@ -113,8 +113,8 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
-      expect(JSON.parse(testContent).resolutions.config).toEqual('1.22.0');
+      expect(JSON.parse(testContent).dependencies.config).toBe('1.22.0');
+      expect(JSON.parse(testContent).resolutions.config).toBe('1.22.0');
     });
     it('updates glob resolutions', () => {
       const upgrade = {
@@ -126,10 +126,8 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input01GlobContent,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
-      expect(JSON.parse(testContent).resolutions['**/config']).toEqual(
-        '1.22.0'
-      );
+      expect(JSON.parse(testContent).dependencies.config).toBe('1.22.0');
+      expect(JSON.parse(testContent).resolutions['**/config']).toBe('1.22.0');
     });
     it('updates glob resolutions without dep', () => {
       const upgrade = {
@@ -142,7 +140,7 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toEqual(
+      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toBe(
         '8.1.0'
       );
     });
@@ -209,6 +207,49 @@ describe('manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
+    });
+
+    it('returns null if empty file', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'angular-touch-not',
+        newValue: '1.5.8',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: null,
+        upgrade,
+      });
+      expect(testContent).toBeNull();
+    });
+
+    it('replaces package', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'abc',
+        newValue: '2.0.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
+      expect(JSON.parse(testContent).dependencies.config).toBeUndefined();
+      expect(JSON.parse(testContent).dependencies.abc).toBe('2.0.0');
+    });
+
+    it('replaces glob package resolutions', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'abc',
+        newValue: '2.0.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01GlobContent,
+        upgrade,
+      });
+      expect(JSON.parse(testContent).resolutions.config).toBeUndefined();
+      expect(JSON.parse(testContent).resolutions['**/abc']).toBe('2.0.0');
     });
   });
 });

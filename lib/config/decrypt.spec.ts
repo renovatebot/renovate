@@ -22,14 +22,14 @@ describe('config/decrypt', () => {
     it('warns if no privateKey found', async () => {
       config.encrypted = { a: '1' };
       const res = await decryptConfig(config, repository);
-      expect(res.encrypted).not.toBeDefined();
-      expect(res.a).not.toBeDefined();
+      expect(res.encrypted).toBeUndefined();
+      expect(res.a).toBeUndefined();
     });
     it('handles invalid encrypted type', async () => {
       config.encrypted = 1;
       setGlobalConfig({ privateKey });
       const res = await decryptConfig(config, repository);
-      expect(res.encrypted).not.toBeDefined();
+      expect(res.encrypted).toBeUndefined();
     });
     it('handles invalid encrypted value', async () => {
       config.encrypted = { a: 1 };
@@ -41,28 +41,28 @@ describe('config/decrypt', () => {
     it('replaces npm token placeholder in npmrc', async () => {
       setGlobalConfig({ privateKey: 'invalid-key', privateKeyOld: privateKey }); // test old key failover
       config.npmrc =
-        '//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n'; // eslint-disable-line no-template-curly-in-string
+        '//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n';
       config.encrypted = {
         npmToken:
           'FLA9YHIzpE7YetAg/P0X46npGRCMqn7hgyzwX5ZQ9wYgu9BRRbTiBVsUIFTyM5BuP1Q22slT2GkWvFvum7GU236Y6QiT7Nr8SLvtsJn2XUuq8H7REFKzdy3+wqyyWbCErYTFyY1dcPM7Ht+CaGDWdd8u/FsoX7AdMRs/X1jNUo6iSmlUiyGlYDKF+QMnCJom1VPVgZXWsGKdjI2MLny991QMaiv0VajmFIh4ENv4CtXOl/1twvIl/6XTXAaqpJJKDTPZEuydi+PHDZmal2RAOfrkH4m0UURa7SlfpUlIg+EaqbNGp85hCYXLwRcEET1OnYr3rH1oYkcYJ40any1tvQ==',
       };
       const res = await decryptConfig(config, repository);
-      expect(res.encrypted).not.toBeDefined();
-      expect(res.npmToken).not.toBeDefined();
-      expect(res.npmrc).toEqual(
+      expect(res.encrypted).toBeUndefined();
+      expect(res.npmToken).toBeUndefined();
+      expect(res.npmrc).toBe(
         '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n'
       );
     });
     it('appends npm token in npmrc', async () => {
       setGlobalConfig({ privateKey });
-      config.npmrc = 'foo=bar\n'; // eslint-disable-line no-template-curly-in-string
+      config.npmrc = 'foo=bar\n';
       config.encrypted = {
         npmToken:
           'FLA9YHIzpE7YetAg/P0X46npGRCMqn7hgyzwX5ZQ9wYgu9BRRbTiBVsUIFTyM5BuP1Q22slT2GkWvFvum7GU236Y6QiT7Nr8SLvtsJn2XUuq8H7REFKzdy3+wqyyWbCErYTFyY1dcPM7Ht+CaGDWdd8u/FsoX7AdMRs/X1jNUo6iSmlUiyGlYDKF+QMnCJom1VPVgZXWsGKdjI2MLny991QMaiv0VajmFIh4ENv4CtXOl/1twvIl/6XTXAaqpJJKDTPZEuydi+PHDZmal2RAOfrkH4m0UURa7SlfpUlIg+EaqbNGp85hCYXLwRcEET1OnYr3rH1oYkcYJ40any1tvQ==',
       };
       const res = await decryptConfig(config, repository);
-      expect(res.encrypted).not.toBeDefined();
-      expect(res.npmToken).not.toBeDefined();
+      expect(res.encrypted).toBeUndefined();
+      expect(res.npmToken).toBeUndefined();
       expect(res.npmrc).toMatchSnapshot();
     });
     it('decrypts nested', async () => {
@@ -82,13 +82,13 @@ describe('config/decrypt', () => {
         'backend/package.json',
       ];
       const res = await decryptConfig(config, repository);
-      expect(res.encrypted).not.toBeDefined();
-      expect(res.packageFiles[0].devDependencies.encrypted).not.toBeDefined();
-      expect(res.packageFiles[0].devDependencies.branchPrefix).toEqual(
+      expect(res.encrypted).toBeUndefined();
+      expect(res.packageFiles[0].devDependencies.encrypted).toBeUndefined();
+      expect(res.packageFiles[0].devDependencies.branchPrefix).toBe(
         'abcdef-ghijklm-nopqf-stuvwxyz'
       );
-      expect(res.packageFiles[0].devDependencies.npmToken).not.toBeDefined();
-      expect(res.packageFiles[0].devDependencies.npmrc).toEqual(
+      expect(res.packageFiles[0].devDependencies.npmToken).toBeUndefined();
+      expect(res.packageFiles[0].devDependencies.npmrc).toBe(
         '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n'
       );
     });
@@ -139,8 +139,8 @@ describe('config/decrypt', () => {
           'wcFMAw+4H7SgaqGOAQ/+Lz6RlbEymbnmMhrktuaGiDPWRNPEQFuMRwwYM6/B/r0JMZa9tskAA5RpyYKxGmJJeuRtlA8GkTw02GoZomlJf/KXJZ95FwSbkXMSRJRD8LJ2402Hw2TaOTaSvfamESnm8zhNo8cok627nkKQkyrpk64heVlU5LIbO2+UgYgbiSQjuXZiW+QuJ1hVRjx011FQgEYc59+22yuKYqd8rrni7TrVqhGRlHCAqvNAGjBI4H7uTFh0sP4auunT/JjxTeTkJoNu8KgS/LdrvISpO67TkQziZo9XD5FOzSN7N3e4f8vO4N4fpjgkIDH/9wyEYe0zYz34xMAFlnhZzqrHycRqzBJuMxGqlFQcKWp9IisLMoVJhLrnvbDLuwwcjeqYkhvODjSs7UDKwTE4X4WmvZr0x4kOclOeAAz/pM6oNVnjgWJd9SnYtoa67bZVkne0k6mYjVhosie8v8icijmJ4OyLZUGWnjZCRd/TPkzQUw+B0yvsop9FYGidhCI+4MVx6W5w7SRtCctxVfCjLpmU4kWaBUUJ5YIQ5xm55yxEYuAsQkxOAYDCMFlV8ntWStYwIG1FsBgJX6VPevXuPPMjWiPNedIpJwBH2PLB4blxMfzDYuCeaIqU4daDaEWxxpuFTTK9fLdJKuipwFG6rwE3OuijeSN+2SLszi834DXtUjQdikHSTQG392+oTmZCFPeffLk/OiV2VpdXF3gGL7sr5M9hOWIZ783q0vW1l6nAElZ7UA//kW+L6QRxbnBVTJK5eCmMY6RJmL76zjqC1jQ0FC10',
       };
       const res = await decryptConfig(config, repository);
-      expect(res.encrypted).not.toBeDefined();
-      expect(res.token).toEqual('123');
+      expect(res.encrypted).toBeUndefined();
+      expect(res.token).toBe('123');
       await expect(decryptConfig(config, 'wrong/org')).rejects.toThrow(
         'config-validation'
       );
@@ -152,8 +152,8 @@ describe('config/decrypt', () => {
           'wcFMAw+4H7SgaqGOAQ//Wp7N0PaDZp0uOdwsc1CuqAq0UPcq+IQdHyKpJs3tHiCecXBHogy4P+rY9nGaUrVneCr4HexuKGuyJf1yl0ZqFffAUac5PjF8eDvjukQGOUq4aBlOogJCEefnuuVxVJx+NRR5iF1P6v57bmI1c+zoqZI/EQB30KU6O1BsdGPLUA/+R3dwCZd5Mbd36s34eYBasqcY9/QbqFcpElXMEPMse3kMCsVXPbZ+UMjtPJiBPUmtJq+ifnu1LzDrfshusSQMwgd/QNk7nEsijiYKllkWhHTP6g7zigvJ46x0h6AYS108YiuK3B9XUhXN9m05Ac6KTEEUdRI3E/dK2dQuRkLjXC8wceQm4A19Gm0uHoMIJYOCbiVoBCH6ayvKbZWZV5lZ4D1JbDNGmKeIj6OX9XWEMKiwTx0Xe89V7BdJzwIGrL0TCLtXuYWZ/R2k+UuBqtgzr44BsBqMpKUA0pcGBoqsEou1M05Ae9fJMF6ADezF5UQZPxT1hrMldiTp3p9iHGfWN2tKHeoW/8CqlIqg9JEkTc+Pl/L9E6ndy5Zjf097PvcmSGhxUQBE7XlrZoIlGhiEU/1HPMen0UUIs0LUu1ywpjCex2yTWnU2YmEwy0MQI1sekSr96QFxDDz9JcynYOYbqR/X9pdxEWyzQ+NJ3n6K97nE1Dj9Sgwu7mFGiUdNkf/SUAF0eZi/eXg71qumpMGBd4eWPtgkeMPLHjvMSYw9vBUfcoKFz6RJ4woG0dw5HOFkPnIjXKWllnl/o01EoBp/o8uswsIS9Nb8i+bp27U6tAHE',
       };
       const res = await decryptConfig(config, repository);
-      expect(res.encrypted).not.toBeDefined();
-      expect(res.token).toEqual('123');
+      expect(res.encrypted).toBeUndefined();
+      expect(res.token).toBe('123');
       await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
         'config-validation'
       );

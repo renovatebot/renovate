@@ -1,16 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/pip-compile/artifacts catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "requirements.txt",
-      "stderr": "not found",
-    },
-  },
-]
-`;
-
 exports[`manager/pip-compile/artifacts returns null if unchanged 1`] = `
 Array [
   Object {

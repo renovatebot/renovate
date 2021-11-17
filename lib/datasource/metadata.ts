@@ -126,7 +126,7 @@ function massageGitlabUrl(url: string): string {
     .replace('.git', '');
 }
 
-function normalizeDate(input: any): string | null {
+export function normalizeDate(input: any): string | null {
   if (
     typeof input === 'number' &&
     !Number.isNaN(input) &&
@@ -175,7 +175,6 @@ function massageTimestamps(dep: ReleaseResult): void {
   }
 }
 
-/* eslint-disable no-param-reassign */
 export function addMetaData(
   dep?: ReleaseResult,
   datasource?: string,

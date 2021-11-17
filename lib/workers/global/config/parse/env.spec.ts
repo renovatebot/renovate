@@ -158,79 +158,6 @@ describe('workers/global/config/parse/env', () => {
         token: 'an Azure DevOps token',
       });
     });
-    it('supports docker username/password', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        DOCKER_USERNAME: 'some-username',
-        DOCKER_PASSWORD: 'some-password',
-      };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
-        hostRules: [
-          {
-            hostType: 'docker',
-            password: 'some-password',
-            username: 'some-username',
-          },
-        ],
-      });
-    });
-    it('supports password-only', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        NPM_PASSWORD: 'some-password',
-      };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
-        hostRules: [{ hostType: 'npm', password: 'some-password' }],
-      });
-    });
-    it('supports domain and host names with case insensitivity', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        GITHUB__TAGS_GITHUB_COM_TOKEN: 'some-token',
-        pypi_my_CUSTOM_HOST_passWORD: 'some-password',
-      };
-      const res = env.getConfig(envParam);
-      expect(res).toMatchSnapshot({
-        hostRules: [
-          { matchHost: 'github.com', token: 'some-token' },
-          { matchHost: 'my.custom.host', password: 'some-password' },
-        ],
-      });
-    });
-    it('regression test for #10937', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_USERNAME: 'some-user',
-        GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_PASSWORD: 'some-password',
-      };
-      const res = env.getConfig(envParam);
-      expect(res).toMatchObject({
-        hostRules: [
-          {
-            hostType: 'git-tags',
-            matchHost: 'gitlab.example-domain.net',
-            password: 'some-password',
-            username: 'some-user',
-          },
-        ],
-      });
-    });
-    it('supports datasource env token', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        PYPI_TOKEN: 'some-token',
-      };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
-        hostRules: [{ hostType: 'pypi', token: 'some-token' }],
-      });
-    });
-    it('rejects incomplete datasource env token', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        PYPI_FOO_TOKEN: 'some-token',
-      };
-      expect(env.getConfig(envParam).hostRules).toHaveLength(0);
-    });
-    it('rejects npm env', () => {
-      const envParam: NodeJS.ProcessEnv = {
-        npm_package_devDependencies__types_registry_auth_token: '4.2.0',
-      };
-      expect(env.getConfig(envParam).hostRules).toHaveLength(0);
-    });
     it('supports Bitbucket token', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: PlatformId.Bitbucket,
@@ -275,6 +202,7 @@ describe('workers/global/config/parse/env', () => {
       beforeAll(() => {
         processExit = jest
           .spyOn(process, 'exit')
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
           .mockImplementation((() => {}) as never);
       });
 
@@ -304,20 +232,20 @@ describe('workers/global/config/parse/env', () => {
         name: 'foo',
         env: false,
       };
-      expect(env.getEnvName(option)).toEqual('');
+      expect(env.getEnvName(option)).toBe('');
     });
     it('returns existing env', () => {
       const option: Partial<RenovateOptions> = {
         name: 'foo',
         env: 'FOO',
       };
-      expect(env.getEnvName(option)).toEqual('FOO');
+      expect(env.getEnvName(option)).toBe('FOO');
     });
     it('generates RENOVATE_ env', () => {
       const option: Partial<RenovateOptions> = {
         name: 'oneTwoThree',
       };
-      expect(env.getEnvName(option)).toEqual('RENOVATE_ONE_TWO_THREE');
+      expect(env.getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
     });
   });
 });

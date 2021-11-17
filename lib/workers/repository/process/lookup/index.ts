@@ -88,6 +88,7 @@ export async function lookupUpdates(
         logger.debug({ dependency: depName }, 'Found deprecationMessage');
         res.deprecationMessage = dependency.deprecationMessage;
       }
+
       res.sourceUrl = dependency?.sourceUrl;
       if (dependency.sourceDirectory) {
         res.sourceDirectory = dependency.sourceDirectory;
@@ -112,7 +113,7 @@ export async function lookupUpdates(
       // Reapply package rules in case we missed something from sourceUrl
       config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
       if (followTag) {
-        const taggedVersion = dependency.tags[followTag];
+        const taggedVersion = dependency.tags?.[followTag];
         if (!taggedVersion) {
           res.warnings.push({
             topic: depName,
@@ -144,6 +145,17 @@ export async function lookupUpdates(
         res.updates.push(rollback);
       }
       let rangeStrategy = getRangeStrategy(config);
+      if (dependency.replacementName && dependency.replacementVersion) {
+        res.updates.push({
+          updateType: 'replacement',
+          newName: dependency.replacementName,
+          newValue: versioning.getNewValue({
+            currentValue,
+            newVersion: dependency.replacementVersion,
+            rangeStrategy,
+          }),
+        });
+      }
       // istanbul ignore next
       if (
         isVulnerabilityAlert &&
@@ -258,7 +270,7 @@ export async function lookupUpdates(
         }
         if (!update.newValue || update.newValue === currentValue) {
           if (!lockedVersion) {
-            continue; // eslint-disable-line no-continue
+            continue;
           }
           // istanbul ignore if
           if (rangeStrategy === 'bump') {
@@ -266,7 +278,7 @@ export async function lookupUpdates(
               { depName, currentValue, lockedVersion, newVersion },
               'Skipping bump because newValue is the same'
             );
-            continue; // eslint-disable-line no-continue
+            continue;
           }
           res.isSingleVersion = true;
         }

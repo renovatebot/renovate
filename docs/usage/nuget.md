@@ -30,12 +30,14 @@ Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json
 Alternative feeds can be specified either [in a `NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository) or in Renovate configuration options:
 
 ```json
-"nuget": {
-  "registryUrls": [
-    "https://api.nuget.org/v3/index.json",
-    "https://example1.com/nuget/",
-    "https://example2.com/nuget/v3/index.json"
-  ]
+{
+  "nuget": {
+    "registryUrls": [
+      "https://api.nuget.org/v3/index.json",
+      "https://example1.com/nuget/",
+      "https://example2.com/nuget/v3/index.json"
+    ]
+  }
 }
 ```
 
@@ -50,10 +52,10 @@ Renovate as a NuGet client supports both versions and will use `v2` unless the c
 If you have a `v3` feed that does not match this pattern (e.g. JFrog Artifactory) you need to help Renovate by appending `#protocolVersion=3` to the registry URL:
 
 ```json
-"nuget": {
-  "registryUrls": [
-    "http://myV3feed#protocolVersion=3"
-  ]
+{
+  "nuget": {
+    "registryUrls": ["http://myV3feed#protocolVersion=3"]
+  }
 }
 ```
 
@@ -62,14 +64,16 @@ If you have a `v3` feed that does not match this pattern (e.g. JFrog Artifactory
 Credentials for authenticated/private feeds can be provided via host rules in the configuration options (file or command line parameter).
 
 ```json
-"hostRules": [
-  {
-    "hostType": "nuget",
-    "matchHost": "http://example1.com/nuget",
-    "username": "root",
-    "password": "p4$$w0rd"
-  }
-]
+{
+  "hostRules": [
+    {
+      "hostType": "nuget",
+      "matchHost": "http://example1.com/nuget",
+      "username": "root",
+      "password": "p4$$w0rd"
+    }
+  ]
+}
 ```
 
 Please note that at the moment only Basic HTTP authentication (via username and password) is supported.
