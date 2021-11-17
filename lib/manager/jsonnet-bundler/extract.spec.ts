@@ -4,7 +4,7 @@ import { extractPackageFile } from './extract';
 const jsonnetfile = loadFixture('jsonnetfile.json');
 const jsonnetfileWithName = loadFixture('jsonnetfile-with-name.json');
 
-describe('manager/jsonnet-bundler', () => {
+describe('manager/jsonnet-bundler/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for invalid file', () => {
       expect(
