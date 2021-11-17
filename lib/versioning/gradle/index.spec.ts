@@ -19,6 +19,7 @@ describe('versioning/gradle/index', () => {
     ${'1.a-1'}                   | ${'1a1'}                     | ${0}
     ${'dev'}                     | ${'dev'}                     | ${0}
     ${'rc'}                      | ${'rc'}                      | ${0}
+    ${'preview'}                 | ${'preview'}                 | ${0}
     ${'release'}                 | ${'release'}                 | ${0}
     ${'final'}                   | ${'final'}                   | ${0}
     ${'snapshot'}                | ${'SNAPSHOT'}                | ${0}
@@ -43,6 +44,7 @@ describe('versioning/gradle/index', () => {
     ${'1.0-zeta'}                | ${'1.0-SNAPSHOT'}            | ${-1}
     ${'1.0-zeta'}                | ${'1.0-rc'}                  | ${-1}
     ${'1.0-rc'}                  | ${'1.0'}                     | ${-1}
+    ${'1.0-preview'}             | ${'1.0'}                     | ${-1}
     ${'1.0'}                     | ${'1.0-20150201.121010-123'} | ${-1}
     ${'1.0-20150201.121010-123'} | ${'1.1'}                     | ${-1}
     ${'Hoxton.RELEASE'}          | ${'Hoxton.SR1'}              | ${-1}
@@ -68,6 +70,7 @@ describe('versioning/gradle/index', () => {
     ${'1.0-SNAPSHOT'}            | ${'1.0-zeta'}                | ${1}
     ${'1.0-rc'}                  | ${'1.0-zeta'}                | ${1}
     ${'1.0'}                     | ${'1.0-rc'}                  | ${1}
+    ${'1.0'}                     | ${'1.0-preview'}             | ${1}
     ${'1.0-20150201.121010-123'} | ${'1.0'}                     | ${1}
     ${'1.1'}                     | ${'1.0-20150201.121010-123'} | ${1}
     ${'Hoxton.SR1'}              | ${'Hoxton.RELEASE'}          | ${1}
@@ -170,6 +173,7 @@ describe('versioning/gradle/index', () => {
     ${'1-ga-1'}                             | ${true}
     ${'1.3-groovy-2.5'}                     | ${true}
     ${'1.3-RC1-groovy-2.5'}                 | ${false}
+    ${'1-preview'}                          | ${false}
     ${'Hoxton.RELEASE'}                     | ${true}
     ${'Hoxton.SR'}                          | ${true}
     ${'Hoxton.SR1'}                         | ${true}

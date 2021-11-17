@@ -128,28 +128,24 @@ You can find the Renovate team's preset configs at the "Config Presets" section 
 If you browse the "default" presets, you will see some that contain parameters, e.g.:
 
 ```json
-    "labels": {
-      "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
-      "labels": [
-        "{{arg0}}",
-        "{{arg1}}"
-      ]
-    },
-    "assignee": {
-      "description": "Assign PRs to <code>{{arg0}}</code>",
-      "assignees": [
-        "{{arg0}}"
-      ]
-    },
+{
+  "labels": {
+    "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
+    "labels": ["{{arg0}}", "{{arg1}}"]
+  },
+  "assignee": {
+    "description": "Assign PRs to <code>{{arg0}}</code>",
+    "assignees": ["{{arg0}}"]
+  }
+}
 ```
 
 Here is how you would use these in your Renovate config:
 
 ```json
-  "extends": [
-    ":labels(dependencies,devops)",
-    ":assignee(rarkins)"
-  ]
+{
+  "extends": [":labels(dependencies,devops)", ":assignee(rarkins)"]
+}
 ```
 
 In short, the number of `{{argx}}` parameters in the definition is how many parameters you need to provide.
@@ -170,7 +166,9 @@ To host your preset config on GitHub:
 - In other repos, reference it in an extends array like "github>owner/name", for example:
 
 ```json
+{
   "extends": ["github>rarkins/renovate-config"]
+}
 ```
 
 From then on Renovate will use the Renovate config from the preset repo's default branch.
@@ -259,7 +257,6 @@ For example:
 {
   "name": "renovate-config-fastcore",
   "version": "0.0.1",
-  ...
   "renovate-config": {
     "default": {
       "extends": ["config:base", "schedule:nonOfficeHours"]
@@ -271,7 +268,9 @@ For example:
 Then in each of your repositories you can add your Renovate config like:
 
 ```json
+{
   "extends": ["fastcore"]
+}
 ```
 
 Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
@@ -279,5 +278,7 @@ Any repository including this config will then adopt the rules of the default `l
 Note: if you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
 
 ```json
+{
   "extends": ["@fastcore"]
+}
 ```

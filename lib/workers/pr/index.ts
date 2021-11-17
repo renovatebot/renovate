@@ -149,6 +149,16 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 export async function ensurePr(
   prConfig: BranchConfig
 ): Promise<EnsurePrResult> {
+  let branchStatus: BranchStatus;
+  async function getBranchStatus(): Promise<BranchStatus> {
+    if (branchStatus) {
+      return branchStatus;
+    }
+    branchStatus = await resolveBranchStatus(branchName, ignoreTests);
+    logger.debug(`Branch status is: ${branchStatus}`);
+    return branchStatus;
+  }
+
   const config: BranchConfig = { ...prConfig };
 
   logger.trace({ config }, 'ensurePr');
@@ -168,7 +178,6 @@ export async function ensurePr(
     logger.debug('Forcing PR because of artifact errors');
     config.forcePr = true;
   }
-  let branchStatus: BranchStatus;
 
   // Only create a PR if a branch automerge has failed
   if (
@@ -176,13 +185,10 @@ export async function ensurePr(
     config.automergeType.startsWith('branch') &&
     !config.forcePr
   ) {
-    branchStatus ||= await resolveBranchStatus(branchName, ignoreTests);
-    logger.debug(
-      `Branch is configured for branch automerge, branch status) is: ${branchStatus}`
-    );
+    logger.debug(`Branch automerge is enabled`);
     if (
       config.stabilityStatus !== BranchStatus.yellow &&
-      branchStatus === BranchStatus.yellow
+      (await getBranchStatus()) === BranchStatus.yellow
     ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
@@ -196,7 +202,7 @@ export async function ensurePr(
         config.forcePr = true;
       }
     }
-    if (config.forcePr || branchStatus === BranchStatus.red) {
+    if (config.forcePr || (await getBranchStatus()) === BranchStatus.red) {
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
@@ -205,9 +211,8 @@ export async function ensurePr(
   }
   if (config.prCreation === 'status-success') {
     logger.debug('Checking branch combined status');
-    branchStatus ||= await resolveBranchStatus(branchName, ignoreTests);
-    if (branchStatus !== BranchStatus.green) {
-      logger.debug(`Branch status is "${branchStatus}" - not creating PR`);
+    if ((await getBranchStatus()) !== BranchStatus.green) {
+      logger.debug(`Branch status isn't green - not creating PR`);
       return { prBlockedBy: 'AwaitingTests' };
     }
     logger.debug('Branch status success');
@@ -223,9 +228,8 @@ export async function ensurePr(
     !config.forcePr
   ) {
     logger.debug('Checking branch combined status');
-    branchStatus ||= await resolveBranchStatus(branchName, ignoreTests);
-    if (branchStatus === BranchStatus.yellow) {
-      logger.debug(`Branch status is "${branchStatus}" - checking timeout`);
+    if ((await getBranchStatus()) === BranchStatus.yellow) {
+      logger.debug(`Branch status is yellow - checking timeout`);
       const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
       const millisecondsPerHour = 1000 * 60 * 60;
@@ -330,7 +334,7 @@ export async function ensurePr(
         !existingPr.hasAssignees &&
         !existingPr.hasReviewers &&
         config.automerge &&
-        branchStatus === BranchStatus.red
+        (await getBranchStatus()) === BranchStatus.red
       ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
@@ -475,7 +479,7 @@ export async function ensurePr(
     if (
       config.automerge &&
       !config.assignAutomerge &&
-      branchStatus !== BranchStatus.red
+      (await getBranchStatus()) !== BranchStatus.red
     ) {
       logger.debug(
         `Skipping assignees and reviewers as automerge=${config.automerge}`

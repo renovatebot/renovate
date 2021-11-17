@@ -33,78 +33,23 @@ describe('manager/gradle/shallow/extract', () => {
     expect(res).toBeNull();
   });
 
-  it('works', async () => {
+  it('extracts from cross-referenced files', async () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
       'build.gradle': 'url "https://example.com"; "foo:bar:$baz"',
-      'settings.gradle': null,
     });
 
     const res = await extractAllPackageFiles({} as ExtractConfig, [
       'build.gradle',
       'gradle.properties',
-      'settings.gradle',
     ]);
 
-    expect(res).toMatchObject([
+    expect(res).toMatchSnapshot([
       {
         packageFile: 'gradle.properties',
-        deps: [
-          {
-            depName: 'foo:bar',
-            currentValue: '1.2.3',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://example.com',
-            ],
-          },
-        ],
-      },
-      {
-        datasource: 'maven',
-        deps: [],
-        packageFile: 'settings.gradle',
+        deps: [{ depName: 'foo:bar', currentValue: '1.2.3' }],
       },
       { packageFile: 'build.gradle', deps: [] },
-    ]);
-  });
-
-  it('works with file-ext', async () => {
-    mockFs({
-      'gradle.properties': '',
-      'build.gradle': 'url "https://example.com"; "foo:bar:1.2.3@zip"',
-      'settings.gradle': null,
-    });
-
-    const res = await extractAllPackageFiles({} as ExtractConfig, [
-      'build.gradle',
-      'gradle.properties',
-      'settings.gradle',
-    ]);
-
-    expect(res).toMatchObject([
-      {
-        packageFile: 'gradle.properties',
-        deps: [],
-      },
-      {
-        datasource: 'maven',
-        deps: [],
-        packageFile: 'settings.gradle',
-      },
-      {
-        packageFile: 'build.gradle',
-        deps: [
-          {
-            depName: 'foo:bar',
-            currentValue: '1.2.3',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://example.com',
-            ],
-          },
-        ],
-      },
     ]);
   });
 
