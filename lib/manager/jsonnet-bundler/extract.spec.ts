@@ -27,6 +27,11 @@ describe('manager/jsonnet-bundler/extract', () => {
         extractPackageFile(jsonnetfileLocalDependencies, 'jsonnetfile.json')
       ).toBeNull();
     });
+    it('returns null for vendored dependencies', () => {
+      expect(
+        extractPackageFile(jsonnetfile, 'vendor/jsonnetfile.json')
+      ).toBeNull();
+    });
     it('extracts dependency', () => {
       const res = extractPackageFile(jsonnetfile, 'jsonnetfile.json');
       expect(res).toMatchSnapshot({

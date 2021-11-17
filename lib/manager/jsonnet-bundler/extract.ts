@@ -15,6 +15,10 @@ export function extractPackageFile(
   logger.trace(`jsonnet-bundler.extractPackageFile(${packageFile})`);
   logger.trace({ content });
 
+  if (packageFile.match(/vendor\//)) {
+    return null;
+  }
+
   const deps: PackageDependency[] = [];
   let jsonnetFile: JsonnetFile;
   try {
