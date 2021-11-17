@@ -6,6 +6,9 @@ import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 
+export const fileDeprecationMessage =
+  'Providing a config file without an extension is deprecated. Please use explicit file extensions.';
+
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   switch (upath.extname(file)) {
     case '.yaml':
@@ -31,9 +34,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     configFile = `${process.cwd()}/${configFile}`;
   }
   if (!upath.extname(configFile)) {
-    logger.info(
-      'Providing a config file without an extension is deprecated. Please use explicit file extensions.'
-    );
+    logger.info(fileDeprecationMessage);
     for (const ext of ['.js', '.json']) {
       const resolved = upath.addExt(configFile, ext);
       if (await fs.exists(resolved)) {

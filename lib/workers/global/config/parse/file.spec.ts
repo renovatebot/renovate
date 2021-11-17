@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
+import { logger } from '../../../../logger';
 import customConfig from './__fixtures__/file';
 import * as file from './file';
 
@@ -16,8 +17,15 @@ describe('workers/global/config/parse/file', () => {
   });
 
   describe('.getConfig()', () => {
+    it('raises deprecation warning when no extension given', async () => {
+      const configFile = upath.resolve(__dirname, './__fixtures__/file');
+      await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      expect(logger.info).toHaveBeenCalledWith(file.fileDeprecationMessage);
+    });
+
     it.each([
-      ['custom config file', 'file.js'],
+      ['custom config file without extension', 'file'],
+      ['custom config file with extension', 'file.js'],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
     ])('parses %s', async (fileType, filePath) => {
