@@ -220,11 +220,7 @@ export async function writeExistingFiles(
           }
           if (lockFileChanged) {
             logger.debug('Massaging npm lock file before writing to disk');
-            existingNpmLock = JSON.stringify(
-              npmLockParsed,
-              null,
-              detectedIndent
-            );
+            existingNpmLock = JSON.stringify(npmLockParsed, null, 2);
           }
           await outputFile(npmLockPath, existingNpmLock);
         }
@@ -255,8 +251,6 @@ export async function writeUpdatedPackageFiles(
   for (const packageFile of config.updatedPackageFiles) {
     if (packageFile.name.endsWith('package-lock.json')) {
       logger.debug(`Writing package-lock file: ${packageFile.name}`);
-      logger.warn('output updated package file ' + packageFile.name);
-      debugger;
       await outputFile(
         upath.join(localDir, packageFile.name),
         packageFile.contents
@@ -286,8 +280,6 @@ export async function writeUpdatedPackageFiles(
     } catch (err) {
       logger.warn({ err }, 'Error adding token to package files');
     }
-    logger.warn('output massaged package file ' + packageFile.name);
-    debugger;
     await outputFile(
       upath.join(localDir, packageFile.name),
       JSON.stringify(massagedFile)
