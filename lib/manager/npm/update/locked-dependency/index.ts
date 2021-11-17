@@ -1,3 +1,4 @@
+import detectIndent from 'detect-indent';
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../logger';
 import { api as semver } from '../../../../versioning/npm';
@@ -46,6 +47,7 @@ export async function updateLockedDependency(
     }
     let packageJson: PackageJson;
     let packageLockJson: PackageLockOrEntry;
+    const detectedIndent = detectIndent(lockFileContent).indent || '  ';
     let newPackageJsonContent: string;
     try {
       packageJson = JSON.parse(packageFileContent);
@@ -161,7 +163,11 @@ export async function updateLockedDependency(
       delete dependency.resolved;
       delete dependency.integrity;
     }
-    let newLockFileContent = JSON.stringify(packageLockJson, null, 2);
+    let newLockFileContent = JSON.stringify(
+      packageLockJson,
+      null,
+      detectedIndent
+    );
     // iterate through the parent updates first
     for (const parentUpdate of parentUpdates) {
       const parentUpdateConfig = {

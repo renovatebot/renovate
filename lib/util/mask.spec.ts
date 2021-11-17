@@ -2,7 +2,8 @@ import { maskToken } from './mask';
 
 describe('util/mask', () => {
   describe('.maskToken', () => {
-    it('returns value if passed value is falsy', () => {
+    it('returns empty string if passed value is falsy', () => {
+      expect(maskToken()).toBe('');
       expect(maskToken('')).toBe('');
     });
 
