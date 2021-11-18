@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
+import detectIndent from 'detect-indent';
 import { dump, load } from 'js-yaml';
 import upath from 'upath';
 import { getGlobalConfig } from '../../../config/global';
@@ -167,9 +168,11 @@ export async function writeExistingFiles(
       } else {
         logger.debug(`Writing ${npmLock}`);
         let existingNpmLock: string;
+        let detectedIndent: string;
         let npmLockParsed: any;
         try {
           existingNpmLock = await getFile(npmLock);
+          detectedIndent = detectIndent(existingNpmLock).indent || '  ';
           npmLockParsed = JSON.parse(existingNpmLock);
         } catch (err) {
           logger.warn({ err }, 'Error parsing npm lock file');
@@ -217,7 +220,11 @@ export async function writeExistingFiles(
           }
           if (lockFileChanged) {
             logger.debug('Massaging npm lock file before writing to disk');
-            existingNpmLock = JSON.stringify(npmLockParsed, null, 2);
+            existingNpmLock = JSON.stringify(
+              npmLockParsed,
+              null,
+              detectedIndent
+            );
           }
           await outputFile(npmLockPath, existingNpmLock);
         }
@@ -258,6 +265,8 @@ export async function writeUpdatedPackageFiles(
       continue;
     }
     logger.debug(`Writing ${String(packageFile.name)}`);
+    const detectedIndent =
+      detectIndent(packageFile.contents.toString()).indent || '  ';
     const massagedFile = JSON.parse(packageFile.contents.toString());
     try {
       const { token } = hostRules.find({
@@ -279,7 +288,7 @@ export async function writeUpdatedPackageFiles(
     }
     await outputFile(
       upath.join(localDir, packageFile.name),
-      JSON.stringify(massagedFile)
+      JSON.stringify(massagedFile, null, detectedIndent)
     );
   }
 }

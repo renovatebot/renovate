@@ -79,7 +79,8 @@ export default function prepareError(err: Error): Record<string, unknown> {
       response.response = {
         statusCode: err.response?.statusCode,
         statusMessage: err.response?.statusMessage,
-        body: clone(err.response.body),
+        body:
+          err.name === 'TimeoutError' ? undefined : clone(err.response.body),
         headers: clone(err.response.headers),
         httpVersion: err.response.httpVersion,
       };
