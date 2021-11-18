@@ -78,6 +78,13 @@ function handleGotError(
     logger.debug({ err }, 'GitHub failure: abuse detection');
     throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
+  if (
+    err.statusCode === 403 &&
+    message.startsWith('You have exceeded a secondary rate limit')
+  ) {
+    logger.debug({ err }, 'GitHub failure: secondary rate limit');
+    throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+  }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
     logger.debug({ path }, 'Endpoint needs paid GitHub plan');
     throw err;
