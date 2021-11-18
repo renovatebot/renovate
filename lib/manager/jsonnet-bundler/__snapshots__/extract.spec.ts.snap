@@ -8,12 +8,18 @@ Object {
       "datasource": "git-tags",
       "depName": "prometheus-operator",
       "lookupName": "https://github.com/prometheus-operator/prometheus-operator.git",
+      "managerData": Object {
+        "subdir": "jsonnet/prometheus-operator",
+      },
     },
     Object {
       "currentValue": "v0.9.0",
       "datasource": "git-tags",
       "depName": "kube-prometheus",
       "lookupName": "ssh://git@github.com/prometheus-operator/kube-prometheus.git",
+      "managerData": Object {
+        "subdir": "jsonnet/kube-prometheus",
+      },
     },
   ],
 }
@@ -27,6 +33,9 @@ Object {
       "datasource": "git-tags",
       "depName": "prometheus-operator-mixin",
       "lookupName": "https://github.com/prometheus-operator/prometheus-operator",
+      "managerData": Object {
+        "subdir": "jsonnet/mixin",
+      },
     },
   ],
 }
