@@ -145,21 +145,6 @@ export function migrateConfig(
           regEx(/{{depNameShort}}/g), // TODO #12071
           '{{depName}}'
         );
-      } else if (key === 'gitFs') {
-        delete migratedConfig.gitFs;
-      } else if (key === 'rebaseStalePrs') {
-        delete migratedConfig.rebaseStalePrs;
-        if (!migratedConfig.rebaseWhen) {
-          if (val === null) {
-            migratedConfig.rebaseWhen = 'auto';
-          }
-          if (val === true) {
-            migratedConfig.rebaseWhen = 'behind-base-branch';
-          }
-          if (val === false) {
-            migratedConfig.rebaseWhen = 'conflicted';
-          }
-        }
       } else if (key === 'rebaseConflictedPrs') {
         delete migratedConfig.rebaseConflictedPrs;
         if (val === false) {
