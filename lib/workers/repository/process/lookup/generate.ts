@@ -53,12 +53,9 @@ export function generateUpdate(
     update.newValue = currentValue;
     return update;
   }
-  update.updateType ||= getUpdateType(
-    config,
-    versioning,
-    currentVersion,
-    newVersion
-  );
+  update.updateType =
+    update.updateType ||
+    getUpdateType(config, versioning, currentVersion, newVersion);
   if (!versioning.isVersion(update.newValue)) {
     update.isRange = true;
   }
