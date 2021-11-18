@@ -342,8 +342,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somepreset',
-        presetPath: 'somefile',
+        presetName: 'somefile/somepreset',
+        presetPath: undefined,
         presetSource: 'github',
       });
     });
@@ -355,8 +355,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somesubpreset',
-        presetPath: 'somefile/somepreset',
+        presetName: 'somefile/somepreset/somesubpreset',
+        presetPath: undefined,
         presetSource: 'github',
       });
     });
@@ -425,6 +425,34 @@ describe('config/presets/index', () => {
         presetName: 'some-file',
         presetPath: 'some-dir',
         presetSource: 'local',
+      });
+    });
+    it('parses local with sub preset and tag', () => {
+      expect(
+        presets.parsePreset(
+          'local>some-group/some-repo:some-file/subpreset#1.2.3'
+        )
+      ).toEqual({
+        packageName: 'some-group/some-repo',
+        params: undefined,
+        presetName: 'some-file/subpreset',
+        presetPath: undefined,
+        presetSource: 'local',
+        packageTag: '1.2.3',
+      });
+    });
+    it('parses local with subdirectory and tag', () => {
+      expect(
+        presets.parsePreset(
+          'local>some-group/some-repo//some-dir/some-file#1.2.3'
+        )
+      ).toEqual({
+        packageName: 'some-group/some-repo',
+        params: undefined,
+        presetName: 'some-file',
+        presetPath: 'some-dir',
+        presetSource: 'local',
+        packageTag: '1.2.3',
       });
     });
     it('parses no prefix as local', () => {

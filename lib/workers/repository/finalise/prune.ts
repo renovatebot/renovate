@@ -69,7 +69,11 @@ async function cleanUpBranches(
         await deleteBranch(branchName);
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message?.includes("bad revision 'origin/")) {
+      if (err.message === 'config-validation') {
+        logger.debug(
+          'Cannot prune branch due to collision between tags and branch names'
+        );
+      } else if (err.message?.includes("bad revision 'origin/")) {
         logger.debug(
           { branchName },
           'Branch not found on origin when attempting to prune'
