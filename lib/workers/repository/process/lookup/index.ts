@@ -183,8 +183,21 @@ export async function lookupUpdates(
           allVersions.map((v) => v.version)
         );
       // istanbul ignore if
-      if (!currentVersion && lockedVersion) {
-        return res;
+      if (!currentVersion) {
+        logger.debug(
+          {
+            currentDigest,
+            currentValue,
+            datasource,
+            depName,
+            lockedVersion,
+            packageFile,
+          },
+          'No dep currentVersion'
+        );
+        if (lockedVersion) {
+          return res;
+        }
       }
       res.currentVersion = currentVersion;
       if (
@@ -254,11 +267,26 @@ export async function lookupUpdates(
           return res;
         }
         const newVersion = release.version;
+        const fromVersion = lockedVersion || currentVersion;
+        if (!fromVersion) {
+          logger.debug(
+            {
+              currentDigest,
+              currentValue,
+              datasource,
+              depName,
+              lockedVersion,
+              packageFile,
+            },
+            'No dep currentVersion or lockedVersion'
+          );
+          continue;
+        }
         const update = generateUpdate(
           config,
           versioning,
           rangeStrategy,
-          lockedVersion || currentVersion,
+          fromVersion,
           bucket,
           release
         );
