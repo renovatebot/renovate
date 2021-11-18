@@ -1670,7 +1670,7 @@ const options: RenovateOptions[] = [
   {
     name: 'confidential',
     description:
-      'If enabled, the issues and MRs created by Renovate are set as confidential. This is applicable to GitLab only',
+      'If enabled, issues created by Renovate are set as confidential.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],
