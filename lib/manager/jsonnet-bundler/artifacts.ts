@@ -1,4 +1,3 @@
-import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -13,7 +12,7 @@ import type {
 
 function dependencyUrl(dep: PackageDependency): string {
   const url = dep.lookupName;
-  if (dep.managerData.subdir) {
+  if (dep.managerData?.subdir) {
     return url.concat('/', dep.managerData.subdir);
   }
   return url;
@@ -36,18 +35,20 @@ export async function updateArtifacts(
   }
 
   try {
-    let cmd: string;
+    const commands = [];
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
     };
 
     if (config.isLockFileMaintenance) {
-      cmd = 'jb update';
+      commands.push('jb update');
     } else {
-      cmd = `jb update ${updatedDeps.map(dependencyUrl).map(quote).join(' ')}`;
+      for (const dep of updatedDeps) {
+        commands.push(`jb update "${dependencyUrl(dep)}"`);
+      }
     }
 
-    await exec(cmd, execOptions);
+    await exec(commands, execOptions);
 
     const status = await getRepoStatus();
 
@@ -57,7 +58,7 @@ export async function updateArtifacts(
 
     const res: UpdateArtifactsResult[] = [];
 
-    for (const f of status.modified.concat(status.not_added)) {
+    for (const f of status.modified ?? []) {
       res.push({
         file: {
           name: f,
@@ -65,7 +66,15 @@ export async function updateArtifacts(
         },
       });
     }
-    for (const f of status.deleted) {
+    for (const f of status.not_added ?? []) {
+      res.push({
+        file: {
+          name: f,
+          contents: await readLocalFile(f),
+        },
+      });
+    }
+    for (const f of status.deleted ?? []) {
       res.push({
         file: {
           name: '|delete|',
