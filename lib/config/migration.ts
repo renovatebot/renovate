@@ -66,11 +66,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (key === 'enabledManagers' && is.array(val)) {
-        // Replace yarn with npm, since yarn actually uses npm as package manager
-        migratedConfig.enabledManagers = migratedConfig.enabledManagers.map(
-          (element) => (element === 'yarn' ? 'npm' : element)
-        );
       } else if (parentKey === 'hostRules' && key === 'platform') {
         migratedConfig.hostType = val;
         delete migratedConfig.platform;

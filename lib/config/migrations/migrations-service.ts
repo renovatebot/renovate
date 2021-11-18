@@ -2,6 +2,7 @@ import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
+import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
@@ -92,6 +93,9 @@ export class MigrationsService {
     migrations.push(new GoModTidyMigration(originalConfig, migratedConfig));
     migrations.push(
       new SemanticCommitsMigration(originalConfig, migratedConfig)
+    );
+    migrations.push(
+      new EnabledManagersMigration(originalConfig, migratedConfig)
     );
 
     return migrations;
