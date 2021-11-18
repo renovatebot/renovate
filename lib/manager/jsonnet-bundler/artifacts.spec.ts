@@ -14,7 +14,6 @@ const config: UpdateArtifactsConfig = {};
 
 describe('manager/jsonnet-bundler/artifacts', () => {
   beforeEach(() => {
-
     docker.resetPrefetchedImages();
 
     setGlobalConfig(adminConfig);

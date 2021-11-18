@@ -12,7 +12,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string
 ): PackageFile | null {
-  logger.trace({packageFile}, 'jsonnet-bundler.extractPackageFile()');
+  logger.trace({ packageFile }, 'jsonnet-bundler.extractPackageFile()');
 
   if (packageFile.match(/vendor\//)) {
     return null;
@@ -41,9 +41,7 @@ export function extractPackageFile(
   return { deps };
 }
 
-function extractDependency(
-  dependency: Dependency
-): PackageDependency | null {
+function extractDependency(dependency: Dependency): PackageDependency | null {
   if (!dependency.source.git) {
     return null;
   }
