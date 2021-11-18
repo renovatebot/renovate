@@ -5,6 +5,7 @@ import { BinarySourceMigration } from './custom/binary-source-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
+import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import type { Migration } from './types';
 
@@ -89,6 +90,9 @@ export class MigrationsService {
     );
     migrations.push(new TrustLevelMigration(originalConfig, migratedConfig));
     migrations.push(new GoModTidyMigration(originalConfig, migratedConfig));
+    migrations.push(
+      new SemanticCommitsMigration(originalConfig, migratedConfig)
+    );
 
     return migrations;
   }
