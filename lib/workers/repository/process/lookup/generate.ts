@@ -48,6 +48,7 @@ export function generateUpdate(
   }
   update.newMajor = versioning.getMajor(newVersion);
   update.newMinor = versioning.getMinor(newVersion);
+  // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
     update.newValue = currentValue;
