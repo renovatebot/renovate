@@ -21,7 +21,7 @@ Object {
       "managerData": Object {
         "lineNumber": 5,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "bootsnap",
@@ -29,7 +29,7 @@ Object {
       "managerData": Object {
         "lineNumber": 6,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 5.0",
@@ -46,7 +46,7 @@ Object {
       "managerData": Object {
         "lineNumber": 9,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "jquery-rails",
@@ -54,7 +54,7 @@ Object {
       "managerData": Object {
         "lineNumber": 10,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "uglifier",
@@ -62,7 +62,7 @@ Object {
       "managerData": Object {
         "lineNumber": 11,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "foreman",
@@ -73,7 +73,7 @@ Object {
       "managerData": Object {
         "lineNumber": 14,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "sqlite3",
@@ -84,7 +84,7 @@ Object {
       "managerData": Object {
         "lineNumber": 15,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "listen",
@@ -95,7 +95,7 @@ Object {
       "managerData": Object {
         "lineNumber": 16,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "pg",
@@ -106,7 +106,7 @@ Object {
       "managerData": Object {
         "lineNumber": 20,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "newrelic_rpm",
@@ -117,7 +117,7 @@ Object {
       "managerData": Object {
         "lineNumber": 21,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "< 1.17.2",
@@ -140,7 +140,7 @@ Object {
       "managerData": Object {
         "lineNumber": 23,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
   ],
   "lockFiles": Array [
@@ -344,7 +344,7 @@ Object {
       "managerData": Object {
         "lineNumber": 29,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 0.7.7",
@@ -361,7 +361,7 @@ Object {
       "managerData": Object {
         "lineNumber": 31,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 5.1",
@@ -481,7 +481,7 @@ Object {
       "managerData": Object {
         "lineNumber": 49,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 2.1",
@@ -515,7 +515,7 @@ Object {
       "managerData": Object {
         "lineNumber": 53,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 4.3",
@@ -567,7 +567,7 @@ Object {
       "managerData": Object {
         "lineNumber": 59,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.1",
@@ -601,7 +601,7 @@ Object {
       "managerData": Object {
         "lineNumber": 63,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.10",
@@ -654,7 +654,7 @@ Object {
       "managerData": Object {
         "lineNumber": 69,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.19",
@@ -670,7 +670,7 @@ Object {
       "managerData": Object {
         "lineNumber": 71,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 2.1",
@@ -687,7 +687,7 @@ Object {
       "managerData": Object {
         "lineNumber": 73,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 6.2",
@@ -902,14 +902,14 @@ Object {
       "managerData": Object {
         "lineNumber": 97,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "json-ld",
       "managerData": Object {
         "lineNumber": 99,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 3.0",
@@ -1221,7 +1221,7 @@ Object {
       "managerData": Object {
         "lineNumber": 136,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 0.78",
@@ -1328,7 +1328,7 @@ Object {
       "managerData": Object {
         "lineNumber": 147,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "stackprof",
@@ -1339,7 +1339,7 @@ Object {
       "managerData": Object {
         "lineNumber": 148,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 0.11",
@@ -1371,7 +1371,7 @@ Object {
       "managerData": Object {
         "lineNumber": 156,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "connection_pool",
@@ -1379,7 +1379,7 @@ Object {
       "managerData": Object {
         "lineNumber": 157,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
   ],
   "lockFiles": Array [
@@ -1403,7 +1403,7 @@ Object {
       "managerData": Object {
         "lineNumber": 4,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": ">= 11.1",
@@ -1420,7 +1420,7 @@ Object {
       "managerData": Object {
         "lineNumber": 6,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 5.0",
@@ -1443,7 +1443,7 @@ Object {
       "managerData": Object {
         "lineNumber": 10,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
   ],
   "lockFiles": Array [
@@ -1494,7 +1494,7 @@ Object {
       "managerData": Object {
         "lineNumber": 14,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 5",
@@ -1510,7 +1510,7 @@ Object {
       "managerData": Object {
         "lineNumber": 16,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 3.1.11",
@@ -1581,7 +1581,7 @@ Object {
       "managerData": Object {
         "lineNumber": 34,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.2.0",
@@ -1601,7 +1601,7 @@ Object {
       "managerData": Object {
         "lineNumber": 39,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "\\">= 3.0.5\\", \\"< 3.2\\"",
@@ -1618,7 +1618,7 @@ Object {
       "managerData": Object {
         "lineNumber": 41,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "connection_pool",
@@ -1626,7 +1626,7 @@ Object {
       "managerData": Object {
         "lineNumber": 42,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": ">= 1.1.0",
@@ -1646,7 +1646,7 @@ Object {
       "managerData": Object {
         "lineNumber": 49,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "resque-scheduler",
@@ -1657,7 +1657,7 @@ Object {
       "managerData": Object {
         "lineNumber": 50,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "sidekiq",
@@ -1668,7 +1668,7 @@ Object {
       "managerData": Object {
         "lineNumber": 51,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "sucker_punch",
@@ -1679,7 +1679,7 @@ Object {
       "managerData": Object {
         "lineNumber": 52,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "delayed_job",
@@ -1690,7 +1690,7 @@ Object {
       "managerData": Object {
         "lineNumber": 53,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "queue_classic",
@@ -1700,7 +1700,7 @@ Object {
       "managerData": Object {
         "lineNumber": 54,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "sneakers",
@@ -1711,7 +1711,7 @@ Object {
       "managerData": Object {
         "lineNumber": 55,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "que",
@@ -1722,7 +1722,7 @@ Object {
       "managerData": Object {
         "lineNumber": 56,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "backburner",
@@ -1733,7 +1733,7 @@ Object {
       "managerData": Object {
         "lineNumber": 57,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "delayed_job_active_record",
@@ -1744,7 +1744,7 @@ Object {
       "managerData": Object {
         "lineNumber": 58,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "sequel",
@@ -1755,7 +1755,7 @@ Object {
       "managerData": Object {
         "lineNumber": 59,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "puma",
@@ -1766,7 +1766,7 @@ Object {
       "managerData": Object {
         "lineNumber": 64,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "hiredis",
@@ -1777,7 +1777,7 @@ Object {
       "managerData": Object {
         "lineNumber": 66,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 4.0",
@@ -1800,7 +1800,7 @@ Object {
       "managerData": Object {
         "lineNumber": 69,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "websocket-client-simple",
@@ -1810,7 +1810,7 @@ Object {
       "managerData": Object {
         "lineNumber": 71,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "blade",
@@ -1821,7 +1821,7 @@ Object {
       "managerData": Object {
         "lineNumber": 73,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "blade-sauce_labs_plugin",
@@ -1832,7 +1832,7 @@ Object {
       "managerData": Object {
         "lineNumber": 74,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "sprockets-export",
@@ -1843,7 +1843,7 @@ Object {
       "managerData": Object {
         "lineNumber": 75,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "aws-sdk-s3",
@@ -1854,7 +1854,7 @@ Object {
       "managerData": Object {
         "lineNumber": 80,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.11",
@@ -1877,7 +1877,7 @@ Object {
       "managerData": Object {
         "lineNumber": 82,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.2",
@@ -1897,7 +1897,7 @@ Object {
       "managerData": Object {
         "lineNumber": 88,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "webmock",
@@ -1905,7 +1905,7 @@ Object {
       "managerData": Object {
         "lineNumber": 89,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "qunit-selenium",
@@ -1916,7 +1916,7 @@ Object {
       "managerData": Object {
         "lineNumber": 92,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "chromedriver-helper",
@@ -1927,7 +1927,7 @@ Object {
       "managerData": Object {
         "lineNumber": 93,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "minitest-bisect",
@@ -1938,7 +1938,7 @@ Object {
       "managerData": Object {
         "lineNumber": 101,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "minitest-retry",
@@ -1949,7 +1949,7 @@ Object {
       "managerData": Object {
         "lineNumber": 102,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "stackprof",
@@ -1960,7 +1960,7 @@ Object {
       "managerData": Object {
         "lineNumber": 105,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "byebug",
@@ -1971,7 +1971,7 @@ Object {
       "managerData": Object {
         "lineNumber": 106,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "benchmark-ips",
@@ -1982,7 +1982,7 @@ Object {
       "managerData": Object {
         "lineNumber": 109,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": ">= 1.8.1",
@@ -2041,7 +2041,7 @@ Object {
       "managerData": Object {
         "lineNumber": 129,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "activerecord-jdbcmysql-adapter",
@@ -2052,7 +2052,7 @@ Object {
       "managerData": Object {
         "lineNumber": 131,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "activerecord-jdbcpostgresql-adapter",
@@ -2063,7 +2063,7 @@ Object {
       "managerData": Object {
         "lineNumber": 132,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": ">= 1.3.0",
@@ -2120,14 +2120,14 @@ Object {
       "managerData": Object {
         "lineNumber": 154,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "ibm_db",
       "managerData": Object {
         "lineNumber": 158,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "tzinfo-data",
@@ -2135,7 +2135,7 @@ Object {
       "managerData": Object {
         "lineNumber": 159,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": ">= 0.1.0",
@@ -2170,7 +2170,7 @@ Object {
       "registryUrls": Array [
         "https://gems.example.com",
       ],
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "another_internal_gem",
@@ -2180,7 +2180,7 @@ Object {
       "registryUrls": Array [
         "https://gems.example.com",
       ],
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "latest",
@@ -2195,7 +2195,7 @@ Object {
       "managerData": Object {
         "lineNumber": 10,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "wirble",
@@ -2206,7 +2206,7 @@ Object {
       "managerData": Object {
         "lineNumber": 14,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "faker",
@@ -2217,7 +2217,7 @@ Object {
       "managerData": Object {
         "lineNumber": 15,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
   ],
   "registryUrls": Array [
@@ -2544,7 +2544,7 @@ Object {
       "managerData": Object {
         "lineNumber": 52,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 4.11",
@@ -2669,7 +2669,7 @@ Object {
       "managerData": Object {
         "lineNumber": 81,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.1.0",
@@ -2740,7 +2740,7 @@ Object {
       "managerData": Object {
         "lineNumber": 98,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.0",
@@ -2775,7 +2775,7 @@ Object {
       "managerData": Object {
         "lineNumber": 108,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 3.5",
@@ -2900,7 +2900,7 @@ Object {
       "managerData": Object {
         "lineNumber": 134,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "faraday_middleware-aws-signers-v4",
@@ -2908,7 +2908,7 @@ Object {
       "managerData": Object {
         "lineNumber": 135,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 2.12",
@@ -3078,7 +3078,7 @@ Object {
       "managerData": Object {
         "lineNumber": 158,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 3.1.0",
@@ -3164,7 +3164,7 @@ Object {
       "managerData": Object {
         "lineNumber": 175,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 0.6.0",
@@ -3253,7 +3253,7 @@ Object {
       "managerData": Object {
         "lineNumber": 200,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 2.0.9",
@@ -3297,7 +3297,7 @@ Object {
       "managerData": Object {
         "lineNumber": 216,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 4.0",
@@ -3485,7 +3485,7 @@ Object {
       "managerData": Object {
         "lineNumber": 273,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 0.10.5",
@@ -3718,7 +3718,7 @@ Object {
       "managerData": Object {
         "lineNumber": 321,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 0.8",
@@ -3901,7 +3901,7 @@ Object {
       "managerData": Object {
         "lineNumber": 353,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.7.0",
@@ -4260,7 +4260,7 @@ Object {
       "managerData": Object {
         "lineNumber": 404,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 3.22.0",
@@ -4355,7 +4355,7 @@ Object {
       "managerData": Object {
         "lineNumber": 414,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.1",
@@ -4390,7 +4390,7 @@ Object {
       "managerData": Object {
         "lineNumber": 417,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "guard-rspec",
@@ -4401,7 +4401,7 @@ Object {
       "managerData": Object {
         "lineNumber": 418,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 4.9",
@@ -4436,7 +4436,7 @@ Object {
       "managerData": Object {
         "lineNumber": 426,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 1.0.0",
@@ -4525,7 +4525,7 @@ Object {
       "managerData": Object {
         "lineNumber": 445,
       },
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "currentValue": "~> 5.2",
@@ -4753,7 +4753,7 @@ Object {
       "registryUrls": Array [
         "https://rubygems.org",
       ],
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
     Object {
       "depName": "brakeman",
@@ -4764,7 +4764,7 @@ Object {
       "registryUrls": Array [
         "https://rubygems.org",
       ],
-      "skipReason": "no-version",
+      "currentValue": ">= 0",
     },
   ],
   "lockFiles": Array [

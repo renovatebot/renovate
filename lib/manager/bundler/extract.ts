@@ -1,6 +1,5 @@
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -46,6 +45,7 @@ export async function extractPackageFile(
       const dep: PackageDependency = {
         depName: gemMatch.groups.depName,
         managerData: { lineNumber },
+        datasource: RubyGemsDatasource.id,
       };
       if (gemMatch.groups.currentValue) {
         const currentValue = gemMatch.groups.currentValue;
@@ -53,10 +53,9 @@ export async function extractPackageFile(
           ? currentValue
           : currentValue.slice(1, -1);
       } else {
-        dep.skipReason = SkipReason.NoVersion;
-      }
-      if (!dep.skipReason) {
-        dep.datasource = RubyGemsDatasource.id;
+        // mimic the same behaviour as Bundler does
+        // https://github.com/rubygems/rubygems/blob/3.2/bundler/spec/runtime/load_spec.rb#L14
+        dep.currentValue = ">= 0";
       }
       res.deps.push(dep);
     }
