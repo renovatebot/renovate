@@ -379,8 +379,9 @@ The Composer output should inform you about the reasons the update failed.
 
 ## confidential
 
-If enabled, the issues and MRs created by Renovate are set as confidential, even in a public repository.
-By default issues created by Renovate are visible to all users. This option is applicable to GitLab only.
+If enabled, issues created by Renovate are set as confidential, even in a public repository.
+By default issues created by Renovate are visible to all users.
+This option is applicable to GitLab only.
 
 ## configWarningReuseIssue
 
