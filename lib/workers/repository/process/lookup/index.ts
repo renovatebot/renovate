@@ -183,21 +183,8 @@ export async function lookupUpdates(
           allVersions.map((v) => v.version)
         );
       // istanbul ignore if
-      if (!currentVersion) {
-        logger.debug(
-          {
-            currentDigest,
-            currentValue,
-            datasource,
-            depName,
-            lockedVersion,
-            packageFile,
-          },
-          'No dep currentVersion'
-        );
-        if (lockedVersion) {
-          return res;
-        }
+      if (!currentVersion && lockedVersion) {
+        return res;
       }
       res.currentVersion = currentVersion;
       if (
