@@ -1,8 +1,8 @@
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-import { PackageDependency, PackageFile } from '../types';
-import { Dependency, JsonnetFile } from './types';
+import type { PackageDependency, PackageFile } from '../types';
+import type { Dependency, JsonnetFile } from './types';
 
 const gitUrl = regEx(
   /(ssh:\/\/git@|https:\/\/)([\w.]+)\/([\w:/\-~]*)\/(?<depName>[\w:/-]+)(\.git)?/
@@ -12,8 +12,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string
 ): PackageFile | null {
-  logger.trace(`jsonnet-bundler.extractPackageFile(${packageFile})`);
-  logger.trace({ content });
+  logger.trace({packageFile}, 'jsonnet-bundler.extractPackageFile()');
 
   if (packageFile.match(/vendor\//)) {
     return null;
@@ -22,7 +21,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   let jsonnetFile: JsonnetFile;
   try {
-    jsonnetFile = JSON.parse(content);
+    jsonnetFile = JSON.parse(content) as JsonnetFile;
   } catch (err) {
     logger.debug({ packageFile }, 'Invalid JSON');
     return null;
@@ -42,7 +41,7 @@ export function extractPackageFile(
   return { deps };
 }
 
-export function extractDependency(
+function extractDependency(
   dependency: Dependency
 ): PackageDependency | null {
   if (!dependency.source.git) {

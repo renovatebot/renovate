@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../test/util';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const jsonnetfile = loadFixture('jsonnetfile.json');
 const jsonnetfileWithName = loadFixture('jsonnetfile-with-name.json');

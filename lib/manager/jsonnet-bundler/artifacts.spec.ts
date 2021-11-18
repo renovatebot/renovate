@@ -3,7 +3,7 @@ import { setGlobalConfig } from '../../config/global';
 import { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
+import { updateArtifacts } from '.';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

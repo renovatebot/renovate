@@ -5,7 +5,7 @@ import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
-import {
+import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
@@ -36,7 +36,7 @@ export async function updateArtifacts(
   }
 
   try {
-    let cmd;
+    let cmd: string;
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
     };
