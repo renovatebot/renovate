@@ -1,15 +1,18 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
-import { mockExecAll } from '../../../test/exec-util';
-import { fs, git } from '../../../test/util';
+import { envMock, mockExecAll } from '../../../test/exec-util';
+import { fs, git, mocked } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
 import { RepoGlobalConfig } from '../../config/types';
+import * as _env from '../../util/exec/env';
 import { StatusResult } from '../../util/git';
 import { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 jest.mock('child_process');
+jest.mock('../../util/exec/env');
 jest.mock('../../../lib/util/fs');
 jest.mock('../../../lib/util/git');
 
@@ -22,6 +25,8 @@ const config: UpdateArtifactsConfig = {};
 
 describe('manager/jsonnet-bundler/artifacts', () => {
   beforeEach(() => {
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
+
     setGlobalConfig(adminConfig);
   });
 
