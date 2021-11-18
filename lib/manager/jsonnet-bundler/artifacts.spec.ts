@@ -19,9 +19,6 @@ describe('manager/jsonnet-bundler/artifacts', () => {
 
     setGlobalConfig(adminConfig);
   });
-  afterEach(() => {
-    setGlobalConfig();
-  });
 
   it('returns null if no jsonnetfile.lock found', async () => {
     expect(
