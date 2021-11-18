@@ -145,11 +145,6 @@ export function migrateConfig(
           regEx(/{{depNameShort}}/g), // TODO #12071
           '{{depName}}'
         );
-      } else if (key === 'rebaseConflictedPrs') {
-        delete migratedConfig.rebaseConflictedPrs;
-        if (val === false) {
-          migratedConfig.rebaseWhen = 'never';
-        }
       } else if (key === 'ignoreNpmrcFile') {
         delete migratedConfig.ignoreNpmrcFile;
         if (!is.string(migratedConfig.npmrc)) {
