@@ -16,4 +16,5 @@ export interface Source {
 
 export interface GitSource {
   remote: string;
+  subdir?: string;
 }

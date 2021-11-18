@@ -1,15 +1,29 @@
-import { dirname, join } from 'upath';
+import { quote } from 'shlex';
+import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
-import { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import {
+  PackageDependency,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+} from '../types';
+
+function dependencyUrl(dep: PackageDependency): string {
+  const url = dep.lookupName;
+  if (dep.managerData.subdir) {
+    return url.concat('/', dep.managerData.subdir);
+  }
+  return url;
+}
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
-  const { packageFileName, newPackageFileContent } = updateArtifact;
+  const { packageFileName, updatedDeps, newPackageFileContent, config } =
+    updateArtifact;
   logger.trace(`jsonnetfile.updateArtifacts(${packageFileName})`);
   logger.trace({ newPackageFileContent });
 
@@ -21,30 +35,29 @@ export async function updateArtifacts(
     return null;
   }
 
-  const vendorDir = join(dirname(packageFileName), 'vendor/');
+  try {
+    let cmd;
+    const execOptions: ExecOptions = {
+      cwdFile: packageFileName,
+    };
 
-  const execOptions: ExecOptions = {
-    cwdFile: packageFileName,
-  };
-  await exec('jb update', execOptions);
+    if (config.isLockFileMaintenance) {
+      cmd = 'jb update';
+    } else {
+      cmd = `jb update ${updatedDeps.map(dependencyUrl).map(quote).join(' ')}`;
+    }
 
-  const status = await getRepoStatus();
+    await exec(cmd, execOptions);
 
-  if (!status.modified.includes(lockFileName)) {
-    return null;
-  }
+    const status = await getRepoStatus();
 
-  const res: UpdateArtifactsResult[] = [
-    {
-      file: {
-        name: lockFileName,
-        contents: await readLocalFile(lockFileName),
-      },
-    },
-  ];
+    if (status.isClean()) {
+      return null;
+    }
 
-  for (const f of status.modified.concat(status.not_added)) {
-    if (f.startsWith(vendorDir)) {
+    const res: UpdateArtifactsResult[] = [];
+
+    for (const f of status.modified.concat(status.not_added)) {
       res.push({
         file: {
           name: f,
@@ -52,25 +65,27 @@ export async function updateArtifacts(
         },
       });
     }
-  }
-  for (const f of status.deleted || []) {
-    res.push({
-      file: {
-        name: '|delete|',
-        contents: f,
-      },
-    });
-  }
+    for (const f of status.deleted) {
+      res.push({
+        file: {
+          name: '|delete|',
+          contents: f,
+        },
+      });
+    }
 
-  const finalPackageFileContent = await readLocalFile(packageFileName, 'utf8');
-  if (finalPackageFileContent !== newPackageFileContent) {
-    res.push({
-      file: {
-        name: packageFileName,
-        contents: finalPackageFileContent,
+    return res;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: err.stderr,
+        },
       },
-    });
+    ];
   }
-
-  return res;
 }

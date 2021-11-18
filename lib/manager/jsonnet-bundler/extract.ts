@@ -57,5 +57,6 @@ export function extractDependency(
     lookupName: dependency.source.git.remote,
     currentValue: dependency.version,
     datasource: GitTagsDatasource.id,
+    managerData: { subdir: dependency.source.git.subdir },
   };
 }
