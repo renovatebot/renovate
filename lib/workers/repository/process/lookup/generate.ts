@@ -48,9 +48,17 @@ export function generateUpdate(
   }
   update.newMajor = versioning.getMajor(newVersion);
   update.newMinor = versioning.getMinor(newVersion);
-  update.updateType =
-    update.updateType ||
-    getUpdateType(config, versioning, currentVersion, newVersion);
+  if (!update.updateType && !currentVersion) {
+    logger.debug({ update }, 'Update has no currentVersion');
+    update.newValue = currentValue;
+    return update;
+  }
+  update.updateType ||= getUpdateType(
+    config,
+    versioning,
+    currentVersion,
+    newVersion
+  );
   if (!versioning.isVersion(update.newValue)) {
     update.isRange = true;
   }

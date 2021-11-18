@@ -254,26 +254,11 @@ export async function lookupUpdates(
           return res;
         }
         const newVersion = release.version;
-        const fromVersion = lockedVersion || currentVersion;
-        if (!fromVersion) {
-          logger.debug(
-            {
-              currentDigest,
-              currentValue,
-              datasource,
-              depName,
-              lockedVersion,
-              packageFile,
-            },
-            'No dep currentVersion or lockedVersion'
-          );
-          continue;
-        }
         const update = generateUpdate(
           config,
           versioning,
           rangeStrategy,
-          fromVersion,
+          lockedVersion || currentVersion,
           bucket,
           release
         );
