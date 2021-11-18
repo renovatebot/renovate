@@ -860,6 +860,7 @@ export async function ensureIssue({
   reuseTitle,
   body,
   labels,
+  confidential,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
@@ -884,6 +885,7 @@ export async function ensureIssue({
               title,
               description,
               labels: (labels || issue.labels || []).join(','),
+              confidential: confidential ?? false,
             },
           }
         );
@@ -895,6 +897,7 @@ export async function ensureIssue({
           title,
           description,
           labels: (labels || []).join(','),
+          confidential: confidential ?? false,
         },
       });
       logger.info('Issue created');

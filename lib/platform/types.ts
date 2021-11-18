@@ -106,6 +106,7 @@ export interface EnsureIssueConfig {
   labels?: string[];
   once?: boolean;
   shouldReOpen?: boolean;
+  confidential?: boolean;
 }
 export interface BranchStatusConfig {
   branchName: string;

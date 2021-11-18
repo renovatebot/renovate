@@ -1668,6 +1668,14 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['gitlab'],
   },
   {
+    name: 'confidential',
+    description:
+      'If enabled, the issues and MRs created by Renovate are set as confidential. This is applicable to GitLab only',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'reviewersSampleSize',
     description: 'Take a random sample of given size from reviewers.',
     type: 'integer',

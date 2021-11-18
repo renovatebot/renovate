@@ -49,6 +49,7 @@ export async function raiseConfigWarningIssue(
       body,
       once,
       shouldReOpen: shouldReopen,
+      confidential: config.confidential,
     });
     if (res === 'created') {
       logger.warn({ configError: error, res }, 'Config Warning');

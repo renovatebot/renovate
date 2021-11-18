@@ -63,6 +63,7 @@ export async function raiseDeprecationWarnings(
           title: issueTitle,
           body: issueBody,
           once: ensureOnce,
+          confidential: config.confidential,
         });
       }
     }

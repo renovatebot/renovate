@@ -356,6 +356,7 @@ export async function ensureDependencyDashboard(
       reuseTitle,
       body: issueBody,
       labels: config.dependencyDashboardLabels,
+      confidential: config.confidential,
     });
   }
 }
