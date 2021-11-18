@@ -1,3 +1,4 @@
+import { SemVer, parseRange } from 'semver-utils';
 import type { RangeStrategy } from '../../types';
 import type { RangeConfig } from '../types';
 
@@ -14,9 +15,29 @@ import type { RangeConfig } from '../types';
  *
  */
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
-  if (config.rangeStrategy === 'auto') {
+  const { currentValue, rangeStrategy } = config;
+
+  if (rangeStrategy === 'auto') {
+    const semVersions = parseRange(currentValue);
+    if (semVersions.length === 1 && defaultRange(semVersions[0])) {
+      // default range ('>= 0') indicates the need for staying at the latest version.
+      return 'update-lockfile';
+    }
+
     return 'replace';
   }
 
-  return config.rangeStrategy;
+  return rangeStrategy;
+}
+
+function defaultRange(v: SemVer): boolean {
+  if (
+    v.operator === '>=' &&
+    v.major === '0' &&
+    v.minor === undefined &&
+    v.patch === undefined
+  ) {
+    return true;
+  }
+  return false;
 }
