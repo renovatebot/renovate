@@ -14,8 +14,6 @@ const config: UpdateArtifactsConfig = {};
 
 describe('manager/jsonnet-bundler/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
 
     docker.resetPrefetchedImages();
 
