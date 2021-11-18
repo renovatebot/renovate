@@ -2,7 +2,8 @@ import urlJoin from 'url-join';
 import { regEx } from './regex';
 
 const ensureTrailingSlashRe = /\/?$/;
- const trimTrailingSlashRe = regEx(/\/+$/);
+const trimTrailingSlashRe = regEx(/\/+$/);
+const trimLeadingSlashRe = regEx(/^\//);
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
 }
@@ -21,7 +22,7 @@ export function ensureTrailingSlash(url: string): string {
 }
 
 export function trimTrailingSlash(url: string): string {
-  return url.replace(trimTrailingSlashRe, ''); 
+  return url.replace(trimTrailingSlashRe, '');
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
@@ -83,5 +84,5 @@ export function createURLFromHostOrURL(url: string): URL | null {
 }
 
 export function trimLeadingSlash(url: string): string {
-  return url.replace(regEx(/^\//), '');
+  return url.replace(trimLeadingSlashRe, '');
 }
