@@ -1,6 +1,8 @@
 import urlJoin from 'url-join';
 import { regEx } from './regex';
 
+const ensureTrailingSlashRe = /\/?$/;
+ const trimTrailingSlashRe = regEx(/\/+$/);
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
 }
@@ -15,11 +17,11 @@ export function ensurePathPrefix(url: string, prefix: string): string {
 }
 
 export function ensureTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '/'); // TODO #12070 #12071 adds / in the front when used with re2
+  return url.replace(ensureTrailingSlashRe, '/'); // TODO #12070 adds / in the front when used with re2
 }
 
 export function trimTrailingSlash(url: string): string {
-  return url.replace(regEx(/\/+$/), ''); // TODO #12071
+  return url.replace(trimTrailingSlashRe, ''); 
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
