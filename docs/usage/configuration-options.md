@@ -379,7 +379,8 @@ The Composer output should inform you about the reasons the update failed.
 
 ## confidential
 
-If enabled, issues created by Renovate are set as confidential, even in a public repository.
+If enabled, all issues created by Renovate are set as confidential, even in a public repository.
+**Note:** the Dependency Dashboard issue will also be confidential.
 By default issues created by Renovate are visible to all users.
 This option is applicable to GitLab only.
 
