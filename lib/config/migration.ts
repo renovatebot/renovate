@@ -135,13 +135,6 @@ export function migrateConfig(
         delete depTypePackageRule.packageRules;
         migratedConfig.packageRules.push(depTypePackageRule);
         delete migratedConfig[key];
-      } else if (key === 'pinVersions') {
-        delete migratedConfig.pinVersions;
-        if (val === true) {
-          migratedConfig.rangeStrategy = 'pin';
-        } else if (val === false) {
-          migratedConfig.rangeStrategy = 'replace';
-        }
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g), // TODO #12071
