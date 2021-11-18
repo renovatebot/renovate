@@ -88,5 +88,19 @@ describe('workers/global/config/parse/file', () => {
 
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
+    it('fatal error and exit if invalid config file type', async () => {
+      const mockProcessExit = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+      const configFile = upath.resolve(tmp.path, './file.txt');
+      fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
+      await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+      expect(logger.fatal).toHaveBeenCalledWith(
+        `Unsupported file type: ${configFile}`
+      );
+      mockProcessExit.mockRestore();
+      fs.unlinkSync(configFile);
+    });
   });
 });

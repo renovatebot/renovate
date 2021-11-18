@@ -52,6 +52,9 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     if (err instanceof SyntaxError || err instanceof TypeError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
       process.exit(1);
+    } else if (err.message.startsWith(`Unsupported file type`)) {
+      logger.fatal(err.message);
+      process.exit(1);
     } else if (env.RENOVATE_CONFIG_FILE) {
       logger.fatal('No custom config file found on disk');
       process.exit(1);
