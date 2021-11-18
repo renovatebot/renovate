@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -35,20 +36,21 @@ export async function updateArtifacts(
   }
 
   try {
-    const commands = [];
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
     };
 
     if (config.isLockFileMaintenance) {
-      commands.push('jb update');
+      await exec('jb update', execOptions);
     } else {
-      for (const dep of updatedDeps) {
-        commands.push(`jb update "${dependencyUrl(dep)}"`);
+      const dependencyUrls = updatedDeps.map(dependencyUrl);
+      if (dependencyUrls.length > 0) {
+        await exec(
+          `jb update ${dependencyUrls.map(quote).join(' ')}`,
+          execOptions
+        );
       }
     }
-
-    await exec(commands, execOptions);
 
     const status = await getRepoStatus();
 
