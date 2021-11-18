@@ -1198,7 +1198,7 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 This feature can be used to refresh lock files and keep them up-to-date.
 "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
-Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock`, `poetry.lock` and `Cargo.lock`.
+Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock`, `poetry.lock`, `Cargo.lock` and `jsonnetfile.lock.json`.
 Others may be added via feature request.
 
 This feature is disabled by default.
