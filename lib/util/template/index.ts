@@ -13,7 +13,7 @@ handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
 // istanbul ignore next
 handlebars.registerHelper(
   'replace',
-  (find, replace, context) => context.replace(find, 'g', replace) // TODO #12070 adding regex here causes coverage issues
+  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12070 adding regex here causes coverage issues
 );
 
 export const exposedConfigOptions = [

@@ -125,7 +125,7 @@ export async function extractAllPackageFiles(
     if (is.array(doc?.include)) {
       for (const includeObj of doc.include) {
         if (is.string(includeObj.local)) {
-          const fileObj = trimLeadingSlash(includeObj.local); // TODO #12071
+          const fileObj = trimLeadingSlash(includeObj.local);
           if (!seen.has(fileObj)) {
             seen.add(fileObj);
             filesToExamine.push(fileObj);
@@ -133,7 +133,7 @@ export async function extractAllPackageFiles(
         }
       }
     } else if (is.string(doc?.include)) {
-      const fileObj = trimLeadingSlash(doc.include); // TODO #12071
+      const fileObj = trimLeadingSlash(doc.include);
       if (!seen.has(fileObj)) {
         seen.add(fileObj);
         filesToExamine.push(fileObj);
