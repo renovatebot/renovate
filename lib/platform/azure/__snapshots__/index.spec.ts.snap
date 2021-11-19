@@ -66,12 +66,7 @@ Object {
   "number": 456,
   "pullRequestId": 456,
   "reviewers": Array [
-    Object {
-      "isFlagged": false,
-      "isRequired": false,
-      "reviewerUrl": "user-url",
-      "vote": 10,
-    },
+    "user-url",
   ],
   "sourceBranch": undefined,
   "sourceRefName": undefined,

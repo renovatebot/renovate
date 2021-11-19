@@ -105,6 +105,8 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
 
   const isConflicted = azurePr.mergeStatus === PullRequestAsyncStatus.Conflicts;
 
+  const reviewers = azurePr.reviewers?.map((reviewer) => reviewer.reviewerUrl);
+
   return {
     ...azurePr,
     sourceBranch,
@@ -116,6 +118,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     targetBranch,
     createdAt,
     ...(isConflicted && { isConflicted }),
+    ...(reviewers && { reviewers }),
   } as AzurePr;
 }
 
