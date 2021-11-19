@@ -16,22 +16,22 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "puma",
       "lockedVersion": "4.3.1",
       "managerData": Object {
         "lineNumber": 5,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "bootsnap",
       "lockedVersion": "1.4.5",
       "managerData": Object {
         "lineNumber": 6,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 5.0",
@@ -43,34 +43,33 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sass-rails-bootstrap",
       "lockedVersion": "2.2.2.3",
       "managerData": Object {
         "lineNumber": 9,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "jquery-rails",
       "lockedVersion": "4.3.5",
       "managerData": Object {
         "lineNumber": 10,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "uglifier",
       "lockedVersion": "4.2.0",
       "managerData": Object {
         "lineNumber": 11,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "foreman",
       "depTypes": Array [
@@ -80,9 +79,9 @@ Object {
       "managerData": Object {
         "lineNumber": 14,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sqlite3",
       "depTypes": Array [
@@ -92,9 +91,9 @@ Object {
       "managerData": Object {
         "lineNumber": 15,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "listen",
       "depTypes": Array [
@@ -104,9 +103,9 @@ Object {
       "managerData": Object {
         "lineNumber": 16,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "pg",
       "depTypes": Array [
@@ -116,9 +115,9 @@ Object {
       "managerData": Object {
         "lineNumber": 20,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "newrelic_rpm",
       "depTypes": Array [
@@ -128,6 +127,7 @@ Object {
       "managerData": Object {
         "lineNumber": 21,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "< 1.17.2",
@@ -142,7 +142,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "airbrake",
       "depTypes": Array [
@@ -152,6 +151,7 @@ Object {
       "managerData": Object {
         "lineNumber": 23,
       },
+      "rangeStrategy": "update-lockfile",
     },
   ],
   "lockFiles": Array [
@@ -350,13 +350,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "browser",
       "lockedVersion": "2.7.1",
       "managerData": Object {
         "lineNumber": 29,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 0.7.7",
@@ -368,13 +368,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "iso-639",
       "lockedVersion": "0.2.8",
       "managerData": Object {
         "lineNumber": 31,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 5.1",
@@ -489,13 +489,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "fastimage",
       "lockedVersion": "2.1.7",
       "managerData": Object {
         "lineNumber": 49,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 2.1",
@@ -525,12 +525,12 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "health_check",
       "managerData": Object {
         "lineNumber": 53,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 4.3",
@@ -577,13 +577,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "idn-ruby",
       "lockedVersion": "0.1.0",
       "managerData": Object {
         "lineNumber": 59,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.1",
@@ -613,12 +613,12 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "nilsimsa",
       "managerData": Object {
         "lineNumber": 63,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.10",
@@ -666,13 +666,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "parslet",
       "lockedVersion": "1.8.2",
       "managerData": Object {
         "lineNumber": 69,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.19",
@@ -684,12 +684,12 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "posix-spawn",
       "managerData": Object {
         "lineNumber": 71,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 2.1",
@@ -701,13 +701,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "premailer-rails",
       "lockedVersion": "1.10.3",
       "managerData": Object {
         "lineNumber": 73,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 6.2",
@@ -917,21 +917,21 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "webpush",
       "lockedVersion": "0.3.8",
       "managerData": Object {
         "lineNumber": 97,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "json-ld",
       "managerData": Object {
         "lineNumber": 99,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 3.0",
@@ -1235,7 +1235,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "memory_profiler",
       "depTypes": Array [
@@ -1245,6 +1244,7 @@ Object {
       "managerData": Object {
         "lineNumber": 136,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 0.78",
@@ -1343,7 +1343,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "derailed_benchmarks",
       "depTypes": Array [
@@ -1353,9 +1352,9 @@ Object {
       "managerData": Object {
         "lineNumber": 147,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "stackprof",
       "depTypes": Array [
@@ -1365,6 +1364,7 @@ Object {
       "managerData": Object {
         "lineNumber": 148,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 0.11",
@@ -1391,22 +1391,22 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "concurrent-ruby",
       "lockedVersion": "1.1.5",
       "managerData": Object {
         "lineNumber": 156,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "connection_pool",
       "lockedVersion": "2.2.2",
       "managerData": Object {
         "lineNumber": 157,
       },
+      "rangeStrategy": "update-lockfile",
     },
   ],
   "lockFiles": Array [
@@ -1425,13 +1425,13 @@ Object {
   },
   "deps": Array [
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "rails",
       "lockedVersion": "6.0.1",
       "managerData": Object {
         "lineNumber": 4,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": ">= 11.1",
@@ -1443,13 +1443,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "rack-proxy",
       "lockedVersion": "0.6.5",
       "managerData": Object {
         "lineNumber": 6,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 5.0",
@@ -1464,7 +1464,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "byebug",
       "depTypes": Array [
@@ -1474,6 +1473,7 @@ Object {
       "managerData": Object {
         "lineNumber": 10,
       },
+      "rangeStrategy": "update-lockfile",
     },
   ],
   "lockFiles": Array [
@@ -1519,13 +1519,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sass-rails",
       "lockedVersion": "5.0.7",
       "managerData": Object {
         "lineNumber": 14,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 5",
@@ -1537,12 +1537,12 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "webpacker",
       "managerData": Object {
         "lineNumber": 16,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 3.1.11",
@@ -1605,7 +1605,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "w3c_validators",
       "depTypes": Array [
@@ -1615,6 +1614,7 @@ Object {
       "managerData": Object {
         "lineNumber": 34,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.2.0",
@@ -1629,13 +1629,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "dalli",
       "lockedVersion": "2.7.9",
       "managerData": Object {
         "lineNumber": 39,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "\\">= 3.0.5\\", \\"< 3.2\\"",
@@ -1647,22 +1647,22 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "libxml-ruby",
       "lockedVersion": "3.1.0",
       "managerData": Object {
         "lineNumber": 41,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "connection_pool",
       "lockedVersion": "2.2.2",
       "managerData": Object {
         "lineNumber": 42,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": ">= 1.1.0",
@@ -1674,7 +1674,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "resque",
       "depTypes": Array [
@@ -1684,9 +1683,9 @@ Object {
       "managerData": Object {
         "lineNumber": 49,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "resque-scheduler",
       "depTypes": Array [
@@ -1696,9 +1695,9 @@ Object {
       "managerData": Object {
         "lineNumber": 50,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sidekiq",
       "depTypes": Array [
@@ -1708,9 +1707,9 @@ Object {
       "managerData": Object {
         "lineNumber": 51,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sucker_punch",
       "depTypes": Array [
@@ -1720,9 +1719,9 @@ Object {
       "managerData": Object {
         "lineNumber": 52,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "delayed_job",
       "depTypes": Array [
@@ -1732,9 +1731,9 @@ Object {
       "managerData": Object {
         "lineNumber": 53,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "queue_classic",
       "depTypes": Array [
@@ -1743,9 +1742,9 @@ Object {
       "managerData": Object {
         "lineNumber": 54,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sneakers",
       "depTypes": Array [
@@ -1755,9 +1754,9 @@ Object {
       "managerData": Object {
         "lineNumber": 55,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "que",
       "depTypes": Array [
@@ -1767,9 +1766,9 @@ Object {
       "managerData": Object {
         "lineNumber": 56,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "backburner",
       "depTypes": Array [
@@ -1779,9 +1778,9 @@ Object {
       "managerData": Object {
         "lineNumber": 57,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "delayed_job_active_record",
       "depTypes": Array [
@@ -1791,9 +1790,9 @@ Object {
       "managerData": Object {
         "lineNumber": 58,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sequel",
       "depTypes": Array [
@@ -1803,9 +1802,9 @@ Object {
       "managerData": Object {
         "lineNumber": 59,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "puma",
       "depTypes": Array [
@@ -1815,9 +1814,9 @@ Object {
       "managerData": Object {
         "lineNumber": 64,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "hiredis",
       "depTypes": Array [
@@ -1827,6 +1826,7 @@ Object {
       "managerData": Object {
         "lineNumber": 66,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 4.0",
@@ -1841,7 +1841,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "redis-namespace",
       "depTypes": Array [
@@ -1851,9 +1850,9 @@ Object {
       "managerData": Object {
         "lineNumber": 69,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "websocket-client-simple",
       "depTypes": Array [
@@ -1862,9 +1861,9 @@ Object {
       "managerData": Object {
         "lineNumber": 71,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "blade",
       "depTypes": Array [
@@ -1874,9 +1873,9 @@ Object {
       "managerData": Object {
         "lineNumber": 73,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "blade-sauce_labs_plugin",
       "depTypes": Array [
@@ -1886,9 +1885,9 @@ Object {
       "managerData": Object {
         "lineNumber": 74,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sprockets-export",
       "depTypes": Array [
@@ -1898,9 +1897,9 @@ Object {
       "managerData": Object {
         "lineNumber": 75,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "aws-sdk-s3",
       "depTypes": Array [
@@ -1910,6 +1909,7 @@ Object {
       "managerData": Object {
         "lineNumber": 80,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.11",
@@ -1924,7 +1924,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "azure-storage",
       "depTypes": Array [
@@ -1934,6 +1933,7 @@ Object {
       "managerData": Object {
         "lineNumber": 82,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.2",
@@ -1948,25 +1948,24 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "aws-sdk-sns",
       "lockedVersion": "1.8.1",
       "managerData": Object {
         "lineNumber": 88,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "webmock",
       "lockedVersion": "3.4.2",
       "managerData": Object {
         "lineNumber": 89,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "qunit-selenium",
       "depTypes": Array [
@@ -1976,9 +1975,9 @@ Object {
       "managerData": Object {
         "lineNumber": 92,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "chromedriver-helper",
       "depTypes": Array [
@@ -1988,9 +1987,9 @@ Object {
       "managerData": Object {
         "lineNumber": 93,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "minitest-bisect",
       "depTypes": Array [
@@ -2000,9 +1999,9 @@ Object {
       "managerData": Object {
         "lineNumber": 101,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "minitest-retry",
       "depTypes": Array [
@@ -2012,9 +2011,9 @@ Object {
       "managerData": Object {
         "lineNumber": 102,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "stackprof",
       "depTypes": Array [
@@ -2024,9 +2023,9 @@ Object {
       "managerData": Object {
         "lineNumber": 105,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "byebug",
       "depTypes": Array [
@@ -2036,9 +2035,9 @@ Object {
       "managerData": Object {
         "lineNumber": 106,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "benchmark-ips",
       "depTypes": Array [
@@ -2048,6 +2047,7 @@ Object {
       "managerData": Object {
         "lineNumber": 109,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": ">= 1.8.1",
@@ -2101,16 +2101,15 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
       "lockedVersion": "52.1-java",
       "managerData": Object {
         "lineNumber": 129,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcmysql-adapter",
       "depTypes": Array [
@@ -2120,9 +2119,9 @@ Object {
       "managerData": Object {
         "lineNumber": 131,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcpostgresql-adapter",
       "depTypes": Array [
@@ -2132,6 +2131,7 @@ Object {
       "managerData": Object {
         "lineNumber": 132,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": ">= 1.3.0",
@@ -2184,29 +2184,29 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "activerecord-oracle_enhanced-adapter",
       "managerData": Object {
         "lineNumber": 154,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "ibm_db",
       "managerData": Object {
         "lineNumber": 158,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "tzinfo-data",
       "lockedVersion": "1.2018.7",
       "managerData": Object {
         "lineNumber": 159,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": ">= 0.1.0",
@@ -2234,23 +2234,23 @@ Object {
   },
   "deps": Array [
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "some_internal_gem",
       "managerData": Object {
         "lineNumber": 4,
       },
+      "rangeStrategy": "update-lockfile",
       "registryUrls": Array [
         "https://gems.example.com",
       ],
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "another_internal_gem",
       "managerData": Object {
         "lineNumber": 5,
       },
+      "rangeStrategy": "update-lockfile",
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -2264,15 +2264,14 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "sqlite3",
       "managerData": Object {
         "lineNumber": 10,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "wirble",
       "depTypes": Array [
@@ -2282,9 +2281,9 @@ Object {
       "managerData": Object {
         "lineNumber": 14,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "faker",
       "depTypes": Array [
@@ -2294,6 +2293,7 @@ Object {
       "managerData": Object {
         "lineNumber": 15,
       },
+      "rangeStrategy": "update-lockfile",
     },
   ],
   "registryUrls": Array [
@@ -2615,13 +2615,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "gssapi",
       "lockedVersion": "1.2.0",
       "managerData": Object {
         "lineNumber": 52,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 4.11",
@@ -2741,13 +2741,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "net-ldap",
       "lockedVersion": "0.16.0",
       "managerData": Object {
         "lineNumber": 81,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.1.0",
@@ -2813,13 +2813,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "hashie-forbidden_attributes",
       "lockedVersion": "0.1.1",
       "managerData": Object {
         "lineNumber": 98,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.0",
@@ -2849,13 +2849,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "mini_magick",
       "lockedVersion": "4.9.5",
       "managerData": Object {
         "lineNumber": 108,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 3.5",
@@ -2975,22 +2975,22 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "aws-sdk",
       "lockedVersion": "2.11.374",
       "managerData": Object {
         "lineNumber": 134,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "faraday_middleware-aws-signers-v4",
       "lockedVersion": "0.1.7",
       "managerData": Object {
         "lineNumber": 135,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 2.12",
@@ -3155,13 +3155,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "icalendar",
       "lockedVersion": "2.4.1",
       "managerData": Object {
         "lineNumber": 158,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 3.1.0",
@@ -3239,7 +3239,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "rack-timeout",
       "depTypes": Array [
@@ -3249,6 +3248,7 @@ Object {
       "managerData": Object {
         "lineNumber": 175,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 0.6.0",
@@ -3332,13 +3332,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "ruby-progressbar",
       "lockedVersion": "1.10.1",
       "managerData": Object {
         "lineNumber": 200,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 2.0.9",
@@ -3377,13 +3377,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "device_detector",
       "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 216,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 4.0",
@@ -3566,13 +3566,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "fast_blank",
       "lockedVersion": "1.0.0",
       "managerData": Object {
         "lineNumber": 273,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 0.10.5",
@@ -3800,13 +3800,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "derailed_benchmarks",
       "lockedVersion": "1.3.5",
       "managerData": Object {
         "lineNumber": 321,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 0.8",
@@ -3980,7 +3980,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "awesome_print",
       "depTypes": Array [
@@ -3991,6 +3990,7 @@ Object {
       "managerData": Object {
         "lineNumber": 353,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.7.0",
@@ -4341,7 +4341,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "rspec-parameterized",
       "depTypes": Array [
@@ -4351,6 +4350,7 @@ Object {
       "managerData": Object {
         "lineNumber": 404,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 3.22.0",
@@ -4437,7 +4437,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "rails-controller-testing",
       "depTypes": Array [
@@ -4447,6 +4446,7 @@ Object {
       "managerData": Object {
         "lineNumber": 414,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.1",
@@ -4473,7 +4473,6 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "rspec_junit_formatter",
       "depTypes": Array [
@@ -4483,9 +4482,9 @@ Object {
       "managerData": Object {
         "lineNumber": 417,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "guard-rspec",
       "depTypes": Array [
@@ -4495,6 +4494,7 @@ Object {
       "managerData": Object {
         "lineNumber": 418,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 4.9",
@@ -4524,13 +4524,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "html2text",
       "lockedVersion": "0.2.0",
       "managerData": Object {
         "lineNumber": 426,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 1.0.0",
@@ -4614,13 +4614,13 @@ Object {
       },
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "net-ntp",
       "lockedVersion": "2.1.3",
       "managerData": Object {
         "lineNumber": 445,
       },
+      "rangeStrategy": "update-lockfile",
     },
     Object {
       "currentValue": "~> 5.2",
@@ -4840,25 +4840,25 @@ Object {
   },
   "deps": Array [
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "rubocop",
       "lockedVersion": "0.68.1",
       "managerData": Object {
         "lineNumber": 3,
       },
+      "rangeStrategy": "update-lockfile",
       "registryUrls": Array [
         "https://rubygems.org",
       ],
     },
     Object {
-      "currentValue": ">= 0",
       "datasource": "rubygems",
       "depName": "brakeman",
       "lockedVersion": "4.4.0",
       "managerData": Object {
         "lineNumber": 5,
       },
+      "rangeStrategy": "update-lockfile",
       "registryUrls": Array [
         "https://rubygems.org",
       ],

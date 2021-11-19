@@ -119,7 +119,7 @@ export function generateBranchConfig(
       upgrade.displayFrom = upgrade.currentVersion;
       upgrade.displayTo = upgrade.newVersion;
     } else if (!upgrade.isLockFileMaintenance) {
-      upgrade.displayFrom = upgrade.currentValue;
+      upgrade.displayFrom = upgrade.currentValue || upgrade.lockedVersion;
       upgrade.displayTo = upgrade.newValue;
     }
     upgrade.displayFrom ??= '';

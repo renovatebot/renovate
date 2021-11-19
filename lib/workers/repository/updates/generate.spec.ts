@@ -591,5 +591,19 @@ describe('workers/repository/updates/generate', () => {
       expect(res.pendingChecks).toBeUndefined();
       expect(res.upgrades).toHaveLength(1);
     });
+
+    it('handles missing currentValue', () => {
+      const branch = [
+        {
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentValue: undefined,
+          lockedVersion: '1.0.0',
+          newVersion: '1.0.1',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].displayFrom).toBe('1.0.0');
+    });
   });
 });

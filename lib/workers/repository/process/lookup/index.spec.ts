@@ -1262,6 +1262,16 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({ skipReason: 'invalid-value' });
     });
+    it('returns performs lookup on lockedVersion if currentValue is undefined', async () => {
+      config.currentValue = undefined;
+      config.depName = 'q';
+      config.lockedVersion = '0.9.99';
+      config.datasource = datasourceNpmId;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.4.1', updateType: 'major' },
+      ]);
+    });
     it('handles digest pin', async () => {
       config.currentValue = '8.0.0';
       config.depName = 'node';

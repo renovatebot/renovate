@@ -32,7 +32,6 @@ export async function lookupUpdates(
   let config: LookupUpdateConfig = { ...inconfig };
   const {
     currentDigest,
-    currentValue,
     datasource,
     depName,
     digestOneAndOnly,
@@ -44,6 +43,7 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
+  const currentValue = config.currentValue || lockedVersion;
   const res: UpdateResult = {
     updates: [],
     warnings: [],

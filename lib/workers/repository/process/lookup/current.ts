@@ -12,6 +12,9 @@ export function getCurrentVersion(
   allVersions: string[]
 ): string | null {
   const { currentValue, lockedVersion } = config;
+  if (currentValue === undefined) {
+    return lockedVersion;
+  }
   // istanbul ignore if
   if (!is.string(currentValue)) {
     return null;

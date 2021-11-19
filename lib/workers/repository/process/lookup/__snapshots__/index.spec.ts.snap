@@ -621,6 +621,20 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() returns performs lookup on lockedVersion if currentValue is undefined 1`] = `
+Array [
+  Object {
+    "bucket": "major",
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
+    "newVersion": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "updateType": "major",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns rollback for pinned version 1`] = `
 Array [
   Object {

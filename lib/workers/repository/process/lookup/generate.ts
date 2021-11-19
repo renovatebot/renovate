@@ -31,7 +31,7 @@ export function generateUpdate(
       update[field] = release[field];
     }
   }
-  const { currentValue } = config;
+  const currentValue = config.currentValue || config.lockedVersion;
   try {
     update.newValue = versioning.getNewValue({
       currentValue,

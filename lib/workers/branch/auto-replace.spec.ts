@@ -105,6 +105,19 @@ describe('workers/branch/auto-replace', () => {
       // FIXME: explicit assert condition
       expect(res).toBe('wrong source');
     });
+    it('returns existing content if replaceString and currentValue are undefined', async () => {
+      const script =
+        '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
+      upgrade.baseDeps = extractPackageFile(script).deps;
+      upgrade.depName = 'reactstrap';
+      upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
+      upgrade.currentValue = undefined;
+      upgrade.newValue = '7.1.1';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = undefined;
+      const res = await doAutoReplace(upgrade, script, reuseExistingBranch);
+      expect(res).toBe(script);
+    });
     it('updates version and integrity', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous">';

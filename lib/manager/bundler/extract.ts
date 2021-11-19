@@ -53,9 +53,8 @@ export async function extractPackageFile(
           ? currentValue
           : currentValue.slice(1, -1);
       } else {
-        // mimic the same behaviour as Bundler does if version is missing
-        // https://github.com/rubygems/rubygems/blob/3.2/bundler/spec/runtime/load_spec.rb#L14
-        dep.currentValue = '>= 0';
+        // Enforce lockfile update if version constraint is missing.
+        dep.rangeStrategy = 'update-lockfile';
       }
       res.deps.push(dep);
     }
