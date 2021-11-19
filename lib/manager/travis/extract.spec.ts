@@ -42,62 +42,56 @@ describe('manager/travis/extract', () => {
 
     it('handles matrix node_js syntax with node_js array', () => {
       const res = extractPackageFile(matrixYAMLwithNodeSyntaxArray);
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "deps": Array [
-            Object {
-              "currentValue": "11.10.1",
-              "datasource": "github-tags",
-              "depName": "node",
-              "lookupName": "nodejs/node",
-            },
-            Object {
-              "currentValue": "11.10.2",
-              "datasource": "github-tags",
-              "depName": "node",
-              "lookupName": "nodejs/node",
-            },
-          ],
-        }
-      `);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '11.10.1',
+            datasource: 'github-tags',
+            depName: 'node',
+            lookupName: 'nodejs/node',
+          },
+          {
+            currentValue: '11.10.2',
+            datasource: 'github-tags',
+            depName: 'node',
+            lookupName: 'nodejs/node',
+          },
+        ],
+      });
     });
 
     it('handles matrix node_js syntax with node_js array 2', () => {
       const res = extractPackageFile(matrixYAMLwithNodeSyntaxArray2);
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "deps": Array [
-            Object {
-              "currentValue": "11.10.1",
-              "datasource": "github-tags",
-              "depName": "node",
-              "lookupName": "nodejs/node",
-            },
-            Object {
-              "currentValue": "11.10.2",
-              "datasource": "github-tags",
-              "depName": "node",
-              "lookupName": "nodejs/node",
-            },
-          ],
-        }
-      `);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '11.10.1',
+            datasource: 'github-tags',
+            depName: 'node',
+            lookupName: 'nodejs/node',
+          },
+          {
+            currentValue: '11.10.2',
+            datasource: 'github-tags',
+            depName: 'node',
+            lookupName: 'nodejs/node',
+          },
+        ],
+      });
     });
 
     it('handles matrix node_js syntax with alias', () => {
       const res = extractPackageFile(matrixYAMLwithNodeSyntaxAlias);
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "deps": Array [
-            Object {
-              "currentValue": "11.10.1",
-              "datasource": "github-tags",
-              "depName": "node",
-              "lookupName": "nodejs/node",
-            },
-          ],
-        }
-      `);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '11.10.1',
+            datasource: 'github-tags',
+            depName: 'node',
+            lookupName: 'nodejs/node',
+          },
+        ],
+      });
     });
 
     it('handles invalid matrix node_js syntax', () => {
