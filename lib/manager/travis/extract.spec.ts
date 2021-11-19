@@ -28,18 +28,16 @@ describe('manager/travis/extract', () => {
 
     it('handles matrix node_js syntax with node_js string', () => {
       const res = extractPackageFile(matrixYAMLwithNodeSyntaxString);
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "deps": Array [
-            Object {
-              "currentValue": "11.10.1",
-              "datasource": "github-tags",
-              "depName": "node",
-              "lookupName": "nodejs/node",
+      expect(res).toEqual({
+          deps: [
+            {
+              currentValue: "11.10.1",
+              datasource: "github-tags",
+              depName: "node",
+              lookupName: "nodejs/node",
             },
           ],
-        }
-      `);
+        });
     });
 
     it('handles matrix node_js syntax with node_js array', () => {
