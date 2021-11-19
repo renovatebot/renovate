@@ -445,11 +445,6 @@ export async function validateConfig(
                         }
                       }
                     }
-                  } else {
-                    errors.push({
-                      topic: 'Configuration Error',
-                      message: `${currentPath}[${managerIndex.toString()}] must contain a matchStrings array.`,
-                    });
                   }
                 } else {
                   errors.push({
