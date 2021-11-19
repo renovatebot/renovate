@@ -296,6 +296,21 @@ describe('config/validation', () => {
         regexManagers: [
           {
             fileMatch: [],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+    it('errors if empty regexManager matchStrings', async () => {
+      const config = {
+        regexManagers: [
+          {
+            fileMatch: [],
             matchStrings: [],
           },
         ],
