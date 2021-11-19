@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../test/util';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const invalidYAML = loadFixture('invalid.yml');
 const matrixYAMLwithNodeSyntaxString = loadFixture('matrix_jobs.yml');
