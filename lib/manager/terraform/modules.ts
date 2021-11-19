@@ -14,7 +14,7 @@ export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
 );
 export const bitbucketRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?ref=(?<tag>.*)$/
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*.git)\/?(?<subfolder>.*)))\?ref=(?<tag>.*)$/
 );
 export const gitTagsRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
@@ -46,10 +46,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.datasource = datasourceGithubTags.id;
   } else if (bitbucketRefMatch) {
     dep.depType = 'module';
-    dep.depName =
-      bitbucketRefMatch.groups.workspace +
-      '/' +
-      bitbucketRefMatch.groups.project;
+    dep.depName = bitbucketRefMatch.groups.project.replace(regEx(/\.git$/), '');
     dep.lookupName = dep.depName;
     dep.currentValue = bitbucketRefMatch.groups.tag;
     dep.datasource = BitBucketTagsDatasource.id;
