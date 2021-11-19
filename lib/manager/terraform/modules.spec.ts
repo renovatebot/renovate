@@ -1,4 +1,8 @@
-import { gitTagsRefMatchRegex, githubRefMatchRegex } from './modules';
+import {
+  bitbucketRefMatchRegex,
+  gitTagsRefMatchRegex,
+  githubRefMatchRegex,
+} from './modules';
 
 describe('manager/terraform/modules', () => {
   describe('githubRefMatchRegex', () => {
@@ -58,6 +62,38 @@ describe('manager/terraform/modules', () => {
 
       expect(ssh.project).toBe('hashicorp/example.repo-123');
       expect(ssh.tag).toBe('v1.0.0');
+    });
+  });
+  describe('bitbucketRefMatchRegex', () => {
+    it('should split workspace, project and tag from source', () => {
+      const ssh = bitbucketRefMatchRegex.exec(
+        'git::ssh://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0'
+      ).groups;
+      const https = bitbucketRefMatchRegex.exec(
+        'git::https://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0'
+      ).groups;
+      const plain = bitbucketRefMatchRegex.exec(
+        'bitbucket.org/hashicorp/example.git?ref=v1.0.0'
+      ).groups;
+      const subfolder = bitbucketRefMatchRegex.exec(
+        'bitbucket.org/hashicorp/example.git/terraform?ref=v1.0.0'
+      ).groups;
+
+      expect(ssh.workspace).toBe('hashicorp');
+      expect(ssh.project).toBe('example');
+      expect(ssh.tag).toBe('v1.0.0');
+
+      expect(https.workspace).toBe('hashicorp');
+      expect(https.project).toBe('example');
+      expect(https.tag).toBe('v1.0.0');
+
+      expect(plain.workspace).toBe('hashicorp');
+      expect(plain.project).toBe('example');
+      expect(plain.tag).toBe('v1.0.0');
+
+      expect(subfolder.workspace).toBe('hashicorp');
+      expect(subfolder.project).toBe('example');
+      expect(subfolder.tag).toBe('v1.0.0');
     });
   });
 });
