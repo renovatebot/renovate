@@ -27,7 +27,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       part.includes('require') // matches [requires], requirements(), and requires
   );
 
-  const deps = [];
+  const deps: PackageDependency[] = [];
   for (const section of sections) {
     let depType = setDepType(section, 'requires');
     const rawLines = section.split('\n').filter((line) => line.length !== 0);
