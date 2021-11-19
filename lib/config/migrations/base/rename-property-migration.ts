@@ -2,6 +2,8 @@ import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from './abstract-migration';
 
 export class RenamePropertyMigration extends AbstractMigration {
+  readonly propertyName: string;
+
   protected readonly newPropertyName: string;
 
   constructor(
@@ -10,7 +12,8 @@ export class RenamePropertyMigration extends AbstractMigration {
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig
   ) {
-    super(deprecatedPropertyName, originalConfig, migratedConfig);
+    super(originalConfig, migratedConfig);
+    this.propertyName = deprecatedPropertyName;
     this.newPropertyName = newPropertyName;
   }
 

@@ -1,11 +1,8 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class RebaseStalePrsMigration extends AbstractMigration {
-  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
-    super('rebaseStalePrs', originalConfig, migratedConfig);
-  }
+  readonly propertyName = 'rebaseStalePrs';
 
   override run(): void {
     const { rebaseStalePrs, rebaseConflictedPrs, rebaseWhen } =

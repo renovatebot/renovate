@@ -1,11 +1,8 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class EnabledManagersMigration extends AbstractMigration {
-  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
-    super('enabledManagers', originalConfig, migratedConfig);
-  }
+  readonly propertyName = 'enabledManagers';
 
   override run(): void {
     const { enabledManagers } = this.originalConfig;
