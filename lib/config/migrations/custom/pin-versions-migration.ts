@@ -9,7 +9,7 @@ export class PinVersionsMigration extends AbstractMigration {
     this.delete(this.propertyName);
 
     if (is.boolean(pinVersions)) {
-      this.migratedConfig.rangeStrategy = pinVersions ? 'pin' : 'replace';
+      this.setSafely('rangeStrategy', pinVersions ? 'pin' : 'replace');
     }
   }
 }

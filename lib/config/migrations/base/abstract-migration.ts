@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../types';
 import type { Migration } from '../types';
 
@@ -17,5 +18,17 @@ export abstract class AbstractMigration implements Migration {
 
   protected delete(property: string): void {
     delete this.migratedConfig[property];
+  }
+
+  protected setSafely<Key extends keyof RenovateConfig>(
+    property: Key,
+    value: RenovateConfig[Key]
+  ): void {
+    if (
+      is.nullOrUndefined(this.originalConfig[property]) &&
+      is.nullOrUndefined(this.migratedConfig[property])
+    ) {
+      this.migratedConfig[property] = value;
+    }
   }
 }

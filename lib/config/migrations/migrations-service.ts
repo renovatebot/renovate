@@ -39,13 +39,11 @@ export class MigrationsService {
     ['versionScheme', 'versioning'],
   ]);
 
-  static run(originalConfig: RenovateConfig): RenovateConfig {
-    const migratedConfig: RenovateConfig = {};
-    const migrations = MigrationsService.getMigrations(
-      originalConfig,
-      migratedConfig
-    );
-
+  static run(
+    originalConfig: RenovateConfig,
+    migratedConfig: RenovateConfig = {},
+    migrations = MigrationsService.getMigrations(originalConfig, migratedConfig)
+  ): RenovateConfig {
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
       const migration = migrations.find((item) => item.propertyName === key);

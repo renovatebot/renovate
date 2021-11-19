@@ -7,7 +7,7 @@ export class RequiredStatusChecksMigration extends AbstractMigration {
     this.delete(this.propertyName);
 
     if (this.originalConfig.requiredStatusChecks === null) {
-      this.migratedConfig.ignoreTests = true;
+      this.setSafely('ignoreTests', true);
     }
   }
 }

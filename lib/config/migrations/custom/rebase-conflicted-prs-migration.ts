@@ -8,7 +8,7 @@ export class RebaseConflictedPrs extends AbstractMigration {
     this.delete(this.propertyName);
 
     if (rebaseConflictedPrs === false) {
-      this.migratedConfig.rebaseWhen = 'never';
+      this.setSafely('rebaseWhen', 'never');
     }
   }
 }

@@ -4,19 +4,13 @@ export class TrustLevelMigration extends AbstractMigration {
   readonly propertyName = 'trustLevel';
 
   override run(): void {
-    const {
-      allowCustomCrateRegistries,
-      allowScripts,
-      exposeAllEnv,
-      trustLevel,
-    } = this.originalConfig;
+    const { trustLevel } = this.originalConfig;
     this.delete(this.propertyName);
 
     if (trustLevel === 'high') {
-      this.migratedConfig.allowCustomCrateRegistries =
-        allowCustomCrateRegistries ?? true;
-      this.migratedConfig.allowScripts = allowScripts ?? true;
-      this.migratedConfig.exposeAllEnv = exposeAllEnv ?? true;
+      this.setSafely('allowCustomCrateRegistries', true);
+      this.setSafely('allowScripts', true);
+      this.setSafely('exposeAllEnv', true);
     }
   }
 }
