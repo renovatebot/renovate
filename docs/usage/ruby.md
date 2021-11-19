@@ -17,7 +17,7 @@ Renovate supports upgrading dependencies in Bundler's Gemfiles and their accompa
 
 ## Caveats
 
-If a dependency has no version constraint, renovate will assume the version constraint `>= 0`.
+If a dependency has no version constraint, Renovate will assume the version constraint `>= 0`.
 In such cases the `rangeStrategy` will be set automatically to `update-lockfile` and updates will only be done in the `Gemfile.lock` file.
 To avoid many PRs with potentially breaking changes it is highly recommended to specify a version constraint and pin at least the major version, e.g. `gem 'some-gem', '~> 2.0'`.
 
