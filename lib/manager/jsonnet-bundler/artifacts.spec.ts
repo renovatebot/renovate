@@ -1,20 +1,16 @@
-import { exec as _exec } from 'child_process';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/exec-util';
-import { fs, git, mocked } from '../../../test/util';
+import { envMock, exec, mockExecAll } from '../../../test/exec-util';
+import { env, fs, git } from '../../../test/util';
 import { setGlobalConfig } from '../../config/global';
-import { RepoGlobalConfig } from '../../config/types';
-import * as _env from '../../util/exec/env';
-import { StatusResult } from '../../util/git';
-import { UpdateArtifactsConfig } from '../types';
+import type { RepoGlobalConfig } from '../../config/types';
+import type { StatusResult } from '../../util/git';
+import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
-jest.mock('../../../lib/util/fs');
-jest.mock('../../../lib/util/git');
+jest.mock('../../util/fs');
+jest.mock('../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

@@ -5,7 +5,6 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v0.50.0",
-      "datasource": "git-tags",
       "depName": "prometheus-operator",
       "lookupName": "https://github.com/prometheus-operator/prometheus-operator.git",
       "managerData": Object {
@@ -14,7 +13,6 @@ Object {
     },
     Object {
       "currentValue": "v0.9.0",
-      "datasource": "git-tags",
       "depName": "kube-prometheus",
       "lookupName": "ssh://git@github.com/prometheus-operator/kube-prometheus.git",
       "managerData": Object {
@@ -30,7 +28,6 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "v0.50.0",
-      "datasource": "git-tags",
       "depName": "prometheus-operator-mixin",
       "lookupName": "https://github.com/prometheus-operator/prometheus-operator",
       "managerData": Object {

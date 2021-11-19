@@ -1,4 +1,3 @@
-import { GitTagsDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -53,7 +52,6 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
       dependency.name || match.groups.depName || dependency.source.git.remote,
     lookupName: dependency.source.git.remote,
     currentValue: dependency.version,
-    datasource: GitTagsDatasource.id,
     managerData: { subdir: dependency.source.git.subdir },
   };
 }
