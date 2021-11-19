@@ -80,7 +80,10 @@ export function getNewValue({
   }
   if (ranges.some((range) => range.operator === '===')) {
     // the operator "===" is used for legacy non PEP440 versions
-    logger.warn('Arbitrary equality not supported: ' + currentValue);
+    logger.warn(
+      { currentValue },
+      'PEP440 arbitrary equality (===) not supported'
+    );
     return null;
   }
   let result = ranges
