@@ -89,6 +89,10 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     if (failureCodes.includes(err.code)) {
       throw new ExternalHostError(err);
     }
+    // istanbul ignore if
+    if (err.response?.statusCode === 503) {
+      throw new ExternalHostError(err);
+    }
   }
 
   private static getRegistryRepository(
