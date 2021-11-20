@@ -170,11 +170,6 @@ export function migrateConfig(
         const templateIndex = val.indexOf(`{{`);
         migratedConfig.branchPrefix = val.substring(0, templateIndex);
         migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
-      } else if (key === 'versionStrategy') {
-        delete migratedConfig.versionStrategy;
-        if (val === 'widen') {
-          migratedConfig.rangeStrategy = 'widen';
-        }
       } else if (key === 'semanticPrefix' && is.string(val)) {
         delete migratedConfig.semanticPrefix;
         let [text] = val.split(':') as any; // TODO: fixme
