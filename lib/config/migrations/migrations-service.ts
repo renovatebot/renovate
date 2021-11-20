@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../types';
+import { AbstractMigration } from './base/abstract-migration';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
@@ -11,7 +12,7 @@ import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
-import type { Migration } from './types';
+import type { MigrationConstructor } from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
@@ -39,11 +40,26 @@ export class MigrationsService {
     ['versionScheme', 'versioning'],
   ]);
 
-  static run(
-    originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig = {},
-    migrations = MigrationsService.getMigrations(originalConfig, migratedConfig)
-  ): RenovateConfig {
+  static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
+    BinarySourceMigration,
+    EnabledManagersMigration,
+    GoModTidyMigration,
+    IgnoreNodeModulesMigration,
+    PinVersionsMigration,
+    RebaseConflictedPrs,
+    RebaseStalePrsMigration,
+    RequiredStatusChecksMigration,
+    SemanticCommitsMigration,
+    TrustLevelMigration,
+  ];
+
+  static run(originalConfig: RenovateConfig): RenovateConfig {
+    const migratedConfig: RenovateConfig = {};
+    const migrations = MigrationsService.getMigrations(
+      originalConfig,
+      migratedConfig
+    );
+
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
       const migration = migrations.find((item) => item.propertyName === key);
@@ -53,11 +69,28 @@ export class MigrationsService {
     return migratedConfig;
   }
 
+  static runMigration(
+    originalConfig: RenovateConfig,
+    Migration: MigrationConstructor
+  ): RenovateConfig {
+    const migratedConfig: RenovateConfig = {};
+    const migration = new Migration(originalConfig, migratedConfig);
+
+    for (const [key, value] of Object.entries(originalConfig)) {
+      migratedConfig[key] ??= value;
+      if (key === migration.propertyName) {
+        migration.run();
+      }
+    }
+
+    return migratedConfig;
+  }
+
   private static getMigrations(
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig
-  ): Migration[] {
-    const migrations: Migration[] = [];
+  ): AbstractMigration[] {
+    const migrations: AbstractMigration[] = [];
 
     for (const propertyName of MigrationsService.removedProperties) {
       migrations.push(
@@ -83,26 +116,9 @@ export class MigrationsService {
       );
     }
 
-    migrations.push(new BinarySourceMigration(originalConfig, migratedConfig));
-    migrations.push(
-      new IgnoreNodeModulesMigration(originalConfig, migratedConfig)
-    );
-    migrations.push(
-      new RequiredStatusChecksMigration(originalConfig, migratedConfig)
-    );
-    migrations.push(new TrustLevelMigration(originalConfig, migratedConfig));
-    migrations.push(new GoModTidyMigration(originalConfig, migratedConfig));
-    migrations.push(
-      new SemanticCommitsMigration(originalConfig, migratedConfig)
-    );
-    migrations.push(
-      new EnabledManagersMigration(originalConfig, migratedConfig)
-    );
-    migrations.push(new PinVersionsMigration(originalConfig, migratedConfig));
-    migrations.push(
-      new RebaseStalePrsMigration(originalConfig, migratedConfig)
-    );
-    migrations.push(new RebaseConflictedPrs(originalConfig, migratedConfig));
+    for (const Migration of this.customMigrations) {
+      migrations.push(new Migration(originalConfig, migratedConfig));
+    }
 
     return migrations;
   }

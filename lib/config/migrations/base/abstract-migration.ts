@@ -1,8 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../types';
-import type { Migration } from '../types';
 
-export abstract class AbstractMigration implements Migration {
+export abstract class AbstractMigration {
   abstract readonly propertyName: string;
 
   protected readonly originalConfig: RenovateConfig;

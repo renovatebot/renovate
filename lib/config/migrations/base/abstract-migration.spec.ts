@@ -1,4 +1,3 @@
-import { RenovateConfig } from '../../types';
 import { MigrationsService } from '../migrations-service';
 import { AbstractMigration } from './abstract-migration';
 
@@ -11,28 +10,26 @@ class FakeMigration extends AbstractMigration {
 }
 
 describe('config/migrations/base/abstract-migration', () => {
-  it('set property value if it is not provided by user', () => {
-    const migratedConfig: RenovateConfig = {};
-    const fakeMigration = new FakeMigration(
+  it('set property value if it is undefined', () => {
+    const migratedConfig = MigrationsService.runMigration(
       { old: 'old value' },
-      migratedConfig
+      FakeMigration
     );
-    MigrationsService.run({ old: 'old value' }, migratedConfig, [
-      fakeMigration,
-    ]);
+    expect(migratedConfig.new).toBe('new value');
+  });
+
+  it('set property value if it is null', () => {
+    const migratedConfig = MigrationsService.runMigration(
+      { old: 'old value', new: null },
+      FakeMigration
+    );
     expect(migratedConfig.new).toBe('new value');
   });
 
   it('do not set property value if it is provided by user', () => {
-    const migratedConfig: RenovateConfig = {};
-    const fakeMigration = new FakeMigration(
+    const migratedConfig = MigrationsService.runMigration(
       { old: 'old value', new: 'another value' },
-      migratedConfig
-    );
-    MigrationsService.run(
-      { old: 'old value', new: 'another value' },
-      migratedConfig,
-      [fakeMigration]
+      FakeMigration
     );
     expect(migratedConfig.new).toBe('another value');
   });

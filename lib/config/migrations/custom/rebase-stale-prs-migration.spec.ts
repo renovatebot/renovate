@@ -1,26 +1,36 @@
 import { MigrationsService } from '../migrations-service';
+import { RebaseStalePrsMigration } from './rebase-stale-prs-migration';
 
 describe('config/migrations/custom/rebase-stale-prs-migration', () => {
   it('should migrate true', () => {
-    const migratedConfig = MigrationsService.run({
-      rebaseStalePrs: true,
-    });
+    const migratedConfig = MigrationsService.runMigration(
+      {
+        rebaseStalePrs: true,
+      },
+      RebaseStalePrsMigration
+    );
 
     expect(migratedConfig.rebaseWhen).toBe('behind-base-branch');
   });
 
   it('should migrate false', () => {
-    const migratedConfig = MigrationsService.run({
-      rebaseStalePrs: false,
-    });
+    const migratedConfig = MigrationsService.runMigration(
+      {
+        rebaseStalePrs: false,
+      },
+      RebaseStalePrsMigration
+    );
 
     expect(migratedConfig.rebaseWhen).toBe('conflicted');
   });
 
   it('should migrate null', () => {
-    const migratedConfig = MigrationsService.run({
-      rebaseStalePrs: null,
-    });
+    const migratedConfig = MigrationsService.runMigration(
+      {
+        rebaseStalePrs: null,
+      },
+      RebaseStalePrsMigration
+    );
 
     expect(migratedConfig.rebaseWhen).toBe('auto');
   });
