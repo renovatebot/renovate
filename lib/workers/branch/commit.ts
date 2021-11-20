@@ -41,6 +41,10 @@ export function commitFilesToBranch(
     config.branchName !== sanitize(config.branchName) ||
     config.commitMessage !== sanitize(config.commitMessage)
   ) {
+    logger.debug(
+      { branchName: config.branchName },
+      'Secrets exposed in branchName or commitMessage'
+    );
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
   // API will know whether to create new branch or not

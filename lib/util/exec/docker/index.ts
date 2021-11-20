@@ -76,7 +76,10 @@ export async function getDockerTag(
   const ver = versioning.get(scheme);
 
   if (!ver.isValid(constraint)) {
-    logger.warn({ constraint }, `Invalid ${scheme} version constraint`);
+    logger.warn(
+      { scheme, constraint },
+      `Invalid Docker image version constraint`
+    );
     return 'latest';
   }
 
