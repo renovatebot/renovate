@@ -99,7 +99,7 @@ export async function tryDecrypt(
             const orgName = org.replace(regEx(/\/$/), ''); // Strip trailing slash
             if (is.nonEmptyString(repo)) {
               const scopedRepository = `${orgName}/${repo}`;
-              if (scopedRepository.toLowerCase() === repository.toLowerCase()) {
+              if (scopedRepository === repository) {
                 decryptedStr = value;
               } else {
                 logger.debug(
@@ -107,14 +107,12 @@ export async function tryDecrypt(
                   'Secret is scoped to a different repository'
                 );
                 const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepository}".`;
+                error.validationError = `Encrypted secret is scoped to a different repository: ${scopedRepository}.`;
                 throw error;
               }
             } else {
               const scopedOrg = `${orgName}/`;
-              if (
-                repository.toLowerCase().startsWith(scopedOrg.toLowerCase())
-              ) {
+              if (repository.startsWith(scopedOrg)) {
                 decryptedStr = value;
               } else {
                 logger.debug(
@@ -122,7 +120,7 @@ export async function tryDecrypt(
                   'Secret is scoped to a different org'
                 );
                 const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different org: "${scopedOrg}".`;
+                error.validationError = `Encrypted secret is scoped to a different org" ${scopedOrg}.`;
                 throw error;
               }
             }

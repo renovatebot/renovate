@@ -107,16 +107,10 @@ const manualSourceUrls = {
   },
 };
 
-const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
-const gitPrefix = regEx('^git:/?/?');
-
 function massageGithubUrl(url: string): string {
   return url
     .replace('http:', 'https:')
-    .replace('http+git:', 'https:')
-    .replace('https+git:', 'https:')
-    .replace(gitPrefix, 'https://')
-    .replace(githubPages, 'https://github.com/$1/$2')
+    .replace(regEx(/^git:\/?\/?/), 'https://')
     .replace('www.github.com', 'github.com')
     .split('/')
     .slice(0, 5)

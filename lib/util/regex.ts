@@ -5,8 +5,6 @@ import { logger } from '../logger';
 
 let RegEx: RegExpConstructor;
 
-const cache = new Map<string, RegExp>();
-
 try {
   // eslint-disable-next-line
   const RE2 = require('re2');
@@ -20,16 +18,8 @@ try {
 }
 
 export function regEx(pattern: string | RegExp, flags?: string): RegExp {
-  const key = `${pattern.toString()}:${flags}`;
-
-  if (cache.has(key)) {
-    return cache.get(key);
-  }
-
   try {
-    const instance = new RegEx(pattern, flags);
-    cache.set(key, instance);
-    return instance;
+    return new RegEx(pattern, flags);
   } catch (err) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = pattern.toString();

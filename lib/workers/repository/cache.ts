@@ -75,8 +75,7 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
       isModified,
       upgrades,
     };
-  } catch (error) {
-    const err = error.err || error; // external host error nests err
+  } catch (err) {
     const errCodes = [401, 404];
     // istanbul ignore if
     if (errCodes.includes(err.response?.statusCode)) {

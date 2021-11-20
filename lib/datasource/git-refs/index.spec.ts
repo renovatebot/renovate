@@ -91,18 +91,6 @@ describe('datasource/git-refs/index', () => {
       );
       expect(digest).toMatchSnapshot();
     });
-    it('ignores refs/for/', async () => {
-      simpleGit.mockReturnValue({
-        listRemote() {
-          return Promise.resolve(lsRemote1);
-        },
-      });
-      const digest = await new GitRefsDatasource().getDigest(
-        { lookupName: 'a tag to look up' },
-        'master'
-      );
-      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-    });
     it('returns digest for HEAD', async () => {
       simpleGit.mockReturnValue({
         listRemote() {

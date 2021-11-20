@@ -81,7 +81,7 @@ export async function updateArtifacts({
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    logger.debug({ err }, 'Failed to update Helm lock file');
+    logger.warn({ err }, 'Failed to update Helm lock file');
     return [
       {
         artifactError: {

@@ -192,14 +192,6 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
-      it('should throw secondary rate limit exceeded', async () => {
-        await expect(
-          fail(403, {
-            message:
-              'You have exceeded a secondary rate limit and have been temporarily blocked from content creation. Please retry your request again later.',
-          })
-        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
-      });
       it('should throw Bad credentials', async () => {
         await expect(
           fail(401, { message: 'Bad credentials. (401)' })
