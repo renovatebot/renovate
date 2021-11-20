@@ -4,6 +4,7 @@ import { regEx } from './regex';
 const ensureTrailingSlashRe = /\/?$/;
 const trimTrailingSlashRe = regEx(/\/+$/);
 const trimLeadingSlashRe = regEx(/^\//);
+
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
 }
