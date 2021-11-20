@@ -47,9 +47,13 @@ export async function tryBranchAutomerge(
       }
       if (
         err.message.includes('refusing to merge unrelated histories') ||
-        err.message.includes('Not possible to fast-forward')
+        err.message.includes('Not possible to fast-forward') ||
+        err.message.includes(
+          'Updates were rejected because the tip of your current branch is behind'
+        )
       ) {
-        logger.warn({ err }, 'Branch is not up to date - cannot automerge');
+        logger.debug({ err }, 'Branch automerge error');
+        logger.info('Branch is not up to date - cannot automerge');
         return 'stale';
       }
       if (err.message.includes('Protected branch')) {

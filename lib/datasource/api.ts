@@ -1,5 +1,6 @@
 import { AdoptiumJavaDatasource } from './adoptium-java';
 import { ArtifactoryDatasource } from './artifactory';
+import { AwsMachineImageDataSource } from './aws-machine-image';
 import { BitBucketTagsDatasource } from './bitbucket-tags';
 import { CdnJsDatasource } from './cdnjs';
 import { ClojureDatasource } from './clojure';
@@ -42,6 +43,7 @@ export default api;
 
 api.set(AdoptiumJavaDatasource.id, new AdoptiumJavaDatasource());
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
+api.set(AwsMachineImageDataSource.id, new AwsMachineImageDataSource());
 api.set('bitbucket-tags', new BitBucketTagsDatasource());
 api.set('cdnjs', new CdnJsDatasource());
 api.set('clojure', new ClojureDatasource());
