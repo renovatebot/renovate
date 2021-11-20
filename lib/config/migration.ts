@@ -159,9 +159,6 @@ export function migrateConfig(
           '{{managerBranchPrefix}}',
           '{{additionalBranchPrefix}}'
         );
-      } else if (key === 'managerBranchPrefix') {
-        delete migratedConfig.managerBranchPrefix;
-        migratedConfig.additionalBranchPrefix = val;
       } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
