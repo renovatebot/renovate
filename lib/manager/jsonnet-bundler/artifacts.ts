@@ -22,10 +22,8 @@ function dependencyUrl(dep: PackageDependency): string {
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
-  const { packageFileName, updatedDeps, newPackageFileContent, config } =
-    updateArtifact;
-  logger.trace(`jsonnetfile.updateArtifacts(${packageFileName})`);
-  logger.trace({ newPackageFileContent });
+  const { packageFileName, updatedDeps, config } = updateArtifact;
+  logger.trace({ packageFileName }, 'jsonnet-bundler.updateArtifacts()');
 
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock.json');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
