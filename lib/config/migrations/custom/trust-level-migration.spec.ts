@@ -10,6 +10,7 @@ describe('config/migrations/custom/trust-level-migration', () => {
       TrustLevelMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('trustLevel');
     expect(migratedConfig.allowCustomCrateRegistries).toBeTrue();
     expect(migratedConfig.allowScripts).toBeTrue();
     expect(migratedConfig.exposeAllEnv).toBeTrue();
@@ -26,6 +27,7 @@ describe('config/migrations/custom/trust-level-migration', () => {
       TrustLevelMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('trustLevel');
     expect(migratedConfig.allowCustomCrateRegistries).toBeFalse();
     expect(migratedConfig.allowScripts).toBeFalse();
     expect(migratedConfig.exposeAllEnv).toBeFalse();

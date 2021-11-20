@@ -10,6 +10,7 @@ describe('config/migrations/custom/pin-versions-migration', () => {
       PinVersionsMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('pinVersions');
     expect(migratedConfig.rangeStrategy).toBe('pin');
   });
 
@@ -21,6 +22,7 @@ describe('config/migrations/custom/pin-versions-migration', () => {
       PinVersionsMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('pinVersions');
     expect(migratedConfig.rangeStrategy).toBe('replace');
   });
 });

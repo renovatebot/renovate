@@ -10,6 +10,7 @@ describe('config/migrations/custom/ignore-node-modules-migration', () => {
       IgnoreNodeModulesMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('ignoreNodeModules');
     expect(migratedConfig.ignorePaths).toEqual(['node_modules/']);
   });
 });

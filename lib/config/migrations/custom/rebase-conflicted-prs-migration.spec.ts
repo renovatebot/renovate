@@ -10,6 +10,7 @@ describe('config/migrations/custom/rebase-conflicted-prs-migration', () => {
       RebaseConflictedPrs
     );
 
+    expect(migratedConfig).not.toHaveProperty('rebaseConflictedPrs');
     expect(migratedConfig.rebaseWhen).toBe('never');
   });
 });

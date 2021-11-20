@@ -10,6 +10,7 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
       RebaseStalePrsMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('rebaseStalePrs');
     expect(migratedConfig.rebaseWhen).toBe('behind-base-branch');
   });
 
@@ -21,6 +22,7 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
       RebaseStalePrsMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('rebaseStalePrs');
     expect(migratedConfig.rebaseWhen).toBe('conflicted');
   });
 
@@ -32,6 +34,7 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
       RebaseStalePrsMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('rebaseStalePrs');
     expect(migratedConfig.rebaseWhen).toBe('auto');
   });
 });
