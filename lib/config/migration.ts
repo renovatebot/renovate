@@ -432,12 +432,6 @@ export function migrateConfig(
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
         }
-      } else if (key === 'composerIgnorePlatformReqs') {
-        if (val === true) {
-          migratedConfig.composerIgnorePlatformReqs = [];
-        } else if (val === false) {
-          migratedConfig.composerIgnorePlatformReqs = null;
-        }
       } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
         if (migratedConfig[key] !== undefined) {
           migratedConfig.platformAutomerge = migratedConfig[key];
