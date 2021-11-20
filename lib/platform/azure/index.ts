@@ -410,19 +410,17 @@ export async function createPr({
     );
   }
   if (platformOptions?.azureAutoApprove) {
-    pr.reviewers = [
-      await azureApiGit.createPullRequestReviewer(
-        {
-          reviewerUrl: pr.createdBy.url,
-          vote: AzurePrVote.Approved,
-          isFlagged: false,
-          isRequired: false,
-        },
-        config.repoId,
-        pr.pullRequestId,
-        pr.createdBy.id
-      ),
-    ];
+    await azureApiGit.createPullRequestReviewer(
+      {
+        reviewerUrl: pr.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      },
+      config.repoId,
+      pr.pullRequestId,
+      pr.createdBy.id
+    );
   }
   await Promise.all(
     labels.map((label) =>
