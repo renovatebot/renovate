@@ -2,6 +2,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
+import { ToolConstraint } from '../../util/exec/types';
 import { readLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
@@ -33,11 +34,20 @@ export async function updateArtifacts(
     return null;
   }
 
-  try {
-    const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
-    };
+  const jsonnetBundlerToolConstraint: ToolConstraint = {
+    toolName: 'jb',
+    constraint: config.constraints?.jb,
+  };
 
+  const execOptions: ExecOptions = {
+    cwdFile: packageFileName,
+    docker: {
+      image: 'sidecar',
+    },
+    toolConstraints: [jsonnetBundlerToolConstraint],
+  };
+
+  try {
     if (config.isLockFileMaintenance) {
       await exec('jb update', execOptions);
     } else {
