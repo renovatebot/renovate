@@ -78,6 +78,9 @@ describe('manager/terraform/modules', () => {
       const subfolder = bitbucketRefMatchRegex.exec(
         'bitbucket.org/hashicorp/example.git/terraform?ref=v1.0.0'
       ).groups;
+      const subfolderWithDoubleSlash = bitbucketRefMatchRegex.exec(
+        'bitbucket.org/hashicorp/example.git//terraform?ref=v1.0.0'
+      ).groups;
 
       expect(ssh.workspace).toBe('hashicorp');
       expect(ssh.project).toBe('example');
@@ -94,6 +97,20 @@ describe('manager/terraform/modules', () => {
       expect(subfolder.workspace).toBe('hashicorp');
       expect(subfolder.project).toBe('example');
       expect(subfolder.tag).toBe('v1.0.0');
+
+      expect(subfolderWithDoubleSlash.workspace).toBe('hashicorp');
+      expect(subfolderWithDoubleSlash.project).toBe('example');
+      expect(subfolderWithDoubleSlash.tag).toBe('v1.0.0');
+    });
+
+    it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
+      const dots = bitbucketRefMatchRegex.exec(
+        'bitbucket.org/hashicorp/example.repo-123.git?ref=v1.0.0'
+      ).groups;
+
+      expect(dots.workspace).toBe('hashicorp');
+      expect(dots.project).toBe('example.repo-123');
+      expect(dots.tag).toBe('v1.0.0');
     });
   });
 });

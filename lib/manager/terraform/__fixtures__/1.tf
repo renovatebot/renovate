@@ -92,7 +92,7 @@ module "addons_aws" {
   aws-ebs-csi-driver = {
     enabled          = true
     is_default_class = true
-    version = "1.0.0"
+    version          = "1.0.0"
   }
 
 
@@ -143,7 +143,7 @@ provider "gitlab" {
 }
 
 provider "gitlab" {
-  token   = "${var.gitlab_token}"
+  token   = var.gitlab_token
   version = "=1.3"
 }
 
@@ -162,7 +162,7 @@ provider "helm" {
 provider "newrelic" {
   version = "V1.9"
 
-  api_key = "${var.newrelic_api_key}"
+  api_key = var.newrelic_api_key
 }
 
 module "foobar" {
@@ -187,6 +187,26 @@ module "gittags_http" {
 
 module "gittags_ssh" {
   source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3"
+}
+
+module "bitbucket_ssh" {
+  source = "git::ssh://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0"
+}
+
+module "bitbucket_https" {
+  source = "git::https://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0"
+}
+
+module "bitbucket_plain" {
+  source = "bitbucket.org/hashicorp/example.git?ref=v1.0.0"
+}
+
+module "bitbucket_subfolder" {
+  source = "bitbucket.org/hashicorp/example.git/terraform?ref=v1.0.0"
+}
+
+module "bitbucket_subfolder_with_double_slash" {
+  source = "bitbucket.org/hashicorp/example.git//terraform?ref=v1.0.0"
 }
 
 terraform {
@@ -242,7 +262,7 @@ resource "docker_image" "invalid" {
 }
 
 resource "docker_image" "ignore_variable" {
-  name          = "${data.docker_registry_image.ubuntu.name}"
+  name          = data.docker_registry_image.ubuntu.name
   pull_triggers = ["${data.docker_registry_image.ubuntu.sha256_digest}"]
 }
 
