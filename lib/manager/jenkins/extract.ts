@@ -1,5 +1,5 @@
 import { load } from 'js-yaml';
-import * as datasourceJenkins from '../../datasource/jenkins-plugins';
+import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
@@ -12,7 +12,7 @@ const YamlExtension = regEx(/\.ya?ml$/);
 
 function getDependency(plugin: JenkinsPlugin): PackageDependency {
   const dep: PackageDependency = {
-    datasource: datasourceJenkins.id,
+    datasource: JenkinsPluginsDatasource.id,
     versioning: dockerVersioning.id,
     depName: plugin.artifactId,
   };

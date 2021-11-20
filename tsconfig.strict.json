@@ -31,7 +31,6 @@
     "./lib/datasource/gitlab-tags/types.ts",
     "./lib/datasource/gradle-version/types.ts",
     "./lib/datasource/hex/types.ts",
-    "./lib/datasource/jenkins-plugins/common.ts",
     "./lib/datasource/maven/common.ts",
     "./lib/datasource/node/common.ts",
     "./lib/datasource/node/types.ts",
