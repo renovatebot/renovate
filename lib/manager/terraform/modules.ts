@@ -46,7 +46,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.datasource = datasourceGithubTags.id;
   } else if (bitbucketRefMatch) {
     dep.depType = 'module';
-    dep.depName = bitbucketRefMatch.groups.project.replace(regEx(/\.git$/), '');
+    dep.depName = bitbucketRefMatch.groups.project;
     dep.lookupName = dep.depName;
     dep.currentValue = bitbucketRefMatch.groups.tag;
     dep.datasource = BitBucketTagsDatasource.id;
