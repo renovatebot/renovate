@@ -28,7 +28,7 @@ import {
 } from './util';
 
 const dependencyBlockExtractionRegex = regEx(
-  /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/
+  /^\s*(?P<type>[a-z_]+)\s+("(?P<lookupName>[^"]+)"\s+)?("(?P<terraformName>[^"]+)"\s+)?{\s*$/
 );
 const contentCheckList = [
   'module "',

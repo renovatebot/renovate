@@ -6,7 +6,9 @@ import { analyzeTerraformProvider } from './providers';
 import type { ExtractionResult } from './types';
 import { keyValueExtractionRegex } from './util';
 
-export const providerBlockExtractionRegex = regEx(/^\s*(?<key>[^\s]+)\s+=\s+{/);
+export const providerBlockExtractionRegex = regEx(
+  /^\s*(?P<key>[^\s]+)\s+=\s+{/
+);
 
 function extractBlock(
   lineNum: number,

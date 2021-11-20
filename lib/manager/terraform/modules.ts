@@ -10,12 +10,12 @@ import { extractTerraformProvider } from './providers';
 import type { ExtractionResult } from './types';
 
 export const githubRefMatchRegex = regEx(
-  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
+  /github\.com([/:])(?P<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?P<tag>.*)$/i
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
+  /(?:git::)?(?P<url>(?:http|https|ssh):\/\/(?:.*@)?(?P<path>.*.*\/(?P<project>.*\/.*)))\?ref=(?P<tag>.*)$/
 );
-const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
+const hostnameMatchRegex = regEx(/^(?P<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
 export function extractTerraformModule(
   startingLine: number,

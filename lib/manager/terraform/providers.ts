@@ -14,7 +14,7 @@ import {
 } from './util';
 
 export const sourceExtractionRegex = regEx(
-  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
+  /^(?:(?P<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?P<namespace>[^/]+)\/)?(?P<type>[^/]+)/
 );
 
 export function extractTerraformProvider(
