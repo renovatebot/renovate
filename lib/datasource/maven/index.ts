@@ -2,7 +2,6 @@ import pMap from 'p-map';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
-import { ensureTrailingSlash } from '../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
@@ -236,7 +235,7 @@ export async function getReleases({
   const dependency = getDependencyParts(lookupName);
   let releases: Release[] = null;
   const repoForVersions = {};
-  const repoUrl = ensureTrailingSlash(registryUrl);
+  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12070
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
   const metadataVersions = await getVersionsFromMetadata(dependency, repoUrl);
   if (metadataVersions) {
