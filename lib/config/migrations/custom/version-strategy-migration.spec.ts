@@ -5,7 +5,7 @@ describe('config/migrations/custom/version-strategy-migration', () => {
   it('should migrate versionStrategy="widen" to rangeStrategy="widen"', () => {
     const migratedConfig = MigrationsService.runMigration(
       {
-        upgradeInRange: true,
+        versionStrategy: 'widen',
       },
       VersionStrategyMigration
     );

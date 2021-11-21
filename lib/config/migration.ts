@@ -43,7 +43,7 @@ export function migrateConfig(
       'peerDependencies',
     ];
     const { migratePresets } = GlobalConfig.get();
-    for (const [key, val] of Object.entries(config)) {
+    for (const [key, val] of Object.entries(newConfig)) {
       if (key === 'pathRules') {
         if (is.array(val)) {
           migratedConfig.packageRules = is.array(migratedConfig.packageRules)
@@ -419,9 +419,6 @@ export function migrateConfig(
           }
           migratedConfig[key] = newArray;
         }
-      } else if (key === 'compatibility' && is.object(val)) {
-        migratedConfig.constraints = migratedConfig.compatibility;
-        delete migratedConfig.compatibility;
       } else if (is.object(val)) {
         const subMigrate = migrateConfig(
           migratedConfig[key] as RenovateConfig,
