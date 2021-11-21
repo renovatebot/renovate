@@ -9,8 +9,9 @@ export class GoModTidyMigration extends AbstractMigration {
     this.delete(this.propertyName);
 
     if (gomodTidy) {
-      this.migratedConfig.postUpdateOptions ??= postUpdateOptions ?? [];
-      this.migratedConfig.postUpdateOptions.push('gomodTidy');
+      this.migratedConfig.postUpdateOptions = Array.isArray(postUpdateOptions)
+        ? postUpdateOptions.concat(['gomodTidy'])
+        : ['gomodTidy'];
     }
   }
 }
