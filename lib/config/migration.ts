@@ -44,14 +44,7 @@ export function migrateConfig(
     ];
     const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key === 'suppressNotifications') {
-        if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
-          migratedConfig.suppressNotifications =
-            migratedConfig.suppressNotifications.filter(
-              (item) => item !== 'prEditNotification'
-            );
-        }
-      } else if (key.startsWith('masterIssue')) {
+      if (key.startsWith('masterIssue')) {
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
         if (optionTypes[newKey] === 'boolean' && val === 'true') {
