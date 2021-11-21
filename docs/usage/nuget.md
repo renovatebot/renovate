@@ -9,7 +9,7 @@ Renovate supports upgrading dependencies in `.csproj`, `.fsproj`, and `.vbproj` 
 
 ## Version Support
 
-Only SDK-style `.csproj`/`.fsproj`/`.vbproj`files are currently supported. By default, this includes:
+Only SDK-style `.csproj`/`.fsproj`/`.vbproj` files are currently supported. By default, this includes:
 
 - .NET Core 1.0 and above
 - .NET Standard class libraries
@@ -23,6 +23,8 @@ To convert your .NET Framework `.csproj`/`.fsproj`/`.vbproj` into an SDK-style p
 1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
 1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or on [alternate feeds](#Alternate%20feeds)) to determine if any upgrades are available
 1. If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version are embedded in the generated PR
+
+If your project file references `packages.config` file, no dependencies will be extracted. Find out here how to [migrate from packages.config to PackageReference](https://docs.microsoft.com/en-us/nuget/consume-packages/migrate-packages-config-to-package-reference).
 
 ## Alternate feeds
 
