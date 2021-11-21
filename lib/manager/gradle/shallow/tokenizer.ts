@@ -3,7 +3,7 @@ import { regEx } from '../../../util/regex';
 import { TokenType } from './common';
 import type { StringInterpolation, Token } from './types';
 
-const escapedCharRegex = /\\['"bfnrt\\]/; // TODO #12070
+const escapedCharRegex = /\\['"bfnrt\\]/; // TODO #12070 re2 incompatible with moo state
 const escapedChars = {
   [TokenType.EscapedChar]: {
     match: escapedCharRegex,
@@ -24,17 +24,17 @@ const escapedChars = {
 const lexer = moo.states({
   // Top-level Groovy lexemes
   main: {
-    [TokenType.LineComment]: { match: /\/\/.*?$/ }, // TODO #12070
-    [TokenType.MultiComment]: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12070
-    [TokenType.Newline]: { match: /\r?\n/, lineBreaks: true }, // TODO #12070
-    [TokenType.Space]: { match: /[ \t\r]+/ }, // TODO #12070
+    [TokenType.LineComment]: { match: /\/\/.*?$/ }, // TODO #12070 re2 incompatible with moo state
+    [TokenType.MultiComment]: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12070 re2 incompatible with moo state
+    [TokenType.Newline]: { match: /\r?\n/, lineBreaks: true }, // TODO #12070 re2 incompatible with moo state
+    [TokenType.Space]: { match: /[ \t\r]+/ }, // TODO #12070 re2 incompatible with moo state
     [TokenType.Semicolon]: ';',
     [TokenType.Colon]: ':',
     [TokenType.Dot]: '.',
     [TokenType.Comma]: ',',
-    [TokenType.Operator]: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/, // TODO #12070
+    [TokenType.Operator]: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/, // TODO #12070 re2 incompatible with moo state
     [TokenType.Assignment]: '=',
-    [TokenType.Word]: { match: /[a-zA-Z$_][a-zA-Z0-9$_]+/ }, // TODO #12070
+    [TokenType.Word]: { match: /[a-zA-Z$_][a-zA-Z0-9$_]+/ }, // TODO #12070 re2 incompatible with moo state
     [TokenType.LeftParen]: { match: '(' },
     [TokenType.RightParen]: { match: ')' },
     [TokenType.LeftBracket]: { match: '[' },
@@ -86,12 +86,12 @@ const lexer = moo.states({
     variable: {
       // Supported: ${foo}, $foo, ${ foo.bar.baz }, $foo.bar.baz
       match:
-        /\${\s*[a-zA-Z_][a-zA-Z0-9_]*(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*/, // TODO #12070
+        /\${\s*[a-zA-Z_][a-zA-Z0-9_]*(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*/, // TODO #12070 re2 incompatible with moo state
       value: (x: string): string =>
         x.replace(regEx(/^\${?\s*/), '').replace(regEx(/\s*}$/), ''),
     },
     [TokenType.IgnoredInterpolationStart]: {
-      match: /\${/, // TODO #12070
+      match: /\${/, // TODO #12070 re2 incompatible with moo state
       push: TokenType.IgnoredInterpolationStart,
     },
     [TokenType.Chars]: moo.fallback,

@@ -9,7 +9,7 @@ handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 // istanbul ignore next
 handlebars.registerHelper(
   'replace',
-  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12070
+  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12070 adding regex here causes coverage issues
 );
 
 export const exposedConfigOptions = [
@@ -140,7 +140,7 @@ function getFilteredObject(input: CompileInput): any {
   return res;
 }
 
-const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12070
+const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12070 adding regex here causes coverage issues
 
 export function compile(
   template: string,

@@ -9,6 +9,7 @@ import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
 import { regEx } from '../../util/regex';
 import { add } from '../../util/sanitize';
+import { ensureTrailingSlash } from '../../util/url';
 import type { Npmrc, PackageResolution } from './types';
 
 let npmrc: Record<string, any> = {};
@@ -112,8 +113,8 @@ export function resolvePackage(packageName: string): PackageResolution {
     !authInfo &&
     npmrc &&
     npmrc._authToken &&
-    registryUrl.replace(regEx(/\/?$/), '/') ===
-      npmrc.registry?.replace(/\/?$/, '/') // TODO #12070
+    ensureTrailingSlash(registryUrl) ===
+      ensureTrailingSlash(npmrc.registry || '')
   ) {
     authInfo = { type: 'Bearer', token: npmrc._authToken };
   }
