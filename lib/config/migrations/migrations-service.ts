@@ -7,6 +7,7 @@ import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
+import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
@@ -53,6 +54,7 @@ export class MigrationsService {
     ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
     GoModTidyMigration,
+    HostRulesMigration,
     IgnoreNodeModulesMigration,
     PinVersionsMigration,
     RaiseDeprecationWarningsMigration,
