@@ -5,7 +5,7 @@ export class HostRulesMigration extends AbstractMigration {
   readonly propertyName = 'hostRules';
 
   override run(value): void {
-    this.migratedConfig.hostRules = value.map((rule) => {
+    const newValue = value.map((rule) => {
       const newRule: Record<string, unknown> = { ...rule };
       newRule.hostType ??= newRule.platform;
       newRule.matchHost ??=
@@ -24,5 +24,7 @@ export class HostRulesMigration extends AbstractMigration {
 
       return newRule as HostRule;
     });
+
+    this.rewrite(newValue);
   }
 }

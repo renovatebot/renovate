@@ -4,9 +4,9 @@ import type { RenovateConfig } from '../../types';
 export abstract class AbstractMigration {
   abstract readonly propertyName: string;
 
-  protected readonly originalConfig: RenovateConfig;
+  private readonly originalConfig: RenovateConfig;
 
-  protected readonly migratedConfig: RenovateConfig;
+  private readonly migratedConfig: RenovateConfig;
 
   constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
     this.originalConfig = originalConfig;
@@ -15,25 +15,36 @@ export abstract class AbstractMigration {
 
   abstract run(value: unknown): void;
 
-  protected delete(property: string): void {
-    delete this.migratedConfig[property];
-  }
-
-  protected setSafely<Key extends keyof RenovateConfig>(
-    property: Key,
-    value: RenovateConfig[Key]
-  ): void {
-    if (
-      is.nullOrUndefined(this.originalConfig[property]) &&
-      is.nullOrUndefined(this.migratedConfig[property])
-    ) {
-      this.migratedConfig[property] = value;
-    }
-  }
-
   protected get<Key extends keyof RenovateConfig>(
     key: Key
   ): RenovateConfig[Key] {
     return this.migratedConfig[key] ?? this.originalConfig[key];
+  }
+
+  protected setSafely<Key extends keyof RenovateConfig>(
+    key: Key,
+    value: RenovateConfig[Key]
+  ): void {
+    if (
+      is.nullOrUndefined(this.originalConfig[key]) &&
+      is.nullOrUndefined(this.migratedConfig[key])
+    ) {
+      this.migratedConfig[key] = value;
+    }
+  }
+
+  protected setHard<Key extends keyof RenovateConfig>(
+    key: Key,
+    value: RenovateConfig[Key]
+  ): void {
+    this.migratedConfig[key] = value;
+  }
+
+  protected rewrite(value: unknown): void {
+    this.setHard(this.propertyName, value);
+  }
+
+  protected delete(property: string): void {
+    delete this.migratedConfig[property];
   }
 }

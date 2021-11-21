@@ -5,7 +5,7 @@ export class BinarySourceMigration extends AbstractMigration {
 
   override run(value): void {
     if (value === 'auto') {
-      this.migratedConfig.binarySource = 'global';
+      this.rewrite('global');
     }
   }
 }

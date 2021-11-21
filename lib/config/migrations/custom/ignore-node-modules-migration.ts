@@ -6,6 +6,6 @@ export class IgnoreNodeModulesMigration extends AbstractMigration {
   override run(value): void {
     this.delete(this.propertyName);
 
-    this.migratedConfig.ignorePaths = value ? ['node_modules/'] : [];
+    this.setSafely('ignorePaths', value ? ['node_modules/'] : []);
   }
 }

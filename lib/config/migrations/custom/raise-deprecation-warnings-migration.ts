@@ -8,11 +8,11 @@ export class RaiseDeprecationWarningsMigration extends AbstractMigration {
     this.delete(this.propertyName);
 
     if (value === false) {
-      this.migratedConfig.suppressNotifications = Array.isArray(
-        suppressNotifications
-      )
+      const newSuppressNotifications = Array.isArray(suppressNotifications)
         ? suppressNotifications.concat(['deprecationWarningIssues'])
         : ['deprecationWarningIssues'];
+
+      this.setHard('suppressNotifications', newSuppressNotifications);
     }
   }
 }

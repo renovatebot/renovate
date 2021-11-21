@@ -4,7 +4,7 @@ import { AbstractMigration } from './abstract-migration';
 export class RenamePropertyMigration extends AbstractMigration {
   readonly propertyName: string;
 
-  protected readonly newPropertyName: string;
+  private readonly newPropertyName: string;
 
   constructor(
     deprecatedPropertyName: string,
@@ -20,6 +20,6 @@ export class RenamePropertyMigration extends AbstractMigration {
   override run(value): void {
     this.delete(this.propertyName);
 
-    this.migratedConfig[this.newPropertyName] = value;
+    this.setSafely(this.newPropertyName, value);
   }
 }

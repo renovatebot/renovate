@@ -6,10 +6,10 @@ export class EnabledManagersMigration extends AbstractMigration {
 
   override run(value: string[]): void {
     if (is.array(value)) {
-      // Replace yarn with npm, since yarn actually uses npm as package manager
-      this.migratedConfig.enabledManagers = value.map((manager) =>
+      const newValue = value.map((manager) =>
         manager === 'yarn' ? 'npm' : manager
       );
+      this.rewrite(newValue);
     }
   }
 }

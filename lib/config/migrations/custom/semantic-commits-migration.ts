@@ -6,9 +6,9 @@ export class SemanticCommitsMigration extends AbstractMigration {
 
   override run(value): void {
     if (is.boolean(value)) {
-      this.migratedConfig.semanticCommits = value ? 'enabled' : 'disabled';
+      this.rewrite(value ? 'enabled' : 'disabled');
     } else if (value !== 'enabled' && value !== 'disabled') {
-      this.migratedConfig.semanticCommits = 'auto';
+      this.rewrite('auto');
     }
   }
 }

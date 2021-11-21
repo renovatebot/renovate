@@ -6,7 +6,7 @@ export class ComposerIgnorePlatformReqsMigration extends AbstractMigration {
 
   override run(value): void {
     if (is.boolean(value)) {
-      this.migratedConfig.composerIgnorePlatformReqs = value ? [] : null;
+      this.rewrite(value ? [] : null);
     }
   }
 }

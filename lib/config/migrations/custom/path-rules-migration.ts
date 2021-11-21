@@ -9,9 +9,11 @@ export class PathRulesMigration extends AbstractMigration {
     this.delete(this.propertyName);
 
     if (Array.isArray(value)) {
-      this.migratedConfig.packageRules = Array.isArray(packageRules)
+      const newPackageRules = Array.isArray(packageRules)
         ? packageRules.concat(value)
         : value;
+
+      this.setHard('packageRules', newPackageRules);
     }
   }
 }
