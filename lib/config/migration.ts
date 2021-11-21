@@ -46,15 +46,7 @@ export function migrateConfig(
     ];
     const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key === 'pathRules') {
-        if (is.array(val)) {
-          migratedConfig.packageRules = is.array(migratedConfig.packageRules)
-            ? migratedConfig.packageRules
-            : [];
-          migratedConfig.packageRules = val.concat(migratedConfig.packageRules);
-        }
-        delete migratedConfig.pathRules;
-      } else if (key === 'suppressNotifications') {
+      if (key === 'suppressNotifications') {
         if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
           migratedConfig.suppressNotifications =
             migratedConfig.suppressNotifications.filter(
