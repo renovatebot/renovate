@@ -13,7 +13,7 @@ export abstract class AbstractMigration {
     this.migratedConfig = migratedConfig;
   }
 
-  abstract run(): void;
+  abstract run(value: unknown): void;
 
   protected delete(property: string): void {
     delete this.migratedConfig[property];
@@ -29,5 +29,11 @@ export abstract class AbstractMigration {
     ) {
       this.migratedConfig[property] = value;
     }
+  }
+
+  protected get<Key extends keyof RenovateConfig>(
+    key: Key
+  ): RenovateConfig[Key] {
+    return this.migratedConfig[key] ?? this.originalConfig[key];
   }
 }

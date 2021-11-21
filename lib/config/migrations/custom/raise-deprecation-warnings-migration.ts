@@ -3,12 +3,11 @@ import { AbstractMigration } from '../base/abstract-migration';
 export class RaiseDeprecationWarningsMigration extends AbstractMigration {
   readonly propertyName = 'raiseDeprecationWarnings';
 
-  override run(): void {
-    const { raiseDeprecationWarnings, suppressNotifications } =
-      this.originalConfig;
+  override run(value): void {
+    const suppressNotifications = this.get('suppressNotifications');
     this.delete(this.propertyName);
 
-    if (raiseDeprecationWarnings === false) {
+    if (value === false) {
       this.migratedConfig.suppressNotifications = Array.isArray(
         suppressNotifications
       )

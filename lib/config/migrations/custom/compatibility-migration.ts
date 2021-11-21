@@ -4,12 +4,11 @@ import { AbstractMigration } from '../base/abstract-migration';
 export class CompatibilityMigration extends AbstractMigration {
   readonly propertyName = 'compatibility';
 
-  override run(): void {
-    const { compatibility } = this.originalConfig;
+  override run(value): void {
     this.delete(this.propertyName);
 
-    if (is.object(compatibility)) {
-      this.setSafely('constraints', compatibility);
+    if (is.object(value)) {
+      this.setSafely('constraints', value);
     }
   }
 }

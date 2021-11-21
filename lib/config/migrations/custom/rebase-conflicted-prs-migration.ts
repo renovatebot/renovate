@@ -3,11 +3,10 @@ import { AbstractMigration } from '../base/abstract-migration';
 export class RebaseConflictedPrs extends AbstractMigration {
   readonly propertyName = 'rebaseConflictedPrs';
 
-  override run(): void {
-    const { rebaseConflictedPrs } = this.originalConfig;
+  override run(value): void {
     this.delete(this.propertyName);
 
-    if (rebaseConflictedPrs === false) {
+    if (value === false) {
       this.setSafely('rebaseWhen', 'never');
     }
   }

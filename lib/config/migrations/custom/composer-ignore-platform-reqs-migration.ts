@@ -4,12 +4,9 @@ import { AbstractMigration } from '../base/abstract-migration';
 export class ComposerIgnorePlatformReqsMigration extends AbstractMigration {
   readonly propertyName = 'composerIgnorePlatformReqs';
 
-  override run(): void {
-    const { composerIgnorePlatformReqs } = this.originalConfig;
-
-    if (is.boolean(composerIgnorePlatformReqs)) {
-      this.migratedConfig.composerIgnorePlatformReqs =
-        composerIgnorePlatformReqs ? [] : null;
+  override run(value): void {
+    if (is.boolean(value)) {
+      this.migratedConfig.composerIgnorePlatformReqs = value ? [] : null;
     }
   }
 }
