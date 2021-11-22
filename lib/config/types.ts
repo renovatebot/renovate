@@ -91,6 +91,7 @@ export interface GlobalOnlyConfig {
 // The below should contain config options where globalOnly=true
 export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
+  allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
@@ -232,7 +233,8 @@ export type UpdateType =
   | 'lockFileMaintenance'
   | 'lockfileUpdate'
   | 'rollback'
-  | 'bump';
+  | 'bump'
+  | 'replacement';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 

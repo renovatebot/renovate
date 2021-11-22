@@ -1,4 +1,5 @@
 import type { XmlDocument } from 'xmldoc';
+import type { Release } from '../types';
 
 export interface MavenDependency {
   display: string;
@@ -12,6 +13,6 @@ export interface MavenXml {
   xml?: XmlDocument;
 }
 
-export type ArtifactsInfo = Record<string, boolean | null>;
+export type ReleaseMap = Record<string, Release | null>;
 
-export type ArtifactInfoResult = [string, boolean | string | null];
+export type HttpResourceCheckResult = 'found' | 'not-found' | 'error' | Date;

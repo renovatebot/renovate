@@ -647,7 +647,7 @@ export async function processBranch(
           ' - any of the package files in this branch needs updating, or \n';
         content += ' - the branch becomes conflicted, or\n';
         content +=
-          ' - you check the rebase/retry checkbox if found above, or\n';
+          ' - you click the rebase/retry checkbox if found above, or\n';
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';

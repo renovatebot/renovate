@@ -126,7 +126,7 @@ export async function updateArtifacts({
           addIfUpdated(status, fileProjectPath)
         )
       )
-    ).filter((e) => e != null);
+    ).filter(Boolean);
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file.name) },
       `Returning updated gradle-wrapper files`

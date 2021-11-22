@@ -195,6 +195,12 @@ export async function extractPackageFile(
         dep.datasource = npmId;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
+        if (
+          dep.currentValue.startsWith('2') ||
+          dep.currentValue.startsWith('3')
+        ) {
+          dep.lookupName = '@yarnpkg/cli';
+        }
       } else if (depName === 'npm') {
         dep.datasource = npmId;
         dep.commitMessageTopic = 'npm';

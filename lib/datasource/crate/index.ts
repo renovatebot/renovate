@@ -217,7 +217,7 @@ export class CrateDatasource extends Datasource {
           `Cloning private cargo registry`
         );
 
-        const git = Git(simpleGitConfig());
+        const git = Git({ ...simpleGitConfig(), maxConcurrentProcesses: 1 });
         const clonePromise = git.clone(registryUrl, clonePath, {
           '--depth': 1,
         });

@@ -99,5 +99,4 @@ export function analyzeTerraformProvider(
   massageProviderLookupName(dep);
 
   dep.lockedVersion = getLockedVersion(dep, locks);
-  /* eslint-enable no-param-reassign */
 }

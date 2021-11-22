@@ -1,4 +1,4 @@
-import * as datasourceRubygems from '../../datasource/rubygems';
+import { RubyGemsDatasource } from '../../datasource/rubygems';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
@@ -57,7 +57,7 @@ export async function extractPackageFile(
         dep.skipReason = SkipReason.NoVersion;
       }
       if (!dep.skipReason) {
-        dep.datasource = datasourceRubygems.id;
+        dep.datasource = RubyGemsDatasource.id;
       }
       res.deps.push(dep);
     }

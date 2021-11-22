@@ -94,7 +94,7 @@ export function extractRoles(lines: string[]): PackageDependency[] {
       };
       do {
         const localdep = interpretLine(lineMatch, lineNumber, dep);
-        if (localdep == null) {
+        if (!localdep) {
           break;
         }
         const line = lines[lineNumber + 1];

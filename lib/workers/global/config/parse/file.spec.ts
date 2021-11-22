@@ -16,24 +16,24 @@ describe('workers/global/config/parse/file', () => {
   });
 
   describe('.getConfig()', () => {
-    it('parses custom config file', () => {
+    it('parses custom config file', async () => {
       const configFile = upath.resolve(__dirname, './__fixtures__/file.js');
-      expect(file.getConfig({ RENOVATE_CONFIG_FILE: configFile })).toEqual(
-        customConfig
-      );
+      expect(
+        await file.getConfig({ RENOVATE_CONFIG_FILE: configFile })
+      ).toEqual(customConfig);
     });
-    it('migrates', () => {
+    it('migrates', async () => {
       const configFile = upath.resolve(__dirname, './__fixtures__/file2.js');
-      const res = file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      const res = await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toBe('bump');
     });
 
-    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', () => {
-      expect(file.getConfig({})).toBeDefined();
+    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
+      expect(await file.getConfig({})).toBeDefined();
     });
 
-    it('fatal error and exit if error in parsing config.js', () => {
+    it('fatal error and exit if error in parsing config.js', async () => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
         .mockImplementation(() => undefined as never);
@@ -50,19 +50,19 @@ describe('workers/global/config/parse/file', () => {
         "repositories": [ "test/test" ],
       };`;
       fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
-      file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(mockProcessExit).toHaveBeenCalledWith(1);
 
       fs.unlinkSync(configFile);
     });
 
-    it('fatal error and exit if custom config file does not exist', () => {
+    it('fatal error and exit if custom config file does not exist', async () => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
         .mockImplementation(() => undefined as never);
 
       const configFile = upath.resolve(tmp.path, './file4.js');
-      file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
 
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });

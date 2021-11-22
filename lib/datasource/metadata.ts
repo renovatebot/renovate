@@ -107,10 +107,16 @@ const manualSourceUrls = {
   },
 };
 
+const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
+const gitPrefix = regEx('^git:/?/?');
+
 function massageGithubUrl(url: string): string {
   return url
     .replace('http:', 'https:')
-    .replace(regEx(/^git:\/?\/?/), 'https://')
+    .replace('http+git:', 'https:')
+    .replace('https+git:', 'https:')
+    .replace(gitPrefix, 'https://')
+    .replace(githubPages, 'https://github.com/$1/$2')
     .replace('www.github.com', 'github.com')
     .split('/')
     .slice(0, 5)
@@ -126,7 +132,7 @@ function massageGitlabUrl(url: string): string {
     .replace('.git', '');
 }
 
-function normalizeDate(input: any): string | null {
+export function normalizeDate(input: any): string | null {
   if (
     typeof input === 'number' &&
     !Number.isNaN(input) &&

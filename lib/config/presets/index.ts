@@ -5,6 +5,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
 import * as migration from '../migration';
@@ -39,7 +40,7 @@ const nonScopedPresetWithSubdirRegex = regEx(
   /^(?<packageName>~?[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-.]+?))?$/
 );
 const gitPresetRegex = regEx(
-  /^(?<packageName>[\w\-./]+)(?::(?<presetPath>[\w-./]+\/))?(?::?(?<presetName>[\w\-.+]+))?(?:#(?<packageTag>[\w\-.]+?))?$/
+  /^(?<packageName>[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<packageTag>[\w\-.]+?))?$/
 );
 
 export function replaceArgs(
@@ -74,10 +75,10 @@ export function replaceArgs(
 export function parsePreset(input: string): ParsedPreset {
   let str = input;
   let presetSource: string;
-  let presetPath: string;
+  let presetPath: string | undefined;
   let packageName: string;
   let presetName: string;
-  let packageTag: string;
+  let packageTag: string | undefined;
   let params: string[];
   if (str.startsWith('github>')) {
     presetSource = 'github';
@@ -119,6 +120,7 @@ export function parsePreset(input: string): ParsedPreset {
     'packages',
     'preview',
     'regexManagers',
+    'replacements',
     'schedule',
     'workarounds',
   ];
@@ -157,12 +159,8 @@ export function parsePreset(input: string): ParsedPreset {
     ({ packageName, presetPath, presetName, packageTag } =
       nonScopedPresetWithSubdirRegex.exec(str)?.groups || {});
   } else {
-    ({ packageName, presetPath, presetName, packageTag } =
+    ({ packageName, presetName, packageTag } =
       gitPresetRegex.exec(str)?.groups || {});
-
-    if (is.nonEmptyString(presetPath) && presetPath.endsWith('/')) {
-      presetPath = presetPath.slice(0, -1);
-    }
 
     if (presetSource === 'npm' && !packageName.startsWith('renovate-config-')) {
       packageName = `renovate-config-${packageName}`;
@@ -251,9 +249,10 @@ export async function getPreset(
 export async function resolveConfigPresets(
   inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
-  ignorePresets?: string[],
+  _ignorePresets?: string[],
   existingPresets: string[] = []
 ): Promise<AllConfig> {
+  let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets || [];
   }

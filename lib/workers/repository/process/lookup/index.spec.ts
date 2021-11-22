@@ -71,8 +71,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = datasourceNpmId;
       config.rollbackPrs = true;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '0.9.7', updateType: 'rollback' },
+        { newValue: '1.4.1', updateType: 'major' },
+      ]);
     });
     it('returns rollback for ranged version', async () => {
       config.currentValue = '^0.9.99';
@@ -80,8 +82,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = datasourceNpmId;
       config.rollbackPrs = true;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '^0.9.7', updateType: 'rollback' },
+      ]);
     });
     it('supports minor and major upgrades for tilde ranges', async () => {
       config.currentValue = '^0.4.0';
@@ -89,8 +92,11 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '0.4.4', updateType: 'pin' },
+        { newValue: '0.9.7', updateType: 'minor' },
+        { newValue: '1.4.1', updateType: 'major' },
+      ]);
     });
     it('supports lock file updates mixed with regular updates', async () => {
       config.currentValue = '^0.4.0';
@@ -100,8 +106,11 @@ describe('workers/repository/process/lookup/index', () => {
       config.separateMinorPatch = true;
       config.lockedVersion = '0.4.0';
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { isLockfileUpdate: true, newValue: '^0.4.0', updateType: 'patch' },
+        { newValue: '^0.9.0', updateType: 'minor' },
+        { newValue: '^1.0.0', updateType: 'major' },
+      ]);
     });
     it('returns multiple updates if grouping but separateMajorMinor=true', async () => {
       config.groupName = 'somegroup';
@@ -145,8 +154,11 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '0.4.4', updateType: 'pin' },
+        { newValue: '0.9.7', updateType: 'minor' },
+        { newValue: '1.4.1', updateType: 'major' },
+      ]);
     });
     it('enforces allowedVersions', async () => {
       config.currentValue = '0.4.0';
@@ -235,8 +247,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '0.9.7', updateType: 'patch' },
+        { newValue: '1.4.1', updateType: 'major' },
+      ]);
     });
     it('returns patch minor and major', async () => {
       config.separateMinorPatch = true;
@@ -256,8 +270,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '0.4.4', updateType: 'pin' },
+        { newValue: '1.4.1', updateType: 'major' },
+      ]);
     });
     it('disables major release separation (minor)', async () => {
       config.separateMajorMinor = false;
@@ -266,8 +282,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.4.1', updateType: 'minor' },
+      ]);
     });
     it('uses minimum version for vulnerabilityAlerts', async () => {
       config.currentValue = '1.0.0';
@@ -285,8 +302,11 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '0.4.4', updateType: 'pin' },
+        { newValue: '0.9.7', updateType: 'minor' },
+        { newValue: '1.4.1', updateType: 'major' },
+      ]);
     });
     it('ignores pinning for ranges when other upgrade exists', async () => {
       config.currentValue = '~0.9.0';
@@ -294,8 +314,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '0.9.7', updateType: 'pin' },
+        { newValue: '1.4.1', updateType: 'major' },
+      ]);
     });
     it('upgrades minor ranged versions', async () => {
       config.currentValue = '~1.0.0';
@@ -303,8 +325,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.0.1', updateType: 'pin' },
+        { newValue: '1.4.1', updateType: 'minor' },
+      ]);
     });
     it('handles update-lockfile', async () => {
       config.currentValue = '^1.2.1';
@@ -323,8 +347,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '~1.3.0 || ~1.4.0', updateType: 'minor' },
+      ]);
     });
     it('replaces minor complex ranged versions if configured', async () => {
       config.currentValue = '~1.2.0 || ~1.3.0';
@@ -332,8 +357,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '~1.4.0', updateType: 'minor' },
+      ]);
     });
     it('widens major ranged versions if configured', async () => {
       config.currentValue = '^2.0.0';
@@ -344,8 +370,9 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '^2.0.0 || ^3.0.0', updateType: 'major' },
+      ]);
     });
     it('replaces major complex ranged versions if configured', async () => {
       config.currentValue = '^1.0.0 || ^2.0.0';
@@ -356,8 +383,9 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '^3.0.0', updateType: 'major' },
+      ]);
     });
     it('pins minor ranged versions', async () => {
       config.currentValue = '^1.0.0';
@@ -365,8 +393,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.4.1', updateType: 'pin' },
+      ]);
     });
     it('uses the locked version for pinning', async () => {
       config.currentValue = '^1.0.0';
@@ -375,8 +404,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.0.0', updateType: 'pin' },
+        { newValue: '1.4.1', updateType: 'minor' },
+      ]);
     });
     it('ignores minor ranged versions when not pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -401,8 +432,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.3.0', updateType: 'pin' },
+        { newValue: '1.4.1', updateType: 'minor' },
+      ]);
     });
     it('upgrades .x minor ranges', async () => {
       config.currentValue = '1.3.x';
@@ -410,8 +443,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.3.0', updateType: 'pin' },
+        { newValue: '1.4.1', updateType: 'minor' },
+      ]);
     });
     it('upgrades tilde ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -419,8 +454,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '~1.4.0', updateType: 'minor' },
+      ]);
     });
     it('upgrades .x major ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -428,8 +464,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.x', updateType: 'major' },
+      ]);
     });
     it('upgrades .x minor ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -437,8 +474,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.4.x', updateType: 'minor' },
+      ]);
     });
     it('upgrades .x complex minor ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
@@ -446,8 +484,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.2.x - 1.4.x', updateType: 'minor' },
+      ]);
     });
     it('upgrades shorthand major ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -455,8 +494,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1', updateType: 'major' },
+      ]);
     });
     it('upgrades shorthand minor ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -464,8 +504,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.4', updateType: 'minor' },
+      ]);
     });
     it('upgrades multiple tilde ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -473,8 +514,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '~0.9.0', updateType: 'minor' },
+        { newValue: '~1.4.0', updateType: 'major' },
+      ]);
     });
     it('upgrades multiple caret ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -482,8 +525,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '^0.9.0', updateType: 'minor' },
+        { newValue: '^1.0.0', updateType: 'major' },
+      ]);
     });
     it('supports complex ranges', async () => {
       config.rangeStrategy = 'widen';
@@ -493,8 +538,10 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(2);
-      // FIXME: explicit assert condition
-      expect(res.updates[0]).toMatchSnapshot();
+      expect(res.updates[0]).toMatchSnapshot({
+        newValue: '^0.7.0 || ^0.8.0 || ^0.9.0',
+        updateType: 'minor',
+      });
     });
     it('supports complex major ranges', async () => {
       config.rangeStrategy = 'widen';
@@ -505,8 +552,12 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        {
+          newValue: '^1.0.0 || ^2.0.0 || ^3.0.0',
+          updateType: 'major',
+        },
+      ]);
     });
     it('supports complex major hyphen ranges', async () => {
       config.rangeStrategy = 'widen';
@@ -517,8 +568,9 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.x - 3.x', updateType: 'major' },
+      ]);
     });
     it('widens .x OR ranges', async () => {
       config.rangeStrategy = 'widen';
@@ -529,8 +581,9 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.x || 2.x || 3.x', updateType: 'major' },
+      ]);
     });
     it('widens stanndalone major OR ranges', async () => {
       config.rangeStrategy = 'widen';
@@ -541,8 +594,9 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1 || 2 || 3', updateType: 'major' },
+      ]);
     });
     it('supports complex tilde ranges', async () => {
       config.rangeStrategy = 'widen';
@@ -550,8 +604,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '~1.2.0 || ~1.3.0 || ~1.4.0', updateType: 'minor' },
+      ]);
     });
     it('returns nothing for greater than ranges', async () => {
       config.rangeStrategy = 'replace';
@@ -567,8 +622,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '<= 0.9.7', updateType: 'minor' },
+        { newValue: '<= 1.4.1', updateType: 'major' },
+      ]);
     });
     it('upgrades less than ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -576,8 +633,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '< 0.9.8', updateType: 'minor' },
+        { newValue: '< 1.4.2', updateType: 'major' },
+      ]);
     });
     it('upgrades less than major ranges', async () => {
       config.rangeStrategy = 'replace';
@@ -585,8 +644,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '< 2', updateType: 'major' },
+      ]);
     });
     it('upgrades less than equal minor ranges', async () => {
       config.rangeStrategy = 'replace';
@@ -594,8 +654,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '<= 1.4', updateType: 'minor' },
+      ]);
     });
     it('upgrades equal minor ranges', async () => {
       config.rangeStrategy = 'replace';
@@ -603,8 +664,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '=1.4.1', updateType: 'minor' },
+      ]);
     });
     it('upgrades less than equal major ranges', async () => {
       config.rangeStrategy = 'replace';
@@ -613,8 +675,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '<= 2', updateType: 'major' },
+      ]);
     });
     it('upgrades major less than equal ranges', async () => {
       config.rangeStrategy = 'replace';
@@ -675,8 +738,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toMatchSnapshot([]);
     });
     it('supports > latest versions if configured', async () => {
       config.respectLatest = false;
@@ -684,8 +746,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '2.0.3', updateType: 'major' },
+      ]);
     });
     it('should ignore unstable versions if the current version is stable', async () => {
       config.currentValue = '2.5.16';
@@ -715,8 +778,9 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '2.0.0', updateType: 'major' },
+      ]);
     });
 
     it('should return pendingChecks', async () => {
@@ -943,8 +1007,9 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://registry.npmjs.org')
         .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '^0.0.35', updateType: 'patch' },
+      ]);
     });
     it('should downgrade from missing versions', async () => {
       config.currentValue = '1.16.1';
@@ -1000,8 +1065,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '^1.4.1', updateType: 'minor' },
+      ]);
     });
     it('supports in-range tilde updates', async () => {
       config.rangeStrategy = 'bump';
@@ -1010,8 +1076,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.separateMinorPatch = true;
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '~1.0.1', updateType: 'patch' },
+        { newValue: '~1.4.1', updateType: 'minor' },
+      ]);
     });
     it('supports in-range tilde patch updates', async () => {
       config.rangeStrategy = 'bump';
@@ -1020,8 +1088,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.separateMinorPatch = true;
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '~1.0.1', updateType: 'patch' },
+        { newValue: '~1.4.1', updateType: 'minor' },
+      ]);
     });
     it('supports in-range gte updates', async () => {
       config.rangeStrategy = 'bump';
@@ -1029,8 +1099,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '>=1.4.1', updateType: 'minor' },
+      ]);
     });
     it('supports majorgte updates', async () => {
       config.rangeStrategy = 'bump';
@@ -1039,8 +1110,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = datasourceNpmId;
       config.separateMajorMinor = false;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '>=1.4.1', updateType: 'major' },
+      ]);
     });
     it('rejects in-range unsupported operator', async () => {
       config.rangeStrategy = 'bump';
@@ -1048,8 +1120,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
     it('rejects non-fully specified in-range updates', async () => {
       config.rangeStrategy = 'bump';
@@ -1057,8 +1128,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
     it('rejects complex range in-range updates', async () => {
       config.rangeStrategy = 'bump';
@@ -1066,8 +1136,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'q';
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
     it('replaces non-range in-range updates', async () => {
       config.depName = 'q';
@@ -1076,8 +1145,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '1.0.0';
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([
+        { newValue: '1.4.1', updateType: 'minor' },
+      ]);
     });
     it('handles github 404', async () => {
       config.depName = 'foo';
@@ -1085,8 +1155,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
       httpMock.scope('https://pypi.org').get('/pypi/foo/json').reply(404);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
     it('handles pypi 404', async () => {
       config.depName = 'foo';
@@ -1097,8 +1166,7 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://api.github.com')
         .get('/repos/some/repo/git/refs/tags?per_page=100')
         .reply(404);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
     it('handles packagist', async () => {
       config.depName = 'foo/bar';
@@ -1110,16 +1178,14 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://packagist.org')
         .get('/packages/foo/bar.json')
         .reply(404);
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
     it('handles unknown datasource', async () => {
       config.depName = 'foo';
       config.datasource = 'typo';
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
-      // FIXME: explicit assert condition
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot([]);
     });
     it('handles PEP440', async () => {
       config.manager = 'pip_requirements';
@@ -1134,8 +1200,11 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = datasourceNpmId;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toMatchSnapshot([
+        { newValue: '==0.9.4', updateType: 'pin' },
+        { newValue: '==0.9.7', updateType: 'patch' },
+        { newValue: '==1.4.1', updateType: 'major' },
+      ]);
     });
     it('returns complex object', async () => {
       config.currentValue = '1.3.0';
@@ -1185,15 +1254,13 @@ describe('workers/repository/process/lookup/index', () => {
       config.depName = 'node';
       config.datasource = datasourceDockerId;
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({ skipReason: 'invalid-value' });
     });
     it('skips undefined values', async () => {
       config.depName = 'node';
       config.datasource = datasourceDockerId;
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({ skipReason: 'invalid-value' });
     });
     it('handles digest pin', async () => {
       config.currentValue = '8.0.0';
@@ -1213,31 +1280,93 @@ describe('workers/repository/process/lookup/index', () => {
       docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        currentVersion: '8.0.0',
+        isSingleVersion: true,
+        updates: [
+          {
+            newDigest: 'sha256:abcdef1234567890',
+            newValue: '8.1.0',
+            updateType: 'minor',
+          },
+          {
+            newDigest: 'sha256:0123456789abcdef',
+            newValue: '8.0.0',
+            updateType: 'pin',
+          },
+        ],
+      });
     });
-    ['8.1.0', '8.1', '8'].forEach((currentValue) => {
-      it('skips uncompatible versions for ' + currentValue, async () => {
-        config.currentValue = currentValue;
-        config.depName = 'node';
-        config.versioning = dockerVersioningId;
-        config.datasource = datasourceDockerId;
-        docker.getReleases.mockResolvedValueOnce({
-          releases: [
-            { version: '8.1.0' },
-            { version: '8.1.5' },
-            { version: '8.1' },
-            { version: '8.2.0' },
-            { version: '8.2.5' },
-            { version: '8.2' },
-            { version: '8' },
-            { version: '9.0' },
-            { version: '9' },
-          ],
-        });
-        const res = await lookup.lookupUpdates(config);
-        // FIXME: explicit assert condition
-        expect(res).toMatchSnapshot();
+    it('skips uncompatible versions for 8.1.0', async () => {
+      config.currentValue = '8.1.0';
+      config.depName = 'node';
+      config.versioning = dockerVersioningId;
+      config.datasource = datasourceDockerId;
+      docker.getReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '8.1.0' },
+          { version: '8.1.5' },
+          { version: '8.1' },
+          { version: '8.2.0' },
+          { version: '8.2.5' },
+          { version: '8.2' },
+          { version: '8' },
+          { version: '9.0' },
+          { version: '9' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot({
+        updates: [{ newValue: '8.2.5', updateType: 'minor' }],
+      });
+    });
+    it('skips uncompatible versions for 8.1', async () => {
+      config.currentValue = '8.1';
+      config.depName = 'node';
+      config.versioning = dockerVersioningId;
+      config.datasource = datasourceDockerId;
+      docker.getReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '8.1.0' },
+          { version: '8.1.5' },
+          { version: '8.1' },
+          { version: '8.2.0' },
+          { version: '8.2.5' },
+          { version: '8.2' },
+          { version: '8' },
+          { version: '9.0' },
+          { version: '9' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot({
+        updates: [
+          { newValue: '8.2', updateType: 'minor' },
+          { newValue: '9.0', updateType: 'major' },
+        ],
+      });
+    });
+    it('skips uncompatible versions for 8', async () => {
+      config.currentValue = '8';
+      config.depName = 'node';
+      config.versioning = dockerVersioningId;
+      config.datasource = datasourceDockerId;
+      docker.getReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '8.1.0' },
+          { version: '8.1.5' },
+          { version: '8.1' },
+          { version: '8.2.0' },
+          { version: '8.2.5' },
+          { version: '8.2' },
+          { version: '8' },
+          { version: '9.0' },
+          { version: '9' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot({
+        updates: [{ newValue: '9', updateType: 'major' }],
       });
     });
     it('handles digest pin for up to date version', async () => {
@@ -1257,8 +1386,15 @@ describe('workers/repository/process/lookup/index', () => {
       });
       docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updates: [
+          {
+            newDigest: 'sha256:abcdef1234567890',
+            newValue: '8.1.0',
+            updateType: 'pin',
+          },
+        ],
+      });
     });
     it('handles digest pin for non-version', async () => {
       config.currentValue = 'alpine';
@@ -1280,8 +1416,15 @@ describe('workers/repository/process/lookup/index', () => {
       });
       docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updates: [
+          {
+            newDigest: 'sha256:abcdef1234567890',
+            newValue: 'alpine',
+            updateType: 'pin',
+          },
+        ],
+      });
     });
     it('handles digest lookup failure', async () => {
       config.currentValue = 'alpine';
@@ -1324,8 +1467,20 @@ describe('workers/repository/process/lookup/index', () => {
       docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updates: [
+          {
+            newDigest: 'sha256:abcdef1234567890',
+            newValue: '8.1.0',
+            updateType: 'minor',
+          },
+          {
+            newDigest: 'sha256:0123456789abcdef',
+            newValue: '8.0.0',
+            updateType: 'digest',
+          },
+        ],
+      });
     });
     it('handles digest update for non-version', async () => {
       config.currentValue = 'alpine';
@@ -1348,8 +1503,15 @@ describe('workers/repository/process/lookup/index', () => {
       });
       docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updates: [
+          {
+            newDigest: 'sha256:abcdef1234567890',
+            newValue: 'alpine',
+            updateType: 'digest',
+          },
+        ],
+      });
     });
     it('handles git submodule update', async () => {
       jest.mock('../../../../datasource/git-refs', () => ({
@@ -1381,8 +1543,15 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentDigest = 'some-digest';
 
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updates: [
+          {
+            newDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            updateType: 'digest',
+          },
+        ],
+        versioning: 'git',
+      });
     });
     it('handles sourceUrl packageRules with version restrictions', async () => {
       config.currentValue = '0.9.99';
@@ -1396,7 +1565,21 @@ describe('workers/repository/process/lookup/index', () => {
       ];
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
-      // FIXME: explicit assert condition
+      expect(res).toMatchSnapshot({
+        sourceUrl: 'https://github.com/kriskowal/q',
+        updates: [{ newValue: '1.3.0', updateType: 'major' }],
+      });
+    });
+
+    it('handles replacements', async () => {
+      config.currentValue = '1.4.1';
+      config.depName = 'q';
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'r';
+      config.replacementVersion = '2.0.0';
+      config.datasource = datasourceNpmId;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
   });

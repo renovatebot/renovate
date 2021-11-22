@@ -1090,6 +1090,11 @@ For instance if you have a project with an `"examples/"` directory you wish to i
 
 Useful to know: Renovate's default ignore is `node_modules` and `bower_components` only, however if you are extending the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
+## ignorePlugins
+
+Set this to `true` if running plugins causes problems.
+Applicable for Composer only for now.
+
 ## ignorePrAuthor
 
 This is usually needed if someone needs to migrate bot accounts, including from hosted app to self-hosted.
@@ -1234,7 +1239,7 @@ See [Private npm module support](https://docs.renovatebot.com/getting-started/pr
 ## npmrcMerge
 
 This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
-In some situations you need the ability to force override `.npmrc` contents in a repo (`npmMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmMerge=true`).
+In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
 A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and therefore its values ignored.
@@ -1647,6 +1652,31 @@ For example to apply a special label for Major updates:
     {
       "matchUpdateTypes": ["major"],
       "labels": ["UPDATE-MAJOR"]
+    }
+  ]
+}
+```
+
+### replacementName
+
+Use this field to define the name of a replacement package.
+Must be used with `replacementVersion` (see example below).
+You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+
+### replacementVersion
+
+Use this field to define the version of a replacement package.
+Must be used with `replacementName`.
+For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["jade"],
+      "replacementName": "pug",
+      "replacementVersion": "2.0.0"
     }
   ]
 }
@@ -2218,7 +2248,7 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
-In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageUrls` like so:
+In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageRules` like so:
 
 ```json
 {
@@ -2232,6 +2262,10 @@ In case there is a need to configure them manually, it can be done using this `r
 ```
 
 The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
+
+## replacement
+
+Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
 
 ## respectLatest
 
@@ -2357,13 +2391,15 @@ For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were b
 If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released.
 If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
-It is recommended that you leave this setting to `true`, because of the polite way that Renovate handles this.
+It is recommended that you leave this option to `true`, because of the polite way that Renovate handles this.
 For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives.
 In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released.
 You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it.
 Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to the base branch once it's tested.
 After that, Renovate will resume providing you updates to 3.x again!
 i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
+
+This option also has priority over package groups configured by `packageRule`. So Renovate will propose separate PRs for major and minor updates of packages even if they are grouped. If you want to enforce grouped package updates, you need to set this option `false` within the `packageRule`.
 
 ## separateMinorPatch
 
