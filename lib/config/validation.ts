@@ -392,9 +392,7 @@ export async function validateConfig(
                 'depTypeTemplate',
               ];
               // TODO: fix types
-              for (const [managerIndex, regexManager] of (
-                val as any[]
-              ).entries()) {
+              for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
                     (k) => !allowedKeys.includes(k)
