@@ -287,6 +287,9 @@
     "typescript": "4.4.4",
     "unified": "9.2.2"
   },
+  "resolutions": {
+    "**/json-schema": "^0.4.0"
+  },
   "files": [
     "dist"
   ]
