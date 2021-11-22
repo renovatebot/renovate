@@ -287,9 +287,6 @@
     "typescript": "4.4.4",
     "unified": "9.2.2"
   },
-  "resolutions": {
-    "**/kind-of": ">=6.0.3"
-  },
   "files": [
     "dist"
   ]
