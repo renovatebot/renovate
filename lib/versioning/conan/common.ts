@@ -2,6 +2,32 @@ import * as semver from 'semver';
 import { SemVer, parseRange } from 'semver-utils';
 import { regEx } from '../../util/regex';
 
+export function makeVersion(
+  version: string,
+  options: semver.Options
+): string | boolean {
+  const splitVersion = version.split('.');
+  const prerelease = semver.prerelease(version, options);
+
+  if (prerelease && !options.includePrerelease) {
+    if (!Number.isNaN(+prerelease[0])) {
+      const stringVersion = `${splitVersion[0]}.${splitVersion[1]}.${splitVersion[2]}`;
+      return semver.valid(stringVersion, options);
+    }
+    return false;
+  }
+
+  if (
+    options.loose &&
+    !semver.valid(version, options) &&
+    splitVersion.length !== 3
+  ) {
+    return semver.valid(semver.coerce(version, options), options);
+  }
+
+  return semver.valid(version, options);
+}
+
 export function cleanVersion(version: string): string {
   if (version) {
     return version

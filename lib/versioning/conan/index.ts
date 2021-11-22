@@ -8,6 +8,7 @@ import {
   containsOperators,
   fixParsedRange,
   getOptions,
+  makeVersion,
   matchesWithOptions,
 } from './common';
 
@@ -25,33 +26,7 @@ export const supportedRangeStrategies = ['auto', 'bump', 'widen', 'replace'];
 const MIN = 1;
 const MAX = -1;
 
-const makeVersion = (
-  version: string,
-  options: semver.Options
-): string | boolean => {
-  const splitVersion = version.split('.');
-  const prerelease = semver.prerelease(version, options);
-
-  if (prerelease && !options.includePrerelease) {
-    if (!Number.isNaN(+prerelease[0])) {
-      const stringVersion = `${splitVersion[0]}.${splitVersion[1]}.${splitVersion[2]}`;
-      return semver.valid(stringVersion, options);
-    }
-    return false;
-  }
-
-  if (
-    options.loose &&
-    !semver.valid(version, options) &&
-    splitVersion.length !== 3
-  ) {
-    return semver.valid(semver.coerce(version, options), options);
-  }
-
-  return semver.valid(version, options);
-};
-
-const isVersion = (input: string): string | boolean => {
+function isVersion(input: string): string | boolean {
   if (input && !input.includes('[')) {
     const qualifiers = getOptions(input);
     const version = cleanVersion(input);
@@ -62,9 +37,9 @@ const isVersion = (input: string): string | boolean => {
     return makeVersion(version, qualifiers) || looseResult;
   }
   return false;
-};
+}
 
-const isValid = (input: string): string | boolean => {
+function isValid(input: string): string | boolean {
   const version = cleanVersion(input);
   const qualifiers = getOptions(input);
   if (makeVersion(version, qualifiers)) {
@@ -72,10 +47,10 @@ const isValid = (input: string): string | boolean => {
   }
 
   return semver.validRange(version, qualifiers);
-};
+}
 
 // always include prereleases
-const getMajor = (version: string): null | number => {
+function getMajor(version: string): null | number {
   const cleanedVersion = cleanVersion(version);
   const options = getOptions(version);
   options.includePrerelease = true;
@@ -84,10 +59,10 @@ const getMajor = (version: string): null | number => {
     return Number(cleanerVersion.split('.')[0]);
   }
   return null;
-};
+}
 
 // always include prereleases
-const getMinor = (version: string): null | number => {
+function getMinor(version: string): null | number {
   const cleanedVersion = cleanVersion(version);
   const options = getOptions(version);
   options.includePrerelease = true;
@@ -96,10 +71,10 @@ const getMinor = (version: string): null | number => {
     return Number(cleanerVersion.split('.')[1]);
   }
   return null;
-};
+}
 
 // always include prereleases
-const getPatch = (version: string): null | number => {
+function getPatch(version: string): null | number {
   const cleanedVersion = cleanVersion(version);
   const options = getOptions(version);
   options.includePrerelease = true;
@@ -113,9 +88,9 @@ const getPatch = (version: string): null | number => {
     return Number(newVersion.split('.')[2]);
   }
   return null;
-};
+}
 
-const equals = (version: string, other: string): boolean => {
+function equals(version: string, other: string): boolean {
   const cleanedVersion = cleanVersion(version);
   const cleanOther = cleanVersion(other);
   const options = { loose: true, includePrerelease: true };
@@ -125,9 +100,9 @@ const equals = (version: string, other: string): boolean => {
   } catch {
     return looseResult;
   }
-};
+}
 
-const isGreaterThan = (version: string, other: string): boolean => {
+function isGreaterThan(version: string, other: string): boolean {
   const cleanedVersion = cleanVersion(version);
   const cleanOther = cleanVersion(other);
   const options = { loose: true, includePrerelease: true };
@@ -137,9 +112,9 @@ const isGreaterThan = (version: string, other: string): boolean => {
   } catch {
     return looseResult;
   }
-};
+}
 
-const isLessThanRange = (version: string, range: string): boolean => {
+function isLessThanRange(version: string, range: string): boolean {
   const cleanedVersion = cleanVersion(version);
   const cleanRange = cleanVersion(range);
   const options = getOptions(range);
@@ -149,9 +124,9 @@ const isLessThanRange = (version: string, range: string): boolean => {
   } catch {
     return looseResult;
   }
-};
+}
 
-const sortVersions = (version: string, other: string): number => {
+function sortVersions(version: string, other: string): number {
   const cleanedVersion = cleanVersion(version);
   const cleanOther = cleanVersion(other);
   const options = { loose: true, includePrerelease: true };
@@ -160,9 +135,9 @@ const sortVersions = (version: string, other: string): number => {
   } catch {
     return looseAPI.sortVersions(cleanedVersion, cleanOther);
   }
-};
+}
 
-const matches = (version: string, range: string): boolean => {
+function matches(version: string, range: string): boolean {
   if (isVersion(version) && isVersion(range)) {
     return true;
   }
@@ -170,9 +145,9 @@ const matches = (version: string, range: string): boolean => {
   const options = getOptions(range);
   const cleanRange = cleanVersion(range);
   return matchesWithOptions(cleanedVersion, cleanRange, options);
-};
+}
 
-const isCompatible = (version: string, range: string): boolean => {
+function isCompatible(version: string, range: string): boolean {
   if (isVersion(version) && isVersion(range)) {
     return true;
   }
@@ -182,15 +157,17 @@ const isCompatible = (version: string, range: string): boolean => {
     return !isLessThanRange(version, range);
   }
   return false;
-};
+}
 
-const isStable = (_: string): boolean => true;
+function isStable(_: string): boolean {
+  return true;
+}
 
-const findSatisfyingVersion = (
+function findSatisfyingVersion(
   versions: string[],
   range: string,
   compareRt: number
-): string | null => {
+): string | null {
   const options = getOptions(range);
   let cur = null;
   let curSV = null;
@@ -217,17 +194,21 @@ const findSatisfyingVersion = (
     return versions[curIndex];
   }
   return null;
-};
+}
 
-const minSatisfyingVersion = (
+function minSatisfyingVersion(
   versions: string[],
   range: string
-): string | null => findSatisfyingVersion(versions, range, MIN);
+): string | null {
+  return findSatisfyingVersion(versions, range, MIN);
+}
 
-const getSatisfyingVersion = (
+function getSatisfyingVersion(
   versions: string[],
   range: string
-): string | null => findSatisfyingVersion(versions, range, MAX);
+): string | null {
+  return findSatisfyingVersion(versions, range, MAX);
+}
 
 function replaceRange({ currentValue, newVersion }: NewValueConfig): string {
   const parsedRange = parseRange(currentValue);
