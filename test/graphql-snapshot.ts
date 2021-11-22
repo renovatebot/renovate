@@ -37,11 +37,13 @@ type Variables = Record<string, string>;
 interface SelectionSet {
   __vars?: Variables;
   __args?: Arguments;
-  [key: string]: null | SelectionSet | Arguments;
+  [key: string]: undefined | null | SelectionSet | Arguments;
 }
 
 interface GraphqlSnapshot {
   query?: SelectionSet;
+  mutation?: SelectionSet;
+  subscription?: SelectionSet;
   variables?: Record<string, string>;
 }
 
@@ -81,7 +83,7 @@ function getArguments(key: string, val: ValueNode): Arguments {
 }
 
 function simplifyArguments(
-  argNodes: ReadonlyArray<ArgumentNode>
+  argNodes?: ReadonlyArray<ArgumentNode>
 ): Arguments | null {
   if (argNodes) {
     let result: Arguments = {};
