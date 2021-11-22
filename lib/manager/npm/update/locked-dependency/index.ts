@@ -16,10 +16,7 @@ export function validateInputs(config: UpdateLockedConfig): boolean {
     return false;
   }
   if (!(semver.isVersion(currentVersion) && semver.isVersion(newVersion))) {
-    logger.warn(
-      { currentVersion, newVersion },
-      'Update versions are not valid'
-    );
+    logger.warn({ config }, 'Update versions are not valid');
     return false;
   }
   return true;
