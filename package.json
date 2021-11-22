@@ -288,8 +288,7 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "**/css-what": "^5.0.1",
-    "**/kind-of": ">=6.0.3"
+    "**/json-schema": "^0.4.0"
   },
   "files": [
     "dist"
