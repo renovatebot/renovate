@@ -33,26 +33,28 @@ export function extractPackageFile(content: string): PackageFile | null {
     matrix_include = doc.matrix.include;
   }
 
-  if (is.array(matrix_include)) {
-    for (const item of matrix_include) {
-      if (item?.node_js) {
-        if (is.array(item.node_js)) {
-          item.node_js.forEach((currentValue) => {
-            deps.push({
-              depName: 'node',
-              datasource: datasourceGithubTags.id,
-              lookupName: 'nodejs/node',
-              currentValue: currentValue.toString(),
-            });
-          });
-        } else if (is.string(item.node_js)) {
+  if (!is.array(matrix_include)) {
+    return deps.length ? { deps } : null;
+  }
+
+  for (const item of matrix_include) {
+    if (item?.node_js) {
+      if (is.array(item.node_js)) {
+        item.node_js.forEach((currentValue) => {
           deps.push({
             depName: 'node',
             datasource: datasourceGithubTags.id,
             lookupName: 'nodejs/node',
-            currentValue: item.node_js.toString(),
+            currentValue: currentValue.toString(),
           });
-        }
+        });
+      } else if (is.string(item.node_js)) {
+        deps.push({
+          depName: 'node',
+          datasource: datasourceGithubTags.id,
+          lookupName: 'nodejs/node',
+          currentValue: item.node_js.toString(),
+        });
       }
     }
   }
