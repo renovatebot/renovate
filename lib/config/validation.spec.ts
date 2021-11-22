@@ -296,6 +296,29 @@ describe('config/validation', () => {
         regexManagers: [
           {
             fileMatch: [],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "message": "Each Regex Manager must contain a fileMatch array",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+    it('errors if empty regexManager matchStrings', async () => {
+      const config = {
+        regexManagers: [
+          {
+            fileMatch: [],
             matchStrings: [],
           },
         ],
@@ -306,6 +329,14 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "message": "Each Regex Manager must contain a fileMatch array",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
     });
     it('errors if no regexManager fileMatch', async () => {
       const config = {
