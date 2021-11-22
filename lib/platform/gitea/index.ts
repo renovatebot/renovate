@@ -224,8 +224,7 @@ const platform: Platform = {
     repoName?: string,
     branchOrTag?: string
   ): Promise<any | null> {
-    const repo = repoName ?? config.repository;
-    const raw = await platform.getRawFile(fileName, repo, branchOrTag);
+    const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
     if (fileName.endsWith('.json5')) {
       return JSON5.parse(raw);
     }

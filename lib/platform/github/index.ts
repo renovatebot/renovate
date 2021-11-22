@@ -189,8 +189,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const repo = repoName ?? config.repository;
-  const raw = await getRawFile(fileName, repo, branchOrTag);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
