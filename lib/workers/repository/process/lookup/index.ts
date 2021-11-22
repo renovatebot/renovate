@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
@@ -231,10 +232,12 @@ export async function lookupUpdates(
           release.version,
           versioning
         );
-        if (buckets[bucket]) {
-          buckets[bucket].push(release);
-        } else {
-          buckets[bucket] = [release];
+        if (is.string(bucket)) {
+          if (buckets[bucket]) {
+            buckets[bucket].push(release);
+          } else {
+            buckets[bucket] = [release];
+          }
         }
       }
       const depResultConfig = mergeChildConfig(config, res);
