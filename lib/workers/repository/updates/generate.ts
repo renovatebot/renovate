@@ -172,6 +172,10 @@ export function generateBranchConfig(
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
     // istanbul ignore if
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
+      logger.debug(
+        { branchName: config.branchName },
+        'Secrets exposed in commit message'
+      );
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
@@ -202,6 +206,10 @@ export function generateBranchConfig(
         .replace(regEx(/\s+/g), ' '); // TODO #12071
       // istanbul ignore if
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
+        logger.debug(
+          { branchName: config.branchName },
+          'Secrets were exposed in PR title'
+        );
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
       if (upgrade.toLowerCase) {
