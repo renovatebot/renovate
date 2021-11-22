@@ -121,8 +121,8 @@ export async function getRawFile(
   let repoId: string;
   if (repoName) {
     const repos = await azureApiGit.getRepositories();
-    const repository = getRepoByName(repoName, repos);
-    repoId = repository.id;
+    const repo = getRepoByName(repoName, repos);
+    repoId = repo.id;
   } else {
     repoId = config.repoId;
   }
