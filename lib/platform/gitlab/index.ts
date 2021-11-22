@@ -685,6 +685,8 @@ export function massageMarkdown(input: string): string {
     );
 
     desc = smartTruncate(desc, 25000);
+  } else {
+    desc = smartTruncate(desc, 1000000);
   }
 
   return desc;
