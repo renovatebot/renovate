@@ -668,15 +668,10 @@ describe('platform/azure/index', () => {
         },
       };
       const prUpdateResult = {
-        ...prResult,
-        reviewers: [
-          {
-            reviewerUrl: prResult.createdBy.url,
-            vote: AzurePrVote.Approved,
-            isFlagged: false,
-            isRequired: false,
-          },
-        ],
+        reviewerUrl: prResult.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
       };
       const updateFn = jest
         .fn(() => prUpdateResult)
