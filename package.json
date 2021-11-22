@@ -136,7 +136,7 @@
     "@yarnpkg/core": "2.4.0",
     "@yarnpkg/parsers": "2.4.1",
     "auth-header": "1.0.0",
-    "azure-devops-node-api": "11.0.1",
+    "azure-devops-node-api": "11.1.0",
     "bunyan": "1.8.15",
     "cacache": "15.3.0",
     "chalk": "4.1.2",
