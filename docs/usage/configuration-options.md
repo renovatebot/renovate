@@ -2408,7 +2408,9 @@ Then eventually when you do want to update to Webpack 3.x you can make that upda
 After that, Renovate will resume providing you updates to 3.x again!
 i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
-This option also has priority over package groups configured by `packageRule`. So Renovate will propose separate PRs for major and minor updates of packages even if they are grouped. If you want to enforce grouped package updates, you need to set this option `false` within the `packageRule`.
+This option also has priority over package groups configured by `packageRule`.
+So Renovate will propose separate PRs for major and minor updates of packages even if they are grouped.
+If you want to enforce grouped package updates, you need to set this option to `false` within the `packageRule`.
 
 ## separateMinorPatch
 
