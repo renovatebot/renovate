@@ -19,6 +19,7 @@ import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migrati
 import { PackageNameMigration } from './custom/package-name-migration';
 import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackageRulesMigration } from './custom/package-rules-migration';
+import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
@@ -80,6 +81,7 @@ export class MigrationsService {
     PackageNameMigration,
     PackagePatternMigration,
     PackageRulesMigration,
+    PackagesMigration,
     PathRulesMigration,
     PinVersionsMigration,
     RaiseDeprecationWarningsMigration,
