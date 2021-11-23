@@ -1,6 +1,7 @@
 # Gitea
 
-Renovate uses modern git upload filters to suppress large blob downloads. For Gitea you need to manually enable upload filters.
+Renovate uses modern Git upload filters to suppress large blob downloads.
+For Gitea you need to manually enable upload filters.
 Checkout the official [docs](https://docs.gitea.io/en-us/clone-filters/).
 
 ## Unsupported platform features/concepts
