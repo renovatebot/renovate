@@ -10,6 +10,7 @@ describe('config/migrations/custom/package-pattern-migration', () => {
       PackagePatternMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('packagePattern');
     expect(migratedConfig.packagePatterns).toEqual(['test']);
   });
 });

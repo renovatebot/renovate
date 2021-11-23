@@ -10,6 +10,7 @@ describe('config/migrations/custom/package-name-migration', () => {
       PackageNameMigration
     );
 
+    expect(migratedConfig).not.toHaveProperty('packageName');
     expect(migratedConfig.packageNames).toEqual(['test']);
   });
 });

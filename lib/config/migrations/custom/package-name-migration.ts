@@ -5,7 +5,6 @@ export class PackageNameMigration extends AbstractMigration {
 
   override run(value): void {
     this.delete();
-
     this.setSafely('packageNames', [value]);
   }
 }
