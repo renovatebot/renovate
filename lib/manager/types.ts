@@ -97,7 +97,6 @@ export interface PackageFile<T = Record<string, any>>
 
 export interface Package<T> extends ManagerData<T> {
   currentValue?: string;
-  unconstrainedValue?: boolean;
   currentDigest?: string;
   depName?: string;
   depType?: string;
