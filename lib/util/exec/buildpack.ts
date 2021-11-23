@@ -3,6 +3,7 @@ import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import * as allVersioning from '../../versioning';
 import { id as composerVersioningId } from '../../versioning/composer';
+import { id as semverVersioningId } from '../../versioning/semver';
 import type { ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
@@ -10,6 +11,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     depName: 'composer/composer',
     versioning: composerVersioningId,
+  },
+  jb: {
+    datasource: 'github-releases',
+    depName: 'jsonnet-bundler/jsonnet-bundler',
+    versioning: semverVersioningId,
   },
 };
 
