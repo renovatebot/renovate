@@ -6,7 +6,7 @@ export class RebaseStalePrsMigration extends AbstractMigration {
 
   override run(value): void {
     const rebaseConflictedPrs = this.get('rebaseConflictedPrs');
-    this.delete(this.propertyName);
+    this.delete();
 
     if (rebaseConflictedPrs !== false) {
       if (is.boolean(value)) {

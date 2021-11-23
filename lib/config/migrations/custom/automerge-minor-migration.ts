@@ -5,7 +5,7 @@ export class AutomergeMinorMigration extends AbstractMigration {
 
   override run(value): void {
     const minor = this.get('minor');
-    this.delete(this.propertyName);
+    this.delete();
 
     const newMinor = minor || {};
     newMinor.automerge = Boolean(value);

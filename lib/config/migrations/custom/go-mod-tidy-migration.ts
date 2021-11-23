@@ -6,7 +6,7 @@ export class GoModTidyMigration extends AbstractMigration {
   override run(value): void {
     const postUpdateOptions = this.get('postUpdateOptions');
 
-    this.delete(this.propertyName);
+    this.delete();
 
     if (value) {
       const newPostUpdateOptions = Array.isArray(postUpdateOptions)

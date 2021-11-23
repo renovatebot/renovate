@@ -5,7 +5,7 @@ export class RaiseDeprecationWarningsMigration extends AbstractMigration {
 
   override run(value): void {
     const suppressNotifications = this.get('suppressNotifications');
-    this.delete(this.propertyName);
+    this.delete();
 
     if (value === false) {
       const newSuppressNotifications = Array.isArray(suppressNotifications)

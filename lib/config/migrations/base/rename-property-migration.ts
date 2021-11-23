@@ -18,7 +18,7 @@ export class RenamePropertyMigration extends AbstractMigration {
   }
 
   override run(value): void {
-    this.delete(this.propertyName);
+    this.delete();
 
     this.setSafely(this.newPropertyName, value);
   }

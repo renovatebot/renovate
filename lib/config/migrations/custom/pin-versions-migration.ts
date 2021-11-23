@@ -5,7 +5,7 @@ export class PinVersionsMigration extends AbstractMigration {
   readonly propertyName = 'pinVersions';
 
   override run(value): void {
-    this.delete(this.propertyName);
+    this.delete();
 
     if (is.boolean(value)) {
       this.setSafely('rangeStrategy', value ? 'pin' : 'replace');

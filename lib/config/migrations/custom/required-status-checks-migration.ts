@@ -4,7 +4,7 @@ export class RequiredStatusChecksMigration extends AbstractMigration {
   readonly propertyName = 'requiredStatusChecks';
 
   override run(value): void {
-    this.delete(this.propertyName);
+    this.delete();
 
     if (value === null) {
       this.setSafely('ignoreTests', true);

@@ -4,7 +4,7 @@ export class UpgradeInRangeMigration extends AbstractMigration {
   readonly propertyName = 'upgradeInRange';
 
   override run(value): void {
-    this.delete(this.propertyName);
+    this.delete();
 
     if (value === true) {
       this.setSafely('rangeStrategy', 'bump');

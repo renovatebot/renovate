@@ -6,7 +6,7 @@ export class PathRulesMigration extends AbstractMigration {
   override run(value): void {
     const packageRules = this.get('packageRules');
 
-    this.delete(this.propertyName);
+    this.delete();
 
     if (Array.isArray(value)) {
       const newPackageRules = Array.isArray(packageRules)

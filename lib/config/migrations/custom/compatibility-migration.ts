@@ -5,7 +5,7 @@ export class CompatibilityMigration extends AbstractMigration {
   readonly propertyName = 'compatibility';
 
   override run(value): void {
-    this.delete(this.propertyName);
+    this.delete();
 
     if (is.object(value)) {
       this.setSafely('constraints', value);

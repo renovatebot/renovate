@@ -4,7 +4,7 @@ export class IgnoreNodeModulesMigration extends AbstractMigration {
   readonly propertyName = 'ignoreNodeModules';
 
   override run(value): void {
-    this.delete(this.propertyName);
+    this.delete();
 
     this.setSafely('ignorePaths', value ? ['node_modules/'] : []);
   }
