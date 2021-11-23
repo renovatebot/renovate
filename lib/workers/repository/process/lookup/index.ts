@@ -205,9 +205,16 @@ export async function lookupUpdates(
         });
       }
       let filterStart = currentVersion;
-      if (lockedVersion && rangeStrategy === 'update-lockfile') {
-        // Look for versions greater than the current locked version that still satisfy the package.json range
-        filterStart = lockedVersion;
+      if (lockedVersion) {
+        // istanbul ignore if
+        if (!versioning.isVersion(lockedVersion)) {
+          res.skipReason = SkipReason.InvalidVersion;
+          return res;
+        }
+        if (rangeStrategy === 'update-lockfile') {
+          // Look for versions greater than the current locked version that still satisfy the package.json range
+          filterStart = lockedVersion;
+        }
       }
       // Filter latest, unstable, etc
       let filteredReleases = filterVersions(
