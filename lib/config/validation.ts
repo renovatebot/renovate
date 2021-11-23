@@ -1,4 +1,3 @@
-import { parseCron } from '@cheap-glitch/mi-cron';
 import is from '@sindresorhus/is';
 import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
