@@ -76,7 +76,7 @@ export async function checkAutoMerge(
   if (automergeType === 'pr-comment') {
     logger.debug(`Applying automerge comment: ${automergeComment}`);
     // istanbul ignore if
-    if (GlobalConfig.isDryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info(
         `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
       );
@@ -100,7 +100,7 @@ export async function checkAutoMerge(
   }
   // Let's merge this
   // istanbul ignore if
-  if (GlobalConfig.isDryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info(
       `DRY-RUN: Would merge PR #${pr.number} with strategy "${automergeStrategy}"`
     );

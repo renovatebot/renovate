@@ -43,7 +43,7 @@ export async function rebaseOnboardingBranch(
   const commitMessage = commitMessageFactory.create();
 
   // istanbul ignore if
-  if (GlobalConfig.isDryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }

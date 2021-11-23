@@ -111,7 +111,7 @@ export async function ensureDependencyDashboard(
       )
     )
   ) {
-    if (GlobalConfig.isDryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
         'DRY-RUN: Would close Dependency Dashboard'
@@ -132,7 +132,7 @@ export async function ensureDependencyDashboard(
     is.nonEmptyArray(branches) &&
     branches.some((branch) => branch.result !== BranchResult.Automerged);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
-    if (GlobalConfig.isDryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
         'DRY-RUN: Would close Dependency Dashboard'
@@ -345,7 +345,7 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  if (GlobalConfig.isDryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info(
       { title: config.dependencyDashboardTitle },
       'DRY-RUN: Would ensure Dependency Dashboard'

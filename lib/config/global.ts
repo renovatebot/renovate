@@ -49,8 +49,4 @@ export class GlobalConfig {
   static reset(): void {
     GlobalConfig.config = {};
   }
-
-  static get isDryRun(): boolean {
-    return GlobalConfig.get('dryRun');
-  }
 }

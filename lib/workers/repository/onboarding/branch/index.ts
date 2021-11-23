@@ -70,7 +70,7 @@ export async function checkOnboardingBranch(
       );
     }
   }
-  if (!GlobalConfig.isDryRun) {
+  if (!GlobalConfig.get('dryRun')) {
     await checkoutBranch(onboardingBranch);
   }
   const branchList = [onboardingBranch];

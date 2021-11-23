@@ -31,7 +31,7 @@ async function cleanUpBranches(
             { prNo: pr.number, prTitle: pr.title },
             'Branch is modified - skipping PR autoclosing'
           );
-          if (GlobalConfig.isDryRun) {
+          if (GlobalConfig.get('dryRun')) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {
             await platform.ensureComment({
@@ -41,7 +41,7 @@ async function cleanUpBranches(
                 'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
           }
-        } else if (GlobalConfig.isDryRun) {
+        } else if (GlobalConfig.get('dryRun')) {
           logger.info(
             { prNo: pr.number, prTitle: pr.title },
             `DRY-RUN: Would autoclose PR`
@@ -62,7 +62,7 @@ async function cleanUpBranches(
           });
           await deleteBranch(branchName);
         }
-      } else if (GlobalConfig.isDryRun) {
+      } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
         logger.info({ branch: branchName }, `Deleting orphan branch`);
