@@ -1,0 +1,7 @@
+---
+- id: renovate-config-validator
+  name: renovate-config-validator
+  description: "renovatebot: Universal dependency update tool that fits into your workflows."
+  entry: renovate-config-validator
+  language: node
+  files: ^((\.git(hub|lab)/)?renovate\.json5?|\.renovaterc(\.json)?)
