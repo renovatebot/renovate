@@ -170,14 +170,16 @@ export async function lookupUpdates(
         .map((release) => release.version);
       const currentVersion =
         getCurrentVersion(
-          config,
+          currentValue,
+          lockedVersion,
           versioning,
           rangeStrategy,
           latestVersion,
           nonDeprecatedVersions
         ) ||
         getCurrentVersion(
-          config,
+          currentValue,
+          lockedVersion,
           versioning,
           rangeStrategy,
           latestVersion,
