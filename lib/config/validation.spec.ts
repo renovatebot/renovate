@@ -308,7 +308,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         Array [
           Object {
-            "message": "Each Regex Manager must contain a fileMatch array",
+            "message": "Each Regex Manager must contain a non-empty fileMatch array",
             "topic": "Configuration Error",
           },
         ]
@@ -318,21 +318,28 @@ describe('config/validation', () => {
       const config = {
         regexManagers: [
           {
-            fileMatch: [],
+            fileMatch: ['foo'],
             matchStrings: [],
+          },
+          {
+            fileMatch: ['foo'],
           },
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as RenovateConfig,
         true
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
+      expect(errors).toHaveLength(2);
       expect(errors).toMatchInlineSnapshot(`
         Array [
           Object {
-            "message": "Each Regex Manager must contain a fileMatch array",
+            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "topic": "Configuration Error",
+          },
+          Object {
+            "message": "Each Regex Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
         ]
