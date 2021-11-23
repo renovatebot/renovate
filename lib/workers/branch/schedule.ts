@@ -39,14 +39,17 @@ export function hasValidSchedule(
   }
   // check if any of the schedules fail to parse
   const hasFailedSchedules = schedule.some((scheduleText) => {
-    // Check if the string starts with asterisk - that may mean we have cron syntax
-    if (scheduleText.indexOf(minutesChar) === 0) {
-      const parsedCron = parseCron(scheduleText);
-      if (parsedCron === undefined || parsedCron.minutes.length !== 60) {
-        // Either wrong cron syntax or has minutes specified
+    const parsedCron = parseCron(scheduleText);
+    if (parsedCron !== undefined) {
+      if (
+        parsedCron.minutes.length !== 60 ||
+        scheduleText.indexOf(minutesChar) !== 0
+      ) {
+        message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
         return true;
       }
 
+      // It was valid cron syntax and * as minutes
       return false;
     }
 
