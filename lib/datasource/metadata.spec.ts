@@ -76,6 +76,28 @@ describe('datasource/metadata', () => {
     });
   });
 
+  it('Should massage github sourceUrls', () => {
+    const dep: ReleaseResult = {
+      sourceUrl: 'https://some.github.com/repo',
+      releases: [
+        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
+        {
+          version: '2.0.0.dev1',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+        },
+        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
+        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
+      ],
+    };
+    const datasource = PypiDatasource.id;
+    const lookupName = 'django-filter';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://github.com/some/repo',
+    });
+  });
+
   it('Should handle parsing of sourceUrls correctly for GitLab also', () => {
     const dep: ReleaseResult = {
       sourceUrl: 'https://gitlab.com/meno/dropzone/tree/master',

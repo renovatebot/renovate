@@ -61,8 +61,17 @@ export class GitRefsDatasource extends Datasource {
       { lookupName },
       this.id
     );
-    const findValue = newValue || 'HEAD';
-    const ref = rawRefs.find((rawRef) => rawRef.value === findValue);
+    let ref: RawRefs;
+    if (newValue) {
+      ref = rawRefs.find(
+        (rawRef) =>
+          ['heads', 'tags'].includes(rawRef.type) && rawRef.value === newValue
+      );
+    } else {
+      ref = rawRefs.find(
+        (rawRef) => rawRef.type === '' && rawRef.value === 'HEAD'
+      );
+    }
     if (ref) {
       return ref.hash;
     }
