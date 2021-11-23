@@ -2317,7 +2317,7 @@ You can configure the `rollbackPrs` property globally, per-lanuage, or per-packa
 
 The `schedule` option allows you to define times of week or month for Renovate updates.
 Running Renovate around the clock may seem too "noisy" for some projects and therefore `schedule` is a good way to reduce the noise by reducing the timeframe in which Renovate will operate on your repository.
-Renovate supports the standard [Cron syntax](https://crontab.guru/crontab.5.html) (without minutes) and [Later syntax](https://github.com/breejs/later) for defining the schedule.
+Renovate supports the standard [Cron syntax](https://crontab.guru/crontab.5.html) and [Later syntax](https://github.com/breejs/later) for defining the schedule.
 
 The default value for `schedule` is "at any time", which is functionally the same as declaring a `null` schedule.
 i.e. Renovate will run on the repository around the clock.
@@ -2336,6 +2336,8 @@ on friday and saturday
 every 3 months on the first day of the month
 * 0 2 * * *
 ```
+
+Note: For Cron schedule, please use \* for minutes, as Renovate doesn't support minute granularity.
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates.
 You could then configure a schedule like this at the repository level:
@@ -2364,7 +2366,8 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 ```
 
 Technical details: We mostly rely on the text parsing of the library [@breejs/later](https://github.com/breejs/later) but only its concepts of "days", "time_before", and "time_after".
-Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text). For parsing Cron syntax, we use [@chip-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
+Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
+For parsing Cron syntax, we use [@chip-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 ## semanticCommitScope

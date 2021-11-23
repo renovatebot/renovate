@@ -85,31 +85,22 @@ export function hasValidSchedule(
 function cronMatches(cron: string, now: DateTime): boolean {
   const parsedCron = parseCron(cron);
 
-  if (
-    parsedCron.hours.length !== 0 &&
-    parsedCron.hours.indexOf(now.hour) === -1
-  ) {
+  if (parsedCron.hours.indexOf(now.hour) === -1) {
     // Hours mismatch
     return false;
   }
 
-  if (parsedCron.days.length !== 0 && parsedCron.days.indexOf(now.day) === -1) {
+  if (parsedCron.days.indexOf(now.day) === -1) {
     // Days mismatch
     return false;
   }
 
-  if (
-    parsedCron.weekDays.length !== 0 &&
-    parsedCron.weekDays.indexOf(now.weekday) === -1
-  ) {
+  if (parsedCron.weekDays.indexOf(now.weekday) === -1) {
     // Weekdays mismatch
     return false;
   }
 
-  if (
-    parsedCron.months.length !== 0 &&
-    parsedCron.months.indexOf(now.month) === -1
-  ) {
+  if (parsedCron.months.indexOf(now.month) === -1) {
     // Months mismatch
     return false;
   }
