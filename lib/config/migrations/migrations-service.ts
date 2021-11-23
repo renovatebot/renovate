@@ -15,6 +15,7 @@ import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { PackageNameMigration } from './custom/package-name-migration';
+import { PackagePatternMigration } from './custom/package-pattern-migration';
 import { PackageRulesMigration } from './custom/package-rules-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
@@ -72,6 +73,7 @@ export class MigrationsService {
     HostRulesMigration,
     IgnoreNodeModulesMigration,
     PackageNameMigration,
+    PackagePatternMigration,
     PackageRulesMigration,
     PathRulesMigration,
     PinVersionsMigration,
