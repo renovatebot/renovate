@@ -44,8 +44,8 @@ export async function lookupUpdates(
     rollbackPrs,
     isVulnerabilityAlert,
     updatePinnedDependencies,
+    unconstrainedValue,
   } = config;
-  const effectiveValue = currentValue || config.effectiveValue;
   const res: UpdateResult = {
     updates: [],
     warnings: [],
@@ -64,8 +64,8 @@ export async function lookupUpdates(
       res.skipReason = SkipReason.InvalidConfig;
       return res;
     }
-    const isValid = effectiveValue && versioning.isValid(effectiveValue);
-    if (isValid) {
+    const isValid = currentValue && versioning.isValid(currentValue);
+    if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
         versioning.isSingleVersion(currentValue)
@@ -131,8 +131,8 @@ export async function lookupUpdates(
         );
       }
       // Check that existing constraint can be satisfied
-      const allSatisfyingVersions = allVersions.filter((v) =>
-        versioning.matches(v.version, effectiveValue)
+      const allSatisfyingVersions = allVersions.filter(
+        (v) => unconstrainedValue || versioning.matches(v.version, currentValue)
       );
       if (rollbackPrs && !allSatisfyingVersions.length) {
         const rollback = getRollbackUpdate(config, allVersions, versioning);
@@ -140,7 +140,7 @@ export async function lookupUpdates(
         if (!rollback) {
           res.warnings.push({
             topic: depName,
-            message: `Can't find version matching ${effectiveValue} for ${depName}`,
+            message: `Can't find version matching ${currentValue} for ${depName}`,
           });
           return res;
         }
@@ -171,7 +171,8 @@ export async function lookupUpdates(
         .map((release) => release.version);
       const currentVersion =
         getCurrentVersion(
-          effectiveValue,
+          currentValue,
+          unconstrainedValue,
           lockedVersion,
           versioning,
           rangeStrategy,
@@ -179,7 +180,8 @@ export async function lookupUpdates(
           nonDeprecatedVersions
         ) ||
         getCurrentVersion(
-          effectiveValue,
+          currentValue,
+          unconstrainedValue,
           lockedVersion,
           versioning,
           rangeStrategy,
@@ -227,9 +229,10 @@ export async function lookupUpdates(
         latestVersion,
         allVersions,
         versioning
-      ).filter((v) =>
-        // Leave only compatible versions
-        versioning.isCompatible(v.version, effectiveValue)
+      ).filter(
+        (v) =>
+          // Leave only compatible versions
+          unconstrainedValue || versioning.isCompatible(v.version, currentValue)
       );
       if (isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
@@ -377,7 +380,6 @@ export async function lookupUpdates(
         datasource,
         depName,
         digestOneAndOnly,
-        effectiveValue,
         followTag,
         lockedVersion,
         packageFile,
@@ -385,6 +387,7 @@ export async function lookupUpdates(
         rollbackPrs,
         isVulnerabilityAlert,
         updatePinnedDependencies,
+        unconstrainedValue,
         err,
       },
       'lookupUpdates error'

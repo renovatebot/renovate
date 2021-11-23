@@ -41,7 +41,7 @@ export interface LookupUpdateConfig
   datasource: string;
   depName: string;
   minimumConfidence?: string;
-  effectiveValue?: string;
+  unconstrainedValue?: boolean;
 }
 
 export interface UpdateResult {

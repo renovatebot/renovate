@@ -5,12 +5,16 @@ import type { VersioningApi } from '../../../../versioning/types';
 
 export function getCurrentVersion(
   currentValue: string,
+  unconstrainedValue: boolean,
   lockedVersion: string,
   versioning: VersioningApi,
   rangeStrategy: string,
   latestVersion: string,
   allVersions: string[]
 ): string | null {
+  if (unconstrainedValue) {
+    return allVersions.pop();
+  }
   // istanbul ignore if
   if (!is.string(currentValue)) {
     return null;

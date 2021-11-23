@@ -52,7 +52,7 @@ export async function extractPackageFile(
           ? currentValue
           : currentValue.slice(1, -1);
       } else {
-        dep.effectiveValue = '>=0';
+        dep.unconstrainedValue = true;
       }
       dep.datasource = RubyGemsDatasource.id;
       res.deps.push(dep);

@@ -341,8 +341,8 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].updateType).toBe('minor');
     });
-    it('handles effectiveValue', async () => {
-      config.effectiveValue = '>=0';
+    it('handles unconstrainedValue values', async () => {
+      config.unconstrainedValue = true;
       config.lockedVersion = '1.2.1';
       config.rangeStrategy = 'update-lockfile';
       config.depName = 'q';
@@ -352,7 +352,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchInlineSnapshot(`
         Array [
           Object {
-            "bucket": "non-major",
+            "bucket": "major",
             "isLockfileUpdate": true,
             "isRange": true,
             "newMajor": 1,
