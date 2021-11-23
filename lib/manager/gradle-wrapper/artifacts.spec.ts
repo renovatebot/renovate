@@ -9,7 +9,7 @@ import {
   git,
   partial,
 } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { resetPrefetchedImages } from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git';
@@ -50,7 +50,7 @@ describe('manager/gradle-wrapper/artifacts', () => {
       LC_ALL: 'en_US',
     });
 
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
@@ -58,7 +58,7 @@ describe('manager/gradle-wrapper/artifacts', () => {
   });
 
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   it('replaces existing value', async () => {
@@ -97,7 +97,7 @@ describe('manager/gradle-wrapper/artifacts', () => {
   });
 
   it('gradlew not found', async () => {
-    setGlobalConfig({ ...adminConfig, localDir: 'some-dir' });
+    GlobalConfig.set({ ...adminConfig, localDir: 'some-dir' });
     const res = await gradleWrapper.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',
       updatedDeps: [],

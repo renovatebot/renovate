@@ -3,7 +3,7 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../../test/exec-util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
@@ -141,12 +141,12 @@ describe('util/exec/docker/index', () => {
 
   describe('removeDanglingContainers', () => {
     beforeEach(() => {
-      setGlobalConfig({ binarySource: 'docker' });
+      GlobalConfig.set({ binarySource: 'docker' });
     });
 
     it('short-circuits in non-Docker environment', async () => {
       const execSnapshots = mockExecAll(exec);
-      setGlobalConfig({ binarySource: 'global' });
+      GlobalConfig.set({ binarySource: 'global' });
       await removeDanglingContainers();
       expect(execSnapshots).toBeEmpty();
     });
@@ -231,7 +231,7 @@ describe('util/exec/docker/index', () => {
       `bash -l -c "foo && bar && baz"`;
 
     beforeEach(() => {
-      setGlobalConfig({ dockerUser: 'some-user' });
+      GlobalConfig.set({ dockerUser: 'some-user' });
     });
 
     it('returns executable command', async () => {

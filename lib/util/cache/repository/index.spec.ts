@@ -1,6 +1,6 @@
 import * as _fs from 'fs-extra';
 import { mocked } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import * as repositoryCache from '.';
 
 jest.mock('fs-extra');
@@ -10,7 +10,7 @@ const fs = mocked(_fs);
 describe('util/cache/repository/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    setGlobalConfig({ cacheDir: '/tmp/renovate/cache/' });
+    GlobalConfig.set({ cacheDir: '/tmp/renovate/cache/' });
   });
   const config = {
     platform: 'github',

@@ -1,5 +1,5 @@
 import { configFileNames } from '../../../../config/app-strings';
-import { getGlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import {
@@ -43,7 +43,7 @@ export async function rebaseOnboardingBranch(
   const commitMessage = commitMessageFactory.create();
 
   // istanbul ignore if
-  if (getGlobalConfig().dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }

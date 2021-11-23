@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as handlebars from 'handlebars';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { clone } from '../clone';
 
@@ -154,7 +154,7 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...getGlobalConfig(), ...input };
+  const data = { ...GlobalConfig.get(), ...input };
   const filteredInput = filterFields ? getFilteredObject(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
