@@ -1,5 +1,8 @@
 # Gitea
 
+Renovate uses modern git upload filters to suppress large blob downloads. For Gitea you need to manually enable upload filters.
+Checkout the official [docs](https://docs.gitea.io/en-us/clone-filters/).
+
 ## Unsupported platform features/concepts
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than v1.14.0 do not have the required API.
