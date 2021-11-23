@@ -29,6 +29,7 @@ function matchesRule(
     manager,
     datasource,
   } = inputConfig;
+  const effectiveValue = currentValue || inputConfig.effectiveValue;
   // Setting empty arrays simplifies our logic later
   const matchFiles = packageRule.matchFiles || [];
   const matchPaths = packageRule.matchPaths || [];
@@ -206,14 +207,14 @@ function matchesRule(
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     if (isConfigRegex(matchCurrentVersionStr)) {
       const matches = configRegexPredicate(matchCurrentVersionStr);
-      if (!matches(currentValue)) {
+      if (!matches(effectiveValue)) {
         return false;
       }
       positiveMatch = true;
     } else if (version.isVersion(matchCurrentVersionStr)) {
       let isMatch = false;
       try {
-        isMatch = version.matches(matchCurrentVersionStr, currentValue);
+        isMatch = version.matches(matchCurrentVersionStr, effectiveValue);
       } catch (err) {
         // Do nothing
       }
@@ -223,8 +224,8 @@ function matchesRule(
       positiveMatch = true;
     } else {
       const compareVersion =
-        currentValue && version.isVersion(currentValue)
-          ? currentValue // it's a version so we can match against it
+        effectiveValue && version.isVersion(effectiveValue)
+          ? effectiveValue // it's a version so we can match against it
           : lockedVersion || currentVersion; // need to match against this currentVersion, if available
       if (compareVersion) {
         // istanbul ignore next
@@ -240,7 +241,7 @@ function matchesRule(
         }
       } else {
         logger.debug(
-          { matchCurrentVersionStr, currentValue },
+          { matchCurrentVersionStr, effectiveValue },
           'Could not find a version to compare'
         );
         return false;

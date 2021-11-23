@@ -386,6 +386,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depName?: string;
   currentValue?: string;
   currentVersion?: string;
+  effectiveValue?: string;
   lockedVersion?: string;
   updateType?: UpdateType;
   isBump?: boolean;
