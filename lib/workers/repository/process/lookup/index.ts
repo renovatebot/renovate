@@ -44,8 +44,8 @@ export async function lookupUpdates(
     rollbackPrs,
     isVulnerabilityAlert,
     updatePinnedDependencies,
-    unconstrainedValue,
   } = config;
+  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
   const res: UpdateResult = {
     updates: [],
     warnings: [],
@@ -172,7 +172,6 @@ export async function lookupUpdates(
       const currentVersion =
         getCurrentVersion(
           currentValue,
-          unconstrainedValue,
           lockedVersion,
           versioning,
           rangeStrategy,
@@ -181,7 +180,6 @@ export async function lookupUpdates(
         ) ||
         getCurrentVersion(
           currentValue,
-          unconstrainedValue,
           lockedVersion,
           versioning,
           rangeStrategy,

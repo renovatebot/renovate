@@ -28,8 +28,8 @@ function matchesRule(
     baseBranch,
     manager,
     datasource,
-    unconstrainedValue,
   } = inputConfig;
+  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
   // Setting empty arrays simplifies our logic later
   const matchFiles = packageRule.matchFiles || [];
   const matchPaths = packageRule.matchPaths || [];

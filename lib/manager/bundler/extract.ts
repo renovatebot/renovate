@@ -51,8 +51,6 @@ export async function extractPackageFile(
         dep.currentValue = regEx(/\s*,\s*/).test(currentValue) // TODO #12071
           ? currentValue
           : currentValue.slice(1, -1);
-      } else {
-        dep.unconstrainedValue = true;
       }
       dep.datasource = RubyGemsDatasource.id;
       res.deps.push(dep);

@@ -342,7 +342,6 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates[0].updateType).toBe('minor');
     });
     it('handles unconstrainedValue values', async () => {
-      config.unconstrainedValue = true;
       config.lockedVersion = '1.2.1';
       config.rangeStrategy = 'update-lockfile';
       config.depName = 'q';

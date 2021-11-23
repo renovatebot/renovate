@@ -22,7 +22,6 @@ Object {
       "managerData": Object {
         "lineNumber": 5,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -31,7 +30,6 @@ Object {
       "managerData": Object {
         "lineNumber": 6,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 5.0",
@@ -49,7 +47,6 @@ Object {
       "managerData": Object {
         "lineNumber": 9,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -58,7 +55,6 @@ Object {
       "managerData": Object {
         "lineNumber": 10,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -67,7 +63,6 @@ Object {
       "managerData": Object {
         "lineNumber": 11,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -79,7 +74,6 @@ Object {
       "managerData": Object {
         "lineNumber": 14,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -91,7 +85,6 @@ Object {
       "managerData": Object {
         "lineNumber": 15,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -103,7 +96,6 @@ Object {
       "managerData": Object {
         "lineNumber": 16,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -115,7 +107,6 @@ Object {
       "managerData": Object {
         "lineNumber": 20,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -127,7 +118,6 @@ Object {
       "managerData": Object {
         "lineNumber": 21,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "< 1.17.2",
@@ -151,7 +141,6 @@ Object {
       "managerData": Object {
         "lineNumber": 23,
       },
-      "unconstrainedValue": true,
     },
   ],
   "lockFiles": Array [
@@ -356,7 +345,6 @@ Object {
       "managerData": Object {
         "lineNumber": 29,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 0.7.7",
@@ -374,7 +362,6 @@ Object {
       "managerData": Object {
         "lineNumber": 31,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 5.1",
@@ -495,7 +482,6 @@ Object {
       "managerData": Object {
         "lineNumber": 49,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 2.1",
@@ -530,7 +516,6 @@ Object {
       "managerData": Object {
         "lineNumber": 53,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 4.3",
@@ -583,7 +568,6 @@ Object {
       "managerData": Object {
         "lineNumber": 59,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.1",
@@ -618,7 +602,6 @@ Object {
       "managerData": Object {
         "lineNumber": 63,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.10",
@@ -672,7 +655,6 @@ Object {
       "managerData": Object {
         "lineNumber": 69,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.19",
@@ -689,7 +671,6 @@ Object {
       "managerData": Object {
         "lineNumber": 71,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 2.1",
@@ -707,7 +688,6 @@ Object {
       "managerData": Object {
         "lineNumber": 73,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 6.2",
@@ -923,7 +903,6 @@ Object {
       "managerData": Object {
         "lineNumber": 97,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -931,7 +910,6 @@ Object {
       "managerData": Object {
         "lineNumber": 99,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 3.0",
@@ -1244,7 +1222,6 @@ Object {
       "managerData": Object {
         "lineNumber": 136,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 0.78",
@@ -1352,7 +1329,6 @@ Object {
       "managerData": Object {
         "lineNumber": 147,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1364,7 +1340,6 @@ Object {
       "managerData": Object {
         "lineNumber": 148,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 0.11",
@@ -1397,7 +1372,6 @@ Object {
       "managerData": Object {
         "lineNumber": 156,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1406,7 +1380,6 @@ Object {
       "managerData": Object {
         "lineNumber": 157,
       },
-      "unconstrainedValue": true,
     },
   ],
   "lockFiles": Array [
@@ -1431,7 +1404,6 @@ Object {
       "managerData": Object {
         "lineNumber": 4,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": ">= 11.1",
@@ -1449,7 +1421,6 @@ Object {
       "managerData": Object {
         "lineNumber": 6,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 5.0",
@@ -1473,7 +1444,6 @@ Object {
       "managerData": Object {
         "lineNumber": 10,
       },
-      "unconstrainedValue": true,
     },
   ],
   "lockFiles": Array [
@@ -1525,7 +1495,6 @@ Object {
       "managerData": Object {
         "lineNumber": 14,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 5",
@@ -1542,7 +1511,6 @@ Object {
       "managerData": Object {
         "lineNumber": 16,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 3.1.11",
@@ -1614,7 +1582,6 @@ Object {
       "managerData": Object {
         "lineNumber": 34,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.2.0",
@@ -1635,7 +1602,6 @@ Object {
       "managerData": Object {
         "lineNumber": 39,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "\\">= 3.0.5\\", \\"< 3.2\\"",
@@ -1653,7 +1619,6 @@ Object {
       "managerData": Object {
         "lineNumber": 41,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1662,7 +1627,6 @@ Object {
       "managerData": Object {
         "lineNumber": 42,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": ">= 1.1.0",
@@ -1683,7 +1647,6 @@ Object {
       "managerData": Object {
         "lineNumber": 49,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1695,7 +1658,6 @@ Object {
       "managerData": Object {
         "lineNumber": 50,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1707,7 +1669,6 @@ Object {
       "managerData": Object {
         "lineNumber": 51,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1719,7 +1680,6 @@ Object {
       "managerData": Object {
         "lineNumber": 52,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1731,7 +1691,6 @@ Object {
       "managerData": Object {
         "lineNumber": 53,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1742,7 +1701,6 @@ Object {
       "managerData": Object {
         "lineNumber": 54,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1754,7 +1712,6 @@ Object {
       "managerData": Object {
         "lineNumber": 55,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1766,7 +1723,6 @@ Object {
       "managerData": Object {
         "lineNumber": 56,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1778,7 +1734,6 @@ Object {
       "managerData": Object {
         "lineNumber": 57,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1790,7 +1745,6 @@ Object {
       "managerData": Object {
         "lineNumber": 58,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1802,7 +1756,6 @@ Object {
       "managerData": Object {
         "lineNumber": 59,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1814,7 +1767,6 @@ Object {
       "managerData": Object {
         "lineNumber": 64,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1826,7 +1778,6 @@ Object {
       "managerData": Object {
         "lineNumber": 66,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 4.0",
@@ -1850,7 +1801,6 @@ Object {
       "managerData": Object {
         "lineNumber": 69,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1861,7 +1811,6 @@ Object {
       "managerData": Object {
         "lineNumber": 71,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1873,7 +1822,6 @@ Object {
       "managerData": Object {
         "lineNumber": 73,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1885,7 +1833,6 @@ Object {
       "managerData": Object {
         "lineNumber": 74,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1897,7 +1844,6 @@ Object {
       "managerData": Object {
         "lineNumber": 75,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1909,7 +1855,6 @@ Object {
       "managerData": Object {
         "lineNumber": 80,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.11",
@@ -1933,7 +1878,6 @@ Object {
       "managerData": Object {
         "lineNumber": 82,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.2",
@@ -1954,7 +1898,6 @@ Object {
       "managerData": Object {
         "lineNumber": 88,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1963,7 +1906,6 @@ Object {
       "managerData": Object {
         "lineNumber": 89,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1975,7 +1917,6 @@ Object {
       "managerData": Object {
         "lineNumber": 92,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1987,7 +1928,6 @@ Object {
       "managerData": Object {
         "lineNumber": 93,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -1999,7 +1939,6 @@ Object {
       "managerData": Object {
         "lineNumber": 101,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2011,7 +1950,6 @@ Object {
       "managerData": Object {
         "lineNumber": 102,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2023,7 +1961,6 @@ Object {
       "managerData": Object {
         "lineNumber": 105,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2035,7 +1972,6 @@ Object {
       "managerData": Object {
         "lineNumber": 106,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2047,7 +1983,6 @@ Object {
       "managerData": Object {
         "lineNumber": 109,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": ">= 1.8.1",
@@ -2107,7 +2042,6 @@ Object {
       "managerData": Object {
         "lineNumber": 129,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2119,7 +2053,6 @@ Object {
       "managerData": Object {
         "lineNumber": 131,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2131,7 +2064,6 @@ Object {
       "managerData": Object {
         "lineNumber": 132,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": ">= 1.3.0",
@@ -2189,7 +2121,6 @@ Object {
       "managerData": Object {
         "lineNumber": 154,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2197,7 +2128,6 @@ Object {
       "managerData": Object {
         "lineNumber": 158,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2206,7 +2136,6 @@ Object {
       "managerData": Object {
         "lineNumber": 159,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": ">= 0.1.0",
@@ -2242,7 +2171,6 @@ Object {
       "registryUrls": Array [
         "https://gems.example.com",
       ],
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2253,7 +2181,6 @@ Object {
       "registryUrls": Array [
         "https://gems.example.com",
       ],
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "latest",
@@ -2269,7 +2196,6 @@ Object {
       "managerData": Object {
         "lineNumber": 10,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2281,7 +2207,6 @@ Object {
       "managerData": Object {
         "lineNumber": 14,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2293,7 +2218,6 @@ Object {
       "managerData": Object {
         "lineNumber": 15,
       },
-      "unconstrainedValue": true,
     },
   ],
   "registryUrls": Array [
@@ -2621,7 +2545,6 @@ Object {
       "managerData": Object {
         "lineNumber": 52,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 4.11",
@@ -2747,7 +2670,6 @@ Object {
       "managerData": Object {
         "lineNumber": 81,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.1.0",
@@ -2819,7 +2741,6 @@ Object {
       "managerData": Object {
         "lineNumber": 98,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.0",
@@ -2855,7 +2776,6 @@ Object {
       "managerData": Object {
         "lineNumber": 108,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 3.5",
@@ -2981,7 +2901,6 @@ Object {
       "managerData": Object {
         "lineNumber": 134,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -2990,7 +2909,6 @@ Object {
       "managerData": Object {
         "lineNumber": 135,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 2.12",
@@ -3161,7 +3079,6 @@ Object {
       "managerData": Object {
         "lineNumber": 158,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 3.1.0",
@@ -3248,7 +3165,6 @@ Object {
       "managerData": Object {
         "lineNumber": 175,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 0.6.0",
@@ -3338,7 +3254,6 @@ Object {
       "managerData": Object {
         "lineNumber": 200,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 2.0.9",
@@ -3383,7 +3298,6 @@ Object {
       "managerData": Object {
         "lineNumber": 216,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 4.0",
@@ -3572,7 +3486,6 @@ Object {
       "managerData": Object {
         "lineNumber": 273,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 0.10.5",
@@ -3806,7 +3719,6 @@ Object {
       "managerData": Object {
         "lineNumber": 321,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 0.8",
@@ -3990,7 +3902,6 @@ Object {
       "managerData": Object {
         "lineNumber": 353,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.7.0",
@@ -4350,7 +4261,6 @@ Object {
       "managerData": Object {
         "lineNumber": 404,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 3.22.0",
@@ -4446,7 +4356,6 @@ Object {
       "managerData": Object {
         "lineNumber": 414,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.1",
@@ -4482,7 +4391,6 @@ Object {
       "managerData": Object {
         "lineNumber": 417,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -4494,7 +4402,6 @@ Object {
       "managerData": Object {
         "lineNumber": 418,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 4.9",
@@ -4530,7 +4437,6 @@ Object {
       "managerData": Object {
         "lineNumber": 426,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 1.0.0",
@@ -4620,7 +4526,6 @@ Object {
       "managerData": Object {
         "lineNumber": 445,
       },
-      "unconstrainedValue": true,
     },
     Object {
       "currentValue": "~> 5.2",
@@ -4849,7 +4754,6 @@ Object {
       "registryUrls": Array [
         "https://rubygems.org",
       ],
-      "unconstrainedValue": true,
     },
     Object {
       "datasource": "rubygems",
@@ -4861,7 +4765,6 @@ Object {
       "registryUrls": Array [
         "https://rubygems.org",
       ],
-      "unconstrainedValue": true,
     },
   ],
   "lockFiles": Array [
