@@ -125,7 +125,7 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ec2": "3.35.0",
+    "@aws-sdk/client-ec2": "3.42.0",
     "@aws-sdk/client-ecr": "3.38.0",
     "@breejs/later": "4.1.0",
     "@iarna/toml": "2.2.5",
