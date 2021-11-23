@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import extract from 'extract-zip';
 import pMap from 'p-map';
-import { basename, join } from 'upath';
+import { join } from 'upath';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/types';
 import { logger } from '../../../logger';
@@ -9,6 +9,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import { Http } from '../../../util/http';
+import { regEx } from '../../../util/regex';
 
 export class TerraformProviderHash {
   static http = new Http(TerraformProviderDatasource.id);
@@ -31,7 +32,7 @@ export class TerraformProviderHash {
 
       // add double space, the filename and a new line char
       rootHash.update('  ');
-      const fileName = basename(file);
+      const fileName = file.replace(regEx(/^.*[\\/]/), '');
       rootHash.update(fileName);
       rootHash.update('\n');
     }
