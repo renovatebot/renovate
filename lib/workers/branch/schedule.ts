@@ -168,7 +168,8 @@ export function isScheduledNow(config: RenovateConfig): boolean {
 
   // We run if any schedule matches
   const isWithinSchedule = configSchedule.some((scheduleText) => {
-    if (scheduleText.indexOf(minutesChar) === 0) {
+    const cronSchedule = parseCron(scheduleText);
+    if (cronSchedule) {
       // We have Cron syntax
       if (cronMatches(scheduleText, now)) {
         logger.debug(`Matches schedule ${scheduleText}`);
