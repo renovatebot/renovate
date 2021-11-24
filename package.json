@@ -178,7 +178,7 @@
     "minimatch": "3.0.4",
     "moo": "0.5.1",
     "node-html-parser": "3.3.6",
-    "openpgp": "5.0.0",
+    "openpgp": "5.0.1",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
     "p-queue": "6.6.2",
