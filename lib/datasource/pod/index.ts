@@ -102,17 +102,15 @@ const githubRegex = regEx(
 );
 
 const githubEnterpriseRegex = regEx(
-  /(?<hostURL>(^https:\/\/github\..*\.com))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+  /(?<hostURL>(^https:\/\/github\..+\.[a-zA-z0-9-]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
 );
 
 async function getReleasesFromGithub(
   lookupName: string,
-  match: RegExpExecArray,
+  opts: { hostURL: string; account: string; repo: string },
   useShard = false
 ): Promise<ReleaseResult | null> {
-  const { hostURL, account, repo } = match?.groups || {};
-  const opts = { hostURL, account, repo, useShard };
-  const url = releasesGithubUrl(lookupName, opts);
+  const url = releasesGithubUrl(lookupName, { ...opts, useShard });
   const resp = await requestGithub<{ name: string }[]>(url, lookupName);
   if (resp) {
     const releases = resp.map(({ name }) => ({ version: name }));
@@ -120,7 +118,7 @@ async function getReleasesFromGithub(
   }
 
   if (!useShard) {
-    return getReleasesFromGithub(lookupName, match, true);
+    return getReleasesFromGithub(lookupName, opts, true);
   }
 
   return null;
@@ -191,7 +189,9 @@ export async function getReleases({
   const match =
     githubRegex.exec(baseUrl) || githubEnterpriseRegex.exec(baseUrl);
   if (match) {
-    result = await getReleasesFromGithub(podName, match);
+    const { hostURL, account, repo } = match?.groups || {};
+    const opts = { hostURL, account, repo };
+    result = await getReleasesFromGithub(podName, opts);
   } else {
     result = await getReleasesFromCDN(podName, baseUrl);
   }
