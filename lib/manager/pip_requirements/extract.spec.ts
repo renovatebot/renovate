@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { extractPackageFile } from './extract';
 
 const requirements1 = loadFixture('requirements1.txt');
@@ -14,11 +14,11 @@ const requirements8 = loadFixture('requirements8.txt');
 describe('manager/pip_requirements/extract', () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
   afterEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
   describe('extractPackageFile()', () => {
     let config;
@@ -124,7 +124,7 @@ describe('manager/pip_requirements/extract', () => {
     });
     it('should replace env vars in high trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
-      setGlobalConfig({ exposeAllEnv: true });
+      GlobalConfig.set({ exposeAllEnv: true });
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',

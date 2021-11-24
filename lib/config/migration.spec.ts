@@ -1,6 +1,6 @@
 import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
-import { setGlobalConfig } from './global';
+import { GlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
   MigratedConfig,
@@ -703,7 +703,7 @@ describe('config/migration', () => {
     });
   });
   it('it migrates presets', () => {
-    setGlobalConfig({
+    GlobalConfig.set({
       migratePresets: {
         '@org': 'local>org/renovate-config',
         '@org2/foo': '',

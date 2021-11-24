@@ -1,4 +1,4 @@
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import {
   extractContraints,
   getComposerArguments,
@@ -46,7 +46,7 @@ describe('manager/composer/utils', () => {
 
   describe('getComposerArguments', () => {
     afterEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
 
     it('disables scripts and plugins by default', () => {
@@ -82,7 +82,7 @@ describe('manager/composer/utils', () => {
       );
     });
     it('allows scripts when configured', () => {
-      setGlobalConfig({
+      GlobalConfig.set({
         allowScripts: true,
       });
       expect(getComposerArguments({})).toBe(
@@ -90,7 +90,7 @@ describe('manager/composer/utils', () => {
       );
     });
     it('disables scripts when configured locally', () => {
-      setGlobalConfig({
+      GlobalConfig.set({
         allowScripts: true,
       });
       expect(
@@ -102,7 +102,7 @@ describe('manager/composer/utils', () => {
       );
     });
     it('allows plugins when configured', () => {
-      setGlobalConfig({
+      GlobalConfig.set({
         allowPlugins: true,
       });
       expect(getComposerArguments({})).toBe(
@@ -110,7 +110,7 @@ describe('manager/composer/utils', () => {
       );
     });
     it('disables plugins when configured locally', () => {
-      setGlobalConfig({
+      GlobalConfig.set({
         allowPlugins: true,
       });
       expect(

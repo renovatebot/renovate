@@ -1,6 +1,6 @@
 import * as upath from 'upath';
 import { loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
@@ -14,10 +14,10 @@ const adminConfig: RepoGlobalConfig = {
 describe('manager/nuget/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
     afterEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('returns empty for invalid csproj', async () => {
       expect(await extractPackageFile('nothing here', 'bogus', config)).toEqual(
