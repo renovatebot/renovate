@@ -966,11 +966,11 @@ describe('platform/bitbucket/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('ignores branchOrTag', async () => {
+    it('returns file content from branch or tag', async () => {
       const data = { foo: 'bar' };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
+        .get('/2.0/repositories/some/repo/src/dev/file.json')
         .reply(200, JSON.stringify(data));
       const res = await bitbucket.getJsonFile('file.json', 'some/repo', 'dev');
       expect(res).toEqual(data);
