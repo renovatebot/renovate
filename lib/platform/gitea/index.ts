@@ -215,7 +215,7 @@ const platform: Platform = {
     branchOrTag?: string
   ): Promise<string | null> {
     const repo = repoName ?? config.repository;
-    const contents = await helper.getRepoContents(repo, fileName);
+    const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
     return contents.contentString;
   },
 

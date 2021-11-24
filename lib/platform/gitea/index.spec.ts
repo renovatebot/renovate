@@ -1538,7 +1538,7 @@ describe('platform/gitea/index', () => {
       expect(res).toEqual(data);
     });
 
-    it('ignores branchOrTag', async () => {
+    it('returns file content from branch or tag', async () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
