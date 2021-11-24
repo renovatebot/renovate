@@ -1927,6 +1927,16 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(smartTruncate).toHaveBeenCalledTimes(1);
       expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 25000);
     });
+
+    it('truncates description for API version gt 13.4', async () => {
+      jest.mock('../utils/pr-body');
+      const { smartTruncate } = require('../utils/pr-body');
+
+      await initFakePlatform('13.4.1');
+      gitlab.massageMarkdown(prBody);
+      expect(smartTruncate).toHaveBeenCalledTimes(1);
+      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 1000000);
+    });
   });
 
   describe('getVulnerabilityAlerts()', () => {

@@ -1,6 +1,5 @@
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -52,12 +51,8 @@ export async function extractPackageFile(
         dep.currentValue = regEx(/\s*,\s*/).test(currentValue) // TODO #12071
           ? currentValue
           : currentValue.slice(1, -1);
-      } else {
-        dep.skipReason = SkipReason.NoVersion;
       }
-      if (!dep.skipReason) {
-        dep.datasource = RubyGemsDatasource.id;
-      }
+      dep.datasource = RubyGemsDatasource.id;
       res.deps.push(dep);
     }
     const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line); // TODO #12071
