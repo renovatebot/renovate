@@ -3,7 +3,7 @@ import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
 import { git, partial } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/deep/__testutil__/gradle';
@@ -42,12 +42,12 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
 
     afterEach(async () => {
       await Git(fixtures).checkout(['HEAD', '--', '.']);
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
 
     it('replaces existing value', async () => {
@@ -168,7 +168,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         localDir: resolve(fixtures, './wrongCmd'),
       };
 
-      setGlobalConfig(wrongCmdConfig);
+      GlobalConfig.set(wrongCmdConfig);
       const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
@@ -191,7 +191,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
     });
 
     it('gradlew not found', async () => {
-      setGlobalConfig({ localDir: 'some-dir' });
+      GlobalConfig.set({ localDir: 'some-dir' });
       const res = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],

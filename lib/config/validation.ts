@@ -408,44 +408,51 @@ export async function validateConfig(
                     )}`,
                   });
                 } else if (is.nonEmptyArray(regexManager.fileMatch)) {
-                  let validRegex = false;
-                  for (const matchString of regexManager.matchStrings) {
-                    try {
-                      regEx(matchString);
-                      validRegex = true;
-                    } catch (e) {
-                      errors.push({
-                        topic: 'Configuration Error',
-                        message: `Invalid regExp for ${currentPath}: \`${String(
-                          matchString
-                        )}\``,
-                      });
-                    }
-                  }
-                  if (validRegex) {
-                    const mandatoryFields = [
-                      'depName',
-                      'currentValue',
-                      'datasource',
-                    ];
-                    for (const field of mandatoryFields) {
-                      if (
-                        !regexManager[`${field}Template`] &&
-                        !regexManager.matchStrings.some((matchString) =>
-                          matchString.includes(`(?<${field}>`)
-                        )
-                      ) {
+                  if (is.nonEmptyArray(regexManager.matchStrings)) {
+                    let validRegex = false;
+                    for (const matchString of regexManager.matchStrings) {
+                      try {
+                        regEx(matchString);
+                        validRegex = true;
+                      } catch (e) {
                         errors.push({
                           topic: 'Configuration Error',
-                          message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          message: `Invalid regExp for ${currentPath}: \`${String(
+                            matchString
+                          )}\``,
                         });
                       }
                     }
+                    if (validRegex) {
+                      const mandatoryFields = [
+                        'depName',
+                        'currentValue',
+                        'datasource',
+                      ];
+                      for (const field of mandatoryFields) {
+                        if (
+                          !regexManager[`${field}Template`] &&
+                          !regexManager.matchStrings.some((matchString) =>
+                            matchString.includes(`(?<${field}>`)
+                          )
+                        ) {
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          });
+                        }
+                      }
+                    }
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                    });
                   }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
+                    message: `Each Regex Manager must contain a non-empty fileMatch array`,
                   });
                 }
               }

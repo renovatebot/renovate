@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-import { setGlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global';
 import * as presets from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { getOnboardingConfig, getOnboardingConfigContents } from './config';
@@ -12,7 +12,7 @@ describe('workers/repository/onboarding/branch/config', () => {
   let config: RenovateConfig;
 
   beforeAll(() => {
-    setGlobalConfig({
+    GlobalConfig.set({
       localDir: '',
     });
   });

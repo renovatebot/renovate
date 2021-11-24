@@ -4,7 +4,7 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
-import { getGlobalConfig } from './global';
+import { GlobalConfig } from './global';
 import { MigrationsService } from './migrations';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
@@ -42,7 +42,7 @@ export function migrateConfig(
       'optionalDependencies',
       'peerDependencies',
     ];
-    const { migratePresets } = getGlobalConfig();
+    const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(config)) {
       if (key === 'pathRules') {
         if (is.array(val)) {
