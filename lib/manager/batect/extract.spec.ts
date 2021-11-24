@@ -1,4 +1,4 @@
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
@@ -35,11 +35,11 @@ const config: ExtractConfig = {};
 describe('manager/batect/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
 
     afterEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
 
     it('returns empty array for empty configuration file', async () => {

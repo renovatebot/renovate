@@ -113,7 +113,8 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repoName?: string
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   const azureApiGit = await azureApi.gitApi();
 
@@ -133,9 +134,10 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repoName?: string
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
@@ -410,7 +412,7 @@ export async function createPr({
     );
   }
   if (platformOptions?.azureAutoApprove) {
-    pr = await azureApiGit.createPullRequestReviewer(
+    await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy.url,
         vote: AzurePrVote.Approved,

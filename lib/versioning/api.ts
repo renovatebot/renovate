@@ -1,3 +1,4 @@
+import * as amazonMachineImage from './aws-machine-image';
 import * as cargo from './cargo';
 import * as composer from './composer';
 import * as docker from './docker';
@@ -26,6 +27,7 @@ import * as ubuntu from './ubuntu';
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
 
+api.set(amazonMachineImage.id, amazonMachineImage.api);
 api.set('cargo', cargo.api);
 api.set('composer', composer.api);
 api.set('docker', docker.api);

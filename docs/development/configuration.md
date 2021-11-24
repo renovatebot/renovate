@@ -53,11 +53,10 @@ If you add a `renovate.json` file to the root of your repository, you can use th
 If you add configuration options to your `package.json` then these will override any other settings above.
 
 ```json
-"renovate": {
-  "labels": [
-    "upgrade",
-    "bot"
-  ]
+{
+  "renovate": {
+    "labels": ["upgrade", "bot"]
+  }
 }
 ```
 
