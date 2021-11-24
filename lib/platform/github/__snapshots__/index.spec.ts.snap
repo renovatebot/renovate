@@ -4945,7 +4945,7 @@ Array [
 ]
 `;
 
-exports[`platform/github/index getJsonFile() ignores branchOrTag 1`] = `
+exports[`platform/github/index getJsonFile() returns file content 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5006,7 +5006,7 @@ Array [
 ]
 `;
 
-exports[`platform/github/index getJsonFile() returns file content 1`] = `
+exports[`platform/github/index getJsonFile() returns file content from branch or tag 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -5062,7 +5062,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/contents/file.json",
+    "url": "https://api.github.com/repos/some/repo/contents/file.json?ref=dev",
   },
 ]
 `;
