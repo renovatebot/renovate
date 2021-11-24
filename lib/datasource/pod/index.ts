@@ -7,6 +7,7 @@ import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import type { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
+import { massageGithubUrl } from '../metadata';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'pod';
@@ -32,13 +33,15 @@ function shardParts(lookupName: string): string[] {
 
 function releasesGithubUrl(
   lookupName: string,
-  opts: { account: string; repo: string; useShard: boolean }
+  opts: { hostURL: string; account: string; repo: string; useShard: boolean }
 ): string {
-  const { useShard, account, repo } = opts;
-  const prefix = 'https://api.github.com/repos';
+  const { hostURL, account, repo, useShard } = opts;
+  const prefix = hostURL
+    ? `${hostURL}/api/v3/repos`
+    : 'https://api.github.com/repos';
   const shard = shardParts(lookupName).join('/');
-  const suffix = useShard ? `${shard}/${lookupName}` : lookupName;
-  return `${prefix}/${account}/${repo}/contents/Specs/${suffix}`;
+  const suffix = useShard ? `${repo}/${shard}/${lookupName}` : lookupName;
+  return `${prefix}/${account}/${repo}/contents/${suffix}`;
 }
 
 function handleError(lookupName: string, err: HttpError): void {
@@ -98,14 +101,17 @@ const githubRegex = regEx(
   /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
 );
 
+const githubEnterpriseRegex = regEx(
+  /(?<hostURL>(^https:\/\/github\..*\.com))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+);
+
 async function getReleasesFromGithub(
   lookupName: string,
-  registryUrl: string,
+  match: RegExpExecArray,
   useShard = false
 ): Promise<ReleaseResult | null> {
-  const match = githubRegex.exec(registryUrl);
-  const { account, repo } = match?.groups || {};
-  const opts = { account, repo, useShard };
+  const { hostURL, account, repo } = match?.groups || {};
+  const opts = { hostURL, account, repo, useShard };
   const url = releasesGithubUrl(lookupName, opts);
   const resp = await requestGithub<{ name: string }[]>(url, lookupName);
   if (resp) {
@@ -114,7 +120,7 @@ async function getReleasesFromGithub(
   }
 
   if (!useShard) {
-    return getReleasesFromGithub(lookupName, registryUrl, true);
+    return getReleasesFromGithub(lookupName, match, true);
   }
 
   return null;
@@ -175,15 +181,17 @@ export async function getReleases({
   }
 
   let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
-
+  baseUrl = massageGithubUrl(baseUrl);
   // In order to not abuse github API limits, query CDN instead
   if (isDefaultRepo(baseUrl)) {
     [baseUrl] = defaultRegistryUrls;
   }
 
   let result: ReleaseResult | null = null;
-  if (githubRegex.exec(baseUrl)) {
-    result = await getReleasesFromGithub(podName, baseUrl);
+  const match =
+    githubRegex.exec(baseUrl) || githubEnterpriseRegex.exec(baseUrl);
+  if (match) {
+    result = await getReleasesFromGithub(podName, match);
   } else {
     result = await getReleasesFromCDN(podName, baseUrl);
   }
