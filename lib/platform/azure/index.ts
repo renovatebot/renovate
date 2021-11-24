@@ -5,6 +5,7 @@ import {
   GitPullRequestMergeStrategy,
   GitStatus,
   GitStatusState,
+  GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import delay from 'delay';
@@ -127,7 +128,22 @@ export async function getRawFile(
     repoId = config.repoId;
   }
 
-  const buf = await azureApiGit.getItemContent(repoId, fileName);
+  const versionDescriptor: GitVersionDescriptor = <GitVersionDescriptor>{
+    version: branchOrTag,
+  };
+
+  const buf = await azureApiGit.getItemContent(
+    repoId,
+    fileName,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    branchOrTag ? versionDescriptor : undefined
+  );
+
   const str = await streamToString(buf);
   return str;
 }
