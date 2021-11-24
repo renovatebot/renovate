@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
@@ -117,7 +117,7 @@ export async function extractPackageFile(
           '\n'
         );
       }
-      if (repoNpmrc.includes('=${') && !getGlobalConfig().exposeAllEnv) {
+      if (repoNpmrc.includes('=${') && !GlobalConfig.get('exposeAllEnv')) {
         logger.debug(
           { npmrcFileName },
           'Stripping .npmrc file of lines with variables'

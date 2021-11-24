@@ -19,6 +19,10 @@ export function getBucket(
   }
   const fromMajor = versioning.getMajor(currentVersion);
   const toMajor = versioning.getMajor(newVersion);
+  // istanbul ignore if
+  if (toMajor === null) {
+    return null;
+  }
   if (fromMajor !== toMajor) {
     if (separateMultipleMajor) {
       return `major-${toMajor}`;

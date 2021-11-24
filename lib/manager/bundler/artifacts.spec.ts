@@ -2,7 +2,7 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, git, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';
@@ -52,11 +52,11 @@ describe('manager/bundler/artifacts', () => {
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     docker.resetPrefetchedImages();
 
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     fs.ensureCacheDir.mockResolvedValue('/tmp/cache/others/gem');
   });
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
   it('returns null by default', async () => {
     expect(
@@ -106,7 +106,7 @@ describe('manager/bundler/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
     fs.readLocalFile.mockResolvedValueOnce(null);
@@ -127,7 +127,7 @@ describe('manager/bundler/artifacts', () => {
   });
   describe('Docker', () => {
     beforeEach(() => {
-      setGlobalConfig({
+      GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
       });
@@ -159,7 +159,7 @@ describe('manager/bundler/artifacts', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('constraints options', async () => {
-      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -191,7 +191,7 @@ describe('manager/bundler/artifacts', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid constraints options', async () => {
-      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -224,7 +224,7 @@ describe('manager/bundler/artifacts', () => {
     });
 
     it('injects bundler host configuration environment variables', async () => {
-      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -264,7 +264,7 @@ describe('manager/bundler/artifacts', () => {
     });
 
     it('injects bundler host configuration as command with bundler < 2', async () => {
-      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -309,7 +309,7 @@ describe('manager/bundler/artifacts', () => {
     });
 
     it('injects bundler host configuration as command with bundler >= 2', async () => {
-      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
@@ -354,7 +354,7 @@ describe('manager/bundler/artifacts', () => {
     });
 
     it('injects bundler host configuration as command with bundler == latest', async () => {
-      setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('1.2.0');
