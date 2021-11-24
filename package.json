@@ -108,7 +108,8 @@
     "Mikhail Yakushin <driver733@gmail.com>",
     "Sebastian Poxhofer <sebastian@poxhofer.at>",
     "Henry Sachs <henrysachs@gmail.com>",
-    "Arkadiusz Kosmala <kosmala.arkadiusz@gmail.com>"
+    "Arkadiusz Kosmala <kosmala.arkadiusz@gmail.com>",
+    "Markus Siebert <mail@markussiebert.com>"
   ],
   "license": "AGPL-3.0",
   "bugs": {
@@ -124,6 +125,7 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
+    "@aws-sdk/client-ec2": "3.35.0",
     "@aws-sdk/client-ecr": "3.38.0",
     "@breejs/later": "4.1.0",
     "@iarna/toml": "2.2.5",
@@ -134,7 +136,7 @@
     "@yarnpkg/core": "2.4.0",
     "@yarnpkg/parsers": "2.4.1",
     "auth-header": "1.0.0",
-    "azure-devops-node-api": "11.0.1",
+    "azure-devops-node-api": "11.1.0",
     "bunyan": "1.8.15",
     "cacache": "15.3.0",
     "chalk": "4.1.2",
@@ -205,6 +207,7 @@
   },
   "devDependencies": {
     "@actions/core": "1.6.0",
+    "@aws-sdk/client-s3": "3.41.0",
     "@jest/globals": "27.3.1",
     "@jest/reporters": "27.3.1",
     "@jest/test-result": "27.3.1",
@@ -217,7 +220,7 @@
     "@types/changelog-filename-regex": "2.0.0",
     "@types/clean-git-ref": "2.0.0",
     "@types/conventional-commits-detector": "1.0.0",
-    "@types/eslint": "7.28.2",
+    "@types/eslint": "7.29.0",
     "@types/fs-extra": "9.0.13",
     "@types/git-url-parse": "9.0.1",
     "@types/github-url-from-git": "1.5.1",
@@ -235,7 +238,7 @@
     "@types/nock": "10.0.3",
     "@types/node": "14.17.33",
     "@types/node-emoji": "1.8.1",
-    "@types/parse-link-header": "1.0.0",
+    "@types/parse-link-header": "1.0.1",
     "@types/registry-auth-token": "4.2.1",
     "@types/semver": "7.3.9",
     "@types/semver-stable": "3.0.0",
@@ -244,8 +247,9 @@
     "@types/traverse": "0.6.32",
     "@types/url-join": "4.0.1",
     "@types/xmldoc": "1.1.6",
-    "@typescript-eslint/eslint-plugin": "5.3.1",
-    "@typescript-eslint/parser": "5.3.1",
+    "@typescript-eslint/eslint-plugin": "5.4.0",
+    "@typescript-eslint/parser": "5.4.0",
+    "aws-sdk-client-mock": "0.5.6",
     "conventional-changelog-conventionalcommits": "4.6.1",
     "cross-env": "7.0.3",
     "emojibase-data": "6.2.0",
@@ -268,10 +272,10 @@
     "markdownlint-cli2": "0.3.2",
     "mock-fs": "5.1.2",
     "mockdate": "3.0.5",
-    "nock": "13.2.0",
+    "nock": "13.2.1",
     "npm-run-all": "4.1.5",
     "prettier": "2.4.1",
-    "pretty-quick": "3.1.1",
+    "pretty-quick": "3.1.2",
     "rimraf": "3.0.2",
     "semantic-release": "18.0.0",
     "shelljs": "0.8.4",
@@ -284,8 +288,7 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "**/css-what": "^5.0.1",
-    "**/kind-of": ">=6.0.3"
+    "**/json-schema": "^0.4.0"
   },
   "files": [
     "dist"

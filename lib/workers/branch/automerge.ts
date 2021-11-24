@@ -1,4 +1,4 @@
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
@@ -33,7 +33,7 @@ export async function tryBranchAutomerge(
   if (branchStatus === BranchStatus.green) {
     logger.debug(`Automerging branch`);
     try {
-      if (getGlobalConfig().dryRun) {
+      if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would automerge branch' + config.branchName);
       } else {
         await mergeBranch(config.branchName);
@@ -47,9 +47,13 @@ export async function tryBranchAutomerge(
       }
       if (
         err.message.includes('refusing to merge unrelated histories') ||
-        err.message.includes('Not possible to fast-forward')
+        err.message.includes('Not possible to fast-forward') ||
+        err.message.includes(
+          'Updates were rejected because the tip of your current branch is behind'
+        )
       ) {
-        logger.warn({ err }, 'Branch is not up to date - cannot automerge');
+        logger.debug({ err }, 'Branch automerge error');
+        logger.info('Branch is not up to date - cannot automerge');
         return 'stale';
       }
       if (err.message.includes('Protected branch')) {

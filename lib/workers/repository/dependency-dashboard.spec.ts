@@ -7,7 +7,7 @@ import {
   logger,
   platform,
 } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import type { Platform } from '../../platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
@@ -32,7 +32,7 @@ async function dryRun(
   ensureIssueCalls = 0
 ) {
   jest.clearAllMocks();
-  setGlobalConfig({ dryRun: true });
+  GlobalConfig.set({ dryRun: true });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
@@ -67,7 +67,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];

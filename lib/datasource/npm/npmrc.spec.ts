@@ -1,5 +1,5 @@
 import { mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import * as _sanitize from '../../util/sanitize';
 import { getNpmrc, setNpmrc } from './npmrc';
 
@@ -10,7 +10,7 @@ const sanitize = mocked(_sanitize);
 describe('datasource/npm/npmrc', () => {
   beforeEach(() => {
     setNpmrc('');
-    setGlobalConfig();
+    GlobalConfig.reset();
     jest.resetAllMocks();
   });
 
@@ -37,7 +37,7 @@ describe('datasource/npm/npmrc', () => {
   });
 
   it('sanitize _authtoken with high trust', () => {
-    setGlobalConfig({ exposeAllEnv: true });
+    GlobalConfig.set({ exposeAllEnv: true });
     process.env.TEST_TOKEN = 'test';
     setNpmrc(
       '//registry.test.com:_authToken=${TEST_TOKEN}\n_authToken=\nregistry=http://localhost'

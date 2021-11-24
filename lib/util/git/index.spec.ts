@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
 import { GitNoVerifyOption, setNoVerify } from '.';
@@ -71,7 +71,7 @@ describe('util/git/index', () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setGlobalConfig({ localDir: tmpDir.path });
+    GlobalConfig.set({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
     });

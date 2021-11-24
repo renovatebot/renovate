@@ -1,5 +1,5 @@
 import { quote } from 'shlex';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
@@ -23,11 +23,11 @@ export function getComposerArguments(config: UpdateArtifactsConfig): string {
   }
 
   args += ' --no-ansi --no-interaction';
-  if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
+  if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
     args += ' --no-scripts --no-autoloader';
   }
 
-  if (!getGlobalConfig().allowPlugins || config.ignorePlugins) {
+  if (!GlobalConfig.get('allowPlugins') || config.ignorePlugins) {
     args += ' --no-plugins';
   }
 
