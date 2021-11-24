@@ -1,4 +1,4 @@
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 
 const basicEnvVars = [
   'HTTP_PROXY',
@@ -20,7 +20,7 @@ export function getChildProcessEnv(
   customEnvVars: string[] = []
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
-  if (getGlobalConfig().exposeAllEnv) {
+  if (GlobalConfig.get('exposeAllEnv')) {
     return { ...env, ...process.env };
   }
   const envVars = [...basicEnvVars, ...customEnvVars];

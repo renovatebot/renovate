@@ -1,7 +1,7 @@
 import URL from 'url';
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { logger } from '../../logger';
 import { simpleGitConfig } from '../../util/git/config';
@@ -90,7 +90,7 @@ export default async function extractPackageFile(
   fileName: string,
   config: ExtractConfig
 ): Promise<PackageFile | null> {
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   const git = Git(localDir);
   const gitModulesPath = upath.join(localDir, fileName);
 
