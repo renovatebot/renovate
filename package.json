@@ -215,7 +215,7 @@
     "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.4",
     "@semantic-release/exec": "6.0.2",
     "@types/auth-header": "1.0.2",
-    "@types/bunyan": "1.8.7",
+    "@types/bunyan": "1.8.8",
     "@types/cacache": "15.0.1",
     "@types/changelog-filename-regex": "2.0.0",
     "@types/clean-git-ref": "2.0.0",
