@@ -29,6 +29,7 @@ function matchesRule(
     manager,
     datasource,
   } = inputConfig;
+  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
   // Setting empty arrays simplifies our logic later
   const matchFiles = packageRule.matchFiles || [];
   const matchPaths = packageRule.matchPaths || [];
@@ -206,14 +207,16 @@ function matchesRule(
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     if (isConfigRegex(matchCurrentVersionStr)) {
       const matches = configRegexPredicate(matchCurrentVersionStr);
-      if (!matches(currentValue)) {
+      if (!unconstrainedValue && !matches(currentValue)) {
         return false;
       }
       positiveMatch = true;
     } else if (version.isVersion(matchCurrentVersionStr)) {
       let isMatch = false;
       try {
-        isMatch = version.matches(matchCurrentVersionStr, currentValue);
+        isMatch =
+          unconstrainedValue ||
+          version.matches(matchCurrentVersionStr, currentValue);
       } catch (err) {
         // Do nothing
       }

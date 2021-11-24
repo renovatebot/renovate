@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, platform } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';
@@ -17,7 +17,7 @@ beforeEach(() => {
 describe('workers/repository/error-config', () => {
   describe('raiseConfigWarningIssue()', () => {
     beforeEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('creates issues', async () => {
       const error = new Error(CONFIG_VALIDATION);
@@ -32,7 +32,7 @@ describe('workers/repository/error-config', () => {
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
-      setGlobalConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
@@ -57,7 +57,7 @@ describe('workers/repository/error-config', () => {
         number: 1,
         state: PrState.Open,
       });
-      setGlobalConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });

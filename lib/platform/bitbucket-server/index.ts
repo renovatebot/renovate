@@ -123,9 +123,11 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repoName: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
-  const [project, slug] = repoName.split('/');
+  const repo = repoName ?? config.repository;
+  const [project, slug] = repo.split('/');
   const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
   const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
@@ -139,9 +141,10 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repoName: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }

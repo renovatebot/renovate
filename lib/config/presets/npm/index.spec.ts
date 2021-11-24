@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { setGlobalConfig } from '../../global';
+import { GlobalConfig } from '../../global';
 import * as npm from '.';
 
 jest.mock('registry-auth-token');
@@ -8,7 +8,7 @@ jest.mock('delay');
 describe('config/presets/npm/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
