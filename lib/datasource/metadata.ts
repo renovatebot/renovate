@@ -110,8 +110,14 @@ const manualSourceUrls = {
 const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
 const gitPrefix = regEx('^git:/?/?');
 
-function massageGithubUrl(url: string): string {
-  return url
+export function massageGithubUrl(url: string): string {
+  let massagedUrl = url;
+
+  if (url.startsWith('git@')) {
+    massagedUrl = url.replace(':', '/').replace('git@', 'https://');
+  }
+
+  return massagedUrl
     .replace('http:', 'https:')
     .replace('http+git:', 'https:')
     .replace('https+git:', 'https:')
