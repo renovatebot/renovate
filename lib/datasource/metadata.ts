@@ -121,6 +121,7 @@ export function massageGithubUrl(url: string): string {
     .replace('http:', 'https:')
     .replace('http+git:', 'https:')
     .replace('https+git:', 'https:')
+    .replace('ssh://git@', 'https://')
     .replace(gitPrefix, 'https://')
     .replace(githubPages, 'https://github.com/$1/$2')
     .replace('www.github.com', 'github.com')
