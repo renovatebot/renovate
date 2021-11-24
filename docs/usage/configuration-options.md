@@ -1503,7 +1503,8 @@ Use this field to restrict rules to a particular datasource. e.g.
 {
   "packageRules": [
     {
-      "matchCurrentVersion": ">=1.0.0"
+      "matchCurrentVersion": ">=1.0.0",
+      "matchPackageNames": ["angular"]
     }
   ]
 }
