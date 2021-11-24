@@ -558,7 +558,7 @@ describe('util/exec/index', () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: { executionTimeout: 30 * 60 * 1000 },
+        adminConfig: { executionTimeout: 30 },
       },
     ],
 
