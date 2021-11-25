@@ -92,7 +92,7 @@ export async function updateArtifacts({
       throw err;
     }
 
-    logger.warn(
+    logger.debug(
       { err, message: err.message, command },
       'Failed to update Mix lock file'
     );
