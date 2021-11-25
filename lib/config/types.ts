@@ -27,6 +27,7 @@ export interface RenovateSharedConfig {
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  confidential?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];

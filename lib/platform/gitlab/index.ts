@@ -157,10 +157,14 @@ function urlEscape(str: string): string {
 
 export async function getRawFile(
   fileName: string,
-  repoName: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
-  const url = `projects/${repoName}/repository/files/${escapedFileName}?ref=HEAD`;
+  const repo = repoName ?? config.repository;
+  const url =
+    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
+    (branchOrTag || `HEAD`);
   const res = await gitlabApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -169,9 +173,10 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repoName: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
@@ -862,6 +867,7 @@ export async function ensureIssue({
   reuseTitle,
   body,
   labels,
+  confidential,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
@@ -886,6 +892,7 @@ export async function ensureIssue({
               title,
               description,
               labels: (labels || issue.labels || []).join(','),
+              confidential: confidential ?? false,
             },
           }
         );
@@ -897,6 +904,7 @@ export async function ensureIssue({
           title,
           description,
           labels: (labels || []).join(','),
+          confidential: confidential ?? false,
         },
       });
       logger.info('Issue created');
