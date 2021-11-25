@@ -2150,12 +2150,12 @@ Followed by some information.
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
-        it('ignores branchOrTag argument', async () => {
+        it('returns file content from branch or tag', async () => {
           const data = { foo: 'bar' };
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000&at=dev`
             )
             .reply(200, {
               isLastPage: true,
