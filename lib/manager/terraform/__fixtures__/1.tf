@@ -143,7 +143,7 @@ provider "gitlab" {
 }
 
 provider "gitlab" {
-  token   = var.gitlab_token
+  token = "${var.gitlab_token}"
   version = "=1.3"
 }
 
@@ -162,7 +162,7 @@ provider "helm" {
 provider "newrelic" {
   version = "V1.9"
 
-  api_key = var.newrelic_api_key
+  api_key = "${var.newrelic_api_key}"
 }
 
 module "foobar" {
@@ -262,7 +262,7 @@ resource "docker_image" "invalid" {
 }
 
 resource "docker_image" "ignore_variable" {
-  name          = data.docker_registry_image.ubuntu.name
+  name          = "${data.docker_registry_image.ubuntu.name}"
   pull_triggers = ["${data.docker_registry_image.ubuntu.sha256_digest}"]
 }
 

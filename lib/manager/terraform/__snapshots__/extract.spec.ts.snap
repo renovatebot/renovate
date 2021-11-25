@@ -388,7 +388,11 @@ Object {
       "skipReason": "invalid-dependency-specification",
     },
     Object {
-      "skipReason": "invalid-dependency-specification",
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker",
+      "depType": "docker_image",
+      "replaceString": "\${data.docker_registry_image.ubuntu.name}",
+      "skipReason": "contains-variable",
     },
     Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
