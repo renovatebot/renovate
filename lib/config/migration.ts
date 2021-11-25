@@ -97,9 +97,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           regEx(/{{depNameShort}}/g), // TODO #12071
           '{{depName}}'
         );
-      } else if (key === 'separateMajorReleases') {
-        delete migratedConfig.separateMultipleMajor;
-        migratedConfig.separateMajorMinor = val;
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',

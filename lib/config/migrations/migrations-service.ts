@@ -33,6 +33,7 @@ import { RequiredStatusChecksMigration } from './custom/required-status-checks-m
 import { ScheduleMigration } from './custom/schedule-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { SemanticPrefixMigration } from './custom/semantic-prefix-migration';
+import { SeparateMajorReleasesMigration } from './custom/separate-major-release-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
@@ -100,6 +101,7 @@ export class MigrationsService {
     ScheduleMigration,
     SemanticCommitsMigration,
     SemanticPrefixMigration,
+    SeparateMajorReleasesMigration,
     SuppressNotificationsMigration,
     TrustLevelMigration,
     UnpublishSafeMigration,
