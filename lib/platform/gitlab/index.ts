@@ -162,7 +162,9 @@ export async function getRawFile(
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const repo = repoName ?? config.repository;
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=HEAD`;
+  const url =
+    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
+    (branchOrTag || `HEAD`);
   const res = await gitlabApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -330,6 +332,7 @@ type BranchState =
   | 'pending'
   | 'created'
   | 'running'
+  | 'waiting_for_resource'
   | 'manual'
   | 'success'
   | 'failed'
@@ -370,6 +373,7 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
   created: BranchStatus.yellow,
   manual: BranchStatus.yellow,
   running: BranchStatus.yellow,
+  waiting_for_resource: BranchStatus.yellow,
   success: BranchStatus.green,
   failed: BranchStatus.red,
   canceled: BranchStatus.red,
