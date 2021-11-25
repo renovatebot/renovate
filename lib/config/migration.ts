@@ -111,16 +111,6 @@ export function migrateConfig(
         const templateIndex = val.indexOf(`{{`);
         migratedConfig.branchPrefix = val.substring(0, templateIndex);
         migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
-      } else if (key === 'semanticPrefix' && is.string(val)) {
-        delete migratedConfig.semanticPrefix;
-        let [text] = val.split(':') as any; // TODO: fixme
-        text = text.split('(');
-        [migratedConfig.semanticCommitType] = text;
-        if (text.length > 1) {
-          [migratedConfig.semanticCommitScope] = text[1].split(')');
-        } else {
-          migratedConfig.semanticCommitScope = null;
-        }
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
