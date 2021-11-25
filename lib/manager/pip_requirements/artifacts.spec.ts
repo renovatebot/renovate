@@ -1,5 +1,5 @@
 import _fs from 'fs-extra';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
@@ -19,7 +19,7 @@ describe('manager/pip_requirements/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    setGlobalConfig({ localDir: '' });
+    GlobalConfig.set({ localDir: '' });
   });
   it('returns null if no updatedDeps were provided', async () => {
     expect(

@@ -377,6 +377,13 @@ Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-p
 This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
 The Composer output should inform you about the reasons the update failed.
 
+## confidential
+
+If enabled, all issues created by Renovate are set as confidential, even in a public repository.
+**Note:** the Dependency Dashboard issue will also be confidential.
+By default issues created by Renovate are visible to all users.
+This option is applicable to GitLab only.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
@@ -1198,7 +1205,16 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 This feature can be used to refresh lock files and keep them up-to-date.
 "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
-Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock`, `poetry.lock` and `Cargo.lock`.
+Supported lock files are:
+
+- `package-lock.json`
+- `yarn.lock`
+- `composer.lock`
+- `Gemfile.lock`
+- `poetry.lock`
+- `Cargo.lock`
+- `jsonnetfile.lock.json`
+
 Others may be added via feature request.
 
 This feature is disabled by default.
@@ -2399,7 +2415,9 @@ Then eventually when you do want to update to Webpack 3.x you can make that upda
 After that, Renovate will resume providing you updates to 3.x again!
 i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
-This option also has priority over package groups configured by `packageRule`. So Renovate will propose separate PRs for major and minor updates of packages even if they are grouped. If you want to enforce grouped package updates, you need to set this option `false` within the `packageRule`.
+This option also has priority over package groups configured by `packageRule`.
+So Renovate will propose separate PRs for major and minor updates of packages even if they are grouped.
+If you want to enforce grouped package updates, you need to set this option to `false` within the `packageRule`.
 
 ## separateMinorPatch
 

@@ -27,6 +27,7 @@ export interface RenovateSharedConfig {
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  confidential?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -101,6 +102,7 @@ export interface RepoGlobalConfig {
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
+  executionTimeout?: number;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;

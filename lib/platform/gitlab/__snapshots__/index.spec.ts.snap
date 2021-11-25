@@ -1190,6 +1190,41 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab/index ensureIssue() creates confidential issue 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
+  },
+  Object {
+    "body": Object {
+      "confidential": true,
+      "description": "new-content",
+      "labels": "",
+      "title": "new-title",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "content-length": "81",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues",
+  },
+]
+`;
+
 exports[`platform/gitlab/index ensureIssue() creates issue 1`] = `
 Array [
   Object {
@@ -1205,6 +1240,7 @@ Array [
   },
   Object {
     "body": Object {
+      "confidential": false,
       "description": "new-content",
       "labels": "",
       "title": "new-title",
@@ -1213,7 +1249,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer 123test",
-      "content-length": "61",
+      "content-length": "82",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1239,6 +1275,7 @@ Array [
   },
   Object {
     "body": Object {
+      "confidential": false,
       "description": "new-content",
       "labels": "Renovate,Maintenance",
       "title": "new-title",
@@ -1247,7 +1284,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer 123test",
-      "content-length": "81",
+      "content-length": "102",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1285,6 +1322,52 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab/index ensureIssue() updates confidential issue 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
+  },
+  Object {
+    "body": Object {
+      "confidential": true,
+      "description": "newer-content",
+      "labels": "Renovate,Maintenance",
+      "title": "title-2",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "content-length": "101",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
+  },
+]
+`;
+
 exports[`platform/gitlab/index ensureIssue() updates issue 1`] = `
 Array [
   Object {
@@ -1311,6 +1394,7 @@ Array [
   },
   Object {
     "body": Object {
+      "confidential": false,
       "description": "newer-content",
       "labels": "",
       "title": "title-2",
@@ -1319,7 +1403,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer 123test",
-      "content-length": "61",
+      "content-length": "82",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1356,6 +1440,7 @@ Array [
   },
   Object {
     "body": Object {
+      "confidential": false,
       "description": "newer-content",
       "labels": "Renovate,Maintenance",
       "title": "title-2",
@@ -1364,7 +1449,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Bearer 123test",
-      "content-length": "81",
+      "content-length": "102",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -2210,6 +2295,60 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD",
+  },
+]
+`;
+
+exports[`platform/gitlab/index getJsonFile() returns file content from branch or tag 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=dev",
+  },
+]
+`;
+
+exports[`platform/gitlab/index getJsonFile() returns file content from given repo 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "gitlab.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/different%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD",
   },
 ]
 `;
