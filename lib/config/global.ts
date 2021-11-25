@@ -16,6 +16,7 @@ export class GlobalConfig {
     'dockerUser',
     'dryRun',
     'exposeAllEnv',
+    'executionTimeout',
     'localDir',
     'migratePresets',
     'privateKey',
