@@ -125,10 +125,11 @@ function extractLeinRepos(content: string): string[] {
       }
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
-    const matches = repoSectionContent.match(/"https?:\/\/[^"]*"/g) || []; // #12070 using re with .exec here gives unexpected results
+    const matches =
+      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) || [];
     const urls = matches.map((x) =>
       x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
-    ); // TODO #12071
+    );
     urls.forEach((url) => result.push(url));
   }
 

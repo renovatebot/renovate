@@ -12,7 +12,7 @@ export default function errSerializer(err: Error): any {
     const val = response[field];
     if (is.string(val)) {
       response[field] = val.replace(
-        /https:\/\/[^@]*?@/g, // TODO #12070 #12071 RE2 causes circular dependency
+        /https:\/\/[^@]*?@/g, // TODO #12070 circular dependency
         'https://**redacted**@'
       );
     }

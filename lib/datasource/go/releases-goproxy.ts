@@ -56,7 +56,7 @@ export function parseGoproxy(
 const lexer = moo.states({
   main: {
     separator: {
-      match: /\s*?,\s*?/, // TODO #12070 moo is not compatible with re2
+      match: /\s*?,\s*?/, // TODO #12070 moo states
       value: (_: string) => '|',
     },
     asterisk: {
@@ -77,14 +77,14 @@ const lexer = moo.states({
       value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
     },
     escapedChar: {
-      match: /\\./, // TODO #12070 moo is not compatible with re2
+      match: /\\./, // TODO #12070 moo states
       value: (s: string) => s.slice(1),
     },
   },
   characterRange: {
-    char: /[^\\\]\n]/, // TODO #12070 moo is not compatible with re2
+    char: /[^\\\]\n]/, // TODO #12070 moo states
     escapedChar: {
-      match: /\\./, // TODO #12070 moo is not compatible with re2
+      match: /\\./, // TODO #12070 moo states
       value: (s: string) => s.slice(1),
     },
     characterRangeEnd: {
