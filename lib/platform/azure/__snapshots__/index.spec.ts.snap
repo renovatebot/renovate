@@ -65,14 +65,6 @@ Object {
   "displayNumber": "Pull Request #456",
   "number": 456,
   "pullRequestId": 456,
-  "reviewers": Array [
-    Object {
-      "isFlagged": false,
-      "isRequired": false,
-      "reviewerUrl": "user-url",
-      "vote": 10,
-    },
-  ],
   "sourceBranch": undefined,
   "sourceRefName": undefined,
   "state": "open",

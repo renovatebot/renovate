@@ -1528,21 +1528,6 @@ describe('platform/gitea/index', () => {
       expect(res).toEqual(data);
     });
 
-    it('returns file content in json5 format', async () => {
-      const json5Data = `
-        { 
-          // json5 comment
-          foo: 'bar' 
-        }
-      `;
-      helper.getRepoContents.mockResolvedValueOnce({
-        contentString: json5Data,
-      } as never);
-      await initFakeRepo({ full_name: 'some/repo' });
-      const res = await gitea.getJsonFile('file.json5');
-      expect(res).toEqual({ foo: 'bar' });
-    });
-
     it('returns file content from given repo', async () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
@@ -1563,6 +1548,20 @@ describe('platform/gitea/index', () => {
       expect(res).toEqual(data);
     });
 
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: json5Data,
+      } as never);
+      await initFakeRepo({ full_name: 'some/repo' });
+      const res = await gitea.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
+    });
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',
@@ -1570,7 +1569,6 @@ describe('platform/gitea/index', () => {
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
-
     it('throws on errors', async () => {
       helper.getRepoContents.mockRejectedValueOnce(new Error('some error'));
       await initFakeRepo({ full_name: 'some/repo' });

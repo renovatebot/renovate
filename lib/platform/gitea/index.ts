@@ -211,19 +211,20 @@ const platform: Platform = {
 
   async getRawFile(
     fileName: string,
-    repo: string = config.repository,
+    repoName?: string,
     branchOrTag?: string
   ): Promise<string | null> {
+    const repo = repoName ?? config.repository;
     const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
     return contents.contentString;
   },
 
   async getJsonFile(
     fileName: string,
-    repo: string = config.repository,
+    repoName?: string,
     branchOrTag?: string
   ): Promise<any | null> {
-    const raw = await platform.getRawFile(fileName, repo, branchOrTag);
+    const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
     if (fileName.endsWith('.json5')) {
       return JSON5.parse(raw);
     }

@@ -668,15 +668,10 @@ describe('platform/azure/index', () => {
         },
       };
       const prUpdateResult = {
-        ...prResult,
-        reviewers: [
-          {
-            reviewerUrl: prResult.createdBy.url,
-            vote: AzurePrVote.Approved,
-            isFlagged: false,
-            isRequired: false,
-          },
-        ],
+        reviewerUrl: prResult.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
       };
       const updateFn = jest
         .fn(() => prUpdateResult)
@@ -1270,7 +1265,7 @@ describe('platform/azure/index', () => {
       expect(res).toEqual({ foo: 'bar' });
     });
 
-    it('returns file content from branch or tag', async () => {
+    it('ignores branchOrTag', async () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -1295,7 +1290,6 @@ describe('platform/azure/index', () => {
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
-
     it('throws on errors', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -1307,7 +1301,6 @@ describe('platform/azure/index', () => {
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
-
     it('supports fetch from another repo', async () => {
       const data = { foo: 'bar' };
       const gitApiMock = {

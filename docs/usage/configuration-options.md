@@ -377,6 +377,13 @@ Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-p
 This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
 The Composer output should inform you about the reasons the update failed.
 
+## confidential
+
+If enabled, all issues created by Renovate are set as confidential, even in a public repository.
+**Note:** the Dependency Dashboard issue will also be confidential.
+By default issues created by Renovate are visible to all users.
+This option is applicable to GitLab only.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
@@ -1198,7 +1205,16 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 This feature can be used to refresh lock files and keep them up-to-date.
 "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
-Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock`, `poetry.lock` and `Cargo.lock`.
+Supported lock files are:
+
+- `package-lock.json`
+- `yarn.lock`
+- `composer.lock`
+- `Gemfile.lock`
+- `poetry.lock`
+- `Cargo.lock`
+- `jsonnetfile.lock.json`
+
 Others may be added via feature request.
 
 This feature is disabled by default.
@@ -2391,13 +2407,17 @@ For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were b
 If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released.
 If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
-It is recommended that you leave this setting to `true`, because of the polite way that Renovate handles this.
+It is recommended that you leave this option to `true`, because of the polite way that Renovate handles this.
 For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives.
 In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released.
 You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it.
 Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to the base branch once it's tested.
 After that, Renovate will resume providing you updates to 3.x again!
 i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
+
+This option also has priority over package groups configured by `packageRule`.
+So Renovate will propose separate PRs for major and minor updates of packages even if they are grouped.
+If you want to enforce grouped package updates, you need to set this option to `false` within the `packageRule`.
 
 ## separateMinorPatch
 

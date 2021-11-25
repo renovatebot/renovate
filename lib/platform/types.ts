@@ -106,6 +106,7 @@ export interface EnsureIssueConfig {
   labels?: string[];
   once?: boolean;
   shouldReOpen?: boolean;
+  confidential?: boolean;
 }
 export interface BranchStatusConfig {
   branchName: string;
@@ -154,12 +155,12 @@ export interface Platform {
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,
-    repo?: string,
+    repoName?: string,
     branchOrTag?: string
   ): Promise<string | null>;
   getJsonFile(
     fileName: string,
-    repo?: string,
+    repoName?: string,
     branchOrTag?: string
   ): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;

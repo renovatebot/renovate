@@ -3,7 +3,7 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
@@ -40,7 +40,7 @@ describe('manager/pip-compile/artifacts', () => {
       LANG: 'en_US.UTF-8',
       LC_ALL: 'en_US',
     });
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
 
@@ -89,7 +89,7 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    setGlobalConfig(dockerAdminConfig);
+    GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
@@ -144,7 +144,7 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   it('uses pipenv version from config', async () => {
-    setGlobalConfig(dockerAdminConfig);
+    GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],

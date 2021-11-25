@@ -184,7 +184,9 @@ export async function initRepo({
   const names = getProjectAndRepo(repository);
   config.defaultMergeMethod = await azureHelper.getMergeMethod(
     repo.id,
-    names.project
+    names.project,
+    null,
+    defaultBranch
   );
   config.mergeMethods = {};
   config.repoForceRebase = false;
@@ -427,7 +429,7 @@ export async function createPr({
     );
   }
   if (platformOptions?.azureAutoApprove) {
-    pr = await azureApiGit.createPullRequestReviewer(
+    await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy.url,
         vote: AzurePrVote.Approved,
@@ -633,7 +635,8 @@ export async function mergePr({
     (config.mergeMethods[pr.targetRefName] = await azureHelper.getMergeMethod(
       config.repoId,
       config.project,
-      pr.targetRefName
+      pr.targetRefName,
+      config.defaultBranch
     ));
 
   const objToUpdate: GitPullRequest = {

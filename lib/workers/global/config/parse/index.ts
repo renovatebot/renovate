@@ -18,7 +18,7 @@ export async function parseConfigs(
 
   // Get configs
   const defaultConfig = defaultsParser.getConfig();
-  const fileConfig = fileParser.getConfig(env);
+  const fileConfig = await fileParser.getConfig(env);
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = envParser.getConfig(env);
 

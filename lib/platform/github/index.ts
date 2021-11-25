@@ -173,9 +173,10 @@ async function getBranchProtection(
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository,
+  repoName?: string,
   branchOrTag?: string
 ): Promise<string | null> {
+  const repo = repoName ?? config.repository;
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
     url += `?ref=` + branchOrTag;
@@ -188,10 +189,10 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository,
+  repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo, branchOrTag);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }

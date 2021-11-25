@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { fs, loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { extractPackageFile } from '.';
 
@@ -25,7 +25,7 @@ jest.mock('../../util/fs');
 
 describe('manager/terraform/extract', () => {
   beforeEach(() => {
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
   });
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
