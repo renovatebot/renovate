@@ -97,14 +97,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           regEx(/{{depNameShort}}/g), // TODO #12071
           '{{depName}}'
         );
-      } else if (
-        key === 'branchPrefix' &&
-        is.string(val) &&
-        val.includes('{{')
-      ) {
-        const templateIndex = val.indexOf(`{{`);
-        migratedConfig.branchPrefix = val.substring(0, templateIndex);
-        migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
