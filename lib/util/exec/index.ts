@@ -68,7 +68,7 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string {
 }
 
 function getRawExecOptions(opts: ExecOptions): RawExecOptions {
-  const { executionTimeout: defaultExecutionTimeout } = getGlobalConfig();
+  const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
   const execOptions: ExecOptions = { ...opts };
   delete execOptions.extraEnv;
   delete execOptions.docker;
