@@ -21,7 +21,7 @@ import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
-import {
+import type {
   CommitFilesConfig,
   CommitSha,
   LocalConfig,
