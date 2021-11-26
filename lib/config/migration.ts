@@ -36,14 +36,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       'peerDependencies',
     ];
     for (const [key, val] of Object.entries(newConfig)) {
-      if (key.startsWith('masterIssue')) {
-        const newKey = key.replace('masterIssue', 'dependencyDashboard');
-        migratedConfig[newKey] = val;
-        if (optionTypes[newKey] === 'boolean' && val === 'true') {
-          migratedConfig[newKey] = true;
-        }
-        delete migratedConfig[key];
-      } else if (key === 'packageFiles' && is.array(val)) {
+      if (key === 'packageFiles' && is.array(val)) {
         const fileList = [];
         for (const packageFile of val) {
           if (is.object(packageFile) && !is.array(packageFile)) {

@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../types';
 
 export abstract class AbstractMigration {
-  abstract readonly propertyName: string;
+  abstract readonly propertyName: string | RegExp;
 
   private readonly originalConfig: RenovateConfig;
 
@@ -13,7 +13,7 @@ export abstract class AbstractMigration {
     this.migratedConfig = migratedConfig;
   }
 
-  abstract run(value: unknown): void;
+  abstract run(value: unknown, key: string): void;
 
   protected get<Key extends keyof RenovateConfig>(
     key: Key
@@ -41,10 +41,18 @@ export abstract class AbstractMigration {
   }
 
   protected rewrite(value: unknown): void {
+    if (!is.string(this.propertyName)) {
+      throw new Error();
+    }
+
     this.setHard(this.propertyName, value);
   }
 
   protected delete(property = this.propertyName): void {
+    if (!is.string(property)) {
+      throw new Error();
+    }
+
     delete this.migratedConfig[property];
   }
 }
