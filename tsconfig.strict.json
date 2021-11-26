@@ -113,6 +113,8 @@
     "./lib/util/object.ts",
     "./lib/util/sanitize.ts",
     "./lib/util/split.ts",
+    "./lib/versioning/swift/index.spec.ts",
+    "./lib/versioning/swift/index.ts",
     "./lib/workers/pr/changelog/hbs-template.ts",
     "./lib/workers/pr/changelog/types.ts",
     "./lib/workers/repository/init/types.ts",
