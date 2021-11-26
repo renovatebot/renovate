@@ -125,13 +125,9 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      const migration = migrations.find((item) => {
-        if (is.regExp(item.propertyName)) {
-          return item.propertyName.test(key);
-        }
-
-        return item.propertyName === key;
-      });
+      const migration = migrations.find((item) =>
+        MigrationsService.isMigrationForProperty(item, key)
+      );
       migration?.run(value, key);
     }
 
@@ -147,17 +143,24 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      if (
-        is.regExp(migration.propertyName) &&
-        migration.propertyName.test(key)
-      ) {
-        migration.run(value, key);
-      } else if (key === migration.propertyName) {
+
+      if (MigrationsService.isMigrationForProperty(migration, key)) {
         migration.run(value, key);
       }
     }
 
     return migratedConfig;
+  }
+
+  private static isMigrationForProperty(
+    migration: AbstractMigration,
+    key: string
+  ): boolean {
+    if (is.regExp(migration.propertyName)) {
+      return migration.propertyName.test(key);
+    }
+
+    return migration.propertyName === key;
   }
 
   private static getMigrations(
