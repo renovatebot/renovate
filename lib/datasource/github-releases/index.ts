@@ -56,7 +56,7 @@ export async function getReleases({
     releases: null,
   };
   dependency.releases = githubReleases
-    .filter(({ draft }) => draft === undefined || draft === false)
+    .filter(({ draft }) => draft !== false)
     .map(({ tag_name, published_at, prerelease }) => ({
       version: tag_name,
       gitRef: tag_name,

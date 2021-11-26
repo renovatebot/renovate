@@ -3,7 +3,7 @@ export type GithubRelease = {
   tag_name: string;
   published_at: string;
   prerelease: boolean;
-  draft: boolean;
+  draft?: boolean;
   assets: GithubReleaseAsset[];
 
   html_url: string;
