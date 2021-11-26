@@ -7,7 +7,7 @@ import { PlatformId } from '../../constants';
 import * as _datasource from '../../datasource';
 import * as datasourcePackagist from '../../datasource/packagist';
 import * as docker from '../../util/exec/docker';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from './artifacts';
