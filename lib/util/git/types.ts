@@ -1,11 +1,6 @@
-import type {
-  DiffResult as DiffResult_,
-  StatusResult as StatusResult_,
-} from 'simple-git';
 import type { GitOptions } from '../../types/git';
 
-export type StatusResult = StatusResult_;
-export type DiffResult = DiffResult_;
+export type { DiffResult, StatusResult } from 'simple-git';
 
 export interface GitAuthor {
   name?: string;
