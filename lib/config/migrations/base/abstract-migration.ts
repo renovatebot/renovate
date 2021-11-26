@@ -42,7 +42,7 @@ export abstract class AbstractMigration {
 
   protected rewrite(value: unknown): void {
     if (!is.string(this.propertyName)) {
-      throw new Error();
+      throw new Error(`${this.constructor.name}: invalid property name`);
     }
 
     this.setHard(this.propertyName, value);
@@ -50,7 +50,7 @@ export abstract class AbstractMigration {
 
   protected delete(property = this.propertyName): void {
     if (!is.string(property)) {
-      throw new Error();
+      throw new Error(`${this.constructor.name}: invalid property name`);
     }
 
     delete this.migratedConfig[property];

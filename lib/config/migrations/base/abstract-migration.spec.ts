@@ -9,6 +9,22 @@ class FakeMigration extends AbstractMigration {
   }
 }
 
+class FakeRegExpMigrationDelete extends AbstractMigration {
+  readonly propertyName = /test/;
+
+  override run(): void {
+    this.delete();
+  }
+}
+
+class FakeRegExpMigrationRewrite extends AbstractMigration {
+  readonly propertyName = /test/;
+
+  override run(): void {
+    this.rewrite(1);
+  }
+}
+
 describe('config/migrations/base/abstract-migration', () => {
   it('set property value if it is undefined', () => {
     const migratedConfig = MigrationsService.runMigration(
@@ -32,5 +48,21 @@ describe('config/migrations/base/abstract-migration', () => {
       FakeMigration
     );
     expect(migratedConfig.new).toBe('another value');
+  });
+
+  it('should throw an error to incorrect usage of delete method', () => {
+    const instance = new FakeRegExpMigrationDelete({}, {});
+
+    expect(() => instance.run()).toThrow(
+      'FakeRegExpMigrationDelete: invalid property name'
+    );
+  });
+
+  it('should throw an error to incorrect usage of rewrite method', () => {
+    const instance = new FakeRegExpMigrationRewrite({}, {});
+
+    expect(() => instance.run()).toThrow(
+      'FakeRegExpMigrationRewrite: invalid property name'
+    );
   });
 });

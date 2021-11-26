@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../types';
 import { AbstractMigration } from './base/abstract-migration';
 import { RemovePropertyMigration } from './base/remove-property-migration';
@@ -125,7 +126,7 @@ export class MigrationsService {
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
       const migration = migrations.find((item) => {
-        if (item.propertyName instanceof RegExp) {
+        if (is.regExp(item.propertyName)) {
           return item.propertyName.test(key);
         }
 
@@ -146,7 +147,12 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      if (key === migration.propertyName) {
+      if (
+        is.regExp(migration.propertyName) &&
+        migration.propertyName.test(key)
+      ) {
+        migration.run(value, key);
+      } else if (key === migration.propertyName) {
         migration.run(value, key);
       }
     }
