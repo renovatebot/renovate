@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import Git, { Options, ResetMode, SimpleGit, TaskOptions } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
-import type { GlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
