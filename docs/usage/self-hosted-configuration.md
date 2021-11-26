@@ -250,6 +250,11 @@ e.g.
 
 ## endpoint
 
+## executionTimeout
+
+Default execution timeout in minutes for child processes Renovate creates.
+If this option is not set, Renovate will fallback to 15 minutes.
+
 ## exposeAllEnv
 
 By default, Renovate only passes a limited set of environment variables to package managers.
