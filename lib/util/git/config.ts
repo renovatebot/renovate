@@ -1,10 +1,6 @@
 import is from '@sindresorhus/is';
 import { SimpleGitOptions } from 'simple-git';
-
-export const enum GitNoVerifyOption {
-  Commit = 'commit',
-  Push = 'push',
-}
+import { GitNoVerifyOption } from './types';
 
 let noVerify: GitNoVerifyOption[] = [
   GitNoVerifyOption.Push,

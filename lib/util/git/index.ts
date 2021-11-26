@@ -1,13 +1,6 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import Git, {
-  DiffResult as DiffResult_,
-  Options,
-  ResetMode,
-  SimpleGit,
-  StatusResult as StatusResult_,
-  TaskOptions,
-} from 'simple-git';
+import Git, { Options, ResetMode, SimpleGit, TaskOptions } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -22,43 +15,26 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { GitOptions, GitProtocol } from '../../types/git';
+import { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
+import { getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
+import {
+  CommitFilesConfig,
+  CommitSha,
+  GitNoVerifyOption,
+  LocalConfig,
+  StatusResult,
+  StorageConfig,
+} from './types';
 
-export { GitNoVerifyOption, setNoVerify } from './config';
+export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
-}
-
-export type StatusResult = StatusResult_;
-
-export type DiffResult = DiffResult_;
-
-export type CommitSha = string;
-
-interface StorageConfig {
-  currentBranch?: string;
-  url: string;
-  extraCloneOpts?: GitOptions;
-  cloneSubmodules?: boolean;
-  fullClone?: boolean;
-}
-
-interface LocalConfig extends StorageConfig {
-  additionalBranches: string[];
-  currentBranch: string;
-  currentBranchSha: string;
-  branchCommits: Record<string, CommitSha>;
-  branchIsModified: Record<string, boolean>;
-  ignoredAuthors: string[];
-  gitAuthorName?: string;
-  gitAuthorEmail?: string;
 }
 
 // istanbul ignore next
@@ -659,33 +635,6 @@ export async function hasDiff(branchName: string): Promise<boolean> {
     return true;
   }
 }
-
-/**
- * File to commit
- */
-export interface File {
-  /**
-   * Relative file path
-   */
-  name: string;
-
-  /**
-   * file contents
-   */
-  contents: string | Buffer;
-
-  /**
-   * the executable bit
-   */
-  executable?: boolean;
-}
-
-export type CommitFilesConfig = {
-  branchName: string;
-  files: File[];
-  message: string;
-  force?: boolean;
-};
 
 export async function commitFiles({
   branchName,
