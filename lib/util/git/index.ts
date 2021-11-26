@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import Git, { Options, ResetMode, SimpleGit, TaskOptions } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
-import { GlobalConfig } from '../../config/global';
+import type { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -15,13 +15,13 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { GitProtocol } from '../../types/git';
+import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
-import {
+import type {
   CommitFilesConfig,
   CommitSha,
   LocalConfig,
