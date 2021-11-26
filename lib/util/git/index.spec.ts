@@ -4,7 +4,6 @@ import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { GitNoVerifyOption } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
@@ -364,7 +363,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Commit]);
+      setNoVerify(['commit']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -394,7 +393,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Push]);
+      setNoVerify(['push']);
 
       await git.commitFiles({
         branchName: 'renovate/something',

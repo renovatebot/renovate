@@ -12,10 +12,7 @@ export interface GitAuthor {
   address?: string;
 }
 
-export const enum GitNoVerifyOption {
-  Commit = 'commit',
-  Push = 'push',
-}
+export type GitNoVerifyOption = 'commit' | 'push';
 
 export type CommitSha = string;
 

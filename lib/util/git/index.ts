@@ -24,7 +24,6 @@ import { configSigningKey, writePrivateKey } from './private-key';
 import {
   CommitFilesConfig,
   CommitSha,
-  GitNoVerifyOption,
   LocalConfig,
   StatusResult,
   StorageConfig,
@@ -713,7 +712,7 @@ export async function commitFiles({
     }
 
     const commitOptions: Options = {};
-    if (getNoVerify().includes(GitNoVerifyOption.Commit)) {
+    if (getNoVerify().includes('commit')) {
       commitOptions['--no-verify'] = null;
     }
 
@@ -744,7 +743,7 @@ export async function commitFiles({
       '--force-with-lease': null,
       '-u': null,
     };
-    if (getNoVerify().includes(GitNoVerifyOption.Push)) {
+    if (getNoVerify().includes('push')) {
       pushOptions['--no-verify'] = null;
     }
 

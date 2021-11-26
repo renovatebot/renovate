@@ -1,11 +1,8 @@
 import is from '@sindresorhus/is';
 import { SimpleGitOptions } from 'simple-git';
-import { GitNoVerifyOption } from './types';
+import type { GitNoVerifyOption } from './types';
 
-let noVerify: GitNoVerifyOption[] = [
-  GitNoVerifyOption.Push,
-  GitNoVerifyOption.Commit,
-];
+let noVerify: GitNoVerifyOption[] = ['push', 'commit'];
 
 export function setNoVerify(value: GitNoVerifyOption[]): void {
   if (!is.array(value, is.string)) {
