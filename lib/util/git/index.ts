@@ -15,7 +15,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { GitProtocol } from '../../types/git';
+import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
