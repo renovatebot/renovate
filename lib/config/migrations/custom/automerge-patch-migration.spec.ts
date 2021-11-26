@@ -12,4 +12,21 @@ describe('config/migrations/custom/automerge-patch-migration', () => {
 
     expect(migratedConfig.patch.automerge).toBeTrue();
   });
+
+  it('should add value to existing object', () => {
+    const migratedConfig = MigrationsService.runMigration(
+      {
+        automergePatch: 'some-value',
+        patch: {
+          excludePackageNames: ['test'],
+        },
+      },
+      AutomergePatchMigration
+    );
+
+    expect(migratedConfig.patch).toEqual({
+      automerge: true,
+      excludePackageNames: ['test'],
+    });
+  });
 });

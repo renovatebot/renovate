@@ -12,4 +12,21 @@ describe('config/migrations/custom/automerge-minor-migration', () => {
 
     expect(migratedConfig.minor.automerge).toBeTrue();
   });
+
+  it('should add value to existing object', () => {
+    const migratedConfig = MigrationsService.runMigration(
+      {
+        automergeMinor: 'some-value',
+        minor: {
+          excludePackageNames: ['test'],
+        },
+      },
+      AutomergeMinorMigration
+    );
+
+    expect(migratedConfig.minor).toEqual({
+      automerge: true,
+      excludePackageNames: ['test'],
+    });
+  });
 });

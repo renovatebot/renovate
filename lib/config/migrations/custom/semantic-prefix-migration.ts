@@ -6,11 +6,11 @@ export class SemanticPrefixMigration extends AbstractMigration {
   readonly propertyName = 'semanticPrefix';
 
   override run(value): void {
+    this.delete();
+
     if (!is.string(value)) {
       return;
     }
-
-    this.delete();
 
     try {
       const semanticCommitMessage = SemanticCommitMessage.fromString(value);
