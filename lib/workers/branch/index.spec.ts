@@ -10,7 +10,7 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
-import { File, StatusResult } from '../../util/git/types';
+import type { File, StatusResult } from '../../util/git/types';
 import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
