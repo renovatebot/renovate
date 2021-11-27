@@ -1,4 +1,5 @@
 import { Stream } from 'stream';
+import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { clone } from '../util/clone';
@@ -91,36 +92,50 @@ export default function prepareError(err: Error): Record<string, unknown> {
   return response;
 }
 
-export function sanitizeValue(_value: unknown, seen = new WeakMap()): any {
-  let value = _value;
-  if (Array.isArray(value)) {
+type NestedValue = unknown[] | Record<string, unknown>;
+
+function isNested(value: unknown): value is NestedValue {
+  return is.array(value) || is.plainObject(value);
+}
+
+export function sanitizeValue(
+  value: unknown,
+  seen = new WeakMap<NestedValue, unknown>()
+): any {
+  if (is.date(value) && is.function_(value)) {
+    return value;
+  }
+
+  if (is.buffer(value)) {
+    return '[content]';
+  }
+
+  if (is.error(value)) {
+    const err = prepareError(value);
+    return sanitizeValue(err, seen);
+  }
+
+  if (is.string(value)) {
+    return sanitize(value);
+  }
+
+  if (is.array(value)) {
     const length = value.length;
     const arrayResult = Array(length);
     seen.set(value, arrayResult);
     for (let idx = 0; idx < length; idx += 1) {
       const val = value[idx];
-      arrayResult[idx] = seen.has(val)
-        ? seen.get(val)
-        : sanitizeValue(val, seen);
+      arrayResult[idx] =
+        isNested(val) && seen.has(val)
+          ? seen.get(val)
+          : sanitizeValue(val, seen);
     }
     return arrayResult;
   }
 
-  if (value instanceof Buffer) {
-    return '[content]';
-  }
-
-  if (value instanceof Error) {
-    value = prepareError(value);
-  }
-
-  if (value && typeof value !== 'function' && typeof value === 'object') {
-    if (value instanceof Date) {
-      return value;
-    }
-
+  if (is.plainObject(value)) {
     const objectResult: Record<string, any> = {};
-    seen.set(value as any, objectResult);
+    seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
       let curValue: any;
       if (!val) {
@@ -145,7 +160,7 @@ export function sanitizeValue(_value: unknown, seen = new WeakMap()): any {
     return objectResult;
   }
 
-  return typeof value === 'string' ? sanitize(value) : value;
+  return value;
 }
 
 export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
