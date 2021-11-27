@@ -122,6 +122,7 @@
     "./lib/workers/pr/changelog/hbs-template.ts",
     "./lib/workers/pr/changelog/types.ts",
     "./lib/workers/repository/init/types.ts",
+    "./lib/workers/repository/model/commit-message.ts",
     "./test/graphql-snapshot.ts",
     "./test/json-schema.ts",
     "./test/newline-snapshot-serializer.ts",
