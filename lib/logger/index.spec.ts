@@ -166,6 +166,7 @@ describe('logger/index', () => {
       secrets: {
         foo: 'barsecret',
       },
+      someFn: () => 'secret"password',
       someObject: new SomeClass('secret"password'),
     });
 
@@ -178,6 +179,7 @@ describe('logger/index', () => {
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe('[Template]');
     expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someFn).toBe('[function]');
     expect(logged.someObject.field).toBe('**redacted**');
   });
 });
