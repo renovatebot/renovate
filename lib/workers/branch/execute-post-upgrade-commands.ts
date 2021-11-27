@@ -1,11 +1,12 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { addMeta, logger } from '../../logger';
 import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { File, getRepoStatus } from '../../util/git';
+import { getRepoStatus } from '../../util/git';
+import type { File } from '../../util/git/types';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { compile } from '../../util/template';
@@ -23,7 +24,7 @@ export async function postUpgradeCommandsExecutor(
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const artifactErrors = [...(config.artifactErrors || [])];
   const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
-    getGlobalConfig();
+    GlobalConfig.get();
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -62,7 +63,7 @@ export async function postUpgradeCommandsExecutor(
 
             logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
-              cwd: getGlobalConfig().localDir,
+              cwd: GlobalConfig.get('localDir'),
             });
 
             logger.debug(
@@ -149,7 +150,7 @@ export async function postUpgradeCommandsExecutor(
 export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
-  const { allowedPostUpgradeCommands } = getGlobalConfig();
+  const { allowedPostUpgradeCommands } = GlobalConfig.get();
 
   const hasChangedFiles =
     config.updatedPackageFiles?.length > 0 ||

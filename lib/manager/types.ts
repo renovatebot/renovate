@@ -6,7 +6,7 @@ import type {
 } from '../config/types';
 import type { ProgrammingLanguage } from '../constants';
 import type { RangeStrategy, SkipReason } from '../types';
-import type { File } from '../util/git';
+import type { File } from '../util/git/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -44,6 +44,7 @@ export interface UpdateArtifactsConfig {
   composerIgnorePlatformReqs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
+  ignorePlugins?: boolean;
   ignoreScripts?: boolean;
   updateType?: UpdateType;
   newValue?: string;
@@ -130,9 +131,11 @@ export interface LookupUpdate {
   isPin?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
+  isReplacement?: boolean;
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
+  newName?: string;
   newValue: string;
   semanticCommitType?: string;
   pendingChecks?: boolean;
@@ -177,6 +180,7 @@ export interface Upgrade<T = Record<string, any>>
   newDigest?: string;
   newFrom?: string;
   newMajor?: number;
+  newName?: string;
   newValue?: string;
   packageFile?: string;
   rangeStrategy?: RangeStrategy;

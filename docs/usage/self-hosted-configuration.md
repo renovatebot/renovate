@@ -11,6 +11,8 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowCustomCrateRegistries
 
+## allowPlugins
+
 ## allowPostUpgradeCommandTemplating
 
 Set to true to allow templating of dependency level post-upgrade commands.
@@ -247,6 +249,11 @@ e.g.
 ## dryRun
 
 ## endpoint
+
+## executionTimeout
+
+Default execution timeout in minutes for child processes Renovate creates.
+If this option is not set, Renovate will fallback to 15 minutes.
 
 ## exposeAllEnv
 

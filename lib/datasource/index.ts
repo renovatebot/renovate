@@ -63,7 +63,7 @@ async function getRegistryReleases(
     );
     // istanbul ignore if
     if (cachedResult) {
-      logger.debug({ cacheKey }, 'Returning cached datasource response');
+      logger.trace({ cacheKey }, 'Returning cached datasource response');
       return cachedResult;
     }
   }
@@ -213,6 +213,18 @@ export function getDefaultVersioning(datasourceName: string): string {
   return datasource?.defaultVersioning || 'semver';
 }
 
+function applyReplacements(
+  config: GetReleasesInternalConfig
+): Pick<ReleaseResult, 'replacementName' | 'replacementVersion'> | undefined {
+  if (config.replacementName && config.replacementVersion) {
+    return {
+      replacementName: config.replacementName,
+      replacementVersion: config.replacementVersion,
+    };
+  }
+  return undefined;
+}
+
 async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
@@ -250,6 +262,7 @@ async function fetchReleases(
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
+  dep = { ...dep, ...applyReplacements(config) };
   return dep;
 }
 

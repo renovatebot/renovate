@@ -45,13 +45,14 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 
 ### GitHub
 
-| name                                        | example use                     | preset    | resolves as                  | filename        | Git tag        |
-| ------------------------------------------- | ------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
-| GitHub default                              | `github>abc/foo`                | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
-| GitHub with preset name                     | `github>abc/foo:xyz`            | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
-| GitHub default with a tag                   | `github>abc/foo#1.5.4`          | `default` | `https://github.com/abc/foo` | `default.json`  | `1.5.4`        |
-| GitHub with preset name with a tag          | `github>abc/foo:xyz#1.5.4`      | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | `1.5.4`        |
-| GitHub with preset name and path with a tag | `github>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| name                                        | example use                      | preset    | resolves as                  | filename        | Git tag        |
+| ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
+| GitHub default                              | `github>abc/foo`                 | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
+| GitHub with preset name                     | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
+| GitHub default with a tag                   | `github>abc/foo#1.5.4`           | `default` | `https://github.com/abc/foo` | `default.json`  | `1.5.4`        |
+| GitHub with preset name with a tag          | `github>abc/foo:xyz#1.5.4`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| GitHub with preset name and path with a tag | `github>abc/foo//path/xyz#1.5.4` | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| GitHub with subpreset name and tag          | `github>abc/foo:xyz/sub#1.5.4`   | `sub`     | `https://github.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 
 ### GitLab
 
@@ -62,6 +63,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | GitLab default with a tag                   | `gitlab>abc/foo#1.5.4`          | `default` | `https://gitlab.com/abc/foo` | `default.json`  | `1.5.4`        |
 | GitLab with preset name with a tag          | `gitlab>abc/foo:xyz#1.5.4`      | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 | GitLab with preset name and path with a tag | `gitlab>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://gitlab.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| GitLab with subpreset name and tag          | `gitlab>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 
 ### Gitea
 
@@ -72,6 +74,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | Gitea default with a tag                   | `gitea>abc/foo#1.5.4`          | `default` | `https://gitea.com/abc/foo` | `default.json`  | `1.5.4`        |
 | Gitea with preset name with a tag          | `gitea>abc/foo:xyz#1.5.4`      | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 | Gitea with preset name and path with a tag | `gitea>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://gitea.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| Gitea with subpreset name and tag          | `gitea>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 
 ### Self-hosted Git
 
@@ -82,6 +85,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | Local default with a tag                   | `local>abc/foo#1.5.4`          | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.5.4`        |
 | Local with preset name with a tag          | `local>abc/foo:xyz#1.5.4`      | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 | Local with preset name and path with a tag | `local>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 
 Note that you can't combine the path and sub-preset syntaxes.
 This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
@@ -128,28 +132,24 @@ You can find the Renovate team's preset configs at the "Config Presets" section 
 If you browse the "default" presets, you will see some that contain parameters, e.g.:
 
 ```json
-    "labels": {
-      "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
-      "labels": [
-        "{{arg0}}",
-        "{{arg1}}"
-      ]
-    },
-    "assignee": {
-      "description": "Assign PRs to <code>{{arg0}}</code>",
-      "assignees": [
-        "{{arg0}}"
-      ]
-    },
+{
+  "labels": {
+    "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
+    "labels": ["{{arg0}}", "{{arg1}}"]
+  },
+  "assignee": {
+    "description": "Assign PRs to <code>{{arg0}}</code>",
+    "assignees": ["{{arg0}}"]
+  }
+}
 ```
 
 Here is how you would use these in your Renovate config:
 
 ```json
-  "extends": [
-    ":labels(dependencies,devops)",
-    ":assignee(rarkins)"
-  ]
+{
+  "extends": [":labels(dependencies,devops)", ":assignee(rarkins)"]
+}
 ```
 
 In short, the number of `{{argx}}` parameters in the definition is how many parameters you need to provide.
@@ -170,7 +170,9 @@ To host your preset config on GitHub:
 - In other repos, reference it in an extends array like "github>owner/name", for example:
 
 ```json
+{
   "extends": ["github>rarkins/renovate-config"]
+}
 ```
 
 From then on Renovate will use the Renovate config from the preset repo's default branch.
@@ -259,7 +261,6 @@ For example:
 {
   "name": "renovate-config-fastcore",
   "version": "0.0.1",
-  ...
   "renovate-config": {
     "default": {
       "extends": ["config:base", "schedule:nonOfficeHours"]
@@ -271,7 +272,9 @@ For example:
 Then in each of your repositories you can add your Renovate config like:
 
 ```json
+{
   "extends": ["fastcore"]
+}
 ```
 
 Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
@@ -279,5 +282,7 @@ Any repository including this config will then adopt the rules of the default `l
 Note: if you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
 
 ```json
+{
   "extends": ["@fastcore"]
+}
 ```
