@@ -123,6 +123,7 @@
     "./lib/workers/pr/changelog/types.ts",
     "./lib/workers/repository/init/types.ts",
     "./test/graphql-snapshot.ts",
+    "./test/http-mock.ts",
     "./test/json-schema.ts",
     "./test/newline-snapshot-serializer.ts",
     "./test/static-files.spec.ts",
