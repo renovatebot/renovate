@@ -25,14 +25,14 @@ async function rm(namespace: string, key: string): Promise<void> {
 export async function get<T = never>(
   namespace: string,
   key: string
-): Promise<T> {
+): Promise<T | undefined> {
   if (!client) {
     return undefined;
   }
   logger.trace(`cache.get(${namespace}, ${key})`);
   try {
     const res = await client?.get(getKey(namespace, key));
-    const cachedValue = JSON.parse(res);
+    const cachedValue = res && JSON.parse(res);
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
         logger.trace({ namespace, key }, 'Returning cached value');
