@@ -16,11 +16,14 @@ describe('util/sanitize', () => {
     const hashed = Buffer.from(`${username}:${password}`).toString('base64');
     add(hashed);
     add(password);
-    // FIXME: explicit assert condition
-    expect(
-      sanitize(
-        `My token is ${token}, username is "${username}" and password is "${password}" (hashed: ${hashed})`
-      )
-    ).toMatchSnapshot();
+
+    const input = `My token is ${token}, username is "${username}" and password is "${password}" (hashed: ${hashed})`;
+    const output =
+      'My token is **redacted**, username is "userabc" and password is "**redacted**" (hashed: **redacted**)';
+    expect(sanitize(input)).toBe(output);
+
+    const inputX2 = [input, input].join('\n');
+    const outputX2 = [output, output].join('\n');
+    expect(sanitize(inputX2)).toBe(outputX2);
   });
 });
