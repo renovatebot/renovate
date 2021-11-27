@@ -106,6 +106,8 @@ export function cache<T>({
       finalNamespace = namespace;
     } else if (is.function_(namespace)) {
       finalNamespace = namespace.apply(instance, args);
+    } else {
+      return callback();
     }
 
     let finalKey: string;
@@ -113,6 +115,8 @@ export function cache<T>({
       finalKey = key;
     } else if (is.function_(key)) {
       finalKey = key.apply(instance, args);
+    } else {
+      return callback();
     }
 
     const cachedResult = await packageCache.get<unknown>(
