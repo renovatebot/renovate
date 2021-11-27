@@ -92,18 +92,26 @@ export default function prepareError(err: Error): Record<string, unknown> {
   return response;
 }
 
-type NestedValue = unknown[] | Record<string, unknown>;
+type NestedValue = unknown[] | object;
 
 function isNested(value: unknown): value is NestedValue {
-  return is.array(value) || is.plainObject(value);
+  return is.array(value) || is.object(value);
 }
 
 export function sanitizeValue(
   value: unknown,
   seen = new WeakMap<NestedValue, unknown>()
 ): any {
-  if (is.date(value) && is.function_(value)) {
+  if (is.string(value)) {
+    return sanitize(value);
+  }
+
+  if (is.date(value)) {
     return value;
+  }
+
+  if (is.function_(value)) {
+    return '[function]';
   }
 
   if (is.buffer(value)) {
@@ -113,10 +121,6 @@ export function sanitizeValue(
   if (is.error(value)) {
     const err = prepareError(value);
     return sanitizeValue(err, seen);
-  }
-
-  if (is.string(value)) {
-    return sanitize(value);
   }
 
   if (is.array(value)) {
@@ -133,7 +137,7 @@ export function sanitizeValue(
     return arrayResult;
   }
 
-  if (is.plainObject(value)) {
+  if (is.object(value)) {
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
@@ -157,6 +161,7 @@ export function sanitizeValue(
 
       objectResult[key] = curValue;
     }
+
     return objectResult;
   }
 
