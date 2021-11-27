@@ -152,6 +152,10 @@ describe('logger/index', () => {
     });
     add({ password: 'secret"password' });
 
+    class SomeClass {
+      constructor(public field: string) {}
+    }
+
     logger.error({
       foo: 'secret"password',
       bar: ['somethingelse', 'secret"password'],
@@ -162,6 +166,7 @@ describe('logger/index', () => {
       secrets: {
         foo: 'barsecret',
       },
+      someObject: new SomeClass('secret"password'),
     });
 
     expect(logged.foo).not.toBe('secret"password');
@@ -172,6 +177,6 @@ describe('logger/index', () => {
     expect(logged.buffer).toBe('[content]');
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe('[Template]');
-    expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someObject.field).toBe('**redacted**');
   });
 });
