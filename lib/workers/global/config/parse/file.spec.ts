@@ -17,14 +17,7 @@ describe('workers/global/config/parse/file', () => {
   });
 
   describe('.getConfig()', () => {
-    it('raises deprecation warning when no extension given', async () => {
-      const configFile = upath.resolve(__dirname, './__fixtures__/file');
-      await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
-      expect(logger.info).toHaveBeenCalledWith(file.fileDeprecationMessage);
-    });
-
     it.each([
-      ['custom config file without extension', 'file'],
       ['custom config file with extension', 'file.js'],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
@@ -88,17 +81,19 @@ describe('workers/global/config/parse/file', () => {
 
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
-    it('fatal error and exit if invalid config file type', async () => {
+
+    it.each([
+      ['invalid config file type', './file.txt'],
+      ['missing config file type', './file'],
+    ])('fatal error and exit if %s', async (fileType, filePath) => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
         .mockImplementation(() => undefined as never);
-      const configFile = upath.resolve(tmp.path, './file.txt');
+      const configFile = upath.resolve(tmp.path, filePath);
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(mockProcessExit).toHaveBeenCalledWith(1);
-      expect(logger.fatal).toHaveBeenCalledWith(
-        `Unsupported file type: ${configFile}`
-      );
+      expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       mockProcessExit.mockRestore();
       fs.unlinkSync(configFile);
     });

@@ -1,13 +1,10 @@
-import fs, { readFile } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-
-export const fileDeprecationMessage =
-  'Providing a config file without an extension is deprecated. Please use explicit file extensions.';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   switch (upath.extname(file)) {
@@ -24,7 +21,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       return tmpConfig.default ? tmpConfig.default : tmpConfig;
     }
     default:
-      throw new Error(`Unsupported file type: ${file}`);
+      throw new Error('Unsupported file type');
   }
 }
 
@@ -32,16 +29,6 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config.js';
   if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
-  }
-  if (!upath.extname(configFile)) {
-    logger.info(fileDeprecationMessage);
-    for (const ext of ['.js', '.json']) {
-      const resolved = upath.addExt(configFile, ext);
-      if (await fs.exists(resolved)) {
-        configFile = resolved;
-        break;
-      }
-    }
   }
   logger.debug('Checking for config file in ' + configFile);
   let config: AllConfig = {};
@@ -52,7 +39,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     if (err instanceof SyntaxError || err instanceof TypeError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
       process.exit(1);
-    } else if (err.message.startsWith(`Unsupported file type`)) {
+    } else if (err.message === 'Unsupported file type') {
       logger.fatal(err.message);
       process.exit(1);
     } else if (env.RENOVATE_CONFIG_FILE) {
