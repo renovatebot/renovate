@@ -3,11 +3,11 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import * as _hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from './artifacts';
@@ -61,11 +61,11 @@ describe('manager/gomod/artifacts', () => {
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -151,7 +151,7 @@ describe('manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -170,7 +170,7 @@ describe('manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -189,7 +189,7 @@ describe('manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -212,7 +212,7 @@ describe('manager/gomod/artifacts', () => {
   });
 
   it('supports docker mode with 2 credentials', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -256,7 +256,7 @@ describe('manager/gomod/artifacts', () => {
   });
 
   it('supports docker mode with single credential', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-enterprise-token',
@@ -295,7 +295,7 @@ describe('manager/gomod/artifacts', () => {
   });
 
   it('supports docker mode with multiple credentials for different paths', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-enterprise-token-repo1',
@@ -341,7 +341,7 @@ describe('manager/gomod/artifacts', () => {
   });
 
   it('supports docker mode and ignores non http credentials', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-token',
@@ -384,7 +384,7 @@ describe('manager/gomod/artifacts', () => {
   });
 
   it('supports docker mode with many credentials', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -442,7 +442,7 @@ describe('manager/gomod/artifacts', () => {
   });
 
   it('supports docker mode and ignores non git credentials', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -484,7 +484,7 @@ describe('manager/gomod/artifacts', () => {
   });
 
   it('supports docker mode with goModTidy', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename

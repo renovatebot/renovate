@@ -1,12 +1,12 @@
 import { loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { extractPackageFile } from '.';
 
 const sample = loadFixture('mix.exs');
 
 describe('manager/mix/extract', () => {
   beforeEach(() => {
-    setGlobalConfig({ localDir: '' });
+    GlobalConfig.set({ localDir: '' });
   });
 
   describe('extractPackageFile()', () => {

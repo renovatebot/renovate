@@ -1,7 +1,7 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, hostRules } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
@@ -25,11 +25,11 @@ describe('manager/mix/artifacts', () => {
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
   });
 
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   it('returns null if no mix.lock found', async () => {
@@ -82,7 +82,7 @@ describe('manager/mix/artifacts', () => {
 
   it('returns updated mix.lock', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
@@ -100,7 +100,7 @@ describe('manager/mix/artifacts', () => {
 
   it('authenticates to private repositories', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll(exec);
@@ -140,7 +140,7 @@ describe('manager/mix/artifacts', () => {
   });
 
   it('returns updated mix.lock in subdir', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('subdir/mix.lock');
     mockExecAll(exec);
     expect(
