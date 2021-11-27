@@ -14,15 +14,17 @@ export default function configSerializer(
   const arrayFields = ['packageFiles', 'upgrades'];
 
   return traverse(config).map(function scrub(val: string) {
-    if (val && templateFields.includes(this.key)) {
-      this.update('[Template]');
-    }
-    if (val && contentFields.includes(this.key)) {
-      this.update('[content]');
-    }
-    // istanbul ignore if
-    if (val && arrayFields.includes(this.key)) {
-      this.update('[Array]');
+    if (this.key && val) {
+      if (templateFields.includes(this.key)) {
+        this.update('[Template]');
+      }
+      if (contentFields.includes(this.key)) {
+        this.update('[content]');
+      }
+      // istanbul ignore if
+      if (arrayFields.includes(this.key)) {
+        this.update('[Array]');
+      }
     }
   });
 }
