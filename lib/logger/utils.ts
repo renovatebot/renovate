@@ -71,9 +71,10 @@ export default function prepareError(err: Error): Record<string, unknown> {
     };
     response.options = options;
 
-    for (const k of ['username', 'password', 'method', 'http2']) {
-      options[k] = err.options[k];
-    }
+    options.username = err.options.username;
+    options.password = err.options.password;
+    options.method = err.options.method;
+    options.http2 = err.options.http2;
 
     // istanbul ignore else
     if (err.response) {
@@ -174,7 +175,11 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
 
   const stream = streamConfig.stream as BunyanStream;
   if (stream?.writable) {
-    const write = (chunk: BunyanRecord, enc, cb): void => {
+    const write = (
+      chunk: BunyanRecord,
+      enc: BufferEncoding,
+      cb: (err?: Error | null) => void
+    ): void => {
       const raw = sanitizeValue(chunk);
       const result =
         streamConfig.type === 'raw'

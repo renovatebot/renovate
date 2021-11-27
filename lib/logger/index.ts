@@ -9,7 +9,7 @@ import type { BunyanRecord, Logger } from './types';
 import { ProblemStream, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT ?? nanoid();
-let curMeta = {};
+let curMeta: Record<string, unknown> = {};
 
 const problems = new ProblemStream();
 
