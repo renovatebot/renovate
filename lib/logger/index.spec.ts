@@ -177,6 +177,7 @@ describe('logger/index', () => {
     expect(logged.buffer).toBe('[content]');
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe('[Template]');
+    expect(logged.secrets.foo).toBe('***********');
     expect(logged.someObject.field).toBe('**redacted**');
   });
 });
