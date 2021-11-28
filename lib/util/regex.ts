@@ -52,7 +52,7 @@ export function isConfigRegex(input: unknown): input is string {
   );
 }
 
-export function parseConfigRegex(input: string): RegExp | null {
+function parseConfigRegex(input: string): RegExp | null {
   try {
     const regexString = input
       .replace(configValStart, '')
@@ -66,15 +66,18 @@ export function parseConfigRegex(input: string): RegExp | null {
 
 type ConfigRegexPredicate = (s: string) => boolean;
 
-export function configRegexPredicate(input: string): ConfigRegexPredicate {
-  let result = (_: string): boolean => false;
-  const configRegex = parseConfigRegex(input);
-  if (configRegex) {
-    const isPositive = !input.startsWith('!');
-    result = (x: string): boolean => {
-      const res = configRegex.test(x);
-      return isPositive ? res : !res;
-    };
+export function configRegexPredicate(
+  input: string
+): ConfigRegexPredicate | null {
+  if (isConfigRegex(input)) {
+    const configRegex = parseConfigRegex(input);
+    if (configRegex) {
+      const isPositive = !input.startsWith('!');
+      return (x: string): boolean => {
+        const res = configRegex.test(x);
+        return isPositive ? res : !res;
+      };
+    }
   }
-  return result;
+  return null;
 }
