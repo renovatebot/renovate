@@ -56,7 +56,7 @@ export function parseGoproxy(
 const lexer = moo.states({
   main: {
     separator: {
-      match: /\s*?,\s*?/, // TODO #12070 moo states
+      match: regEx(/\s*?,\s*?/), // TODO #12870
       value: (_: string) => '|',
     },
     asterisk: {
@@ -77,14 +77,14 @@ const lexer = moo.states({
       value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
     },
     escapedChar: {
-      match: /\\./, // TODO #12070 moo states
+      match: /\\./, // TODO #12870
       value: (s: string) => s.slice(1),
     },
   },
   characterRange: {
-    char: /[^\\\]\n]/, // TODO #12070 moo states
+    char: /[^\\\]\n]/, // TODO #12870
     escapedChar: {
-      match: /\\./, // TODO #12070 moo states
+      match: /\\./, // TODO #12870
       value: (s: string) => s.slice(1),
     },
     characterRangeEnd: {
