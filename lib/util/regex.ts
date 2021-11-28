@@ -22,8 +22,9 @@ try {
 export function regEx(pattern: string | RegExp, flags?: string): RegExp {
   const key = `${pattern.toString()}:${flags}`;
 
-  if (cache.has(key)) {
-    return cache.get(key);
+  const cachedResult = cache.get(key);
+  if (cachedResult) {
+    return cachedResult;
   }
 
   try {
@@ -63,16 +64,20 @@ function parseConfigRegex(input: string): RegExp | null {
   return null;
 }
 
-type ConfigRegexPredicate = (string) => boolean;
+type ConfigRegexPredicate = (s: string) => boolean;
 
-export function configRegexPredicate(input: string): ConfigRegexPredicate {
-  const configRegex = parseConfigRegex(input);
-  if (configRegex) {
-    const isPositive = !input.startsWith('!');
-    return (x: string): boolean => {
-      const res = configRegex.test(x);
-      return isPositive ? res : !res;
-    };
+export function configRegexPredicate(
+  input: string
+): ConfigRegexPredicate | null {
+  if (isConfigRegex(input)) {
+    const configRegex = parseConfigRegex(input);
+    if (configRegex) {
+      const isPositive = !input.startsWith('!');
+      return (x: string): boolean => {
+        const res = configRegex.test(x);
+        return isPositive ? res : !res;
+      };
+    }
   }
   return null;
 }
