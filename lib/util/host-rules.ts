@@ -92,6 +92,7 @@ function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
 }
 
 function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
+  // istanbul ignore if
   if (!rule.matchHost) {
     return false;
   }
