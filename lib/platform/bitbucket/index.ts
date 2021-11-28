@@ -120,7 +120,7 @@ export async function getRawFile(
   const path = fileName;
 
   let finalBranchOrTag = branchOrTag;
-  if (branchOrTag && branchOrTag.indexOf(pathSeparator) !== -1) {
+  if (branchOrTag?.includes(pathSeparator)) {
     // Branch name contans slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
