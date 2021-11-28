@@ -40,10 +40,7 @@ export class GlobalConfig {
 
     const result = { ...config };
     for (const option of GlobalConfig.OPTIONS) {
-      GlobalConfig.config = {
-        ...GlobalConfig.config,
-        [option]: config[option],
-      };
+      GlobalConfig.config[option] = config[option] as never;
       delete result[option];
     }
 
