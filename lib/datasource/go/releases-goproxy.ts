@@ -39,7 +39,7 @@ export function parseGoproxy(
   const result: GoproxyItem[] = input
     .split(regEx(/([^,|]*(?:,|\|))/))
     .filter(Boolean)
-    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12070 lookahead not supported in re2
+    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12872 lookahead
     .map(([url, separator]) => ({
       url,
       fallback:

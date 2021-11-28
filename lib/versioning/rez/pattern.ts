@@ -76,17 +76,17 @@ export const inclusiveBound = regEx(
   `^(?<inclusive_bound>(?<inclusive_lower_version>${versionGroup})?\\.\\.(?<inclusive_upper_version>${versionGroup})?)$`
 ); /* Match an inclusive bound (e.g. 1.0.0..2.0.0) */
 // Add ? after |\\+) in order to match >=1.15
-export const lowerBound = new RegExp( // TODO #12070 named backreference (NOT SUPPORTED) in re2
+export const lowerBound = new RegExp( // TODO #12872 named backreference
   `^(?<lower_bound>(?<lower_bound_prefix>>|>=)?(?<lower_version>${versionGroup})?(\\k<lower_bound_prefix>|\\+)?)$`
 ); /* Match a lower bound (e.g. 1.0.0+) */
-export const upperBound = new RegExp( // TODO #12070  lookahead (NOT SUPPORTED) in re2
+export const upperBound = new RegExp( // TODO #12872  lookahead
   `^(?<upper_bound>(?<upper_bound_prefix><(?=${versionGroup})|<=)?(?<upper_version>${versionGroup})?)$`
 ); /* Match an upper bound (e.g. <=1.0.0) */
 // Add ,? to match >=7,<9 (otherwise it just matches >=7<9)
-export const ascendingRange = new RegExp( // TODO #12070  named backreference (NOT SUPPORTED) in re2
+export const ascendingRange = new RegExp( // TODO #12872  named backreference
   `^(?<range_asc>(?<range_lower_asc>(?<range_lower_asc_prefix>>|>=)?(?<range_lower_asc_version>${versionGroup})?(\\k<range_lower_asc_prefix>|\\+)?),?(?<range_upper_asc>(\\k<range_lower_asc_version>,?|)(?<range_upper_asc_prefix><(?=${versionGroup})|<=)(?<range_upper_asc_version>${versionGroup})?))$`
 ); /* Match a range in ascending order (e.g. 1.0.0+<2.0.0) */
 // Add , to match <9,>=7 (otherwise it just matches <9>=7)
-export const descendingRange = new RegExp( // TODO #12070  named backreference (NOT SUPPORTED) in re2
+export const descendingRange = new RegExp( // TODO #12872  named backreference
   `^(?<range_desc>(?<range_upper_desc>(?<range_upper_desc_prefix><|<=)?(?<range_upper_desc_version>${versionGroup})?(\\k<range_upper_desc_prefix>|\\+)?),(?<range_lower_desc>(\\k<range_upper_desc_version>,|)(?<range_lower_desc_prefix><(?=${versionGroup})|>=?)(?<range_lower_desc_version>${versionGroup})?))$`
 ); /* Match a range in descending order (e.g. <=2.0.0,1.0.0+) */

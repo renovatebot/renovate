@@ -4,7 +4,7 @@ import type { PackageDependency, PackageFile } from '../types';
 import type { ExtractContext, ExtractedVariables } from './types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
-  const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12070 lookahead not supported in re2
+  const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12872 lookahead
   const keyOffset = str.search(regex);
   if (keyOffset < 0) {
     return null;
