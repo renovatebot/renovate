@@ -22,8 +22,9 @@ try {
 export function regEx(pattern: string | RegExp, flags?: string): RegExp {
   const key = `${pattern.toString()}:${flags}`;
 
-  if (cache.has(key)) {
-    return cache.get(key);
+  const cachedResult = cache.get(key);
+  if (cachedResult) {
+    return cachedResult;
   }
 
   try {
@@ -51,7 +52,7 @@ export function isConfigRegex(input: unknown): input is string {
   );
 }
 
-function parseConfigRegex(input: string): RegExp | null {
+export function parseConfigRegex(input: string): RegExp | null {
   try {
     const regexString = input
       .replace(configValStart, '')
@@ -63,7 +64,7 @@ function parseConfigRegex(input: string): RegExp | null {
   return null;
 }
 
-type ConfigRegexPredicate = (string) => boolean;
+type ConfigRegexPredicate = (s: string) => boolean;
 
 export function configRegexPredicate(input: string): ConfigRegexPredicate {
   const configRegex = parseConfigRegex(input);
@@ -74,5 +75,5 @@ export function configRegexPredicate(input: string): ConfigRegexPredicate {
       return isPositive ? res : !res;
     };
   }
-  return null;
+  return () => false;
 }

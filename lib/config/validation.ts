@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { getLanguageList, getManagerList } from '../manager';
-import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
+import { isConfigRegex, parseConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import { migrateConfig } from './migration';
@@ -214,7 +214,7 @@ export async function validateConfig(
         ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
         isConfigRegex(val)
       ) {
-        if (!configRegexPredicate(val)) {
+        if (!parseConfigRegex(val)) {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
