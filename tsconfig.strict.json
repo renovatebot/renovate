@@ -127,6 +127,8 @@
     "./lib/util/mask.spec.ts",
     "./lib/util/mask.ts",
     "./lib/util/object.ts",
+    "./lib/util/regex.spec.ts",
+    "./lib/util/regex.ts",
     "./lib/util/sanitize.ts",
     "./lib/util/split.ts",
     "./lib/versioning/swift/index.spec.ts",
