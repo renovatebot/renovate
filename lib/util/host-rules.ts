@@ -13,17 +13,12 @@ interface LegacyHostRule {
   baseUrl?: string;
 }
 
-function isHostRuleField(input: string): input is keyof HostRule {
-  return !['hostName', 'domainName', 'baseUrl'].includes(input);
-}
-
 function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
-  const result: HostRule = {};
-  for (const [field, value] of Object.entries(rule)) {
-    if (isHostRuleField(field)) {
-      result[field] = clone(value);
-    }
-  }
+  const cloned: LegacyHostRule & HostRule = clone(rule);
+  delete cloned.hostName;
+  delete cloned.domainName;
+  delete cloned.baseUrl;
+  const result: HostRule = cloned;
 
   const { matchHost } = result;
   const { hostName, domainName, baseUrl } = rule;
