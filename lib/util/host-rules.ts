@@ -7,27 +7,46 @@ import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
-const legacyHostFields = ['hostName', 'domainName', 'baseUrl'];
+interface LegacyHostRule {
+  hostName?: string;
+  domainName?: string;
+  baseUrl?: string;
+}
 
-export function add(params: HostRule): void {
-  const rule = clone(params);
-  const matchedFields = legacyHostFields.filter((field) => rule[field]);
-  if (matchedFields.length) {
-    if (rule.matchHost || matchedFields.length > 1) {
-      throw new Error(
-        `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
-      );
+function isHostRuleField(input: string): input is keyof HostRule {
+  return !['hostName', 'domainName', 'baseUrl'].includes(input);
+}
+
+function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
+  const result: HostRule = {};
+  for (const [field, value] of Object.entries(rule)) {
+    if (isHostRuleField(field)) {
+      result[field] = clone(value);
     }
-    const field = matchedFields[0];
-    logger.warn({ field }, 'Legacy hostRules field needs migrating');
-    rule.matchHost = rule[field];
-    delete rule[field];
   }
 
-  const confidentialFields = ['password', 'token'];
+  const { matchHost } = result;
+  const { hostName, domainName, baseUrl } = rule;
+  const hostValues = [matchHost, hostName, domainName, baseUrl].filter(Boolean);
+  if (hostValues.length === 1) {
+    const [matchHost] = hostValues;
+    result.matchHost = matchHost;
+  } else if (hostValues.length > 1) {
+    throw new Error(
+      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
+    );
+  }
+
+  return result;
+}
+
+export function add(params: HostRule): void {
+  const rule = migrateRule(params);
+
+  const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
   if (rule.matchHost) {
     const parsedUrl = parseUrl(rule.matchHost);
-    rule.resolvedHost = parsedUrl?.hostname || rule.matchHost;
+    rule.resolvedHost = parsedUrl?.hostname ?? rule.matchHost;
     confidentialFields.forEach((field) => {
       if (rule[field]) {
         logger.debug(
@@ -38,7 +57,7 @@ export function add(params: HostRule): void {
   }
   confidentialFields.forEach((field) => {
     const secret = rule[field];
-    if (secret && secret.length > 3) {
+    if (typeof secret === 'string' && secret.length > 3) {
       sanitize.add(secret);
     }
   });
@@ -61,7 +80,7 @@ function isEmptyRule(rule: HostRule): boolean {
 }
 
 function isHostTypeRule(rule: HostRule): boolean {
-  return rule.hostType && !rule.resolvedHost;
+  return !!rule.hostType && !rule.resolvedHost;
 }
 
 function isHostOnlyRule(rule: HostRule): boolean {
@@ -69,7 +88,7 @@ function isHostOnlyRule(rule: HostRule): boolean {
 }
 
 function isMultiRule(rule: HostRule): boolean {
-  return rule.hostType && !!rule.resolvedHost;
+  return !!rule.hostType && !!rule.resolvedHost;
 }
 
 function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
@@ -77,10 +96,13 @@ function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
 }
 
 function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
-  if (validateUrl(rule.matchHost)) {
+  if (!rule.matchHost) {
+    return false;
+  }
+  if (search.url && validateUrl(rule.matchHost)) {
     return search.url.startsWith(rule.matchHost);
   }
-  const parsedUrl = parseUrl(search.url);
+  const parsedUrl = search.url ? parseUrl(search.url) : null;
   if (!parsedUrl?.hostname) {
     return false;
   }
@@ -132,10 +154,13 @@ export function find(search: HostRuleSearch): HostRule {
 }
 
 export function hosts({ hostType }: { hostType: string }): string[] {
-  return hostRules
-    .filter((rule) => rule.hostType === hostType)
-    .map((rule) => rule.resolvedHost)
-    .filter(Boolean);
+  const result: string[] = [];
+  for (const rule of hostRules) {
+    if (rule.hostType === hostType && rule.resolvedHost) {
+      result.push(rule.resolvedHost);
+    }
+  }
+  return result;
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
