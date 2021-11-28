@@ -56,7 +56,7 @@ export function parseGoproxy(
 const lexer = moo.states({
   main: {
     separator: {
-      match: regEx(/\s*?,\s*?/), // TODO #12870
+      match: /\s*?,\s*?/, // TODO #12870
       value: (_: string) => '|',
     },
     asterisk: {
