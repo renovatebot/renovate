@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import { logger } from '../logger';
 import { HostRule } from '../types';
@@ -52,7 +53,7 @@ export function add(params: HostRule): void {
   }
   confidentialFields.forEach((field) => {
     const secret = rule[field];
-    if (typeof secret === 'string' && secret.length > 3) {
+    if (is.string(secret) && secret.length > 3) {
       sanitize.add(secret);
     }
   });
