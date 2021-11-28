@@ -13,7 +13,7 @@ handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
 // istanbul ignore next
 handlebars.registerHelper(
   'replace',
-  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12070 adding regex here causes coverage issues
+  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
 export const exposedConfigOptions = [
@@ -147,7 +147,7 @@ function getFilteredObject(input: CompileInput): any {
   return res;
 }
 
-const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12070 adding regex here causes coverage issues
+const templateRegex = /{{(#(if|unless) )?([a-zA-Z]+)}}/g; // TODO #12873
 
 export function compile(
   template: string,

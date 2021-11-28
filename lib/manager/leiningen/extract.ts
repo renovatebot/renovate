@@ -105,7 +105,7 @@ function extractLeinRepos(content: string): string[] {
   const result = [];
 
   const repoContent = trimAtKey(
-    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12070 lookahead not supported in re2
+    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12872 lookahead
     'repositories'
   );
 
