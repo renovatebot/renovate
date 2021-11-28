@@ -1,3 +1,4 @@
+import assert from 'assert';
 import swift from '.';
 
 const {
@@ -86,6 +87,7 @@ describe('versioning/swift/index', () => {
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
+      assert(isLessThanRange);
       expect(isLessThanRange(version, range)).toBe(expected);
     }
   );
