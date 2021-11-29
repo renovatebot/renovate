@@ -3,7 +3,7 @@ import {
   exec as _cpExec,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { RawExecOptions, VolumeOption } from './common';
@@ -38,7 +38,7 @@ describe('util/exec/index', () => {
     jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   afterEach(() => {
@@ -543,6 +543,26 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Default timeout from executionTimeout config option',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 30 * 60 * 1000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { executionTimeout: 30 },
+      },
+    ],
+
+    [
       'Explicit maxBuffer',
       {
         processEnv,
@@ -697,7 +717,7 @@ describe('util/exec/index', () => {
       callback(null, { stdout: '', stderr: '' });
       return undefined;
     });
-    setGlobalConfig({ cacheDir, localDir: cwd, ...adminConfig });
+    GlobalConfig.set({ cacheDir, localDir: cwd, ...adminConfig });
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
@@ -714,19 +734,19 @@ describe('util/exec/index', () => {
       return undefined;
     });
 
-    setGlobalConfig({ binarySource: 'global' });
+    GlobalConfig.set({ binarySource: 'global' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setGlobalConfig({ binarySource: 'docker' });
+    GlobalConfig.set({ binarySource: 'docker' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setGlobalConfig({ binarySource: 'global' });
+    GlobalConfig.set({ binarySource: 'global' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setGlobalConfig({ binarySource: 'docker' });
+    GlobalConfig.set({ binarySource: 'docker' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
@@ -750,7 +770,7 @@ describe('util/exec/index', () => {
   });
 
   it('wraps error if removeDockerContainer throws an error', async () => {
-    setGlobalConfig({ binarySource: 'docker' });
+    GlobalConfig.set({ binarySource: 'docker' });
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });

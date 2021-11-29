@@ -1245,6 +1245,7 @@ describe('platform/azure/index', () => {
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
     });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         { 
@@ -1263,6 +1264,21 @@ describe('platform/azure/index', () => {
       const res = await azure.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
     });
+
+    it('returns file content from branch or tag', async () => {
+      const data = { foo: 'bar' };
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemContent: jest.fn(() =>
+              Promise.resolve(Readable.from(JSON.stringify(data)))
+            ),
+          } as any)
+      );
+      const res = await azure.getJsonFile('file.json', undefined, 'dev');
+      expect(res).toEqual(data);
+    });
+
     it('throws on malformed JSON', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>

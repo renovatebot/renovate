@@ -55,14 +55,14 @@ export async function getReleases({
     sourceUrl: getSourceUrl(repo, registryUrl),
     releases: null,
   };
-  dependency.releases = githubReleases.map(
-    ({ tag_name, published_at, prerelease }) => ({
+  dependency.releases = githubReleases
+    .filter(({ draft }) => draft !== true)
+    .map(({ tag_name, published_at, prerelease }) => ({
       version: tag_name,
       gitRef: tag_name,
       releaseTimestamp: published_at,
       isStable: prerelease ? false : undefined,
-    })
-  );
+    }));
   const cacheMinutes = 10;
   await packageCache.set(cacheNamespace, cacheKey, dependency, cacheMinutes);
   return dependency;

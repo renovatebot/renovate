@@ -45,6 +45,7 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
+  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
   const res: UpdateResult = {
     updates: [],
     warnings: [],
@@ -64,7 +65,7 @@ export async function lookupUpdates(
       return res;
     }
     const isValid = currentValue && versioning.isValid(currentValue);
-    if (isValid) {
+    if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
         versioning.isSingleVersion(currentValue)
@@ -130,8 +131,8 @@ export async function lookupUpdates(
         );
       }
       // Check that existing constraint can be satisfied
-      const allSatisfyingVersions = allVersions.filter((v) =>
-        versioning.matches(v.version, currentValue)
+      const allSatisfyingVersions = allVersions.filter(
+        (v) => unconstrainedValue || versioning.matches(v.version, currentValue)
       );
       if (rollbackPrs && !allSatisfyingVersions.length) {
         const rollback = getRollbackUpdate(config, allVersions, versioning);
@@ -191,6 +192,7 @@ export async function lookupUpdates(
       }
       res.currentVersion = currentVersion;
       if (
+        currentValue &&
         currentVersion &&
         rangeStrategy === 'pin' &&
         !versioning.isSingleVersion(currentValue)
@@ -226,9 +228,10 @@ export async function lookupUpdates(
         latestVersion,
         allVersions,
         versioning
-      ).filter((v) =>
-        // Leave only compatible versions
-        versioning.isCompatible(v.version, currentValue)
+      ).filter(
+        (v) =>
+          // Leave only compatible versions
+          unconstrainedValue || versioning.isCompatible(v.version, currentValue)
       );
       if (isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
@@ -383,6 +386,7 @@ export async function lookupUpdates(
         rollbackPrs,
         isVulnerabilityAlert,
         updatePinnedDependencies,
+        unconstrainedValue,
         err,
       },
       'lookupUpdates error'

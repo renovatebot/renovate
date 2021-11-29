@@ -1,9 +1,9 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
@@ -23,7 +23,7 @@ describe('manager/jsonnet-bundler/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
   });
 
   it('returns null if jsonnetfile.lock does not exist', async () => {

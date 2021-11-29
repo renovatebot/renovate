@@ -92,10 +92,10 @@ describe('logger/index', () => {
   });
 
   it('supports file-based logging', () => {
-    let chunk = null;
+    let chunk = '';
     fs.createWriteStream.mockReturnValueOnce({
       writable: true,
-      write(x) {
+      write(x: string) {
         chunk = x;
       },
     });
@@ -112,10 +112,10 @@ describe('logger/index', () => {
   });
 
   it('handles cycles', () => {
-    let logged = null;
+    let logged: Record<string, any> = {};
     fs.createWriteStream.mockReturnValueOnce({
       writable: true,
-      write(x) {
+      write(x: string) {
         logged = JSON.parse(x);
       },
     });
@@ -126,7 +126,7 @@ describe('logger/index', () => {
       level: 'error',
     });
 
-    const meta = { foo: null, bar: [] };
+    const meta: Record<string, any> = { foo: null, bar: [] };
     meta.foo = meta;
     meta.bar.push(meta);
     logger.error(meta, 'foo');
@@ -137,10 +137,10 @@ describe('logger/index', () => {
   });
 
   it('sanitizes secrets', () => {
-    let logged = null;
+    let logged: Record<string, any> = {};
     fs.createWriteStream.mockReturnValueOnce({
       writable: true,
-      write(x) {
+      write(x: string) {
         logged = JSON.parse(x);
       },
     });
@@ -152,6 +152,10 @@ describe('logger/index', () => {
     });
     add({ password: 'secret"password' });
 
+    class SomeClass {
+      constructor(public field: string) {}
+    }
+
     logger.error({
       foo: 'secret"password',
       bar: ['somethingelse', 'secret"password'],
@@ -162,6 +166,8 @@ describe('logger/index', () => {
       secrets: {
         foo: 'barsecret',
       },
+      someFn: () => 'secret"password',
+      someObject: new SomeClass('secret"password'),
     });
 
     expect(logged.foo).not.toBe('secret"password');
@@ -173,5 +179,7 @@ describe('logger/index', () => {
     expect(logged.content).toBe('[content]');
     expect(logged.prBody).toBe('[Template]');
     expect(logged.secrets.foo).toBe('***********');
+    expect(logged.someFn).toBe('[function]');
+    expect(logged.someObject.field).toBe('**redacted**');
   });
 });

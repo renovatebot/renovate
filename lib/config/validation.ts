@@ -443,11 +443,16 @@ export async function validateConfig(
                         }
                       }
                     }
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                    });
                   }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
+                    message: `Each Regex Manager must contain a non-empty fileMatch array`,
                   });
                 }
               }

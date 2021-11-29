@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`util/sanitize sanitizes secrets from strings 1`] = `"My token is **redacted**, username is \\"userabc\\" and password is \\"**redacted**\\" (hashed: **redacted**)"`;

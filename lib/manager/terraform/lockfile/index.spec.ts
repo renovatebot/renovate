@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { fs, loadFixture, mocked } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { TerraformProviderHash } from './hash';
@@ -33,7 +33,7 @@ describe('manager/terraform/lockfile/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
   });
 
   it('returns null if no .terraform.lock.hcl found', async () => {
