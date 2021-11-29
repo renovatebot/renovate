@@ -192,6 +192,7 @@ export async function lookupUpdates(
       }
       res.currentVersion = currentVersion;
       if (
+        currentValue &&
         currentVersion &&
         rangeStrategy === 'pin' &&
         !versioning.isSingleVersion(currentValue)
