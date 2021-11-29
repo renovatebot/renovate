@@ -45,9 +45,9 @@ describe('datasource/pod/index', () => {
     it('returns null for 404', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/foo/bar/contents/Specs/foo')
+        .get('/repos/foo/bar/contents/foo')
         .reply(404)
-        .get('/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .get('/repos/foo/bar/contents/bar/a/c/b/foo')
         .reply(404);
       const res = await getPkgReleases({
         ...config,
@@ -103,7 +103,7 @@ describe('datasource/pod/index', () => {
     it('processes real data from Github', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/Artsy/Specs/contents/Specs/foo')
+        .get('/repos/Artsy/Specs/contents/foo')
         .reply(404)
         .get('/repos/Artsy/Specs/contents/Specs/a/c/b/foo')
         .reply(200, [{ name: '1.2.3' }]);
