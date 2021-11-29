@@ -2027,7 +2027,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() ignores branchOrTag argument 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns file content 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2068,7 +2068,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns file content 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns file content from branch or tag 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2104,7 +2104,7 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000&at=dev",
   },
 ]
 `;
@@ -6525,7 +6525,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with path getJsonFile() ignores branchOrTag argument 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns file content 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6566,7 +6566,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns file content 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns file content from branch or tag 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6602,7 +6602,7 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000&at=dev",
   },
 ]
 `;
