@@ -539,11 +539,11 @@ export async function isBranchConflicted(
   await syncGit();
 
   if (!branchExists(baseBranch) || !branchExists(branch)) {
-    logger.debug(
+    logger.warn(
       { baseBranch, branch },
       'isBranchConflicted: branch does not exist'
     );
-    return null;
+    return true;
   }
 
   const baseBranchSha = getBranchCommit(baseBranch);
@@ -582,7 +582,7 @@ export async function isBranchConflicted(
         { baseBranch, branch, err },
         'Conflict detection: unknown error'
       );
-      result = null;
+      result = true;
     }
   } finally {
     if (origBranch) {
