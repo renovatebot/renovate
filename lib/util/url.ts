@@ -77,5 +77,5 @@ export function parseUrl(url: string): URL | null {
  * @returns an URL object or null
  */
 export function createURLFromHostOrURL(url: string): URL | null {
-  return parseUrl(url) || parseUrl(`https://${url}`);
+  return parseUrl(url) ?? parseUrl(`https://${url}`);
 }
