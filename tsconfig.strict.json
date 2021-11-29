@@ -23,7 +23,7 @@
     "lib/platform/utils/pr-body.ts",
     "lib/proxy.ts",
     "lib/types/**/*.ts",
-    "lib/util/cache/package/*.ts",
+    "lib/util/cache/*.ts",
     "lib/util/clone.ts",
     "lib/util/date.ts",
     "lib/util/exec/common.ts",
@@ -66,6 +66,6 @@
     "lib/datasource/helm/common.ts",
     "lib/logger/err-serializer.spec.ts",
     "lib/manager/gradle/shallow/types.ts",
-    "lib/util/cache/package/*.spec.ts"
+    "lib/util/cache/*.spec.ts"
   ]
 }
