@@ -32,7 +32,7 @@ export class TerraformProviderHash {
 
       // add double space, the filename and a new line char
       rootHash.update('  ');
-      const fileName = file.replace(regEx(/^.*[\\/]/), '');
+      const fileName = file.replace(regEx(/^.*[\\/]/), '');  // TODO #12071
       rootHash.update(fileName);
       rootHash.update('\n');
     }
