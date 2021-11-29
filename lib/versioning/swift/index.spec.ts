@@ -90,8 +90,7 @@ describe('versioning/swift/index', () => {
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
-      assert(isLessThanRange);
-      expect(isLessThanRange(version, range)).toBe(expected);
+      expect(isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 

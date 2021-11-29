@@ -38,7 +38,7 @@ function getSatisfyingVersion(
 ): string | null {
   const normalizedVersions = versions.map((v) => v.replace(regEx(/^v/), ''));
   const semverRange = toSemverRange(range);
-  return semverRange && maxSatisfying(normalizedVersions, semverRange);
+  return semverRange ? maxSatisfying(normalizedVersions, semverRange) : null;
 }
 
 function minSatisfyingVersion(
@@ -47,7 +47,7 @@ function minSatisfyingVersion(
 ): string | null {
   const normalizedVersions = versions.map((v) => v.replace(regEx(/^v/), ''));
   const semverRange = toSemverRange(range);
-  return semverRange && minSatisfying(normalizedVersions, semverRange);
+  return semverRange ? minSatisfying(normalizedVersions, semverRange) : null;
 }
 
 function isLessThanRange(version: string, range: string): boolean {
