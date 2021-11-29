@@ -12,6 +12,7 @@ const config = {
 };
 
 const githubApiHost = 'https://api.github.com';
+const githubEntApiHost = 'https://github.foo.com';
 const cocoapodsHost = 'https://cdn.cocoapods.org';
 
 describe('datasource/pod/index', () => {
@@ -52,6 +53,23 @@ describe('datasource/pod/index', () => {
       const res = await getPkgReleases({
         ...config,
         registryUrls: [...config.registryUrls, 'https://github.com/foo/bar'],
+      });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null for 404 Github enterprise', async () => {
+      httpMock
+        .scope(githubEntApiHost)
+        .get('/api/v3/repos/foo/bar/contents/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/bar/a/c/b/foo')
+        .reply(404);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: [
+          ...config.registryUrls,
+          'https://github.foo.com/foo/bar',
+        ],
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -113,6 +131,46 @@ describe('datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.com/Artsy/Specs',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('processes real data from Github Enterprise with shard repo setup', async () => {
+      httpMock
+        .scope(githubEntApiHost)
+        .get('/api/v3/repos/foo/bar/contents/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/bar/a/c/b/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.foo.com/foo/bar'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.foo.com/foo/bar',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('processes real data from Github Enterprise', async () => {
+      httpMock
+        .scope(githubEntApiHost)
+        .get('/api/v3/repos/foo/bar/contents/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.foo.com/foo/bar'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.foo.com/foo/bar',
         releases: [
           {
             version: '1.2.3',
