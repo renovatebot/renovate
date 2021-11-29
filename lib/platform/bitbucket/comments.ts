@@ -1,6 +1,9 @@
 import { logger } from '../../logger';
+import { BitbucketHttp } from '../../util/http/bitbucket';
+import type { EnsureCommentConfig } from '../types';
 import { Config, accumulateValues } from './utils';
-import { api } from './bb-got-wrapper';
+
+const bitbucketHttp = new BitbucketHttp();
 
 interface Comment {
   content: { raw: string };
@@ -8,6 +11,10 @@ interface Comment {
 }
 
 export type CommentsConfig = Pick<Config, 'repository'>;
+
+interface EnsureBitBucketCommentConfig extends EnsureCommentConfig {
+  config: CommentsConfig;
+}
 
 async function getComments(
   config: CommentsConfig,
@@ -26,7 +33,7 @@ async function addComment(
   prNo: number,
   raw: string
 ): Promise<void> {
-  await api.post(
+  await bitbucketHttp.postJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
     {
       body: { content: { raw } },
@@ -40,7 +47,7 @@ async function editComment(
   commentId: number,
   raw: string
 ): Promise<void> {
-  await api.put(
+  await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`,
     {
       body: { content: { raw } },
@@ -53,17 +60,17 @@ async function deleteComment(
   prNo: number,
   commentId: number
 ): Promise<void> {
-  await api.delete(
+  await bitbucketHttp.deleteJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`
   );
 }
 
-export async function ensureComment(
-  config: CommentsConfig,
-  prNo: number,
-  topic: string | null,
-  content: string
-): Promise<boolean> {
+export async function ensureComment({
+  config,
+  number: prNo,
+  topic,
+  content,
+}: EnsureBitBucketCommentConfig): Promise<boolean> {
   try {
     const comments = await getComments(config, prNo);
     let body: string;
@@ -72,7 +79,7 @@ export async function ensureComment(
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
       body = `### ${topic}\n\n${content}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.content.raw.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.content.raw !== body;
@@ -81,7 +88,7 @@ export async function ensureComment(
     } else {
       logger.debug(`Ensuring content-only comment in #${prNo}`);
       body = `${content}`;
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         if (comment.content.raw === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -96,7 +103,7 @@ export async function ensureComment(
       );
     } else if (commentNeedsUpdating) {
       await editComment(config, prNo, commentId, body);
-      logger.info({ repository: config.repository, prNo }, 'Comment updated');
+      logger.debug({ repository: config.repository, prNo }, 'Comment updated');
     } else {
       logger.debug('Comment is already update-to-date');
     }
@@ -110,17 +117,28 @@ export async function ensureComment(
 export async function ensureCommentRemoval(
   config: CommentsConfig,
   prNo: number,
-  topic: string
+  topic?: string,
+  content?: string
 ): Promise<void> {
   try {
-    logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${prNo} is removed`
+    );
     const comments = await getComments(config, prNo);
-    let commentId: number;
-    comments.forEach(comment => {
-      if (comment.content.raw.startsWith(`### ${topic}\n\n`)) {
-        commentId = comment.id;
-      }
-    });
+
+    const byTopic = (comment: Comment): boolean =>
+      comment.content.raw.startsWith(`### ${topic}\n\n`);
+    const byContent = (comment: Comment): boolean =>
+      comment.content.raw.trim() === content;
+
+    let commentId: number | null = null;
+
+    if (topic) {
+      commentId = comments.find(byTopic)?.id;
+    } else if (content) {
+      commentId = comments.find(byContent)?.id;
+    }
+
     if (commentId) {
       await deleteComment(config, prNo, commentId);
     }

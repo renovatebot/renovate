@@ -1,17 +1,18 @@
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { logger } from '../../logger';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-export default function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): UpdateArtifactsResult[] | null {
-  return [
-    {
+export default function updateArtifacts({
+  updatedDeps,
+}: UpdateArtifact): UpdateArtifactsResult[] | null {
+  const res: UpdateArtifactsResult[] = [];
+  updatedDeps.forEach((dep) => {
+    logger.info('Updating submodule ' + dep.depName);
+    res.push({
       file: {
-        name: updatedDeps[0],
+        name: dep.depName,
         contents: '',
       },
-    },
-  ];
+    });
+  });
+  return res;
 }

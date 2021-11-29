@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/terragrunt/extract extractPackageFile() extracts terragrunt sources 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v0.0.9",
+      "datasource": "github-tags",
+      "depName": "github.com/myuser/myrepo",
+      "depType": "github",
+      "lookupName": "myuser/myrepo",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "github-tags",
+      "depName": "github.com/hashicorp/example",
+      "depType": "github",
+      "lookupName": "hashicorp/example",
+    },
+    Object {
+      "currentValue": "next",
+      "datasource": "github-tags",
+      "depName": "github.com/hashicorp/example",
+      "depType": "github",
+      "lookupName": "hashicorp/example",
+    },
+    Object {
+      "skipReason": "no-source",
+    },
+    Object {},
+    Object {
+      "datasource": "terraform-module",
+      "depName": "my.host/modules/test",
+      "depType": "terragrunt",
+      "registryUrls": Array [
+        "https://my.host",
+      ],
+    },
+    Object {
+      "datasource": "terraform-module",
+      "depName": "my.host/modules/test?ref=v1.2.1",
+      "depType": "terragrunt",
+      "registryUrls": Array [
+        "https://my.host",
+      ],
+    },
+    Object {},
+    Object {
+      "datasource": "terraform-module",
+      "depName": "my.host.local/sources/example?ref=v1.2.1",
+      "depType": "terragrunt",
+      "registryUrls": Array [
+        "https://my.host.local",
+      ],
+    },
+    Object {},
+    Object {},
+    Object {
+      "currentValue": "tfmodule_one-v0.0.9",
+      "datasource": "github-tags",
+      "depName": "github.com/githubuser/myrepo",
+      "depType": "github",
+      "lookupName": "githubuser/myrepo",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "github-tags",
+      "depName": "github.com/hashicorp/example.2.3",
+      "depType": "github",
+      "lookupName": "hashicorp/example.2.3",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "github-tags",
+      "depName": "github.com/hashicorp/example.2.3",
+      "depType": "github",
+      "lookupName": "hashicorp/example.2.3",
+    },
+    Object {
+      "datasource": "terraform-module",
+      "depName": "hashicorp/consul/aws",
+      "depType": "terragrunt",
+    },
+    Object {
+      "currentValue": "v0.1.0",
+      "datasource": "github-tags",
+      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "depType": "github",
+      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
+    },
+    Object {
+      "currentValue": "v0.1.0",
+      "datasource": "github-tags",
+      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "depType": "github",
+      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
+    },
+    Object {
+      "currentValue": "v2.0.0",
+      "datasource": "github-tags",
+      "depName": "github.com/hashicorp/example",
+      "depType": "github",
+      "lookupName": "hashicorp/example",
+    },
+    Object {
+      "datasource": "terraform-module",
+      "depName": "terraform-aws-modules/security-group/aws",
+      "depType": "terragrunt",
+    },
+    Object {
+      "datasource": "terraform-module",
+      "depName": "terraform-aws-modules/security-group/aws",
+      "depType": "terragrunt",
+    },
+    Object {
+      "skipReason": "local",
+    },
+    Object {
+      "skipReason": "no-source",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": "next",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": "v1.0.1",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": "v1.0.2",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "http://bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": "v1.0.3",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "ssh://git@bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "skipReason": "no-source",
+    },
+    Object {
+      "skipReason": "no-source",
+    },
+  ],
+}
+`;

@@ -1,0 +1,1 @@
+Extracts Maven-type dependencies.

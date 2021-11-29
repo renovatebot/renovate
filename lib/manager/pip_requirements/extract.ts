@@ -1,15 +1,22 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
-import { RANGE_PATTERN as rangePattern } from '@renovate/pep440/lib/specifier';
+import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
+import { GlobalConfig } from '../../config/global';
+import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
-import { isValid, isSingleVersion } from '../../versioning/pep440';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import { regEx } from '../../util/regex';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
 const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
-const specifierPartPattern = `\\s*${rangePattern.replace(/\?<\w+>/g, '?:')}`;
+const rangePattern: string = RANGE_PATTERN;
+const specifierPartPattern = `\\s*${rangePattern.replace(
+  regEx(/\?<\w+>/g),
+  '?:'
+)}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
@@ -22,7 +29,7 @@ export function extractPackageFile(
 
   let indexUrl: string;
   const extraUrls = [];
-  content.split('\n').forEach(line => {
+  content.split('\n').forEach((line) => {
     if (line.startsWith('--index-url ')) {
       indexUrl = line.substring('--index-url '.length).split(' ')[0];
     }
@@ -37,43 +44,41 @@ export function extractPackageFile(
   if (indexUrl) {
     // index url in file takes precedence
     registryUrls.push(indexUrl);
-  } else if (config.registryUrls && config.registryUrls.length) {
+  } else if (config.registryUrls?.length) {
     // configured registryURls takes next precedence
     registryUrls = registryUrls.concat(config.registryUrls);
   } else if (extraUrls.length) {
     // Use default registry first if extra URLs are present and index URL is not
-    registryUrls.push('https://pypi.org/pypi/');
+    registryUrls.push(process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/');
   }
   registryUrls = registryUrls.concat(extraUrls);
 
-  const regex = new RegExp(`^${dependencyPattern}$`, 'g');
+  const pkgRegex = regEx(`^(${packagePattern})$`);
+  const pkgValRegex = regEx(`^${dependencyPattern}$`);
   const deps = content
     .split('\n')
-    .map((rawline, lineNumber) => {
+    .map((rawline) => {
       let dep: PackageDependency = {};
-      const [line, comment] = rawline.split('#').map(part => part.trim());
+      const [line, comment] = rawline.split('#').map((part) => part.trim());
       if (isSkipComment(comment)) {
-        dep.skipReason = 'ignored';
+        dep.skipReason = SkipReason.Ignored;
       }
-      regex.lastIndex = 0;
-      const matches = regex.exec(line);
+      const lineNoHashes = line.split(' \\')[0];
+      const matches =
+        pkgValRegex.exec(lineNoHashes) || pkgRegex.exec(lineNoHashes);
       if (!matches) {
         return null;
       }
-      const [, depName, , currentValue] = matches;
+      const [, depName, , currVal] = matches;
+      const currentValue = currVal?.trim();
       dep = {
         ...dep,
         depName,
         currentValue,
-        managerData: { lineNumber },
-        datasource: 'pypi',
+        datasource: PypiDatasource.id,
       };
-      if (
-        isValid(currentValue) &&
-        isSingleVersion(currentValue) &&
-        currentValue.startsWith('==')
-      ) {
-        dep.fromVersion = currentValue.replace(/^==/, '');
+      if (currentValue?.startsWith('==')) {
+        dep.currentVersion = currentValue.replace(/^==\s*/, '');
       }
       return dep;
     })
@@ -83,7 +88,25 @@ export function extractPackageFile(
   }
   const res: PackageFile = { deps };
   if (registryUrls.length > 0) {
-    res.registryUrls = registryUrls;
+    res.registryUrls = registryUrls.map((url) => {
+      // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
+      const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), ''); // TODO #12071
+      if (!GlobalConfig.get('exposeAllEnv')) {
+        return cleaned;
+      }
+      // interpolate any environment variables
+      return cleaned.replace(
+        regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g), // TODO #12071
+        (match) => {
+          const envvar = match
+            .substring(1)
+            .replace(regEx(/^{/), '')
+            .replace(regEx(/}$/), ''); // TODO #12071
+          const sub = process.env[envvar];
+          return sub || match;
+        }
+      );
+    });
   }
   return res;
 }

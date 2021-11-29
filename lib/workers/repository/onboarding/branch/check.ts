@@ -1,17 +1,26 @@
+import { configFileNames } from '../../../../config/app-strings';
+import type { RenovateConfig } from '../../../../config/types';
+import {
+  REPOSITORY_CLOSED_ONBOARDING,
+  REPOSITORY_NO_CONFIG,
+} from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import { configFileNames } from '../../../../config/app-strings';
-import { RenovateConfig } from '../../../../config';
+import { PrState } from '../../../../types';
+import { getCache } from '../../../../util/cache/repository';
+import { readLocalFile } from '../../../../util/fs';
+import { getFileList } from '../../../../util/git';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
-  const fileList = await platform.getFileList();
+  const fileList = await getFileList();
   return fileList.includes(fileName);
 };
 
 const configFileExists = async (): Promise<boolean> => {
   for (const fileName of configFileNames) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
+      logger.debug({ fileName }, 'Config file exists');
       return true;
     }
   }
@@ -20,7 +29,7 @@ const configFileExists = async (): Promise<boolean> => {
 
 const packageJsonConfigExists = async (): Promise<boolean> => {
   try {
-    const pJson = JSON.parse(await platform.getFile('package.json'));
+    const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
     if (pJson.renovate) {
       return true;
     }
@@ -34,19 +43,44 @@ const packageJsonConfigExists = async (): Promise<boolean> => {
 export type Pr = any;
 
 const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
-  platform.findPr(config.onboardingBranch, config.onboardingPrTitle, '!open');
+  platform.findPr({
+    branchName: config.onboardingBranch,
+    prTitle: config.onboardingPrTitle,
+    state: PrState.NotOpen,
+  });
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
-  // Repo is onboarded if admin is bypassing onboarding and does not require a
+  // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
   if (config.requireConfig === false && config.onboarding === false) {
     // Return early and avoid checking for config files
     return true;
   }
+  const cache = getCache();
+  if (cache.configFileName) {
+    logger.debug('Checking cached config file name');
+    try {
+      const configFileContent = await platform.getJsonFile(
+        cache.configFileName
+      );
+      if (configFileContent) {
+        if (
+          cache.configFileName !== 'package.json' ||
+          configFileContent.renovate
+        ) {
+          logger.debug('Existing config file confirmed');
+          return true;
+        }
+      }
+    } catch (err) {
+      // probably file doesn't exist
+    }
+    logger.debug('Existing config file no longer exists');
+    delete cache.configFileName;
+  }
   if (await configFileExists()) {
-    logger.debug('config file exists');
     await platform.ensureIssueClosing(title);
     return true;
   }
@@ -60,7 +94,7 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   // If onboarding has been disabled and config files are required then the
   // repository has not been onboarded yet
   if (config.requireConfig && config.onboarding === false) {
-    throw new Error('disabled');
+    throw new Error(REPOSITORY_NO_CONFIG);
   }
 
   const pr = await closedPrExists(config);
@@ -73,19 +107,18 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     logger.debug('Config not mandatory so repo is considered onboarded');
     return true;
   }
-  logger.info('Repo is not onboarded and no merged PRs exist');
+  logger.debug('Repo is not onboarded and no merged PRs exist');
   if (!config.suppressNotifications.includes('onboardingClose')) {
     // ensure PR comment
-    await platform.ensureComment(
-      pr.number,
-      `Renovate is disabled`,
-      `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`
-    );
+    await platform.ensureComment({
+      number: pr.number,
+      topic: `Renovate is disabled`,
+      content: `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
+    });
   }
-  throw new Error('disabled');
+  throw new Error(REPOSITORY_CLOSED_ONBOARDING);
 };
 
 export const onboardingPrExists = async (
   config: RenovateConfig
-): Promise<boolean> =>
-  (await platform.getBranchPr(config.onboardingBranch)) != null;
+): Promise<boolean> => !!(await platform.getBranchPr(config.onboardingBranch));

@@ -1,4 +1,9 @@
-export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
+import { ProgrammingLanguage } from '../../constants';
 
-export const language = 'docker';
+export { extractPackageFile } from './extract';
+
+export const language = ProgrammingLanguage.Docker;
+
+export const defaultConfig = {
+  fileMatch: [],
+};

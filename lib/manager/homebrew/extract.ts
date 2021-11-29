@@ -1,28 +1,26 @@
-import { isValid } from '../../versioning/semver';
-import { skip, isSpace, removeComments } from './util';
+import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
+import type { PackageDependency, PackageFile } from '../types';
+import type { UrlPathParsedResult } from './types';
+import { isSpace, removeComments, skip } from './util';
 
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;
   i += 'sha256'.length;
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   if (content[i] !== '"' && content[i] !== "'") {
     return null;
   }
   i += 1;
-  let j = i;
-  j = skip(i, content, c => {
-    return c !== '"' && c !== "'";
-  });
+  const j = skip(i, content, (c) => c !== '"' && c !== "'");
   const sha256 = content.slice(i, j);
   return sha256;
 }
 
 function extractSha256(content: string): string | null {
-  const sha256RegExp = /(^|\s)sha256(\s)/;
+  const sha256RegExp = regEx(/(^|\s)sha256(\s)/);
   let i = content.search(sha256RegExp);
   if (isSpace(content[i])) {
     i += 1;
@@ -33,24 +31,19 @@ function extractSha256(content: string): string | null {
 function parseUrl(idx: number, content: string): string | null {
   let i = idx;
   i += 'url'.length;
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   const chr = content[i];
   if (chr !== '"' && chr !== "'") {
     return null;
   }
   i += 1;
-  let j = i;
-  j = skip(i, content, c => {
-    return c !== '"' && c !== "'" && !isSpace(c);
-  });
+  const j = skip(i, content, (c) => c !== '"' && c !== "'" && !isSpace(c));
   const url = content.slice(i, j);
   return url;
 }
 
 function extractUrl(content: string): string | null {
-  const urlRegExp = /(^|\s)url(\s)/;
+  const urlRegExp = regEx(/(^|\s)url(\s)/);
   let i = content.search(urlRegExp);
   // content.search() returns -1 if not found
   if (i === -1) {
@@ -63,12 +56,6 @@ function extractUrl(content: string): string | null {
   return parseUrl(i, content);
 }
 
-export interface UrlPathParsedResult {
-  currentValue: string;
-  ownerName: string;
-  repoName: string;
-}
-
 export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
   if (!urlStr) {
     return null;
@@ -79,7 +66,7 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
       return null;
     }
     let s = url.pathname.split('/');
-    s = s.filter(val => val);
+    s = s.filter((val) => val);
     const ownerName = s[0];
     const repoName = s[1];
     let currentValue: string;
@@ -98,9 +85,6 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
     if (!currentValue) {
       return null;
     }
-    if (!isValid(currentValue)) {
-      return null;
-    }
     return { currentValue, ownerName, repoName };
   } catch (_) {
     return null;
@@ -112,31 +96,21 @@ export function parseUrlPath(urlStr: string): UrlPathParsedResult | null {
 function parseClassHeader(idx: number, content: string): string | null {
   let i = idx;
   i += 'class'.length;
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   // Skip all non space and non '<' characters
-  let j = skip(i, content, c => {
-    return !isSpace(c) && c !== '<';
-  });
+  let j = skip(i, content, (c) => !isSpace(c) && c !== '<');
   const className = content.slice(i, j);
   i = j;
   // Skip spaces
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   if (content[i] === '<') {
     i += 1;
   } else {
     return null;
   } // Skip spaces
-  i = skip(i, content, c => {
-    return isSpace(c);
-  });
+  i = skip(i, content, (c) => isSpace(c));
   // Skip non-spaces
-  j = skip(i, content, c => {
-    return !isSpace(c);
-  });
+  j = skip(i, content, (c) => !isSpace(c));
   if (content.slice(i, j) !== 'Formula') {
     return null;
   }
@@ -144,7 +118,7 @@ function parseClassHeader(idx: number, content: string): string | null {
 }
 
 function extractClassName(content: string): string | null {
-  const classRegExp = /(^|\s)class\s/;
+  const classRegExp = regEx(/(^|\s)class\s/);
   let i = content.search(classRegExp);
   if (isSpace(content[i])) {
     i += 1;
@@ -152,7 +126,7 @@ function extractClassName(content: string): string | null {
   return parseClassHeader(i, content);
 }
 
-// TODO: Maybe check if quotes/double-quotes are balanced
+// TODO: Maybe check if quotes/double-quotes are balanced (#9591)
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('extractPackageFile()');
   /*
@@ -172,7 +146,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     logger.debug('Invalid URL field');
   }
   const urlPathResult = parseUrlPath(url);
-  let skipReason: string;
+  let skipReason: SkipReason;
   let currentValue: string = null;
   let ownerName: string = null;
   let repoName: string = null;
@@ -182,18 +156,18 @@ export function extractPackageFile(content: string): PackageFile | null {
     repoName = urlPathResult.repoName;
   } else {
     logger.debug('Error: Unsupported URL field');
-    skipReason = 'unsupported-url';
+    skipReason = SkipReason.UnsupportedUrl;
   }
   const sha256 = extractSha256(cleanContent);
   if (!sha256 || sha256.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
-    skipReason = 'invalid-sha256';
+    skipReason = SkipReason.InvalidSha256;
   }
   const dep: PackageDependency = {
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,
-    datasource: 'github',
+    datasource: datasourceGithubTags.id,
   };
   if (skipReason) {
     dep.skipReason = skipReason;

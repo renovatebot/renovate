@@ -1,0 +1,9 @@
+[tool.poetry]
+name = "example 7"
+version = "0.1.0"
+description = ""
+authors = ["John Doe <john.doe@gmail.com>"]
+source = []
+
+[tool.poetry.dependencies]
+dep0 = '0.0.0'

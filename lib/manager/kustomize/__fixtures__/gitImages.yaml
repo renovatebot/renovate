@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: testing-namespace
+
+resources:
+- deployment.yaml
+
+images:
+- name: node
+  newTag: v0.1.0
+- newTag: v0.0.1
+  name: group/instance
+- name: quay.io/test/repo
+  newTag: v0.0.2
+- name: gitlab.com/org/suborg/image
+  newTag: v0.0.3
+- name: this-lives/on-docker-hub
+  newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
+  newTag: v0.0.4
+- name: nginx
+  newTag: 2.5

@@ -1,68 +1,56 @@
-import got from '../../util/got';
-import { logger } from '../../logger';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { HttpResponse } from '../../util/http';
+import { Datasource } from '../datasource';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { DartResult } from './types';
 
-export async function getPkgReleases({
-  lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  let result: ReleaseResult = null;
-  const pkgUrl = `https://pub.dartlang.org/api/packages/${lookupName}`;
-  interface DartResult {
-    versions?: {
-      version: string;
-    }[];
-    latest?: {
-      pubspec?: { homepage?: string; repository?: string };
-    };
+export class DartDatasource extends Datasource {
+  static readonly id = 'dart';
+
+  constructor() {
+    super(DartDatasource.id);
   }
 
-  let raw: {
-    body: DartResult;
-  } = null;
-  try {
-    raw = await got(pkgUrl, {
-      json: true,
-    });
-  } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.info({ lookupName }, `Dependency lookup failure: not found`);
-      logger.debug({ err }, 'Dart lookup error');
-      return null;
+  override readonly customRegistrySupport = false;
+
+  override readonly defaultRegistryUrls = ['https://pub.dartlang.org/'];
+
+  async getReleases({
+    lookupName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    let result: ReleaseResult = null;
+    const pkgUrl = `${registryUrl}api/packages/${lookupName}`;
+
+    let raw: HttpResponse<DartResult> = null;
+    try {
+      raw = await this.http.getJson<DartResult>(pkgUrl);
+    } catch (err) {
+      this.handleGenericErrors(err);
     }
-    if (
-      err.statusCode === 429 ||
-      (err.statusCode >= 500 && err.statusCode < 600)
-    ) {
-      logger.warn({ lookupName, err }, `pub.dartlang.org registry failure`);
-      throw new Error('registry-failure');
-    }
-    logger.warn(
-      { err, lookupName },
-      'pub.dartlang.org lookup failure: Unknown error'
-    );
-    return null;
-  }
 
-  const body = raw && raw.body;
-  if (body) {
-    const { versions, latest } = body;
-    if (versions && latest) {
-      result = {
-        releases: body.versions.map(({ version }) => ({ version })),
-      };
+    const body = raw?.body;
+    if (body) {
+      const { versions, latest } = body;
+      if (versions && latest) {
+        result = {
+          releases: body.versions.map(({ version, published }) => ({
+            version,
+            releaseTimestamp: published,
+          })),
+        };
 
-      const pubspec = latest.pubspec;
-      if (pubspec) {
-        if (pubspec.homepage) {
-          result.homepage = pubspec.homepage;
-        }
+        const pubspec = latest.pubspec;
+        if (pubspec) {
+          if (pubspec.homepage) {
+            result.homepage = pubspec.homepage;
+          }
 
-        if (pubspec.repository) {
-          result.sourceUrl = pubspec.repository;
+          if (pubspec.repository) {
+            result.sourceUrl = pubspec.repository;
+          }
         }
       }
     }
+    return result;
   }
-
-  return result;
 }

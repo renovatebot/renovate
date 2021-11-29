@@ -1,10 +1,12 @@
 let prev: string;
 
-export function print(val: any) {
+// this does not work as intended
+// see https://jestjs.io/docs/en/configuration#snapshotserializers-arraystring
+export function print(val: string): string {
   return JSON.stringify(val);
 }
-export function test(val: any) {
-  if (['prBody', 'prTitle'].some(str => str === prev)) {
+export function test(val: string): boolean {
+  if (['prBody', 'prTitle'].some((str) => str === prev)) {
     return typeof val === 'string' && val.includes('\n');
   }
   prev = val;

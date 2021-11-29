@@ -1,7 +1,8 @@
-import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
-import { parse as _parse } from '@snyk/ruby-semver/lib/ruby/gem-requirement';
+import { parse as _parse } from '@renovatebot/ruby-semver/dist/ruby/requirement';
+import { Version, create } from '@renovatebot/ruby-semver/dist/ruby/version';
 import { logger } from '../../logger';
-import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from './operator';
+import { regEx } from '../../util/regex';
+import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator';
 
 export interface Range {
   version: string;
@@ -10,11 +11,13 @@ export interface Range {
 }
 
 const parse = (range: string): Range => {
-  const regExp = /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.-]+)$/;
+  const regExp = regEx(
+    /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/
+  );
 
   const value = (range || '').trim();
 
-  const match = value.match(regExp);
+  const match = regExp.exec(value);
   if (match) {
     const { version = null, operator = null, delimiter = ' ' } = match.groups;
     return { version, operator, delimiter };
@@ -27,15 +30,14 @@ const parse = (range: string): Range => {
   };
 };
 
-interface GemVersion {
-  release(): GemVersion;
-  compare(ver: GemVersion): number;
-  bump(): GemVersion;
-}
-type GemRequirement = [string, GemVersion];
+type GemRequirement = [string, Version];
 
-const ltr = (version: string, range: string): boolean => {
-  const gemVersion: GemVersion = create(version);
+const ltr = (version: string, range: string): boolean | null => {
+  const gemVersion = create(version);
+  if (!gemVersion) {
+    logger.warn(`Invalid ruby version '${version}'`);
+    return null;
+  }
   const requirements: GemRequirement[] = range.split(',').map(_parse);
 
   const results = requirements.map(([operator, ver]) => {

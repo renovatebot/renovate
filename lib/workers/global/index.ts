@@ -1,49 +1,26 @@
 import is from '@sindresorhus/is';
+import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
-import os from 'os';
-import path from 'path';
-import { setEmojiConfig } from '../../util/emoji';
-import { logger, setMeta, getErrors } from '../../logger';
+import { satisfies } from 'semver';
+import upath from 'upath';
+import * as pkg from '../../../package.json';
 import * as configParser from '../../config';
-import * as repositoryWorker from '../repository';
-import * as cache from './cache';
-import { autodiscoverRepositories } from './autodiscover';
-import { initPlatform } from '../../platform';
+import { resolveConfigPresets } from '../../config/presets';
+import { validateConfigSecrets } from '../../config/secrets';
+import type {
+  AllConfig,
+  RenovateConfig,
+  RenovateRepository,
+} from '../../config/types';
+import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
+import { getProblems, logger, setMeta } from '../../logger';
+import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
-import { printStats } from '../../util/got/stats';
-import * as limits from './limits';
-
-type RenovateConfig = configParser.RenovateConfig;
-type RenovateRepository = configParser.RenovateRepository;
-
-// istanbul ignore next
-function detectRenovateVersion(): void {
-  try {
-    global.renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
-  } catch (err) {
-    logger.debug({ err }, 'Error getting renovate version');
-  }
-}
-
-async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
-  const config: RenovateConfig = { ...input };
-  process.env.TMPDIR = process.env.RENOVATE_TMPDIR || os.tmpdir();
-  if (config.baseDir) {
-    logger.debug('Using configured baseDir: ' + config.baseDir);
-  } else {
-    config.baseDir = path.join(process.env.TMPDIR, 'renovate');
-    logger.debug('Using baseDir: ' + config.baseDir);
-  }
-  await fs.ensureDir(config.baseDir);
-  if (config.cacheDir) {
-    logger.debug('Using configured cacheDir: ' + config.cacheDir);
-  } else {
-    config.cacheDir = path.join(config.baseDir, 'cache');
-    logger.debug('Using cacheDir: ' + config.cacheDir);
-  }
-  await fs.ensureDir(config.cacheDir);
-  return config;
-}
+import * as repositoryWorker from '../repository';
+import { autodiscoverRepositories } from './autodiscover';
+import { parseConfigs } from './config/parse';
+import { globalFinalize, globalInitialize } from './initialize';
+import { Limit, isLimitReached } from './limits';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -53,7 +30,7 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  repoConfig.localDir = path.join(
+  repoConfig.localDir = upath.join(
     repoConfig.baseDir,
     `./repos/${repoConfig.platform}/${repoConfig.repository}`
   );
@@ -62,59 +39,105 @@ export async function getRepositoryConfig(
   return configParser.filterConfig(repoConfig, 'repository');
 }
 
-export async function start(): Promise<0 | 1> {
+function getGlobalConfig(): Promise<RenovateConfig> {
+  return parseConfigs(process.env, process.argv);
+}
+
+function haveReachedLimits(): boolean {
+  if (isLimitReached(Limit.Commits)) {
+    logger.info('Max commits created for this run.');
+    return true;
+  }
+  return false;
+}
+
+/* istanbul ignore next */
+function checkEnv(): void {
+  const range = pkg.engines.node;
+  const rangeNext = pkg['engines-next']?.node;
+  if (process.release?.name !== 'node' || !process.versions?.node) {
+    logger.warn(
+      { release: process.release, versions: process.versions },
+      'Unknown node environment detected.'
+    );
+  } else if (!satisfies(process.versions?.node, range)) {
+    logger.error(
+      { versions: process.versions, range },
+      'Unsupported node environment detected. Please update your node version.'
+    );
+  } else if (rangeNext && !satisfies(process.versions?.node, rangeNext)) {
+    logger.warn(
+      { versions: process.versions },
+      `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`
+    );
+  }
+}
+
+export async function validatePresets(config: AllConfig): Promise<void> {
   try {
-    cache.init(os.tmpdir());
-    let config = await configParser.parseConfigs(process.env, process.argv);
-    config = await initPlatform(config);
-    config = await setDirectories(config);
+    await resolveConfigPresets(config);
+  } catch (err) /* istanbul ignore next */ {
+    throw new Error(CONFIG_PRESETS_INVALID);
+  }
+}
+
+export async function start(): Promise<number> {
+  let config: AllConfig;
+  try {
+    // read global config from file, env and cli args
+    config = await getGlobalConfig();
+    // initialize all submodules
+    config = await globalInitialize(config);
+
+    await validatePresets(config);
+
+    checkEnv();
+
+    // validate secrets. Will throw and abort if invalid
+    validateConfigSecrets(config);
+
+    // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
-    cache.init(config.cacheDir);
-    if (config.repositories.length === 0) {
-      logger.warn(
-        'No repositories found - did you want to run with flag --autodiscover?'
+
+    if (is.nonEmptyString(config.writeDiscoveredRepos)) {
+      const content = JSON.stringify(config.repositories);
+      await writeFile(config.writeDiscoveredRepos, content);
+      logger.info(
+        `Written discovered repositories to ${config.writeDiscoveredRepos}`
       );
+      return 0;
     }
-    // Move global variables that we need to use later
-    const importGlobals = ['prBanner', 'prFooter'];
-    config.global = {};
-    importGlobals.forEach(key => {
-      config.global[key] = config[key];
-      delete config[key];
-    });
-    global.trustLevel = config.trustLevel || 'low';
-    delete config.trustLevel;
-    detectRenovateVersion();
-    limits.init(config);
-    setEmojiConfig(config);
+
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
-      if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
-        logger.info(
-          'Max commits created for this run. Skipping all remaining repositories.'
-        );
+      if (haveReachedLimits()) {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
       if (repoConfig.hostRules) {
         hostRules.clear();
-        repoConfig.hostRules.forEach(rule => hostRules.add(rule));
+        repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
         repoConfig.hostRules = [];
       }
       await repositoryWorker.renovateRepository(repoConfig);
+      setMeta({});
     }
-    setMeta({});
-    printStats();
-    logger.info(`Renovate finished`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));
     } else {
-      logger.fatal({ err }, `Fatal error: ${err.message}`);
+      logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
     }
+    if (!config) {
+      // return early if we can't parse config options
+      logger.debug(`Missing config`);
+      return 2;
+    }
+  } finally {
+    globalFinalize(config);
+    logger.debug(`Renovate exiting`);
   }
-  const loggerErrors = getErrors();
-  /* istanbul ignore if */
+  const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
   if (loggerErrors.length) {
     logger.info(
       { loggerErrors },

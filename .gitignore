@@ -10,7 +10,18 @@
 /package-lock.json
 *.pyc
 renovate-0.0.0-semantic-release.tgz
-/e2e/node_modules
+/test/e2e/node_modules
 .eslintcache
 junit.xml
 /test-results
+renovate-schema.json
+**/gradle-wrapper/__fixtures__/**/.gradle
+.clinic/
+
+# generated code
+**/*.generated.ts
+tools/dist
+test/datasource/nuget/_fixtures/obj
+
+# testing
+/docker-compose.yml

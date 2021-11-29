@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/presets/index getPreset gets linters 1`] = `
+Object {
+  "description": Array [
+    "All lint-related packages",
+  ],
+  "extends": Array [
+    "packages:emberTemplateLint",
+    "packages:eslint",
+    "packages:stylelint",
+    "packages:tslint",
+  ],
+  "matchPackageNames": Array [
+    "remark-lint",
+  ],
+}
+`;
+
+exports[`config/presets/index getPreset handles 404 packages 1`] = `undefined`;
+
+exports[`config/presets/index getPreset handles 404 packages 2`] = `undefined`;
+
+exports[`config/presets/index getPreset handles 404 packages 3`] = `undefined`;
+
+exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = `
+Object {
+  "automergeType": "pr",
+  "branchPrefix": "renovate/",
+  "description": Array [
+    "Use <code>renovate/</code> as prefix for all branch names",
+    "If semantic commits detected, use semantic commit type <code>fix</code> for dependencies and <code>chore</code> for all others",
+    "Require all status checks to pass before any automerging",
+    "Pin dependency versions for <code>devDependencies</code> and retain SemVer ranges for others",
+  ],
+  "ignoreTests": false,
+  "ignoreUnstable": true,
+  "labels": Array [
+    "dependencies",
+  ],
+  "lockFileMaintenance": Object {
+    "automerge": true,
+    "enabled": true,
+    "schedule": Array [
+      "before 8am on Monday",
+    ],
+  },
+  "major": Object {
+    "automerge": false,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
+  "packageRules": Array [
+    Object {
+      "matchPackagePatterns": Array [
+        "*",
+      ],
+      "semanticCommitType": "chore",
+    },
+    Object {
+      "matchDepTypes": Array [
+        "dependencies",
+        "require",
+      ],
+      "semanticCommitType": "fix",
+    },
+    Object {
+      "matchPackagePatterns": Array [
+        "*",
+      ],
+      "rangeStrategy": "replace",
+    },
+    Object {
+      "matchDepTypes": Array [
+        "devDependencies",
+      ],
+      "rangeStrategy": "pin",
+    },
+    Object {
+      "matchDepTypes": Array [
+        "peerDependencies",
+      ],
+      "rangeStrategy": "widen",
+    },
+  ],
+  "prCreation": "immediate",
+  "rebaseWhen": "behind-base-branch",
+  "respectLatest": true,
+  "schedule": Array [
+    "before 8am",
+  ],
+  "semanticCommits": "enabled",
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "timezone": "Asia/Taipei",
+}
+`;
+
+exports[`config/presets/index resolvePreset resolves eslint 1`] = `
+Object {
+  "matchPackageNames": Array [
+    "@types/eslint",
+    "babel-eslint",
+  ],
+  "matchPackagePrefixes": Array [
+    "@typescript-eslint/",
+    "eslint",
+  ],
+}
+`;
+
+exports[`config/presets/index resolvePreset resolves linters 1`] = `
+Object {
+  "description": Array [
+    "All lint-related packages",
+  ],
+  "matchPackageNames": Array [
+    "@types/eslint",
+    "babel-eslint",
+    "codelyzer",
+    "remark-lint",
+  ],
+  "matchPackagePatterns": Array [
+    "\\\\btslint\\\\b",
+  ],
+  "matchPackagePrefixes": Array [
+    "ember-template-lint",
+    "@typescript-eslint/",
+    "eslint",
+    "stylelint",
+  ],
+}
+`;
+
+exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
+Object {
+  "description": Array [
+    "Update lint packages automatically if tests pass",
+  ],
+  "packageRules": Array [
+    Object {
+      "automerge": true,
+      "description": Array [
+        "All lint-related packages",
+      ],
+      "matchPackageNames": Array [
+        "@types/eslint",
+        "babel-eslint",
+        "codelyzer",
+        "remark-lint",
+      ],
+      "matchPackagePatterns": Array [
+        "\\\\btslint\\\\b",
+      ],
+      "matchPackagePrefixes": Array [
+        "ember-template-lint",
+        "@typescript-eslint/",
+        "eslint",
+        "stylelint",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`config/presets/index resolvePreset resolves self-hosted presets without baseConfig 1`] = `
+Object {
+  "labels": Array [
+    "self-hosted resolved",
+  ],
+}
+`;

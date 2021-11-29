@@ -1,0 +1,3524 @@
+{
+  "id": "hashicorp/azurerm/2.53.0",
+  "owner": "hashicorp",
+  "namespace": "hashicorp",
+  "name": "azurerm",
+  "alias": "azurerm",
+  "version": "2.53.0",
+  "tag": "2.53.0",
+  "description": "terraform-provider-azurerm",
+  "source": "https://github.com/terraform-providers/terraform-provider-azurerm",
+  "published_at": "2019-11-26T08:22:56Z",
+  "downloads": 5181001,
+  "official": true,
+  "versions": [
+    "2.52.0",
+    "2.53.0"
+  ],
+  "docs": [
+    {
+      "id": "27489",
+      "title": "overview",
+      "path": "website/docs/index.html.markdown",
+      "slug": "index",
+      "category": "overview",
+      "subcategory": ""
+    },
+    {
+      "id": "27490",
+      "title": "api_management",
+      "path": "website/docs/d/api_management.html.markdown",
+      "slug": "api_management",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27491",
+      "title": "api_management_api",
+      "path": "website/docs/d/api_management_api.html.markdown",
+      "slug": "api_management_api",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27492",
+      "title": "api_management_group",
+      "path": "website/docs/d/api_management_group.html.markdown",
+      "slug": "api_management_group",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27493",
+      "title": "api_management_product",
+      "path": "website/docs/d/api_management_product.html.markdown",
+      "slug": "api_management_product",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27494",
+      "title": "api_management_user",
+      "path": "website/docs/d/api_management_user.html.markdown",
+      "slug": "api_management_user",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27495",
+      "title": "app_service",
+      "path": "website/docs/d/app_service.html.markdown",
+      "slug": "app_service",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27496",
+      "title": "app_service_certificate",
+      "path": "website/docs/d/app_service_certificate.html.markdown",
+      "slug": "app_service_certificate",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27497",
+      "title": "app_service_certificate_order",
+      "path": "website/docs/d/app_service_certificate_order.html.markdown",
+      "slug": "app_service_certificate_order",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27498",
+      "title": "app_service_plan",
+      "path": "website/docs/d/app_service_plan.html.markdown",
+      "slug": "app_service_plan",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27499",
+      "title": "application_insights",
+      "path": "website/docs/d/application_insights.html.markdown",
+      "slug": "application_insights",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27500",
+      "title": "application_security_group",
+      "path": "website/docs/d/application_security_group.html.markdown",
+      "slug": "application_security_group",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27501",
+      "title": "automation_account",
+      "path": "website/docs/d/automation_account.html.markdown",
+      "slug": "automation_account",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27502",
+      "title": "automation_variable_bool",
+      "path": "website/docs/d/automation_variable_bool.html.markdown",
+      "slug": "automation_variable_bool",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27503",
+      "title": "automation_variable_datetime",
+      "path": "website/docs/d/automation_variable_datetime.html.markdown",
+      "slug": "automation_variable_datetime",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27504",
+      "title": "automation_variable_int",
+      "path": "website/docs/d/automation_variable_int.html.markdown",
+      "slug": "automation_variable_int",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27505",
+      "title": "automation_variable_string",
+      "path": "website/docs/d/automation_variable_string.html.markdown",
+      "slug": "automation_variable_string",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27506",
+      "title": "availability_set",
+      "path": "website/docs/d/availability_set.html.markdown",
+      "slug": "availability_set",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27507",
+      "title": "azuread_application",
+      "path": "website/docs/d/azuread_application.html.markdown",
+      "slug": "azuread_application",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27508",
+      "title": "azuread_service_principal",
+      "path": "website/docs/d/azuread_service_principal.html.markdown",
+      "slug": "azuread_service_principal",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27509",
+      "title": "batch_account",
+      "path": "website/docs/d/batch_account.html.markdown",
+      "slug": "batch_account",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27510",
+      "title": "batch_certificate",
+      "path": "website/docs/d/batch_certificate.html.markdown",
+      "slug": "batch_certificate",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27511",
+      "title": "batch_pool",
+      "path": "website/docs/d/batch_pool.html.markdown",
+      "slug": "batch_pool",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27512",
+      "title": "builtin_role_definition",
+      "path": "website/docs/d/builtin_role_definition.markdown",
+      "slug": "builtin_role_definition",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27513",
+      "title": "cdn_profile",
+      "path": "website/docs/d/cdn_profile.html.markdown",
+      "slug": "cdn_profile",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27514",
+      "title": "client_config",
+      "path": "website/docs/d/client_config.html.markdown",
+      "slug": "client_config",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27515",
+      "title": "container_registry",
+      "path": "website/docs/d/container_registry.markdown",
+      "slug": "container_registry",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27516",
+      "title": "cosmosdb_account",
+      "path": "website/docs/d/cosmosdb_account.html.markdown",
+      "slug": "cosmosdb_account",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27517",
+      "title": "data_factory",
+      "path": "website/docs/d/data_factory.html.markdown",
+      "slug": "data_factory",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27518",
+      "title": "data_lake_store",
+      "path": "website/docs/d/data_lake_store.html.markdown",
+      "slug": "data_lake_store",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27519",
+      "title": "dev_test_lab",
+      "path": "website/docs/d/dev_test_lab.html.markdown",
+      "slug": "dev_test_lab",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27520",
+      "title": "dev_test_virtual_network",
+      "path": "website/docs/d/dev_test_virtual_network.html.markdown",
+      "slug": "dev_test_virtual_network",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27521",
+      "title": "dns_zone",
+      "path": "website/docs/d/dns_zone.html.markdown",
+      "slug": "dns_zone",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27522",
+      "title": "eventhub_namespace",
+      "path": "website/docs/d/eventhub_namespace.html.markdown",
+      "slug": "eventhub_namespace",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27523",
+      "title": "express_route_circuit",
+      "path": "website/docs/d/express_route_circuit.html.markdown",
+      "slug": "express_route_circuit",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27524",
+      "title": "firewall",
+      "path": "website/docs/d/firewall.html.markdown",
+      "slug": "firewall",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27525",
+      "title": "hdinsight_cluster",
+      "path": "website/docs/d/hdinsight_cluster.html.markdown",
+      "slug": "hdinsight_cluster",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27526",
+      "title": "healthcare_service",
+      "path": "website/docs/d/healthcare_service.html.markdown",
+      "slug": "healthcare_service",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27527",
+      "title": "image",
+      "path": "website/docs/d/image.html.markdown",
+      "slug": "image",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27528",
+      "title": "key_vault",
+      "path": "website/docs/d/key_vault.html.markdown",
+      "slug": "key_vault",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27529",
+      "title": "key_vault_access_policy",
+      "path": "website/docs/d/key_vault_access_policy.html.markdown",
+      "slug": "key_vault_access_policy",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27530",
+      "title": "key_vault_key",
+      "path": "website/docs/d/key_vault_key.html.markdown",
+      "slug": "key_vault_key",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27531",
+      "title": "key_vault_secret",
+      "path": "website/docs/d/key_vault_secret.html.markdown",
+      "slug": "key_vault_secret",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27532",
+      "title": "kubernetes_cluster",
+      "path": "website/docs/d/kubernetes_cluster.html.markdown",
+      "slug": "kubernetes_cluster",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27533",
+      "title": "kubernetes_service_versions",
+      "path": "website/docs/d/kubernetes_service_versions.html.markdown",
+      "slug": "kubernetes_service_versions",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27534",
+      "title": "loadbalancer",
+      "path": "website/docs/d/loadbalancer.html.markdown",
+      "slug": "loadbalancer",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27535",
+      "title": "loadbalancer_backend_address_pool",
+      "path": "website/docs/d/loadbalancer_backend_address_pool.html.markdown",
+      "slug": "loadbalancer_backend_address_pool",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27536",
+      "title": "log_analytics_workspace",
+      "path": "website/docs/d/log_analytics_workspace.html.markdown",
+      "slug": "log_analytics_workspace",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27537",
+      "title": "logic_app_workflow",
+      "path": "website/docs/d/logic_app_workflow.html.markdown",
+      "slug": "logic_app_workflow",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27538",
+      "title": "managed_disk",
+      "path": "website/docs/d/managed_disk.html.markdown",
+      "slug": "managed_disk",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27539",
+      "title": "management_group",
+      "path": "website/docs/d/management_group.html.markdown",
+      "slug": "management_group",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27540",
+      "title": "maps_account",
+      "path": "website/docs/d/maps_account.html.markdown",
+      "slug": "maps_account",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27541",
+      "title": "monitor_action_group",
+      "path": "website/docs/d/monitor_action_group.html.markdown",
+      "slug": "monitor_action_group",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27542",
+      "title": "monitor_diagnostic_categories",
+      "path": "website/docs/d/monitor_diagnostic_categories.html.markdown",
+      "slug": "monitor_diagnostic_categories",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27543",
+      "title": "monitor_log_profile",
+      "path": "website/docs/d/monitor_log_profile.html.markdown",
+      "slug": "monitor_log_profile",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27544",
+      "title": "mssql_elasticpool",
+      "path": "website/docs/d/mssql_elasticpool.html.markdown",
+      "slug": "mssql_elasticpool",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27545",
+      "title": "netapp_account",
+      "path": "website/docs/d/netapp_account.html.markdown",
+      "slug": "netapp_account",
+      "category": "data-sources",
+      "subcategory": "NetApp"
+    },
+    {
+      "id": "27546",
+      "title": "netapp_pool",
+      "path": "website/docs/d/netapp_pool.html.markdown",
+      "slug": "netapp_pool",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27547",
+      "title": "network_ddos_protection_plan",
+      "path": "website/docs/d/network_ddos_protection_plan.html.markdown",
+      "slug": "network_ddos_protection_plan",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27548",
+      "title": "network_interface",
+      "path": "website/docs/d/network_interface.html.markdown",
+      "slug": "network_interface",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27549",
+      "title": "network_security_group",
+      "path": "website/docs/d/network_security_group.html.markdown",
+      "slug": "network_security_group",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27550",
+      "title": "network_watcher",
+      "path": "website/docs/d/network_watcher.html.markdown",
+      "slug": "network_watcher",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27551",
+      "title": "notification_hub",
+      "path": "website/docs/d/notification_hub.html.markdown",
+      "slug": "notification_hub",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27552",
+      "title": "notification_hub_namespace",
+      "path": "website/docs/d/notification_hub_namespace.html.markdown",
+      "slug": "notification_hub_namespace",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27553",
+      "title": "platform_image",
+      "path": "website/docs/d/platform_image.html.markdown",
+      "slug": "platform_image",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27554",
+      "title": "policy_definition",
+      "path": "website/docs/d/policy_definition.markdown",
+      "slug": "policy_definition",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27555",
+      "title": "postgresql_server",
+      "path": "website/docs/d/postgresql_server.html.markdown",
+      "slug": "postgresql_server",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27556",
+      "title": "private_link_service",
+      "path": "website/docs/d/private_link_service.html.markdown",
+      "slug": "private_link_service",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27557",
+      "title": "private_link_service_endpoint_connections",
+      "path": "website/docs/d/private_link_service_endpoint_connections.html.markdown",
+      "slug": "private_link_service_endpoint_connections",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27558",
+      "title": "proximity_placement_group",
+      "path": "website/docs/d/proximity_placement_group.html.markdown",
+      "slug": "proximity_placement_group",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27559",
+      "title": "public_ip",
+      "path": "website/docs/d/public_ip.html.markdown",
+      "slug": "public_ip",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27560",
+      "title": "public_ip_prefix",
+      "path": "website/docs/d/public_ip_prefix.html.markdown",
+      "slug": "public_ip_prefix",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27561",
+      "title": "public_ips",
+      "path": "website/docs/d/public_ips.html.markdown",
+      "slug": "public_ips",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27562",
+      "title": "recovery_services_protection_policy_vm",
+      "path": "website/docs/d/recovery_services_protection_policy_vm.markdown",
+      "slug": "recovery_services_protection_policy_vm",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27563",
+      "title": "recovery_services_vault",
+      "path": "website/docs/d/recovery_services_vault.markdown",
+      "slug": "recovery_services_vault",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27564",
+      "title": "redis_cache",
+      "path": "website/docs/d/redis_cache.html.markdown",
+      "slug": "redis_cache",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27565",
+      "title": "resource_group",
+      "path": "website/docs/d/resource_group.html.markdown",
+      "slug": "resource_group",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27566",
+      "title": "resources",
+      "path": "website/docs/d/resources.html.markdown",
+      "slug": "resources",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27567",
+      "title": "role_definition",
+      "path": "website/docs/d/role_definition.markdown",
+      "slug": "role_definition",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27568",
+      "title": "route_table",
+      "path": "website/docs/d/route_table.html.markdown",
+      "slug": "route_table",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27569",
+      "title": "scheduler_job_collection",
+      "path": "website/docs/d/scheduler_job_collection.html.markdown",
+      "slug": "scheduler_job_collection",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27570",
+      "title": "servicebus_namespace",
+      "path": "website/docs/d/servicebus_namespace.html.markdown",
+      "slug": "servicebus_namespace",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27571",
+      "title": "servicebus_namespace_authorization_rule",
+      "path": "website/docs/d/servicebus_namespace_authorization_rule.html.markdown",
+      "slug": "servicebus_namespace_authorization_rule",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27572",
+      "title": "shared_image",
+      "path": "website/docs/d/shared_image.html.markdown",
+      "slug": "shared_image",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27573",
+      "title": "shared_image_gallery",
+      "path": "website/docs/d/shared_image_gallery.html.markdown",
+      "slug": "shared_image_gallery",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27574",
+      "title": "shared_image_version",
+      "path": "website/docs/d/shared_image_version.html.markdown",
+      "slug": "shared_image_version",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27575",
+      "title": "snapshot",
+      "path": "website/docs/d/snapshot.html.markdown",
+      "slug": "snapshot",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27576",
+      "title": "sql_database",
+      "path": "website/docs/d/sql_database.html.markdown",
+      "slug": "sql_database",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27577",
+      "title": "sql_server",
+      "path": "website/docs/d/sql_server.html.markdown",
+      "slug": "sql_server",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27578",
+      "title": "storage_account",
+      "path": "website/docs/d/storage_account.html.markdown",
+      "slug": "storage_account",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27579",
+      "title": "storage_account_blob_container_sas",
+      "path": "website/docs/d/storage_account_blob_container_sas.html.markdown",
+      "slug": "storage_account_blob_container_sas",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27580",
+      "title": "storage_account_sas",
+      "path": "website/docs/d/storage_account_sas.html.markdown",
+      "slug": "storage_account_sas",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27581",
+      "title": "storage_management_policy",
+      "path": "website/docs/d/storage_management_policy.html.markdown",
+      "slug": "storage_management_policy",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27582",
+      "title": "stream_analytics_job",
+      "path": "website/docs/d/stream_analytics_job.html.markdown",
+      "slug": "stream_analytics_job",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27583",
+      "title": "subnet",
+      "path": "website/docs/d/subnet.html.markdown",
+      "slug": "subnet",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27584",
+      "title": "subscription",
+      "path": "website/docs/d/subscription.html.markdown",
+      "slug": "subscription",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27585",
+      "title": "subscriptions",
+      "path": "website/docs/d/subscriptions.html.markdown",
+      "slug": "subscriptions",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27586",
+      "title": "traffic_manager_geographical_location",
+      "path": "website/docs/d/traffic_manager_geographical_location.html.markdown",
+      "slug": "traffic_manager_geographical_location",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27587",
+      "title": "user_assigned_identity",
+      "path": "website/docs/d/user_assigned_identity.html.markdown",
+      "slug": "user_assigned_identity",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27588",
+      "title": "virtual_hub",
+      "path": "website/docs/d/virtual_hub.html.markdown",
+      "slug": "virtual_hub",
+      "category": "data-sources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27589",
+      "title": "virtual_machine",
+      "path": "website/docs/d/virtual_machine.html.markdown",
+      "slug": "virtual_machine",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27590",
+      "title": "virtual_network",
+      "path": "website/docs/d/virtual_network.html.markdown",
+      "slug": "virtual_network",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27591",
+      "title": "virtual_network_gateway",
+      "path": "website/docs/d/virtual_network_gateway.html.markdown",
+      "slug": "virtual_network_gateway",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27592",
+      "title": "virtual_network_gateway_connection",
+      "path": "website/docs/d/virtual_network_gateway_connection.html.markdown",
+      "slug": "virtual_network_gateway_connection",
+      "category": "data-sources",
+      "subcategory": ""
+    },
+    {
+      "id": "27593",
+      "title": "Azure Resource Manager: 2.0 Upgrade Guide",
+      "path": "website/docs/guides/2.0-upgrade-guide.html.markdown",
+      "slug": "2.0-upgrade-guide",
+      "category": "guides",
+      "subcategory": ""
+    },
+    {
+      "id": "27594",
+      "title": "Azure Provider: Authenticating via the Azure CLI",
+      "path": "website/docs/guides/azure_cli.html.markdown",
+      "slug": "azure_cli",
+      "category": "guides",
+      "subcategory": ""
+    },
+    {
+      "id": "27595",
+      "title": "Azure Provider: Authenticating via Managed Identity",
+      "path": "website/docs/guides/managed_service_identity.html.markdown",
+      "slug": "managed_service_identity",
+      "category": "guides",
+      "subcategory": ""
+    },
+    {
+      "id": "27596",
+      "title": "Azure Provider: Migrating to a renamed resource",
+      "path": "website/docs/guides/migrating-between-renamed-resources.html.markdown",
+      "slug": "migrating-between-renamed-resources",
+      "category": "guides",
+      "subcategory": ""
+    },
+    {
+      "id": "27597",
+      "title": "Azure Active Directory: Migrating to the AzureAD Provider",
+      "path": "website/docs/guides/migrating-to-azuread.html.markdown",
+      "slug": "migrating-to-azuread",
+      "category": "guides",
+      "subcategory": ""
+    },
+    {
+      "id": "27598",
+      "title": "Azure Provider: Authenticating via a Service Principal and a Client Certificate",
+      "path": "website/docs/guides/service_principal_client_certificate.html.markdown",
+      "slug": "service_principal_client_certificate",
+      "category": "guides",
+      "subcategory": ""
+    },
+    {
+      "id": "27599",
+      "title": "Azure Provider: Authenticating via a Service Principal and a Client Secret",
+      "path": "website/docs/guides/service_principal_client_secret.html.markdown",
+      "slug": "service_principal_client_secret",
+      "category": "guides",
+      "subcategory": ""
+    },
+    {
+      "id": "27600",
+      "title": "analysis_services_server",
+      "path": "website/docs/r/analysis_services_server.html.markdown",
+      "slug": "analysis_services_server",
+      "category": "resources",
+      "subcategory": "Analysis Services"
+    },
+    {
+      "id": "27601",
+      "title": "api_management",
+      "path": "website/docs/r/api_management.html.markdown",
+      "slug": "api_management",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27602",
+      "title": "api_management_api",
+      "path": "website/docs/r/api_management_api.html.markdown",
+      "slug": "api_management_api",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27603",
+      "title": "api_management_api_operation",
+      "path": "website/docs/r/api_management_api_operation.html.markdown",
+      "slug": "api_management_api_operation",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27604",
+      "title": "api_management_api_operation_policy",
+      "path": "website/docs/r/api_management_api_operation_policy.html.markdown",
+      "slug": "api_management_api_operation_policy",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27605",
+      "title": "api_management_api_policy",
+      "path": "website/docs/r/api_management_api_policy.html.markdown",
+      "slug": "api_management_api_policy",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27606",
+      "title": "api_management_api_schema",
+      "path": "website/docs/r/api_management_api_schema.html.markdown",
+      "slug": "api_management_api_schema",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27607",
+      "title": "api_management_api_version_set",
+      "path": "website/docs/r/api_management_api_version_set.html.markdown",
+      "slug": "api_management_api_version_set",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27608",
+      "title": "api_management_authorization_server",
+      "path": "website/docs/r/api_management_authorization_server.html.markdown",
+      "slug": "api_management_authorization_server",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27609",
+      "title": "api_management_backend",
+      "path": "website/docs/r/api_management_backend.html.markdown",
+      "slug": "api_management_backend",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27610",
+      "title": "api_management_certificate",
+      "path": "website/docs/r/api_management_certificate.html.markdown",
+      "slug": "api_management_certificate",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27611",
+      "title": "api_management_group",
+      "path": "website/docs/r/api_management_group.html.markdown",
+      "slug": "api_management_group",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27612",
+      "title": "api_management_group_user",
+      "path": "website/docs/r/api_management_group_user.html.markdown",
+      "slug": "api_management_group_user",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27613",
+      "title": "api_management_logger",
+      "path": "website/docs/r/api_management_logger.html.markdown",
+      "slug": "api_management_logger",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27614",
+      "title": "api_management_openid_connect_provider",
+      "path": "website/docs/r/api_management_openid_connect_provider.html.markdown",
+      "slug": "api_management_openid_connect_provider",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27615",
+      "title": "api_management_product",
+      "path": "website/docs/r/api_management_product.html.markdown",
+      "slug": "api_management_product",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27616",
+      "title": "api_management_product_api",
+      "path": "website/docs/r/api_management_product_api.html.markdown",
+      "slug": "api_management_product_api",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27617",
+      "title": "api_management_product_group",
+      "path": "website/docs/r/api_management_product_group.html.markdown",
+      "slug": "api_management_product_group",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27618",
+      "title": "api_management_product_policy",
+      "path": "website/docs/r/api_management_product_policy.html.markdown",
+      "slug": "api_management_product_policy",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27619",
+      "title": "api_management_property",
+      "path": "website/docs/r/api_management_property.html.markdown",
+      "slug": "api_management_property",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27620",
+      "title": "api_management_subscription",
+      "path": "website/docs/r/api_management_subscription.html.markdown",
+      "slug": "api_management_subscription",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27621",
+      "title": "api_management_user",
+      "path": "website/docs/r/api_management_user.html.markdown",
+      "slug": "api_management_user",
+      "category": "resources",
+      "subcategory": "API Management"
+    },
+    {
+      "id": "27622",
+      "title": "app_service",
+      "path": "website/docs/r/app_service.html.markdown",
+      "slug": "app_service",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27623",
+      "title": "app_service_active_slot",
+      "path": "website/docs/r/app_service_active_slot.html.markdown",
+      "slug": "app_service_active_slot",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27624",
+      "title": "app_service_certificate",
+      "path": "website/docs/r/app_service_certificate.html.markdown",
+      "slug": "app_service_certificate",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27625",
+      "title": "app_service_certificate_order",
+      "path": "website/docs/r/app_service_certificate_order.html.markdown",
+      "slug": "app_service_certificate_order",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27626",
+      "title": "app_service_custom_hostname_binding",
+      "path": "website/docs/r/app_service_custom_hostname_binding.html.markdown",
+      "slug": "app_service_custom_hostname_binding",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27627",
+      "title": "app_service_plan",
+      "path": "website/docs/r/app_service_plan.html.markdown",
+      "slug": "app_service_plan",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27628",
+      "title": "app_service_slot",
+      "path": "website/docs/r/app_service_slot.html.markdown",
+      "slug": "app_service_slot",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27629",
+      "title": "app_service_source_control_token",
+      "path": "website/docs/r/app_service_source_control_token.html.markdown",
+      "slug": "app_service_source_control_token",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27630",
+      "title": "application_gateway",
+      "path": "website/docs/r/application_gateway.html.markdown",
+      "slug": "application_gateway",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27631",
+      "title": "application_insights",
+      "path": "website/docs/r/application_insights.html.markdown",
+      "slug": "application_insights",
+      "category": "resources",
+      "subcategory": "Application Insights"
+    },
+    {
+      "id": "27632",
+      "title": "application_insights_analytics_item",
+      "path": "website/docs/r/application_insights_analytics_item.html.markdown",
+      "slug": "application_insights_analytics_item",
+      "category": "resources",
+      "subcategory": "Application Insights"
+    },
+    {
+      "id": "27633",
+      "title": "application_insights_api_key",
+      "path": "website/docs/r/application_insights_api_key.html.markdown",
+      "slug": "application_insights_api_key",
+      "category": "resources",
+      "subcategory": "Application Insights"
+    },
+    {
+      "id": "27634",
+      "title": "application_insights_web_test",
+      "path": "website/docs/r/application_insights_web_test.html.markdown",
+      "slug": "application_insights_web_test",
+      "category": "resources",
+      "subcategory": "Application Insights"
+    },
+    {
+      "id": "27635",
+      "title": "application_security_group",
+      "path": "website/docs/r/application_security_group.html.markdown",
+      "slug": "application_security_group",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27636",
+      "title": "automation_account",
+      "path": "website/docs/r/automation_account.html.markdown",
+      "slug": "automation_account",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27637",
+      "title": "automation_credential",
+      "path": "website/docs/r/automation_credential.html.markdown",
+      "slug": "automation_credential",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27638",
+      "title": "automation_dsc_configuration",
+      "path": "website/docs/r/automation_dsc_configuration.html.markdown",
+      "slug": "automation_dsc_configuration",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27639",
+      "title": "automation_dsc_nodeconfiguration",
+      "path": "website/docs/r/automation_dsc_nodeconfiguration.html.markdown",
+      "slug": "automation_dsc_nodeconfiguration",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27640",
+      "title": "automation_job_schedule",
+      "path": "website/docs/r/automation_job_schedule.html.markdown",
+      "slug": "automation_job_schedule",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27641",
+      "title": "automation_module",
+      "path": "website/docs/r/automation_module.html.markdown",
+      "slug": "automation_module",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27642",
+      "title": "automation_runbook",
+      "path": "website/docs/r/automation_runbook.html.markdown",
+      "slug": "automation_runbook",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27643",
+      "title": "automation_schedule",
+      "path": "website/docs/r/automation_schedule.html.markdown",
+      "slug": "automation_schedule",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27644",
+      "title": "automation_variable_bool",
+      "path": "website/docs/r/automation_variable_bool.html.markdown",
+      "slug": "automation_variable_bool",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27645",
+      "title": "automation_variable_datetime",
+      "path": "website/docs/r/automation_variable_datetime.html.markdown",
+      "slug": "automation_variable_datetime",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27646",
+      "title": "automation_variable_int",
+      "path": "website/docs/r/automation_variable_int.html.markdown",
+      "slug": "automation_variable_int",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27647",
+      "title": "automation_variable_string",
+      "path": "website/docs/r/automation_variable_string.html.markdown",
+      "slug": "automation_variable_string",
+      "category": "resources",
+      "subcategory": "Automation"
+    },
+    {
+      "id": "27648",
+      "title": "autoscale_setting",
+      "path": "website/docs/r/autoscale_setting.html.markdown",
+      "slug": "autoscale_setting",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27649",
+      "title": "availability_set",
+      "path": "website/docs/r/availability_set.html.markdown",
+      "slug": "availability_set",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27650",
+      "title": "azuread_application",
+      "path": "website/docs/r/azuread_application.html.markdown",
+      "slug": "azuread_application",
+      "category": "resources",
+      "subcategory": "Azure Active Directory"
+    },
+    {
+      "id": "27651",
+      "title": "azuread_service_principal",
+      "path": "website/docs/r/azuread_service_principal.html.markdown",
+      "slug": "azuread_service_principal",
+      "category": "resources",
+      "subcategory": "Azure Active Directory"
+    },
+    {
+      "id": "27652",
+      "title": "azuread_service_principal_password",
+      "path": "website/docs/r/azuread_service_principal_password.html.markdown",
+      "slug": "azuread_service_principal_password",
+      "category": "resources",
+      "subcategory": "Azure Active Directory"
+    },
+    {
+      "id": "27653",
+      "title": "bastion_host",
+      "path": "website/docs/r/bastion_host.html.markdown",
+      "slug": "bastion_host",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27654",
+      "title": "batch_account",
+      "path": "website/docs/r/batch_account.html.markdown",
+      "slug": "batch_account",
+      "category": "resources",
+      "subcategory": "Batch"
+    },
+    {
+      "id": "27655",
+      "title": "batch_application",
+      "path": "website/docs/r/batch_application.html.markdown",
+      "slug": "batch_application",
+      "category": "resources",
+      "subcategory": "Batch"
+    },
+    {
+      "id": "27656",
+      "title": "batch_certificate",
+      "path": "website/docs/r/batch_certificate.html.markdown",
+      "slug": "batch_certificate",
+      "category": "resources",
+      "subcategory": "Batch"
+    },
+    {
+      "id": "27657",
+      "title": "batch_pool",
+      "path": "website/docs/r/batch_pool.html.markdown",
+      "slug": "batch_pool",
+      "category": "resources",
+      "subcategory": "Batch"
+    },
+    {
+      "id": "27658",
+      "title": "bot_channel_email",
+      "path": "website/docs/r/bot_channel_email.markdown",
+      "slug": "bot_channel_email",
+      "category": "resources",
+      "subcategory": "Bot"
+    },
+    {
+      "id": "27659",
+      "title": "bot_channel_slack",
+      "path": "website/docs/r/bot_channel_slack.markdown",
+      "slug": "bot_channel_slack",
+      "category": "resources",
+      "subcategory": "Bot"
+    },
+    {
+      "id": "27660",
+      "title": "bot_channels_registration",
+      "path": "website/docs/r/bot_channels_registration.markdown",
+      "slug": "bot_channels_registration",
+      "category": "resources",
+      "subcategory": "Bot"
+    },
+    {
+      "id": "27661",
+      "title": "bot_connection",
+      "path": "website/docs/r/bot_connection.markdown",
+      "slug": "bot_connection",
+      "category": "resources",
+      "subcategory": "Bot"
+    },
+    {
+      "id": "27662",
+      "title": "bot_web_app",
+      "path": "website/docs/r/bot_web_app.markdown",
+      "slug": "bot_web_app",
+      "category": "resources",
+      "subcategory": "Bot"
+    },
+    {
+      "id": "27663",
+      "title": "cdn_endpoint",
+      "path": "website/docs/r/cdn_endpoint.html.markdown",
+      "slug": "cdn_endpoint",
+      "category": "resources",
+      "subcategory": "CDN"
+    },
+    {
+      "id": "27664",
+      "title": "cdn_profile",
+      "path": "website/docs/r/cdn_profile.html.markdown",
+      "slug": "cdn_profile",
+      "category": "resources",
+      "subcategory": "CDN"
+    },
+    {
+      "id": "27665",
+      "title": "cognitive_account",
+      "path": "website/docs/r/cognitive_account.html.markdown",
+      "slug": "cognitive_account",
+      "category": "resources",
+      "subcategory": "Cognitive Services"
+    },
+    {
+      "id": "27666",
+      "title": "connection_monitor",
+      "path": "website/docs/r/connection_monitor.html.markdown",
+      "slug": "connection_monitor",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27667",
+      "title": "container_group",
+      "path": "website/docs/r/container_group.html.markdown",
+      "slug": "container_group",
+      "category": "resources",
+      "subcategory": "Container"
+    },
+    {
+      "id": "27668",
+      "title": "container_registry",
+      "path": "website/docs/r/container_registry.html.markdown",
+      "slug": "container_registry",
+      "category": "resources",
+      "subcategory": "Container"
+    },
+    {
+      "id": "27669",
+      "title": "container_registry_webhook",
+      "path": "website/docs/r/container_registry_webhook.html.markdown",
+      "slug": "container_registry_webhook",
+      "category": "resources",
+      "subcategory": "Container"
+    },
+    {
+      "id": "27670",
+      "title": "container_service",
+      "path": "website/docs/r/container_service.html.markdown",
+      "slug": "container_service",
+      "category": "resources",
+      "subcategory": "Container"
+    },
+    {
+      "id": "27671",
+      "title": "cosmosdb_account",
+      "path": "website/docs/r/cosmosdb_account.html.markdown",
+      "slug": "cosmosdb_account",
+      "category": "resources",
+      "subcategory": "CosmosDB (DocumentDB)"
+    },
+    {
+      "id": "27672",
+      "title": "cosmosdb_cassandra_keyspace",
+      "path": "website/docs/r/cosmosdb_cassandra_keyspace.html.markdown",
+      "slug": "cosmosdb_cassandra_keyspace",
+      "category": "resources",
+      "subcategory": "CosmosDB (DocumentDB)"
+    },
+    {
+      "id": "27673",
+      "title": "cosmosdb_mongo_collection",
+      "path": "website/docs/r/cosmosdb_mongo_collection.html.markdown",
+      "slug": "cosmosdb_mongo_collection",
+      "category": "resources",
+      "subcategory": "CosmosDB (DocumentDB)"
+    },
+    {
+      "id": "27674",
+      "title": "cosmosdb_mongo_database",
+      "path": "website/docs/r/cosmosdb_mongo_database.html.markdown",
+      "slug": "cosmosdb_mongo_database",
+      "category": "resources",
+      "subcategory": "CosmosDB (DocumentDB)"
+    },
+    {
+      "id": "27675",
+      "title": "cosmosdb_sql_container",
+      "path": "website/docs/r/cosmosdb_sql_container.html.markdown",
+      "slug": "cosmosdb_sql_container",
+      "category": "resources",
+      "subcategory": "CosmosDB (DocumentDB)"
+    },
+    {
+      "id": "27676",
+      "title": "cosmosdb_sql_database",
+      "path": "website/docs/r/cosmosdb_sql_database.html.markdown",
+      "slug": "cosmosdb_sql_database",
+      "category": "resources",
+      "subcategory": "CosmosDB (DocumentDB)"
+    },
+    {
+      "id": "27677",
+      "title": "cosmosdb_table",
+      "path": "website/docs/r/cosmosdb_table.html.markdown",
+      "slug": "cosmosdb_table",
+      "category": "resources",
+      "subcategory": "CosmosDB (DocumentDB)"
+    },
+    {
+      "id": "27678",
+      "title": "dashboard",
+      "path": "website/docs/r/dashboard.html.markdown",
+      "slug": "dashboard",
+      "category": "resources",
+      "subcategory": "Portal"
+    },
+    {
+      "id": "27679",
+      "title": "data_factory",
+      "path": "website/docs/r/data_factory.html.markdown",
+      "slug": "data_factory",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27680",
+      "title": "data_factory_dataset_mysql",
+      "path": "website/docs/r/data_factory_dataset_mysql.html.markdown",
+      "slug": "data_factory_dataset_mysql",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27681",
+      "title": "data_factory_dataset_postgresql",
+      "path": "website/docs/r/data_factory_dataset_postgresql.html.markdown",
+      "slug": "data_factory_dataset_postgresql",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27682",
+      "title": "data_factory_dataset_sql_server_table",
+      "path": "website/docs/r/data_factory_dataset_sql_server_table.html.markdown",
+      "slug": "data_factory_dataset_sql_server_table",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27683",
+      "title": "data_factory_integration_runtime_managed",
+      "path": "website/docs/r/data_factory_integration_runtime_managed.html.markdown",
+      "slug": "data_factory_integration_runtime_managed",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27684",
+      "title": "data_factory_linked_service_data_lake_storage_gen2",
+      "path": "website/docs/r/data_factory_linked_service_data_lake_storage_gen2.html.markdown",
+      "slug": "data_factory_linked_service_data_lake_storage_gen2",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27685",
+      "title": "data_factory_linked_service_mysql",
+      "path": "website/docs/r/data_factory_linked_service_mysql.html.markdown",
+      "slug": "data_factory_linked_service_mysql",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27686",
+      "title": "data_factory_linked_service_postgresql",
+      "path": "website/docs/r/data_factory_linked_service_postgresql.html.markdown",
+      "slug": "data_factory_linked_service_postgresql",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27687",
+      "title": "data_factory_linked_service_sql_server",
+      "path": "website/docs/r/data_factory_linked_service_sql_server.html.markdown",
+      "slug": "data_factory_linked_service_sql_server",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27688",
+      "title": "data_factory_pipeline",
+      "path": "website/docs/r/data_factory_pipeline.html.markdown",
+      "slug": "data_factory_pipeline",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27689",
+      "title": "data_factory_trigger_schedule",
+      "path": "website/docs/r/data_factory_trigger_schedule.html.markdown",
+      "slug": "data_factory_trigger_schedule",
+      "category": "resources",
+      "subcategory": "Data Factory"
+    },
+    {
+      "id": "27690",
+      "title": "data_lake_analytics_account",
+      "path": "website/docs/r/data_lake_analytics_account.html.markdown",
+      "slug": "data_lake_analytics_account",
+      "category": "resources",
+      "subcategory": "Data Lake"
+    },
+    {
+      "id": "27691",
+      "title": "data_lake_analytics_firewall_rule",
+      "path": "website/docs/r/data_lake_analytics_firewall_rule.html.markdown",
+      "slug": "data_lake_analytics_firewall_rule",
+      "category": "resources",
+      "subcategory": "Data Lake"
+    },
+    {
+      "id": "27692",
+      "title": "data_lake_store",
+      "path": "website/docs/r/data_lake_store.html.markdown",
+      "slug": "data_lake_store",
+      "category": "resources",
+      "subcategory": "Data Lake"
+    },
+    {
+      "id": "27693",
+      "title": "data_lake_store_file",
+      "path": "website/docs/r/data_lake_store_file.html.markdown",
+      "slug": "data_lake_store_file",
+      "category": "resources",
+      "subcategory": "Data Lake"
+    },
+    {
+      "id": "27694",
+      "title": "data_lake_store_firewall_rule",
+      "path": "website/docs/r/data_lake_store_firewall_rule.html.markdown",
+      "slug": "data_lake_store_firewall_rule",
+      "category": "resources",
+      "subcategory": "Data Lake"
+    },
+    {
+      "id": "27695",
+      "title": "databricks_workspace",
+      "path": "website/docs/r/databricks_workspace.html.markdown",
+      "slug": "databricks_workspace",
+      "category": "resources",
+      "subcategory": "Databricks"
+    },
+    {
+      "id": "27696",
+      "title": "ddos_protection_plan",
+      "path": "website/docs/r/ddos_protection_plan.html.markdown",
+      "slug": "ddos_protection_plan",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27697",
+      "title": "dev_test_lab",
+      "path": "website/docs/r/dev_test_lab.html.markdown",
+      "slug": "dev_test_lab",
+      "category": "resources",
+      "subcategory": "Dev Test"
+    },
+    {
+      "id": "27698",
+      "title": "dev_test_linux_virtual_machine",
+      "path": "website/docs/r/dev_test_linux_virtual_machine.html.markdown",
+      "slug": "dev_test_linux_virtual_machine",
+      "category": "resources",
+      "subcategory": "Dev Test"
+    },
+    {
+      "id": "27699",
+      "title": "dev_test_policy",
+      "path": "website/docs/r/dev_test_policy.html.markdown",
+      "slug": "dev_test_policy",
+      "category": "resources",
+      "subcategory": "Dev Test"
+    },
+    {
+      "id": "27700",
+      "title": "dev_test_schedule",
+      "path": "website/docs/r/dev_test_schedule.html.markdown",
+      "slug": "dev_test_schedule",
+      "category": "resources",
+      "subcategory": "Dev Test"
+    },
+    {
+      "id": "27701",
+      "title": "dev_test_virtual_network",
+      "path": "website/docs/r/dev_test_virtual_network.html.markdown",
+      "slug": "dev_test_virtual_network",
+      "category": "resources",
+      "subcategory": "Dev Test"
+    },
+    {
+      "id": "27702",
+      "title": "dev_test_windows_virtual_machine",
+      "path": "website/docs/r/dev_test_windows_virtual_machine.html.markdown",
+      "slug": "dev_test_windows_virtual_machine",
+      "category": "resources",
+      "subcategory": "Dev Test"
+    },
+    {
+      "id": "27703",
+      "title": "devspace_controller",
+      "path": "website/docs/r/devspace_controller.html.markdown",
+      "slug": "devspace_controller",
+      "category": "resources",
+      "subcategory": "DevSpace"
+    },
+    {
+      "id": "27704",
+      "title": "dns_a_record",
+      "path": "website/docs/r/dns_a_record.html.markdown",
+      "slug": "dns_a_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27705",
+      "title": "dns_aaaa_record",
+      "path": "website/docs/r/dns_aaaa_record.html.markdown",
+      "slug": "dns_aaaa_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27706",
+      "title": "dns_caa_record",
+      "path": "website/docs/r/dns_caa_record.html.markdown",
+      "slug": "dns_caa_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27707",
+      "title": "dns_cname_record",
+      "path": "website/docs/r/dns_cname_record.html.markdown",
+      "slug": "dns_cname_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27708",
+      "title": "dns_mx_record",
+      "path": "website/docs/r/dns_mx_record.html.markdown",
+      "slug": "dns_mx_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27709",
+      "title": "dns_ns_record",
+      "path": "website/docs/r/dns_ns_record.html.markdown",
+      "slug": "dns_ns_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27710",
+      "title": "dns_ptr_record",
+      "path": "website/docs/r/dns_ptr_record.html.markdown",
+      "slug": "dns_ptr_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27711",
+      "title": "dns_srv_record",
+      "path": "website/docs/r/dns_srv_record.html.markdown",
+      "slug": "dns_srv_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27712",
+      "title": "dns_txt_record",
+      "path": "website/docs/r/dns_txt_record.html.markdown",
+      "slug": "dns_txt_record",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27713",
+      "title": "dns_zone",
+      "path": "website/docs/r/dns_zone.html.markdown",
+      "slug": "dns_zone",
+      "category": "resources",
+      "subcategory": "DNS"
+    },
+    {
+      "id": "27714",
+      "title": "eventgrid_domain",
+      "path": "website/docs/r/eventgrid_domain.html.markdown",
+      "slug": "eventgrid_domain",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27715",
+      "title": "eventgrid_event_subscription",
+      "path": "website/docs/r/eventgrid_event_subscription.html.markdown",
+      "slug": "eventgrid_event_subscription",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27716",
+      "title": "eventgrid_topic",
+      "path": "website/docs/r/eventgrid_topic.html.markdown",
+      "slug": "eventgrid_topic",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27717",
+      "title": "eventhub",
+      "path": "website/docs/r/eventhub.html.markdown",
+      "slug": "eventhub",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27718",
+      "title": "eventhub_authorization_rule",
+      "path": "website/docs/r/eventhub_authorization_rule.html.markdown",
+      "slug": "eventhub_authorization_rule",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27719",
+      "title": "eventhub_consumer_group",
+      "path": "website/docs/r/eventhub_consumer_group.html.markdown",
+      "slug": "eventhub_consumer_group",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27720",
+      "title": "eventhub_namespace",
+      "path": "website/docs/r/eventhub_namespace.html.markdown",
+      "slug": "eventhub_namespace",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27721",
+      "title": "eventhub_namespace_authorization_rule",
+      "path": "website/docs/r/eventhub_namespace_authorization_rule.html.markdown",
+      "slug": "eventhub_namespace_authorization_rule",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27722",
+      "title": "eventhub_namespace_disaster_recovery_config",
+      "path": "website/docs/r/eventhub_namespace_disaster_recovery_config.html.markdown",
+      "slug": "eventhub_namespace_disaster_recovery_config",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27723",
+      "title": "express_route_circuit",
+      "path": "website/docs/r/express_route_circuit.html.markdown",
+      "slug": "express_route_circuit",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27724",
+      "title": "express_route_circuit_authorization",
+      "path": "website/docs/r/express_route_circuit_authorization.html.markdown",
+      "slug": "express_route_circuit_authorization",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27725",
+      "title": "express_route_circuit_peering",
+      "path": "website/docs/r/express_route_circuit_peering.html.markdown",
+      "slug": "express_route_circuit_peering",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27726",
+      "title": "firewall",
+      "path": "website/docs/r/firewall.html.markdown",
+      "slug": "firewall",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27727",
+      "title": "firewall_application_rule_collection",
+      "path": "website/docs/r/firewall_application_rule_collection.html.markdown",
+      "slug": "firewall_application_rule_collection",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27728",
+      "title": "firewall_nat_rule_collection",
+      "path": "website/docs/r/firewall_nat_rule_collection.html.markdown",
+      "slug": "firewall_nat_rule_collection",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27729",
+      "title": "firewall_network_rule_collection",
+      "path": "website/docs/r/firewall_network_rule_collection.html.markdown",
+      "slug": "firewall_network_rule_collection",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27730",
+      "title": "front_door",
+      "path": "website/docs/r/front_door.html.markdown",
+      "slug": "front_door",
+      "category": "resources",
+      "subcategory": "Front Door"
+    },
+    {
+      "id": "27731",
+      "title": "front_door_firewall_policy",
+      "path": "website/docs/r/front_door_firewall_policy.html.markdown",
+      "slug": "front_door_firewall_policy",
+      "category": "resources",
+      "subcategory": "Front Door"
+    },
+    {
+      "id": "27732",
+      "title": "function_app",
+      "path": "website/docs/r/function_app.html.markdown",
+      "slug": "function_app",
+      "category": "resources",
+      "subcategory": "App Service (Web Apps)"
+    },
+    {
+      "id": "27733",
+      "title": "hdinsight_hadoop_cluster",
+      "path": "website/docs/r/hdinsight_hadoop_cluster.html.markdown",
+      "slug": "hdinsight_hadoop_cluster",
+      "category": "resources",
+      "subcategory": "HDInsight"
+    },
+    {
+      "id": "27734",
+      "title": "hdinsight_hbase_cluster",
+      "path": "website/docs/r/hdinsight_hbase_cluster.html.markdown",
+      "slug": "hdinsight_hbase_cluster",
+      "category": "resources",
+      "subcategory": "HDInsight"
+    },
+    {
+      "id": "27735",
+      "title": "hdinsight_interactive_query_cluster",
+      "path": "website/docs/r/hdinsight_interactive_query_cluster.html.markdown",
+      "slug": "hdinsight_interactive_query_cluster",
+      "category": "resources",
+      "subcategory": "HDInsight"
+    },
+    {
+      "id": "27736",
+      "title": "hdinsight_kafka_cluster",
+      "path": "website/docs/r/hdinsight_kafka_cluster.html.markdown",
+      "slug": "hdinsight_kafka_cluster",
+      "category": "resources",
+      "subcategory": "HDInsight"
+    },
+    {
+      "id": "27737",
+      "title": "hdinsight_ml_services_cluster",
+      "path": "website/docs/r/hdinsight_ml_services_cluster.html.markdown",
+      "slug": "hdinsight_ml_services_cluster",
+      "category": "resources",
+      "subcategory": "HDInsight"
+    },
+    {
+      "id": "27738",
+      "title": "hdinsight_rserver_cluster",
+      "path": "website/docs/r/hdinsight_rserver_cluster.html.markdown",
+      "slug": "hdinsight_rserver_cluster",
+      "category": "resources",
+      "subcategory": "HDInsight"
+    },
+    {
+      "id": "27739",
+      "title": "hdinsight_spark_cluster",
+      "path": "website/docs/r/hdinsight_spark_cluster.html.markdown",
+      "slug": "hdinsight_spark_cluster",
+      "category": "resources",
+      "subcategory": "HDInsight"
+    },
+    {
+      "id": "27740",
+      "title": "hdinsight_storm_cluster",
+      "path": "website/docs/r/hdinsight_storm_cluster.html.markdown",
+      "slug": "hdinsight_storm_cluster",
+      "category": "resources",
+      "subcategory": "HDInsight"
+    },
+    {
+      "id": "27741",
+      "title": "healthcare_service",
+      "path": "website/docs/r/healthcare_service.html.markdown",
+      "slug": "healthcare_service",
+      "category": "resources",
+      "subcategory": "Healthcare API"
+    },
+    {
+      "id": "27742",
+      "title": "image",
+      "path": "website/docs/r/image.html.markdown",
+      "slug": "image",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27743",
+      "title": "iothub",
+      "path": "website/docs/r/iothub.html.markdown",
+      "slug": "iothub",
+      "category": "resources",
+      "subcategory": "IoT Hub"
+    },
+    {
+      "id": "27744",
+      "title": "iothub_consumer_group",
+      "path": "website/docs/r/iothub_consumer_group.html.markdown",
+      "slug": "iothub_consumer_group",
+      "category": "resources",
+      "subcategory": "IoT Hub"
+    },
+    {
+      "id": "27745",
+      "title": "iothub_dps",
+      "path": "website/docs/r/iothub_dps.html.markdown",
+      "slug": "iothub_dps",
+      "category": "resources",
+      "subcategory": "IoT Hub"
+    },
+    {
+      "id": "27746",
+      "title": "iothub_dps_certificate",
+      "path": "website/docs/r/iothub_dps_certificate.html.markdown",
+      "slug": "iothub_dps_certificate",
+      "category": "resources",
+      "subcategory": "IoT Hub"
+    },
+    {
+      "id": "27747",
+      "title": "iothub_endpoint_eventhub",
+      "path": "website/docs/r/iothub_endpoint_eventhub.html.markdown",
+      "slug": "iothub_endpoint_eventhub",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27748",
+      "title": "iothub_endpoint_servicebus_queue",
+      "path": "website/docs/r/iothub_endpoint_servicebus_queue.html.markdown",
+      "slug": "iothub_endpoint_servicebus_queue",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27749",
+      "title": "iothub_endpoint_servicebus_topic",
+      "path": "website/docs/r/iothub_endpoint_servicebus_topic.html.markdown",
+      "slug": "iothub_endpoint_servicebus_topic",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27750",
+      "title": "iothub_endpoint_storage_container",
+      "path": "website/docs/r/iothub_endpoint_storage_container.html.markdown",
+      "slug": "iothub_endpoint_storage_container",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27751",
+      "title": "iothub_route",
+      "path": "website/docs/r/iothub_route.html.markdown",
+      "slug": "iothub_route",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27752",
+      "title": "iothub_shared_access_policy",
+      "path": "website/docs/r/iothub_shared_access_policy.html.markdown",
+      "slug": "iothub_shared_access_policy",
+      "category": "resources",
+      "subcategory": "IoT Hub"
+    },
+    {
+      "id": "27753",
+      "title": "key_vault",
+      "path": "website/docs/r/key_vault.html.markdown",
+      "slug": "key_vault",
+      "category": "resources",
+      "subcategory": "Key Vault"
+    },
+    {
+      "id": "27754",
+      "title": "key_vault_access_policy",
+      "path": "website/docs/r/key_vault_access_policy.html.markdown",
+      "slug": "key_vault_access_policy",
+      "category": "resources",
+      "subcategory": "Key Vault"
+    },
+    {
+      "id": "27755",
+      "title": "key_vault_certificate",
+      "path": "website/docs/r/key_vault_certificate.html.markdown",
+      "slug": "key_vault_certificate",
+      "category": "resources",
+      "subcategory": "Key Vault"
+    },
+    {
+      "id": "27756",
+      "title": "key_vault_key",
+      "path": "website/docs/r/key_vault_key.html.markdown",
+      "slug": "key_vault_key",
+      "category": "resources",
+      "subcategory": "Key Vault"
+    },
+    {
+      "id": "27757",
+      "title": "key_vault_secret",
+      "path": "website/docs/r/key_vault_secret.html.markdown",
+      "slug": "key_vault_secret",
+      "category": "resources",
+      "subcategory": "Key Vault"
+    },
+    {
+      "id": "27758",
+      "title": "kubernetes_cluster",
+      "path": "website/docs/r/kubernetes_cluster.html.markdown",
+      "slug": "kubernetes_cluster",
+      "category": "resources",
+      "subcategory": "Container"
+    },
+    {
+      "id": "27759",
+      "title": "kubernetes_cluster_node_pool",
+      "path": "website/docs/r/kubernetes_cluster_node_pool.html.markdown",
+      "slug": "kubernetes_cluster_node_pool",
+      "category": "resources",
+      "subcategory": "Container"
+    },
+    {
+      "id": "27760",
+      "title": "kusto_cluster",
+      "path": "website/docs/r/kusto_cluster.html.markdown",
+      "slug": "kusto_cluster",
+      "category": "resources",
+      "subcategory": "Data Explorer"
+    },
+    {
+      "id": "27761",
+      "title": "kusto_database",
+      "path": "website/docs/r/kusto_database.html.markdown",
+      "slug": "kusto_database",
+      "category": "resources",
+      "subcategory": "Data Explorer"
+    },
+    {
+      "id": "27762",
+      "title": "kusto_eventhub_data_connection",
+      "path": "website/docs/r/kusto_eventhub_data_connection.html.markdown",
+      "slug": "kusto_eventhub_data_connection",
+      "category": "resources",
+      "subcategory": "Data Explorer"
+    },
+    {
+      "id": "27763",
+      "title": "linux_virtual_machine_scale_set",
+      "path": "website/docs/r/linux_virtual_machine_scale_set.html.markdown",
+      "slug": "linux_virtual_machine_scale_set",
+      "category": "resources",
+      "subcategory": "Beta"
+    },
+    {
+      "id": "27764",
+      "title": "loadbalancer",
+      "path": "website/docs/r/loadbalancer.html.markdown",
+      "slug": "loadbalancer",
+      "category": "resources",
+      "subcategory": "Load Balancer"
+    },
+    {
+      "id": "27765",
+      "title": "loadbalancer_backend_address_pool",
+      "path": "website/docs/r/loadbalancer_backend_address_pool.html.markdown",
+      "slug": "loadbalancer_backend_address_pool",
+      "category": "resources",
+      "subcategory": "Load Balancer"
+    },
+    {
+      "id": "27766",
+      "title": "loadbalancer_nat_pool",
+      "path": "website/docs/r/loadbalancer_nat_pool.html.markdown",
+      "slug": "loadbalancer_nat_pool",
+      "category": "resources",
+      "subcategory": "Load Balancer"
+    },
+    {
+      "id": "27767",
+      "title": "loadbalancer_nat_rule",
+      "path": "website/docs/r/loadbalancer_nat_rule.html.markdown",
+      "slug": "loadbalancer_nat_rule",
+      "category": "resources",
+      "subcategory": "Load Balancer"
+    },
+    {
+      "id": "27768",
+      "title": "loadbalancer_outbound_rule",
+      "path": "website/docs/r/loadbalancer_outbound_rule.html.markdown",
+      "slug": "loadbalancer_outbound_rule",
+      "category": "resources",
+      "subcategory": "Load Balancer"
+    },
+    {
+      "id": "27769",
+      "title": "loadbalancer_probe",
+      "path": "website/docs/r/loadbalancer_probe.html.markdown",
+      "slug": "loadbalancer_probe",
+      "category": "resources",
+      "subcategory": "Load Balancer"
+    },
+    {
+      "id": "27770",
+      "title": "loadbalancer_rule",
+      "path": "website/docs/r/loadbalancer_rule.html.markdown",
+      "slug": "loadbalancer_rule",
+      "category": "resources",
+      "subcategory": "Load Balancer"
+    },
+    {
+      "id": "27771",
+      "title": "local_network_gateway",
+      "path": "website/docs/r/local_network_gateway.html.markdown",
+      "slug": "local_network_gateway",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27772",
+      "title": "log_analytics_linked_service",
+      "path": "website/docs/r/log_analytics_linked_service.html.markdown",
+      "slug": "log_analytics_linked_service",
+      "category": "resources",
+      "subcategory": "Log Analytics"
+    },
+    {
+      "id": "27773",
+      "title": "log_analytics_solution",
+      "path": "website/docs/r/log_analytics_solution.html.markdown",
+      "slug": "log_analytics_solution",
+      "category": "resources",
+      "subcategory": "Log Analytics"
+    },
+    {
+      "id": "27774",
+      "title": "log_analytics_workspace",
+      "path": "website/docs/r/log_analytics_workspace.html.markdown",
+      "slug": "log_analytics_workspace",
+      "category": "resources",
+      "subcategory": "Log Analytics"
+    },
+    {
+      "id": "27775",
+      "title": "log_analytics_workspace_linked_service",
+      "path": "website/docs/r/log_analytics_workspace_linked_service.html.markdown",
+      "slug": "log_analytics_workspace_linked_service",
+      "category": "resources",
+      "subcategory": "Log Analytics"
+    },
+    {
+      "id": "27776",
+      "title": "logic_app_action_custom",
+      "path": "website/docs/r/logic_app_action_custom.html.markdown",
+      "slug": "logic_app_action_custom",
+      "category": "resources",
+      "subcategory": "Logic App"
+    },
+    {
+      "id": "27777",
+      "title": "logic_app_action_http",
+      "path": "website/docs/r/logic_app_action_http.html.markdown",
+      "slug": "logic_app_action_http",
+      "category": "resources",
+      "subcategory": "Logic App"
+    },
+    {
+      "id": "27778",
+      "title": "logic_app_trigger_custom",
+      "path": "website/docs/r/logic_app_trigger_custom.html.markdown",
+      "slug": "logic_app_trigger_custom",
+      "category": "resources",
+      "subcategory": "Logic App"
+    },
+    {
+      "id": "27779",
+      "title": "logic_app_trigger_http_request",
+      "path": "website/docs/r/logic_app_trigger_http_request.html.markdown",
+      "slug": "logic_app_trigger_http_request",
+      "category": "resources",
+      "subcategory": "Logic App"
+    },
+    {
+      "id": "27780",
+      "title": "logic_app_trigger_recurrence",
+      "path": "website/docs/r/logic_app_trigger_recurrence.html.markdown",
+      "slug": "logic_app_trigger_recurrence",
+      "category": "resources",
+      "subcategory": "Logic App"
+    },
+    {
+      "id": "27781",
+      "title": "logic_app_workflow",
+      "path": "website/docs/r/logic_app_workflow.html.markdown",
+      "slug": "logic_app_workflow",
+      "category": "resources",
+      "subcategory": "Logic App"
+    },
+    {
+      "id": "27782",
+      "title": "managed_disk",
+      "path": "website/docs/r/managed_disk.html.markdown",
+      "slug": "managed_disk",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27783",
+      "title": "management_group",
+      "path": "website/docs/r/management_group.html.markdown",
+      "slug": "management_group",
+      "category": "resources",
+      "subcategory": "Management"
+    },
+    {
+      "id": "27784",
+      "title": "management_lock",
+      "path": "website/docs/r/management_lock.html.markdown",
+      "slug": "management_lock",
+      "category": "resources",
+      "subcategory": "Management"
+    },
+    {
+      "id": "27785",
+      "title": "maps_account",
+      "path": "website/docs/r/maps_account.html.markdown",
+      "slug": "maps_account",
+      "category": "resources",
+      "subcategory": "Maps"
+    },
+    {
+      "id": "27786",
+      "title": "mariadb_configuration",
+      "path": "website/docs/r/mariadb_configuration.html.markdown",
+      "slug": "mariadb_configuration",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27787",
+      "title": "mariadb_database",
+      "path": "website/docs/r/mariadb_database.html.markdown",
+      "slug": "mariadb_database",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27788",
+      "title": "mariadb_firewall_rule",
+      "path": "website/docs/r/mariadb_firewall_rule.html.markdown",
+      "slug": "mariadb_firewall_rule",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27789",
+      "title": "mariadb_server",
+      "path": "website/docs/r/mariadb_server.html.markdown",
+      "slug": "mariadb_server",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27790",
+      "title": "mariadb_virtual_network_rule",
+      "path": "website/docs/r/mariadb_virtual_network_rule.html.markdown",
+      "slug": "mariadb_virtual_network_rule",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27791",
+      "title": "marketplace_agreement",
+      "path": "website/docs/r/marketplace_agreement.html.markdown",
+      "slug": "marketplace_agreement",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27792",
+      "title": "media_services_account",
+      "path": "website/docs/r/media_services_account.html.markdown",
+      "slug": "media_services_account",
+      "category": "resources",
+      "subcategory": "Media"
+    },
+    {
+      "id": "27793",
+      "title": "metric_alertrule",
+      "path": "website/docs/r/metric_alertrule.html.markdown",
+      "slug": "metric_alertrule",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27794",
+      "title": "monitor_action_group",
+      "path": "website/docs/r/monitor_action_group.html.markdown",
+      "slug": "monitor_action_group",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27795",
+      "title": "monitor_activity_log_alert",
+      "path": "website/docs/r/monitor_activity_log_alert.html.markdown",
+      "slug": "monitor_activity_log_alert",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27796",
+      "title": "monitor_autoscale_setting",
+      "path": "website/docs/r/monitor_autoscale_setting.html.markdown",
+      "slug": "monitor_autoscale_setting",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27797",
+      "title": "monitor_diagnostic_setting",
+      "path": "website/docs/r/monitor_diagnostic_setting.html.markdown",
+      "slug": "monitor_diagnostic_setting",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27798",
+      "title": "monitor_log_profile",
+      "path": "website/docs/r/monitor_log_profile.html.markdown",
+      "slug": "monitor_log_profile",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27799",
+      "title": "monitor_metric_alert",
+      "path": "website/docs/r/monitor_metric_alert.html.markdown",
+      "slug": "monitor_metric_alert",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27800",
+      "title": "monitor_metric_alertrule",
+      "path": "website/docs/r/monitor_metric_alertrule.html.markdown",
+      "slug": "monitor_metric_alertrule",
+      "category": "resources",
+      "subcategory": "Monitor"
+    },
+    {
+      "id": "27801",
+      "title": "mssql_elasticpool",
+      "path": "website/docs/r/mssql_elasticpool.html.markdown",
+      "slug": "mssql_elasticpool",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27802",
+      "title": "mysql_configuration",
+      "path": "website/docs/r/mysql_configuration.html.markdown",
+      "slug": "mysql_configuration",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27803",
+      "title": "mysql_database",
+      "path": "website/docs/r/mysql_database.html.markdown",
+      "slug": "mysql_database",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27804",
+      "title": "mysql_firewall_rule",
+      "path": "website/docs/r/mysql_firewall_rule.html.markdown",
+      "slug": "mysql_firewall_rule",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27805",
+      "title": "mysql_server",
+      "path": "website/docs/r/mysql_server.html.markdown",
+      "slug": "mysql_server",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27806",
+      "title": "mysql_virtual_network_rule",
+      "path": "website/docs/r/mysql_virtual_network_rule.html.markdown",
+      "slug": "mysql_virtual_network_rule",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27807",
+      "title": "netapp_account",
+      "path": "website/docs/r/netapp_account.html.markdown",
+      "slug": "netapp_account",
+      "category": "resources",
+      "subcategory": "NetApp"
+    },
+    {
+      "id": "27808",
+      "title": "netapp_pool",
+      "path": "website/docs/r/netapp_pool.html.markdown",
+      "slug": "netapp_pool",
+      "category": "resources",
+      "subcategory": "NetApp"
+    },
+    {
+      "id": "27809",
+      "title": "network_connection_monitor",
+      "path": "website/docs/r/network_connection_monitor.html.markdown",
+      "slug": "network_connection_monitor",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27810",
+      "title": "network_ddos_protection_plan",
+      "path": "website/docs/r/network_ddos_protection_plan.html.markdown",
+      "slug": "network_ddos_protection_plan",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27811",
+      "title": "network_interface",
+      "path": "website/docs/r/network_interface.html.markdown",
+      "slug": "network_interface",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27812",
+      "title": "network_interface_application_gateway_backend_address_pool_association",
+      "path": "website/docs/r/network_interface_application_gateway_backend_address_pool_association.html.markdown",
+      "slug": "network_interface_application_gateway_backend_address_pool_association",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27813",
+      "title": "network_interface_application_security_group_association",
+      "path": "website/docs/r/network_interface_application_security_group_association.html.markdown",
+      "slug": "network_interface_application_security_group_association",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27814",
+      "title": "network_interface_backend_address_pool_association",
+      "path": "website/docs/r/network_interface_backend_address_pool_association.html.markdown",
+      "slug": "network_interface_backend_address_pool_association",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27815",
+      "title": "network_interface_nat_rule_association",
+      "path": "website/docs/r/network_interface_nat_rule_association.html.markdown",
+      "slug": "network_interface_nat_rule_association",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27816",
+      "title": "network_packet_capture",
+      "path": "website/docs/r/network_packet_capture.html.markdown",
+      "slug": "network_packet_capture",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27817",
+      "title": "network_profile",
+      "path": "website/docs/r/network_profile.html.markdown",
+      "slug": "network_profile",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27818",
+      "title": "network_security_group",
+      "path": "website/docs/r/network_security_group.html.markdown",
+      "slug": "network_security_group",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27819",
+      "title": "network_security_rule",
+      "path": "website/docs/r/network_security_rule.html.markdown",
+      "slug": "network_security_rule",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27820",
+      "title": "network_watcher",
+      "path": "website/docs/r/network_watcher.html.markdown",
+      "slug": "network_watcher",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27821",
+      "title": "notification_hub",
+      "path": "website/docs/r/notification_hub.html.markdown",
+      "slug": "notification_hub",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27822",
+      "title": "notification_hub_authorization_rule",
+      "path": "website/docs/r/notification_hub_authorization_rule.html.markdown",
+      "slug": "notification_hub_authorization_rule",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27823",
+      "title": "notification_hub_namespace",
+      "path": "website/docs/r/notification_hub_namespace.html.markdown",
+      "slug": "notification_hub_namespace",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27824",
+      "title": "packet_capture",
+      "path": "website/docs/r/packet_capture.html.markdown",
+      "slug": "packet_capture",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27825",
+      "title": "policy_assignment",
+      "path": "website/docs/r/policy_assignment.html.markdown",
+      "slug": "policy_assignment",
+      "category": "resources",
+      "subcategory": "Policy"
+    },
+    {
+      "id": "27826",
+      "title": "policy_definition",
+      "path": "website/docs/r/policy_definition.html.markdown",
+      "slug": "policy_definition",
+      "category": "resources",
+      "subcategory": "Policy"
+    },
+    {
+      "id": "27827",
+      "title": "policy_set_definition",
+      "path": "website/docs/r/policy_set_definition.html.markdown",
+      "slug": "policy_set_definition",
+      "category": "resources",
+      "subcategory": "Policy"
+    },
+    {
+      "id": "27828",
+      "title": "postgresql_configuration",
+      "path": "website/docs/r/postgresql_configuration.html.markdown",
+      "slug": "postgresql_configuration",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27829",
+      "title": "postgresql_database",
+      "path": "website/docs/r/postgresql_database.html.markdown",
+      "slug": "postgresql_database",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27830",
+      "title": "postgresql_firewall_rule",
+      "path": "website/docs/r/postgresql_firewall_rule.html.markdown",
+      "slug": "postgresql_firewall_rule",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27831",
+      "title": "postgresql_server",
+      "path": "website/docs/r/postgresql_server.html.markdown",
+      "slug": "postgresql_server",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27832",
+      "title": "postgresql_virtual_network_rule",
+      "path": "website/docs/r/postgresql_virtual_network_rule.html.markdown",
+      "slug": "postgresql_virtual_network_rule",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27833",
+      "title": "private_dns_a_record",
+      "path": "website/docs/r/private_dns_a_record.html.markdown",
+      "slug": "private_dns_a_record",
+      "category": "resources",
+      "subcategory": "Private DNS"
+    },
+    {
+      "id": "27834",
+      "title": "private_dns_aaaa_record",
+      "path": "website/docs/r/private_dns_aaaa_record.html.markdown",
+      "slug": "private_dns_aaaa_record",
+      "category": "resources",
+      "subcategory": "Private DNS"
+    },
+    {
+      "id": "27835",
+      "title": "private_dns_cname_record",
+      "path": "website/docs/r/private_dns_cname_record.html.markdown",
+      "slug": "private_dns_cname_record",
+      "category": "resources",
+      "subcategory": "Private DNS"
+    },
+    {
+      "id": "27836",
+      "title": "private_dns_ptr_record",
+      "path": "website/docs/r/private_dns_ptr_record.html.markdown",
+      "slug": "private_dns_ptr_record",
+      "category": "resources",
+      "subcategory": "Private DNS"
+    },
+    {
+      "id": "27837",
+      "title": "private_dns_srv_record",
+      "path": "website/docs/r/private_dns_srv_record.html.markdown",
+      "slug": "private_dns_srv_record",
+      "category": "resources",
+      "subcategory": "Private DNS"
+    },
+    {
+      "id": "27838",
+      "title": "private_dns_zone",
+      "path": "website/docs/r/private_dns_zone.html.markdown",
+      "slug": "private_dns_zone",
+      "category": "resources",
+      "subcategory": "Private DNS"
+    },
+    {
+      "id": "27839",
+      "title": "private_dns_zone_virtual_network_link",
+      "path": "website/docs/r/private_dns_zone_virtual_network_link.html.markdown",
+      "slug": "private_dns_zone_virtual_network_link",
+      "category": "resources",
+      "subcategory": "Private DNS"
+    },
+    {
+      "id": "27840",
+      "title": "private_link_service",
+      "path": "website/docs/r/private_link_service.html.markdown",
+      "slug": "private_link_service",
+      "category": "resources",
+      "subcategory": ""
+    },
+    {
+      "id": "27841",
+      "title": "proximity_placement_group",
+      "path": "website/docs/r/proximity_placement_group.html.markdown",
+      "slug": "proximity_placement_group",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27842",
+      "title": "public_ip",
+      "path": "website/docs/r/public_ip.html.markdown",
+      "slug": "public_ip",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27843",
+      "title": "public_ip_prefix",
+      "path": "website/docs/r/public_ip_prefix.html.markdown",
+      "slug": "public_ip_prefix",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27844",
+      "title": "recovery_network_mapping",
+      "path": "website/docs/r/recovery_network_mapping.html.markdown",
+      "slug": "recovery_network_mapping",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27845",
+      "title": "recovery_services_fabric",
+      "path": "website/docs/r/recovery_services_fabric.html.markdown",
+      "slug": "recovery_services_fabric",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27846",
+      "title": "recovery_services_protected_vm",
+      "path": "website/docs/r/recovery_services_protected_vm.markdown",
+      "slug": "recovery_services_protected_vm",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27847",
+      "title": "recovery_services_protection_container",
+      "path": "website/docs/r/recovery_services_protection_container.html.markdown",
+      "slug": "recovery_services_protection_container",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27848",
+      "title": "recovery_services_protection_container_mapping",
+      "path": "website/docs/r/recovery_services_protection_container_mapping.html.markdown",
+      "slug": "recovery_services_protection_container_mapping",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27849",
+      "title": "recovery_services_protection_policy_vm",
+      "path": "website/docs/r/recovery_services_protection_policy_vm.markdown",
+      "slug": "recovery_services_protection_policy_vm",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27850",
+      "title": "recovery_services_replicated_vm",
+      "path": "website/docs/r/recovery_services_replicated_vm.html.markdown",
+      "slug": "recovery_services_replicated_vm",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27851",
+      "title": "recovery_services_replication_policy",
+      "path": "website/docs/r/recovery_services_replication_policy.html.markdown",
+      "slug": "recovery_services_replication_policy",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27852",
+      "title": "recovery_services_vault",
+      "path": "website/docs/r/recovery_services_vault.markdown",
+      "slug": "recovery_services_vault",
+      "category": "resources",
+      "subcategory": "Recovery Services"
+    },
+    {
+      "id": "27853",
+      "title": "redis_cache",
+      "path": "website/docs/r/redis_cache.html.markdown",
+      "slug": "redis_cache",
+      "category": "resources",
+      "subcategory": "Redis"
+    },
+    {
+      "id": "27854",
+      "title": "redis_firewall_rule",
+      "path": "website/docs/r/redis_firewall_rule.html.markdown",
+      "slug": "redis_firewall_rule",
+      "category": "resources",
+      "subcategory": "Redis"
+    },
+    {
+      "id": "27855",
+      "title": "relay_hybrid_connection",
+      "path": "website/docs/r/relay_hybrid_connection.html.markdown",
+      "slug": "relay_hybrid_connection",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27856",
+      "title": "relay_namespace",
+      "path": "website/docs/r/relay_namespace.html.markdown",
+      "slug": "relay_namespace",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27857",
+      "title": "resource_group",
+      "path": "website/docs/r/resource_group.html.markdown",
+      "slug": "resource_group",
+      "category": "resources",
+      "subcategory": "Base"
+    },
+    {
+      "id": "27858",
+      "title": "role_assignment",
+      "path": "website/docs/r/role_assignment.html.markdown",
+      "slug": "role_assignment",
+      "category": "resources",
+      "subcategory": "Authorization"
+    },
+    {
+      "id": "27859",
+      "title": "role_definition",
+      "path": "website/docs/r/role_definition.html.markdown",
+      "slug": "role_definition",
+      "category": "resources",
+      "subcategory": "Authorization"
+    },
+    {
+      "id": "27860",
+      "title": "route",
+      "path": "website/docs/r/route.html.markdown",
+      "slug": "route",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27861",
+      "title": "route_table",
+      "path": "website/docs/r/route_table.html.markdown",
+      "slug": "route_table",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27862",
+      "title": "scheduler_job",
+      "path": "website/docs/r/scheduler_job.html.markdown",
+      "slug": "scheduler_job",
+      "category": "resources",
+      "subcategory": "Scheduler"
+    },
+    {
+      "id": "27863",
+      "title": "scheduler_job_collection",
+      "path": "website/docs/r/scheduler_job_collection.html.markdown",
+      "slug": "scheduler_job_collection",
+      "category": "resources",
+      "subcategory": "Scheduler"
+    },
+    {
+      "id": "27864",
+      "title": "search_service",
+      "path": "website/docs/r/search_service.html.markdown",
+      "slug": "search_service",
+      "category": "resources",
+      "subcategory": "Search"
+    },
+    {
+      "id": "27865",
+      "title": "security_center_contact",
+      "path": "website/docs/r/security_center_contact.markdown",
+      "slug": "security_center_contact",
+      "category": "resources",
+      "subcategory": "Security Center"
+    },
+    {
+      "id": "27866",
+      "title": "security_center_subscription_pricing",
+      "path": "website/docs/r/security_center_subscription_pricing.markdown",
+      "slug": "security_center_subscription_pricing",
+      "category": "resources",
+      "subcategory": "Security Center"
+    },
+    {
+      "id": "27867",
+      "title": "security_center_workspace",
+      "path": "website/docs/r/security_center_workspace.markdown",
+      "slug": "security_center_workspace",
+      "category": "resources",
+      "subcategory": "Security Center"
+    },
+    {
+      "id": "27868",
+      "title": "service_fabric_cluster",
+      "path": "website/docs/r/service_fabric_cluster.html.markdown",
+      "slug": "service_fabric_cluster",
+      "category": "resources",
+      "subcategory": "Service Fabric"
+    },
+    {
+      "id": "27869",
+      "title": "servicebus_namespace",
+      "path": "website/docs/r/servicebus_namespace.html.markdown",
+      "slug": "servicebus_namespace",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27870",
+      "title": "servicebus_namespace_authorization_rule",
+      "path": "website/docs/r/servicebus_namespace_authorization_rule.html.markdown",
+      "slug": "servicebus_namespace_authorization_rule",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27871",
+      "title": "servicebus_queue",
+      "path": "website/docs/r/servicebus_queue.html.markdown",
+      "slug": "servicebus_queue",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27872",
+      "title": "servicebus_queue_authorization_rule",
+      "path": "website/docs/r/servicebus_queue_authorization_rule.html.markdown",
+      "slug": "servicebus_queue_authorization_rule",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27873",
+      "title": "servicebus_subscription",
+      "path": "website/docs/r/servicebus_subscription.html.markdown",
+      "slug": "servicebus_subscription",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27874",
+      "title": "servicebus_subscription_rule",
+      "path": "website/docs/r/servicebus_subscription_rule.html.markdown",
+      "slug": "servicebus_subscription_rule",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27875",
+      "title": "servicebus_topic",
+      "path": "website/docs/r/servicebus_topic.html.markdown",
+      "slug": "servicebus_topic",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27876",
+      "title": "servicebus_topic_authorization_rule",
+      "path": "website/docs/r/servicebus_topic_authorization_rule.html.markdown",
+      "slug": "servicebus_topic_authorization_rule",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27877",
+      "title": "shared_image",
+      "path": "website/docs/r/shared_image.html.markdown",
+      "slug": "shared_image",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27878",
+      "title": "shared_image_gallery",
+      "path": "website/docs/r/shared_image_gallery.html.markdown",
+      "slug": "shared_image_gallery",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27879",
+      "title": "shared_image_version",
+      "path": "website/docs/r/shared_image_version.html.markdown",
+      "slug": "shared_image_version",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27880",
+      "title": "signalr_service",
+      "path": "website/docs/r/signalr_service.html.markdown",
+      "slug": "signalr_service",
+      "category": "resources",
+      "subcategory": "Messaging"
+    },
+    {
+      "id": "27881",
+      "title": "snapshot",
+      "path": "website/docs/r/snapshot.html.markdown",
+      "slug": "snapshot",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27882",
+      "title": "sql_active_directory_administrator",
+      "path": "website/docs/r/sql_active_directory_administrator.markdown",
+      "slug": "sql_active_directory_administrator",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27883",
+      "title": "sql_database",
+      "path": "website/docs/r/sql_database.html.markdown",
+      "slug": "sql_database",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27884",
+      "title": "sql_elasticpool",
+      "path": "website/docs/r/sql_elasticpool.html.markdown",
+      "slug": "sql_elasticpool",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27885",
+      "title": "sql_failover_group",
+      "path": "website/docs/r/sql_failover_group.html.markdown",
+      "slug": "sql_failover_group",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27886",
+      "title": "sql_firewall_rule",
+      "path": "website/docs/r/sql_firewall_rule.html.markdown",
+      "slug": "sql_firewall_rule",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27887",
+      "title": "sql_server",
+      "path": "website/docs/r/sql_server.html.markdown",
+      "slug": "sql_server",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27888",
+      "title": "sql_virtual_network_rule",
+      "path": "website/docs/r/sql_virtual_network_rule.html.markdown",
+      "slug": "sql_virtual_network_rule",
+      "category": "resources",
+      "subcategory": "Database"
+    },
+    {
+      "id": "27889",
+      "title": "storage_account",
+      "path": "website/docs/r/storage_account.html.markdown",
+      "slug": "storage_account",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27890",
+      "title": "storage_blob",
+      "path": "website/docs/r/storage_blob.html.markdown",
+      "slug": "storage_blob",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27891",
+      "title": "storage_container",
+      "path": "website/docs/r/storage_container.html.markdown",
+      "slug": "storage_container",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27892",
+      "title": "storage_data_lake_gen2_filesystem",
+      "path": "website/docs/r/storage_data_lake_gen2_filesystem.html.markdown",
+      "slug": "storage_data_lake_gen2_filesystem",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27893",
+      "title": "storage_management_policy",
+      "path": "website/docs/r/storage_management_policy.html.markdown",
+      "slug": "storage_management_policy",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27894",
+      "title": "storage_queue",
+      "path": "website/docs/r/storage_queue.html.markdown",
+      "slug": "storage_queue",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27895",
+      "title": "storage_share",
+      "path": "website/docs/r/storage_share.html.markdown",
+      "slug": "storage_share",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27896",
+      "title": "storage_share_directory",
+      "path": "website/docs/r/storage_share_directory.html.markdown",
+      "slug": "storage_share_directory",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27897",
+      "title": "storage_table",
+      "path": "website/docs/r/storage_table.html.markdown",
+      "slug": "storage_table",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27898",
+      "title": "storage_table_entity",
+      "path": "website/docs/r/storage_table_entity.html.markdown",
+      "slug": "storage_table_entity",
+      "category": "resources",
+      "subcategory": "Storage"
+    },
+    {
+      "id": "27899",
+      "title": "stream_analytics_function_javascript_udf",
+      "path": "website/docs/r/stream_analytics_function_javascript_udf.html.markdown",
+      "slug": "stream_analytics_function_javascript_udf",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27900",
+      "title": "stream_analytics_job",
+      "path": "website/docs/r/stream_analytics_job.html.markdown",
+      "slug": "stream_analytics_job",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27901",
+      "title": "stream_analytics_output_blob",
+      "path": "website/docs/r/stream_analytics_output_blob.html.markdown",
+      "slug": "stream_analytics_output_blob",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27902",
+      "title": "stream_analytics_output_eventhub",
+      "path": "website/docs/r/stream_analytics_output_eventhub.html.markdown",
+      "slug": "stream_analytics_output_eventhub",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27903",
+      "title": "stream_analytics_output_mssql",
+      "path": "website/docs/r/stream_analytics_output_mssql.html.markdown",
+      "slug": "stream_analytics_output_mssql",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27904",
+      "title": "stream_analytics_output_servicebus_queue",
+      "path": "website/docs/r/stream_analytics_output_servicebus_queue.html.markdown",
+      "slug": "stream_analytics_output_servicebus_queue",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27905",
+      "title": "stream_analytics_output_servicebus_topic",
+      "path": "website/docs/r/stream_analytics_output_servicebus_topic.html.markdown",
+      "slug": "stream_analytics_output_servicebus_topic",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27906",
+      "title": "stream_analytics_stream_input_blob",
+      "path": "website/docs/r/stream_analytics_stream_input_blob.html.markdown",
+      "slug": "stream_analytics_stream_input_blob",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27907",
+      "title": "stream_analytics_stream_input_eventhub",
+      "path": "website/docs/r/stream_analytics_stream_input_eventhub.html.markdown",
+      "slug": "stream_analytics_stream_input_eventhub",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27908",
+      "title": "stream_analytics_stream_input_iothub",
+      "path": "website/docs/r/stream_analytics_stream_input_iothub.html.markdown",
+      "slug": "stream_analytics_stream_input_iothub",
+      "category": "resources",
+      "subcategory": "Stream Analytics"
+    },
+    {
+      "id": "27909",
+      "title": "subnet",
+      "path": "website/docs/r/subnet.html.markdown",
+      "slug": "subnet",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27910",
+      "title": "subnet_network_security_group_association",
+      "path": "website/docs/r/subnet_network_security_group_association.html.markdown",
+      "slug": "subnet_network_security_group_association",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27911",
+      "title": "subnet_route_table_association",
+      "path": "website/docs/r/subnet_route_table_association.html.markdown",
+      "slug": "subnet_route_table_association",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27912",
+      "title": "template_deployment",
+      "path": "website/docs/r/template_deployment.html.markdown",
+      "slug": "template_deployment",
+      "category": "resources",
+      "subcategory": "Template"
+    },
+    {
+      "id": "27913",
+      "title": "traffic_manager_endpoint",
+      "path": "website/docs/r/traffic_manager_endpoint.html.markdown",
+      "slug": "traffic_manager_endpoint",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27914",
+      "title": "traffic_manager_profile",
+      "path": "website/docs/r/traffic_manager_profile.html.markdown",
+      "slug": "traffic_manager_profile",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27915",
+      "title": "user_assigned_identity",
+      "path": "website/docs/r/user_assigned_identity.markdown",
+      "slug": "user_assigned_identity",
+      "category": "resources",
+      "subcategory": "Authorization"
+    },
+    {
+      "id": "27916",
+      "title": "virtual_machine",
+      "path": "website/docs/r/virtual_machine.html.markdown",
+      "slug": "virtual_machine",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27917",
+      "title": "virtual_machine_data_disk_attachment",
+      "path": "website/docs/r/virtual_machine_data_disk_attachment.html.markdown",
+      "slug": "virtual_machine_data_disk_attachment",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27918",
+      "title": "virtual_machine_extension",
+      "path": "website/docs/r/virtual_machine_extension.html.markdown",
+      "slug": "virtual_machine_extension",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27919",
+      "title": "virtual_machine_scale_set",
+      "path": "website/docs/r/virtual_machine_scale_set.html.markdown",
+      "slug": "virtual_machine_scale_set",
+      "category": "resources",
+      "subcategory": "Compute"
+    },
+    {
+      "id": "27920",
+      "title": "virtual_network",
+      "path": "website/docs/r/virtual_network.html.markdown",
+      "slug": "virtual_network",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27921",
+      "title": "virtual_network_gateway",
+      "path": "website/docs/r/virtual_network_gateway.html.markdown",
+      "slug": "virtual_network_gateway",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27922",
+      "title": "virtual_network_gateway_connection",
+      "path": "website/docs/r/virtual_network_gateway_connection.html.markdown",
+      "slug": "virtual_network_gateway_connection",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27923",
+      "title": "virtual_network_peering",
+      "path": "website/docs/r/virtual_network_peering.html.markdown",
+      "slug": "virtual_network_peering",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27924",
+      "title": "virtual_wan",
+      "path": "website/docs/r/virtual_wan.html.markdown",
+      "slug": "virtual_wan",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27925",
+      "title": "web_application_firewall_policy",
+      "path": "website/docs/r/web_application_firewall_policy.html.markdown",
+      "slug": "web_application_firewall_policy",
+      "category": "resources",
+      "subcategory": "Network"
+    },
+    {
+      "id": "27926",
+      "title": "windows_virtual_machine_scale_set",
+      "path": "website/docs/r/windows_virtual_machine_scale_set.html.markdown",
+      "slug": "windows_virtual_machine_scale_set",
+      "category": "resources",
+      "subcategory": "Beta"
+    }
+  ]
+}

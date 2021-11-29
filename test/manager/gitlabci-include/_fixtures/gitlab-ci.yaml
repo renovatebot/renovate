@@ -1,9 +1,0 @@
-include:
-- project: mikebryant/include-source-example
-  file: /template.yaml
-  ref: 1.0.0
--   project: mikebryant/include-source-example2
-    file: /template.yaml
-    ref: master
-- {"project":"mikebryant/include-source-example3", "file": "/template.yaml",}
-- {}

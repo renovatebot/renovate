@@ -1,31 +1,74 @@
+import is from '@sindresorhus/is';
+import { getManagerConfig, mergeChildConfig } from '../../../config';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
-import { getManagerConfig, RenovateConfig } from '../../../config';
+import type { PackageFile } from '../../../manager/types';
+import { getFileList } from '../../../util/git';
+import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
-import { PackageFile } from '../../../manager/common';
 
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
-  const extractions: Record<string, PackageFile[]> = {};
-  let fileCount = 0;
-  for (const manager of getManagerList()) {
-    if (
-      config.enabledManagers.length &&
-      !config.enabledManagers.includes(manager)
-    ) {
-      logger.debug(`${manager} is not in enabledManagers list - skipping`);
-      continue; // eslint-disable-line
+  let managerList = getManagerList();
+  if (is.nonEmptyArray(config.enabledManagers)) {
+    logger.debug('Applying enabledManagers filtering');
+    managerList = managerList.filter((manager) =>
+      config.enabledManagers.includes(manager)
+    );
+  }
+  const extractList: RenovateConfig[] = [];
+  const fileList = await getFileList();
+
+  const tryConfig = (extractConfig: RenovateConfig): void => {
+    const matchingFileList = getMatchingFiles(extractConfig, fileList);
+    if (matchingFileList.length) {
+      extractList.push({ ...extractConfig, fileList: matchingFileList });
     }
+  };
+
+  for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
-    const packageFiles = await getManagerPackageFiles(managerConfig);
-    if (packageFiles && packageFiles.length) {
+    if (manager === 'regex') {
+      for (const regexManager of config.regexManagers) {
+        tryConfig(mergeChildConfig(managerConfig, regexManager));
+      }
+    } else {
+      tryConfig(managerConfig);
+    }
+  }
+
+  const extractResults = await Promise.all(
+    extractList.map(async (managerConfig) => {
+      const packageFiles = await getManagerPackageFiles(managerConfig);
+      return { manager: managerConfig.manager, packageFiles };
+    })
+  );
+  const extractions: Record<string, PackageFile[]> = {};
+  let fileCount = 0;
+  for (const { manager, packageFiles } of extractResults) {
+    if (packageFiles?.length) {
       fileCount += packageFiles.length;
-      logger.info(`Found ${manager} package files`);
-      extractions[manager] = packageFiles;
+      logger.debug(`Found ${manager} package files`);
+      extractions[manager] = (extractions[manager] || []).concat(packageFiles);
     }
   }
   logger.debug(`Found ${fileCount} package file(s)`);
+
+  // If enabledManagers is non-empty, check that each of them has at least one extraction.
+  // If not, log a warning to indicate possible misconfiguration.
+  if (is.nonEmptyArray(config.enabledManagers)) {
+    for (const enabledManager of config.enabledManagers) {
+      if (!(enabledManager in extractions)) {
+        logger.debug(
+          { manager: enabledManager },
+          `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
+        );
+      }
+    }
+  }
+
   return extractions;
 }

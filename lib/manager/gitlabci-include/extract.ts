@@ -1,23 +1,24 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
+import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
-import { PackageDependency, ExtractConfig, PackageFile } from '../common';
+import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
+import { replaceReferenceTags } from '../gitlabci/utils';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
-function extractDepFromInclude(includeObj: {
+function extractDepFromIncludeFile(includeObj: {
   file: any;
   project: string;
   ref: string;
-}): PackageDependency | null {
-  if (!includeObj.file || !includeObj.project) {
-    return null;
-  }
+}): PackageDependency {
   const dep: PackageDependency = {
-    datasource: 'gitlab',
+    datasource: datasourceGitlabTags.id,
     depName: includeObj.project,
     depType: 'repository',
   };
   if (!includeObj.ref) {
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = SkipReason.UnknownVersion;
     return dep;
   }
   dep.currentValue = includeObj.ref;
@@ -31,27 +32,34 @@ export function extractPackageFile(
 ): PackageFile | null {
   const deps: PackageDependency[] = [];
   try {
-    const doc = yaml.safeLoad(content, { json: true });
-    if (doc.include && is.array(doc.include)) {
-      for (const includeObj of doc.include) {
-        const dep = extractDepFromInclude(includeObj);
-        if (dep) {
-          if (config.endpoint) {
-            dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
-          }
-          deps.push(dep);
+    // TODO: fix me (#9610)
+    const doc: any = load(replaceReferenceTags(content), {
+      json: true,
+    });
+    let includes;
+    if (doc?.include && is.array(doc.include)) {
+      includes = doc.include;
+    } else {
+      includes = [doc.include];
+    }
+    for (const includeObj of includes) {
+      if (includeObj?.file && includeObj.project) {
+        const dep = extractDepFromIncludeFile(includeObj);
+        if (config.endpoint) {
+          dep.registryUrls = [
+            config.endpoint.replace(regEx(/\/api\/v4\/?/), ''),
+          ]; // TODO #12071
         }
+        deps.push(dep);
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    if (err.stack && err.stack.startsWith('YAMLException:')) {
-      logger.debug({ err });
-      logger.info('YAML exception extracting GitLab CI includes');
+    if (err.stack?.startsWith('YAMLException:')) {
+      logger.debug({ err }, 'YAML exception extracting GitLab CI includes');
     } else {
       logger.warn({ err }, 'Error extracting GitLab CI includes');
     }
   }
-
   if (!deps.length) {
     return null;
   }

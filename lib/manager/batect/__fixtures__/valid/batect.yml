@@ -1,0 +1,34 @@
+containers:
+  container-1:
+    image: alpine:1.2.3
+
+  container-2:
+    image: alpine:1.2.3
+
+  container-3:
+    image: ubuntu:20.04
+
+  container-4:
+    build_directory: some_build_directory
+
+  container-5:
+    image: postgres:9.6.20@sha256:166179811e4c75f8a092367afed6091208c8ecf60b111c7e49f29af45ca05e08
+
+include:
+  - include.yml
+  - subdir/file.yml
+
+  - type: file
+    path: another-include.yml
+
+  - type: file
+    repo: https://file.includes/should/not/have/repo.git
+    ref: this-isn't-valid
+
+  - type: git
+    repo: https://includes.com/my-repo.git
+    ref: 1.2.3
+
+  - type: git
+    repo: https://includes.com/my-other-repo.git
+    ref: 4.5.6

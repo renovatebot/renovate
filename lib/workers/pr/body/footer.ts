@@ -1,10 +1,10 @@
-import handlebars from 'handlebars';
-import { PrBodyConfig } from './common';
+import * as template from '../../../util/template';
+import type { BranchConfig } from '../../types';
 
 // istanbul ignore next
-export function getPrFooter(config: PrBodyConfig): string {
-  if (config.global && config.global.prFooter) {
-    return '\n---\n\n' + handlebars.compile(config.global.prFooter)(config);
+export function getPrFooter(config: BranchConfig): string {
+  if (config.prFooter) {
+    return '\n---\n\n' + template.compile(config.prFooter, config);
   }
   return '';
 }

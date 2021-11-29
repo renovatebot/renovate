@@ -1,3 +1,5 @@
+import { regEx } from '../../util/regex';
+
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
 
@@ -35,11 +37,11 @@ function iterateChars(str: string, cb: (p: string, n: string) => void): void {
 }
 
 function isDigit(char: string): boolean {
-  return /^\d$/.test(char);
+  return regEx(/^\d$/).test(char);
 }
 
 function isLetter(char: string): boolean {
-  return /^[a-z]$/i.test(char);
+  return regEx(/^[a-z]$/i).test(char);
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
@@ -55,7 +57,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
 
   function yieldToken(transition = false): void {
     const val = currentVal || '0';
-    if (/^\d+$/.test(val)) {
+    if (regEx(/^\d+$/).test(val)) {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
@@ -101,7 +103,8 @@ function isNull(token: Token): boolean {
     val === 'final' ||
     val === 'ga' ||
     val === 'release' ||
-    val === 'latest'
+    val === 'latest' ||
+    val === 'sr'
   );
 }
 
@@ -112,11 +115,11 @@ const zeroToken: NumberToken = {
   isTransition: false,
 };
 
-function tokenize(versionStr: string): Token[] {
+function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
-  iterateTokens(versionStr.toLowerCase().replace(/^v/i, ''), token => {
+  iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
     if (token.prefix === PREFIX_HYPHEN) {
       buf = [];
     }
@@ -125,7 +128,7 @@ function tokenize(versionStr: string): Token[] {
       leadingZero = false;
       result = result.concat(buf);
       buf = [];
-    } else if (leadingZero) {
+    } else if (leadingZero || preserveMinorZeroes) {
       result = result.concat(buf);
       buf = [];
     }
@@ -160,89 +163,100 @@ function commonOrder(token: Token): number {
   return 3;
 }
 
-function qualifierOrder(token: Token): number {
+export enum QualifierTypes {
+  Alpha = 1,
+  Beta,
+  Milestone,
+  RC,
+  Snapshot,
+  Release,
+  SP,
+}
+
+export function qualifierType(token: Token): number {
   const val = token.val;
   if (val === 'alpha' || (token.isTransition && val === 'a')) {
-    return 1;
+    return QualifierTypes.Alpha;
   }
   if (val === 'beta' || (token.isTransition && val === 'b')) {
-    return 2;
+    return QualifierTypes.Beta;
   }
   if (val === 'milestone' || (token.isTransition && val === 'm')) {
-    return 3;
+    return QualifierTypes.Milestone;
   }
-  if (val === 'rc' || val === 'cr') {
-    return 4;
+  if (val === 'rc' || val === 'cr' || val === 'preview') {
+    return QualifierTypes.RC;
   }
-  if (val === 'snapshot') {
-    return 5;
+  if (val === 'snapshot' || val === 'snap') {
+    return QualifierTypes.Snapshot;
   }
   if (
     val === '' ||
     val === 'final' ||
     val === 'ga' ||
     val === 'release' ||
-    val === 'latest'
+    val === 'latest' ||
+    val === 'sr'
   ) {
-    return 6;
+    return QualifierTypes.Release;
   }
   if (val === 'sp') {
-    return 7;
+    return QualifierTypes.SP;
   }
   return null;
 }
 
 function qualifierCmp(left: Token, right: Token): number {
-  const leftOrder = qualifierOrder(left);
-  const rightOrder = qualifierOrder(right);
+  const leftOrder = qualifierType(left);
+  const rightOrder = qualifierType(right);
   if (leftOrder && rightOrder) {
-    if (leftOrder === rightOrder) {
-      return 0;
-    }
     if (leftOrder < rightOrder) {
       return -1;
     }
-    return 1;
-  }
-  if (left.val === right.val) {
+    if (leftOrder > rightOrder) {
+      return 1;
+    }
     return 0;
   }
+
+  if (leftOrder && leftOrder < QualifierTypes.Release) {
+    return -1;
+  }
+  if (rightOrder && rightOrder < QualifierTypes.Release) {
+    return 1;
+  }
+
   if (left.val < right.val) {
     return -1;
   }
-  // istanbul ignore next
-  return 1;
+  if (left.val > right.val) {
+    return 1;
+  }
+  return 0;
 }
 
 function tokenCmp(left: Token, right: Token): number {
-  if (left.prefix === right.prefix) {
-    if (left.type === TYPE_NUMBER && right.type === TYPE_NUMBER) {
-      if (left.val === right.val) {
-        return 0;
-      }
-      if (left.val < right.val) {
-        return -1;
-      }
-      return 1;
-    }
-    if (left.type === TYPE_NUMBER) {
-      return 1;
-    }
-    if (right.type === TYPE_NUMBER) {
-      return -1;
-    }
-    return qualifierCmp(left, right);
-  }
   const leftOrder = commonOrder(left);
   const rightOrder = commonOrder(right);
-  // istanbul ignore if
-  if (leftOrder === rightOrder) {
-    return 0;
-  }
+
   if (leftOrder < rightOrder) {
     return -1;
   }
-  return 1;
+  if (leftOrder > rightOrder) {
+    return 1;
+  }
+
+  if (left.type === TYPE_NUMBER && right.type === TYPE_NUMBER) {
+    if (left.val < right.val) {
+      return -1;
+    }
+    if (left.val > right.val) {
+      return 1;
+    }
+    return 0;
+  }
+
+  return qualifierCmp(left, right);
 }
 
 function compare(left: string, right: string): number {
@@ -253,16 +267,29 @@ function compare(left: string, right: string): number {
     const leftToken = leftTokens[idx] || nullFor(rightTokens[idx]);
     const rightToken = rightTokens[idx] || nullFor(leftTokens[idx]);
     const cmpResult = tokenCmp(leftToken, rightToken);
-    if (cmpResult !== 0) return cmpResult;
+    if (cmpResult !== 0) {
+      return cmpResult;
+    }
   }
   return 0;
 }
 
 function isVersion(version: string): boolean {
-  if (!version) return false;
-  if (!/^[a-z0-9.-]+$/i.test(version)) return false;
-  if (/^[.-]/.test(version)) return false;
-  if (/[.-]$/.test(version)) return false;
+  if (!version) {
+    return false;
+  }
+  if (!regEx(/^[a-z0-9.-]+$/i).test(version)) {
+    return false;
+  }
+  if (regEx(/^[.-]/).test(version)) {
+    return false;
+  }
+  if (regEx(/[.-]$/).test(version)) {
+    return false;
+  }
+  if (['latest', 'release'].includes(version.toLowerCase())) {
+    return false;
+  }
   const tokens = tokenize(version);
   return !!tokens.length;
 }
@@ -270,7 +297,7 @@ function isVersion(version: string): boolean {
 const INCLUDING_POINT = 'INCLUDING_POINT';
 const EXCLUDING_POINT = 'EXCLUDING_POINT';
 
-function parseRange(rangeStr: string): any {
+function parseRange(rangeStr: string): Range[] {
   function emptyInterval(): Range {
     return {
       leftType: null,
@@ -286,10 +313,12 @@ function parseRange(rangeStr: string): any {
   let result: Range[] = [];
   let interval = emptyInterval();
 
-  commaSplit.forEach(subStr => {
-    if (!result) return;
+  commaSplit.forEach((subStr) => {
+    if (!result) {
+      return;
+    }
     if (interval.leftType === null) {
-      if (/^\[.*]$/.test(subStr)) {
+      if (regEx(/^\[.*]$/).test(subStr)) {
         const ver = subStr.slice(1, -1);
         result.push({
           leftType: INCLUDING_POINT,
@@ -300,12 +329,12 @@ function parseRange(rangeStr: string): any {
           rightBracket: ']',
         });
         interval = emptyInterval();
-      } else if (subStr[0] === '[') {
+      } else if (subStr.startsWith('[')) {
         const ver = subStr.slice(1);
         interval.leftType = INCLUDING_POINT;
         interval.leftValue = ver;
         interval.leftBracket = '[';
-      } else if (subStr[0] === '(' || subStr[0] === ']') {
+      } else if (subStr.startsWith('(') || subStr.startsWith(']')) {
         const ver = subStr.slice(1);
         interval.leftType = EXCLUDING_POINT;
         interval.leftValue = ver;
@@ -313,18 +342,18 @@ function parseRange(rangeStr: string): any {
       } else {
         result = null;
       }
-    } else if (/]$/.test(subStr)) {
+    } else if (subStr.endsWith(']')) {
       const ver = subStr.slice(0, -1);
       interval.rightType = INCLUDING_POINT;
       interval.rightValue = ver;
       interval.rightBracket = ']';
       result.push(interval);
       interval = emptyInterval();
-    } else if (/\)$/.test(subStr) || /\[$/.test(subStr)) {
+    } else if (subStr.endsWith(')') || subStr.endsWith('[')) {
       const ver = subStr.slice(0, -1);
       interval.rightType = EXCLUDING_POINT;
       interval.rightValue = ver;
-      interval.rightBracket = /\)$/.test(subStr) ? ')' : '[';
+      interval.rightBracket = subStr.endsWith(')') ? ')' : '[';
       result.push(interval);
       interval = emptyInterval();
     } else {
@@ -332,39 +361,46 @@ function parseRange(rangeStr: string): any {
     }
   });
 
-  if (interval.leftType) return null; // something like '[1,2],[3'
-  if (!result || !result.length) return null;
+  if (interval.leftType) {
+    return null;
+  } // something like '[1,2],[3'
+  if (!result || !result.length) {
+    return null;
+  }
 
   const lastIdx = result.length - 1;
   let prevValue: string = null;
-  return result.reduce(
-    (acc, range, idx) => {
-      const { leftType, leftValue, rightType, rightValue } = range;
+  return result.reduce((acc, range, idx) => {
+    const { leftType, leftValue, rightType, rightValue } = range;
 
-      if (idx === 0 && leftValue === '') {
-        if (leftType === EXCLUDING_POINT && isVersion(rightValue)) {
-          prevValue = rightValue;
-          return [...acc, { ...range, leftValue: null }];
-        }
-        return null;
-      }
-      if (idx === lastIdx && rightValue === '') {
-        if (rightType === EXCLUDING_POINT && isVersion(leftValue)) {
-          if (prevValue && compare(prevValue, leftValue) === 1) return null;
-          return [...acc, { ...range, rightValue: null }];
-        }
-        return null;
-      }
-      if (isVersion(leftValue) && isVersion(rightValue)) {
-        if (compare(leftValue, rightValue) === 1) return null;
-        if (prevValue && compare(prevValue, leftValue) === 1) return null;
+    if (idx === 0 && leftValue === '') {
+      if (leftType === EXCLUDING_POINT && isVersion(rightValue)) {
         prevValue = rightValue;
-        return [...acc, range];
+        return [...acc, { ...range, leftValue: null }];
       }
       return null;
-    },
-    [] as Range[]
-  );
+    }
+    if (idx === lastIdx && rightValue === '') {
+      if (rightType === EXCLUDING_POINT && isVersion(leftValue)) {
+        if (prevValue && compare(prevValue, leftValue) === 1) {
+          return null;
+        }
+        return [...acc, { ...range, rightValue: null }];
+      }
+      return null;
+    }
+    if (isVersion(leftValue) && isVersion(rightValue)) {
+      if (compare(leftValue, rightValue) === 1) {
+        return null;
+      }
+      if (prevValue && compare(prevValue, leftValue) === 1) {
+        return null;
+      }
+      prevValue = rightValue;
+      return [...acc, range];
+    }
+    return null;
+  }, [] as Range[]);
 }
 
 function isValid(str: string): boolean {
@@ -384,7 +420,9 @@ export interface Range {
 }
 
 function rangeToStr(fullRange: Range[]): string | null {
-  if (fullRange === null) return null;
+  if (fullRange === null) {
+    return null;
+  }
 
   const valToStr = (val: string): string => (val === null ? '' : val);
 
@@ -399,7 +437,7 @@ function rangeToStr(fullRange: Range[]): string | null {
     }
   }
 
-  const intervals = fullRange.map(val =>
+  const intervals = fullRange.map((val) =>
     [
       val.leftBracket,
       valToStr(val.leftValue),
@@ -411,14 +449,48 @@ function rangeToStr(fullRange: Range[]): string | null {
   return intervals.join(',');
 }
 
+function tokensToStr(tokens: Token[]): string {
+  return tokens.reduce((result, token, idx) => {
+    const prefix = token.prefix === PREFIX_DOT ? '.' : '-';
+    return `${result}${idx !== 0 && token.val !== '' ? prefix : ''}${
+      token.val
+    }`;
+  }, '');
+}
+
+function coerceRangeValue(prev: string, next: string): string {
+  const prevTokens = tokenize(prev, true);
+  const nextTokens = tokenize(next, true);
+  const resultTokens = nextTokens.slice(0, prevTokens.length);
+  const align = Math.max(0, prevTokens.length - nextTokens.length);
+  if (align > 0) {
+    resultTokens.push(...prevTokens.slice(prevTokens.length - align));
+  }
+  return tokensToStr(resultTokens);
+}
+
+function incrementRangeValue(value: string): string {
+  const tokens = tokenize(value);
+  const lastToken = tokens[tokens.length - 1];
+  if (typeof lastToken.val === 'number') {
+    lastToken.val += 1;
+    return coerceRangeValue(value, tokensToStr(tokens));
+  }
+  return value;
+}
+
 function autoExtendMavenRange(
   currentRepresentation: string,
   newValue: string
 ): string | null {
   const range = parseRange(currentRepresentation);
-  if (!range) return currentRepresentation;
+  if (!range) {
+    return currentRepresentation;
+  }
   const isPoint = (vals: Range[]): boolean => {
-    if (vals.length !== 1) return false;
+    if (vals.length !== 1) {
+      return false;
+    }
     const { leftType, leftValue, rightType, rightValue } = vals[0];
     return (
       leftType === 'INCLUDING_POINT' &&
@@ -429,28 +501,48 @@ function autoExtendMavenRange(
   if (isPoint(range)) {
     return `[${newValue}]`;
   }
-  let nearestIntervalIdx = 0;
-  const len = range.length;
-  for (let idx = len - 1; idx >= 0; idx = -1) {
-    const { leftValue, rightValue } = range[idx];
-    if (rightValue === null) {
-      nearestIntervalIdx = idx;
-      break;
-    }
-    if (compare(rightValue, newValue) === -1) {
-      nearestIntervalIdx = idx;
-      break;
-    }
-    if (leftValue && compare(leftValue, newValue) !== 1) {
-      return currentRepresentation;
-    }
+
+  const interval = [...range].reverse().find((elem) => {
+    const { rightType, rightValue } = elem;
+    return (
+      rightValue === null ||
+      (rightType === INCLUDING_POINT && compare(rightValue, newValue) === -1) ||
+      (rightType === EXCLUDING_POINT && compare(rightValue, newValue) !== 1)
+    );
+  });
+
+  if (!interval) {
+    return currentRepresentation;
   }
-  const interval = range[nearestIntervalIdx];
-  if (interval.rightValue !== null) {
-    interval.rightValue = newValue;
-  } else {
-    interval.leftValue = newValue;
+
+  const { leftValue, rightValue } = interval;
+  if (
+    leftValue !== null &&
+    rightValue !== null &&
+    incrementRangeValue(leftValue) === rightValue
+  ) {
+    if (compare(newValue, leftValue) !== -1) {
+      interval.leftValue = coerceRangeValue(leftValue, newValue);
+      interval.rightValue = incrementRangeValue(interval.leftValue);
+    }
+  } else if (rightValue !== null) {
+    if (interval.rightType === INCLUDING_POINT) {
+      const tokens = tokenize(rightValue);
+      const lastToken = tokens[tokens.length - 1];
+      if (typeof lastToken.val === 'number') {
+        interval.rightValue = coerceRangeValue(rightValue, newValue);
+      } else {
+        interval.rightValue = newValue;
+      }
+    } else {
+      interval.rightValue = incrementRangeValue(
+        coerceRangeValue(rightValue, newValue)
+      );
+    }
+  } else if (leftValue !== null) {
+    interval.leftValue = coerceRangeValue(leftValue, newValue);
   }
+
   return rangeToStr(range);
 }
 

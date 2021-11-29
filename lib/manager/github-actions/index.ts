@@ -1,6 +1,10 @@
 import { extractPackageFile } from './extract';
-import { updateDependency } from './update';
 
-const language = 'docker';
+export { extractPackageFile };
 
-export { extractPackageFile, language, updateDependency };
+export const defaultConfig = {
+  fileMatch: [
+    '^(workflow-templates|\\.github\\/workflows)\\/[^/]+\\.ya?ml$',
+    '(^|\\/)action\\.ya?ml$',
+  ],
+};

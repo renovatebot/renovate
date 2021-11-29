@@ -1,5 +1,14 @@
-export { extractPackageFile } from './extract';
-export { getPackageUpdates } from './package';
-export { updateDependency } from './update';
+import { ProgrammingLanguage } from '../../constants';
+import * as nodeVersioning from '../../versioning/node';
 
-export const language = 'node';
+export { extractPackageFile } from './extract';
+
+export const language = ProgrammingLanguage.NodeJS;
+
+export const defaultConfig = {
+  fileMatch: ['^.travis.yml$'],
+  major: {
+    enabled: false,
+  },
+  versioning: nodeVersioning.id,
+};

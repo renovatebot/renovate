@@ -1,11 +1,11 @@
 // Code originally derived from https://github.com/hadfieldn/node-bunyan-prettystream but since heavily edited
 // Neither fork nor original repo appear to be maintained
 
-import * as util from 'util';
 import { Stream } from 'stream';
+import * as util from 'util';
 import chalk from 'chalk';
 import stringify from 'json-stringify-pretty-compact';
-import { BunyanRecord } from './utils';
+import type { BunyanRecord } from './types';
 
 const bunyanFields = [
   'name',
@@ -37,7 +37,7 @@ const levels: Record<number, string> = {
 
 export function indent(str: string, leading = false): string {
   const prefix = leading ? '       ' : '';
-  return prefix + str.split(/\r?\n/).join('\n       ');
+  return prefix + str.split(/\r?\n/).join('\n       '); // TODO #12070
 }
 
 export function getMeta(rec: BunyanRecord): string {
@@ -45,12 +45,12 @@ export function getMeta(rec: BunyanRecord): string {
     return '';
   }
   let res = rec.module ? ` [${rec.module}]` : ``;
-  const filteredMeta = metaFields.filter(elem => rec[elem]);
+  const filteredMeta = metaFields.filter((elem) => rec[elem]);
   if (!filteredMeta.length) {
     return res;
   }
   const metaStr = filteredMeta
-    .map(field => `${field}=${rec[field]}`)
+    .map((field) => `${field}=${String(rec[field])}`)
     .join(', ');
   res = ` (${metaStr})${res}`;
   return chalk.gray(res);
@@ -62,8 +62,12 @@ export function getDetails(rec: BunyanRecord): string {
   }
   const recFiltered = { ...rec };
   delete recFiltered.module;
-  Object.keys(recFiltered).forEach(key => {
-    if (bunyanFields.includes(key) || metaFields.includes(key)) {
+  Object.keys(recFiltered).forEach((key) => {
+    if (
+      key === 'logContext' ||
+      bunyanFields.includes(key) ||
+      metaFields.includes(key)
+    ) {
       delete recFiltered[key];
     }
   });
@@ -72,7 +76,7 @@ export function getDetails(rec: BunyanRecord): string {
     return '';
   }
   return `${remainingKeys
-    .map(key => `${indent(`"${key}": ${stringify(recFiltered[key])}`, true)}`)
+    .map((key) => `${indent(`"${key}": ${stringify(recFiltered[key])}`, true)}`)
     .join(',\n')}\n`;
 }
 

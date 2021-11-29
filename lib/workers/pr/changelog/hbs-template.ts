@@ -5,7 +5,7 @@ export default `### Release Notes
 {{#if upgrade.hasReleaseNotes}}
 
 <details>
-<summary>{{upgrade.githubName}}</summary>
+<summary>{{upgrade.repoName}}</summary>
 
 {{#each upgrade.releases as |release|}}
 

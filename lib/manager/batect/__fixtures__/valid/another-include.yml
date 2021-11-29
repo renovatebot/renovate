@@ -1,0 +1,8 @@
+include:
+  - type: git
+    repo: https://another-include.com/my-repo.git
+    ref: 4.5.6
+
+containers:
+  another-include-container-1:
+    image: ubuntu:19.10

@@ -1,18 +1,29 @@
 import * as azure from 'azure-devops-node-api';
-import { IGitApi } from 'azure-devops-node-api/GitApi';
+import { getBasicHandler, getHandlerFromToken } from 'azure-devops-node-api';
 import { ICoreApi } from 'azure-devops-node-api/CoreApi';
+import { IGitApi } from 'azure-devops-node-api/GitApi';
 import { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
+import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
+import { PlatformId } from '../../constants';
+import { HostRule } from '../../types';
 import * as hostRules from '../../util/host-rules';
 
-const hostType = 'azure';
+const hostType = PlatformId.Azure;
 let endpoint: string;
+
+function getAuthenticationHandler(config: HostRule): IRequestHandler {
+  if (!config.token && config.username && config.password) {
+    return getBasicHandler(config.username, config.password, true);
+  }
+  return getHandlerFromToken(config.token, true);
+}
 
 export function azureObj(): azure.WebApi {
   const config = hostRules.find({ hostType, url: endpoint });
-  if (!(config && config.token)) {
-    throw new Error(`No token found for azure`);
+  if (!config.token && !(config.username && config.password)) {
+    throw new Error(`No config found for azure`);
   }
-  const authHandler = azure.getPersonalAccessTokenHandler(config.token);
+  const authHandler = getAuthenticationHandler(config);
   return new azure.WebApi(endpoint, authHandler);
 }
 

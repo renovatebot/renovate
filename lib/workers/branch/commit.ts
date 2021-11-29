@@ -1,27 +1,21 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { FileData, platform } from '../../platform';
+import { GlobalConfig } from '../../config/global';
+import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { RenovateConfig } from '../../config';
+import { commitFiles } from '../../util/git';
+import { sanitize } from '../../util/sanitize';
+import type { BranchConfig } from '../types';
 
-export type CommitConfig = RenovateConfig & {
-  baseBranch?: string;
-  branchName: string;
-  commitMessage: string;
-  excludeCommitPaths?: string[];
-  updatedPackageFiles: FileData[];
-  updatedArtifacts: FileData[];
-};
-
-export async function commitFilesToBranch(
-  config: CommitConfig
-): Promise<boolean> {
+export function commitFilesToBranch(
+  config: BranchConfig
+): Promise<string | null> {
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
-    updatedFiles = updatedFiles.filter(f => {
-      const filename = f.name === '|delete|' ? f.contents : f.name;
-      const matchesExcludePaths = config.excludeCommitPaths.some(path =>
+    updatedFiles = updatedFiles.filter((f) => {
+      const filename = f.name === '|delete|' ? f.contents.toString() : f.name;
+      const matchesExcludePaths = config.excludeCommitPaths.some((path) =>
         minimatch(filename, path, { dot: true })
       );
       if (matchesExcludePaths) {
@@ -31,25 +25,33 @@ export async function commitFilesToBranch(
       return true;
     });
   }
-  if (is.nonEmptyArray(updatedFiles)) {
-    logger.debug(`${updatedFiles.length} file(s) to commit`);
-
-    // istanbul ignore if
-    if (config.dryRun) {
-      logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
-    } else {
-      // API will know whether to create new branch or not
-      await platform.commitFilesToBranch(
-        config.branchName,
-        updatedFiles,
-        config.commitMessage,
-        config.baseBranch || undefined
-      );
-      logger.info({ branch: config.branchName }, `files committed`);
-    }
-  } else {
+  if (!is.nonEmptyArray(updatedFiles)) {
     logger.debug(`No files to commit`);
-    return false;
+    return null;
   }
-  return true;
+  const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
+  logger.debug(`${fileLength} file(s) to commit`);
+  // istanbul ignore if
+  if (GlobalConfig.get('dryRun')) {
+    logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
+    return null;
+  }
+  // istanbul ignore if
+  if (
+    config.branchName !== sanitize(config.branchName) ||
+    config.commitMessage !== sanitize(config.commitMessage)
+  ) {
+    logger.debug(
+      { branchName: config.branchName },
+      'Secrets exposed in branchName or commitMessage'
+    );
+    throw new Error(CONFIG_SECRETS_EXPOSED);
+  }
+  // API will know whether to create new branch or not
+  return commitFiles({
+    branchName: config.branchName,
+    files: updatedFiles,
+    message: config.commitMessage,
+    force: !!config.forceCommit,
+  });
 }

@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "example 1"
+version = "0.1.0"
+description = ""
+authors = ["John Doe <john.doe@gmail.com>"]
+
+[tool.poetry.dependencies]
+dep1_ = "0.0.0"
+dep1 = "0.0.0"
+dep2 = "^0.6.0"
+dep3 = "^0.33.6"
+python = "~2.7 || ^3.4"
+
+[tool.poetry.extras]
+extra_dep1 = "^0.8.3"
+extra_dep2 = "^0.9.4"
+extra_dep3 = "^0.4.0"
+
+[tool.poetry.dev-dependencies]
+dev_dep1 = "^3.0"
+dev_dep2 = "Invalid version."
+
+[build-system]
+requires = ["poetry>=1.0", "wheel"]
+build-backend = "poetry.masonry.api"
+
+[tool.coverage]
+run.omit = ["*/tests_*.py"]
+report.precision = 2

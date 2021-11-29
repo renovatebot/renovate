@@ -1,10 +1,12 @@
 import { fromStream } from 'hasha';
 import { coerce } from 'semver';
-import { parseUrlPath } from './extract';
-import { skip, isSpace, removeComments } from './util';
-import got from '../../util/got';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { Http } from '../../util/http';
+import type { UpdateDependencyConfig } from '../types';
+import { parseUrlPath } from './extract';
+import { isSpace, removeComments, skip } from './util';
+
+const http = new Http('homebrew');
 
 function replaceUrl(
   idx: number,
@@ -14,7 +16,7 @@ function replaceUrl(
 ): string | null {
   let i = idx;
   i += 'url'.length;
-  i = skip(i, content, c => isSpace(c));
+  i = skip(i, content, (c) => isSpace(c));
   const chr = content[i];
   if (chr !== '"' && chr !== "'") {
     return null;
@@ -77,7 +79,7 @@ function replaceSha256(
 ): string | null {
   let i = idx;
   i += 'sha256'.length;
-  i = skip(i, content, c => isSpace(c));
+  i = skip(i, content, (c) => isSpace(c));
   const chr = content[i];
   if (chr !== '"' && chr !== "'") {
     return null;
@@ -133,16 +135,15 @@ function updateSha256(
   return newContent;
 }
 
-// TODO: Refactor
-export async function updateDependency(
-  content: string,
-  upgrade: Upgrade
-): Promise<string> {
+// TODO: Refactor (#9591)
+export async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string> {
   logger.trace('updateDependency()');
   /*
     1. Update url field 2. Update sha256 field
    */
-  let newContent = content;
   let newUrl: string;
   // Example urls:
   // "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
@@ -152,16 +153,16 @@ export async function updateDependency(
     logger.debug(
       `Failed to update - upgrade.managerData.url is invalid ${upgrade.depName}`
     );
-    return content;
+    return fileContent;
   }
-  let newSha256;
+  let newSha256: string;
   try {
-    newUrl = `https://github.com/${upgrade.managerData.ownerName}/${
-      upgrade.managerData.repoName
-    }/releases/download/${upgrade.newValue}/${
-      upgrade.managerData.repoName
-    }-${coerce(upgrade.newValue)}.tar.gz`;
-    newSha256 = await fromStream(got.stream(newUrl), {
+    const ownerName = String(upgrade.managerData.ownerName);
+    const repoName = String(upgrade.managerData.repoName);
+    newUrl = `https://github.com/${ownerName}/${repoName}/releases/download/${
+      upgrade.newValue
+    }/${repoName}-${String(coerce(upgrade.newValue))}.tar.gz`;
+    newSha256 = await fromStream(http.stream(newUrl), {
       algorithm: 'sha256',
     });
   } catch (errOuter) {
@@ -169,41 +170,44 @@ export async function updateDependency(
       `Failed to download release download for ${upgrade.depName} - trying archive instead`
     );
     try {
-      newUrl = `https://github.com/${upgrade.managerData.ownerName}/${upgrade.managerData.repoName}/archive/${upgrade.newValue}.tar.gz`;
-      newSha256 = await fromStream(got.stream(newUrl), {
+      const ownerName = String(upgrade.managerData.ownerName);
+      const repoName = String(upgrade.managerData.repoName);
+      newUrl = `https://github.com/${ownerName}/${repoName}/archive/${upgrade.newValue}.tar.gz`;
+      newSha256 = await fromStream(http.stream(newUrl), {
         algorithm: 'sha256',
       });
     } catch (errInner) {
       logger.debug(
         `Failed to download archive download for ${upgrade.depName} - update failed`
       );
-      return content;
+      return fileContent;
     }
   }
+  // istanbul ignore next
   if (!newSha256) {
     logger.debug(
       `Failed to generate new sha256 for ${upgrade.depName} - update failed`
     );
-    return content;
+    return fileContent;
   }
   const newParsedUrlPath = parseUrlPath(newUrl);
   if (!newParsedUrlPath) {
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
-    return content;
+    return fileContent;
   }
   if (upgrade.newValue !== newParsedUrlPath.currentValue) {
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
-    return content;
+    return fileContent;
   }
-  newContent = updateUrl(content, upgrade.managerData.url, newUrl);
+  let newContent = updateUrl(fileContent, upgrade.managerData.url, newUrl);
   if (!newContent) {
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
-    return content;
+    return fileContent;
   }
   newContent = updateSha256(newContent, upgrade.managerData.sha256, newSha256);
   if (!newContent) {
     logger.debug(`Failed to update sha256 for dependency ${upgrade.depName}`);
-    return content;
+    return fileContent;
   }
   return newContent;
 }

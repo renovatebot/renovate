@@ -1,1 +1,0 @@
-{"name":"some_crate","deps":[{"name":"time","req":"^0.1","features":[],"optional":false,"default_features":true,"target":null,"kind":"normal"},{"name":"threadpool","req":"^0.1.4","features":[],"optional":false,"default_features":true,"target":null,"kind":"normal"}],"cksum":"2884e8cf8d78d9a6de8bbc1898603edb2b625eb8f64e371919906d0fec5660e7","features":{},"yanked":false}

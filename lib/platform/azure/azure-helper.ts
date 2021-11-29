@@ -1,54 +1,18 @@
 import {
+  GitCommit,
   GitPullRequestMergeStrategy,
   GitRef,
-  GitCommit,
-  GitPullRequest,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-
-import * as azureApi from './azure-got-wrapper';
 import { logger } from '../../logger';
-import { Pr } from '../common';
+import * as azureApi from './azure-got-wrapper';
+import {
+  getBranchNameWithoutRefsPrefix,
+  getBranchNameWithoutRefsheadsPrefix,
+  getNewBranchName,
+  streamToString,
+} from './util';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
-
-export function getNewBranchName(branchName?: string): string {
-  if (branchName && !branchName.startsWith('refs/heads/')) {
-    return `refs/heads/${branchName}`;
-  }
-  return branchName;
-}
-
-export function getBranchNameWithoutRefsheadsPrefix(
-  branchPath: string
-): string | undefined {
-  if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsheadsPrefix(${branchPath})`);
-    return undefined;
-  }
-  if (!branchPath.startsWith('refs/heads/')) {
-    logger.trace(
-      `The refs/heads/ name should have started with 'refs/heads/' but it didn't. (${branchPath})`
-    );
-    return branchPath;
-  }
-  return branchPath.substring(11, branchPath.length);
-}
-
-function getBranchNameWithoutRefsPrefix(
-  branchPath?: string
-): string | undefined {
-  if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsPrefix(${branchPath})`);
-    return undefined;
-  }
-  if (!branchPath.startsWith('refs/')) {
-    logger.trace(
-      `The ref name should have started with 'refs/' but it didn't. (${branchPath})`
-    );
-    return branchPath;
-  }
-  return branchPath.substring(5, branchPath.length);
-}
 
 export async function getRefs(
   repoId: string,
@@ -89,21 +53,7 @@ export async function getAzureBranchObj(
   };
 }
 
-async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
-  const chunks: string[] = [];
-  /* eslint-disable promise/avoid-new */
-  const p = await new Promise<string>(resolve => {
-    stream.on('data', (chunk: any) => {
-      chunks.push(chunk.toString());
-    });
-    stream.on('end', () => {
-      resolve(chunks.join(''));
-    });
-  });
-  return p;
-}
-
-// if no branchName, look globaly
+// if no branchName, look globally
 export async function getFile(
   repoId: string,
   filePath: string,
@@ -127,7 +77,7 @@ export async function getFile(
     }
   );
 
-  if (item && item.readable) {
+  if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
       const jTmp = JSON.parse(fileContent);
@@ -147,55 +97,6 @@ export async function getFile(
   return null; // no file found
 }
 
-export function max4000Chars(str: string): string {
-  if (str && str.length >= 4000) {
-    return str.substring(0, 3999);
-  }
-  return str;
-}
-
-export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
-  const pr: Pr = azurePr as any;
-
-  pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
-  pr.number = azurePr.pullRequestId;
-  pr.body = azurePr.description;
-  pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
-
-  // status
-  // export declare enum PullRequestStatus {
-  //   NotSet = 0,
-  //   Active = 1,
-  //   Abandoned = 2,
-  //   Completed = 3,
-  //   All = 4,
-  // }
-  if (azurePr.status === 2) {
-    pr.state = 'closed';
-  } else if (azurePr.status === 3) {
-    pr.state = 'merged';
-  } else {
-    pr.state = 'open';
-  }
-
-  // mergeStatus
-  // export declare enum PullRequestAsyncStatus {
-  //   NotSet = 0,
-  //   Queued = 1,
-  //   Conflicts = 2,
-  //   Succeeded = 3,
-  //   RejectedByPolicy = 4,
-  //   Failure = 5,
-  // }
-  if (azurePr.mergeStatus === 2) {
-    pr.isConflicted = true;
-  }
-
-  pr.isModified = false;
-
-  return pr;
-}
-
 export async function getCommitDetails(
   commit: string,
   repoId: string
@@ -206,46 +107,56 @@ export async function getCommitDetails(
   return results;
 }
 
-export function getProjectAndRepo(
-  str: string
-): { project: string; repo: string } {
-  logger.trace(`getProjectAndRepo(${str})`);
-  const strSplited = str.split(`/`);
-  if (strSplited.length === 1) {
-    return {
-      project: str,
-      repo: str,
-    };
-  }
-  if (strSplited.length === 2) {
-    return {
-      project: strSplited[0],
-      repo: strSplited[1],
-    };
-  }
-  const msg = `${str} can be only structured this way : 'repository' or 'projectName/repository'!`;
-  logger.error(msg);
-  throw new Error(msg);
-}
-
 export async function getMergeMethod(
   repoId: string,
-  project: string
+  project: string,
+  branchRef?: string,
+  defaultBranch?: string
 ): Promise<GitPullRequestMergeStrategy> {
-  const policyConfigurations = (await (await azureApi.policyApi()).getPolicyConfigurations(
-    project
-  ))
+  type Scope = {
+    repositoryId: string;
+    refName?: string;
+    matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
+  };
+  const isRelevantScope = (scope: Scope): boolean => {
+    if (
+      scope.matchKind === 'DefaultBranch' &&
+      (!branchRef || branchRef === `refs/heads/${defaultBranch}`)
+    ) {
+      return true;
+    }
+    if (scope.repositoryId !== repoId) {
+      return false;
+    }
+    if (!branchRef) {
+      return true;
+    }
+    return scope.matchKind === 'Exact'
+      ? scope.refName === branchRef
+      : branchRef.startsWith(scope.refName);
+  };
+
+  const policyConfigurations = (
+    await (await azureApi.policyApi()).getPolicyConfigurations(project)
+  )
     .filter(
-      p =>
-        p.settings.scope.some(s => s.repositoryId === repoId) &&
-        p.type.id === mergePolicyGuid
+      (p) =>
+        p.settings.scope.some(isRelevantScope) && p.type.id === mergePolicyGuid
     )
-    .map(p => p.settings)[0];
+    .map((p) => p.settings)[0];
+
+  logger.trace(
+    `getMergeMethod(${repoId}, ${project}, ${branchRef}) determining mergeMethod from matched policy:\n${JSON.stringify(
+      policyConfigurations,
+      null,
+      4
+    )}`
+  );
 
   try {
     return Object.keys(policyConfigurations)
-      .map(p => GitPullRequestMergeStrategy[p.slice(5)])
-      .find(p => p);
+      .map((p) => GitPullRequestMergeStrategy[p.slice(5)])
+      .find((p) => p);
   } catch (err) {
     return GitPullRequestMergeStrategy.NoFastForward;
   }

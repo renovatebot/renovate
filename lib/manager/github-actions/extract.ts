@@ -1,33 +1,66 @@
+import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
+import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import { PackageFile, PackageDependency } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
+
+const dockerRe = regEx(/^\s+uses: docker:\/\/([^"]+)\s*$/);
+const actionRe = regEx(
+  /^\s+-?\s+?uses: (?<replaceString>(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>.+?)(?: # renovate: tag=(?<tag>.+?))?)\s*?$/
+);
+
+// SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
+const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 
 export function extractPackageFile(content: string): PackageFile | null {
-  logger.debug('github-actions.extractPackageFile()');
+  logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  let lineNumber = 0;
   for (const line of content.split('\n')) {
-    // old github actions syntax will be deprecated on September 30, 2019
-    // after that, the first line can be removed
-    const match =
-      line.match(/^\s+uses = "docker:\/\/([^"]+)"\s*$/) ||
-      line.match(/^\s+uses: docker:\/\/([^"]+)\s*$/);
-    if (match) {
-      const currentFrom = match[1];
+    if (line.trim().startsWith('#')) {
+      continue;
+    }
+
+    const dockerMatch = dockerRe.exec(line);
+    if (dockerMatch) {
+      const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
-      logger.debug(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Docker image inside GitHub Actions'
-      );
-      dep.managerData = { lineNumber };
-      dep.versionScheme = 'docker';
+      dep.depType = 'docker';
+      dep.versioning = dockerVersioning.id;
+      deps.push(dep);
+      continue;
+    }
+
+    const tagMatch = actionRe.exec(line);
+    if (tagMatch?.groups) {
+      const {
+        depName,
+        currentValue,
+        path = '',
+        tag,
+        replaceString,
+      } = tagMatch.groups;
+      const dep: PackageDependency = {
+        depName,
+        commitMessageTopic: '{{{depName}}} action',
+        datasource: githubTagsDatasource.id,
+        versioning: dockerVersioning.id,
+        depType: 'action',
+        replaceString,
+        autoReplaceStringTemplate: `{{depName}}${path}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # renovate: tag={{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}`,
+      };
+      if (shaRe.test(currentValue)) {
+        dep.currentValue = tag;
+        dep.currentDigest = currentValue;
+      } else {
+        dep.currentValue = currentValue;
+        if (!dockerVersioning.api.isValid(currentValue)) {
+          dep.skipReason = SkipReason.InvalidVersion;
+        }
+      }
       deps.push(dep);
     }
-    lineNumber += 1;
   }
   if (!deps.length) {
     return null;

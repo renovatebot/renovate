@@ -1,42 +1,43 @@
-import { logger } from '../../../../logger';
-import { getOnboardingConfig } from './config';
 import { configFileNames } from '../../../../config/app-strings';
-import { RenovateConfig } from '../../../../config';
-import { platform } from '../../../../platform';
+import { GlobalConfig } from '../../../../config/global';
+import type { RenovateConfig } from '../../../../config/types';
+import { logger } from '../../../../logger';
+import { commitFiles } from '../../../../util/git';
+import { OnboardingCommitMessageFactory } from './commit-message';
+import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = configFileNames[0];
 
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
-): Promise<void> {
+): Promise<string | null> {
+  const configFile = configFileNames.includes(config.onboardingConfigFileName)
+    ? config.onboardingConfigFileName
+    : defaultConfigFile;
+
   logger.debug('createOnboardingBranch()');
-  const contents = await getOnboardingConfig(config);
-  logger.info('Creating onboarding branch');
-  let commitMessage;
+  const contents = await getOnboardingConfigContents(config, configFile);
+  logger.debug('Creating onboarding branch');
+
+  const commitMessageFactory = new OnboardingCommitMessageFactory(
+    config,
+    configFile
+  );
+  const commitMessage = commitMessageFactory.create();
+
   // istanbul ignore if
-  if (config.semanticCommits) {
-    commitMessage = config.semanticCommitType;
-    if (config.semanticCommitScope) {
-      commitMessage += `(${config.semanticCommitScope})`;
-    }
-    commitMessage += ': ';
-    commitMessage += 'add ' + defaultConfigFile;
-  } else {
-    commitMessage = 'Add ' + defaultConfigFile;
-  }
-  // istanbul ignore if
-  if (config.dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
-  } else {
-    await platform.commitFilesToBranch(
-      config.onboardingBranch,
-      [
-        {
-          name: defaultConfigFile,
-          contents,
-        },
-      ],
-      commitMessage
-    );
+    return null;
   }
+  return commitFiles({
+    branchName: config.onboardingBranch,
+    files: [
+      {
+        name: configFile,
+        contents,
+      },
+    ],
+    message: commitMessage.toString(),
+  });
 }

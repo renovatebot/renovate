@@ -1,29 +1,29 @@
-import * as bunyan from 'bunyan';
-
 import is from '@sindresorhus/is';
-import { RenovateStream } from './pretty-stdout';
+import * as bunyan from 'bunyan';
+import { nanoid } from 'nanoid';
+import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
-import cmdSerializer from './cmd-serializer';
-import { ErrorStream, withSanitizer } from './utils';
+import { RenovateStream } from './pretty-stdout';
+import type { BunyanRecord, Logger } from './types';
+import { ProblemStream, withSanitizer } from './utils';
 
-let meta = {};
-export interface LogError {
-  level: bunyan.LogLevel;
-  meta: any;
-  msg?: string;
-}
+let logContext: string = process.env.LOG_CONTEXT ?? nanoid();
+let curMeta: Record<string, unknown> = {};
 
-const errors = new ErrorStream();
+const problems = new ProblemStream();
 
 const stdout: bunyan.Stream = {
   name: 'stdout',
-  level: (process.env.LOG_LEVEL as bunyan.LogLevel) || 'info',
+  level:
+    (process.env.LOG_LEVEL as bunyan.LogLevel) ||
+    /* istanbul ignore next: not testable */ 'info',
   stream: process.stdout,
 };
 
+// istanbul ignore else: not testable
 if (process.env.LOG_FORMAT !== 'json') {
-  // TODO: typings
+  // TODO: typings (#9615)
   const prettyStdOut = new RenovateStream() as any;
   prettyStdOut.pipe(process.stdout);
   stdout.stream = prettyStdOut;
@@ -39,33 +39,35 @@ const bunyanLogger = bunyan.createLogger({
     migratedConfig: configSerializer,
     originalConfig: configSerializer,
     presetConfig: configSerializer,
+    oldConfig: configSerializer,
+    newConfig: configSerializer,
     err: errSerializer,
   },
   streams: [
     stdout,
     {
-      name: 'error',
-      level: 'error' as bunyan.LogLevel,
-      stream: errors as any,
+      name: 'problems',
+      level: 'warn' as bunyan.LogLevel,
+      stream: problems as any,
       type: 'raw',
     },
   ].map(withSanitizer),
 });
 
-const logFactory = (level: bunyan.LogLevelString): any => {
-  return (p1: any, p2: any): void => {
+const logFactory =
+  (level: bunyan.LogLevelString): any =>
+  (p1: any, p2: any): void => {
     if (p2) {
       // meta and msg provided
-      bunyanLogger[level]({ ...meta, ...p1 }, p2);
+      bunyanLogger[level]({ logContext, ...curMeta, ...p1 }, p2);
     } else if (is.string(p1)) {
       // only message provided
-      bunyanLogger[level](meta, p1);
+      bunyanLogger[level]({ logContext, ...curMeta }, p1);
     } else {
       // only meta provided
-      bunyanLogger[level]({ ...meta, ...p1 });
+      bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
     }
   };
-};
 
 const loggerLevels: bunyan.LogLevelString[] = [
   'trace',
@@ -76,30 +78,37 @@ const loggerLevels: bunyan.LogLevelString[] = [
   'fatal',
 ];
 
-interface Logger {
-  trace(msg: string): void;
-  trace(meta: Record<string, any>, msg?: string): void;
-  debug(msg: string): void;
-  debug(meta: Record<string, any>, msg?: string): void;
-  info(msg: string): void;
-  info(meta: Record<string, any>, msg?: string): void;
-  warn(msg: string): void;
-  warn(meta: Record<string, any>, msg?: string): void;
-  error(msg: string): void;
-  error(meta: Record<string, any>, msg?: string): void;
-  fatal(msg: string): void;
-  fatal(meta: Record<string, any>, msg?: string): void;
-}
-
 export const logger: Logger = {} as any;
 
-loggerLevels.forEach(loggerLevel => {
+loggerLevels.forEach((loggerLevel) => {
   logger[loggerLevel] = logFactory(loggerLevel);
 });
 
-// setMeta overrides existing meta
-export function setMeta(obj: any): void {
-  meta = { ...obj };
+export function setContext(value: string): void {
+  logContext = value;
+}
+
+export function getContext(): any {
+  return logContext;
+}
+
+// setMeta overrides existing meta, may remove fields if no longer existing
+export function setMeta(obj: Record<string, unknown>): void {
+  curMeta = { ...obj };
+}
+
+// addMeta overrides or adds fields but does not remove any
+export function addMeta(obj: Record<string, unknown>): void {
+  curMeta = { ...curMeta, ...obj };
+}
+
+// removeMeta removes the provided fields from meta
+export function removeMeta(fields: string[]): void {
+  Object.keys(curMeta).forEach((key) => {
+    if (fields.includes(key)) {
+      delete curMeta[key];
+    }
+  });
 }
 
 export /* istanbul ignore next */ function addStream(
@@ -112,6 +121,10 @@ export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
 }
 
-export function getErrors(): any {
-  return errors.getErrors();
+export function getProblems(): BunyanRecord[] {
+  return problems.getProblems();
+}
+
+export function clearProblems(): void {
+  return problems.clearProblems();
 }

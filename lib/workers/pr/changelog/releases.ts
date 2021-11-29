@@ -1,6 +1,11 @@
-import { getPkgReleases, Release, PkgReleaseConfig } from '../../../datasource';
+import {
+  Release,
+  getPkgReleases,
+  isGetPkgReleasesConfig,
+} from '../../../datasource';
 import { logger } from '../../../logger';
-import { get, VersioningApi } from '../../../versioning';
+import { VersioningApi, get } from '../../../versioning';
+import type { BranchUpgradeConfig } from '../../types';
 
 function matchesMMP(version: VersioningApi, v1: string, v2: string): boolean {
   return (
@@ -18,34 +23,34 @@ function matchesUnstable(
   return !version.isStable(v1) && matchesMMP(version, v1, v2);
 }
 
-export type ReleaseConfig = PkgReleaseConfig & {
-  fromVersion: string;
-  releases?: Release[];
-  sourceUrl?: string;
-  toVersion: string;
-};
-
-export async function getReleases(
-  config: ReleaseConfig
+export async function getInRangeReleases(
+  config: BranchUpgradeConfig
 ): Promise<Release[] | null> {
-  const { versionScheme, fromVersion, toVersion, depName, datasource } = config;
+  const { versioning, currentVersion, newVersion, depName, datasource } =
+    config;
+  // istanbul ignore if
+  if (!isGetPkgReleasesConfig(config)) {
+    return null;
+  }
   try {
     const pkgReleases = (await getPkgReleases(config)).releases;
-    const version = get(versionScheme);
+    const version = get(versioning);
 
     const releases = pkgReleases
-      .filter(release => version.isCompatible(release.version, fromVersion))
-      .filter(
-        release =>
-          version.equals(release.version, fromVersion) ||
-          version.isGreaterThan(release.version, fromVersion)
+      .filter((release) =>
+        version.isCompatible(release.version, currentVersion)
       )
-      .filter(release => !version.isGreaterThan(release.version, toVersion))
       .filter(
-        release =>
+        (release) =>
+          version.equals(release.version, currentVersion) ||
+          version.isGreaterThan(release.version, currentVersion)
+      )
+      .filter((release) => !version.isGreaterThan(release.version, newVersion))
+      .filter(
+        (release) =>
           version.isStable(release.version) ||
-          matchesUnstable(version, fromVersion, release.version) ||
-          matchesUnstable(version, toVersion, release.version)
+          matchesUnstable(version, currentVersion, release.version) ||
+          matchesUnstable(version, newVersion, release.version)
       );
     if (version.valueToVersion) {
       for (const release of releases || []) {
@@ -54,8 +59,8 @@ export async function getReleases(
     }
     return releases;
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'getReleases err');
-    logger.info({ datasource, depName }, 'Error getting releases');
+    logger.debug({ err }, 'getInRangeReleases err');
+    logger.debug({ datasource, depName }, 'Error getting releases');
     return null;
   }
 }

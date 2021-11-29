@@ -1,4 +1,9 @@
-export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
+import { ProgrammingLanguage } from '../../constants';
 
-export const language = 'js';
+export { extractPackageFile } from './extract';
+
+export const language = ProgrammingLanguage.JavaScript;
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)package.js$'],
+};

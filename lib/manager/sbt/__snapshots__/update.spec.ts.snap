@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/sbt/update .bumpPackageVersion() increments 1`] = `
+"name := \\"test\\"
+organization := \\"test-org\\"
+version := \\"0.0.3\\"
+"
+`;
+
+exports[`manager/sbt/update .bumpPackageVersion() updates 1`] = `
+"name := \\"test\\"
+organization := \\"test-org\\"
+version := \\"0.1.0\\"
+"
+`;

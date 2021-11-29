@@ -1,0 +1,206 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+      - v25
+
+  pull_request:
+
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: 'Dry-Run'
+        default: 'true'
+        required: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Currently no way to detect automatically (#8153)
+  DEFAULT_BRANCH: main
+  NODE_VERSION: 14
+  DRY_RUN: true
+
+jobs:
+  test:
+    name: ${{ format('test ({0})', matrix.os) }}
+    runs-on: ${{ matrix.os }}
+
+    # tests shouldn't need more time
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [14]
+        java-version: [11]
+        # skip macOS and Windows test on pull requests without 'ci:fulltest' label
+        include: >-
+          ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
+            "os": "macos-latest",
+            "node-version": 14,
+            "java-version": 11
+          }, {
+            "os": "windows-latest",
+            "node-version": 14,
+            "java-version": 11
+          }]' || '[]') }}
+
+    env:
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+      NODE_VERSION: ${{ matrix.node-version }}
+      JAVA_VERSION: ${{ matrix.java-version }}
+      # skip Java tests on pull requests without 'ci:fulltest' label
+      SKIP_JAVA_TESTS: ${{ matrix.node-version != 14 || (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) }}
+
+    steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+        with:
+          fetch-depth: 2
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Set up Java  ${{ env.JAVA_VERSION }}
+        if: env.SKIP_JAVA_TESTS == 'false'
+        uses: actions/setup-java@8db439b6b47e5e12312bf036760bbaa6893481ac # renovate: tag=v2.3.1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+          java-package: jre
+          check-latest: false
+
+      - name: Init platform
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          git --version
+          echo "Node $(node --version)"
+          echo "Yarn $(yarn --version)"
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Unit tests
+        run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
+
+      - name: Codecov
+        uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
+        if: always() && env.coverage == 'true'
+
+      # build after tests to exclude build files from tests
+      # TODO: check if build before test speeds up tests
+      - name: Build
+        run: yarn build
+
+      - name: E2E Test
+        run: yarn test-e2e
+
+  lint:
+    runs-on: ubuntu-latest
+
+    # lint shouldn't need more than 10 min
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+        with:
+          fetch-depth: 2
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          echo "Yarn $(yarn --version)"
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: |
+          yarn ls-lint
+          yarn eslint -f gha
+          yarn prettier
+          yarn markdown-lint
+          yarn git-check
+          yarn doc-fence-check
+
+      - name: Test schema
+        run: yarn test-schema
+
+      - name: Type check
+        run: yarn type-check
+
+      - name: Null check
+        run: yarn null-check
+
+  release:
+    needs: [lint, test]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # release shouldn't need more than 5 min
+    timeout-minutes: 15
+
+    steps:
+      # full checkout for semantic-release
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
+
+      - name: Check dry run
+        run: |
+          if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          elif [[ "${{github.ref}}" == "refs/heads/${{env.DEFAULT_BRANCH}}" ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          elif [[ "${{github.ref}}" =~ ^refs/heads/v[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "DRY_RUN=false" >> $GITHUB_ENV
+          fi
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: semantic-release
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
+          npx semantic-release --dry-run ${{env.DRY_RUN}}
+          git checkout -- .npmrc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

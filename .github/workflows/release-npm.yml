@@ -1,0 +1,73 @@
+name: release-npm
+
+on:
+  repository_dispatch:
+    types: [renovate-release]
+
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Git sha to checkout'
+        required: true
+      version:
+        description: 'Version to release'
+        required: true
+      tag:
+        description: 'Npm dist-tag'
+        default: 'latest'
+        required: false
+
+env:
+  NODE_VERSION: 14
+  GIT_SHA: ${{ github.event.client_payload.sha }}
+  NPM_VERSION: ${{ github.event.client_payload.version }}
+  NPM_TAG: ${{ github.event.client_payload.tag }}
+
+jobs:
+  release-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare env
+        run: |
+          if [[ "${{github.event_name}}" == "workflow_dispatch" ]]; then
+            echo "GIT_SHA=${{ github.event.inputs.sha }}" >> $GITHUB_ENV
+            echo "NPM_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+            echo "NPM_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+        with:
+          ref: ${{ env.GIT_SHA }}
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2.4.1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          yarn config set version-git-tag false
+          npm config set scripts-prepend-node-path true
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build ${{ env.NPM_VERSION }}
+        run: yarn build
+
+      - name: Prepare  ${{ env.NPM_VERSION }}
+        run: |
+          npm --no-git-tag-version version ${{ env.NPM_VERSION }}
+
+      - name: Publish ${{ env.NPM_VERSION }}
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
+          npm publish --tag ${{ env.NPM_TAG }}
+          git checkout -- .npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

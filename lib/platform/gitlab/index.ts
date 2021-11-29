@@ -1,91 +1,150 @@
-import URL, { URLSearchParams } from 'url';
+import URL from 'url';
 import is from '@sindresorhus/is';
-
-import { api } from './gl-got-wrapper';
-import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
+import delay from 'delay';
+import JSON5 from 'json5';
+import pAll from 'p-all';
+import { lt } from 'semver';
+import { PlatformId } from '../../constants';
 import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  PlatformPrOptions,
-  GotResponse,
-  Pr,
-  Issue,
-  VulnerabilityAlert,
-} from '../common';
-import { configFileNames } from '../../config/app-strings';
+  CONFIG_GIT_URL_UNAVAILABLE,
+  PLATFORM_AUTHENTICATION_ERROR,
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+  REPOSITORY_NOT_FOUND,
+  TEMPORARY_ERROR,
+} from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
+import * as git from '../../util/git';
+import * as hostRules from '../../util/host-rules';
+import { HttpResponse } from '../../util/http';
+import { setBaseUrl } from '../../util/http/gitlab';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
+import { ensureTrailingSlash, getQueryString, parseUrl } from '../../util/url';
+import type {
+  BranchStatusConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
+  EnsureIssueConfig,
+  FindPRConfig,
+  GitUrlOption,
+  Issue,
+  MergePRConfig,
+  PlatformParams,
+  PlatformPrOptions,
+  PlatformResult,
+  Pr,
+  RepoParams,
+  RepoResult,
+  UpdatePrConfig,
+} from '../types';
 import { smartTruncate } from '../utils/pr-body';
-import { RenovateConfig } from '../../config';
+import { getUserID, gitlabApi, isUserBusy } from './http';
+import { getMR, updateMR } from './merge-request';
+import type {
+  GitLabMergeRequest,
+  GitlabComment,
+  GitlabIssue,
+  MergeMethod,
+  RepoResponse,
+} from './types';
 
-const defaultConfigFile = configFileNames[0];
 let config: {
-  storage: GitStorage;
-  gitPrivateKey?: string;
   repository: string;
-  localDir: string;
-  defaultBranch: string;
-  baseBranch: string;
   email: string;
   prList: any[];
-  issueList: any[];
-  optimizeForDisabled: boolean;
+  issueList: GitlabIssue[];
+  mergeMethod: MergeMethod;
+  defaultBranch: string;
+  cloneSubmodules: boolean;
+  ignorePrAuthor: boolean;
+  squash: boolean;
 } = {} as any;
 
 const defaults = {
-  hostType: 'gitlab',
+  hostType: PlatformId.Gitlab,
   endpoint: 'https://gitlab.com/api/v4/',
+  version: '0.0.0',
 };
 
-let authorId: number;
+const DRAFT_PREFIX = 'Draft: ';
+const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
+
+let draftPrefix = DRAFT_PREFIX;
 
 export async function initPlatform({
   endpoint,
   token,
-}: {
-  token: string;
-  endpoint: string;
-}): Promise<PlatformConfig> {
+  gitAuthor,
+}: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
   if (endpoint) {
-    defaults.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
-    api.setBaseUrl(defaults.endpoint);
+    defaults.endpoint = ensureTrailingSlash(endpoint);
+    setBaseUrl(defaults.endpoint);
   } else {
-    logger.info('Using default GitLab endpoint: ' + defaults.endpoint);
+    logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
-  let gitAuthor: string;
+  const platformConfig: PlatformResult = {
+    endpoint: defaults.endpoint,
+  };
+  let gitlabVersion: string;
   try {
-    const user = (await api.get(`user`, { token })).body;
-    gitAuthor = `${user.name} <${user.email}>`;
-    authorId = user.id;
+    if (!gitAuthor) {
+      const user = (
+        await gitlabApi.getJson<{ email: string; name: string; id: number }>(
+          `user`,
+          { token }
+        )
+      ).body;
+      platformConfig.gitAuthor = `${user.name} <${user.email}>`;
+    }
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      const version = (
+        await gitlabApi.getJson<{ version: string }>('version', { token })
+      ).body;
+      gitlabVersion = version.version;
+    }
+    logger.debug('GitLab version is: ' + gitlabVersion);
+    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
+    [gitlabVersion] = gitlabVersion.split('-');
+    defaults.version = gitlabVersion;
   } catch (err) {
-    logger.info(
+    logger.debug(
       { err },
-      'Error authenticating with GitLab. Check that your token includes "user" permissions'
+      'Error authenticating with GitLab. Check that your token includes "api" permissions'
     );
     throw new Error('Init: Authentication failure');
   }
-  const platformConfig: PlatformConfig = {
-    endpoint: defaults.endpoint,
-    gitAuthor,
-  };
+  draftPrefix = lt(defaults.version, '13.2.0')
+    ? DRAFT_PREFIX_DEPRECATED
+    : DRAFT_PREFIX;
+
   return platformConfig;
 }
 
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
-  logger.info('Autodiscovering GitLab repositories');
+  logger.debug('Autodiscovering GitLab repositories');
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true`;
-    const res = await api.get(url, { paginate: true });
-    logger.info(`Discovered ${res.body.length} project(s)`);
-    return res.body.map(
-      (repo: { path_with_namespace: string }) => repo.path_with_namespace
-    );
+    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
+    const res = await gitlabApi.getJson<RepoResponse[]>(url, {
+      paginate: true,
+    });
+    logger.debug(`Discovered ${res.body.length} project(s)`);
+    return res.body
+      .filter((repo) => !repo.mirror && !repo.archived)
+      .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
     throw err;
@@ -93,164 +152,194 @@ export async function getRepos(): Promise<string[]> {
 }
 
 function urlEscape(str: string): string {
-  return str ? str.replace(/\//g, '%2F') : str;
+  return str ? str.replace(regEx(/\//g), '%2F') : str;
 }
 
-export function cleanRepo(): void {
-  // istanbul ignore if
-  if (config.storage) {
-    config.storage.cleanRepo();
+export async function getRawFile(
+  fileName: string,
+  repoName?: string,
+  branchOrTag?: string
+): Promise<string | null> {
+  const escapedFileName = urlEscape(fileName);
+  const repo = repoName ?? config.repository;
+  const url =
+    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
+    (branchOrTag || `HEAD`);
+  const res = await gitlabApi.getJson<{ content: string }>(url);
+  const buf = res.body.content;
+  const str = Buffer.from(buf, 'base64').toString();
+  return str;
+}
+
+export async function getJsonFile(
+  fileName: string,
+  repoName?: string,
+  branchOrTag?: string
+): Promise<any | null> {
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
   }
-  // In theory most of this isn't necessary. In practice..
-  config = {} as any;
+  return JSON.parse(raw);
+}
+
+function getRepoUrl(
+  repository: string,
+  gitUrl: GitUrlOption | undefined,
+  res: HttpResponse<RepoResponse>
+): string {
+  if (gitUrl === 'ssh') {
+    if (!res.body.ssh_url_to_repo) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+    }
+    logger.debug({ url: res.body.ssh_url_to_repo }, `using ssh URL`);
+    return res.body.ssh_url_to_repo;
+  }
+
+  const opts = hostRules.find({
+    hostType: defaults.hostType,
+    url: defaults.endpoint,
+  });
+
+  if (
+    gitUrl === 'endpoint' ||
+    process.env.GITLAB_IGNORE_REPO_URL ||
+    res.body.http_url_to_repo === null
+  ) {
+    if (res.body.http_url_to_repo === null) {
+      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
+    }
+    if (process.env.GITLAB_IGNORE_REPO_URL) {
+      logger.warn(
+        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.'
+      );
+    }
+
+    const { protocol, host, pathname } = parseUrl(defaults.endpoint);
+    const newPathname = pathname.slice(0, pathname.indexOf('/api'));
+    const url = URL.format({
+      protocol: protocol.slice(0, -1) || 'https',
+      auth: 'oauth2:' + opts.token,
+      host,
+      pathname: newPathname + '/' + repository + '.git',
+    });
+    logger.debug({ url }, 'using URL based on configured endpoint');
+    return url;
+  }
+
+  logger.debug({ url: res.body.http_url_to_repo }, `using http URL`);
+  const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
+  repoUrl.auth = 'oauth2:' + opts.token;
+  return URL.format(repoUrl);
 }
 
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
-  gitPrivateKey,
-  localDir,
-  optimizeForDisabled,
-}: RepoParams): Promise<RepoConfig> {
+  cloneSubmodules,
+  ignorePrAuthor,
+  gitUrl,
+}: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
-  config.gitPrivateKey = gitPrivateKey;
-  config.localDir = localDir;
-  let res: GotResponse<{
-    archived: boolean;
-    mirror: boolean;
-    default_branch: string;
-    http_url_to_repo: string;
-    forked_from_project: boolean;
-  }>;
+  config.cloneSubmodules = cloneSubmodules;
+  config.ignorePrAuthor = ignorePrAuthor;
+
+  let res: HttpResponse<RepoResponse>;
   try {
-    res = await api.get(`projects/${config.repository}`);
+    res = await gitlabApi.getJson<RepoResponse>(
+      `projects/${config.repository}`
+    );
     if (res.body.archived) {
-      logger.info(
+      logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new Error('archived');
+      throw new Error(REPOSITORY_ARCHIVED);
     }
     if (res.body.mirror) {
-      logger.info(
+      logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
       );
-      throw new Error('mirror');
+      throw new Error(REPOSITORY_MIRRORED);
     }
-    if (res.body.default_branch === null) {
-      throw new Error('empty');
+    if (res.body.repository_access_level === 'disabled') {
+      logger.debug(
+        'Repository portion of project is disabled - throwing error to abort renovation'
+      );
+      throw new Error(REPOSITORY_DISABLED);
     }
-    if (optimizeForDisabled) {
-      let renovateConfig: RenovateConfig;
-      try {
-        renovateConfig = JSON.parse(
-          Buffer.from(
-            (await api.get(
-              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
-            )).body.content,
-            'base64'
-          ).toString()
-        );
-      } catch (err) {
-        // Do nothing
-      }
-      if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error('disabled');
-      }
+    if (res.body.merge_requests_access_level === 'disabled') {
+      logger.debug(
+        'MRs are disabled for the project - throwing error to abort renovation'
+      );
+      throw new Error(REPOSITORY_DISABLED);
+    }
+    if (res.body.default_branch === null || res.body.empty_repo) {
+      throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    config.baseBranch = config.defaultBranch;
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
-    // Discover our user email
-    config.email = (await api.get(`user`)).body.email;
-    logger.debug('Bot email=' + config.email);
+    // istanbul ignore if
+    if (!config.defaultBranch) {
+      logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
+      throw new Error(TEMPORARY_ERROR);
+    }
+    config.mergeMethod = res.body.merge_method || 'merge';
+    if (res.body.squash_option) {
+      config.squash =
+        res.body.squash_option === 'always' ||
+        res.body.squash_option === 'default_on';
+    }
+    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
-    const opts = hostRules.find({
-      hostType: defaults.hostType,
-      url: defaults.endpoint,
-    });
-    let url: string;
-    if (res.body.http_url_to_repo === null) {
-      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
-      const { host, protocol } = URL.parse(defaults.endpoint);
-      url = GitStorage.getUrl({
-        protocol: protocol!.slice(0, -1) as any,
-        auth: 'oauth2:' + opts.token,
-        host,
-        repository,
-      });
-    } else {
-      logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
-      const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-      repoUrl.auth = 'oauth2:' + opts.token;
-      url = URL.format(repoUrl);
-    }
-    config.storage = new GitStorage();
-    await config.storage.initRepo({
+    const url = getRepoUrl(repository, gitUrl, res);
+    await git.initRepo({
       ...config,
       url,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
-      throw new Error('empty');
+      throw new Error(REPOSITORY_EMPTY);
     }
-    if (['archived', 'empty'].includes(err.message)) {
+    if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
       throw err;
     }
     if (err.statusCode === 403) {
-      throw new Error('forbidden');
+      throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (err.statusCode === 404) {
-      throw new Error('not-found');
+      throw new Error(REPOSITORY_NOT_FOUND);
     }
-    if (err.message === 'disabled') {
+    if (err.message === REPOSITORY_DISABLED) {
       throw err;
     }
-    logger.info({ err }, 'Unknown GitLab initRepo error');
+    logger.debug({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
-  const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+  const repoConfig: RepoResult = {
+    defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
   };
   return repoConfig;
 }
 
-export function getRepoForceRebase(): boolean {
-  return false;
+export function getRepoForceRebase(): Promise<boolean> {
+  return Promise.resolve(config?.mergeMethod !== 'merge');
 }
 
-export async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<void> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
-  await config.storage.setBaseBranch(branchName);
-}
+type BranchState =
+  | 'pending'
+  | 'created'
+  | 'running'
+  | 'waiting_for_resource'
+  | 'manual'
+  | 'success'
+  | 'failed'
+  | 'canceled'
+  | 'skipped';
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
-// Get full file list
-export function getFileList(branchName = config.baseBranch): Promise<string[]> {
-  return config.storage.getFileList(branchName);
-}
-
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  return config.storage.branchExists(branchName);
-}
-
-type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
-
-interface BranchStatus {
+interface GitlabBranchStatus {
   status: BranchState;
   name: string;
   allow_failure?: boolean;
@@ -259,94 +348,194 @@ interface BranchStatus {
 async function getStatus(
   branchName: string,
   useCache = true
-): Promise<BranchStatus[]> {
-  const branchSha = await config.storage.getBranchCommit(branchName);
-  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
+): Promise<GitlabBranchStatus[]> {
+  const branchSha = git.getBranchCommit(branchName);
+  try {
+    const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
 
-  return (await api.get(url, { paginate: true, useCache })).body;
+    return (
+      await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
+        paginate: true,
+        useCache,
+      })
+    ).body;
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Error getting commit status');
+    if (err.response?.statusCode === 404) {
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
+  }
 }
+
+const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
+  pending: BranchStatus.yellow,
+  created: BranchStatus.yellow,
+  manual: BranchStatus.yellow,
+  running: BranchStatus.yellow,
+  waiting_for_resource: BranchStatus.yellow,
+  success: BranchStatus.green,
+  failed: BranchStatus.red,
+  canceled: BranchStatus.red,
+  skipped: BranchStatus.red,
+};
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
-): Promise<string> {
+  branchName: string
+): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    return 'success';
-  }
-  if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-    // This is Unsupported
-    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
-    return 'failed';
+
+  if (!git.branchExists(branchName)) {
+    throw new Error(REPOSITORY_CHANGED);
   }
 
-  if (!(await branchExists(branchName))) {
-    throw new Error('repository-changed');
+  const branchStatuses = await getStatus(branchName);
+  // istanbul ignore if
+  if (!is.array(branchStatuses)) {
+    logger.warn(
+      { branchName, branchStatuses },
+      'Empty or unexpected branch statuses'
+    );
+    return BranchStatus.yellow;
   }
-
-  const res = await getStatus(branchName);
-  logger.debug(`Got res with ${res.length} results`);
+  logger.debug(`Got res with ${branchStatuses.length} results`);
+  // ignore all skipped jobs
+  const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
-    return 'pending';
+    return BranchStatus.yellow;
   }
-  let status = 'success';
-  // Return 'success' if all are success
-  res.forEach(check => {
-    // If one is failed then don't overwrite that
-    if (status !== 'failure') {
-      if (!check.allow_failure) {
-        if (check.status === 'failed') {
-          status = 'failure';
-        } else if (check.status !== 'success') {
-          ({ status } = check);
+  let status: BranchStatus = BranchStatus.green; // default to green
+  res
+    .filter((check) => !check.allow_failure)
+    .forEach((check) => {
+      if (status !== BranchStatus.red) {
+        // if red, stay red
+        let mappedStatus: BranchStatus =
+          gitlabToRenovateStatusMapping[check.status];
+        if (!mappedStatus) {
+          logger.warn(
+            { check },
+            'Could not map GitLab check.status to Renovate status'
+          );
+          mappedStatus = BranchStatus.yellow;
+        }
+        if (mappedStatus !== BranchStatus.green) {
+          logger.trace({ check }, 'Found non-green check');
+          status = mappedStatus;
         }
       }
-    }
-  });
+    });
   return status;
 }
 
 // Pull Request
 
-export async function createPr(
-  branchName: string,
-  title: string,
-  rawDescription: string,
-  labels?: string[] | null,
-  useDefaultBranch?: boolean,
-  platformOptions?: PlatformPrOptions
-): Promise<Pr> {
-  const description = sanitize(rawDescription);
-  const targetBranch = useDefaultBranch
-    ? config.defaultBranch
-    : config.baseBranch;
-  logger.debug(`Creating Merge Request: ${title}`);
-  const res = await api.post(`projects/${config.repository}/merge_requests`, {
-    body: {
-      source_branch: branchName,
-      target_branch: targetBranch,
-      remove_source_branch: true,
-      title,
-      description,
-      labels: is.array(labels) ? labels.join(',') : null,
-    },
-  });
-  const pr = res.body;
-  pr.number = pr.iid;
-  pr.branchName = branchName;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.isModified = false;
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
+function massagePr(prToModify: Pr): Pr {
+  const pr = prToModify;
+  if (pr.title.startsWith(DRAFT_PREFIX)) {
+    pr.title = pr.title.substring(DRAFT_PREFIX.length);
+    pr.isDraft = true;
+  } else if (pr.title.startsWith(DRAFT_PREFIX_DEPRECATED)) {
+    pr.title = pr.title.substring(DRAFT_PREFIX_DEPRECATED.length);
+    pr.isDraft = true;
   }
-  if (platformOptions && platformOptions.gitLabAutomerge) {
+  return pr;
+}
+
+async function fetchPrList(): Promise<Pr[]> {
+  const searchParams = {
+    per_page: '100',
+  } as any;
+  // istanbul ignore if
+  if (!config.ignorePrAuthor) {
+    searchParams.scope = 'created_by_me';
+  }
+  const query = getQueryString(searchParams);
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  try {
+    const res = await gitlabApi.getJson<
+      {
+        iid: number;
+        source_branch: string;
+        title: string;
+        state: string;
+        created_at: string;
+      }[]
+    >(urlString, { paginate: true });
+    return res.body.map((pr) =>
+      massagePr({
+        number: pr.iid,
+        sourceBranch: pr.source_branch,
+        title: pr.title,
+        state: pr.state === 'opened' ? PrState.Open : pr.state,
+        createdAt: pr.created_at,
+      })
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Error fetching PR list');
+    if (err.statusCode === 403) {
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
+    }
+    throw err;
+  }
+}
+
+export async function getPrList(): Promise<Pr[]> {
+  if (!config.prList) {
+    config.prList = await fetchPrList();
+  }
+  return config.prList;
+}
+
+async function ignoreApprovals(pr: number): Promise<void> {
+  try {
+    const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
+    const { body: rules } = await gitlabApi.getJson<{ name: string }[]>(url);
+    const ruleName = 'renovateIgnoreApprovals';
+    const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
+    if (!zeroApproversRule) {
+      await gitlabApi.postJson(url, {
+        body: {
+          name: ruleName,
+          approvals_required: 0,
+        },
+      });
+    }
+  } catch (err) {
+    logger.warn({ err }, 'GitLab: Error adding approval rule');
+  }
+}
+
+async function tryPrAutomerge(
+  pr: number,
+  platformOptions: PlatformPrOptions
+): Promise<void> {
+  if (platformOptions?.usePlatformAutomerge) {
     try {
-      await api.put(
-        `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
+      if (platformOptions?.gitLabIgnoreApprovals) {
+        await ignoreApprovals(pr);
+      }
+
+      const desiredStatus = 'can_be_merged';
+      const retryTimes = 5;
+
+      // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
+      for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
+        const { body } = await gitlabApi.getJson<{
+          merge_status: string;
+          pipeline: string;
+        }>(`projects/${config.repository}/merge_requests/${pr}`);
+        // Only continue if the merge request can be merged and has a pipeline.
+        if (body.merge_status === desiredStatus && body.pipeline !== null) {
+          break;
+        }
+        await delay(500 * attempt);
+      }
+
+      await gitlabApi.putJson(
+        `projects/${config.repository}/merge_requests/${pr}/merge`,
         {
           body: {
             should_remove_source_branch: true,
@@ -358,245 +547,229 @@ export async function createPr(
       logger.debug({ err }, 'Automerge on PR creation failed');
     }
   }
+}
 
-  return pr;
+export async function createPr({
+  sourceBranch,
+  targetBranch,
+  prTitle,
+  prBody: rawDescription,
+  draftPR,
+  labels,
+  platformOptions,
+}: CreatePRConfig): Promise<Pr> {
+  let title = prTitle;
+  if (draftPR) {
+    title = draftPrefix + title;
+  }
+  const description = sanitize(rawDescription);
+  logger.debug(`Creating Merge Request: ${title}`);
+  const res = await gitlabApi.postJson<Pr & { iid: number }>(
+    `projects/${config.repository}/merge_requests`,
+    {
+      body: {
+        source_branch: sourceBranch,
+        target_branch: targetBranch,
+        remove_source_branch: true,
+        title,
+        description,
+        labels: (labels || []).join(','),
+        squash: config.squash,
+      },
+    }
+  );
+  const pr = res.body;
+  pr.number = pr.iid;
+  pr.sourceBranch = sourceBranch;
+  pr.displayNumber = `Merge Request #${pr.iid}`;
+  // istanbul ignore if
+  if (config.prList) {
+    config.prList.push(pr);
+  }
+
+  await tryPrAutomerge(pr.iid, platformOptions);
+
+  return massagePr(pr);
 }
 
 export async function getPr(iid: number): Promise<Pr> {
   logger.debug(`getPr(${iid})`);
-  const url = `projects/${config.repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
-  const pr = (await api.get(url)).body;
+  const mr = await getMR(config.repository, iid);
+
   // Harmonize fields with GitHub
-  pr.branchName = pr.source_branch;
-  pr.targetBranch = pr.target_branch;
-  pr.number = pr.iid;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.body = pr.description;
-  pr.isStale = pr.diverged_commits_count > 0;
-  pr.state = pr.state === 'opened' ? 'open' : pr.state;
-  pr.isModified = true;
-  if (pr.merge_status === 'cannot_be_merged') {
+  const pr: Pr = {
+    sourceBranch: mr.source_branch,
+    targetBranch: mr.target_branch,
+    number: mr.iid,
+    displayNumber: `Merge Request #${mr.iid}`,
+    body: mr.description,
+    state: mr.state === 'opened' ? PrState.Open : mr.state,
+    hasAssignees: !!(mr.assignee?.id || mr.assignees?.[0]?.id),
+    hasReviewers: !!mr.reviewers?.length,
+    title: mr.title,
+    labels: mr.labels,
+    sha: mr.sha,
+  };
+
+  if (mr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
     pr.isConflicted = true;
-  } else if (pr.state === 'open') {
-    const branchStatus = await getBranchStatus(pr.branchName, []);
-    if (branchStatus === 'success') {
+  } else if (pr.state === PrState.Open) {
+    const branchStatus = await getBranchStatus(pr.sourceBranch);
+    if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
     }
   }
-  // Check if the most recent branch commit is by us
-  // If not then we don't allow it to be rebased, in case someone's changes would be lost
-  const branchUrl = `projects/${
-    config.repository
-  }/repository/branches/${urlEscape(pr.source_branch)}`;
-  try {
-    const branch = (await api.get(branchUrl)).body;
-    const branchCommitEmail =
-      branch && branch.commit ? branch.commit.author_email : null;
-    // istanbul ignore if
-    if (branchCommitEmail === config.email) {
-      pr.isModified = false;
-    } else {
-      logger.debug(
-        { branchCommitEmail, configEmail: config.email, iid: pr.iid },
-        'Last committer to branch does not match bot email, so PR cannot be rebased.'
-      );
-      pr.isModified = true;
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Error getting PR branch');
-    if (pr.state === 'open' || err.statusCode !== 404) {
-      logger.warn({ err }, 'Error getting PR branch');
-      pr.isConflicted = true;
-    }
+  return massagePr(pr);
+}
+
+export async function updatePr({
+  number: iid,
+  prTitle,
+  prBody: description,
+  state,
+  platformOptions,
+}: UpdatePrConfig): Promise<void> {
+  let title = prTitle;
+  if ((await getPrList()).find((pr) => pr.number === iid)?.isDraft) {
+    title = draftPrefix + title;
   }
-  return pr;
-}
-
-// Return a list of all modified files in a PR
-export async function getPrFiles(mrNo: number): Promise<string[]> {
-  logger.debug({ mrNo }, 'getPrFiles');
-  if (!mrNo) {
-    return [];
-  }
-  const files = (await api.get(
-    `projects/${config.repository}/merge_requests/${mrNo}/changes`
-  )).body.changes;
-  return files.map((f: { new_path: string }) => f.new_path);
-}
-
-// istanbul ignore next
-async function closePr(iid: number): Promise<void> {
-  await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
-    body: {
-      state_event: 'close',
-    },
-  });
-}
-
-export async function updatePr(
-  iid: number,
-  title: string,
-  description: string
-): Promise<void> {
-  await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
-    body: {
-      title,
-      description: sanitize(description),
-    },
-  });
-}
-
-export async function mergePr(iid: number): Promise<boolean> {
-  try {
-    await api.put(`projects/${config.repository}/merge_requests/${iid}/merge`, {
+  const newState = {
+    [PrState.Closed]: 'close',
+    [PrState.Open]: 'reopen',
+  }[state];
+  await gitlabApi.putJson(
+    `projects/${config.repository}/merge_requests/${iid}`,
+    {
       body: {
-        should_remove_source_branch: true,
+        title,
+        description: sanitize(description),
+        ...(newState && { state_event: newState }),
       },
-    });
+    }
+  );
+
+  await tryPrAutomerge(iid, platformOptions);
+}
+
+export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
+  try {
+    await gitlabApi.putJson(
+      `projects/${config.repository}/merge_requests/${id}/merge`,
+      {
+        body: {
+          should_remove_source_branch: true,
+        },
+      }
+    );
     return true;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 401) {
-      logger.info('No permissions to merge PR');
+      logger.debug('No permissions to merge PR');
       return false;
     }
     if (err.statusCode === 406) {
-      logger.info('PR not acceptable for merging');
+      logger.debug({ err }, 'PR not acceptable for merging');
       return false;
     }
     logger.debug({ err }, 'merge PR error');
-    logger.info('PR merge failed');
+    logger.debug('PR merge failed');
     return false;
   }
 }
 
-export function getPrBody(input: string): string {
-  return smartTruncate(
-    input
-      .replace(/Pull Request/g, 'Merge Request')
-      .replace(/PR/g, 'MR')
-      .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/'),
-    1000000
-  );
+export function massageMarkdown(input: string): string {
+  let desc = input
+    .replace(regEx(/Pull Request/g), 'Merge Request')
+    .replace(regEx(/PR/g), 'MR')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
+
+  if (lt(defaults.version, '13.4.0')) {
+    logger.debug(
+      { version: defaults.version },
+      'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters'
+    );
+
+    desc = smartTruncate(desc, 25000);
+  } else {
+    desc = smartTruncate(desc, 1000000);
+  }
+
+  return desc;
 }
 
 // Branch
 
-// Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(branchName: string): Promise<Pr> {
-  logger.debug(`getBranchPr(${branchName})`);
-  // istanbul ignore if
-  if (!(await branchExists(branchName))) {
-    return null;
+function matchesState(state: string, desiredState: string): boolean {
+  if (desiredState === PrState.All) {
+    return true;
   }
-  const query = new URLSearchParams({
-    per_page: '100',
-    state: 'opened',
-    source_branch: branchName,
-  }).toString();
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  const res = await api.get(urlString, { paginate: true });
-  logger.debug(`Got res with ${res.body.length} results`);
-  let pr: any = null;
-  res.body.forEach((result: { source_branch: string }) => {
-    if (result.source_branch === branchName) {
-      pr = result;
-    }
-  });
-  if (!pr) {
-    return null;
+  if (desiredState.startsWith('!')) {
+    return state !== desiredState.substring(1);
   }
-  return getPr(pr.iid);
+  return state === desiredState;
 }
 
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
-}
-
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
-}
-
-export function commitFilesToBranch(
-  branchName: string,
-  files: any[],
-  message: string,
-  parentBranch = config.baseBranch
-): Promise<void> {
-  return config.storage.commitFilesToBranch(
-    branchName,
-    files,
-    message,
-    parentBranch
+export async function findPr({
+  branchName,
+  prTitle,
+  state = PrState.All,
+}: FindPRConfig): Promise<Pr> {
+  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+  const prList = await getPrList();
+  return prList.find(
+    (p: { sourceBranch: string; title: string; state: string }) =>
+      p.sourceBranch === branchName &&
+      (!prTitle || p.title === prTitle) &&
+      matchesState(p.state, state)
   );
 }
 
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
-}
-
-export async function deleteBranch(
-  branchName: string,
-  shouldClosePr = false
-): Promise<void> {
-  if (shouldClosePr) {
-    logger.debug('Closing PR');
-    const pr = await getBranchPr(branchName);
-    // istanbul ignore if
-    if (pr) {
-      await closePr(pr.number);
-    }
-  }
-  return config.storage.deleteBranch(branchName);
-}
-
-export function mergeBranch(branchName: string): Promise<void> {
-  return config.storage.mergeBranch(branchName);
-}
-
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function getRepoStatus(): Promise<StatusResult> {
-  return config.storage.getRepoStatus();
+// Returns the Pull Request for a branch. Null if not exists.
+export async function getBranchPr(branchName: string): Promise<Pr> {
+  logger.debug(`getBranchPr(${branchName})`);
+  const existingPr = await findPr({
+    branchName,
+    state: PrState.Open,
+  });
+  return existingPr ? getPr(existingPr.number) : null;
 }
 
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
-): Promise<string | null> {
+): Promise<BranchStatus | null> {
   // cache-bust in case we have rebased
   const res = await getStatus(branchName, false);
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
-      return check.status;
+      return gitlabToRenovateStatusMapping[check.status] || BranchStatus.yellow;
     }
   }
   return null;
 }
 
-export async function setBranchStatus(
-  branchName: string,
-  context: string,
-  description: string,
-  state: string,
-  targetUrl?: string
-): Promise<void> {
+export async function setBranchStatus({
+  branchName,
+  context,
+  description,
+  state: renovateState,
+  url: targetUrl,
+}: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
-  const branchSha = await config.storage.getBranchCommit(branchName);
+  const branchSha = git.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/statuses/${branchSha}`;
+  let state = 'success';
+  if (renovateState === BranchStatus.yellow) {
+    state = 'pending';
+  } else if (renovateState === BranchStatus.red) {
+    state = 'failed';
+  }
   const options: any = {
-    state: state.replace('failure', 'failed'), // GitLab uses 'failed', not 'failure'
+    state,
     description,
     context,
   };
@@ -604,20 +777,21 @@ export async function setBranchStatus(
     options.target_url = targetUrl;
   }
   try {
-    await api.post(url, { body: options });
+    // give gitlab some time to create pipelines for the sha
+    await delay(1000);
+
+    await gitlabApi.postJson(url, { body: options });
 
     // update status cache
     await getStatus(branchName, false);
   } catch (err) /* istanbul ignore next */ {
     if (
-      err.body &&
-      err.body.message &&
-      err.body.message.startsWith(
+      err.body?.message?.startsWith(
         'Cannot transition status via :enqueue from :pending'
       )
     ) {
       // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
-      logger.info('Ignoring status transition error');
+      logger.debug('Ignoring status transition error');
     } else {
       logger.debug({ err });
       logger.warn('Failed to set branch status');
@@ -627,82 +801,122 @@ export async function setBranchStatus(
 
 // Issue
 
-export async function getIssueList(): Promise<any[]> {
+export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
-    const res = await api.get(
-      `projects/${config.repository}/issues?state=opened`,
-      {
-        useCache: false,
-      }
-    );
+    const query = getQueryString({
+      per_page: '100',
+      scope: 'created_by_me',
+      state: 'opened',
+    });
+    const res = await gitlabApi.getJson<
+      { iid: number; title: string; labels: string[] }[]
+    >(`projects/${config.repository}/issues?${query}`, {
+      useCache: false,
+      paginate: true,
+    });
     // istanbul ignore if
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];
     }
-    config.issueList = res.body.map((i: { iid: number; title: string }) => ({
+    config.issueList = res.body.map((i) => ({
       iid: i.iid,
       title: i.title,
+      labels: i.labels,
     }));
   }
   return config.issueList;
+}
+
+export async function getIssue(
+  number: number,
+  useCache = true
+): Promise<Issue | null> {
+  try {
+    const issueBody = (
+      await gitlabApi.getJson<{ description: string }>(
+        `projects/${config.repository}/issues/${number}`,
+        { useCache }
+      )
+    ).body.description;
+    return {
+      number,
+      body: issueBody,
+    };
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, number }, 'Error getting issue');
+    return null;
+  }
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   try {
     const issueList = await getIssueList();
-    const issue = issueList.find((i: { title: string }) => i.title === title);
+    const issue = issueList.find((i) => i.title === title);
     if (!issue) {
       return null;
     }
-    const issueBody = (await api.get(
-      `projects/${config.repository}/issues/${issue.iid}`
-    )).body.description;
-    return {
-      number: issue.iid,
-      body: issueBody,
-    };
+    return await getIssue(issue.iid);
   } catch (err) /* istanbul ignore next */ {
     logger.warn('Error finding issue');
     return null;
   }
 }
 
-export async function ensureIssue(
-  title: string,
-  body: string
-): Promise<'updated' | 'created' | null> {
+export async function ensureIssue({
+  title,
+  reuseTitle,
+  body,
+  labels,
+  confidential,
+}: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
-  const description = getPrBody(sanitize(body));
+  const description = massageMarkdown(sanitize(body));
   try {
     const issueList = await getIssueList();
-    const issue = issueList.find((i: { title: string }) => i.title === title);
+    let issue = issueList.find((i) => i.title === title);
+    if (!issue) {
+      issue = issueList.find((i) => i.title === reuseTitle);
+    }
     if (issue) {
-      const existingDescription = (await api.get(
-        `projects/${config.repository}/issues/${issue.iid}`
-      )).body.description;
-      if (existingDescription !== description) {
-        logger.debug('Updating issue body');
-        await api.put(`projects/${config.repository}/issues/${issue.iid}`, {
-          body: { description },
-        });
+      const existingDescription = (
+        await gitlabApi.getJson<{ description: string }>(
+          `projects/${config.repository}/issues/${issue.iid}`
+        )
+      ).body.description;
+      if (issue.title !== title || existingDescription !== description) {
+        logger.debug('Updating issue');
+        await gitlabApi.putJson(
+          `projects/${config.repository}/issues/${issue.iid}`,
+          {
+            body: {
+              title,
+              description,
+              labels: (labels || issue.labels || []).join(','),
+              confidential: confidential ?? false,
+            },
+          }
+        );
         return 'updated';
       }
     } else {
-      await api.post(`projects/${config.repository}/issues`, {
+      await gitlabApi.postJson(`projects/${config.repository}/issues`, {
         body: {
           title,
           description,
+          labels: (labels || []).join(','),
+          confidential: confidential ?? false,
         },
       });
+      logger.info('Issue created');
       // delete issueList so that it will be refetched as necessary
       delete config.issueList;
       return 'created';
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
-      logger.info(`Could not create issue: ${err.message}`);
+      logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
@@ -715,10 +929,13 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.title === title) {
-      logger.info({ issue }, 'Closing issue');
-      await api.put(`projects/${config.repository}/issues/${issue.iid}`, {
-        body: { state_event: 'close' },
-      });
+      logger.debug({ issue }, 'Closing issue');
+      await gitlabApi.putJson(
+        `projects/${config.repository}/issues/${issue.iid}`,
+        {
+          body: { state_event: 'close' },
+        }
+      );
     }
   }
 }
@@ -727,33 +944,77 @@ export async function addAssignees(
   iid: number,
   assignees: string[]
 ): Promise<void> {
-  logger.debug(`Adding assignees ${assignees} to #${iid}`);
+  logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
   try {
-    let assigneeId = (await api.get(`users?username=${assignees[0]}`)).body[0]
-      .id;
+    let assigneeId = await getUserID(assignees[0]);
     let url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
-    await api.put(url);
+    await gitlabApi.putJson(url);
     try {
       if (assignees.length > 1) {
         url = `projects/${config.repository}/merge_requests/${iid}?assignee_ids[]=${assigneeId}`;
         for (let i = 1; i < assignees.length; i += 1) {
-          assigneeId = (await api.get(`users?username=${assignees[i]}`)).body[0]
-            .id;
+          assigneeId = await getUserID(assignees[i]);
           url += `&assignee_ids[]=${assigneeId}`;
         }
-        await api.put(url);
+        await gitlabApi.putJson(url);
       }
     } catch (error) {
       logger.error({ iid, assignees }, 'Failed to add multiple assignees');
     }
   } catch (err) {
-    logger.error({ iid, assignees }, 'Failed to add assignees');
+    logger.debug({ err }, 'addAssignees error');
+    logger.warn({ iid, assignees }, 'Failed to add assignees');
   }
 }
 
-export function addReviewers(iid: number, reviewers: string[]): void {
-  logger.debug(`addReviewers('${iid}, '${reviewers})`);
-  logger.warn('Unimplemented in GitLab: approvals');
+export async function addReviewers(
+  iid: number,
+  reviewers: string[]
+): Promise<void> {
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${iid}`);
+
+  if (lt(defaults.version, '13.9.0')) {
+    logger.warn(
+      { version: defaults.version },
+      'Adding reviewers is only available in GitLab 13.9 and onwards'
+    );
+    return;
+  }
+
+  let mr: GitLabMergeRequest;
+  try {
+    mr = await getMR(config.repository, iid);
+  } catch (err) {
+    logger.warn({ err }, 'Failed to get existing reviewers');
+    return;
+  }
+
+  mr.reviewers = mr.reviewers ?? [];
+  const existingReviewers = mr.reviewers.map((r) => r.username);
+  const existingReviewerIDs = mr.reviewers.map((r) => r.id);
+
+  // Figure out which reviewers (of the ones we want to add) are not already on the MR as a reviewer
+  const newReviewers = reviewers.filter((r) => !existingReviewers.includes(r));
+
+  // Gather the IDs for all the reviewers we want to add
+  let newReviewerIDs: number[];
+  try {
+    newReviewerIDs = await pAll(
+      newReviewers.map((r) => () => getUserID(r)),
+      { concurrency: 5 }
+    );
+  } catch (err) {
+    logger.warn({ err }, 'Failed to get IDs of the new reviewers');
+    return;
+  }
+
+  try {
+    await updateMR(config.repository, iid, {
+      reviewer_ids: [...existingReviewerIDs, ...newReviewerIDs],
+    });
+  } catch (err) {
+    logger.warn({ err }, 'Failed to add reviewers');
+  }
 }
 
 export async function deleteLabel(
@@ -763,27 +1024,34 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
     const pr = await getPr(issueNo);
-    const labels = (pr.labels || []).filter((l: string) => l !== label).join();
-    await api.put(`projects/${config.repository}/merge_requests/${issueNo}`, {
-      body: { labels },
-    });
+    const labels = (pr.labels || [])
+      .filter((l: string) => l !== label)
+      .join(',');
+    await gitlabApi.putJson(
+      `projects/${config.repository}/merge_requests/${issueNo}`,
+      {
+        body: { labels },
+      }
+    );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
 }
 
-async function getComments(issueNo: number): Promise<any[]> {
+async function getComments(issueNo: number): Promise<GitlabComment[]> {
   // GET projects/:owner/:repo/merge_requests/:number/notes
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
-  const comments = (await api.get(url, { paginate: true })).body;
+  const comments = (
+    await gitlabApi.getJson<GitlabComment[]>(url, { paginate: true })
+  ).body;
   logger.debug(`Found ${comments.length} comments`);
   return comments;
 }
 
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST projects/:owner/:repo/merge_requests/:number/notes
-  await api.post(
+  await gitlabApi.postJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes`,
     {
       body: { body },
@@ -797,7 +1065,7 @@ async function editComment(
   body: string
 ): Promise<void> {
   // PUT projects/:owner/:repo/merge_requests/:number/notes/:id
-  await api.put(
+  await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
     {
       body: { body },
@@ -810,28 +1078,32 @@ async function deleteComment(
   commentId: number
 ): Promise<void> {
   // DELETE projects/:owner/:repo/merge_requests/:number/notes/:id
-  await api.delete(
+  await gitlabApi.deleteJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`
   );
 }
 
-export async function ensureComment(
-  issueNo: number,
-  topic: string | null | undefined,
-  rawContent: string
-): Promise<void> {
-  const content = sanitize(rawContent);
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
+  const sanitizedContent = sanitize(content);
   const massagedTopic = topic
-    ? topic.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR')
+    ? topic
+        .replace(regEx(/Pull Request/g), 'Merge Request')
+        .replace(regEx(/PR/g), 'MR')
     : topic;
-  const comments = await getComments(issueNo);
+  const comments = await getComments(number);
   let body: string;
-  let commentId;
-  let commentNeedsUpdating;
+  let commentId: number;
+  let commentNeedsUpdating: boolean;
   if (topic) {
-    logger.debug(`Ensuring comment "${massagedTopic}" in #${issueNo}`);
-    body = `### ${topic}\n\n${content}`;
-    body = body.replace(/Pull Request/g, 'Merge Request').replace(/PR/g, 'MR');
+    logger.debug(`Ensuring comment "${massagedTopic}" in #${number}`);
+    body = `### ${topic}\n\n${sanitizedContent}`;
+    body = body
+      .replace(regEx(/Pull Request/g), 'Merge Request')
+      .replace(regEx(/PR/g), 'MR');
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic}\n\n`)) {
         commentId = comment.id;
@@ -839,8 +1111,8 @@ export async function ensureComment(
       }
     });
   } else {
-    logger.debug(`Ensuring content-only comment in #${issueNo}`);
-    body = `${content}`;
+    logger.debug(`Ensuring content-only comment in #${number}`);
+    body = `${sanitizedContent}`;
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body === body) {
         commentId = comment.id;
@@ -849,101 +1121,63 @@ export async function ensureComment(
     });
   }
   if (!commentId) {
-    await addComment(issueNo, body);
-    logger.info({ repository: config.repository, issueNo }, 'Added comment');
+    await addComment(number, body);
+    logger.debug(
+      { repository: config.repository, issueNo: number },
+      'Added comment'
+    );
   } else if (commentNeedsUpdating) {
-    await editComment(issueNo, commentId, body);
-    logger.info({ repository: config.repository, issueNo }, 'Updated comment');
+    await editComment(number, commentId, body);
+    logger.debug(
+      { repository: config.repository, issueNo: number },
+      'Updated comment'
+    );
   } else {
     logger.debug('Comment is already update-to-date');
   }
+  return true;
 }
 
-export async function ensureCommentRemoval(
-  issueNo: number,
-  topic: string
-): Promise<void> {
-  logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+  content,
+}: EnsureCommentRemovalConfig): Promise<void> {
+  logger.debug(
+    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
+  );
+
   const comments = await getComments(issueNo);
-  let commentId;
-  comments.forEach((comment: { body: string; id: number }) => {
-    if (comment.body.startsWith(`### ${topic}\n\n`)) {
-      commentId = comment.id;
-    }
-  });
+  let commentId: number | null = null;
+
+  const byTopic = (comment: GitlabComment): boolean =>
+    comment.body.startsWith(`### ${topic}\n\n`);
+  const byContent = (comment: GitlabComment): boolean =>
+    comment.body.trim() === content;
+
+  if (topic) {
+    commentId = comments.find(byTopic)?.id;
+  } else if (content) {
+    commentId = comments.find(byContent)?.id;
+  }
+
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }
 }
 
-const mapPullRequests = (pr: {
-  iid: number;
-  source_branch: string;
-  title: string;
-  state: string;
-  created_at: string;
-}): Pr => ({
-  number: pr.iid,
-  branchName: pr.source_branch,
-  title: pr.title,
-  state: pr.state === 'opened' ? 'open' : pr.state,
-  createdAt: pr.created_at,
-});
+export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  return Promise.resolve([]);
+}
 
-async function fetchPrList(): Promise<Pr[]> {
-  const query = new URLSearchParams({
-    per_page: '100',
-    author_id: `${authorId}`,
-  }).toString();
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  try {
-    const res = await api.get(urlString, { paginate: true });
-    return res.body.map(mapPullRequests);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error fetching PR list');
-    if (err.statusCode === 403) {
-      throw new Error('authentication-error');
+export async function filterUnavailableUsers(
+  users: string[]
+): Promise<string[]> {
+  const filteredUsers = [];
+  for (const user of users) {
+    if (!(await isUserBusy(user))) {
+      filteredUsers.push(user);
     }
-    throw err;
   }
-}
-
-export async function getPrList(): Promise<Pr[]> {
-  if (!config.prList) {
-    config.prList = await fetchPrList();
-  }
-  return config.prList;
-}
-
-function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
-    return true;
-  }
-  if (desiredState[0] === '!') {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
-export async function findPr(
-  branchName: string,
-  prTitle?: string | null,
-  state = 'all'
-): Promise<Pr> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  const prList = await getPrList();
-  return prList.find(
-    (p: { branchName: string; title: string; state: string }) =>
-      p.branchName === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state)
-  );
-}
-
-export function getCommitMessages(): Promise<string[]> {
-  return config.storage.getCommitMessages();
-}
-
-export function getVulnerabilityAlerts(): VulnerabilityAlert[] {
-  return [];
+  return filteredUsers;
 }

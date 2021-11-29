@@ -1,19 +1,14 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
-import { RangeConfig } from '../common';
-import { RangeStrategy } from '../../versioning';
+import type { RangeStrategy } from '../../types';
+import type { RangeConfig } from '../types';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
-  const {
-    depType,
-    depName,
-    packageJsonType,
-    currentValue,
-    rangeStrategy,
-  } = config;
+  const { depType, depName, packageJsonType, currentValue, rangeStrategy } =
+    config;
   const isComplexRange = parseRange(currentValue).length > 1;
   if (rangeStrategy === 'bump' && isComplexRange) {
-    logger.info(
+    logger.debug(
       { currentValue },
       'Replacing bump strategy for complex range with widen'
     );

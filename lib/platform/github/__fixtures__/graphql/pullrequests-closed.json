@@ -1,0 +1,40 @@
+{
+  "data": {
+    "repository": {
+      "pullRequests": {
+        "pageInfo": {},
+        "nodes": [
+          {
+            "number": 2500,
+            "baseRefName": "master",
+            "headRefName": "renovate/jest-monorepo",
+            "state": "MERGED",
+            "title": "chore(deps): update dependency jest to v23.6.0",
+            "comments": {
+              "nodes": [
+                {
+                  "databaseId": 419928791,
+                  "body": "[![CLA assistant check](https://cla-assistant.io/pull/badge/signed)](https://cla-assistant.io/renovatebot/renovate?pullRequest=2500) <br/>All committers have signed the CLA."
+                }
+              ]
+            }
+          },
+          {
+            "number": 2499,
+            "headRefName": "renovate/delay-4.x",
+            "state": "MERGED",
+            "title": "build(deps): update dependency delay to v4.0.1",
+            "comments": {
+              "nodes": [
+                {
+                  "databaseId": 420006957,
+                  "body": ":tada: This PR is included in version 13.63.5 :tada:\n\nThe release is available on:\n- [npm package (@latest dist-tag)](https://www.npmjs.com/package/renovate)\n- [GitHub release](https://github.com/renovatebot/renovate/releases/tag/13.63.5)\n\nYour **[semantic-release](https://github.com/semantic-release/semantic-release)** bot :package::rocket:"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata minClientVersion="2.12">
+    <id>NUnit</id>
+    <version>3.12.0</version>
+    <title>NUnit</title>
+    <authors>Charlie Poole, Rob Prouse</authors>
+    <owners>Charlie Poole, Rob Prouse</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="file">LICENSE.txt</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <projectUrl>https://nunit.org/</projectUrl>
+    <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</iconUrl>
+    <description>NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.
+
+      This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install
+      version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests.
+      Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
+
+      Supported platforms:
+      - .NET Framework 3.5+
+      - .NET Standard 1.4+
+      - .NET Core
+    </description>
+    <summary>NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.</summary>
+    <releaseNotes>This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need
+      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to
+      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
+    </releaseNotes>
+    <copyright>Copyright (c) 2019 Charlie Poole, Rob Prouse</copyright>
+    <language>en-US</language>
+    <tags>nunit test testing tdd framework fluent assert theory plugin addin</tags>
+    <repository type="git" url="https://github.com/nunit/nunit"/>
+    <dependencies>
+      <group targetFramework=".NETFramework3.5"/>
+      <group targetFramework=".NETFramework4.0"/>
+      <group targetFramework=".NETFramework4.5"/>
+      <group targetFramework=".NETStandard1.4">
+        <dependency id="NETStandard.Library" version="1.6.1"/>
+        <dependency id="System.ComponentModel.TypeConverter" version="4.3.0"/>
+        <dependency id="System.Reflection.TypeExtensions" version="4.4.0" exclude="compile"/>
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="NETStandard.Library" version="2.0.0"/>
+      </group>
+    </dependencies>
+  </metadata>
+</package>

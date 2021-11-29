@@ -1,0 +1,16 @@
+source 'https://github.com/Artsy/Specs.git'
+
+pod 'a'
+pod 'a/sub'
+pod 'b', '1.2.3'
+pod 'c', "1.2.3"
+pod 'd', :path => '~/Documents/Alamofire'
+pod 'e', :git => 'e.git'
+pod 'f', :git => 'f.git', :branch => 'dev'
+pod 'g', :git => 'g.git', :tag => '3.2.1'
+pod 'h', :git => 'https://github.com/foo/foo.git', :tag => '0.0.1'
+pod 'i', :git => 'git@github.com:foo/foo.git', :tag => '0.0.1'
+pod 'j', :git => 'https://gitlab.com/bar/bar.git', :tag => '0.1.0'
+pod 'k', :git => 'https://gitlab.com/bar/bar.git', :tag => '0.1.0'
+pod 'l', :git => 'https://example.com/baz/baz.git', :tag => '1.0.0'
+pod 'm', :git => 'git@example.com:baz/baz.git', :tag => '1.0.0'

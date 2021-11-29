@@ -1,0 +1,4 @@
+version: "3.7"
+services:
+  redis:
+    image: ${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}

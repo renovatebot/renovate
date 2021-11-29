@@ -1,35 +1,58 @@
+import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
+import { BranchStatus } from '../../types';
+import {
+  MergeConfidence,
+  isActiveConfidenceLevel,
+} from '../../util/merge-confidence';
+
+export async function resolveBranchStatus(
+  branchName: string,
+  ignoreTests = false
+): Promise<BranchStatus> {
+  logger.debug(
+    `resolveBranchStatus(branchName=${branchName}, ignoreTests=${ignoreTests})`
+  );
+
+  if (ignoreTests) {
+    logger.debug('Ignore tests. Return green');
+    return BranchStatus.green;
+  }
+
+  const status = await platform.getBranchStatus(branchName);
+  logger.debug(`Branch status ${status}`);
+
+  return status;
+}
 
 async function setStatusCheck(
   branchName: string,
   context: string,
   description: string,
-  state: string,
+  state: BranchStatus,
   url: string
 ): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
     context
   );
-  // Check if state needs setting
   if (existingState === state) {
     logger.debug(`Status check ${context} is already up-to-date`);
   } else {
     logger.debug(`Updating ${context} status check state to ${state}`);
-    await platform.setBranchStatus(
+    await platform.setBranchStatus({
       branchName,
       context,
       description,
       state,
-      url
-    );
+      url,
+    });
   }
 }
 
 export type StabilityConfig = RenovateConfig & {
-  stabilityStatus?: string;
+  stabilityStatus?: BranchStatus;
   branchName: string;
 };
 
@@ -39,7 +62,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   }
   const context = `renovate/stability-days`;
   const description =
-    config.stabilityStatus === 'success'
+    config.stabilityStatus === BranchStatus.green
       ? 'Updates have met stability days requirement'
       : 'Updates have not met stability days requirement';
   await setStatusCheck(
@@ -51,29 +74,25 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   );
 }
 
-export type UnpublishableConfig = RenovateConfig & {
-  unpublishSafe?: boolean;
-  canBeUnpublished?: boolean;
-  branchName: string;
+export type ConfidenceConfig = RenovateConfig & {
+  confidenceStatus?: BranchStatus;
+  minimumConfidence?: MergeConfidence;
 };
 
-export async function setUnpublishable(
-  config: UnpublishableConfig
-): Promise<void> {
-  if (!config.unpublishSafe) {
+export async function setConfidence(config: ConfidenceConfig): Promise<void> {
+  if (!isActiveConfidenceLevel(config.minimumConfidence)) {
     return;
   }
-  const context = `renovate/unpublish-safe`;
-  // Set canBeUnpublished status check
-  const state = config.canBeUnpublished ? 'pending' : 'success';
-  const description = config.canBeUnpublished
-    ? 'Packages < 24 hours old can be unpublished'
-    : 'Packages cannot be unpublished';
+  const context = `renovate/merge-confidence`;
+  const description =
+    config.confidenceStatus === BranchStatus.green
+      ? 'Updates have met Merge Confidence requirement'
+      : 'Updates have not met Merge Confidence requirement';
   await setStatusCheck(
     config.branchName,
     context,
     description,
-    state,
-    config.productLinks.docs
+    config.confidenceStatus,
+    config.productLinks.documentation
   );
 }

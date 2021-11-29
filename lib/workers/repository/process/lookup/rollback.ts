@@ -1,40 +1,35 @@
+import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
-import { LookupUpdate } from './common';
-
-export interface RollbackConfig {
-  currentValue?: string;
-  depName?: string;
-  packageFile: Record<string, any>;
-  versionScheme: string;
-}
+import type { LookupUpdate } from '../../../../manager/types';
+import type { VersioningApi } from '../../../../versioning';
+import type { RollbackConfig } from './types';
 
 export function getRollbackUpdate(
   config: RollbackConfig,
-  versions: string[]
+  versions: Release[],
+  version: VersioningApi
 ): LookupUpdate {
-  const { packageFile, versionScheme, depName, currentValue } = config;
-  const version = versioning.get(versionScheme);
+  const { packageFile, versioning, depName, currentValue } = config;
   // istanbul ignore if
-  if (!version.isLessThanRange) {
-    logger.info(
-      { versionScheme },
-      'Current version scheme does not support isLessThanRange()'
+  if (!('isLessThanRange' in version)) {
+    logger.debug(
+      { versioning },
+      'Current versioning does not support isLessThanRange()'
     );
     return null;
   }
-  const lessThanVersions = versions.filter(v =>
-    version.isLessThanRange(v, currentValue)
+  const lessThanVersions = versions.filter((v) =>
+    version.isLessThanRange(v.version, currentValue)
   );
   // istanbul ignore if
   if (!lessThanVersions.length) {
-    logger.info(
+    logger.debug(
       { packageFile, depName, currentValue },
       'Missing version has nothing to roll back to'
     );
     return null;
   }
-  logger.info(
+  logger.debug(
     { packageFile, depName, currentValue },
     `Current version not found - rolling back`
   );
@@ -42,28 +37,23 @@ export function getRollbackUpdate(
     { dependency: depName, versions },
     'Versions found before rolling back'
   );
-  lessThanVersions.sort((a, b) => version.sortVersions(a, b));
-  const toVersion = lessThanVersions.pop();
+  lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
+  const newVersion = lessThanVersions.pop()?.version;
   // istanbul ignore if
-  if (!toVersion) {
-    logger.info('No toVersion to roll back to');
+  if (!newVersion) {
+    logger.debug('No newVersion to roll back to');
     return null;
   }
-  let fromVersion: string;
-  const newValue = version.getNewValue(
+  const newValue = version.getNewValue({
     currentValue,
-    'replace',
-    fromVersion,
-    toVersion
-  );
+    rangeStrategy: 'replace',
+    newVersion,
+  });
   return {
-    updateType: 'rollback',
-    branchName:
-      '{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x',
-    commitMessageAction: 'Roll back',
-    isRollback: true,
+    bucket: 'rollback',
+    newMajor: version.getMajor(newVersion),
     newValue,
-    newMajor: version.getMajor(toVersion),
-    semanticCommitType: 'fix',
+    newVersion,
+    updateType: 'rollback',
   };
 }

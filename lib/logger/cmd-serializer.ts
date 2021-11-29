@@ -1,4 +1,9 @@
 // istanbul ignore next
-export default function(cmd: string): string {
-  return cmd.replace(/https:\/\/[^@]*@/g, 'https://**redacted**@');
+export default function cmdSerializer(
+  cmd: string | string[]
+): string | string[] {
+  if (typeof cmd === 'string') {
+    return cmd.replace(/https:\/\/[^@]*@/g, 'https://**redacted**@'); // TODO #12070
+  }
+  return cmd;
 }

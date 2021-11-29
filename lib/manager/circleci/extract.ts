@@ -1,6 +1,9 @@
+import { OrbDatasource } from '../../datasource/orb';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
+import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
-import { PackageFile, PackageDependency } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -8,18 +11,25 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const orbs = line.match(/^\s*orbs:\s*$/);
+      const orbs = regEx(/^\s*orbs:\s*$/).exec(line); // TODO #12071
       if (orbs) {
         logger.trace(`Matched orbs on line ${lineNumber}`);
-        let foundOrb: boolean;
+        let foundOrbOrNoop: boolean;
         do {
-          foundOrb = false;
+          foundOrbOrNoop = false;
           const orbLine = lines[lineNumber + 1];
           logger.trace(`orbLine: "${orbLine}"`);
-          const orbMatch = orbLine.match(/^\s+([^:]+):\s(.+)$/);
+          const yamlNoop = regEx(/^\s*(#|$)/).exec(orbLine); // TODO #12071
+          if (yamlNoop) {
+            logger.debug('orbNoop');
+            foundOrbOrNoop = true;
+            lineNumber += 1;
+            continue;
+          }
+          const orbMatch = regEx(/^\s+([^:]+):\s(.+)$/).exec(orbLine); // TODO #12071
           if (orbMatch) {
             logger.trace('orbMatch');
-            foundOrb = true;
+            foundOrbOrNoop = true;
             lineNumber += 1;
             const depName = orbMatch[1];
             const [orbName, currentValue] = orbMatch[2].split('@');
@@ -27,18 +37,17 @@ export function extractPackageFile(content: string): PackageFile | null {
               depType: 'orb',
               depName,
               currentValue,
-              managerData: { lineNumber },
-              datasource: 'orb',
+              datasource: OrbDatasource.id,
               lookupName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
-              versionScheme: 'npm',
+              versioning: npmVersioning.id,
               rangeStrategy: 'pin',
             };
             deps.push(dep);
           }
-        } while (foundOrb);
+        } while (foundOrbOrNoop);
       }
-      const match = line.match(/^\s*- image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+      const match = regEx(/^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line); // TODO #12071
       if (match) {
         const currentFrom = match[1];
         const dep = getDep(currentFrom);
@@ -51,8 +60,13 @@ export function extractPackageFile(content: string): PackageFile | null {
           'CircleCI docker image'
         );
         dep.depType = 'docker';
-        dep.managerData = { lineNumber };
-        deps.push(dep);
+        dep.versioning = 'docker';
+        if (
+          !dep.depName?.startsWith('ubuntu-') &&
+          !dep.depName?.startsWith('windows-server-')
+        ) {
+          deps.push(dep);
+        }
       }
     }
   } catch (err) /* istanbul ignore next */ {

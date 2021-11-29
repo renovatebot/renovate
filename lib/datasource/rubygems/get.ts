@@ -1,67 +1,86 @@
-import { OutgoingHttpHeaders } from 'http';
+import Marshal from 'marshal';
 import { logger } from '../../logger';
-import got from '../../util/got';
-import { maskToken } from '../../util/mask';
-import retriable from './retriable';
-import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
-import { ReleaseResult } from '../common';
+import { HttpError } from '../../util/http/types';
+import { getQueryString, joinUrlParts, parseUrl } from '../../util/url';
+import { Datasource } from '../datasource';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type {
+  JsonGemVersions,
+  JsonGemsInfo,
+  MarshalledVersionInfo,
+} from './types';
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
+const DEPENDENCIES_PATH = '/api/v1/dependencies';
 
-// istanbul ignore next
-const processError = ({ err, ...rest }): null => {
-  const { statusCode, headers = {} } = err;
-  const data = {
-    ...rest,
-    err,
-    statusCode,
-    token: maskToken(headers.authorization) || 'none',
-  };
-
-  switch (statusCode) {
-    case NOT_FOUND:
-      logger.info(data, 'RubyGems lookup failure: not found');
-      break;
-    case FORBIDDEN:
-    case UNAUTHORIZED:
-      logger.info(data, 'RubyGems lookup failure: authentication failed');
-      break;
-    default:
-      logger.debug(data, 'RubyGems lookup failure');
-      throw new Error('registry-failure');
+export class InternalRubyGemsDatasource extends Datasource {
+  constructor(override readonly id: string) {
+    super(id);
   }
-  return null;
-};
 
-const getHeaders = (): OutgoingHttpHeaders => {
-  return { hostType: 'rubygems' };
-};
+  private knownFallbackHosts = ['rubygems.pkg.github.com', 'gitlab.com'];
 
-const fetch = async ({ dependency, registry, path }): Promise<any> => {
-  const json = true;
+  override getReleases({
+    lookupName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    if (this.knownFallbackHosts.includes(parseUrl(registryUrl)?.hostname)) {
+      return this.getDependencyFallback(lookupName, registryUrl);
+    }
+    return this.getDependency(lookupName, registryUrl);
+  }
 
-  const retry = { retries: retriable() };
-  const headers = getHeaders();
+  async getDependencyFallback(
+    dependency: string,
+    registry: string
+  ): Promise<ReleaseResult | null> {
+    logger.debug(
+      { dependency, api: DEPENDENCIES_PATH },
+      'RubyGems lookup for dependency'
+    );
+    const info = await this.fetchBuffer<MarshalledVersionInfo[]>(
+      dependency,
+      registry,
+      DEPENDENCIES_PATH
+    );
+    if (!info || info.length === 0) {
+      return null;
+    }
+    const releases = info.map(
+      ({ number: version, platform: rubyPlatform }) => ({
+        version,
+        rubyPlatform,
+      })
+    );
+    return {
+      releases,
+      homepage: null,
+      sourceUrl: null,
+      changelogUrl: null,
+    };
+  }
 
-  const name = `${path}/${dependency}.json`;
-  const baseUrl = registry;
+  async getDependency(
+    dependency: string,
+    registry: string
+  ): Promise<ReleaseResult | null> {
+    logger.debug(
+      { dependency, api: INFO_PATH },
+      'RubyGems lookup for dependency'
+    );
+    let info: JsonGemsInfo;
 
-  logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
-  const response = (await got(name, { retry, json, baseUrl, headers })) || {
-    body: undefined,
-  };
+    try {
+      info = await this.fetchJson(dependency, registry, INFO_PATH);
+    } catch (error) {
+      // fallback to deps api on 404
+      if (error instanceof HttpError && error.response?.statusCode === 404) {
+        return await this.getDependencyFallback(dependency, registry);
+      }
+      throw error;
+    }
 
-  return response.body;
-};
-
-export const getDependency = async ({
-  dependency,
-  registry,
-}): Promise<ReleaseResult | null> => {
-  logger.debug({ dependency }, 'RubyGems lookup for dependency');
-  try {
-    const info = await fetch({ dependency, registry, path: INFO_PATH });
     if (!info) {
       logger.debug({ dependency }, 'RubyGems package not found.');
       return null;
@@ -75,24 +94,48 @@ export const getDependency = async ({
       return null;
     }
 
-    const versions =
-      (await fetch({ dependency, registry, path: VERSIONS_PATH })) || [];
+    let versions: JsonGemVersions[] = [];
+    let releases: Release[] = [];
+    try {
+      versions = await this.fetchJson(dependency, registry, VERSIONS_PATH);
+    } catch (err) {
+      if (err.statusCode === 400 || err.statusCode === 404) {
+        logger.debug(
+          { registry },
+          'versions endpoint returns error - falling back to info endpoint'
+        );
+      } else {
+        throw err;
+      }
+    }
 
-    const releases = versions.map(
-      ({
-        number: version,
-        platform: rubyPlatform,
-        created_at: releaseTimestamp,
-        rubygems_version: rubygemsVersion,
-        ruby_version: rubyVersion,
-      }) => ({
-        version,
-        rubyPlatform,
-        releaseTimestamp,
-        rubygemsVersion,
-        rubyVersion,
-      })
-    );
+    // TODO: invalid properties for `Release` see #11312
+
+    if (versions.length === 0 && info.version) {
+      logger.warn('falling back to the version from the info endpoint');
+      releases = [
+        {
+          version: info.version,
+          rubyPlatform: info.platform,
+        } as Release,
+      ];
+    } else {
+      releases = versions.map(
+        ({
+          number: version,
+          platform: rubyPlatform,
+          created_at: releaseTimestamp,
+          rubygems_version: rubygemsVersion,
+          ruby_version: rubyVersion,
+        }) => ({
+          version,
+          rubyPlatform,
+          releaseTimestamp,
+          rubygemsVersion,
+          rubyVersion,
+        })
+      );
+    }
 
     return {
       releases,
@@ -100,7 +143,35 @@ export const getDependency = async ({
       sourceUrl: info.source_code_uri,
       changelogUrl: info.changelog_uri,
     };
-  } catch (err) {
-    return processError({ err, registry, dependency });
   }
-};
+
+  private async fetchJson<T>(
+    dependency: string,
+    registry: string,
+    path: string
+  ): Promise<T> {
+    const url = joinUrlParts(registry, path, `${dependency}.json`);
+
+    logger.trace({ registry, dependency, url }, `RubyGems lookup request`);
+    const response = (await this.http.getJson<T>(url)) || {
+      body: undefined,
+    };
+
+    return response.body;
+  }
+
+  private async fetchBuffer<T>(
+    dependency: string,
+    registry: string,
+    path: string
+  ): Promise<T> {
+    const url = `${joinUrlParts(registry, path)}?${getQueryString({
+      gems: dependency,
+    })}`;
+
+    logger.trace({ registry, dependency, url }, `RubyGems lookup request`);
+    const response = await this.http.getBuffer(url);
+
+    return new Marshal(response.body).parsed as T;
+  }
+}

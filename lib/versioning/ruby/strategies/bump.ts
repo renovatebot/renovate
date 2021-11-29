@@ -1,15 +1,13 @@
-import { gte, lte } from '@snyk/ruby-semver';
+import { gte, lte } from '@renovatebot/ruby-semver';
 import { logger } from '../../../logger';
-import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from '../operator';
-import { floor, increment, decrement } from '../version';
+import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
 import { parse as parseRange } from '../range';
+import { decrement, floor, increment } from '../version';
 
 export default ({ range, to }: { range: string; to: string }): string => {
   const ranges = range.split(',').map(parseRange);
   const results = ranges.map(({ operator, version: ver, delimiter }) => {
     switch (operator) {
-      case null:
-        return to;
       case GT:
         return lte(to, ver)
           ? `${GT}${delimiter}${ver}`

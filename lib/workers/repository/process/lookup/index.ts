@@ -1,429 +1,397 @@
-import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
-import { getRollbackUpdate, RollbackConfig } from './rollback';
-import { getRangeStrategy } from '../../../../manager';
-import { filterVersions, FilterConfig } from './filter';
+import is from '@sindresorhus/is';
+import { mergeChildConfig } from '../../../../config';
+import type { ValidationMessage } from '../../../../config/types';
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import {
-  getPkgReleases,
-  supportsDigests,
-  getDigest,
   Release,
+  getDatasourceList,
+  getDefaultVersioning,
+  getDigest,
+  getPkgReleases,
+  isGetPkgReleasesConfig,
+  supportsDigests,
 } from '../../../../datasource';
-import { LookupUpdate } from './common';
-import { RangeConfig } from '../../../../manager/common';
-import { RenovateConfig } from '../../../../config';
+import { logger } from '../../../../logger';
+import { getRangeStrategy } from '../../../../manager';
+import { SkipReason } from '../../../../types';
+import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';
-
-export interface LookupWarning {
-  updateType: 'warning';
-  message: string;
-}
-
-export interface UpdateResult {
-  sourceDirectory?: string;
-  dockerRepository?: string;
-  dockerRegistry?: string;
-  changelogUrl?: string;
-  homepage?: string;
-  deprecationMessage?: string;
-  sourceUrl?: string;
-  skipReason?: string;
-  releases: Release[];
-
-  updates: LookupUpdate[];
-  warnings: LookupWarning[];
-}
-
-export interface LookupUpdateConfig
-  extends RollbackConfig,
-    FilterConfig,
-    RangeConfig,
-    RenovateConfig {
-  separateMinorPatch?: boolean;
-  digestOneAndOnly?: boolean;
-  pinDigests?: boolean;
-  rollbackPrs?: boolean;
-  currentDigest?: string;
-  lockedVersion?: string;
-  vulnerabilityAlert?: boolean;
-  separateMajorMinor?: boolean;
-  separateMultipleMajor?: boolean;
-}
-
-function getType(
-  config: LookupUpdateConfig,
-  fromVersion: string,
-  toVersion: string
-): string {
-  const { versionScheme, rangeStrategy, currentValue } = config;
-  const version = versioning.get(versionScheme);
-  if (rangeStrategy === 'bump' && version.matches(toVersion, currentValue)) {
-    return 'bump';
-  }
-  if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
-    return 'major';
-  }
-  if (version.getMinor(toVersion) > version.getMinor(fromVersion)) {
-    return 'minor';
-  }
-  if (config.separateMinorPatch) {
-    return 'patch';
-  }
-  if (config.patch.automerge && !config.minor.automerge) {
-    return 'patch';
-  }
-  return 'minor';
-}
-
-function getFromVersion(
-  config: LookupUpdateConfig,
-  rangeStrategy: string,
-  latestVersion: string,
-  allVersions: string[]
-): string | null {
-  const { currentValue, lockedVersion, versionScheme } = config;
-  const version = versioning.get(versionScheme);
-  if (version.isVersion(currentValue)) {
-    return currentValue;
-  }
-  if (version.isSingleVersion(currentValue)) {
-    return currentValue.replace(/=/g, '').trim();
-  }
-  logger.trace(`currentValue ${currentValue} is range`);
-  let useVersions = allVersions.filter(v => version.matches(v, currentValue));
-  if (latestVersion && version.matches(latestVersion, currentValue)) {
-    useVersions = useVersions.filter(
-      v => !version.isGreaterThan(v, latestVersion)
-    );
-  }
-  if (rangeStrategy === 'pin') {
-    return (
-      lockedVersion || version.maxSatisfyingVersion(useVersions, currentValue)
-    );
-  }
-  if (rangeStrategy === 'bump') {
-    // Use the lowest version in the current range
-    return version.minSatisfyingVersion(useVersions, currentValue);
-  }
-  // Use the highest version in the current range
-  return version.maxSatisfyingVersion(useVersions, currentValue);
-}
-
-function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
-  const { separateMajorMinor, separateMultipleMajor } = config;
-  const { updateType, newMajor } = update;
-  if (updateType === 'lockfileUpdate') {
-    return updateType;
-  }
-  if (
-    !separateMajorMinor ||
-    config.major.automerge === true ||
-    (config.automerge && config.major.automerge !== false)
-  ) {
-    return 'latest';
-  }
-  if (separateMultipleMajor && updateType === 'major') {
-    return `major-${newMajor}`;
-  }
-  return updateType;
-}
+import { applyPackageRules } from '../../../../util/package-rules';
+import { regEx } from '../../../../util/regex';
+import * as allVersioning from '../../../../versioning';
+import { getBucket } from './bucket';
+import { getCurrentVersion } from './current';
+import { filterVersions } from './filter';
+import { filterInternalChecks } from './filter-checks';
+import { generateUpdate } from './generate';
+import { getRollbackUpdate } from './rollback';
+import type { LookupUpdateConfig, UpdateResult } from './types';
 
 export async function lookupUpdates(
-  config: LookupUpdateConfig
+  inconfig: LookupUpdateConfig
 ): Promise<UpdateResult> {
-  const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
-  logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
-  const version = versioning.get(config.versionScheme);
-  const res: UpdateResult = { updates: [], warnings: [] } as any;
-  if (version.isValid(currentValue)) {
-    const dependency = clone(await getPkgReleases(config));
-    if (!dependency) {
-      // If dependency lookup fails then warn and return
-      const result: LookupWarning = {
-        updateType: 'warning',
-        message: `Failed to look up dependency ${depName}`,
-      };
-      logger.info(
-        { dependency: depName, packageFile: config.packageFile },
-        result.message
-      );
-      // TODO: return warnings in own field
-      res.warnings.push(result);
+  let config: LookupUpdateConfig = { ...inconfig };
+  const {
+    currentDigest,
+    currentValue,
+    datasource,
+    depName,
+    digestOneAndOnly,
+    followTag,
+    lockedVersion,
+    packageFile,
+    pinDigests,
+    rollbackPrs,
+    isVulnerabilityAlert,
+    updatePinnedDependencies,
+  } = config;
+  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
+  const res: UpdateResult = {
+    updates: [],
+    warnings: [],
+  } as any;
+  try {
+    logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
+    // Use the datasource's default versioning if none is configured
+    config.versioning ??= getDefaultVersioning(datasource);
+    const versioning = allVersioning.get(config.versioning);
+    res.versioning = config.versioning;
+    // istanbul ignore if
+    if (
+      !isGetPkgReleasesConfig(config) ||
+      !getDatasourceList().includes(datasource)
+    ) {
+      res.skipReason = SkipReason.InvalidConfig;
       return res;
     }
-    if (dependency.deprecationMessage) {
-      logger.info({ dependency: depName }, 'Found deprecationMessage');
-      res.deprecationMessage = dependency.deprecationMessage;
-    }
-    res.sourceUrl =
-      dependency.sourceUrl && dependency.sourceUrl.length
-        ? dependency.sourceUrl
-        : null;
-    if (dependency.sourceDirectory) {
-      res.sourceDirectory = dependency.sourceDirectory;
-    }
-    res.homepage = dependency.homepage;
-    res.changelogUrl = dependency.changelogUrl;
-    // TODO: improve this
-    // istanbul ignore if
-    if (dependency.dockerRegistry) {
-      res.dockerRegistry = dependency.dockerRegistry;
-      res.dockerRepository = dependency.dockerRepository;
-    }
-    const { latestVersion, releases } = dependency;
-    // Filter out any results from datasource that don't comply with our versioning scheme
-    let allVersions = releases
-      .map(release => release.version)
-      .filter(v => version.isVersion(v));
-    // istanbul ignore if
-    if (allVersions.length === 0) {
-      const message = `Found no results from datasource that look like a version`;
-      logger.debug({ dependency: depName, result: dependency }, message);
-      if (!config.currentDigest) {
+    const isValid = currentValue && versioning.isValid(currentValue);
+    if (unconstrainedValue || isValid) {
+      if (
+        !updatePinnedDependencies &&
+        versioning.isSingleVersion(currentValue)
+      ) {
+        res.skipReason = SkipReason.IsPinned;
         return res;
       }
-    }
-    if (config.followTag) {
-      const taggedVersion = dependency.tags[config.followTag];
-      if (!taggedVersion) {
-        res.warnings.push({
-          updateType: 'warning',
-          message: `Can't find version with tag ${config.followTag} for ${depName}`,
-        });
-        return res;
-      }
-      allVersions = allVersions.filter(
-        v =>
-          v === taggedVersion ||
-          (v === currentValue &&
-            version.isGreaterThan(taggedVersion, currentValue))
-      );
-    }
-    // Check that existing constraint can be satisfied
-    const allSatisfyingVersions = allVersions.filter(v =>
-      version.matches(v, currentValue)
-    );
-    if (config.rollbackPrs && !allSatisfyingVersions.length) {
-      const rollback = getRollbackUpdate(config, allVersions);
-      // istanbul ignore if
-      if (!rollback) {
-        res.warnings.push({
-          updateType: 'warning',
-          message: `Can't find version matching ${currentValue} for ${depName}`,
-        });
-        return res;
-      }
-      res.updates.push(rollback);
-    }
-    let rangeStrategy = getRangeStrategy(config);
-    // istanbul ignore if
-    if (rangeStrategy === 'update-lockfile' && !lockedVersion) {
-      rangeStrategy = 'bump';
-    }
-    const nonDeprecatedVersions = releases
-      .filter(release => !release.isDeprecated)
-      .map(release => release.version);
-    const fromVersion =
-      getFromVersion(
-        config,
-        rangeStrategy,
-        latestVersion,
-        nonDeprecatedVersions
-      ) || getFromVersion(config, rangeStrategy, latestVersion, allVersions);
-    if (
-      fromVersion &&
-      rangeStrategy === 'pin' &&
-      !version.isSingleVersion(currentValue)
-    ) {
-      res.updates.push({
-        updateType: 'pin',
-        isPin: true,
-        newValue: version.getNewValue(
-          currentValue,
-          rangeStrategy,
-          fromVersion,
-          fromVersion
-        ),
-        newMajor: version.getMajor(fromVersion),
-      });
-    }
-    let filterStart = fromVersion;
-    if (lockedVersion && rangeStrategy === 'update-lockfile') {
-      // Look for versions greater than the current locked version that still satisfy the package.json range
-      filterStart = lockedVersion;
-    }
-    // Filter latest, unstable, etc
-    let filteredVersions = filterVersions(
-      config,
-      filterStart,
-      dependency.latestVersion,
-      allVersions,
-      releases
-    ).filter(v =>
-      // Leave only compatible versions
-      version.isCompatible(v, currentValue)
-    );
-    if (vulnerabilityAlert) {
-      filteredVersions = filteredVersions.slice(0, 1);
-    }
-    const buckets = {};
-    for (const toVersion of filteredVersions) {
-      const update: LookupUpdate = { fromVersion, toVersion } as any;
-      try {
-        update.newValue = version.getNewValue(
-          currentValue,
-          rangeStrategy,
-          fromVersion,
-          toVersion
-        );
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn(
-          { err, currentValue, rangeStrategy, fromVersion, toVersion },
-          'getNewValue error'
-        );
-        update.newValue = currentValue;
-      }
-      if (!update.newValue || update.newValue === currentValue) {
-        if (!config.lockedVersion) {
-          continue; // eslint-disable-line no-continue
-        }
-        // istanbul ignore if
-        if (rangeStrategy === 'bump') {
-          logger.trace(
-            { depName, currentValue, lockedVersion, toVersion },
-            'Skipping bump because newValue is the same'
-          );
-          continue; // eslint-disable-line no-continue
-        }
-        update.updateType = 'lockfileUpdate';
-        update.fromVersion = lockedVersion;
-        update.displayFrom = lockedVersion;
-        update.displayTo = toVersion;
-        update.isSingleVersion = true;
-      }
-      update.newMajor = version.getMajor(toVersion);
-      update.newMinor = version.getMinor(toVersion);
-      update.updateType =
-        update.updateType || getType(config, update.fromVersion, toVersion);
-      update.isSingleVersion =
-        update.isSingleVersion || !!version.isSingleVersion(update.newValue);
-      if (!version.isVersion(update.newValue)) {
-        update.isRange = true;
-      }
-      const updateRelease = releases.find(release =>
-        version.equals(release.version, toVersion)
-      );
-      // TODO: think more about whether to just Object.assign this
-      const releaseFields = [
-        'releaseTimestamp',
-        'canBeUnpublished',
-        'downloadUrl',
-        'checksumUrl',
-      ];
-      releaseFields.forEach(field => {
-        if (updateRelease[field] !== undefined) {
-          update[field] = updateRelease[field];
-        }
-      });
 
-      const bucket = getBucket(config, update);
-      if (buckets[bucket]) {
-        if (
-          version.isGreaterThan(update.toVersion, buckets[bucket].toVersion)
-        ) {
-          buckets[bucket] = update;
-        }
-      } else {
-        buckets[bucket] = update;
+      const dependency = clone(await getPkgReleases(config));
+      if (!dependency) {
+        // If dependency lookup fails then warn and return
+        const warning: ValidationMessage = {
+          topic: depName,
+          message: `Failed to look up dependency ${depName}`,
+        };
+        logger.debug({ dependency: depName, packageFile }, warning.message);
+        // TODO: return warnings in own field
+        res.warnings.push(warning);
+        return res;
       }
-    }
-    res.updates = res.updates.concat(Object.values(buckets));
-  } else if (!currentValue) {
-    res.skipReason = 'unsupported-value';
-  } else {
-    logger.debug(`Dependency ${depName} has unsupported value ${currentValue}`);
-    if (!config.pinDigests && !config.currentDigest) {
-      res.skipReason = 'unsupported-value';
-    }
-  }
-  // Add digests if necessary
-  if (supportsDigests(config)) {
-    if (config.currentDigest && config.datasource !== 'gitSubmodules') {
-      if (!config.digestOneAndOnly || !res.updates.length) {
-        // digest update
+      if (dependency.deprecationMessage) {
+        logger.debug({ dependency: depName }, 'Found deprecationMessage');
+        res.deprecationMessage = dependency.deprecationMessage;
+      }
+
+      res.sourceUrl = dependency?.sourceUrl;
+      if (dependency.sourceDirectory) {
+        res.sourceDirectory = dependency.sourceDirectory;
+      }
+      res.homepage = dependency.homepage;
+      res.changelogUrl = dependency.changelogUrl;
+      res.dependencyUrl = dependency?.dependencyUrl;
+
+      const latestVersion = dependency.tags?.latest;
+      // Filter out any results from datasource that don't comply with our versioning
+      let allVersions = dependency.releases.filter((release) =>
+        versioning.isVersion(release.version)
+      );
+      // istanbul ignore if
+      if (allVersions.length === 0) {
+        const message = `Found no results from datasource that look like a version`;
+        logger.debug({ dependency: depName, result: dependency }, message);
+        if (!currentDigest) {
+          return res;
+        }
+      }
+      // Reapply package rules in case we missed something from sourceUrl
+      config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
+      if (followTag) {
+        const taggedVersion = dependency.tags?.[followTag];
+        if (!taggedVersion) {
+          res.warnings.push({
+            topic: depName,
+            message: `Can't find version with tag ${followTag} for ${depName}`,
+          });
+          return res;
+        }
+        allVersions = allVersions.filter(
+          (v) =>
+            v.version === taggedVersion ||
+            (v.version === currentValue &&
+              versioning.isGreaterThan(taggedVersion, currentValue))
+        );
+      }
+      // Check that existing constraint can be satisfied
+      const allSatisfyingVersions = allVersions.filter(
+        (v) => unconstrainedValue || versioning.matches(v.version, currentValue)
+      );
+      if (rollbackPrs && !allSatisfyingVersions.length) {
+        const rollback = getRollbackUpdate(config, allVersions, versioning);
+        // istanbul ignore if
+        if (!rollback) {
+          res.warnings.push({
+            topic: depName,
+            message: `Can't find version matching ${currentValue} for ${depName}`,
+          });
+          return res;
+        }
+        res.updates.push(rollback);
+      }
+      let rangeStrategy = getRangeStrategy(config);
+      if (dependency.replacementName && dependency.replacementVersion) {
         res.updates.push({
-          updateType: 'digest',
-          newValue: config.currentValue,
+          updateType: 'replacement',
+          newName: dependency.replacementName,
+          newValue: versioning.getNewValue({
+            currentValue,
+            newVersion: dependency.replacementVersion,
+            rangeStrategy,
+          }),
         });
       }
-    } else if (config.pinDigests) {
-      // Create a pin only if one doesn't already exists
-      if (!res.updates.some(update => update.updateType === 'pin')) {
-        // pin digest
+      // istanbul ignore next
+      if (
+        isVulnerabilityAlert &&
+        rangeStrategy === 'update-lockfile' &&
+        !lockedVersion
+      ) {
+        rangeStrategy = 'bump';
+      }
+      const nonDeprecatedVersions = dependency.releases
+        .filter((release) => !release.isDeprecated)
+        .map((release) => release.version);
+      const currentVersion =
+        getCurrentVersion(
+          currentValue,
+          lockedVersion,
+          versioning,
+          rangeStrategy,
+          latestVersion,
+          nonDeprecatedVersions
+        ) ||
+        getCurrentVersion(
+          currentValue,
+          lockedVersion,
+          versioning,
+          rangeStrategy,
+          latestVersion,
+          allVersions.map((v) => v.version)
+        );
+      // istanbul ignore if
+      if (!currentVersion && lockedVersion) {
+        return res;
+      }
+      res.currentVersion = currentVersion;
+      if (
+        currentValue &&
+        currentVersion &&
+        rangeStrategy === 'pin' &&
+        !versioning.isSingleVersion(currentValue)
+      ) {
         res.updates.push({
           updateType: 'pin',
-          newValue: config.currentValue,
+          isPin: true,
+          newValue: versioning.getNewValue({
+            currentValue,
+            rangeStrategy,
+            currentVersion,
+            newVersion: currentVersion,
+          }),
+          newMajor: versioning.getMajor(currentVersion),
         });
       }
-    } else if (config.datasource === 'gitSubmodules') {
-      const dependency = clone(await getPkgReleases(config));
-      res.updates.push({
-        updateType: 'digest',
-        newValue: dependency.releases[0].version,
-      });
-    }
-    if (version.valueToVersion) {
-      for (const update of res.updates || []) {
-        update.newVersion = version.valueToVersion(update.newValue);
-        update.fromVersion = version.valueToVersion(update.fromVersion);
-        update.toVersion = version.valueToVersion(update.toVersion);
+      let filterStart = currentVersion;
+      if (lockedVersion) {
+        // istanbul ignore if
+        if (!versioning.isVersion(lockedVersion)) {
+          res.skipReason = SkipReason.InvalidVersion;
+          return res;
+        }
+        if (rangeStrategy === 'update-lockfile') {
+          // Look for versions greater than the current locked version that still satisfy the package.json range
+          filterStart = lockedVersion;
+        }
       }
+      // Filter latest, unstable, etc
+      let filteredReleases = filterVersions(
+        config,
+        filterStart,
+        latestVersion,
+        allVersions,
+        versioning
+      ).filter(
+        (v) =>
+          // Leave only compatible versions
+          unconstrainedValue || versioning.isCompatible(v.version, currentValue)
+      );
+      if (isVulnerabilityAlert) {
+        filteredReleases = filteredReleases.slice(0, 1);
+      }
+      const buckets: Record<string, [Release]> = {};
+      for (const release of filteredReleases) {
+        const bucket = getBucket(
+          config,
+          currentVersion,
+          release.version,
+          versioning
+        );
+        if (is.string(bucket)) {
+          if (buckets[bucket]) {
+            buckets[bucket].push(release);
+          } else {
+            buckets[bucket] = [release];
+          }
+        }
+      }
+      const depResultConfig = mergeChildConfig(config, res);
+      for (const [bucket, releases] of Object.entries(buckets)) {
+        const sortedReleases = releases.sort((r1, r2) =>
+          versioning.sortVersions(r1.version, r2.version)
+        );
+        const { release, pendingChecks, pendingReleases } =
+          await filterInternalChecks(
+            depResultConfig,
+            versioning,
+            bucket,
+            sortedReleases
+          );
+        // istanbul ignore next
+        if (!release) {
+          return res;
+        }
+        const newVersion = release.version;
+        const update = generateUpdate(
+          config,
+          versioning,
+          rangeStrategy,
+          lockedVersion || currentVersion,
+          bucket,
+          release
+        );
+        if (pendingChecks) {
+          update.pendingChecks = pendingChecks;
+        }
+        if (pendingReleases.length) {
+          update.pendingVersions = pendingReleases.map((r) => r.version);
+        }
+        if (!update.newValue || update.newValue === currentValue) {
+          if (!lockedVersion) {
+            continue;
+          }
+          // istanbul ignore if
+          if (rangeStrategy === 'bump') {
+            logger.trace(
+              { depName, currentValue, lockedVersion, newVersion },
+              'Skipping bump because newValue is the same'
+            );
+            continue;
+          }
+          res.isSingleVersion = true;
+        }
+        res.isSingleVersion =
+          res.isSingleVersion || !!versioning.isSingleVersion(update.newValue);
+
+        res.updates.push(update);
+      }
+    } else if (currentValue) {
+      logger.debug(
+        `Dependency ${depName} has unsupported value ${currentValue}`
+      );
+      if (!pinDigests && !currentDigest) {
+        res.skipReason = SkipReason.InvalidValue;
+      } else {
+        delete res.skipReason;
+      }
+    } else {
+      res.skipReason = SkipReason.InvalidValue;
     }
-    // update digest for all
-    for (const update of res.updates) {
-      if (config.pinDigests || config.currentDigest) {
-        update.newDigest = await getDigest(config, update.newValue);
-        if (update.newDigest) {
-          update.newDigestShort = update.newDigest
-            .replace('sha256:', '')
-            .substring(0, 7);
-        } else {
-          logger.info({ newValue: update.newValue }, 'Could not getDigest');
+
+    // Record if the dep is fixed to a version
+    if (lockedVersion) {
+      res.currentVersion = lockedVersion;
+      res.fixedVersion = lockedVersion;
+    } else if (currentValue && versioning.isSingleVersion(currentValue)) {
+      res.fixedVersion = currentValue.replace(regEx(/^=+/), '');
+    }
+    // Add digests if necessary
+    if (supportsDigests(config)) {
+      if (currentDigest) {
+        if (!digestOneAndOnly || !res.updates.length) {
+          // digest update
+          res.updates.push({
+            updateType: 'digest',
+            newValue: currentValue,
+          });
+        }
+      } else if (pinDigests) {
+        // Create a pin only if one doesn't already exists
+        if (!res.updates.some((update) => update.updateType === 'pin')) {
+          // pin digest
+          res.updates.push({
+            updateType: 'pin',
+            newValue: currentValue,
+          });
+        }
+      }
+      if (versioning.valueToVersion) {
+        res.currentVersion = versioning.valueToVersion(res.currentVersion);
+        for (const update of res.updates || []) {
+          update.newVersion = versioning.valueToVersion(update.newVersion);
+        }
+      }
+      // update digest for all
+      for (const update of res.updates) {
+        if (pinDigests || currentDigest) {
+          update.newDigest =
+            update.newDigest || (await getDigest(config, update.newValue));
         }
       }
     }
-  }
-  for (const update of res.updates) {
-    const { updateType, fromVersion, toVersion } = update;
-    if (['bump', 'lockfileUpdate'].includes(updateType)) {
-      update[updateType === 'bump' ? 'isBump' : 'isLockfileUpdate'] = true;
-      if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
-        update.updateType = 'major';
-      } else if (
-        config.separateMinorPatch &&
-        version.getMinor(toVersion) === version.getMinor(fromVersion)
-      ) {
-        update.updateType = 'patch';
-      } else {
-        update.updateType = 'minor';
-      }
+    if (res.updates.length) {
+      delete res.skipReason;
     }
-  }
-  // Strip out any non-changed ones
-  res.updates = res.updates
-    .filter(update => update.newDigest !== null)
-    .filter(
-      update =>
-        update.newValue !== config.currentValue ||
-        update.isLockfileUpdate ||
-        (update.newDigest && !update.newDigest.startsWith(config.currentDigest))
+    // Strip out any non-changed ones
+    res.updates = res.updates
+      .filter((update) => update.newDigest !== null)
+      .filter(
+        (update) =>
+          update.newValue !== currentValue ||
+          update.isLockfileUpdate ||
+          (update.newDigest && !update.newDigest.startsWith(currentDigest))
+      );
+  } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError || err.message === CONFIG_VALIDATION) {
+      throw err;
+    }
+    logger.error(
+      {
+        currentDigest,
+        currentValue,
+        datasource,
+        depName,
+        digestOneAndOnly,
+        followTag,
+        lockedVersion,
+        packageFile,
+        pinDigests,
+        rollbackPrs,
+        isVulnerabilityAlert,
+        updatePinnedDependencies,
+        unconstrainedValue,
+        err,
+      },
+      'lookupUpdates error'
     );
-  if (res.updates.some(update => update.updateType === 'pin')) {
-    for (const update of res.updates) {
-      if (update.updateType !== 'pin' && update.updateType !== 'rollback') {
-        update.blockedByPin = true;
-      }
-    }
+    res.skipReason = SkipReason.InternalError;
   }
   return res;
 }

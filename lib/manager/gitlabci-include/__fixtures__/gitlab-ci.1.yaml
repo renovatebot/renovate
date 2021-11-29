@@ -1,0 +1,13 @@
+include:
+- project: mikebryant/include-source-example
+  file: /template.yaml
+  ref: 1.0.0
+-   project: mikebryant/include-source-example2
+    file: /template.yaml
+    ref: master
+- {"project":"mikebryant/include-source-example3", "file": "/template.yaml",}
+- {}
+
+script:
+- !reference [.setup, script]
+- !reference [arbitrary job name with space and no starting dot, nested1, nested2, nested3]

@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { platform } from '../../platform';
+import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { RenovateConfig } from '../../config';
+import { platform } from '../../platform';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -10,16 +10,21 @@ function repoName(value: string | { repository: string }): string {
 }
 
 export async function autodiscoverRepositories(
-  config: RenovateConfig
-): Promise<RenovateConfig> {
+  config: AllConfig
+): Promise<AllConfig> {
   if (!config.autodiscover) {
+    if (!config.repositories?.length) {
+      logger.warn(
+        'No repositories found - did you want to run with flag --autodiscover?'
+      );
+    }
     return config;
   }
   // Autodiscover list of repositories
   let discovered = await platform.getRepos();
-  if (!(discovered && discovered.length)) {
+  if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
-    logger.info(
+    logger.debug(
       'The account associated with your token does not have access to any repos'
     );
     return config;
@@ -28,13 +33,16 @@ export async function autodiscoverRepositories(
     discovered = discovered.filter(minimatch.filter(config.autodiscoverFilter));
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
-      logger.info('None of the discovered repositories matched the filter');
+      logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
   }
-  logger.info(`Discovered ${discovered.length} repositories`);
+  logger.info(
+    { length: discovered.length, repositories: discovered },
+    `Autodiscovered repositories`
+  );
   // istanbul ignore if
-  if (config.repositories && config.repositories.length) {
+  if (config.repositories?.length) {
     logger.debug(
       'Checking autodiscovered repositories against configured repositories'
     );

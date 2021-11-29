@@ -1,50 +1,62 @@
-import simpleGit from 'simple-git/promise';
+import { cache } from '../../util/cache/package/decorator';
+import { regEx } from '../../util/regex';
 import * as semver from '../../versioning/semver';
-import { logger } from '../../logger';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { Datasource } from '../datasource';
+import { GitDatasource } from '../git-refs/base';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 
-const cacheNamespace = 'git-tags';
-const cacheMinutes = 10;
+export class GitTagsDatasource extends Datasource {
+  static readonly id = 'git-tags';
 
-// git will prompt for known hosts or passwords, unless we activate BatchMode
-process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
+  constructor() {
+    super(GitTagsDatasource.id);
+  }
 
-export async function getPkgReleases({
-  lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult | null> {
-  const git = simpleGit();
-  try {
-    const cachedResult = await renovateCache.get<ReleaseResult>(
-      cacheNamespace,
-      lookupName
-    );
-    /* istanbul ignore next line */
-    if (cachedResult) return cachedResult;
+  override readonly customRegistrySupport = false;
 
-    // fetch remote tags
-    const lsRemote = await git.listRemote([
-      '--sort=-v:refname',
-      '--tags',
-      lookupName,
-    ]);
-    // extract valid tags from git ls-remote which looks like 'commithash\trefs/tags/1.2.3
-    const tags = lsRemote
-      .replace(/^.+?refs\/tags\//gm, '')
-      .split('\n')
-      .filter(tag => semver.isVersion(tag));
-    const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
+  @cache({
+    namespace: `datasource-${GitTagsDatasource.id}`,
+    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+  })
+  async getReleases({
+    lookupName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const rawRefs = await GitDatasource.getRawRefs({ lookupName }, this.id);
+
+    if (rawRefs === null) {
+      return null;
+    }
+    const releases = rawRefs
+      .filter((ref) => ref.type === 'tags')
+      .filter((ref) => semver.isVersion(ref.value))
+      .map((ref) => ({
+        version: ref.value,
+        gitRef: ref.value,
+        newDigest: ref.hash,
+      }));
+
+    const sourceUrl = lookupName
+      .replace(regEx(/\.git$/), '')
+      .replace(regEx(/\/$/), '');
+
     const result: ReleaseResult = {
       sourceUrl,
-      releases: tags.map(tag => ({
-        version: semver.isValid(tag),
-        gitRef: tag,
-      })),
+      releases,
     };
 
-    await renovateCache.set(cacheNamespace, lookupName, result, cacheMinutes);
     return result;
-  } catch (e) {
-    logger.debug(`Error looking up tags in ${lookupName}`);
   }
-  return null;
+
+  override async getDigest(
+    { lookupName }: DigestConfig,
+    newValue?: string
+  ): Promise<string | null> {
+    const rawRefs = await GitDatasource.getRawRefs({ lookupName }, this.id);
+    const findValue = newValue || 'HEAD';
+    const ref = rawRefs.find((rawRef) => rawRef.value === findValue);
+    if (ref) {
+      return ref.hash;
+    }
+    return null;
+  }
 }

@@ -1,11 +1,22 @@
 import * as semver from 'semver';
 import { is as isStable } from 'semver-stable';
+import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
-import { VersioningApi } from '../common';
+
+export const id = 'npm';
+export const displayName = 'npm';
+export const urls = [
+  'https://semver.org/',
+  'https://www.npmjs.com/package/semver',
+  'https://docs.npmjs.com/about-semantic-versioning',
+  'https://semver.npmjs.com/',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 const {
   compare: sortVersions,
-  maxSatisfying: maxSatisfyingVersion,
+  maxSatisfying: getSatisfyingVersion,
   minSatisfying: minSatisfyingVersion,
   major: getMajor,
   minor: getMinor,
@@ -24,7 +35,7 @@ export const isVersion = (input: string): string => valid(input);
 
 const isSingleVersion = (constraint: string): string =>
   isVersion(constraint) ||
-  (constraint.startsWith('=') && isVersion(constraint.substring(1).trim()));
+  (constraint?.startsWith('=') && isVersion(constraint.substring(1).trim()));
 
 export const api: VersioningApi = {
   equals,
@@ -40,7 +51,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   sortVersions,
 };

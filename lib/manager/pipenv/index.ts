@@ -1,5 +1,11 @@
+import { ProgrammingLanguage } from '../../constants';
+
 export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
 export { updateArtifacts } from './artifacts';
 
-export const language = 'python';
+export const language = ProgrammingLanguage.Python;
+export const supportsLockFileMaintenance = true;
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)Pipfile$'],
+};

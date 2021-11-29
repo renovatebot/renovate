@@ -1,4 +1,11 @@
-export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
+import { ProgrammingLanguage } from '../../constants';
+import * as rubyVersioning from '../../versioning/ruby';
 
-export const language = 'ruby';
+export { extractPackageFile } from './extract';
+
+export const language = ProgrammingLanguage.Ruby;
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)\\.ruby-version$'],
+  versioning: rubyVersioning.id,
+};

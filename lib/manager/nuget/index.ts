@@ -1,4 +1,15 @@
-export { extractPackageFile } from './extract';
-export { updateDependency } from './update';
+import { ProgrammingLanguage } from '../../constants';
 
-export const language = 'dotnet';
+export { extractPackageFile } from './extract';
+export { updateArtifacts } from './artifacts';
+
+export const language = ProgrammingLanguage.NET;
+
+export const defaultConfig = {
+  fileMatch: [
+    '\\.(?:cs|fs|vb)proj$',
+    '\\.(?:props|targets)$',
+    '(^|\\/)dotnet-tools\\.json$',
+    '(^|\\/)global\\.json$',
+  ],
+};

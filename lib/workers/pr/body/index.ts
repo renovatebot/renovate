@@ -1,23 +1,26 @@
-import handlebars from 'handlebars';
 import { platform } from '../../../platform';
-import { get } from '../../../versioning';
-import { getPrConfigDescription } from './config-description';
-import { getPrBanner } from './banner';
-import { getPrFooter } from './footer';
-import { getPrUpdatesTable } from './updates-table';
-import { getPrNotes, getPrExtraNotes } from './notes';
+import { regEx } from '../../../util/regex';
+import * as template from '../../../util/template';
+import type { BranchConfig } from '../../types';
 import { getChangelogs } from './changelogs';
+import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
-import { PrBodyConfig } from './common';
+import { getPrFooter } from './footer';
+import { getPrHeader } from './header';
+import { getPrExtraNotes, getPrNotes } from './notes';
+import { getPrUpdatesTable } from './updates-table';
 
-handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
-
-function massageUpdateMetadata(config: PrBodyConfig): void {
-  config.upgrades.forEach(upgrade => {
-    /* eslint-disable no-param-reassign */
-    const { homepage, sourceUrl, sourceDirectory, changelogUrl } = upgrade;
+function massageUpdateMetadata(config: BranchConfig): void {
+  config.upgrades.forEach((upgrade) => {
+    const {
+      homepage,
+      sourceUrl,
+      sourceDirectory,
+      changelogUrl,
+      dependencyUrl,
+    } = upgrade;
     let depNameLinked = upgrade.depName;
-    const primaryLink = homepage || sourceUrl;
+    const primaryLink = homepage || sourceUrl || dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
@@ -40,7 +43,7 @@ function massageUpdateMetadata(config: PrBodyConfig): void {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
         fullUrl =
-          sourceUrl.replace(/\/?$/, '/') +
+          sourceUrl.replace(regEx(/\/?$/), '/') +
           'tree/HEAD/' +
           sourceDirectory.replace('^/?/', '');
       }
@@ -50,39 +53,24 @@ function massageUpdateMetadata(config: PrBodyConfig): void {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
-    const { fromVersion, toVersion, updateType, versionScheme } = upgrade;
-    // istanbul ignore if
-    if (updateType === 'minor') {
-      try {
-        const version = get(versionScheme);
-        if (version.getMinor(fromVersion) === version.getMinor(toVersion)) {
-          upgrade.updateType = 'patch';
-        }
-      } catch (err) {
-        // do nothing
-      }
-    }
-    /* eslint-enable no-param-reassign */
   });
 }
 
-export async function getPrBody(config: PrBodyConfig): Promise<string> {
+export async function getPrBody(config: BranchConfig): Promise<string> {
   massageUpdateMetadata(config);
   const content = {
-    banner: getPrBanner(config),
+    header: getPrHeader(config),
     table: getPrUpdatesTable(config),
     notes: getPrNotes(config) + getPrExtraNotes(config),
     changelogs: getChangelogs(config),
     configDescription: await getPrConfigDescription(config),
-    controls: getControls(),
+    controls: await getControls(config),
     footer: getPrFooter(config),
   };
-  const defaultPrBodyTemplate =
-    '{{{banner}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}';
-  const prBodyTemplate = config.prBodyTemplate || defaultPrBodyTemplate;
-  let prBody = handlebars.compile(prBodyTemplate)(content);
+  const prBodyTemplate = config.prBodyTemplate;
+  let prBody = template.compile(prBodyTemplate, content, false);
   prBody = prBody.trim();
-  prBody = prBody.replace(/\n\n\n+/g, '\n\n');
-  prBody = platform.getPrBody(prBody);
+  prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
+  prBody = platform.massageMarkdown(prBody);
   return prBody;
 }

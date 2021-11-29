@@ -1,0 +1,7 @@
+prometheus_image: "prom/prometheus"  // depName gets initially set
+
+prometheus_registry: "docker.io"  // depName gets initially set
+prometheus_repository: "prom/prometheus"  // depName gets initially set
+prometheus_version: "v2.21.0" // currentValue get set
+
+someother_version: "0.12.0" // overwrites currentValue as later values take precedence.

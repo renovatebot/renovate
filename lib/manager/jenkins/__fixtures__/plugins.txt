@@ -1,0 +1,12 @@
+email-ext:1.2.3
+
+apache-httpcomponents-client-4-api:4.4.10-2.0 # comment
+authentication-tokens:1.2
+blueocean:1.21.0 # another comment
+#blueocean:1.22.0
+
+# this line is completely ignored
+
+# these deps will be ignored:
+git:4.2.0         # renovate:ignore
+git-client:3.3.1  # renovate:ignore

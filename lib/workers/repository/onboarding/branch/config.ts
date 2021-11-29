@@ -1,42 +1,85 @@
-import is from '@sindresorhus/is';
-import { clone } from '../../../../util/clone';
-import { platform } from '../../../../platform';
+import { getPreset } from '../../../../config/presets/local';
+import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
+import type {
+  RenovateConfig,
+  RenovateSharedConfig,
+} from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { RenovateConfig } from '../../../../config';
+import { clone } from '../../../../util/clone';
+import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 
-export async function getOnboardingConfig(
+async function getOnboardingConfig(
   config: RenovateConfig
-): Promise<string> {
-  const onboardingConfig = clone(config.onboardingConfig);
-  try {
-    logger.debug('Checking for greenkeeper config');
+): Promise<RenovateSharedConfig> {
+  let onboardingConfig = clone(config.onboardingConfig);
 
-    const greenkeeperConfig = JSON.parse(await platform.getFile('package.json'))
-      .greenkeeper;
-    if (greenkeeperConfig) {
-      onboardingConfig.statusCheckVerify = true;
-    }
-    const { label, branchName, ignore } = greenkeeperConfig;
-    if (label) {
-      logger.info({ label }, 'Migrating Greenkeeper label');
-      onboardingConfig.labels = [
-        String(label).replace('greenkeeper', 'renovate'),
-      ];
-    }
-    if (branchName) {
-      logger.info({ branch: branchName }, 'Migrating Greenkeeper branchName');
-      onboardingConfig.branchName = String(branchName).replace(
-        'greenkeeper',
-        'renovate'
-      );
-    }
-    if (is.nonEmptyArray(ignore)) {
-      logger.info({ ignore }, 'Migrating Greenkeeper ignore');
-      onboardingConfig.ignoreDeps = ignore.map(String);
-    }
+  let orgPreset: string;
+
+  logger.debug(
+    'Checking if this org/owner has a default Renovate preset which can be used.'
+  );
+
+  const orgName = config.repository.split('/')[0];
+
+  // Check for org/renovate-config
+  try {
+    const packageName = `${orgName}/renovate-config`;
+    await getPreset({ packageName, baseConfig: config });
+    orgPreset = `local>${packageName}`;
   } catch (err) {
-    logger.debug('No greenkeeper config migration');
+    if (
+      err.message !== PRESET_DEP_NOT_FOUND &&
+      !err.message.startsWith('Unsupported platform')
+    ) {
+      logger.warn({ err }, 'Unknown error fetching default owner preset');
+    }
   }
+
+  if (!orgPreset) {
+    // Check for org/.{{platform}}
+    try {
+      const packageName = `${orgName}/.${config.platform}`;
+      const presetName = 'renovate-config';
+      await getPreset({
+        packageName,
+        presetName,
+        baseConfig: config,
+      });
+      orgPreset = `local>${packageName}:${presetName}`;
+    } catch (err) {
+      if (
+        err.message !== PRESET_DEP_NOT_FOUND &&
+        !err.message.startsWith('Unsupported platform')
+      ) {
+        logger.warn({ err }, 'Unknown error fetching default owner preset');
+      }
+    }
+  }
+
+  if (orgPreset) {
+    onboardingConfig = {
+      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      extends: [orgPreset],
+    };
+  } else {
+    // Organization preset did not exist
+    logger.debug(
+      'No default org/owner preset found, so the default onboarding config will be used instead. Note: do not be concerned with any 404 messages that preceded this.'
+    );
+  }
+
   logger.debug({ config: onboardingConfig }, 'onboarding config');
-  return JSON.stringify(onboardingConfig, null, 2) + '\n';
+  return onboardingConfig;
 }
+
+async function getOnboardingConfigContents(
+  config: RenovateConfig,
+  fileName: string
+): Promise<string> {
+  const codeFormat = await EditorConfig.getCodeFormat(fileName);
+  const jsonWriter = new JSONWriter(codeFormat);
+  const onboardingConfig = await getOnboardingConfig(config);
+  return jsonWriter.write(onboardingConfig);
+}
+
+export { getOnboardingConfig, getOnboardingConfigContents };

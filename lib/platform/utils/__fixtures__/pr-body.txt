@@ -1,0 +1,101 @@
+This PR contains the following updates:
+
+| Package | Type | Update | Change |
+|---|---|---|---|
+| [renovate/renovate](https://togithub.com/renovatebot/renovate) | final | minor | `19.46.0-slim` -> `19.47.0-slim` |
+
+---
+
+### Release Notes
+
+<details>
+<summary>renovatebot/renovate</summary>
+
+### [`v19.47.0`](https://togithub.com/renovatebot/renovate/releases/19.47.0)
+
+##### Features
+
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+-   **docker:** AWS ECR authentication support ([#&#8203;4497](https://togithub.com/renovatebot/renovate/issues/4497)) ([acb114a](https://togithub.com/renovatebot/renovate/commit/acb114a))
+
+</details>
+
+---
+
+### Configuration
+
+:date: **Schedule**: At any time (no schedule defined).
+
+:vertical_traffic_light: **Automerge**: Enabled.
+
+:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with "`rebase!`".
+
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+
+---
+
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
+
+---
+
+This PR has been generated by [Renovate Bot](https://togithub.com/marketplace/renovate). View repository job log [here](https://renovatebot.com/dashboard#VisualOn/docker-images).

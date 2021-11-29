@@ -1,9 +1,0 @@
-This [master issue](https://renovatebot.com/blog/master-issue) contains a list of Renovate updates and their statuses.
-
-## Closed/Ignored
-
-These updates were closed unmerged and will not be recreated unless you click a checkbox below.
-
- - [ ] <!-- recreate-branch=branchName1 -->pr1
- - [ ] <!-- recreate-branch=branchName2 -->pr2 (`dep2`, `dep3`)
-

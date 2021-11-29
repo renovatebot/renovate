@@ -1,40 +1,21 @@
-import { coerce } from 'semver';
+import { GradleVersionDatasource } from '../../datasource/gradle-version';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { id as versioning } from '../../versioning/gradle';
+import type { PackageDependency, PackageFile } from '../types';
+import { extractGradleVersion } from './utils';
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
-  logger.debug('gradle-wrapper.extractPackageFile()');
-  const lines = fileContent.split('\n');
-
-  let lineNumber = 0;
-  for (const line of lines) {
-    const match = line.match(
-      /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/
-    );
-    if (match) {
-      const dependency: PackageDependency = {
-        datasource: 'gradleVersion',
-        depType: 'gradle-wrapper',
-        depName: 'gradle',
-        currentValue: coerce(match[1]).toString(),
-        managerData: { lineNumber, gradleWrapperType: match[3] },
-        versionScheme: 'semver',
-      };
-
-      let shaLineNumber = 0;
-      for (const shaLine of lines) {
-        const shaMatch = shaLine.match(/^distributionSha256Sum=((\w){64}).*$/);
-        if (shaMatch) {
-          dependency.managerData.checksumLineNumber = shaLineNumber;
-          break;
-        }
-        shaLineNumber += 1;
-      }
-
-      logger.info(dependency, 'Gradle Wrapper');
-      return { deps: [dependency] };
-    }
-    lineNumber += 1;
+  logger.trace('gradle-wrapper.extractPackageFile()');
+  const extractResult = extractGradleVersion(fileContent);
+  if (extractResult) {
+    const dependency: PackageDependency = {
+      depName: 'gradle',
+      currentValue: extractResult.version,
+      replaceString: extractResult.url,
+      datasource: GradleVersionDatasource.id,
+      versioning,
+    };
+    return { deps: [dependency] };
   }
   return null;
 }

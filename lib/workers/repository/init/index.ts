@@ -1,30 +1,38 @@
+import { applySecretsToConfig } from '../../../config/secrets';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { checkOnboardingBranch } from '../onboarding/branch';
+import { platform } from '../../../platform';
+import { clone } from '../../../util/clone';
+import { setUserRepoConfig } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { initApis } from './apis';
-import { checkBaseBranch } from './base';
-import { mergeRenovateConfig } from './config';
-import { detectSemanticCommits } from './semantic';
+import { initializeCaches } from './cache';
+import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
-import { platform } from '../../../platform';
-import { RenovateConfig } from '../../../config';
 
-export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
-  global.repoCache = {};
-  let config: RenovateConfig = {
-    ...input,
-    errors: [],
-    warnings: [],
-    branchList: [],
-  };
-  config.global = config.global || {};
+function initializeConfig(config: RenovateConfig): RenovateConfig {
+  return { ...clone(config), errors: [], warnings: [], branchList: [] };
+}
+
+function warnOnUnsupportedOptions(config: RenovateConfig): void {
+  if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
+    logger.warn(
+      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${config.platform}'.`
+    );
+  }
+}
+
+export async function initRepo(
+  config_: RenovateConfig
+): Promise<RenovateConfig> {
+  let config: RenovateConfig = initializeConfig(config_);
+  await initializeCaches(config);
   config = await initApis(config);
-  config.semanticCommits = await detectSemanticCommits(config);
-  config = await checkOnboardingBranch(config);
-  config = await mergeRenovateConfig(config);
+  config = await getRepoConfig(config);
   checkIfConfigured(config);
-  config = await checkBaseBranch(config);
-  await platform.setBranchPrefix(config.branchPrefix);
+  warnOnUnsupportedOptions(config);
+  config = applySecretsToConfig(config);
+  setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {

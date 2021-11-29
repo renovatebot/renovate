@@ -1,9 +1,24 @@
 const secrets = new Set<string>();
 
+export const redactedFields = [
+  'authorization',
+  'token',
+  'githubAppKey',
+  'npmToken',
+  'npmrc',
+  'privateKey',
+  'privateKeyOld',
+  'gitPrivateKey',
+  'forkToken',
+  'password',
+];
+
 export function sanitize(input: string): string {
-  if (!input) return input;
+  if (!input) {
+    return input;
+  }
   let output: string = input;
-  secrets.forEach(secret => {
+  secrets.forEach((secret) => {
     while (output.includes(secret)) {
       output = output.replace(secret, '**redacted**');
     }
@@ -13,6 +28,7 @@ export function sanitize(input: string): string {
 
 export function add(secret: string): void {
   secrets.add(secret);
+  secrets.add(secret?.replace('x-access-token:', '')); // GitHub App tokens
 }
 
 export function clear(): void {

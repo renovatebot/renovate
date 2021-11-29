@@ -1,21 +1,24 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { regEx } from '../../util/regex';
+import type { UpdateDependencyConfig } from '../types';
 
-export function updateDependency(
-  currentFileContent: string,
-  upgrade: Upgrade
-): string | null {
+function getDepNameWithNoVersion(depName: string): string {
+  let depNameNoVersion = depName.split('/').slice(0, 3).join('/');
+  if (depNameNoVersion.startsWith('gopkg.in')) {
+    depNameNoVersion = depNameNoVersion.replace(regEx(/\.v\d+$/), '');
+  }
+  return depNameNoVersion;
+}
+
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depName, depType } = upgrade;
-    let depNameNoVersion = depName
-      .split('/')
-      .slice(0, 3)
-      .join('/');
-    if (depNameNoVersion.startsWith('gopkg.in')) {
-      depNameNoVersion = depNameNoVersion.replace(/\.v\d+$/, '');
-    }
-    const lines = currentFileContent.split('\n');
+    const depNameNoVersion = getDepNameWithNoVersion(depName);
+    const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
@@ -29,17 +32,19 @@ export function updateDependency(
     }
     let updateLineExp: RegExp;
     if (depType === 'replace') {
-      updateLineExp = new RegExp(
-        /^(replace\s+[^\s]+[\s]+[=][>]+\s+)([^\s]+\s+)([^\s]+)/
+      updateLineExp = regEx(
+        /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
       );
     } else if (depType === 'require') {
       if (upgrade.managerData.multiLine) {
-        updateLineExp = new RegExp(/^(\s+[^\s]+)(\s+)([^\s]+)/);
+        updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
-        updateLineExp = new RegExp(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
+        updateLineExp = regEx(
+          /^(?<depPart>require\s+[^\s]+)(?<divider>\s+)[^\s]+/
+        );
       }
     }
-    if (!lineToChange.match(updateLineExp)) {
+    if (updateLineExp && !updateLineExp.test(lineToChange)) {
       logger.debug('No image line found');
       return null;
     }
@@ -50,7 +55,7 @@ export function updateDependency(
         upgrade.currentDigest.length
       );
       if (lineToChange.includes(newDigestRightSized)) {
-        return currentFileContent;
+        return fileContent;
       }
       logger.debug(
         { depName, lineToChange, newDigestRightSized },
@@ -58,10 +63,13 @@ export function updateDependency(
       );
       newLine = lineToChange.replace(
         updateLineExp,
-        `$1$2${newDigestRightSized}`
+        `$<depPart>$<divider>${newDigestRightSized}`
       );
     } else {
-      newLine = lineToChange.replace(updateLineExp, `$1$2${upgrade.newValue}`);
+      newLine = lineToChange.replace(
+        updateLineExp,
+        `$<depPart>$<divider>${upgrade.newValue}`
+      );
     }
     if (upgrade.updateType === 'major') {
       logger.debug({ depName }, 'gomod: major update');
@@ -77,19 +85,14 @@ export function updateDependency(
         upgrade.newMajor > 1 &&
         !newLine.includes(`/v${upgrade.newMajor}`)
       ) {
-        // If package has no version, pin to latest one.
-        newLine = newLine.replace(depName, depName + '/v' + upgrade.newMajor);
-        if (upgrade.currentValue.match(/^v(0|1)\./)) {
-          // Add version
-          newLine = newLine.replace(
-            updateLineExp,
-            `$1/v${upgrade.newMajor}$2$3`
-          );
+        if (depName === depNameNoVersion) {
+          // If package currently has no version, pin to latest one.
+          newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
         } else {
           // Replace version
           const [oldV] = upgrade.currentValue.split('.');
           newLine = newLine.replace(
-            new RegExp(`/${oldV}(\\s+)`),
+            regEx(`/${oldV}(\\s+)`),
             `/v${upgrade.newMajor}$1`
           );
         }
@@ -105,12 +108,12 @@ export function updateDependency(
     }
     if (newLine === lineToChange) {
       logger.debug('No changes necessary');
-      return currentFileContent;
+      return fileContent;
     }
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
-    logger.info({ err }, 'Error setting new go.mod version');
+    logger.debug({ err }, 'Error setting new go.mod version');
     return null;
   }
 }

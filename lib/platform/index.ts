@@ -1,86 +1,74 @@
 import URL from 'url';
-import addrs from 'email-addresses';
-import * as hostRules from '../util/host-rules';
+import type { AllConfig } from '../config/types';
+import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
-import { Platform } from './common';
-import { RenovateConfig } from '../config/common';
-import { getOptions } from '../config/definitions';
+import type { HostRule } from '../types';
+import { setGitAuthor, setNoVerify, setPrivateKey } from '../util/git';
+import * as hostRules from '../util/host-rules';
+import platforms from './api';
+import type { Platform } from './types';
 
-export * from './common';
+export * from './types';
 
-const supportedPlatforms = getOptions().find(
-  option => option.name === 'platform'
-).allowedValues;
+export const getPlatformList = (): string[] => Array.from(platforms.keys());
+export const getPlatforms = (): Map<string, Platform> => platforms;
 
 let _platform: Platform;
 
 const handler: ProxyHandler<Platform> = {
   get(_target: Platform, prop: keyof Platform) {
-    if (!_platform) throw new Error(`platform-not-found`);
-
-    // TODO: add more validation
-
+    if (!_platform) {
+      throw new Error(PLATFORM_NOT_FOUND);
+    }
     return _platform[prop];
   },
 };
 
 export const platform = new Proxy<Platform>({} as any, handler);
 
-export async function setPlatformApi(name: string): Promise<void> {
-  if (!supportedPlatforms.includes(name))
+export function setPlatformApi(name: string): void {
+  if (!platforms.has(name)) {
     throw new Error(
-      `Init: Platform "${name}" not found. Must be one of: ${supportedPlatforms.join(
+      `Init: Platform "${name}" not found. Must be one of: ${getPlatformList().join(
         ', '
       )}`
     );
-  _platform = await import('./' + name);
+  }
+  _platform = platforms.get(name);
 }
 
-export async function initPlatform(
-  config: RenovateConfig
-): Promise<RenovateConfig> {
-  await setPlatformApi(config.platform);
+export async function initPlatform(config: AllConfig): Promise<AllConfig> {
+  setPrivateKey(config.gitPrivateKey);
+  setNoVerify(config.gitNoVerify ?? []);
+  setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };
-  let gitAuthor: string;
-  if (config && config.gitAuthor) {
-    logger.info(`Using configured gitAuthor (${config.gitAuthor})`);
-    gitAuthor = config.gitAuthor;
-  } else if (!(platformInfo && platformInfo.gitAuthor)) {
-    logger.info('Using default gitAuthor: Renovate Bot <bot@renovateapp.com>');
-    gitAuthor = 'Renovate Bot <bot@renovateapp.com>';
-  } /* istanbul ignore next */ else {
-    logger.info('Using platform gitAuthor: ' + platformInfo.gitAuthor);
-    gitAuthor = platformInfo.gitAuthor;
+  // istanbul ignore else
+  if (config?.gitAuthor) {
+    logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
+    returnConfig.gitAuthor = config.gitAuthor;
+  } else if (platformInfo?.gitAuthor) {
+    logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
+    returnConfig.gitAuthor = platformInfo.gitAuthor;
   }
-  let gitAuthorParsed: addrs.ParsedMailbox | null = null;
-  try {
-    gitAuthorParsed = addrs.parseOneAddress(gitAuthor) as addrs.ParsedMailbox;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ gitAuthor, err }, 'Error parsing gitAuthor');
-  }
-  // istanbul ignore if
-  if (!gitAuthorParsed) {
-    throw new Error('Init: gitAuthor is not parsed as valid RFC5322 format');
-  }
-  global.gitAuthor = {
-    name: gitAuthorParsed.name,
-    email: gitAuthorParsed.address,
+  // This is done for validation and will be overridden later once repo config is incorporated
+  setGitAuthor(returnConfig.gitAuthor);
+  const platformRule: HostRule = {
+    matchHost: URL.parse(returnConfig.endpoint).hostname,
   };
-  // TODO: types
-  const platformRule: any = {
-    hostType: returnConfig.platform,
-    hostName: URL.parse(returnConfig.endpoint).hostname,
-  };
-  ['token', 'username', 'password'].forEach(field => {
+  ['token', 'username', 'password'].forEach((field) => {
     if (config[field]) {
       platformRule[field] = config[field];
       delete returnConfig[field];
     }
   });
   returnConfig.hostRules = returnConfig.hostRules || [];
-  returnConfig.hostRules.push(platformRule);
-  hostRules.add(platformRule);
+  const typedPlatformRule = {
+    ...platformRule,
+    hostType: returnConfig.platform,
+  };
+  returnConfig.hostRules.push(typedPlatformRule);
+  hostRules.add(typedPlatformRule);
   return returnConfig;
 }

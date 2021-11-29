@@ -1,0 +1,6 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<scm>
+		<!-- as seen in https://repo.maven.apache.org/maven2/ro/nextreports/nextreports-engine/9.2/nextreports-engine-9.2.pom -->
+		<url>git@github.com/child-scm/child</url>
+	</scm>
+</project>

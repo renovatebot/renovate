@@ -1,94 +1,93 @@
 import URL from 'url';
-import { api } from '../../../platform/github/gh-got-wrapper';
+import { PlatformId } from '../../../constants';
+import type { Release } from '../../../datasource/types';
 import { logger } from '../../../logger';
+import * as memCache from '../../../util/cache/memory';
+import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
-import * as versioning from '../../../versioning';
+import { regEx } from '../../../util/regex';
+import * as allVersioning from '../../../versioning';
+import type { BranchUpgradeConfig } from '../../types';
+import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
-import { ChangeLogResult, ChangeLogRelease, ChangeLogConfig } from './common';
-import { Release } from '../../../datasource';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
 
-const ghGot = api.get;
-
-async function getTags(
+function getCachedTags(
   endpoint: string,
-  versionScheme: string,
   repository: string
 ): Promise<string[]> {
-  let url = endpoint
-    ? endpoint.replace(/\/?$/, '/')
-    : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://api.github.com/';
-  url += `repos/${repository}/tags?per_page=100`;
-  try {
-    const res = await ghGot<{ name: string }[]>(url, {
-      paginate: true,
-    });
-
-    const tags = (res && res.body) || [];
-
-    if (!tags.length) {
-      logger.debug({ repository }, 'repository has no Github tags');
-    }
-
-    return tags.map(tag => tag.name);
-  } catch (err) {
-    logger.info({ sourceRepo: repository }, 'Failed to fetch Github tags');
-    logger.debug({ err });
-    // istanbul ignore if
-    if (err.message && err.message.includes('Bad credentials')) {
-      logger.warn('Bad credentials triggering tag fail lookup in changelog');
-      throw err;
-    }
-    return [];
+  const cacheKey = `getTags-${endpoint}-${repository}`;
+  const cachedResult = memCache.get<Promise<string[]>>(cacheKey);
+  // istanbul ignore if
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
+  const promisedRes = getTags(endpoint, repository);
+  memCache.set(cacheKey, promisedRes);
+  return promisedRes;
 }
 
 export async function getChangeLogJSON({
-  endpoint,
-  versionScheme,
-  fromVersion,
-  toVersion,
+  versioning,
+  currentVersion,
+  newVersion,
   sourceUrl,
+  sourceDirectory,
   releases,
   depName,
   manager,
-}: ChangeLogConfig): Promise<ChangeLogResult | null> {
+}: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
-    logger.debug('No release notes for @types');
+    logger.trace('No release notes for @types');
     return null;
   }
-  const version = versioning.get(versionScheme);
+  const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const githubBaseURL = `${protocol}//${host}/`;
+  const baseUrl = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
   const config = hostRules.find({
-    hostType: 'github',
+    hostType: PlatformId.Github,
     url,
   });
+  // istanbul ignore if
   if (!config.token) {
-    logger.debug('Repository URL does not match any known hosts');
+    if (host.endsWith('github.com')) {
+      logger.warn(
+        { manager, depName, sourceUrl },
+        'No github.com token has been configured. Skipping release notes retrieval'
+      );
+      return { error: ChangeLogError.MissingGithubToken };
+    }
+    logger.debug(
+      { manager, depName, sourceUrl },
+      'Repository URL does not match any known github hosts - skipping changelog retrieval'
+    );
     return null;
   }
-  const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')
+  const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
-    : endpoint; // TODO FIX
-  const repository = pathname.slice(1).replace(/\/$/, '');
+    : baseUrl + 'api/v3/';
+  const repository = pathname
+    .slice(1)
+    .replace(regEx(/\/$/), '')
+    .replace(regEx(/\.git$/), '');
   if (repository.split('/').length !== 2) {
-    logger.info({ sourceUrl }, 'Invalid github URL found');
+    logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
-  if (!(releases && releases.length)) {
+  if (!releases?.length) {
     logger.debug('No releases');
     return null;
   }
   // This extra filter/sort should not be necessary, but better safe than sorry
   const validReleases = [...releases]
-    .filter(release => version.isVersion(release.version))
+    .filter((release) => version.isVersion(release.version))
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   if (validReleases.length < 2) {
-    logger.debug('Not enough valid releases');
+    logger.debug(`Not enough valid releases for dep ${depName}`);
     return null;
   }
 
@@ -96,12 +95,12 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(endpoint, versionScheme, repository);
+      tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = new RegExp(`${depName}[@-]`);
+    const regex = regEx(`(?:${depName}|release)[@-]`);
     const tagName = tags
-      .filter(tag => version.isVersion(tag.replace(regex, '')))
-      .find(tag => version.equals(tag.replace(regex, ''), release.version));
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
     if (tagName) {
       return tagName;
     }
@@ -119,16 +118,17 @@ export async function getChangeLogJSON({
   const changelogReleases: ChangeLogRelease[] = [];
   // compare versions
   const include = (v: string): boolean =>
-    version.isGreaterThan(v, fromVersion) &&
-    !version.isGreaterThan(v, toVersion);
+    version.isGreaterThan(v, currentVersion) &&
+    !version.isGreaterThan(v, newVersion);
   for (let i = 1; i < validReleases.length; i += 1) {
     const prev = validReleases[i - 1];
     const next = validReleases[i];
     if (include(next.version)) {
-      let release = await renovateCache.get(
+      let release = await packageCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
+      // istanbul ignore else
       if (!release) {
         release = {
           version: next.version,
@@ -140,10 +140,10 @@ export async function getChangeLogJSON({
         const prevHead = await getRef(prev);
         const nextHead = await getRef(next);
         if (prevHead && nextHead) {
-          release.compare.url = `${githubBaseURL}${repository}/compare/${prevHead}...${nextHead}`;
+          release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
-        await renovateCache.set(
+        await packageCache.set(
           cacheNamespace,
           getCacheKey(prev.version, next.version),
           release,
@@ -156,10 +156,12 @@ export async function getChangeLogJSON({
 
   let res: ChangeLogResult = {
     project: {
-      githubApiBaseURL,
-      githubBaseURL,
-      github: repository,
-      repository: sourceUrl,
+      apiBaseUrl,
+      baseUrl,
+      type: 'github',
+      repository,
+      sourceUrl,
+      sourceDirectory,
       depName,
     },
     versions: changelogReleases,

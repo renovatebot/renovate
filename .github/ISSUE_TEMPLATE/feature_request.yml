@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest an idea for this project.
+labels: ['type:feature', 'status:requirements', 'priority-5-triage']
+body:
+  - type: textarea
+    id: what-would-you-like-renovate-to-be-able-to-do
+    attributes:
+      label: What would you like Renovate to be able to do?
+      placeholder: "Tell us what requirements you need solving, and be sure to mention too if this is part of any bigger problem you're trying to solve."
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation-idea-textbox
+    attributes:
+      label: If you have any ideas on how this should be implemented, please tell us here.
+      placeholder: "In case you've already dug into existing options or source code and have ideas, mention them here. Try to keep implementation ideas separate from requirements."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: interested-in-implementing-the-feature
+    attributes:
+      label: Is this a feature you are interested in implementing yourself?
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true

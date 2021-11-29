@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import { isSingleVersion, parseRange, rangeToStr } from '../maven/compare';
 
 const REV_TYPE_LATEST = 'REV_TYPE_LATEST';
@@ -10,20 +11,23 @@ export interface Revision {
   value: string;
 }
 
-function parseDynamicRevision(str: string): Revision {
-  if (!str) return null;
+export const LATEST_REGEX = regEx(/^latest\.|^latest$/i);
 
-  const LATEST_REGEX = /^latest\.|^latest$/i;
+function parseDynamicRevision(str: string): Revision | null {
+  if (!str) {
+    return null;
+  }
+
   if (LATEST_REGEX.test(str)) {
     const value = str.replace(LATEST_REGEX, '').toLowerCase() || null;
     return {
       type: REV_TYPE_LATEST,
-      value: value !== 'integration' ? value : null,
+      value: value === 'integration' ? null : value,
     };
   }
 
-  const SUBREV_REGEX = /\.\+$/;
-  if (SUBREV_REGEX.test(str)) {
+  const SUBREV_REGEX = regEx(/\.\+$/);
+  if (str.endsWith('.+')) {
     const value = str.replace(SUBREV_REGEX, '');
     if (isSingleVersion(value)) {
       return {

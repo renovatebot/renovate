@@ -9,6 +9,11 @@ export interface PoetryFile {
   tool?: {
     poetry?: PoetrySection;
   };
+
+  'build-system'?: {
+    requires: string[];
+    'build-backend'?: string;
+  };
 }
 
 export interface PoetryDependency {
@@ -20,4 +25,13 @@ export interface PoetryDependency {
 export interface PoetrySource {
   name?: string;
   url?: string;
+}
+
+export interface PoetryLockSection {
+  name?: string;
+  version?: string;
+}
+
+export interface PoetryLock {
+  package?: PoetryLockSection[];
 }

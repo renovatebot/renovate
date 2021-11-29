@@ -1,50 +1,57 @@
 import * as semver from 'semver';
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
-import * as versioning from '../../../../versioning';
-import { Release } from '../../../../datasource';
-
-export interface FilterConfig {
-  allowedVersions?: string;
-  depName?: string;
-  followTag?: string;
-  ignoreDeprecated?: boolean;
-  ignoreUnstable?: boolean;
-  respectLatest?: boolean;
-  versionScheme: string;
-}
+import { configRegexPredicate } from '../../../../util/regex';
+import type { VersioningApi } from '../../../../versioning';
+import * as npmVersioning from '../../../../versioning/npm';
+import * as pep440 from '../../../../versioning/pep440';
+import * as poetryVersioning from '../../../../versioning/poetry';
+import type { FilterConfig } from './types';
 
 export function filterVersions(
   config: FilterConfig,
-  fromVersion: string,
+  currentVersion: string,
   latestVersion: string,
-  versions: string[],
-  releases: Release[]
-): string[] {
-  const {
-    versionScheme,
-    ignoreUnstable,
-    ignoreDeprecated,
-    respectLatest,
-    allowedVersions,
-  } = config;
-  const version = versioning.get(versionScheme);
-  if (!fromVersion) {
+  releases: Release[],
+  versioning: VersioningApi
+): Release[] {
+  const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
+    config;
+  function isVersionStable(version: string): boolean {
+    if (!versioning.isStable(version)) {
+      return false;
+    }
+    // Check if the datasource returned isStable = false
+    const release = releases.find((r) => r.version === version);
+    if (release?.isStable === false) {
+      return false;
+    }
+    return true;
+  }
+  if (!currentVersion) {
     return [];
   }
 
   // Leave only versions greater than current
-  let filteredVersions = versions.filter(v =>
-    version.isGreaterThan(v, fromVersion)
+  let filteredVersions = releases.filter(
+    (v) =>
+      versioning.isVersion(v.version) &&
+      versioning.isGreaterThan(v.version, currentVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
-  const fromRelease = releases.find(release => release.version === fromVersion);
+  const fromRelease = releases.find(
+    (release) => release.version === currentVersion
+  );
   if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
-    filteredVersions = filteredVersions.filter(v => {
-      const versionRelease = releases.find(release => release.version === v);
+    filteredVersions = filteredVersions.filter((v) => {
+      const versionRelease = releases.find(
+        (release) => release.version === v.version
+      );
       if (versionRelease.isDeprecated) {
-        logger.debug(
-          `Skipping ${config.depName}@${v} because it is deprecated`
+        logger.trace(
+          `Skipping ${config.depName}@${v.version} because it is deprecated`
         );
         return false;
       }
@@ -53,21 +60,40 @@ export function filterVersions(
   }
 
   if (allowedVersions) {
-    if (version.isValid(allowedVersions)) {
-      filteredVersions = filteredVersions.filter(v =>
-        version.matches(v, allowedVersions)
+    const isAllowedPred = configRegexPredicate(allowedVersions);
+    if (isAllowedPred) {
+      filteredVersions = filteredVersions.filter(({ version }) =>
+        isAllowedPred(version)
       );
-    } else if (versionScheme !== 'npm' && semver.validRange(allowedVersions)) {
+    } else if (versioning.isValid(allowedVersions)) {
+      filteredVersions = filteredVersions.filter((v) =>
+        versioning.matches(v.version, allowedVersions)
+      );
+    } else if (
+      config.versioning !== npmVersioning.id &&
+      semver.validRange(allowedVersions)
+    ) {
       logger.debug(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions'
       );
-      filteredVersions = filteredVersions.filter(v =>
-        semver.satisfies(semver.coerce(v), allowedVersions)
+      filteredVersions = filteredVersions.filter((v) =>
+        semver.satisfies(semver.coerce(v.version), allowedVersions)
+      );
+    } else if (
+      config.versioning === poetryVersioning.id &&
+      pep440.isValid(allowedVersions)
+    ) {
+      logger.debug(
+        { depName: config.depName },
+        'Falling back to pypi syntax for allowedVersions'
+      );
+      filteredVersions = filteredVersions.filter((v) =>
+        pep440.matches(v.version, allowedVersions)
       );
     } else {
-      const error = new Error('config-validation');
-      error.configFile = 'config';
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = 'config';
       error.validationError = 'Invalid `allowedVersions`';
       error.validationMessage =
         'The following allowedVersions does not parse as a valid version or range: ' +
@@ -76,40 +102,36 @@ export function filterVersions(
     }
   }
 
-  // Return all versions if we aren't ignore unstable. Also ignore latest
-  if (config.followTag || ignoreUnstable === false) {
+  if (config.followTag) {
     return filteredVersions;
   }
 
-  // if current is unstable then allow unstable in the current major only
-  if (!version.isStable(fromVersion)) {
-    // Allow unstable only in current major
-    return filteredVersions.filter(
-      v =>
-        version.isStable(v) ||
-        (version.getMajor(v) === version.getMajor(fromVersion) &&
-          version.getMinor(v) === version.getMinor(fromVersion) &&
-          version.getPatch(v) === version.getPatch(fromVersion))
+  if (
+    respectLatest &&
+    latestVersion &&
+    !versioning.isGreaterThan(currentVersion, latestVersion)
+  ) {
+    filteredVersions = filteredVersions.filter(
+      (v) => !versioning.isGreaterThan(v.version, latestVersion)
     );
   }
 
-  // Normal case: remove all unstable
-  filteredVersions = filteredVersions.filter(v => version.isStable(v));
+  if (!ignoreUnstable) {
+    return filteredVersions;
+  }
 
-  // Filter the latest
+  if (isVersionStable(currentVersion)) {
+    return filteredVersions.filter((v) => isVersionStable(v.version));
+  }
 
-  // No filtering if no latest
-  // istanbul ignore if
-  if (!latestVersion) {
-    return filteredVersions;
-  }
-  // No filtering if not respecting latest
-  if (respectLatest === false) {
-    return filteredVersions;
-  }
-  // No filtering if fromVersion is already past latest
-  if (version.isGreaterThan(fromVersion, latestVersion)) {
-    return filteredVersions;
-  }
-  return filteredVersions.filter(v => !version.isGreaterThan(v, latestVersion));
+  // if current is unstable then allow unstable in the current major only
+  // Allow unstable only in current major
+  return filteredVersions.filter(
+    (v) =>
+      isVersionStable(v.version) ||
+      (versioning.getMajor(v.version) === versioning.getMajor(currentVersion) &&
+        versioning.getMinor(v.version) ===
+          versioning.getMinor(currentVersion) &&
+        versioning.getPatch(v.version) === versioning.getPatch(currentVersion))
+  );
 }

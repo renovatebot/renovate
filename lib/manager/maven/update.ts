@@ -1,10 +1,10 @@
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import type { UpdateDependencyConfig, Upgrade } from '../types';
 
 export function updateAtPosition(
   fileContent: string,
   upgrade: Upgrade,
-  endingAnchor = '"'
+  endingAnchor: string
 ): string | null {
   const { depName, currentValue, newValue, fileReplacePosition } = upgrade;
   const leftPart = fileContent.slice(0, fileReplacePosition);
@@ -24,15 +24,19 @@ export function updateAtPosition(
   return null;
 }
 
-export function updateDependency(
-  fileContent: string,
-  upgrade: Upgrade
-): string | null {
+export function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): string | null {
   const offset = fileContent.indexOf('<');
   const spaces = fileContent.slice(0, offset);
   const restContent = fileContent.slice(offset);
   const updatedContent = updateAtPosition(restContent, upgrade, '</');
-  if (!updatedContent) return null;
-  if (updatedContent === restContent) return fileContent;
+  if (!updatedContent) {
+    return null;
+  }
+  if (updatedContent === restContent) {
+    return fileContent;
+  }
   return `${spaces}${updatedContent}`;
 }

@@ -1,6 +1,9 @@
+import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
-import { PackageFile, PackageDependency } from '../common';
+import type { PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -11,37 +14,33 @@ export function extractPackageFile(content: string): PackageFile | null {
     for (let lineNumber = 1; lineNumber <= lines.length; lineNumber += 1) {
       const lineIdx = lineNumber - 1;
       const line = lines[lineIdx];
-      const pluginsSection = line.match(
+      const pluginsSection = regEx(
         /^(?<pluginsIndent>\s*)(-?\s*)plugins:/
-      );
+      ).exec(line); // TODO #12071
       if (pluginsSection) {
         logger.trace(`Matched plugins on line ${lineNumber}`);
         isPluginsSection = true;
         pluginsIndent = pluginsSection.groups.pluginsIndent;
       } else if (isPluginsSection) {
         logger.debug(`serviceImageLine: "${line}"`);
-        const { currentIndent } = line.match(/^(?<currentIndent>\s*)/).groups;
-        const depLineMatch = line.match(
-          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+):/
-        );
+        const { currentIndent } = regEx(/^(?<currentIndent>\s*)/).exec(
+          line
+        ).groups; // TODO #12071
+        const depLineMatch = regEx(
+          /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/
+        ).exec(line); // TODO #12071
         if (currentIndent.length <= pluginsIndent.length) {
           isPluginsSection = false;
           pluginsIndent = '';
         } else if (depLineMatch) {
           const { depName, currentValue } = depLineMatch.groups;
           logger.trace('depLineMatch');
-          let skipReason: string;
+          let skipReason: SkipReason;
           let repo: string;
           if (depName.startsWith('https://') || depName.startsWith('git@')) {
             logger.debug({ dependency: depName }, 'Skipping git plugin');
-            skipReason = 'git-plugin';
-          } else if (!isVersion(currentValue)) {
-            logger.debug(
-              { currentValue },
-              'Skipping non-pinned current version'
-            );
-            skipReason = 'invalid-version';
-          } else {
+            skipReason = SkipReason.GitPlugin;
+          } else if (isVersion(currentValue)) {
             const splitName = depName.split('/');
             if (splitName.length === 1) {
               repo = `buildkite-plugins/${depName}-buildkite-plugin`;
@@ -52,17 +51,22 @@ export function extractPackageFile(content: string): PackageFile | null {
                 { dependency: depName },
                 'Something is wrong with buildkite plugin name'
               );
-              skipReason = 'unknown';
+              skipReason = SkipReason.InvalidDependencySpecification;
             }
+          } else {
+            logger.debug(
+              { currentValue },
+              'Skipping non-pinned current version'
+            );
+            skipReason = SkipReason.InvalidVersion;
           }
           const dep: PackageDependency = {
-            managerData: { lineNumber },
             depName,
             currentValue,
             skipReason,
           };
           if (repo) {
-            dep.datasource = 'github';
+            dep.datasource = datasourceGithubTags.id;
             dep.lookupName = repo;
           }
           deps.push(dep);

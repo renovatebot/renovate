@@ -1,81 +1,83 @@
 import { logger } from '../../logger';
-import got from '../../util/got';
-import { ReleaseResult, PkgReleaseConfig } from '../common';
+import { cache } from '../../util/cache/package/decorator';
+import type { HttpResponse } from '../../util/http';
+import * as hexVersioning from '../../versioning/hex';
+import { Datasource } from '../datasource';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { HexRelease } from './types';
 
-interface HexRelease {
-  html_url: string;
-  meta?: { links?: Record<string, string> };
-  releases?: { version: string }[];
-}
+export class HexDatasource extends Datasource {
+  static readonly id = 'hex';
 
-export async function getPkgReleases({
-  lookupName,
-}: Partial<PkgReleaseConfig>): Promise<ReleaseResult | null> {
-  // istanbul ignore if
-  if (!lookupName) {
-    logger.warn('hex lookup failure: No lookupName');
-    return null;
+  constructor() {
+    super(HexDatasource.id);
   }
 
-  // Get dependency name from lookupName.
-  // If the dependency is private lookupName contains organization name as following:
-  // depName:organizationName
-  // depName is used to pass it in hex dep url
-  // organizationName is used for accessing to private deps
-  const depName = lookupName.split(':')[0];
-  const hexUrl = `https://hex.pm/api/packages/${depName}`;
-  try {
-    const response = await got(hexUrl, {
-      json: true,
-      hostType: 'hex',
-    });
+  override readonly defaultRegistryUrls = ['https://hex.pm/'];
+
+  override readonly customRegistrySupport = false;
+
+  override readonly defaultVersioning = hexVersioning.id;
+
+  @cache({
+    namespace: `datasource-${HexDatasource.id}`,
+    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+  })
+  async getReleases({
+    lookupName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // Get dependency name from lookupName.
+    // If the dependency is private lookupName contains organization name as following:
+    // hexPackageName:organizationName
+    // hexPackageName is used to pass it in hex dep url
+    // organizationName is used for accessing to private deps
+    const [hexPackageName, organizationName] = lookupName.split(':');
+    const organizationUrlPrefix = organizationName
+      ? `repos/${organizationName}/`
+      : '';
+    const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
+
+    let response: HttpResponse<HexRelease>;
+    try {
+      response = await this.http.getJson<HexRelease>(hexUrl);
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
 
     const hexRelease: HexRelease = response.body;
 
     if (!hexRelease) {
-      logger.warn({ depName }, `Invalid response body`);
+      logger.warn({ datasource: 'hex', lookupName }, `Invalid response body`);
       return null;
     }
 
     const { releases = [], html_url: homepage, meta } = hexRelease;
 
     if (releases.length === 0) {
-      logger.info(`No versions found for ${depName} (${hexUrl})`); // prettier-ignore
+      logger.debug(`No versions found for ${hexPackageName} (${hexUrl})`); // prettier-ignore
       return null;
     }
 
     const result: ReleaseResult = {
-      releases: releases.map(({ version }) => ({ version })),
+      releases: releases.map(({ version, inserted_at }) =>
+        inserted_at
+          ? {
+              version,
+              releaseTimestamp: inserted_at,
+            }
+          : { version }
+      ),
     };
 
     if (homepage) {
       result.homepage = homepage;
     }
 
-    if (meta && meta.links && meta.links.Github) {
+    if (meta?.links?.Github) {
       result.sourceUrl = hexRelease.meta.links.Github;
     }
 
     return result;
-  } catch (err) {
-    const errorData = { depName, err };
-
-    if (
-      err.statusCode === 429 ||
-      (err.statusCode >= 500 && err.statusCode < 600)
-    ) {
-      logger.warn({ lookupName, err }, `hex.pm registry failure`);
-      throw new Error('registry-failure');
-    }
-
-    if (err.statusCode === 401) {
-      logger.debug(errorData, 'Authorization error');
-    } else if (err.statusCode === 404) {
-      logger.debug(errorData, 'Package lookup error');
-    } else {
-      logger.warn(errorData, 'hex lookup failure: Unknown error');
-    }
   }
-
-  return null;
 }

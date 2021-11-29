@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "example 8"
+version = "0.1.0"
+description = ""
+authors = ["John Doe <john.doe@gmail.com>"]
+
+[tool.poetry.dependencies]
+dep0 = '0.0.0'
+
+[[tool.poetry.source]]
+name = "foo"
+url = "https://pypi.org/pypi/"
+
+[[tool.poetry.source]]
+name = "bar"
+url = "https://bar.baz/+simple/"
+
+[[tool.poetry.source]]
+name = "baz"

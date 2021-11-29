@@ -1,20 +1,33 @@
 import {
   eq,
-  valid,
   gt,
-  satisfies,
   maxSatisfying,
   minSatisfying,
-} from '@snyk/ruby-semver';
-import { VersioningApi, RangeStrategy } from '../common';
+  satisfies,
+  valid,
+} from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
-import { parse as parseVersion } from './version';
-import { parse as parseRange, ltr } from './range';
+import { regEx } from '../../util/regex';
+import type { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
-import { pin, bump, replace } from './strategies';
+import { ltr, parse as parseRange } from './range';
+import { bump, pin, replace } from './strategies';
+import { parse as parseVersion } from './version';
+
+export const id = 'ruby';
+export const displayName = 'Ruby';
+export const urls = [
+  'https://guides.rubygems.org/patterns/',
+  'https://bundler.io/v1.5/gemfile.html',
+  'https://www.devalot.com/articles/2012/04/gem-versions.html',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function vtrim<T = unknown>(version: T): string | T {
-  if (typeof version === 'string') return version.replace(/^v/, '');
+  if (typeof version === 'string') {
+    return version.replace(regEx(/^v/), '').replace(regEx(/('|")/g), '');
+  }
   return version;
 }
 
@@ -50,8 +63,8 @@ function isStable(version: string): boolean {
 export const isValid = (input: string): boolean =>
   input
     .split(',')
-    .map(piece => vtrim(piece.trim()))
-    .every(range => {
+    .map((piece) => vtrim(piece.trim()))
+    .every((range) => {
       const { version, operator } = parseRange(range);
 
       return operator
@@ -61,38 +74,70 @@ export const isValid = (input: string): boolean =>
 
 export const matches = (version: string, range: string): boolean =>
   satisfies(vtrim(version), vtrim(range));
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
+const getSatisfyingVersion = (versions: string[], range: string): string =>
   maxSatisfying(versions.map(vtrim), vtrim(range));
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   minSatisfying(versions.map(vtrim), vtrim(range));
 
-const getNewValue = (
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  _fromVersion: string,
-  toVersion: string
-): string => {
-  let result = null;
-  switch (rangeStrategy) {
-    case 'pin':
-      result = pin({ to: vtrim(toVersion) });
-      break;
-    case 'bump':
-      result = bump({ range: vtrim(currentValue), to: vtrim(toVersion) });
-      break;
-    case 'replace':
-      result = replace({ range: vtrim(currentValue), to: vtrim(toVersion) });
-      break;
-    // istanbul ignore next
-    default:
-      logger.warn(`Unsupported strategy ${rangeStrategy}`);
+const getNewValue = ({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string => {
+  let newValue = null;
+  if (isVersion(currentValue)) {
+    newValue = currentValue.startsWith('v') ? 'v' + newVersion : newVersion;
+  } else if (currentValue.replace(regEx(/^=\s*/), '') === currentVersion) {
+    newValue = currentValue.replace(currentVersion, newVersion);
+  } else {
+    switch (rangeStrategy) {
+      case 'update-lockfile':
+        if (satisfies(newVersion, currentValue)) {
+          newValue = currentValue;
+        } else {
+          newValue = getNewValue({
+            currentValue,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          });
+        }
+        break;
+      case 'pin':
+        newValue = pin({ to: vtrim(newVersion) });
+        break;
+      case 'bump':
+        newValue = bump({ range: vtrim(currentValue), to: vtrim(newVersion) });
+        break;
+      case 'auto':
+      case 'widen':
+      case 'replace':
+        newValue = replace({
+          range: vtrim(currentValue),
+          to: vtrim(newVersion),
+        });
+        break;
+      // istanbul ignore next
+      default:
+        logger.warn(`Unsupported strategy ${rangeStrategy}`);
+    }
   }
-
-  if (currentValue !== vtrim(currentValue) && isSingleVersion(result)) {
-    result = `v${result}`;
+  if (regEx(/^('|")/).exec(currentValue)) {
+    const delimiter = currentValue[0];
+    return newValue
+      .split(',')
+      .map(
+        (element) =>
+          element.replace(/^(?<whitespace>\s*)/, `$<whitespace>${delimiter}`) // TODO #12071 #12070
+      )
+      .map(
+        (element) =>
+          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12071 #12070
+      )
+      .join(',');
   }
-
-  return result;
+  return newValue;
 };
 
 export const sortVersions = (left: string, right: string): number =>
@@ -111,7 +156,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,

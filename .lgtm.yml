@@ -1,0 +1,11 @@
+queries:
+  - include: js/user-controlled-bypass
+  - include: js/request-forgery
+  - include: js/indirect-command-line-injection
+  - include: js/regex/missing-regexp-anchor
+  - include: js/node/unused-npm-dependency
+  - include: js/useless-assignment-to-global
+  - include: js/single-run-loop
+  - include: js/misspelled-identifier
+  - include: js/omitted-array-element
+  - include: js/unused-property

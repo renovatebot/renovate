@@ -1,0 +1,7 @@
+include:
+  - local: 'lib/manager/gitlabci/__fixtures__/include.yml'
+
+test:
+  script:
+    - !abc [.setup, script]
+    - echo running my own command

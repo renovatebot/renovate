@@ -1,33 +1,27 @@
 ---
-title: Ruby Bundler Support
+title: Ruby Bundler support
 description: Ruby Bundler support in Renovate
 ---
 
-# Automated Dependency Updates for Ruby Bundler Dependencies
+# Automated dependency updates for Ruby Bundler dependencies
 
-Renovate supports upgrading dependencies in Bundler's `Gemfile`s and their accompanying `Gemfile.lock` files. Support is considered "alpha" stage until there have been some more real-world tests.
+Renovate supports upgrading dependencies in Bundler's Gemfiles and their accompanying `Gemfile.lock` files.
 
-## How It Works
+## How it works
 
-1.  Renovate will search each repository for any `Gemfile` files.
-2.  Existing dependencies will be extracted from the files
-3.  Renovate will resolve the dependency on Rubygems or elsewhere if configured, and look for any newer versions
-4.  A PR will be created with `Gemfile` and `Gemfile.lock` updated in the same commit
-5.  If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
+1. Renovate searches in each repository for any Gemfiles
+1. Existing dependencies are extracted from the Gemfiles
+1. Renovate resolves the dependency on Rubygems.org (or elsewhere if configured), and checks for newer versions
+1. A PR is created which updates the `Gemfile` and `Gemfile.lock` in a single commit
+1. If the source repository has a "changelog" file or uses GitHub releases, then Release Notes for each version are embedded in the generated PR
+
+## Caveats
+
+Renovate doesn't update dependencies without a version constraint.
+Example: `gem 'some-gem', '~> 1.2.3'` will update `some-gem` if a new version matching the constraint is available, but `gem 'some-gem'` won't.
+If you always want to have the latest available version, consider specifying `gem 'some-gem', '> 0'`.
 
 ## Enabling
 
-Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
-
-Because Bundler is considered to be in alpha stage, it is not enabled by default. To opt-in to using it, `bundler.enabled` must be set to `true` in your config. If you are using the hosted Renovate App, then either:
-
-(a) if Renovate has already detected other languages in the same repo, the add `"bundler": { "enabled": true }` to the config, or
-(b) if Renovate doesn't onboard the repo because it doesn't find package files, add your `renovate.json` to `master` branch manually, or
-(c) Contact support@renovatebot.com to ask that Bundler support be added on the server side so that you can receive an onboarding PR
-
-## Future work
-
-- Updating `.gemspec` files
-- Pinning dependencies to the version found in `Gemfile.lock` rather than the latest matching version
-- Lock file maintenance
-- Selective lock file updating (if ranges are in use in the `Gemfile`)
+You can install the [Renovate App](https://github.com/apps/renovate) on GitHub.
+Or you can check out [Renovate OSS](https://github.com/renovatebot/renovate) to self-host Renovate.

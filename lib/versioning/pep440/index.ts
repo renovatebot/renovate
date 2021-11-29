@@ -1,7 +1,13 @@
 import * as pep440 from '@renovate/pep440';
 import { filter } from '@renovate/pep440/lib/specifier';
-import { getNewValue } from './range';
-import { VersioningApi } from '../common';
+import type { VersioningApi } from '../types';
+import { getNewValue, isLessThanRange } from './range';
+
+export const id = 'pep440';
+export const displayName = 'PEP440';
+export const urls = ['https://www.python.org/dev/peps/pep-0440/'];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 const {
   compare: sortVersions,
@@ -13,7 +19,7 @@ const {
   major: getMajor,
   minor: getMinor,
   patch: getPatch,
-  eq: equals,
+  eq,
 } = pep440;
 
 const isStable = (input: string): boolean => {
@@ -25,9 +31,10 @@ const isStable = (input: string): boolean => {
 };
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string): string => validRange(input);
+export const isValid = (input: string): string =>
+  validRange(input) || isVersion(input);
 
-const maxSatisfyingVersion = (versions: string[], range: string): string => {
+const getSatisfyingVersion = (versions: string[], range: string): string => {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
 };
@@ -39,9 +46,12 @@ const minSatisfyingVersion = (versions: string[], range: string): string => {
 
 export const isSingleVersion = (constraint: string): string =>
   isVersion(constraint) ||
-  (constraint.startsWith('==') && isVersion(constraint.substring(2).trim()));
+  (constraint?.startsWith('==') && isVersion(constraint.substring(2).trim()));
 
-export { matches };
+export { isVersion, matches };
+
+const equals = (version1: string, version2: string): boolean =>
+  isVersion(version1) && isVersion(version2) && eq(version1, version2);
 
 export const api: VersioningApi = {
   equals,
@@ -55,10 +65,11 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,
+  isLessThanRange,
 };
 
 export default api;

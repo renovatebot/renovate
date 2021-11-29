@@ -1,173 +1,202 @@
 import is from '@sindresorhus/is';
-import URL from 'url';
-import fs from 'fs-extra';
-import upath from 'upath';
-import { exec } from '../../util/exec';
-import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
+import { quote } from 'shlex';
+import { PlatformId } from '../../constants';
+import {
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  TEMPORARY_ERROR,
+} from '../../constants/error-messages';
+import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
+import { ExecOptions, exec } from '../../util/exec';
+import type { ToolConstraint } from '../../util/exec/types';
+import {
+  ensureCacheDir,
+  ensureLocalDir,
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { getChildProcessEnv } from '../../util/env';
-import { platform } from '../../platform';
+import { regEx } from '../../util/regex';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { AuthJson, ComposerLock } from './types';
+import {
+  composerVersioningId,
+  extractContraints,
+  getComposerArguments,
+  getPhpConstraint,
+  requireComposerDependencyInstallation,
+} from './utils';
 
-export async function updateArtifacts(
-  packageFileName: string,
-  updatedDeps: string[],
-  newPackageFileContent: string,
-  config: UpdateArtifactsConfig
-): Promise<UpdateArtifactsResult[] | null> {
+function getAuthJson(): string | null {
+  const authJson: AuthJson = {};
+
+  const githubCredentials = hostRules.find({
+    hostType: PlatformId.Github,
+    url: 'https://api.github.com/',
+  });
+  if (githubCredentials?.token) {
+    authJson['github-oauth'] = {
+      'github.com': githubCredentials.token.replace('x-access-token:', ''),
+    };
+  }
+
+  hostRules
+    .findAll({ hostType: PlatformId.Gitlab })
+    ?.forEach((gitlabHostRule) => {
+      if (gitlabHostRule?.token) {
+        const host = gitlabHostRule.resolvedHost || 'gitlab.com';
+        authJson['gitlab-token'] = authJson['gitlab-token'] || {};
+        authJson['gitlab-token'][host] = gitlabHostRule.token;
+        // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
+        authJson['gitlab-domains'] = [
+          host,
+          ...(authJson['gitlab-domains'] || []),
+        ];
+      }
+    });
+
+  hostRules
+    .findAll({ hostType: datasourcePackagist.id })
+    ?.forEach((hostRule) => {
+      const { resolvedHost, username, password, token } = hostRule;
+      if (resolvedHost && username && password) {
+        authJson['http-basic'] = authJson['http-basic'] || {};
+        authJson['http-basic'][resolvedHost] = { username, password };
+      } else if (resolvedHost && token) {
+        authJson.bearer = authJson.bearer || {};
+        authJson.bearer[resolvedHost] = token;
+      }
+    });
+
+  return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
+}
+
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
-  process.env.COMPOSER_CACHE_DIR =
-    process.env.COMPOSER_CACHE_DIR ||
-    upath.join(config.cacheDir, './others/composer');
-  await fs.ensureDir(process.env.COMPOSER_CACHE_DIR);
-  logger.debug('Using composer cache ' + process.env.COMPOSER_CACHE_DIR);
-  const lockFileName = packageFileName.replace(/\.json$/, '.lock');
-  const existingLockFileContent = await platform.getFile(lockFileName);
+
+  const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
     return null;
   }
-  const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
-  await fs.ensureDir(upath.join(cwd, 'vendor'));
-  let stdout: string;
-  let stderr: string;
+
+  const vendorDir = getSiblingFileName(packageFileName, 'vendor');
+  const commitVendorFiles = await localPathExists(vendorDir);
+  await ensureLocalDir(vendorDir);
   try {
-    const localPackageFileName = upath.join(config.localDir, packageFileName);
-    await fs.outputFile(localPackageFileName, newPackageFileContent);
-    const localLockFileName = upath.join(config.localDir, lockFileName);
+    await writeLocalFile(packageFileName, newPackageFileContent);
+
+    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
+    const constraints = {
+      ...extractContraints(JSON.parse(newPackageFileContent), existingLockFile),
+      ...config.constraints,
+    };
+
+    const composerToolConstraint: ToolConstraint = {
+      toolName: 'composer',
+      constraint: constraints.composer,
+    };
+
+    const execOptions: ExecOptions = {
+      cwdFile: packageFileName,
+      extraEnv: {
+        COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
+        COMPOSER_AUTH: getAuthJson(),
+      },
+      toolConstraints: [composerToolConstraint],
+      docker: {
+        image: 'php',
+        tagConstraint: getPhpConstraint(constraints),
+        tagScheme: composerVersioningId,
+      },
+    };
+
+    const commands: string[] = [];
+
+    // Determine whether install is required before update
+    if (requireComposerDependencyInstallation(existingLockFile)) {
+      const preCmd = 'composer';
+      const preArgs = 'install' + getComposerArguments(config);
+      logger.debug({ preCmd, preArgs }, 'composer pre-update command');
+      commands.push(`${preCmd} ${preArgs}`);
+    }
+
+    const cmd = 'composer';
+    let args: string;
     if (config.isLockFileMaintenance) {
-      await fs.remove(localLockFileName);
-    }
-    const authJson = {};
-    let credentials = hostRules.find({
-      hostType: 'github',
-      url: 'https://api.github.com/',
-    });
-    // istanbul ignore if
-    if (credentials && credentials.token) {
-      authJson['github-oauth'] = {
-        'github.com': credentials.token,
-      };
-    }
-    credentials = hostRules.find({
-      hostType: 'gitlab',
-      url: 'https://gitlab.com/api/v4/',
-    });
-    // istanbul ignore if
-    if (credentials && credentials.token) {
-      authJson['gitlab-token'] = {
-        'gitlab.com': credentials.token,
-      };
-    }
-    try {
-      // istanbul ignore else
-      if (is.array(config.registryUrls)) {
-        for (const regUrl of config.registryUrls as string[]) {
-          if (regUrl) {
-            const { host } = URL.parse(regUrl);
-            const hostRule = hostRules.find({
-              hostType: 'packagist',
-              url: regUrl,
-            });
-            // istanbul ignore else
-            if (hostRule.username && hostRule.password) {
-              logger.debug('Setting packagist auth for host ' + host);
-              authJson['http-basic'] = authJson['http-basic'] || {};
-              authJson['http-basic'][host] = {
-                username: hostRule.username,
-                password: hostRule.password,
-              };
-            } else {
-              logger.debug('No packagist auth found for ' + regUrl);
-            }
-          }
-        }
-      } else if (config.registryUrls) {
-        logger.warn(
-          { registryUrls: config.registryUrls },
-          'Non-array composer registryUrls'
-        );
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'Error setting registryUrls auth for composer');
-    }
-    if (authJson) {
-      const localAuthFileName = upath.join(cwd, 'auth.json');
-      await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
-    }
-    const env = getChildProcessEnv(['COMPOSER_CACHE_DIR']);
-    const startTime = process.hrtime();
-    let cmd: string;
-    if (config.binarySource === 'docker') {
-      logger.info('Running composer via docker');
-      cmd = `docker run --rm `;
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [config.localDir, process.env.COMPOSER_CACHE_DIR];
-      cmd += volumes.map(v => `-v "${v}":"${v}" `).join('');
-      const envVars = ['COMPOSER_CACHE_DIR'];
-      cmd += envVars.map(e => `-e ${e} `);
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/composer composer`;
-    } else if (
-      config.binarySource === 'auto' ||
-      config.binarySource === 'global'
-    ) {
-      logger.info('Running composer via global composer');
-      cmd = 'composer';
-    } else {
-      logger.warn({ config }, 'Unsupported binarySource');
-      cmd = 'bundle';
-    }
-    let args;
-    if (config.isLockFileMaintenance) {
-      args = 'install';
+      args = 'update';
     } else {
       args =
-        ('update ' + updatedDeps.join(' ')).trim() + ' --with-dependencies';
+        (
+          'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
+        ).trim() + ' --with-dependencies';
     }
-    args += ' --ignore-platform-reqs --no-ansi --no-interaction';
-    if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      args += ' --no-scripts --no-autoloader';
-    }
+    args += getComposerArguments(config);
     logger.debug({ cmd, args }, 'composer command');
-    ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
-      cwd,
-      env,
-    }));
-    const duration = process.hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.info(
-      { seconds, type: 'composer.lock', stdout, stderr },
-      'Generated lockfile'
-    );
-    const status = await platform.getRepoStatus();
+    commands.push(`${cmd} ${args}`);
+
+    await exec(commands, execOptions);
+    const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }
     logger.debug('Returning updated composer.lock');
-    return [
+    const res: UpdateArtifactsResult[] = [
       {
         file: {
           name: lockFileName,
-          contents: await fs.readFile(localLockFileName, 'utf8'),
+          contents: await readLocalFile(lockFileName),
         },
       },
     ];
+
+    if (!commitVendorFiles) {
+      return res;
+    }
+
+    logger.debug(`Committing vendor files in ${vendorDir}`);
+    for (const f of [...status.modified, ...status.not_added]) {
+      if (f.startsWith(vendorDir)) {
+        res.push({
+          file: {
+            name: f,
+            contents: await readLocalFile(f),
+          },
+        });
+      }
+    }
+    for (const f of status.deleted) {
+      res.push({
+        file: {
+          name: '|delete|',
+          contents: f,
+        },
+      });
+    }
+
+    return res;
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     if (
-      err.message &&
-      err.message.includes(
+      err.message?.includes(
         'Your requirements could not be resolved to an installable set of packages.'
       )
     ) {
       logger.info('Composer requirements cannot be resolved');
-    } else if (
-      err.message &&
-      err.message.includes('write error (disk full?)')
-    ) {
-      throw new Error('disk-space');
+    } else if (err.message?.includes('write error (disk full?)')) {
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');
     }

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/npm/update/dependency/index .updateDependency(fileContent, depType, depName, newValue) replaces a github dependency value 1`] = `"{\\"dependencies\\":{\\"gulp\\":\\"gulpjs/gulp#v4.0.0\\"}}"`;
+
+exports[`manager/npm/update/dependency/index .updateDependency(fileContent, depType, depName, newValue) replaces a github fully specified version 1`] = `"{\\"dependencies\\":{\\"n\\":\\"git+https://github.com/owner/n#v1.1.0\\"}}"`;
+
+exports[`manager/npm/update/dependency/index .updateDependency(fileContent, depType, depName, newValue) replaces a github short hash 1`] = `"{\\"dependencies\\":{\\"gulp\\":\\"gulpjs/gulp#0000000\\"}}"`;
+
+exports[`manager/npm/update/dependency/index .updateDependency(fileContent, depType, depName, newValue) replaces a npm package alias 1`] = `"{\\"dependencies\\":{\\"hapi\\":\\"npm:@hapi/hapi@18.3.1\\"}}"`;

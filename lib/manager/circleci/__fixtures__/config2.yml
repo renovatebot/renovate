@@ -1,0 +1,104 @@
+version: 2.1
+
+# There are blank lines and comments in this orbs section intentionally!
+orbs:
+  release-workflows: hutson/library-release-workflows@4.1.0
+  # Comments help me understand my work.
+  # The next line is intentionally just whitespace!
+  
+  no-version: abc/def
+
+  # Comments help me understand my work.
+  volatile: zzz/zzz@volatile
+
+test_plan: &test_plan
+  steps:
+    - checkout
+    - run: pip install --no-cache-dir pipenv==2018.11.26
+    - run: pipenv install --dev --python python
+    - run: pipenv run tox
+
+    # TODO: Upload binary distributable to Circle CI using the `Artifact` feature
+
+jobs:
+  python_3_4_test_plan:
+    <<: [*test_plan]
+    docker:
+      - image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
+    environment:
+      TOXENV: py34
+
+  python_3_5_test_plan:
+    <<: [*test_plan]
+    docker:
+      - image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
+    environment:
+      TOXENV: py35
+
+  python_3_6_test_plan:
+    <<: [*test_plan]
+    docker:
+      - image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
+    environment:
+      TOXENV: py36
+
+  python_3_7_test_plan:
+    <<: [*test_plan]
+    docker:
+      - image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
+    environment:
+      TOXENV: py37
+
+  pypy_3_6_test_plan:
+    # TODO: We do not use this job because, at the time of writing, pipenv has not released a version
+    # with support for pypy - https://github.com/pypa/pipenv/issues/3313
+    <<: [*test_plan]
+    docker:
+      - image: pypy:3-6@sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b
+    environment:
+      TOXENV: pypy
+
+  python_lint_test_plan:
+    <<: [*test_plan]
+    docker:
+      - image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
+    environment:
+      TOXENV: lint
+
+workflows:
+  version: 2
+
+  build_and_test:
+    jobs:
+      - python_3_4_test_plan
+      - python_3_5_test_plan
+      - python_3_6_test_plan
+      - python_3_7_test_plan
+      - python_lint_test_plan
+      - release-workflows/deliver:
+          # TODO: Upload all binary distributables to the GitHub Release page.
+          # TODO: Where do we build and upload the source distributable, `sdist`, for upload to the GitHub Release page?
+          context: github-interaction
+          filters:
+            branches:
+              only: master
+          requires:
+            - python_3_4_test_plan
+            - python_3_5_test_plan
+            - python_3_6_test_plan
+            - python_3_7_test_plan
+            - python_lint_test_plan
+
+  deploy:
+    jobs:
+      # TODO: Re-use the build artifacts from the `build_and_test` workflow.
+      - release-workflows/python-deploy:
+          context: pypi-interaction
+          # TODO: Share these `filters` once we can publish workflows in Orbs - https://circleci.ideas.aha.io/ideas/CCI-I-615
+          filters:
+            tags:
+              # Match only semantically valid semver tags - Authored by David Fichtmueller -  https://github.com/semver/semver/issues/232#issue-48635632
+              # TODO: Support all PEP440-valid tag names.
+              only: /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/
+            branches:
+              ignore: /.*/

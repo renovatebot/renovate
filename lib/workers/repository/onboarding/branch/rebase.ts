@@ -1,62 +1,60 @@
-import { logger } from '../../../../logger';
-import { getOnboardingConfig } from './config';
 import { configFileNames } from '../../../../config/app-strings';
-import { RenovateConfig } from '../../../../config';
-import { platform } from '../../../../platform';
+import { GlobalConfig } from '../../../../config/global';
+import type { RenovateConfig } from '../../../../config/types';
+import { logger } from '../../../../logger';
+import {
+  commitFiles,
+  getFile,
+  isBranchModified,
+  isBranchStale,
+} from '../../../../util/git';
+import { OnboardingCommitMessageFactory } from './commit-message';
+import { getOnboardingConfigContents } from './config';
 
-const defaultConfigFile = configFileNames[0];
-
-function getCommitMessage(config: RenovateConfig): string {
-  let commitMessage: string;
-  // istanbul ignore if
-  if (config.semanticCommits) {
-    commitMessage = config.semanticCommitType;
-    if (config.semanticCommitScope) {
-      commitMessage += `(${config.semanticCommitScope})`;
-    }
-    commitMessage += ': ';
-    commitMessage += 'add ' + defaultConfigFile;
-  } else {
-    commitMessage = 'Add ' + defaultConfigFile;
-  }
-  return commitMessage;
-}
+const defaultConfigFile = (config: RenovateConfig): string =>
+  configFileNames.includes(config.onboardingConfigFileName)
+    ? config.onboardingConfigFileName
+    : configFileNames[0];
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig
-): Promise<void> {
+): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
-  const pr = await platform.getBranchPr(config.onboardingBranch);
-  if (pr.isModified) {
-    logger.info('Onboarding branch has been edited and cannot be rebased');
-    return;
+  if (await isBranchModified(config.onboardingBranch)) {
+    logger.debug('Onboarding branch has been edited and cannot be rebased');
+    return null;
   }
-  const existingContents = await platform.getFile(
-    defaultConfigFile,
-    config.onboardingBranch
-  );
-  const contents = await getOnboardingConfig(config);
-  if (contents === existingContents && !pr.isStale) {
-    logger.info('Onboarding branch is up to date');
-    return;
+  const configFile = defaultConfigFile(config);
+  const existingContents = await getFile(configFile, config.onboardingBranch);
+  const contents = await getOnboardingConfigContents(config, configFile);
+  if (
+    contents === existingContents &&
+    !(await isBranchStale(config.onboardingBranch))
+  ) {
+    logger.debug('Onboarding branch is up to date');
+    return null;
   }
-  logger.info('Rebasing onboarding branch');
+  logger.debug('Rebasing onboarding branch');
   // istanbul ignore next
-  const commitMessage = getCommitMessage(config);
+  const commitMessageFactory = new OnboardingCommitMessageFactory(
+    config,
+    configFile
+  );
+  const commitMessage = commitMessageFactory.create();
 
   // istanbul ignore if
-  if (config.dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
-  } else {
-    await platform.commitFilesToBranch(
-      config.onboardingBranch,
-      [
-        {
-          name: defaultConfigFile,
-          contents,
-        },
-      ],
-      commitMessage
-    );
+    return null;
   }
+  return commitFiles({
+    branchName: config.onboardingBranch,
+    files: [
+      {
+        name: configFile,
+        contents,
+      },
+    ],
+    message: commitMessage.toString(),
+  });
 }

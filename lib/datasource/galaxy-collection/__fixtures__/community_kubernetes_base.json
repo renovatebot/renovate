@@ -1,0 +1,18 @@
+{
+  "id": 201,
+  "href": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
+  "name": "kubernetes",
+  "namespace": {
+    "id": 17693,
+    "href": "https://galaxy.ansible.com/api/v1/namespaces/17693/",
+    "name": "community"
+  },
+  "versions_url": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/",
+  "latest_version": {
+    "version": "1.2.1",
+    "href": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/1.2.1/"
+  },
+  "deprecated": false,
+  "created": "2020-02-05T10:08:00.780436-05:00",
+  "modified": "2021-04-01T09:06:02.676421-04:00"
+}

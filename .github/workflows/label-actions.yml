@@ -1,0 +1,21 @@
+name: 'Label Actions'
+
+on:
+  issues:
+    types: [labeled]
+  discussion:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: write
+  discussions: write
+
+jobs:
+  reaction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/label-actions@93ea5ec1d65e6a21427a1571a18a5b8861206b0b # renovate: tag=v2.2.0
+        with:
+          github-token: ${{ github.token }}
+          process-only: 'issues, discussions'

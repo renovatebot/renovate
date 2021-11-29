@@ -1,0 +1,8 @@
+{
+  "name": "@a/b",
+  "version": "0.0.8",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "license": "MIT",
+  "dependencies": {}
+}

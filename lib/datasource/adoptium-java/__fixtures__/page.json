@@ -1,0 +1,28 @@
+{
+  "versions": [
+    {
+      "build": 7,
+      "major": 16,
+      "minor": 0,
+      "openjdk_version": "16.0.2+7",
+      "security": 2,
+      "semver": "16.0.2+7"
+    },
+    {
+      "build": 7,
+      "major": 11,
+      "minor": 0,
+      "openjdk_version": "11.0.12+7",
+      "security": 12,
+      "semver": "11.0.12+7"
+    },
+    {
+      "build": 8,
+      "major": 8,
+      "minor": 0,
+      "openjdk_version": "1.8.0_302-b08",
+      "security": 302,
+      "semver": "8.0.302+8"
+    }
+  ]
+}

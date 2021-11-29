@@ -2,37 +2,32 @@
 
 ## Configuration Methods
 
-Configuration is supported via any or all of the below:
+Renovate global config can be defined via any of these methods:
 
 - Configuration file
-- Environment
-- CLI
-- `renovate.json`, `renovate.json5`, `.github/renovate.json`, `.github/renovate.json5`, `.renovaterc.json`, or `.renovaterc` in target repository
-- `renovate` field of `package.json` in target repository
+- Environment variables
+- CLI parameters
 
 The above are listed in **_reverse order_** of preference. e.g. CLI values will override environment values if they conflict.
 
 ### Default Configuration
 
-Default configuration values can be found in
-[lib/config/definitions.ts](../../lib/config/definitions.ts)
+The default configuration values can be found in [lib/config/options/index.ts](../../lib/config/options/index.ts).
+Options which have `"globalOnly": true` are reserved only for bot global configuration and cannot be configured within repository config files.
 
 ### Configuration File
 
-You can override default configuration using a configuration file, with default
-name `config.js` in the working directory. If you need an alternate location or
-name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
+You can override default configuration using a configuration file, with default name `config.js` in the working directory.
+If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
 
-Using a configuration file gives you very granular configuration options. For
-instance, you can override most settings at the global (file), repository, or
-package level. e.g. apply one set of labels for `backend/package.json` and a
-different set for `frontend/package.json` in the same repository.
+Using a configuration file gives you very granular configuration options.
+For instance, you can override most settings at the global (file), repository, or package level.
+e.g. apply one set of labels for `backend/package.json` and a different set of labels for `frontend/package.json` in the same repository.
 
 ```javascript
 module.exports = {
   npmrc: '//registry.npmjs.org/:_authToken=abc123',
   baseDir: '/tmp/renovate',
-  logLevel: 'debug',
   includeForks: true,
   gradle: { enabled: false },
 };
@@ -41,10 +36,13 @@ module.exports = {
 ### CLI
 
 ```
-$ node renovate --help
+node renovate --help
 ```
 
-To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.
+To configure any `<list>` items, separate with commas.
+E.g. `renovate --labels=renovate,dependency`.
+
+To enable debug logging export `LOG_LEVEL=debug` to your environment.
 
 ### renovate.json
 
@@ -52,15 +50,13 @@ If you add a `renovate.json` file to the root of your repository, you can use th
 
 ### package.json
 
-If you add configuration options to your `package.json` then these will override
-any other settings above.
+If you add configuration options to your `package.json` then these will override any other settings above.
 
 ```json
-"renovate": {
-  "labels": [
-    "upgrade",
-    "bot"
-  ]
+{
+  "renovate": {
+    "labels": ["upgrade", "bot"]
+  }
 }
 ```
 
@@ -68,4 +64,4 @@ any other settings above.
 
 Please see [https://docs.renovatebot.com/configuration-options/](https://docs.renovatebot.com/configuration-options/) for a list of user-facing configuration options.
 
-For further options when running your own instance of Renovate, please see the full config definitions file at `lib/config/definitions.ts`.
+For further options when running your own instance of Renovate, please see the full config options file at `lib/config/options/index.ts`.

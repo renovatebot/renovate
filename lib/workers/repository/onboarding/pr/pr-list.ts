@@ -1,15 +1,8 @@
-import { emojify } from '../../../../util/emoji';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { RenovateConfig } from '../../../../config';
-import { Upgrade } from '../../../../manager/common';
-
-export interface BranchConfig {
-  upgrades: Upgrade[];
-  baseBranch?: string;
-  branchName: string;
-  schedule?: string[];
-  prTitle: string;
-}
+import { emojify } from '../../../../util/emoji';
+import { regEx } from '../../../../util/regex';
+import type { BranchConfig } from '../../../types';
 
 export function getPrList(
   config: RenovateConfig,
@@ -25,19 +18,19 @@ export function getPrList(
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
 
   for (const branch of branches) {
-    const prTitleRe = /@([a-z]+\/[a-z]+)/;
+    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/); // TODO #12071
     prDesc += `<details>\n<summary>${branch.prTitle.replace(
       prTitleRe,
       '@&#8203;$1'
     )}</summary>\n\n`;
-    if (branch.schedule && branch.schedule.length) {
+    if (branch.schedule?.length) {
       prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
     }
     prDesc += `  - Branch name: \`${branch.branchName}\`\n`;
     prDesc += branch.baseBranch
       ? `  - Merge into: \`${branch.baseBranch}\`\n`
       : '';
-    const seen = [];
+    const seen: string[] = [];
     for (const upgrade of branch.upgrades) {
       let text = '';
       if (upgrade.updateType === 'lockFileMaintenance') {
@@ -54,7 +47,7 @@ export function getPrList(
           text += upgrade.depName.replace(prTitleRe, '@&#8203;$1');
         }
         text += upgrade.isLockfileUpdate
-          ? ` to \`${upgrade.toVersion}\``
+          ? ` to \`${upgrade.newVersion}\``
           : ` to \`${upgrade.newDigest || upgrade.newValue}\``;
         text += '\n';
       }

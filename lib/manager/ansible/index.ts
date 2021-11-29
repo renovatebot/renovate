@@ -1,6 +1,10 @@
+import { ProgrammingLanguage } from '../../constants';
 import extractPackageFile from './extract';
-import updateDependency from './update';
 
-const language = 'docker';
+const language = ProgrammingLanguage.Docker;
 
-export { extractPackageFile, language, updateDependency };
+export { extractPackageFile, language };
+
+export const defaultConfig = {
+  fileMatch: ['(^|/)tasks/[^/]+\\.ya?ml$'],
+};

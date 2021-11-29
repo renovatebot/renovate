@@ -1,116 +1,96 @@
-import slugify from 'slugify';
-import handlebars from 'handlebars';
-import { clean as cleanGitRef } from 'clean-git-ref';
-import { logger, setMeta } from '../../../logger';
-
-import { generateBranchConfig } from './generate';
+import type { Merge } from 'type-fest';
+import type { RenovateConfig, ValidationMessage } from '../../../config/types';
+import { addMeta, logger, removeMeta } from '../../../logger';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types';
+import { embedChangelogs } from '../changelog';
 import { flattenUpdates } from './flatten';
-import { RenovateConfig, ValidationMessage } from '../../../config';
+import { generateBranchConfig } from './generate';
 
-/**
- * Clean git branch name
- *
- * Remove what clean-git-ref fails to:
- * - leading dot/leading dot after slash
- * - trailing dot
- * - whitespace
- */
-function cleanBranchName(branchName: string): string {
-  return cleanGitRef(branchName)
-    .replace(/^\.|\.$/, '') // leading or trailing dot
-    .replace(/\/\./g, '/') // leading dot after slash
-    .replace(/\s/g, ''); // whitespace
-}
-
-export function branchifyUpgrades(
+export type BranchifiedConfig = Merge<
+  RenovateConfig,
+  {
+    branches: BranchConfig[];
+    branchList: string[];
+  }
+>;
+export async function branchifyUpgrades(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
-): RenovateConfig {
+): Promise<BranchifiedConfig> {
   logger.debug('branchifyUpgrades');
-  const updates = flattenUpdates(config, packageFiles);
+  const updates = await flattenUpdates(config, packageFiles);
   logger.debug(
     `${updates.length} flattened updates found: ${updates
-      .map(u => u.depName)
+      .map((u) => u.depName)
+      .filter((txt) => txt?.length)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
-  const branchUpgrades = {};
-  const branches = [];
+  const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
+  const branches: BranchConfig[] = [];
   for (const u of updates) {
-    const update = { ...u };
-    // Massage legacy vars just in case
-    update.currentVersion = update.currentValue;
-    update.newVersion = update.newVersion || update.newValue;
-    // massage for handlebars
-    const upper = (str: string): string =>
-      str.charAt(0).toUpperCase() + str.substr(1);
-    if (update.updateType) {
-      update[`is${upper(update.updateType)}`] = true;
-    }
-    // Check whether to use a group name
-    if (update.groupName) {
-      logger.debug('Using group branchName template');
-      logger.debug(
-        `Dependency ${update.depName} is part of group ${update.groupName}`
-      );
-      update.groupSlug = slugify(update.groupSlug || update.groupName, {
-        lower: true,
-      });
-      if (update.updateType === 'major' && update.separateMajorMinor) {
-        if (update.separateMultipleMajor) {
-          update.groupSlug = `major-${update.newMajor}-${update.groupSlug}`;
-        } else {
-          update.groupSlug = `major-${update.groupSlug}`;
-        }
-      }
-      if (update.updateType === 'patch') {
-        update.groupSlug = `patch-${update.groupSlug}`;
-      }
-      update.branchTopic = update.group.branchTopic || update.branchTopic;
-      update.branchName = handlebars.compile(
-        update.group.branchName || update.branchName
-      )(update);
-    } else {
-      update.branchName = handlebars.compile(update.branchName)(update);
-    }
-    // Compile extra times in case of nested handlebars templates
-    update.branchName = handlebars.compile(update.branchName)(update);
-    update.branchName = cleanBranchName(
-      handlebars.compile(update.branchName)(update)
-    );
-
+    const update: BranchUpgradeConfig = { ...u } as any;
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
     branchUpgrades[update.branchName] = [update].concat(
       branchUpgrades[update.branchName]
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
+  if (config.fetchReleaseNotes) {
+    await embedChangelogs(branchUpgrades);
+  }
   for (const branchName of Object.keys(branchUpgrades)) {
-    setMeta({
-      repository: config.repository,
+    // Add branch name to metadata before generating branch config
+    addMeta({
       branch: branchName,
     });
+    const seenUpdates = {};
+    // Filter out duplicates
+    branchUpgrades[branchName] = branchUpgrades[branchName]
+      .reverse()
+      .filter((upgrade) => {
+        const { manager, packageFile, depName, currentValue, newValue } =
+          upgrade;
+        const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
+        const previousNewValue = seenUpdates[upgradeKey];
+        if (previousNewValue && previousNewValue !== newValue) {
+          logger.info(
+            {
+              manager,
+              packageFile,
+              depName,
+              currentValue,
+              previousNewValue,
+              thisNewValue: newValue,
+            },
+            'Ignoring upgrade collision'
+          );
+          return false;
+        }
+        seenUpdates[upgradeKey] = newValue;
+        return true;
+      })
+      .reverse();
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
+    branch.packageFiles = packageFiles;
     branches.push(branch);
   }
-  setMeta({
-    repository: config.repository,
-  });
+  removeMeta(['branch']);
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
   const branchList = config.repoIsOnboarded
-    ? branches.map(upgrade => upgrade.branchName)
+    ? branches.map((upgrade) => upgrade.branchName)
     : config.branchList;
   // istanbul ignore next
   try {
     // Here we check if there are updates from the same source repo
     // that are not grouped into the same branch
-    const branchUpdates = {};
+    const branchUpdates: Record<string, Record<string, string>> = {};
     for (const branch of branches) {
-      const { sourceUrl, branchName, depName, toVersion } = branch;
-      if (sourceUrl && toVersion) {
-        const key = `${sourceUrl}|${toVersion}`;
+      const { sourceUrl, branchName, depName, newVersion } = branch;
+      if (sourceUrl && newVersion) {
+        const key = `${sourceUrl}|${newVersion}`;
         branchUpdates[key] = branchUpdates[key] || {};
         if (!branchUpdates[key][branchName]) {
           branchUpdates[key][branchName] = depName;
@@ -119,15 +99,15 @@ export function branchifyUpgrades(
     }
     for (const [key, value] of Object.entries(branchUpdates)) {
       if (Object.keys(value).length > 1) {
-        const [sourceUrl, toVersion] = key.split('|');
-        logger.info(
-          { sourceUrl, toVersion, branches: value },
+        const [sourceUrl, newVersion] = key.split('|');
+        logger.debug(
+          { sourceUrl, newVersion, branches: value },
           'Found sourceUrl with multiple branches that should probably be combined into a group'
         );
       }
     }
   } catch (err) {
-    logger.info({ err }, 'Error checking branch duplicates');
+    logger.debug({ err }, 'Error checking branch duplicates');
   }
   return {
     errors: config.errors.concat(errors),

@@ -1,5 +1,15 @@
+import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
-import { VersioningApi, RangeStrategy } from '../common';
+import type { NewValueConfig, VersioningApi } from '../types';
+
+export const id = 'cargo';
+export const displayName = 'Cargo';
+export const urls = [
+  'https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 const isVersion = (input: string): string | boolean => npm.isVersion(input);
 
@@ -25,10 +35,14 @@ function notEmpty(s: string): boolean {
 }
 
 function npm2cargo(input: string): string {
+  // istanbul ignore if
+  if (!input) {
+    return input;
+  }
   // Note: this doesn't remove the ^
   const res = input
-    .split(' ')
-    .map(str => str.trim())
+    .split(regEx(/\s+,?\s*|\s*,?\s+/))
+    .map((str) => str.trim())
     .filter(notEmpty);
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
@@ -49,42 +63,48 @@ export const isValid = (input: string): string | boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, cargo2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions, cargo2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions, cargo2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions, cargo2npm(range));
 
 const isSingleVersion = (constraint: string): string | boolean =>
   constraint.trim().startsWith('=') &&
-  isVersion(
-    constraint
-      .trim()
-      .substring(1)
-      .trim()
-  );
+  isVersion(constraint.trim().substring(1).trim());
 
-function getNewValue(
-  currentValue: string,
-  rangeStrategy: RangeStrategy,
-  fromVersion: string,
-  toVersion: string
-): string {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
+  if (!currentValue || currentValue === '*') {
+    return currentValue;
+  }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
       res += ' ';
     }
-    res += toVersion;
+    res += newVersion;
     return res;
   }
-  const newSemver = npm.getNewValue(
-    cargo2npm(currentValue),
+  const newSemver = npm.getNewValue({
+    currentValue: cargo2npm(currentValue),
     rangeStrategy,
-    fromVersion,
-    toVersion
-  );
+    currentVersion,
+    newVersion,
+  });
   let newCargo = npm2cargo(newSemver);
+  // istanbul ignore if
+  if (!newCargo) {
+    logger.info(
+      { currentValue, newSemver },
+      'Could not get cargo version from semver'
+    );
+    return currentValue;
+  }
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {
     newCargo = newCargo.substring(1);
@@ -99,7 +119,7 @@ export const api: VersioningApi = {
   isSingleVersion,
   isValid,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
 };
 export default api;
