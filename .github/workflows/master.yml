@@ -1,0 +1,53 @@
+name: Master
+
+# TODO: only master, currently for testing
+on: push
+#  push:
+#    branches: master
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # testing, to be removed
+        tag: [test] #'latest','slim'
+
+    steps:
+      - name: Prepare
+        id: prepare
+        run: |
+          if [[ ${{ matrix.tag }} == latest ]]; then
+            echo ::set-output name=file::Dockerfile
+          else
+            echo ::set-output name=file::Dockerfile.${{ matrix.tag }}
+          fi
+          echo ::set-output name=image::docker.pkg.github.com/${{ github.repository }}/cache
+
+      - name: Docker login
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: v0.3.1
+      # - name: Build the Docker image
+      #   run: |
+      #     docker buildx build \
+      #       --cache-from "type=registry,ref=${{ steps.prepare.outputs.image }}:${{ matrix.tag }}" \
+      #       --cache-to "type=registry,ref=${{ steps.prepare.outputs.image }}:${{ matrix.tag }},mode=max" \
+      #       --output "type=docker" \
+      #       --tag ${{ steps.prepare.outputs.image }}:${{ matrix.tag }} \
+      #       --file ./${{ steps.prepare.outputs.file }} .
+      # - name: Image history
+      #   run: docker history ${{ steps.prepare.outputs.image }}:${{ matrix.tag }}
+      # - name: Image size
+      #   run: docker image ls | grep ${{ steps.prepare.outputs.image }}:${{ matrix.tag }}

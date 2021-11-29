@@ -1,0 +1,11 @@
+# Base image
+#============
+FROM renovate/yarn:1.21.1@sha256:6aeeab4a40e4687a961ab8bcefb2fa4ce374c4f0324cc40d37fbcecbfac4af0c AS base
+
+LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
+LABEL name="renovate"
+LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
+
+WORKDIR /usr/src/app/
+
+RUN yarn -version
