@@ -1,5 +1,3 @@
-import { regEx } from '../../../util/regex';
-
 export class CommitMessage {
   public static readonly SEPARATOR: string = ':';
 
@@ -44,14 +42,6 @@ export class CommitMessage {
     const message = this.formatMessage();
 
     return [prefix, message].join(' ').trim();
-  }
-  public static formatCasing(commitMessage: string): string {
-    return commitMessage.replace(
-      regEx(/^([\w]+:|[\w]+\(.*\):)/).test(commitMessage)
-        ? regEx(/: \w+/)
-        : regEx(/^\w+/),
-      (match) => match.toLowerCase()
-    );
   }
 
   private formatMessage(): string {
