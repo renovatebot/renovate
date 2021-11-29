@@ -101,18 +101,23 @@ export function cache<T>({
       return callback();
     }
 
-    let finalNamespace: string;
+    let finalNamespace: string | undefined;
     if (is.string(namespace)) {
       finalNamespace = namespace;
     } else if (is.function_(namespace)) {
       finalNamespace = namespace.apply(instance, args);
     }
 
-    let finalKey: string;
+    let finalKey: string | undefined;
     if (is.string(key)) {
       finalKey = key;
     } else if (is.function_(key)) {
       finalKey = key.apply(instance, args);
+    }
+
+    // istanbul ignore if
+    if (!finalNamespace || !finalKey) {
+      return callback();
     }
 
     const cachedResult = await packageCache.get<unknown>(
