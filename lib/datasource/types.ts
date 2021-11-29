@@ -1,4 +1,3 @@
-import type { ChangeLogNotes } from '../workers/pr/changelog/types';
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -49,7 +48,6 @@ export interface Release {
   registryUrl?: string;
   sourceUrl?: string;
   sourceDirectory?: string;
-  releaseNotes?: ChangeLogNotes;
 }
 
 export interface ReleaseResult {
