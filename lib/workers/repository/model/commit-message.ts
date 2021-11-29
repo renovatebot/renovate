@@ -3,9 +3,9 @@ import { regEx } from '../../../util/regex';
 export class CommitMessage {
   public static readonly SEPARATOR: string = ':';
 
-  private message: string;
+  private message = '';
 
-  private prefix: string;
+  private prefix = '';
 
   constructor(message = '') {
     this.setMessage(message);
@@ -28,11 +28,11 @@ export class CommitMessage {
   }
 
   public setCustomPrefix(prefix?: string): void {
-    this.prefix = (prefix || '').trim();
+    this.prefix = (prefix ?? '').trim();
   }
 
   public setSemanticPrefix(type?: string, scope?: string): void {
-    this.prefix = (type || '').trim();
+    this.prefix = (type ?? '').trim();
 
     if (scope?.trim()) {
       this.prefix += `(${scope.trim()})`;
