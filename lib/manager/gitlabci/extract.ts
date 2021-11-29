@@ -132,7 +132,7 @@ export async function extractAllPackageFiles(
         }
       }
     } else if (is.string(doc?.include)) {
-      const fileObj = doc.include.replace(/^\//, ''); // TODO  #12070
+      const fileObj = doc.include.replace(regEx(/^\//), '');
       if (!seen.has(fileObj)) {
         seen.add(fileObj);
         filesToExamine.push(fileObj);
