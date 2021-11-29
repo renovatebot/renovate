@@ -1,7 +1,7 @@
 import hasha from 'hasha';
 import Git from 'simple-git';
 import { join } from 'upath';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
 import { cache } from '../../util/cache/package/decorator';
@@ -186,7 +186,7 @@ export class CrateDatasource extends Datasource {
     };
 
     if (flavor !== RegistryFlavor.CratesIo) {
-      if (!getGlobalConfig().allowCustomCrateRegistries) {
+      if (!GlobalConfig.get('allowCustomCrateRegistries')) {
         logger.warn(
           'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
         );
@@ -216,7 +216,7 @@ export class CrateDatasource extends Datasource {
           `Cloning private cargo registry`
         );
 
-        const git = Git(simpleGitConfig());
+        const git = Git({ ...simpleGitConfig(), maxConcurrentProcesses: 1 });
         const clonePromise = git.clone(registryUrl, clonePath, {
           '--depth': 1,
         });

@@ -109,9 +109,11 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   // See: https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/src/%7Bcommit%7D/%7Bpath%7D
+  const repo = repoName ?? config.repository;
   const path = fileName;
   const url = `/2.0/repositories/${repo}/src/HEAD/${path}`;
   const res = await bitbucketHttp.get(url);
@@ -120,9 +122,10 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }

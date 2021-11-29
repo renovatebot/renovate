@@ -6,7 +6,7 @@ import type {
 } from '../config/types';
 import type { ProgrammingLanguage } from '../constants';
 import type { RangeStrategy, SkipReason } from '../types';
-import type { File } from '../util/git';
+import type { File } from '../util/git/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -44,6 +44,7 @@ export interface UpdateArtifactsConfig {
   composerIgnorePlatformReqs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
+  ignorePlugins?: boolean;
   ignoreScripts?: boolean;
   updateType?: UpdateType;
   newValue?: string;

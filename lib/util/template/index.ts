@@ -1,10 +1,14 @@
 import is from '@sindresorhus/is';
 import * as handlebars from 'handlebars';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { clone } from '../clone';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
+
+handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
+  JSON.stringify(JSON.parse(input), null, 2)
+);
 
 // istanbul ignore next
 handlebars.registerHelper(
@@ -150,7 +154,7 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...getGlobalConfig(), ...input };
+  const data = { ...GlobalConfig.get(), ...input };
   const filteredInput = filterFields ? getFilteredObject(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {

@@ -1,4 +1,4 @@
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
@@ -83,7 +83,7 @@ export async function checkAutoMerge(
   if (automergeType === 'pr-comment') {
     logger.debug(`Applying automerge comment: ${automergeComment}`);
     // istanbul ignore if
-    if (getGlobalConfig().dryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info(
         `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
       );
@@ -107,7 +107,7 @@ export async function checkAutoMerge(
   }
   // Let's merge this
   // istanbul ignore if
-  if (getGlobalConfig().dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info(
       `DRY-RUN: Would merge PR #${pr.number} with strategy "${automergeStrategy}"`
     );

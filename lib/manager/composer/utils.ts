@@ -1,11 +1,13 @@
 import { quote } from 'shlex';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
+
+const depRequireInstall = new Set(['symfony/flex']);
 
 export function getComposerArguments(config: UpdateArtifactsConfig): string {
   let args = '';
@@ -21,8 +23,12 @@ export function getComposerArguments(config: UpdateArtifactsConfig): string {
   }
 
   args += ' --no-ansi --no-interaction';
-  if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
-    args += ' --no-scripts --no-autoloader --no-plugins';
+  if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+    args += ' --no-scripts --no-autoloader';
+  }
+
+  if (!GlobalConfig.get('allowPlugins') || config.ignorePlugins) {
+    args += ' --no-plugins';
   }
 
   return args;
@@ -37,6 +43,15 @@ export function getPhpConstraint(constraints: Record<string, string>): string {
   }
 
   return null;
+}
+
+export function requireComposerDependencyInstallation(
+  lock: ComposerLock
+): boolean {
+  return (
+    lock.packages?.some((p) => depRequireInstall.has(p.name)) === true ||
+    lock['packages-dev']?.some((p) => depRequireInstall.has(p.name)) === true
+  );
 }
 
 export function extractContraints(

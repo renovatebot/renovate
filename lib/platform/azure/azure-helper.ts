@@ -110,14 +110,21 @@ export async function getCommitDetails(
 export async function getMergeMethod(
   repoId: string,
   project: string,
-  branchRef?: string
+  branchRef?: string,
+  defaultBranch?: string
 ): Promise<GitPullRequestMergeStrategy> {
   type Scope = {
     repositoryId: string;
     refName?: string;
-    matchKind: 'Prefix' | 'Exact';
+    matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
   };
   const isRelevantScope = (scope: Scope): boolean => {
+    if (
+      scope.matchKind === 'DefaultBranch' &&
+      (!branchRef || branchRef === `refs/heads/${defaultBranch}`)
+    ) {
+      return true;
+    }
     if (scope.repositoryId !== repoId) {
       return false;
     }

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
@@ -113,7 +113,7 @@ export async function extractPackageFile(
         logger.debug('Stripping package-lock setting from .npmrc');
         repoNpmrc = repoNpmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n'); // TODO #12070
       }
-      if (repoNpmrc.includes('=${') && !getGlobalConfig().exposeAllEnv) {
+      if (repoNpmrc.includes('=${') && !GlobalConfig.get('exposeAllEnv')) {
         logger.debug(
           { npmrcFileName },
           'Stripping .npmrc file of lines with variables'
@@ -191,6 +191,12 @@ export async function extractPackageFile(
         dep.datasource = npmId;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
+        if (
+          dep.currentValue.startsWith('2') ||
+          dep.currentValue.startsWith('3')
+        ) {
+          dep.lookupName = '@yarnpkg/cli';
+        }
       } else if (depName === 'npm') {
         dep.datasource = npmId;
         dep.commitMessageTopic = 'npm';

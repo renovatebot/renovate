@@ -909,6 +909,7 @@ describe('platform/bitbucket/index', () => {
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         {
@@ -924,6 +925,29 @@ describe('platform/bitbucket/index', () => {
       expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('returns file content from given repo', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/different/repo/src/HEAD/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile('file.json', 'different/repo');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('ignores branchOrTag', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/HEAD/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile('file.json', 'some/repo', 'dev');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('throws on malformed JSON', async () => {
       const scope = await initRepoMock();
       scope
