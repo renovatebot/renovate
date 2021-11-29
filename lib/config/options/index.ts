@@ -748,6 +748,14 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
+    name: 'executionTimeout',
+    description:
+      'Default execution timeout in minutes for child processes Renovate creates.',
+    type: 'integer',
+    default: 15,
+    globalOnly: true,
+  },
+  {
     name: 'aliases',
     description: 'Aliases for registries, package manager specific.',
     type: 'object',

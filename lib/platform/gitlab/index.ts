@@ -332,6 +332,7 @@ type BranchState =
   | 'pending'
   | 'created'
   | 'running'
+  | 'waiting_for_resource'
   | 'manual'
   | 'success'
   | 'failed'
@@ -372,6 +373,7 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
   created: BranchStatus.yellow,
   manual: BranchStatus.yellow,
   running: BranchStatus.yellow,
+  waiting_for_resource: BranchStatus.yellow,
   success: BranchStatus.green,
   failed: BranchStatus.red,
   canceled: BranchStatus.red,

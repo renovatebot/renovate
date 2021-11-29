@@ -306,7 +306,7 @@ export async function getReleases({
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const dependency = getDependencyParts(lookupName);
-  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12070
+  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12071
 
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 

@@ -1,11 +1,7 @@
 import addrs from 'email-addresses';
 import { logger } from '../../logger';
 import { regEx } from '../regex';
-
-export interface GitAuthor {
-  name?: string;
-  address?: string;
-}
+import type { GitAuthor } from './types';
 
 export function parseGitAuthor(input: string): GitAuthor | null {
   let result: GitAuthor = null;
