@@ -51,7 +51,7 @@ Array [
 
 exports[`logger/err-serializer got sanitize http error 2`] = `
 Object {
-  "code": undefined,
+  "code": "ERR_NON_2XX_3XX_RESPONSE",
   "message": "Response code 412 (Precondition Failed)",
   "name": "HTTPError",
   "options": Object {

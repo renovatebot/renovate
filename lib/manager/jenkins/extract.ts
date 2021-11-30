@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
@@ -55,7 +56,7 @@ function extractYaml(content: string): PackageDependency[] {
 
   try {
     const doc = load(content, { json: true }) as JenkinsPlugins;
-    if (doc?.plugins) {
+    if (is.nonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
           const dep = getDependency(plugin);

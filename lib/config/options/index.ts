@@ -748,6 +748,14 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
+    name: 'executionTimeout',
+    description:
+      'Default execution timeout in minutes for child processes Renovate creates.',
+    type: 'integer',
+    default: 15,
+    globalOnly: true,
+  },
+  {
     name: 'aliases',
     description: 'Aliases for registries, package manager specific.',
     type: 'object',
@@ -1663,6 +1671,14 @@ const options: RenovateOptions[] = [
   {
     name: 'filterUnavailableUsers',
     description: 'Filter reviewers and assignees based on their availability.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
+    name: 'confidential',
+    description:
+      'If enabled, issues created by Renovate are set as confidential.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],

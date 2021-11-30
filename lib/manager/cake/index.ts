@@ -13,13 +13,13 @@ export const defaultConfig = {
 
 const lexer = moo.states({
   main: {
-    lineComment: { match: /\/\/.*?$/ }, // TODO #12070
-    multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12070
+    lineComment: { match: /\/\/.*?$/ }, // TODO #12870
+    multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12870
     dependency: {
-      match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/, // TODO #12070
+      match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/, // TODO #12870
     },
     dependencyQuoted: {
-      match: /^#(?:addin|tool|module|load|l)\s+"(?:nuget|dotnet):[^"]+"\s*$/, // TODO #12070
+      match: /^#(?:addin|tool|module|load|l)\s+"(?:nuget|dotnet):[^"]+"\s*$/, // TODO #12870
       value: (s: string) => s.trim().slice(1, -1),
     },
     unknown: moo.fallback,

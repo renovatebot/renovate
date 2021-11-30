@@ -72,12 +72,12 @@ function getPatch(version: string): null | number {
 // comparison
 
 function equals(version: string, other: string): boolean {
-  return isVersion(version) && isVersion(other) && version === other;
+  return !!isVersion(version) && !!isVersion(other) && version === other;
 }
 
 function isGreaterThan(version: string, other: string): boolean {
-  const xMajor = getMajor(version);
-  const yMajor = getMajor(other);
+  const xMajor = getMajor(version) ?? 0;
+  const yMajor = getMajor(other) ?? 0;
   if (xMajor > yMajor) {
     return true;
   }
@@ -85,8 +85,8 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  const xMinor = getMinor(version);
-  const yMinor = getMinor(other);
+  const xMinor = getMinor(version) ?? 0;
+  const yMinor = getMinor(other) ?? 0;
   if (xMinor > yMinor) {
     return true;
   }
@@ -94,8 +94,8 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  const xPatch = getPatch(version) || 0;
-  const yPatch = getPatch(other) || 0;
+  const xPatch = getPatch(version) ?? 0;
+  const yPatch = getPatch(other) ?? 0;
   return xPatch > yPatch;
 }
 

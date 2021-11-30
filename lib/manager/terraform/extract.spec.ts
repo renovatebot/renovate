@@ -35,7 +35,7 @@ describe('manager/terraform/extract', () => {
     it('extracts', async () => {
       const res = await extractPackageFile(tf1, '1.tf', {});
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(46);
+      expect(res.deps).toHaveLength(51);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(8);
     });
 
