@@ -17,7 +17,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { getCache } from '../cache/repository';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
@@ -546,23 +545,6 @@ export async function isBranchConflicted(
     return true;
   }
 
-  const baseBranchSha = getBranchCommit(baseBranch);
-  const branchSha = getBranchCommit(branch);
-
-  const cache = getCache();
-  const olderBranchSha = cache.baseBranchSha;
-  if (olderBranchSha !== baseBranchSha) {
-    cache.baseBranchSha = baseBranchSha;
-    cache.branchConflicts = {};
-  }
-  cache.branchConflicts ||= {};
-
-  const cachedResult = cache.branchConflicts[branchSha];
-  // istanbul ignore if
-  if (cachedResult !== undefined) {
-    return cachedResult;
-  }
-
   let result = false;
 
   let origBranch: string;
@@ -589,7 +571,6 @@ export async function isBranchConflicted(
     }
   }
 
-  cache.branchConflicts[branchSha] = result;
   return result;
 }
 
