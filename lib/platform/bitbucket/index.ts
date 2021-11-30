@@ -47,6 +47,8 @@ let config: utils.Config = {} as any;
 
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
+const pathSeparator = '/';
+
 let renovateUserUuid: string;
 
 export async function initPlatform({
@@ -115,7 +117,17 @@ export async function getRawFile(
   // See: https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/src/%7Bcommit%7D/%7Bpath%7D
   const repo = repoName ?? config.repository;
   const path = fileName;
-  const url = `/2.0/repositories/${repo}/src/HEAD/${path}`;
+
+  let finalBranchOrTag = branchOrTag;
+  if (branchOrTag?.includes(pathSeparator)) {
+    // Branch name contans slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
+    finalBranchOrTag = await getBranchCommit(branchOrTag);
+  }
+
+  const url =
+    `/2.0/repositories/${repo}/src/` +
+    (finalBranchOrTag || `HEAD`) +
+    `/${path}`;
   const res = await bitbucketHttp.get(url);
   return res.body;
 }
