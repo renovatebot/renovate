@@ -217,16 +217,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
       }
     }
-    if (is.nonEmptyArray(migratedConfig.matchManagers)) {
-      if (migratedConfig.matchManagers.includes('gradle-lite')) {
-        if (!migratedConfig.matchManagers.includes('gradle')) {
-          migratedConfig.matchManagers.push('gradle');
-        }
-        migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
-          (manager) => manager !== 'gradle-lite'
-        );
-      }
-    }
     if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
         migratedConfig.gradle || {},
