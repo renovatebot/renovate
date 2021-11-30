@@ -3,7 +3,7 @@ import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 

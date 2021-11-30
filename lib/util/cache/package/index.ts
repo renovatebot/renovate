@@ -10,7 +10,10 @@ function getGlobalKey(namespace: string, key: string): string {
   return `global%%${namespace}%%${key}`;
 }
 
-export function get<T = any>(namespace: string, key: string): Promise<T> {
+export async function get<T = any>(
+  namespace: string,
+  key: string
+): Promise<T | undefined> {
   if (!cacheProxy) {
     return undefined;
   }
@@ -18,21 +21,22 @@ export function get<T = any>(namespace: string, key: string): Promise<T> {
   if (memCache.get(globalKey) === undefined) {
     memCache.set(globalKey, cacheProxy.get(namespace, key));
   }
-  return memCache.get(globalKey);
+  const result = await memCache.get(globalKey);
+  return result;
 }
 
-export function set(
+export async function set(
   namespace: string,
   key: string,
   value: unknown,
   minutes: number
 ): Promise<void> {
   if (!cacheProxy) {
-    return undefined;
+    return;
   }
   const globalKey = getGlobalKey(namespace, key);
   memCache.set(globalKey, value);
-  return cacheProxy.set(namespace, key, value, minutes);
+  await cacheProxy.set(namespace, key, value, minutes);
 }
 
 export function init(config: AllConfig): void {
@@ -42,7 +46,7 @@ export function init(config: AllConfig): void {
       get: redisCache.get,
       set: redisCache.set,
     };
-  } else {
+  } else if (config.cacheDir) {
     fileCache.init(config.cacheDir);
     cacheProxy = {
       get: fileCache.get,

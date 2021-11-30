@@ -15,11 +15,11 @@ export function ensurePathPrefix(url: string, prefix: string): string {
 }
 
 export function ensureTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '/'); // TODO #12070 #12071 add tests for this one
+  return url.replace(/\/?$/, '/'); // TODO #12070 adds slash at the front when re2 is used
 }
 
 export function trimTrailingSlash(url: string): string {
-  return url.replace(regEx(/\/+$/), ''); // TODO #12071
+  return url.replace(regEx(/\/+$/), '');
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
@@ -77,5 +77,5 @@ export function parseUrl(url: string): URL | null {
  * @returns an URL object or null
  */
 export function createURLFromHostOrURL(url: string): URL | null {
-  return parseUrl(url) || parseUrl(`https://${url}`);
+  return parseUrl(url) ?? parseUrl(`https://${url}`);
 }
