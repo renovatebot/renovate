@@ -33,7 +33,6 @@ describe('datasource/conan/index', () => {
           lookupName: 'fakepackage/1.2@_/_',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles bad registries', async () => {
@@ -51,7 +50,6 @@ describe('datasource/conan/index', () => {
           lookupName: 'poco/1.2@_/_',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles missing packages', async () => {
@@ -69,7 +67,6 @@ describe('datasource/conan/index', () => {
           lookupName: 'fakepackage/1.2@_/_',
         })
       ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('processes real versioned data', async () => {
@@ -87,7 +84,6 @@ describe('datasource/conan/index', () => {
           lookupName: 'poco/1.2@_/_',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('it handles mismatched userAndChannel versioned data', async () => {
@@ -105,7 +101,6 @@ describe('datasource/conan/index', () => {
           lookupName: 'poco/1.2@un/matched',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles malformed packages', async () => {
@@ -123,7 +118,6 @@ describe('datasource/conan/index', () => {
           lookupName: 'bad/1.2@_/_',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles non 404 errors', async () => {
@@ -142,8 +136,6 @@ describe('datasource/conan/index', () => {
           lookupName: 'poco/1.2@_/_',
         })
       ).toMatchSnapshot();
-
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('handles missing slash on registries', async () => {
@@ -161,7 +153,6 @@ describe('datasource/conan/index', () => {
           lookupName: 'poco/1.2@_/_',
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
