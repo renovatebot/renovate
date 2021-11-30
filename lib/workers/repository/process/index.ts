@@ -1,10 +1,10 @@
-import { getCache } from '../../../util/cache/repository';
-import { GlobalConfig } from '../../../config/global';
 import { mergeChildConfig } from '../../../config';
+import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
 import { platform } from '../../../platform';
+import { getCache } from '../../../util/cache/repository';
 import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import type { BranchConfig } from '../../types';
@@ -40,7 +40,6 @@ async function getBaseBranchConfig(
 
     baseBranchConfig = mergeChildConfig(GlobalConfig.get(), baseBranchConfig);
     baseBranchConfig.baseBranches = config.baseBranches;
-    console.log(baseBranchConfig);
   }
 
   baseBranchConfig = mergeChildConfig(baseBranchConfig, { baseBranch });
