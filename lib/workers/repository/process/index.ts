@@ -1,3 +1,5 @@
+import { getCache } from '../../../util/cache/repository';
+import { GlobalConfig } from '../../../config/global';
 import { mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -26,13 +28,19 @@ async function getBaseBranchConfig(
       `Using config from branch ${baseBranch} because useBaseBranchConfig option specified`
     );
 
+    // Retrieve config file name autodetected for this repo
+    const cache = getCache();
+    const { configFileName } = cache;
+
     baseBranchConfig = await platform.getJsonFile(
-      config.onboardingConfigFileName,
+      configFileName || config.onboardingConfigFileName,
       config.repository,
       baseBranch
     );
 
+    baseBranchConfig = mergeChildConfig(GlobalConfig.get(), baseBranchConfig);
     baseBranchConfig.baseBranches = config.baseBranches;
+    console.log(baseBranchConfig);
   }
 
   baseBranchConfig = mergeChildConfig(baseBranchConfig, { baseBranch });
