@@ -2,37 +2,7 @@
 
 exports[`datasource/conan/index getReleases handles bad registries 1`] = `null`;
 
-exports[`datasource/conan/index getReleases handles bad registries 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "fake.bintray.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://fake.bintray.com/v2/conans/search?q=poco",
-  },
-]
-`;
-
 exports[`datasource/conan/index getReleases handles bad return 1`] = `null`;
-
-exports[`datasource/conan/index getReleases handles bad return 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "center.conan.io",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://center.conan.io/v2/conans/search?q=fakepackage",
-  },
-]
-`;
 
 exports[`datasource/conan/index getReleases handles malformed packages 1`] = `
 Object {
@@ -45,86 +15,11 @@ Object {
 }
 `;
 
-exports[`datasource/conan/index getReleases handles malformed packages 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "center.conan.io",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://center.conan.io/v2/conans/search?q=bad",
-  },
-]
-`;
-
-exports[`datasource/conan/index getReleases handles missing packages 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "center.conan.io",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://center.conan.io/v2/conans/search?q=fakepackage",
-  },
-]
-`;
-
 exports[`datasource/conan/index getReleases handles missing slash on registries 1`] = `null`;
-
-exports[`datasource/conan/index getReleases handles missing slash on registries 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "fake.bintray.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://fake.bintray.com/v2/conans/search?q=poco",
-  },
-]
-`;
 
 exports[`datasource/conan/index getReleases handles non 404 errors 1`] = `null`;
 
-exports[`datasource/conan/index getReleases handles non 404 errors 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "fake.bintray.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://fake.bintray.com/v2/conans/search?q=poco",
-  },
-]
-`;
-
 exports[`datasource/conan/index getReleases it handles mismatched userAndChannel versioned data 1`] = `null`;
-
-exports[`datasource/conan/index getReleases it handles mismatched userAndChannel versioned data 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "center.conan.io",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://center.conan.io/v2/conans/search?q=poco",
-  },
-]
-`;
 
 exports[`datasource/conan/index getReleases processes real versioned data 1`] = `
 Object {
@@ -147,19 +42,4 @@ Object {
     },
   ],
 }
-`;
-
-exports[`datasource/conan/index getReleases processes real versioned data 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
-      "host": "center.conan.io",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://center.conan.io/v2/conans/search?q=poco",
-  },
-]
 `;
