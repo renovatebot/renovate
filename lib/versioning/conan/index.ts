@@ -1,16 +1,21 @@
 import * as semver from 'semver';
-import { parseRange } from 'semver-utils';
-import { logger } from '../../logger';
 import { api as looseAPI } from '../loose';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   cleanVersion,
-  containsOperators,
-  fixParsedRange,
+  findSatisfyingVersion,
   getOptions,
   makeVersion,
   matchesWithOptions,
 } from './common';
+import {
+  bumpRange,
+  getMajor,
+  getMinor,
+  getPatch,
+  replaceRange,
+  widenRange,
+} from './range';
 
 export const id = 'conan';
 export const displayName = 'conan';
@@ -47,47 +52,6 @@ function isValid(input: string): string | boolean {
   }
 
   return semver.validRange(version, qualifiers);
-}
-
-// always include prereleases
-function getMajor(version: string): null | number {
-  const cleanedVersion = cleanVersion(version);
-  const options = getOptions(version);
-  options.includePrerelease = true;
-  const cleanerVersion = makeVersion(cleanedVersion, options);
-  if (typeof cleanerVersion === 'string') {
-    return Number(cleanerVersion.split('.')[0]);
-  }
-  return null;
-}
-
-// always include prereleases
-function getMinor(version: string): null | number {
-  const cleanedVersion = cleanVersion(version);
-  const options = getOptions(version);
-  options.includePrerelease = true;
-  const cleanerVersion = makeVersion(cleanedVersion, options);
-  if (typeof cleanerVersion === 'string') {
-    return Number(cleanerVersion.split('.')[1]);
-  }
-  return null;
-}
-
-// always include prereleases
-function getPatch(version: string): null | number {
-  const cleanedVersion = cleanVersion(version);
-  const options = getOptions(version);
-  options.includePrerelease = true;
-  const cleanerVersion = makeVersion(cleanedVersion, options);
-
-  if (typeof cleanerVersion === 'string') {
-    const newVersion = semver.valid(
-      semver.coerce(cleanedVersion, options),
-      options
-    );
-    return Number(newVersion.split('.')[2]);
-  }
-  return null;
 }
 
 function equals(version: string, other: string): boolean {
@@ -163,39 +127,6 @@ function isStable(_: string): boolean {
   return true;
 }
 
-function findSatisfyingVersion(
-  versions: string[],
-  range: string,
-  compareRt: number
-): string | null {
-  const options = getOptions(range);
-  let cur = null;
-  let curSV = null;
-  let index = 0;
-  let curIndex = -1;
-
-  versions.forEach((v) => {
-    const versionFromList = makeVersion(v, options);
-    if (typeof versionFromList === 'string') {
-      if (matches(versionFromList, range)) {
-        if (
-          !cur ||
-          semver.compare(curSV, versionFromList, options) === compareRt
-        ) {
-          cur = versionFromList;
-          curIndex = index;
-          curSV = new semver.SemVer(cur, options);
-        }
-      }
-    }
-    index += 1;
-  });
-  if (curIndex >= 0) {
-    return versions[curIndex];
-  }
-  return null;
-}
-
 function minSatisfyingVersion(
   versions: string[],
   range: string
@@ -208,229 +139,6 @@ function getSatisfyingVersion(
   range: string
 ): string | null {
   return findSatisfyingVersion(versions, range, MAX);
-}
-
-function replaceRange({ currentValue, newVersion }: NewValueConfig): string {
-  const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
-  const toVersionMajor = getMajor(newVersion);
-  const toVersionMinor = getMinor(newVersion);
-  const toVersionPatch = getPatch(newVersion);
-  const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)[0])
-    : '';
-
-  if (element.operator === '~>') {
-    return `~> ${toVersionMajor}.${toVersionMinor}.0`;
-  }
-  if (element.operator === '=') {
-    return `=${newVersion}`;
-  }
-  if (element.operator === '~') {
-    if (suffix.length) {
-      return `~${toVersionMajor}.${toVersionMinor}.${toVersionPatch}${suffix}`;
-    }
-    return `~${toVersionMajor}.${toVersionMinor}.0`;
-  }
-  if (element.operator === '<=') {
-    let res;
-    if (element.patch || suffix.length) {
-      res = `<=${newVersion}`;
-    } else if (element.minor) {
-      res = `<=${toVersionMajor}.${toVersionMinor}`;
-    } else {
-      res = `<=${toVersionMajor}`;
-    }
-    if (currentValue.includes('<= ')) {
-      res = res.replace('<=', '<= ');
-    }
-    return res;
-  }
-  if (element.operator === '<') {
-    let res;
-    if (currentValue.endsWith('.0.0')) {
-      const newMajor = toVersionMajor + 1;
-      res = `<${newMajor}.0.0`;
-    } else if (element.patch) {
-      res = `<${semver.inc(newVersion, 'patch')}`;
-    } else if (element.minor) {
-      res = `<${toVersionMajor}.${toVersionMinor + 1}`;
-    } else {
-      res = `<${toVersionMajor + 1}`;
-    }
-    if (currentValue.includes('< ')) {
-      res = res.replace(/</g, '< ');
-    }
-    return res;
-  }
-  if (element.operator === '>') {
-    let res;
-    if (currentValue.endsWith('.0.0')) {
-      const newMajor = toVersionMajor + 1;
-      res = `>${newMajor}.0.0`;
-    } else if (element.patch) {
-      res = `>${toVersionMajor}.${toVersionMinor}.${toVersionPatch}`;
-    } else if (element.minor) {
-      res = `>${toVersionMajor}.${toVersionMinor}`;
-    } else {
-      res = `>${toVersionMajor}`;
-    }
-    if (currentValue.includes('> ')) {
-      res = res.replace(/</g, '> ');
-    }
-    return res;
-  }
-  if (!element.operator) {
-    if (element.minor) {
-      if (element.minor === 'x') {
-        return `${toVersionMajor}.x`;
-      }
-      if (element.minor === '*') {
-        return `${toVersionMajor}.*`;
-      }
-      if (element.patch === 'x') {
-        return `${toVersionMajor}.${toVersionMinor}.x`;
-      }
-      if (element.patch === '*') {
-        return `${toVersionMajor}.${toVersionMinor}.*`;
-      }
-      return `${newVersion}`;
-    }
-    return `${toVersionMajor}`;
-  }
-  return newVersion;
-}
-
-function widenRange(
-  { currentValue, currentVersion, newVersion }: NewValueConfig,
-  options: semver.Options
-): string {
-  const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
-
-  if (matchesWithOptions(newVersion, currentValue, options)) {
-    return currentValue;
-  }
-  const newValue = replaceRange({
-    currentValue,
-    rangeStrategy: 'replace',
-    currentVersion,
-    newVersion,
-  });
-  if (element.operator?.startsWith('<')) {
-    const splitCurrent = currentValue.split(element.operator);
-    splitCurrent.pop();
-    return splitCurrent.join(element.operator) + newValue;
-  }
-  if (parsedRange.length > 1) {
-    const previousElement = parsedRange[parsedRange.length - 2];
-    if (previousElement.operator === '-') {
-      const splitCurrent = currentValue.split('-');
-      splitCurrent.pop();
-      return splitCurrent.join('-') + '- ' + newValue;
-    }
-    if (element.operator?.startsWith('>')) {
-      logger.warn(`Complex ranges ending in greater than are not supported`);
-      return null;
-    }
-  }
-  return `${currentValue} || ${newValue}`;
-}
-
-function bumpRange(
-  { currentValue, currentVersion, newVersion }: NewValueConfig,
-  options: semver.Options
-): string {
-  if (!containsOperators(currentValue) && currentValue.includes('||')) {
-    return widenRange(
-      {
-        currentValue,
-        rangeStrategy: 'widen',
-        currentVersion,
-        newVersion,
-      },
-      options
-    );
-  }
-  const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
-
-  const toVersionMajor = getMajor(newVersion);
-  const toVersionMinor = getMinor(newVersion);
-  const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)[0])
-    : '';
-
-  if (parsedRange.length === 1) {
-    if (!element.operator) {
-      return replaceRange({
-        currentValue,
-        rangeStrategy: 'replace',
-        currentVersion,
-        newVersion,
-      });
-    }
-    if (element.operator.startsWith('~')) {
-      const split = currentValue.split('.');
-      if (suffix.length) {
-        return `${element.operator}${newVersion}`;
-      }
-      if (split.length === 1) {
-        // ~4
-        return `${element.operator}${toVersionMajor}`;
-      }
-      if (split.length === 2) {
-        // ~4.1
-        return `${element.operator}${toVersionMajor}.${toVersionMinor}`;
-      }
-      return `${element.operator}${newVersion}`;
-    }
-    if (element.operator === '=') {
-      return `=${newVersion}`;
-    }
-    if (element.operator === '>=') {
-      return currentValue.includes('>= ')
-        ? `>= ${newVersion}`
-        : `>=${newVersion}`;
-    }
-    if (element.operator.startsWith('<')) {
-      return currentValue;
-    }
-  } else {
-    const newRange = fixParsedRange(currentValue);
-    const versions = newRange.map((x) => {
-      // don't bump or'd single version values
-      if (x.operator === '||') {
-        return x.semver;
-      }
-      if (x.operator) {
-        const bumpedSubRange = bumpRange(
-          {
-            currentValue: x.semver,
-            rangeStrategy: 'bump',
-            currentVersion,
-            newVersion,
-          },
-          options
-        );
-        if (matchesWithOptions(newVersion, bumpedSubRange, options)) {
-          return bumpedSubRange;
-        }
-      }
-
-      return replaceRange({
-        currentValue: x.semver,
-        rangeStrategy: 'replace',
-        currentVersion,
-        newVersion,
-      });
-    });
-    return versions.filter((x) => x !== null && x !== '').join(' ');
-  }
-  logger.debug(
-    'Unsupported range type for rangeStrategy=bump: ' + currentValue
-  );
-  return null;
 }
 
 function getNewValue({

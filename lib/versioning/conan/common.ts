@@ -1,5 +1,4 @@
 import * as semver from 'semver';
-import { SemVer, parseRange } from 'semver-utils';
 import { regEx } from '../../util/regex';
 
 export function makeVersion(
@@ -68,66 +67,38 @@ export function matchesWithOptions(
   return semver.satisfies(cleanedVersion, cleanRange, options);
 }
 
-export function fixParsedRange(range: string): any {
-  const ordValues = [];
+export function findSatisfyingVersion(
+  versions: string[],
+  range: string,
+  compareRt: number
+): string | null {
+  const options = getOptions(range);
+  let cur = null;
+  let curSV = null;
+  let index = 0;
+  let curIndex = -1;
 
-  // don't bump or'd single version values
-  const originalSplit = range.split(' ');
-  for (let i = 0; i < originalSplit.length; i += 1) {
-    if (
-      !containsOperators(originalSplit[i]) &&
-      !originalSplit[i].includes('||')
-    ) {
-      if (i !== 0 && originalSplit[i - 1].includes('||')) {
-        ordValues.push(`|| ${originalSplit[i]}`);
-      } else if (i !== originalSplit.length && originalSplit[i + 1] === '||') {
-        ordValues.push(`${originalSplit[i]} ||`);
-      }
-    } else {
-      ordValues.push(originalSplit[i]);
-    }
-  }
-
-  const parsedRange = parseRange(range);
-  const cleanRange = range.replace(/([<=>^~])( )?/g, '');
-  const splitRange = cleanRange.split(' ');
-  const semverRange: SemVer[] = [];
-
-  for (let i = 0; i < splitRange.length; i += 1) {
-    if (!splitRange[i].includes('||')) {
-      const splitVersion = splitRange[i].split('.');
-      const major = splitVersion[0];
-      const minor = splitVersion[1];
-      const patch = splitVersion[2];
-      const operator = ordValues[i].includes('||')
-        ? '||'
-        : parsedRange[i].operator;
-      const NewSemVer: SemVer = {
-        major,
-      };
-
-      let full = `${operator || ''}${major}`;
-      if (minor) {
-        NewSemVer.minor = minor;
-        full = `${full}.${minor}`;
-        if (patch) {
-          NewSemVer.patch = patch;
-          full = `${full}.${patch}`;
+  versions.forEach((v) => {
+    const versionFromList = makeVersion(v, options);
+    if (typeof versionFromList === 'string') {
+      const cleanedVersion = cleanVersion(versionFromList);
+      const options = getOptions(range);
+      const cleanRange = cleanVersion(range);
+      if (matchesWithOptions(cleanedVersion, cleanRange, options)) {
+        if (
+          !cur ||
+          semver.compare(curSV, versionFromList, options) === compareRt
+        ) {
+          cur = versionFromList;
+          curIndex = index;
+          curSV = new semver.SemVer(cur, options);
         }
       }
-      if (operator) {
-        NewSemVer.operator = operator;
-        full = range.includes(`${operator} `)
-          ? `${operator} ${full.replace(operator, '')}`
-          : `${operator}${full.replace(operator, '')}`;
-      }
-
-      full = ordValues[i].includes('||') ? ordValues[i] : full;
-
-      NewSemVer.semver = full;
-
-      semverRange.push(NewSemVer);
     }
+    index += 1;
+  });
+  if (curIndex >= 0) {
+    return versions[curIndex];
   }
-  return semverRange;
+  return null;
 }
