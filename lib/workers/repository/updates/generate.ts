@@ -185,7 +185,7 @@ export function generateBranchConfig(
       'to v$1'
     );
     if (upgrade.semanticCommitCasing) {
-      // We only need to lowercase the first line
+      // We only need to lowercase the first word of the commitMessage
       const splitMessage = upgrade.commitMessage.split('\n');
       splitMessage[0] = CommitMessage.formatCasing(splitMessage[0]);
       upgrade.commitMessage = splitMessage.join('\n');
