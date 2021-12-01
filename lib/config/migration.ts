@@ -9,7 +9,6 @@ import type {
   MigratedRenovateConfig,
   RenovateConfig,
 } from './types';
-import { mergeChildConfig } from './utils';
 
 // Returns a migrated config
 export function migrateConfig(config: RenovateConfig): MigratedConfig {
@@ -147,24 +146,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
             regEx(from, 'g'), // TODO #12071
             to
           );
-        }
-      }
-    }
-    // Migrate nested packageRules
-    if (is.nonEmptyArray(migratedConfig.packageRules)) {
-      const existingRules = migratedConfig.packageRules;
-      migratedConfig.packageRules = [];
-      for (const packageRule of existingRules) {
-        if (is.array(packageRule.packageRules)) {
-          logger.debug('Flattening nested packageRules');
-          // merge each subrule and add to the parent list
-          for (const subrule of packageRule.packageRules) {
-            const combinedRule = mergeChildConfig(packageRule, subrule);
-            delete combinedRule.packageRules;
-            migratedConfig.packageRules.push(combinedRule);
-          }
-        } else {
-          migratedConfig.packageRules.push(packageRule);
         }
       }
     }
