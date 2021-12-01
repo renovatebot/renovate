@@ -4,28 +4,16 @@ import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
 import { MigrationsService } from './migrations';
-import { getOptions } from './options';
 import type {
   MigratedConfig,
   MigratedRenovateConfig,
   RenovateConfig,
-  RenovateOptions,
 } from './types';
 import { mergeChildConfig } from './utils';
-
-const options = getOptions();
-
-let optionTypes: Record<string, RenovateOptions['type']>;
 
 // Returns a migrated config
 export function migrateConfig(config: RenovateConfig): MigratedConfig {
   try {
-    if (!optionTypes) {
-      optionTypes = {};
-      options.forEach((option) => {
-        optionTypes[option.name] = option.type;
-      });
-    }
     const newConfig = MigrationsService.run(config);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
     const depTypes = [
@@ -115,20 +103,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           }
         });
         delete migratedConfig.depTypes;
-      } else if (optionTypes[key] === 'object' && is.boolean(val)) {
-        migratedConfig[key] = { enabled: val };
-      } else if (optionTypes[key] === 'boolean') {
-        if (val === 'true') {
-          migratedConfig[key] = true;
-        } else if (val === 'false') {
-          migratedConfig[key] = false;
-        }
-      } else if (
-        optionTypes[key] === 'string' &&
-        is.array(val) &&
-        val.length === 1
-      ) {
-        migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
         delete migratedConfig.node.enabled;
         migratedConfig.travis = migratedConfig.travis || {};

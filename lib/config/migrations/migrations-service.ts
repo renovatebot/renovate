@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../types';
 import { AbstractMigration } from './base/abstract-migration';
+import { MigrationByValueType } from './base/migration-by-value-type';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { AutomergeMajorMigration } from './custom/automerge-major-migration';
@@ -126,13 +127,23 @@ export class MigrationsService {
       originalConfig,
       migratedConfig
     );
-
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      const migration = migrations.find((item) =>
+
+      const migrationByPropertyName = migrations.find((item) =>
         MigrationsService.isMigrationForProperty(item, key)
       );
-      migration?.run(value, key);
+
+      if (migrationByPropertyName) {
+        migrationByPropertyName.run(value, key);
+      } else {
+        const migrationByValueType = new MigrationByValueType(
+          key,
+          originalConfig,
+          migratedConfig
+        );
+        migrationByValueType.run(value);
+      }
     }
 
     return migratedConfig;
