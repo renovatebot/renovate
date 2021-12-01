@@ -150,29 +150,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
       }
     }
-    if (is.array(migratedConfig.packageRules)) {
-      const renameMap = {
-        paths: 'matchPaths',
-        languages: 'matchLanguages',
-        baseBranchList: 'matchBaseBranches',
-        managers: 'matchManagers',
-        datasources: 'matchDatasources',
-        depTypeList: 'matchDepTypes',
-        packageNames: 'matchPackageNames',
-        packagePatterns: 'matchPackagePatterns',
-        sourceUrlPrefixes: 'matchSourceUrlPrefixes',
-        updateTypes: 'matchUpdateTypes',
-      };
-      for (const packageRule of migratedConfig.packageRules) {
-        for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
-          const newKey = renameMap[oldKey];
-          if (newKey) {
-            packageRule[newKey] = ruleVal;
-            delete packageRule[oldKey];
-          }
-        }
-      }
-    }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {
       const existingRules = migratedConfig.packageRules;
