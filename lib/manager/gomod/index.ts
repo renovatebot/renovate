@@ -1,5 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
-import * as datasourceGo from '../../datasource/go';
+import { GoDatasource } from '../../datasource/go';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
@@ -11,4 +11,4 @@ export const defaultConfig = {
   fileMatch: ['(^|/)go.mod$'],
 };
 
-export const supportedDatasources = [datasourceGo.id];
+export const supportedDatasources = [GoDatasource.id];

@@ -1,7 +1,7 @@
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGithubReleases from '../../datasource/github-releases';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceGo from '../../datasource/go';
+import { GoDatasource } from '../../datasource/go';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 
@@ -15,5 +15,5 @@ export const supportedDatasources = [
   datasourceDocker.id,
   datasourceGithubReleases.id,
   datasourceGithubTags.id,
-  datasourceGo.id,
+  GoDatasource.id,
 ];
