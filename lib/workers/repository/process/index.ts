@@ -1,5 +1,4 @@
 import { mergeChildConfig } from '../../../config';
-import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
@@ -38,7 +37,7 @@ async function getBaseBranchConfig(
       baseBranch
     );
 
-    baseBranchConfig = mergeChildConfig(GlobalConfig.get(), baseBranchConfig);
+    baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
     baseBranchConfig.baseBranches = config.baseBranches;
   }
 
