@@ -2191,6 +2191,37 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'ignoreTopic',
+    description:
+      'Title of PR comment that gets posted to explain that future upgrades will be ignored.',
+    type: 'string',
+    default: 'Renovate Ignore Notification',
+  },
+  {
+    name: 'ignoreMajor',
+    description:
+      'For major upgrades: content of PR comment that gets posted to explain that future upgrades will be ignored.',
+    type: 'string',
+    default:
+      'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{newMajor}}}.x releases. However, if you upgrade to {{{newMajor}}}.x manually then Renovate will reenable minor and patch updates automatically.',
+  },
+  {
+    name: 'ignoreDigest',
+    description:
+      'For digest upgrades: content of PR comment that gets posted to explain that future upgrades will be ignored.',
+    type: 'string',
+    default:
+      'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{depName}}}:{{{currentValue}}} digest updates. Digest updates will resume if you update the specified tag at any time.',
+  },
+  {
+    name: 'ignoreOther',
+    description:
+      'For other upgrades: content of PR comment that gets posted to explain that future upgrades will be ignored.',
+    type: 'string',
+    default:
+      'As this PR has been closed unmerged, Renovate will now ignore this update ({{{newValue}}}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the `ignoreDeps` array of your renovate config.',
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

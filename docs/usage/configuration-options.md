@@ -1082,6 +1082,21 @@ The above is the same as if you wrote this package rule:
 }
 ```
 
+## ignoreDigest
+
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+This option makes the text of that comment configurable for digest upgrades.
+
+## ignoreMajor
+
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+This option makes the text of that comment configurable for major upgrades.
+
+## ignoreOther
+
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+This option makes the text of that comment configurable for other (neither digest nor major) upgrades.
+
 ## ignorePaths
 
 Renovate will extract dependencies from every file it finds in a repository, unless that file is explicitly ignored.
@@ -1134,6 +1149,11 @@ Currently Renovate's default behavior is to only automerge if every status check
 Setting this option to `true` means that Renovate will ignore _all_ status checks.
 You can set this if you don't have any status checks but still want Renovate to automerge PRs.
 Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
+
+## ignoreTopic
+
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+This option makes the topic of that comment configurable.
 
 ## ignoreUnstable
 
