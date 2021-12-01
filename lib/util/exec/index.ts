@@ -15,7 +15,7 @@ import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
 import type { ToolConstraint } from './types';
 
-type ExtraEnv<T = unknown> = Record<string, T>;
+type ExtraEnv = Record<string, string | null | undefined>;
 
 export interface ExecOptions extends ChildProcessExecOptions {
   cwdFile?: string;
@@ -25,46 +25,48 @@ export interface ExecOptions extends ChildProcessExecOptions {
 }
 
 function getChildEnv({
-  extraEnv = {},
+  extraEnv,
   env: forcedEnv = {},
-}: ExecOptions): ExtraEnv<string> {
+}: ExecOptions): Record<string, string> {
   const globalConfigEnv = GlobalConfig.get('customEnvVariables');
 
-  const inheritedKeys = Object.entries(extraEnv).reduce(
-    (acc, [key, val]) =>
-      val === null || val === undefined ? acc : [...acc, key],
-    []
-  );
+  const inheritedKeys: string[] = [];
+  for (const [key, val] of Object.entries(extraEnv ?? {})) {
+    if (val !== null && val !== undefined) {
+      inheritedKeys.push(key);
+    }
+  }
+
   const parentEnv = getChildProcessEnv(inheritedKeys);
-  const childEnv = Object.entries({
+  const combinedEnv = {
     ...extraEnv,
     ...parentEnv,
     ...globalConfigEnv,
     ...forcedEnv,
-  }).reduce(
-    (acc, [key, val]) =>
-      val === null || val === undefined
-        ? acc
-        : { ...acc, [key]: val.toString() },
-    {}
-  );
-  return childEnv;
+  };
+
+  const result: Record<string, string> = {};
+  for (const [key, val] of Object.entries(combinedEnv)) {
+    if (val !== null && val !== undefined) {
+      result[key] = `${val}`;
+    }
+  }
+
+  return result;
 }
 
-function dockerEnvVars(
-  extraEnv: ExtraEnv,
-  childEnv: ExtraEnv<string>
-): string[] {
+function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   const extraEnvKeys = Object.keys(extraEnv || {});
-  return extraEnvKeys.filter(
-    (key) => typeof childEnv[key] === 'string' && childEnv[key].length > 0
-  );
+  return extraEnvKeys.filter((key) => {
+    const val = childEnv[key];
+    return typeof val === 'string' && val.length > 0;
+  });
 }
 
-function getCwd({ cwd, cwdFile }: ExecOptions): string {
+function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
   const defaultCwd = GlobalConfig.get('localDir');
   const paramCwd = cwdFile ? join(defaultCwd, dirname(cwdFile)) : cwd;
-  return paramCwd || defaultCwd;
+  return paramCwd ?? defaultCwd;
 }
 
 function getRawExecOptions(opts: ExecOptions): RawExecOptions {
@@ -93,11 +95,11 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   }
 
   // Set default max buffer size to 10MB
-  rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
+  rawExecOptions.maxBuffer = rawExecOptions.maxBuffer ?? 10 * 1024 * 1024;
   return rawExecOptions;
 }
 
-function isDocker({ docker }: ExecOptions): boolean {
+function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
   const { binarySource } = GlobalConfig.get();
   return binarySource === 'docker' && !!docker;
 }
@@ -118,17 +120,21 @@ async function prepareRawExec(
 
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
-  if (isDocker(opts)) {
+  if (isDocker(docker)) {
     logger.debug('Using docker to execute');
     const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
     const childEnv = getChildEnv(opts);
     const envVars = dockerEnvVars(extraEnv, childEnv);
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
-    dockerOptions.preCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(dockerOptions.preCommands || []),
-    ];
+    dockerOptions.preCommands ??= [];
+    if (opts.toolConstraints) {
+      const toolInstallCommands = await generateInstallCommands(
+        opts.toolConstraints
+      );
+      dockerOptions.preCommands.unshift(...toolInstallCommands);
+    }
+
     const dockerCommand = await generateDockerCommand(
       rawCommands,
       dockerOptions
@@ -144,12 +150,12 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const { dockerChildPrefix } = GlobalConfig.get();
+  const { dockerChildPrefix = 'renovate_' } = GlobalConfig.get();
 
   const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
-  const useDocker = isDocker(opts);
+  const useDocker = isDocker(docker);
 
-  let res: ExecResult | null = null;
+  let res: ExecResult = { stdout: '', stderr: '' };
   for (const rawCmd of rawCommands) {
     const startTime = Date.now();
     if (useDocker) {
@@ -181,17 +187,15 @@ export async function exec(
       throw err;
     }
     const durationMs = Math.round(Date.now() - startTime);
-    if (res) {
-      logger.debug(
-        {
-          cmd: rawCmd,
-          durationMs,
-          stdout: res.stdout,
-          stderr: res.stderr,
-        },
-        'exec completed'
-      );
-    }
+    logger.debug(
+      {
+        cmd: rawCmd,
+        durationMs,
+        stdout: res.stdout,
+        stderr: res.stderr,
+      },
+      'exec completed'
+    );
   }
 
   return res;
