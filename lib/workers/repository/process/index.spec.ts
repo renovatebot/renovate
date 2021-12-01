@@ -45,19 +45,11 @@ describe('workers/repository/process/index', () => {
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'none';
       const res = await extractDependencies(config);
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "branchList": Array [
-            undefined,
-            undefined,
-          ],
-          "branches": Array [
-            undefined,
-            undefined,
-          ],
-          "packageFiles": undefined,
-        }
-      `);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
       expect(platform.getJsonFile).not.toHaveBeenCalledWith(
         'renovate.json',
         undefined,
@@ -71,19 +63,11 @@ describe('workers/repository/process/index', () => {
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'replace';
       const res = await extractDependencies(config);
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "branchList": Array [
-            undefined,
-            undefined,
-          ],
-          "branches": Array [
-            undefined,
-            undefined,
-          ],
-          "packageFiles": undefined,
-        }
-      `);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
       expect(platform.getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
@@ -99,13 +83,11 @@ describe('workers/repository/process/index', () => {
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'replace';
       const res = await extractDependencies(config);
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "branchList": Array [],
-          "branches": Array [],
-          "packageFiles": null,
-        }
-      `);
+      expect(res).toEqual({
+        branchList: [],
+        branches: [],
+        packageFiles: null,
+      });
       expect(platform.getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
