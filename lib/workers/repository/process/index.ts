@@ -42,7 +42,9 @@ async function getBaseBranchConfig(
       logger.error(
         `Error fetching config file ${configFileName} from branch ${baseBranch} - possible config name mismatch between branches?`
       );
-      return null;
+      throw new Error(
+        `config error: Error fetching config file ${configFileName} from branch ${baseBranch}`
+      );
     }
 
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
@@ -73,9 +75,7 @@ export async function extractDependencies(
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        if (baseBranchConfig) {
-          extracted[baseBranch] = await extract(baseBranchConfig);
-        }
+        extracted[baseBranch] = await extract(baseBranchConfig);
       } else {
         logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
       }
@@ -84,13 +84,11 @@ export async function extractDependencies(
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        if (baseBranchConfig) {
-          const packageFiles = extracted[baseBranch];
-          const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
-          res.branches = res.branches.concat(baseBranchRes?.branches);
-          res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-          res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
-        }
+        const packageFiles = extracted[baseBranch];
+        const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
+        res.branches = res.branches.concat(baseBranchRes?.branches);
+        res.branchList = res.branchList.concat(baseBranchRes?.branchList);
+        res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
       }
     }
   } else {

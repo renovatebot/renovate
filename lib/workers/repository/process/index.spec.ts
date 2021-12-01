@@ -77,21 +77,18 @@ describe('workers/repository/process/index', () => {
 
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
       git.branchExists.mockReturnValue(true);
-      platform.getJsonFile = jest.fn().mockImplementation(() => {
-        throw new Error();
-      });
+      platform.getJsonFile = jest
+        .fn()
+        .mockImplementation((fileName, repoName, branchName) => {
+          if (branchName === 'dev') {
+            throw new Error();
+          }
+          return {};
+        });
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'replace';
-      const res = await extractDependencies(config);
-      expect(res).toEqual({
-        branchList: [],
-        branches: [],
-        packageFiles: null,
-      });
-      expect(platform.getJsonFile).toHaveBeenCalledWith(
-        'renovate.json',
-        undefined,
-        'dev'
+      await expect(extractDependencies(config)).rejects.toThrow(
+        'config error: Error fetching config file renovate.json from branch dev'
       );
     });
   });
