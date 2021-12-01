@@ -1,4 +1,10 @@
-import { platform, RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  git,
+  mocked,
+  platform,
+} from '../../../../test/util';
 import * as _extractUpdate from './extract-update';
 import { extractDependencies, updateRepo } from '.';
 
@@ -76,6 +82,28 @@ describe('workers/repository/process/index', () => {
             undefined,
           ],
           "packageFiles": undefined,
+        }
+      `);
+      expect(platform.getJsonFile).toHaveBeenCalledWith(
+        'renovate.json',
+        undefined,
+        'dev'
+      );
+    });
+
+    it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
+      git.branchExists.mockReturnValue(true);
+      platform.getJsonFile = jest.fn().mockImplementation(() => {
+        throw new Error();
+      });
+      config.baseBranches = ['master', 'dev'];
+      config.useBaseBranchConfig = 'replace';
+      const res = await extractDependencies(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "branchList": Array [],
+          "branches": Array [],
+          "packageFiles": null,
         }
       `);
       expect(platform.getJsonFile).toHaveBeenCalledWith(

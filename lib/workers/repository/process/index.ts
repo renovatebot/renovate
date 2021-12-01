@@ -14,7 +14,7 @@ import type { WriteUpdateResult } from './write';
 async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig
-): Promise<RenovateConfig> {
+): Promise<RenovateConfig | null> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
   let baseBranchConfig: RenovateConfig = config;
@@ -29,13 +29,21 @@ async function getBaseBranchConfig(
 
     // Retrieve config file name autodetected for this repo
     const cache = getCache();
-    const { configFileName } = cache;
+    const configFileName =
+      cache.configFileName || config.onboardingConfigFileName;
 
-    baseBranchConfig = await platform.getJsonFile(
-      configFileName || config.onboardingConfigFileName,
-      config.repository,
-      baseBranch
-    );
+    try {
+      baseBranchConfig = await platform.getJsonFile(
+        configFileName,
+        config.repository,
+        baseBranch
+      );
+    } catch (err) {
+      logger.error(
+        `Error fetching config file ${configFileName} from branch ${baseBranch} - possible config name mismatch between branches?`
+      );
+      return null;
+    }
 
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
     baseBranchConfig.baseBranches = config.baseBranches;
@@ -65,7 +73,9 @@ export async function extractDependencies(
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        extracted[baseBranch] = await extract(baseBranchConfig);
+        if (baseBranchConfig) {
+          extracted[baseBranch] = await extract(baseBranchConfig);
+        }
       } else {
         logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
       }
@@ -74,11 +84,13 @@ export async function extractDependencies(
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        const packageFiles = extracted[baseBranch];
-        const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
-        res.branches = res.branches.concat(baseBranchRes?.branches);
-        res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-        res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+        if (baseBranchConfig) {
+          const packageFiles = extracted[baseBranch];
+          const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
+          res.branches = res.branches.concat(baseBranchRes?.branches);
+          res.branchList = res.branchList.concat(baseBranchRes?.branchList);
+          res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+        }
       }
     }
   } else {
