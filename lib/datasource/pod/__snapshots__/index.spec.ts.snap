@@ -14,18 +14,128 @@ Array [
 ]
 `;
 
-exports[`datasource/pod/index getReleases processes real data from Github 1`] = `
+exports[`datasource/pod/index getReleases processes real data from Github Enterprise with shard with specs 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "host": "api.github.com",
+      "host": "github.foo.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/Artsy/Specs/contents/foo",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo",
   },
+]
+`;
+
+exports[`datasource/pod/index getReleases processes real data from Github Enterprise with shard without specs 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/a/c/b/foo",
+  },
+]
+`;
+
+exports[`datasource/pod/index getReleases processes real data from Github Enterprise with specs without shard 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/Specs/foo",
+  },
+]
+`;
+
+exports[`datasource/pod/index getReleases processes real data from Github Enterprise without specs without shard 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/Specs/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/foo",
+  },
+]
+`;
+
+exports[`datasource/pod/index getReleases processes real data from Github with shard with specs 1`] = `
+Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
@@ -39,42 +149,107 @@ Array [
 ]
 `;
 
-exports[`datasource/pod/index getReleases processes real data from Github Enterprise 1`] = `
+exports[`datasource/pod/index getReleases processes real data from Github with shard without specs 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "host": "github.foo.com",
+      "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/foo",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/Specs/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/a/c/b/foo",
   },
 ]
 `;
 
-exports[`datasource/pod/index getReleases processes real data from Github Enterprise with shard repo setup 1`] = `
+exports[`datasource/pod/index getReleases processes real data from Github with specs without shard 1`] = `
 Array [
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "host": "github.foo.com",
+      "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/foo",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/Specs/a/c/b/foo",
   },
   Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "host": "github.foo.com",
+      "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/bar/a/c/b/foo",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/Specs/foo",
+  },
+]
+`;
+
+exports[`datasource/pod/index getReleases processes real data from Github without specs without shard 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/Specs/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/Specs/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/Artsy/Specs/contents/foo",
   },
 ]
 `;
@@ -103,7 +278,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/foo/bar/contents/foo",
+    "url": "https://api.github.com/repos/foo/bar/contents/Specs/a/c/b/foo",
   },
   Object {
     "headers": Object {
@@ -113,7 +288,27 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/foo/bar/contents/bar/a/c/b/foo",
+    "url": "https://api.github.com/repos/foo/bar/contents/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/foo/bar/contents/Specs/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/foo/bar/contents/foo",
   },
 ]
 `;
@@ -128,7 +323,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/foo",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo",
   },
   Object {
     "headers": Object {
@@ -138,7 +333,27 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/bar/a/c/b/foo",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/a/c/b/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/Specs/foo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "github.foo.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://github.foo.com/api/v3/repos/foo/bar/contents/foo",
   },
 ]
 `;
