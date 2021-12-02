@@ -543,6 +543,26 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Default timeout from executionTimeout config option',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 30 * 60 * 1000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { executionTimeout: 30 },
+      },
+    ],
+
+    [
       'Explicit maxBuffer',
       {
         processEnv,

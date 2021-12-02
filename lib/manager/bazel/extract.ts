@@ -51,7 +51,7 @@ function parseUrl(urlString: string): UrlParsedResult | null {
 
 const lexer = moo.states({
   main: {
-    lineComment: { match: /#.*?$/ }, // TODO #12070
+    lineComment: { match: /#.*?$/ }, // TODO #12870
     leftParen: { match: '(' },
     rightParen: { match: ')' },
     longDoubleQuoted: {

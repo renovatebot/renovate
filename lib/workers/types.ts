@@ -14,9 +14,11 @@ import type {
   PackageFile,
 } from '../manager/types';
 import type { PlatformPrOptions } from '../platform/types';
-import type { File } from '../util/git';
+import type { File } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence';
-import type { ChangeLogResult } from './pr/changelog/types';
+import type { ChangeLogRelease, ChangeLogResult } from './pr/changelog/types';
+
+export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
@@ -50,7 +52,7 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
-  releases?: Release[];
+  releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
   minimumConfidence?: MergeConfidence;
@@ -61,6 +63,7 @@ export interface BranchUpgradeConfig
 
   logJSON?: ChangeLogResult;
 
+  hasReleaseNotes?: boolean;
   homepage?: string;
   changelogUrl?: string;
   dependencyUrl?: string;

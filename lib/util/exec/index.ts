@@ -68,6 +68,7 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string {
 }
 
 function getRawExecOptions(opts: ExecOptions): RawExecOptions {
+  const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
   const execOptions: ExecOptions = { ...opts };
   delete execOptions.extraEnv;
   delete execOptions.docker;
@@ -82,8 +83,15 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
     env: childEnv,
     cwd,
   };
-  // Set default timeout to 15 minutes
-  rawExecOptions.timeout = rawExecOptions.timeout || 15 * 60 * 1000;
+  // Set default timeout config.executionTimeout if specified; othrwise to 15 minutes
+  if (!rawExecOptions.timeout) {
+    if (defaultExecutionTimeout) {
+      rawExecOptions.timeout = defaultExecutionTimeout * 60 * 1000;
+    } else {
+      rawExecOptions.timeout = 15 * 60 * 1000;
+    }
+  }
+
   // Set default max buffer size to 10MB
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
   return rawExecOptions;

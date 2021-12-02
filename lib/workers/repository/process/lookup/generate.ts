@@ -32,18 +32,22 @@ export function generateUpdate(
     }
   }
   const { currentValue } = config;
-  try {
-    update.newValue = versioning.getNewValue({
-      currentValue,
-      rangeStrategy,
-      currentVersion,
-      newVersion,
-    });
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn(
-      { err, currentValue, rangeStrategy, currentVersion, newVersion },
-      'getNewValue error'
-    );
+  if (currentValue) {
+    try {
+      update.newValue = versioning.getNewValue({
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn(
+        { err, currentValue, rangeStrategy, currentVersion, newVersion },
+        'getNewValue error'
+      );
+      update.newValue = currentValue;
+    }
+  } else {
     update.newValue = currentValue;
   }
   update.newMajor = versioning.getMajor(newVersion);

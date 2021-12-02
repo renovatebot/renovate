@@ -177,7 +177,10 @@ export async function getRawFile(
   branchOrTag?: string
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
-  const url = `repos/${repo}/contents/${fileName}`;
+  let url = `repos/${repo}/contents/${fileName}`;
+  if (branchOrTag) {
+    url += `?ref=` + branchOrTag;
+  }
   const res = await githubApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
