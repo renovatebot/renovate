@@ -259,6 +259,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1",
       },
       "version": "5.6.1",
@@ -270,6 +271,7 @@ Object {
       },
       "date": "2020-02-13T15:37:00.000Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0",
       },
       "version": "5.6.0",
@@ -281,6 +283,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
       },
       "version": "5.5.0",
@@ -292,6 +295,7 @@ Object {
       },
       "date": "2018-08-24T14:23:00.000Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0",
       },
       "version": "5.4.0",

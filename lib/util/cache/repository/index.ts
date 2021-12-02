@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import { join } from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import type {
   RenovateConfig,
   RepositoryCacheConfig,
@@ -11,16 +11,16 @@ import type { Cache } from './types';
 // Increment this whenever there could be incompatibilities between old and new cache structure
 export const CACHE_REVISION = 9;
 
-let repositoryCache: RepositoryCacheConfig = 'disabled';
-let cacheFileName: string;
-let cache: Cache = Object.create({});
+let repositoryCache: RepositoryCacheConfig | undefined = 'disabled';
+let cacheFileName: string | null = null;
+let cache: Cache | null = Object.create({});
 
 export function getCacheFileName(config: RenovateConfig): string {
   return join(
-    getGlobalConfig().cacheDir,
+    GlobalConfig.get('cacheDir'),
     '/renovate/repository/',
     config.platform,
-    config.repository + '.json'
+    `${config.repository}.json`
   );
 }
 
@@ -63,7 +63,7 @@ export async function initialize(config: RenovateConfig): Promise<void> {
 }
 
 export function getCache(): Cache {
-  return cache || createCache();
+  return cache ?? createCache();
 }
 
 export async function finalize(): Promise<void> {

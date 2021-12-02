@@ -5,7 +5,7 @@ import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { add } from '../util/sanitize';
-import { getGlobalConfig } from './global';
+import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 
 export async function tryDecryptPgp(
@@ -99,7 +99,7 @@ export async function tryDecrypt(
             const orgName = org.replace(regEx(/\/$/), ''); // Strip trailing slash
             if (is.nonEmptyString(repo)) {
               const scopedRepository = `${orgName}/${repo}`;
-              if (scopedRepository === repository) {
+              if (scopedRepository.toLowerCase() === repository.toLowerCase()) {
                 decryptedStr = value;
               } else {
                 logger.debug(
@@ -107,12 +107,14 @@ export async function tryDecrypt(
                   'Secret is scoped to a different repository'
                 );
                 const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different repository: ${scopedRepository}.`;
+                error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepository}".`;
                 throw error;
               }
             } else {
               const scopedOrg = `${orgName}/`;
-              if (repository.startsWith(scopedOrg)) {
+              if (
+                repository.toLowerCase().startsWith(scopedOrg.toLowerCase())
+              ) {
                 decryptedStr = value;
               } else {
                 logger.debug(
@@ -120,7 +122,7 @@ export async function tryDecrypt(
                   'Secret is scoped to a different org'
                 );
                 const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different org" ${scopedOrg}.`;
+                error.validationError = `Encrypted secret is scoped to a different org: "${scopedOrg}".`;
                 throw error;
               }
             }
@@ -153,7 +155,7 @@ export async function decryptConfig(
 ): Promise<RenovateConfig> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
-  const { privateKey, privateKeyOld } = getGlobalConfig();
+  const { privateKey, privateKeyOld } = GlobalConfig.get();
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');

@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
@@ -50,13 +50,13 @@ export async function generateLockFile(
       },
     };
     // istanbul ignore if
-    if (getGlobalConfig().exposeAllEnv) {
+    if (GlobalConfig.get('exposeAllEnv')) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
     cmd = 'pnpm';
     let args = 'install --recursive --lockfile-only';
-    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
+    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
     }

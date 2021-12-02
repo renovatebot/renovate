@@ -63,7 +63,7 @@ async function getRegistryReleases(
     );
     // istanbul ignore if
     if (cachedResult) {
-      logger.debug({ cacheKey }, 'Returning cached datasource response');
+      logger.trace({ cacheKey }, 'Returning cached datasource response');
       return cachedResult;
     }
   }

@@ -1,5 +1,5 @@
 import { join } from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -38,7 +38,7 @@ export async function generateLockFile(
       cmdOptions += '--package-lock-only --no-audit';
     }
 
-    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
+    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       cmdOptions += ' --ignore-scripts';
     }
 
@@ -57,7 +57,7 @@ export async function generateLockFile(
       },
     };
     // istanbul ignore if
-    if (getGlobalConfig().exposeAllEnv) {
+    if (GlobalConfig.get('exposeAllEnv')) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }

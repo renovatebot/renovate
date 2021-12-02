@@ -17,7 +17,7 @@ async function rm(namespace: string, key: string): Promise<void> {
 export async function get<T = never>(
   namespace: string,
   key: string
-): Promise<T> {
+): Promise<T | undefined> {
   if (!cacheFileName) {
     return undefined;
   }

@@ -21,12 +21,13 @@ import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { AuthJson } from './types';
+import type { AuthJson, ComposerLock } from './types';
 import {
   composerVersioningId,
   extractContraints,
   getComposerArguments,
   getPhpConstraint,
+  requireComposerDependencyInstallation,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -94,11 +95,9 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
+    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
     const constraints = {
-      ...extractContraints(
-        JSON.parse(newPackageFileContent),
-        JSON.parse(existingLockFileContent)
-      ),
+      ...extractContraints(JSON.parse(newPackageFileContent), existingLockFile),
       ...config.constraints,
     };
 
@@ -120,6 +119,17 @@ export async function updateArtifacts({
         tagScheme: composerVersioningId,
       },
     };
+
+    const commands: string[] = [];
+
+    // Determine whether install is required before update
+    if (requireComposerDependencyInstallation(existingLockFile)) {
+      const preCmd = 'composer';
+      const preArgs = 'install' + getComposerArguments(config);
+      logger.debug({ preCmd, preArgs }, 'composer pre-update command');
+      commands.push(`${preCmd} ${preArgs}`);
+    }
+
     const cmd = 'composer';
     let args: string;
     if (config.isLockFileMaintenance) {
@@ -132,7 +142,9 @@ export async function updateArtifacts({
     }
     args += getComposerArguments(config);
     logger.debug({ cmd, args }, 'composer command');
-    await exec(`${cmd} ${args}`, execOptions);
+    commands.push(`${cmd} ${args}`);
+
+    await exec(commands, execOptions);
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
