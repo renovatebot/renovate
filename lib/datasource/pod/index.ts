@@ -164,7 +164,6 @@ async function getReleasesFromGithub(
         URLFormatOptions.WithoutSpecsWithoutShard
       );
     case URLFormatOptions.WithoutSpecsWithoutShard:
-      return null;
     default:
       return null;
   }
