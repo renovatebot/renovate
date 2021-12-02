@@ -23,16 +23,6 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'npm',
     versioning: npmVersioningId,
   },
-  pnpm: {
-    datasource: 'npm',
-    depName: 'pnpm',
-    versioning: npmVersioningId,
-  },
-  yarn: {
-    datasource: 'npm',
-    depName: 'yarn',
-    versioning: npmVersioningId,
-  },
 };
 
 export async function resolveConstraint(
