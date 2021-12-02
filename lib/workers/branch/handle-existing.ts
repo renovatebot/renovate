@@ -10,11 +10,11 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
   if (pr.state === PrState.Closed) {
     let content;
     if (config.updateType === 'major') {
-      content = template.compile(config.ignoreMajor, config);
+      content = template.compile(config.userStrings.ignoreMajor, config);
     } else if (config.updateType === 'digest') {
-      content = template.compile(config.ignoreDigest, config);
+      content = template.compile(config.userStrings.ignoreDigest, config);
     } else {
-      content = template.compile(config.ignoreOther, config);
+      content = template.compile(config.userStrings.ignoreOther, config);
     }
     content +=
       '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
@@ -26,7 +26,7 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
       } else {
         await platform.ensureComment({
           number: pr.number,
-          topic: config.ignoreTopic,
+          topic: config.userStrings.ignoreTopic,
           content,
         });
       }

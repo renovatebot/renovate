@@ -1082,21 +1082,6 @@ The above is the same as if you wrote this package rule:
 }
 ```
 
-## ignoreDigest
-
-When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
-This option makes the text of that comment configurable for digest upgrades.
-
-## ignoreMajor
-
-When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
-This option makes the text of that comment configurable for major upgrades.
-
-## ignoreOther
-
-When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
-This option makes the text of that comment configurable for other (neither digest nor major) upgrades.
-
 ## ignorePaths
 
 Renovate will extract dependencies from every file it finds in a repository, unless that file is explicitly ignored.
@@ -1149,11 +1134,6 @@ Currently Renovate's default behavior is to only automerge if every status check
 Setting this option to `true` means that Renovate will ignore _all_ status checks.
 You can set this if you don't have any status checks but still want Renovate to automerge PRs.
 Beware: configuring Renovate to automerge without any tests can lead to broken builds on your base branch, please think again before enabling this!
-
-## ignoreTopic
-
-When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
-This option makes the topic of that comment configurable.
 
 ## ignoreUnstable
 
@@ -2561,6 +2541,31 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
+## userStrings
+
+User-facing strings pertaining to the PR comment that gets posted when a PR is closed.
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+
+The following strings can currently be customized:
+
+- `ignoreDigest`: Text of the PR comment for digest upgrades.
+- `ignoreMajor`: Text of the PR comment for major upgrades.
+- `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
+- `ignoreTopic`: Topic of the PR comment.
+
+Example:
+
+```json
+{
+  "userStrings": {
+    "ignoreTopic": "Custom topic for PR comment",
+    "ignoreMajor": "Custom text for major upgrades.",
+    "ignoreDigest": "Custom text for digest upgrades.",
+    "ignoreOther": "Custom text for other upgrades."
+  }
+}
+```
 
 ## versioning
 
