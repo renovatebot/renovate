@@ -20,7 +20,6 @@ export interface DockerOptions {
   volumes?: Opt<VolumeOption[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
-  preCommands?: DockerExtraCommands;
 }
 
 export interface RawExecOptions extends ChildProcessExecOptions {

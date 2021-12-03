@@ -464,8 +464,8 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: ['preCommand1', 'preCommand2', null],
           },
+          preCommands: ['preCommand1', 'preCommand2', null],
         },
         outCmd: [
           dockerPullCmd,
@@ -495,7 +495,6 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: null,
           },
         },
         outCmd: [
