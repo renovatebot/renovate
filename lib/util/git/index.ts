@@ -283,8 +283,8 @@ export async function syncGit(): Promise<void> {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
-      await git.pull();
       await git.fetch();
+      await git.pull();
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
       await resetToBranch(config.currentBranch);
