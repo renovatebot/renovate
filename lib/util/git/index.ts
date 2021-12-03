@@ -16,7 +16,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
-import { api as semver } from '../../versioning/semver';
+import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
@@ -152,7 +152,7 @@ export async function validateGitVersion(): Promise<boolean> {
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(/\s+/)) {
-      if (semver.isVersion(section)) {
+      if (semverCoerced.isVersion(section)) {
         version = section;
         break;
       }
@@ -166,7 +166,7 @@ export async function validateGitVersion(): Promise<boolean> {
     !(
       version &&
       (version === GIT_MINIMUM_VERSION ||
-        semver.isGreaterThan(version, GIT_MINIMUM_VERSION))
+        semverCoerced.isGreaterThan(version, GIT_MINIMUM_VERSION))
     )
   ) {
     logger.error(
