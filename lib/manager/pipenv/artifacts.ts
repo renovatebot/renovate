@@ -103,10 +103,8 @@ export async function updateArtifacts({
         image: 'python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: [
-          `pip install --user ${quote(`pipenv${pipenvConstraint}`)}`,
-        ],
       },
+      preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
     };
     logger.debug({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
