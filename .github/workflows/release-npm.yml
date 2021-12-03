@@ -15,11 +15,9 @@ on:
       tag:
         description: 'Npm dist-tag'
         default: 'latest'
+        required: false
 
 env:
-  YARN_MODULES_CACHE_KEY: v1
-  YARN_PACKAGE_CACHE_KEY: v1
-  YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
   GIT_SHA: ${{ github.event.client_payload.sha }}
   NPM_VERSION: ${{ github.event.client_payload.version }}
@@ -29,10 +27,23 @@ jobs:
   release-npm:
     runs-on: ubuntu-latest
     steps:
+      - name: Prepare env
+        run: |
+          if [[ "${{github.event_name}}" == "workflow_dispatch" ]]; then
+            echo "GIT_SHA=${{ github.event.inputs.sha }}" >> $GITHUB_ENV
+            echo "NPM_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+            echo "NPM_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
+        with:
+          ref: ${{ env.GIT_SHA }}
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Init platform
         run: |
@@ -42,25 +53,6 @@ jobs:
           git config --global user.name  'Renovate Bot'
           yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true
-
-      - name: Prepare env
-        run: |
-          if [[ "${{github.event_name}}" == "workflow_dispatch" ]]; then
-            echo "GIT_SHA=${{ github.event.inputs.sha }}" >> $GITHUB_ENV
-            echo "NPM_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-            echo "NPM_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
-          fi
-
-      - uses: actions/checkout@v2.3.4
-        with:
-          ref: ${{ env.GIT_SHA }}
-
-      - name: Cache Yarn packages
-        id: yarn_cache_packages
-        uses: actions/cache@v2.1.5
-        with:
-          path: ${{ env.YARN_CACHE_FOLDER }}
-          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
@@ -74,7 +66,8 @@ jobs:
 
       - name: Publish ${{ env.NPM_VERSION }}
         run: |
-          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
           npm publish --tag ${{ env.NPM_TAG }}
+          git checkout -- .npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

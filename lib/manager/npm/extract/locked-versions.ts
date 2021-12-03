@@ -22,7 +22,10 @@ export async function getLockedVersions(
       }
       const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
       if (!isYarn1) {
-        if (lockfileVersion >= 6) {
+        if (lockfileVersion >= 8) {
+          // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
+          packageFile.constraints.yarn = '^3.0.0';
+        } else if (lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
           packageFile.constraints.yarn = '^2.2.0';
         } else {
@@ -34,7 +37,11 @@ export async function getLockedVersions(
           lockFileCache[yarnLock].lockedVersions[
             `${dep.depName}@${dep.currentValue}`
           ];
-        if (dep.depType === 'engines' && dep.depName === 'yarn' && !isYarn1) {
+        if (
+          (dep.depType === 'engines' || dep.depType === 'packageManager') &&
+          dep.depName === 'yarn' &&
+          !isYarn1
+        ) {
           dep.lookupName = '@yarnpkg/cli';
         }
       }

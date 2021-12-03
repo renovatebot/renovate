@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName, mocked } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
@@ -12,14 +12,11 @@ const hostRules = mocked(_hostRules);
 const giteaApiHost = gitea.Endpoint;
 const basePath = '/repos/some/repo/contents';
 
-describe(getName(), () => {
+describe('config/presets/gitea/index', () => {
   beforeEach(() => {
-    httpMock.setup();
     hostRules.find.mockReturnValue({ token: 'abc' });
     setBaseUrl(giteaApiHost);
   });
-
-  afterEach(() => httpMock.reset());
 
   describe('fetchJSONFile()', () => {
     it('returns JSON', async () => {
@@ -33,9 +30,10 @@ describe(getName(), () => {
       const res = await gitea.fetchJSONFile(
         'some/repo',
         'some-filename.json',
-        giteaApiHost
+        giteaApiHost,
+        null
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -203,6 +201,45 @@ describe(getName(), () => {
             'default',
             undefined,
             'https://api.gitea.example.org'
+          )
+          .catch(() => ({ from: 'api' }))
+      ).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('uses default endpoint with a tag', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/default.json?ref=someTag`)
+        .reply(200, {
+          content: Buffer.from('{"from":"api"}').toString('base64'),
+        });
+      expect(
+        await gitea.getPresetFromEndpoint(
+          'some/repo',
+          'default',
+          undefined,
+          giteaApiHost,
+          'someTag'
+        )
+      ).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('uses custom endpoint with a tag', async () => {
+      httpMock
+        .scope('https://api.gitea.example.org')
+        .get(`${basePath}/default.json?ref=someTag`)
+        .reply(200, {
+          content: Buffer.from('{"from":"api"}').toString('base64'),
+        });
+      expect(
+        await gitea
+          .getPresetFromEndpoint(
+            'some/repo',
+            'default',
+            undefined,
+            'https://api.gitea.example.org',
+            'someTag'
           )
           .catch(() => ({ from: 'api' }))
       ).toEqual({ from: 'api' });

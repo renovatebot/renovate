@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const pipeline1 = loadFixture('pipeline1.yml');
@@ -6,7 +6,7 @@ const pipeline2 = loadFixture('pipeline2.yml');
 const pipeline3 = loadFixture('pipeline3.yml');
 const pipeline4 = loadFixture('pipeline4.yml');
 
-describe(getName(), () => {
+describe('manager/buildkite/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

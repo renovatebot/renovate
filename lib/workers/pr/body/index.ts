@@ -1,6 +1,6 @@
 import { platform } from '../../../platform';
+import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
-import { get } from '../../../versioning';
 import type { BranchConfig } from '../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
@@ -12,7 +12,6 @@ import { getPrUpdatesTable } from './updates-table';
 
 function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach((upgrade) => {
-    /* eslint-disable no-param-reassign */
     const {
       homepage,
       sourceUrl,
@@ -44,7 +43,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
         fullUrl =
-          sourceUrl.replace(/\/?$/, '/') +
+          sourceUrl.replace(regEx(/\/?$/), '/') +
           'tree/HEAD/' +
           sourceDirectory.replace('^/?/', '');
       }
@@ -54,19 +53,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
-    const { currentVersion, newVersion, updateType, versioning } = upgrade;
-    // istanbul ignore if
-    if (updateType === 'minor') {
-      try {
-        const version = get(versioning);
-        if (version.getMinor(currentVersion) === version.getMinor(newVersion)) {
-          upgrade.updateType = 'patch';
-        }
-      } catch (err) {
-        // do nothing
-      }
-    }
-    /* eslint-enable no-param-reassign */
   });
 }
 
@@ -84,7 +70,7 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
   const prBodyTemplate = config.prBodyTemplate;
   let prBody = template.compile(prBodyTemplate, content, false);
   prBody = prBody.trim();
-  prBody = prBody.replace(/\n\n\n+/g, '\n\n');
+  prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
   prBody = platform.massageMarkdown(prBody);
   return prBody;
 }

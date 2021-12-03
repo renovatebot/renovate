@@ -6,17 +6,6 @@ import { promisify } from 'util';
 
 export type Opt<T> = T | null | undefined;
 
-export enum BinarySource {
-  Docker = 'docker',
-  Global = 'global',
-}
-
-export interface ExecConfig {
-  binarySource: Opt<BinarySource>;
-  localDir: Opt<string>;
-  cacheDir: Opt<string>;
-}
-
 export type VolumesPair = [string, string];
 export type VolumeOption = Opt<string | VolumesPair>;
 
@@ -31,8 +20,6 @@ export interface DockerOptions {
   volumes?: Opt<VolumeOption[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
-  preCommands?: DockerExtraCommands;
-  postCommands?: DockerExtraCommands;
 }
 
 export interface RawExecOptions extends ChildProcessExecOptions {

@@ -3,8 +3,8 @@ import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import { getOptions } from './definitions';
 import { migrateConfig } from './migration';
+import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
@@ -21,24 +21,76 @@ let optionParents: Record<string, RenovateOptions['parent']>;
 
 const managerList = getManagerList();
 
+const topLevelObjects = getLanguageList().concat(getManagerList());
+
+const ignoredNodes = [
+  '$schema',
+  'depType',
+  'npmToken',
+  'packageFile',
+  'forkToken',
+  'repository',
+  'vulnerabilityAlertsOnly',
+  'vulnerabilityAlert',
+  'isVulnerabilityAlert',
+  'copyLocalLibs', // deprecated - functionality is now enabled by default
+  'prBody', // deprecated
+  'minimumConfidence', // undocumented feature flag
+];
+
 function isManagerPath(parentPath: string): boolean {
   return (
-    /^regexManagers\[[0-9]+]$/.test(parentPath) ||
+    regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
     managerList.includes(parentPath)
   );
+}
+
+function isIgnored(key: string): boolean {
+  return ignoredNodes.includes(key);
+}
+
+function validateAliasObject(val: Record<string, unknown>): true | string {
+  for (const [key, value] of Object.entries(val)) {
+    if (!is.urlString(value)) {
+      return key;
+    }
+  }
+  return true;
+}
+
+function validatePlainObject(val: Record<string, unknown>): true | string {
+  for (const [key, value] of Object.entries(val)) {
+    if (!is.string(value)) {
+      return key;
+    }
+  }
+  return true;
+}
+
+function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
+  return enabledManagers.filter(
+    (manager) => !getManagerList().includes(manager)
+  );
+}
+
+function getDeprecationMessage(option: string): string {
+  const deprecatedOptions = {
+    branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
+    commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
+    prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
+  };
+  return deprecatedOptions[option];
 }
 
 export function getParentName(parentPath: string): string {
   return parentPath
     ? parentPath
-        .replace(/\.?encrypted$/, '')
-        .replace(/\[\d+\]$/, '')
+        .replace(regEx(/\.?encrypted$/), '')
+        .replace(regEx(/\[\d+\]$/), '')
         .split('.')
         .pop()
     : '.';
 }
-
-const topLevelObjects = getLanguageList().concat(getManagerList());
 
 export async function validateConfig(
   config: RenovateConfig,
@@ -62,54 +114,6 @@ export async function validateConfig(
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
-  function getDeprecationMessage(option: string): string {
-    const deprecatedOptions = {
-      branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
-      commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
-      prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
-      yarnrc:
-        'Use of `yarnrc` in config is deprecated. Please commit it to your repository instead.',
-    };
-    return deprecatedOptions[option];
-  }
-
-  function isIgnored(key: string): boolean {
-    const ignoredNodes = [
-      '$schema',
-      'depType',
-      'npmToken',
-      'packageFile',
-      'forkToken',
-      'repository',
-      'vulnerabilityAlertsOnly',
-      'vulnerabilityAlert',
-      'isVulnerabilityAlert',
-      'copyLocalLibs', // deprecated - functionality is now enabled by default
-      'prBody', // deprecated
-    ];
-    return ignoredNodes.includes(key);
-  }
-
-  function validateAliasObject(
-    key: string,
-    val: Record<string, unknown>
-  ): boolean {
-    if (key === 'aliases') {
-      for (const value of Object.values(val)) {
-        if (!is.urlString(value)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
-    return enabledManagers.filter(
-      (manager) => !getManagerList().includes(manager)
-    );
-  }
-
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     // istanbul ignore if
@@ -118,7 +122,7 @@ export async function validateConfig(
         topic: 'Config security error',
         message: '__proto__',
       });
-      continue; // eslint-disable-line
+      continue;
     }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({
@@ -224,7 +228,7 @@ export async function validateConfig(
             message: `${currentPath}: ${errorMessage}`,
           });
         }
-      } else if (val != null) {
+      } else if (val !== null) {
         const type = optionTypes[key];
         if (type === 'boolean') {
           if (val !== true && val !== false) {
@@ -249,7 +253,7 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
-              const tzRe = /^:timezone\((.+)\)$/;
+              const tzRe = regEx(/^:timezone\((.+)\)$/); // TODO #12071
               for (const subval of val) {
                 if (is.string(subval)) {
                   if (
@@ -263,9 +267,8 @@ export async function validateConfig(
                   }
                   if (tzRe.test(subval)) {
                     const [, timezone] = tzRe.exec(subval);
-                    const [validTimezone, errorMessage] = hasValidTimezone(
-                      timezone
-                    );
+                    const [validTimezone, errorMessage] =
+                      hasValidTimezone(timezone);
                     if (!validTimezone) {
                       errors.push({
                         topic: 'Configuration Error',
@@ -314,9 +317,9 @@ export async function validateConfig(
                   errors.push(
                     ...managerValidator.check({ resolvedRule, currentPath })
                   );
-                  const selectorLength = Object.keys(
-                    resolvedRule
-                  ).filter((ruleKey) => selectors.includes(ruleKey)).length;
+                  const selectorLength = Object.keys(resolvedRule).filter(
+                    (ruleKey) => selectors.includes(ruleKey)
+                  ).length;
                   if (!selectorLength) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
                       packageRule
@@ -383,6 +386,10 @@ export async function validateConfig(
                 'datasourceTemplate',
                 'versioningTemplate',
                 'registryUrlTemplate',
+                'currentValueTemplate',
+                'extractVersionTemplate',
+                'autoReplaceStringTemplate',
+                'depTypeTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
@@ -401,44 +408,51 @@ export async function validateConfig(
                     )}`,
                   });
                 } else if (is.nonEmptyArray(regexManager.fileMatch)) {
-                  let validRegex = false;
-                  for (const matchString of regexManager.matchStrings) {
-                    try {
-                      regEx(matchString);
-                      validRegex = true;
-                    } catch (e) {
-                      errors.push({
-                        topic: 'Configuration Error',
-                        message: `Invalid regExp for ${currentPath}: \`${String(
-                          matchString
-                        )}\``,
-                      });
-                    }
-                  }
-                  if (validRegex) {
-                    const mandatoryFields = [
-                      'depName',
-                      'currentValue',
-                      'datasource',
-                    ];
-                    for (const field of mandatoryFields) {
-                      if (
-                        !regexManager[`${field}Template`] &&
-                        !regexManager.matchStrings.some((matchString) =>
-                          matchString.includes(`(?<${field}>`)
-                        )
-                      ) {
+                  if (is.nonEmptyArray(regexManager.matchStrings)) {
+                    let validRegex = false;
+                    for (const matchString of regexManager.matchStrings) {
+                      try {
+                        regEx(matchString);
+                        validRegex = true;
+                      } catch (e) {
                         errors.push({
                           topic: 'Configuration Error',
-                          message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          message: `Invalid regExp for ${currentPath}: \`${String(
+                            matchString
+                          )}\``,
                         });
                       }
                     }
+                    if (validRegex) {
+                      const mandatoryFields = [
+                        'depName',
+                        'currentValue',
+                        'datasource',
+                      ];
+                      for (const field of mandatoryFields) {
+                        if (
+                          !regexManager[`${field}Template`] &&
+                          !regexManager.matchStrings.some((matchString) =>
+                            matchString.includes(`(?<${field}>`)
+                          )
+                        ) {
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          });
+                        }
+                      }
+                    }
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                    });
                   }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
+                    message: `Each Regex Manager must contain a non-empty fileMatch array`,
                   });
                 }
               }
@@ -474,7 +488,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !/p.*Rules\[\d+\]$/.test(parentPath) && // Inside a packageRule
+              !regEx(/p.*Rules\[\d+\]$/).test(parentPath) && // Inside a packageRule  // TODO #12071
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({
@@ -503,10 +517,21 @@ export async function validateConfig(
         ) {
           if (is.plainObject(val)) {
             if (key === 'aliases') {
-              if (!validateAliasObject(key, val)) {
+              const res = validateAliasObject(val);
+              if (res !== true) {
                 errors.push({
                   topic: 'Configuration Error',
-                  message: `Invalid alias object configuration`,
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
+                });
+              }
+            } else if (
+              ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)
+            ) {
+              const res = validatePlainObject(val);
+              if (res !== true) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
             } else {

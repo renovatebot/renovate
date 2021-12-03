@@ -1,5 +1,11 @@
-import { BranchStatusConfig, Platform, RepoParams, RepoResult } from '..';
-import { getName, partial } from '../../../test/util';
+import {
+  BranchStatusConfig,
+  EnsureIssueConfig,
+  Platform,
+  RepoParams,
+  RepoResult,
+} from '..';
+import { partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -20,7 +26,7 @@ import * as ght from './gitea-helper';
  */
 const GITEA_VERSION = '1.14.0+dev-754-g5d2b7ba63';
 
-describe(getName(), () => {
+describe('platform/gitea/index', () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
@@ -94,6 +100,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'some-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 2,
@@ -101,6 +108,7 @@ describe(getName(), () => {
       state: 'closed',
       body: 'other-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 3,
@@ -108,6 +116,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 4,
@@ -115,6 +124,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
     {
       number: 5,
@@ -122,6 +132,7 @@ describe(getName(), () => {
       state: 'open',
       body: 'duplicate-content',
       assignees: [],
+      labels: [],
     },
   ];
 
@@ -165,8 +176,6 @@ describe(getName(), () => {
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
 
-    global.gitAuthor = { name: 'Renovate', email: 'renovate@example.com' };
-
     setBaseUrl('https://gitea.renovatebot.com/api/v1');
   });
 
@@ -184,7 +193,6 @@ describe(getName(), () => {
 
     return gitea.initRepo({
       repository: mockRepo.full_name,
-      localDir: '',
       ...config,
     });
   }
@@ -251,7 +259,6 @@ describe(getName(), () => {
   describe('initRepo', () => {
     const initRepoCfg: RepoParams = {
       repository: mockRepo.full_name,
-      localDir: '',
     };
 
     it('should propagate API errors', async () => {
@@ -393,20 +400,8 @@ describe(getName(), () => {
         })
       );
 
-      return gitea.getBranchStatus('some-branch', []);
+      return gitea.getBranchStatus('some-branch');
     };
-
-    it('should return success if requiredStatusChecks null', async () => {
-      expect(await gitea.getBranchStatus('some-branch', null)).toEqual(
-        BranchStatus.green
-      );
-    });
-
-    it('should return failed if unsupported requiredStatusChecks', async () => {
-      expect(await gitea.getBranchStatus('some-branch', ['foo'])).toEqual(
-        BranchStatus.red
-      );
-    });
 
     it('should return yellow for unknown result', async () => {
       expect(await getBranchStatus('unknown')).toEqual(BranchStatus.yellow);
@@ -427,7 +422,7 @@ describe(getName(), () => {
     it('should abort when branch status returns 404', async () => {
       helper.getCombinedCommitStatus.mockRejectedValueOnce({ statusCode: 404 });
 
-      await expect(gitea.getBranchStatus('some-branch', [])).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
         REPOSITORY_CHANGED
       );
     });
@@ -437,7 +432,7 @@ describe(getName(), () => {
         new Error('getCombinedCommitStatus()')
       );
 
-      await expect(gitea.getBranchStatus('some-branch', [])).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
         'getCombinedCommitStatus()'
       );
     });
@@ -565,7 +560,9 @@ describe(getName(), () => {
         partial<ght.Branch>({
           commit: {
             id: mockCommitHash,
-            author: partial<ght.CommitUser>({ email: global.gitAuthor.email }),
+            author: partial<ght.CommitUser>({
+              email: 'renovate@whitesourcesoftware.com',
+            }),
           },
         })
       );
@@ -890,7 +887,12 @@ describe(getName(), () => {
     it('should return true when merging succeeds', async () => {
       await initFakeRepo();
 
-      expect(await gitea.mergePr(1, 'some-branch')).toEqual(true);
+      expect(
+        await gitea.mergePr({
+          branchName: 'some-branch',
+          id: 1,
+        })
+      ).toBe(true);
       expect(helper.mergePR).toHaveBeenCalledTimes(1);
       expect(helper.mergePR).toHaveBeenCalledWith(
         mockRepo.full_name,
@@ -903,7 +905,25 @@ describe(getName(), () => {
       helper.mergePR.mockRejectedValueOnce(new Error());
       await initFakeRepo();
 
-      expect(await gitea.mergePr(1, 'some-branch')).toEqual(false);
+      expect(
+        await gitea.mergePr({
+          branchName: 'some-branch',
+          id: 1,
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe('getIssue', () => {
+    it('should return the issue', async () => {
+      const mockIssue = mockIssues.find((i) => i.number === 1);
+      helper.getIssue.mockResolvedValueOnce(mockIssue);
+      await initFakeRepo();
+
+      expect(await gitea.getIssue(mockIssue.number)).toHaveProperty(
+        'number',
+        mockIssue.number
+      );
     });
   });
 
@@ -911,6 +931,7 @@ describe(getName(), () => {
     it('should return existing open issue', async () => {
       const mockIssue = mockIssues.find((i) => i.title === 'open-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.getIssue.mockResolvedValueOnce(mockIssue);
       await initFakeRepo();
 
       expect(await gitea.findIssue(mockIssue.title)).toHaveProperty(
@@ -952,7 +973,7 @@ describe(getName(), () => {
       await initFakeRepo();
       const res = await gitea.ensureIssue(mockIssue);
 
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(helper.createIssue).toHaveBeenCalledTimes(1);
       expect(helper.createIssue).toHaveBeenCalledWith(mockRepo.full_name, {
         body: mockIssue.body,
@@ -960,9 +981,43 @@ describe(getName(), () => {
       });
     });
 
+    it('should create issue with the correct labels', async () => {
+      const mockIssue: EnsureIssueConfig = {
+        title: 'new-title',
+        body: 'new-body',
+        shouldReOpen: false,
+        once: false,
+        labels: ['Renovate', 'Maintenance'],
+      };
+      const mockLabels: ght.Label[] = [
+        partial<ght.Label>({ id: 1, name: 'Renovate' }),
+        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      ];
+
+      helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+
+      helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.createIssue.mockResolvedValueOnce(
+        partial<ght.Issue>({ number: 42 })
+      );
+
+      await initFakeRepo();
+      const res = await gitea.ensureIssue(mockIssue);
+
+      expect(res).toBe('created');
+      expect(helper.createIssue).toHaveBeenCalledTimes(1);
+      expect(helper.createIssue).toHaveBeenCalledWith(mockRepo.full_name, {
+        body: mockIssue.body,
+        title: mockIssue.title,
+        labels: [1, 3],
+      });
+    });
+
     it('should not reopen closed issue by default', async () => {
       const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
       await initFakeRepo();
       const res = await gitea.ensureIssue({
@@ -972,7 +1027,7 @@ describe(getName(), () => {
         once: false,
       });
 
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(helper.updateIssue).toHaveBeenCalledTimes(1);
       expect(helper.updateIssue).toHaveBeenCalledWith(
         mockRepo.full_name,
@@ -985,9 +1040,118 @@ describe(getName(), () => {
       );
     });
 
+    it('should not update labels when not necessary', async () => {
+      const mockLabels: ght.Label[] = [
+        partial<ght.Label>({ id: 1, name: 'Renovate' }),
+        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      ];
+      const mockIssue: ght.Issue = {
+        number: 10,
+        title: 'label-issue',
+        body: 'label-body',
+        assignees: [],
+        labels: mockLabels,
+        state: 'open',
+      };
+
+      helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+      helper.searchIssues.mockResolvedValueOnce([mockIssue]);
+      helper.updateIssue.mockResolvedValueOnce(mockIssue);
+
+      await initFakeRepo();
+      const res = await gitea.ensureIssue({
+        title: mockIssue.title,
+        body: 'new-body',
+        labels: ['Renovate', 'Maintenance'],
+      });
+
+      expect(res).toBe('updated');
+      expect(helper.updateIssue).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledTimes(0);
+    });
+
+    it('should update labels when missing', async () => {
+      const mockLabels: ght.Label[] = [
+        partial<ght.Label>({ id: 1, name: 'Renovate' }),
+        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      ];
+      const mockIssue: ght.Issue = {
+        number: 10,
+        title: 'label-issue',
+        body: 'label-body',
+        assignees: [],
+        labels: [mockLabels[0]],
+        state: 'open',
+      };
+
+      helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+      helper.searchIssues.mockResolvedValueOnce([mockIssue]);
+      helper.updateIssue.mockResolvedValueOnce(mockIssue);
+
+      await initFakeRepo();
+      const res = await gitea.ensureIssue({
+        title: mockIssue.title,
+        body: 'new-body',
+        labels: ['Renovate', 'Maintenance'],
+      });
+
+      expect(res).toBe('updated');
+      expect(helper.updateIssue).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockIssue.number,
+        {
+          labels: [1, 3],
+        }
+      );
+    });
+
+    it('should reset labels when others have been set', async () => {
+      const mockLabels: ght.Label[] = [
+        partial<ght.Label>({ id: 1, name: 'Renovate' }),
+        partial<ght.Label>({ id: 2, name: 'Other label' }),
+        partial<ght.Label>({ id: 3, name: 'Maintenance' }),
+      ];
+      const mockIssue: ght.Issue = {
+        number: 10,
+        title: 'label-issue',
+        body: 'label-body',
+        assignees: [],
+        labels: mockLabels,
+        state: 'open',
+      };
+
+      helper.getRepoLabels.mockResolvedValueOnce(partial(mockLabels));
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+      helper.searchIssues.mockResolvedValueOnce([mockIssue]);
+      helper.updateIssue.mockResolvedValueOnce(mockIssue);
+
+      await initFakeRepo();
+      const res = await gitea.ensureIssue({
+        title: mockIssue.title,
+        body: 'new-body',
+        labels: ['Renovate', 'Maintenance'],
+      });
+
+      expect(res).toBe('updated');
+      expect(helper.updateIssue).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledTimes(1);
+      expect(helper.updateIssueLabels).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockIssue.number,
+        {
+          labels: [1, 3],
+        }
+      );
+    });
+
     it('should reopen closed issue if desired', async () => {
       const closedIssue = mockIssues.find((i) => i.title === 'closed-issue');
       helper.searchIssues.mockResolvedValueOnce(mockIssues);
+      helper.updateIssue.mockResolvedValueOnce(closedIssue);
 
       await initFakeRepo();
       const res = await gitea.ensureIssue({
@@ -997,7 +1161,7 @@ describe(getName(), () => {
         once: false,
       });
 
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(helper.updateIssue).toHaveBeenCalledTimes(1);
       expect(helper.updateIssue).toHaveBeenCalledWith(
         mockRepo.full_name,
@@ -1132,7 +1296,7 @@ describe(getName(), () => {
 
   describe('getRepoForceRebase', () => {
     it('should return false - unsupported by platform', async () => {
-      expect(await gitea.getRepoForceRebase()).toEqual(false);
+      expect(await gitea.getRepoForceRebase()).toBe(false);
     });
   });
 
@@ -1151,7 +1315,7 @@ describe(getName(), () => {
       });
       const body = '### other-topic\n\nother-content';
 
-      expect(res).toEqual(true);
+      expect(res).toBe(true);
       expect(helper.updateComment).not.toHaveBeenCalled();
       expect(helper.createComment).toHaveBeenCalledTimes(1);
       expect(helper.createComment).toHaveBeenCalledWith(
@@ -1174,7 +1338,7 @@ describe(getName(), () => {
         topic: undefined,
       });
 
-      expect(res).toEqual(true);
+      expect(res).toBe(true);
       expect(helper.updateComment).not.toHaveBeenCalled();
       expect(helper.createComment).toHaveBeenCalledTimes(1);
       expect(helper.createComment).toHaveBeenCalledWith(
@@ -1198,7 +1362,7 @@ describe(getName(), () => {
       });
       const body = '### some-topic\n\nsome-new-content';
 
-      expect(res).toEqual(true);
+      expect(res).toBe(true);
       expect(helper.createComment).not.toHaveBeenCalled();
       expect(helper.updateComment).toHaveBeenCalledTimes(1);
       expect(helper.updateComment).toHaveBeenCalledWith(
@@ -1217,7 +1381,7 @@ describe(getName(), () => {
         content: 'some-content',
       });
 
-      expect(res).toEqual(true);
+      expect(res).toBe(true);
       expect(helper.createComment).not.toHaveBeenCalled();
       expect(helper.updateComment).not.toHaveBeenCalled();
     });
@@ -1231,7 +1395,7 @@ describe(getName(), () => {
         content: 'some-content',
       });
 
-      expect(res).toEqual(false);
+      expect(res).toBe(false);
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
   });
@@ -1362,6 +1526,41 @@ describe(getName(), () => {
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
+    });
+
+    it('returns file content from given repo', async () => {
+      const data = { foo: 'bar' };
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: JSON.stringify(data),
+      } as never);
+      await initFakeRepo({ full_name: 'different/repo' });
+      const res = await gitea.getJsonFile('file.json', 'different/repo');
+      expect(res).toEqual(data);
+    });
+
+    it('returns file content from branch or tag', async () => {
+      const data = { foo: 'bar' };
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: JSON.stringify(data),
+      } as never);
+      await initFakeRepo({ full_name: 'some/repo' });
+      const res = await gitea.getJsonFile('file.json', 'some/repo', 'dev');
+      expect(res).toEqual(data);
+    });
+
+    it('returns file content in json5 format', async () => {
+      const json5Data = `
+        { 
+          // json5 comment
+          foo: 'bar' 
+        }
+      `;
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: json5Data,
+      } as never);
+      await initFakeRepo({ full_name: 'some/repo' });
+      const res = await gitea.getJsonFile('file.json5');
+      expect(res).toEqual({ foo: 'bar' });
     });
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({

@@ -1,14 +1,20 @@
 import url from 'url';
-import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
+import { regEx } from '../../util/regex';
+import { normalizeDate } from '../metadata';
 
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
-import type { MavenDependency, MavenXml } from './types';
+import type {
+  HttpResourceCheckResult,
+  MavenDependency,
+  MavenXml,
+} from './types';
 
 const http: Record<string, Http> = {};
 
@@ -100,36 +106,40 @@ export async function downloadHttpProtocol(
   }
 }
 
-async function downloadFileProtocol(pkgUrl: url.URL): Promise<string | null> {
-  const pkgPath = pkgUrl.toString().replace('file://', '');
-  if (!(await fs.exists(pkgPath))) {
-    return null;
-  }
-  return fs.readFile(pkgPath, 'utf8');
-}
-
-export async function isHttpResourceExists(
+export async function checkHttpResource(
   pkgUrl: url.URL | string,
   hostType = id
-): Promise<boolean | string | null> {
+): Promise<HttpResourceCheckResult> {
   try {
     const httpClient = httpByHostType(hostType);
     const res = await httpClient.head(pkgUrl.toString());
     const timestamp = res?.headers?.['last-modified'] as string;
-    return timestamp || true;
+    if (timestamp) {
+      const isoTimestamp = normalizeDate(timestamp);
+      if (isoTimestamp) {
+        const releaseDate = DateTime.fromISO(isoTimestamp, {
+          zone: 'UTC',
+        }).toJSDate();
+        return releaseDate;
+      }
+    }
+    return 'found';
   } catch (err) {
     if (isNotFoundError(err)) {
-      return false;
+      return 'not-found';
     }
 
     const failedUrl = pkgUrl.toString();
-    logger.debug({ failedUrl }, `Can't check HTTP resource existence`);
-    return null;
+    logger.debug(
+      { failedUrl, statusCode: err.statusCode },
+      `Can't check HTTP resource existence`
+    );
+    return 'error';
   }
 }
 
 function containsPlaceholder(str: string): boolean {
-  return /\${.*?}/g.test(str);
+  return regEx(/\${.*?}/g).test(str);
 }
 
 export function getMavenUrl(
@@ -149,15 +159,15 @@ export async function downloadMavenXml(
   }
   let rawContent: string;
   let authorization: boolean;
+  let statusCode: number;
   switch (pkgUrl.protocol) {
-    case 'file:':
-      rawContent = await downloadFileProtocol(pkgUrl);
-      break;
     case 'http:':
     case 'https:':
-      ({ authorization, body: rawContent } = await downloadHttpProtocol(
-        pkgUrl
-      ));
+      ({
+        authorization,
+        body: rawContent,
+        statusCode,
+      } = await downloadHttpProtocol(pkgUrl));
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
@@ -168,17 +178,32 @@ export async function downloadMavenXml(
   }
 
   if (!rawContent) {
-    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
+    logger.debug(
+      { url: pkgUrl.toString(), statusCode },
+      `Content is not found for Maven url`
+    );
     return {};
   }
 
   return { authorization, xml: new XmlDocument(rawContent) };
 }
 
+export function getDependencyParts(lookupName: string): MavenDependency {
+  const [group, name] = lookupName.split(':');
+  const dependencyUrl = `${group.replace(regEx(/\./g), '/')}/${name}`;
+  return {
+    display: lookupName,
+    group,
+    name,
+    dependencyUrl,
+  };
+}
+
 export async function getDependencyInfo(
   dependency: MavenDependency,
   repoUrl: string,
-  version: string
+  version: string,
+  recursionLimit = 5
 ): Promise<Partial<ReleaseResult>> {
   const result: Partial<ReleaseResult> = {};
   const path = `${version}/${dependency.name}-${version}.pom`;
@@ -197,19 +222,46 @@ export async function getDependencyInfo(
 
   const sourceUrl = pomContent.valueWithPath('scm.url');
   if (sourceUrl && !containsPlaceholder(sourceUrl)) {
-    result.sourceUrl = sourceUrl.replace(/^scm:/, '');
+    result.sourceUrl = sourceUrl
+      .replace(regEx(/^scm:/), '')
+      .replace(regEx(/^git:/), '')
+      .replace(regEx(/^git@github.com:/), 'https://github.com/')
+      .replace(regEx(/^git@github.com\//), 'https://github.com/')
+      .replace(regEx(/\.git$/), '');
+
+    if (result.sourceUrl.startsWith('//')) {
+      // most likely the result of us stripping scm:, git: etc
+      // going with prepending https: here which should result in potential information retrival
+      result.sourceUrl = `https:${result.sourceUrl}`;
+    }
+  }
+
+  const parent = pomContent.childNamed('parent');
+  if (recursionLimit > 0 && parent && (!result.sourceUrl || !result.homepage)) {
+    // if we found a parent and are missing some information
+    // trying to get the scm/homepage information from it
+    const [parentGroupId, parentArtifactId, parentVersion] = [
+      'groupId',
+      'artifactId',
+      'version',
+    ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+    if (parentGroupId && parentArtifactId && parentVersion) {
+      const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
+      const parentDependency = getDependencyParts(parentDisplayId);
+      const parentInformation = await getDependencyInfo(
+        parentDependency,
+        repoUrl,
+        parentVersion,
+        recursionLimit - 1
+      );
+      if (!result.sourceUrl && parentInformation.sourceUrl) {
+        result.sourceUrl = parentInformation.sourceUrl;
+      }
+      if (!result.homepage && parentInformation.homepage) {
+        result.homepage = parentInformation.homepage;
+      }
+    }
   }
 
   return result;
-}
-
-export function getDependencyParts(lookupName: string): MavenDependency {
-  const [group, name] = lookupName.split(':');
-  const dependencyUrl = `${group.replace(/\./g, '/')}/${name}`;
-  return {
-    display: lookupName,
-    group,
-    name,
-    dependencyUrl,
-  };
 }

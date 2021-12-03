@@ -10,7 +10,7 @@ const config: InitialOptionsTsJest = {
   collectCoverageFrom: [
     'lib/**/*.{js,ts}',
     '!lib/**/*.{d,spec}.ts',
-    '!lib/**/{__fixtures__,__mocks__,__testutil__}/**/*.{js,ts}',
+    '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
     '!lib/**/types.ts',
   ],
   coverageReporters: ci
@@ -24,14 +24,19 @@ const config: InitialOptionsTsJest = {
       statements: 100,
     },
   },
-  modulePathIgnorePatterns: ['<rootDir>/dist/'],
-  reporters: ['default', './tmp/tools/jest-gh-reporter.js'],
-  setupFilesAfterEnv: ['<rootDir>/test/globals.ts'],
+  modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
+  reporters: ci ? ['default', 'jest-github-actions-reporter'] : ['default'],
+  setupFilesAfterEnv: [
+    'jest-extended/all',
+    'expect-more-jest',
+    '<rootDir>/test/setup.ts',
+  ],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   testEnvironment: 'node',
   testRunner: 'jest-circus/runner',
   globals: {
     'ts-jest': {
+      tsconfig: '<rootDir>/tsconfig.spec.json',
       diagnostics: false,
       isolatedModules: true,
     },

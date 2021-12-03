@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadJsonFixture } from '../../../test/util';
+import { loadJsonFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
@@ -16,12 +16,11 @@ const mailchimpJson: any = loadJsonFixture('mailchimp-api.json');
 
 const baseUrl = 'https://packagist.org';
 
-describe(getName(), () => {
+describe('datasource/packagist/index', () => {
   describe('getReleases', () => {
     let config: any;
     beforeEach(() => {
       jest.resetAllMocks();
-      httpMock.setup();
       hostRules.find = jest.fn((input) => input);
       hostRules.hosts = jest.fn(() => []);
       config = {
@@ -33,11 +32,11 @@ describe(getName(), () => {
       };
     });
 
-    afterEach(() => {
-      httpMock.reset();
-    });
-
     it('supports custom registries', async () => {
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/packages.json')
+        .reply(404);
       config = {
         registryUrls: ['https://composer.renovatebot.com'],
       };
@@ -49,6 +48,7 @@ describe(getName(), () => {
       });
       expect(res).toBeNull();
     });
+
     it('supports plain packages', async () => {
       const packagesOnly = {
         packages: {

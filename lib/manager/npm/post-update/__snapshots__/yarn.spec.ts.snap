@@ -38,6 +38,33 @@ Object {
 }
 `;
 
+exports[`manager/npm/post-update/yarn does not use global cache if zero install is detected 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`manager/npm/post-update/yarn generates lock files using yarn v1.22.0 1`] = `
 Array [
   Object {
@@ -54,6 +81,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
       "timeout": 900000,
@@ -73,6 +101,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
       "timeout": 900000,
@@ -92,6 +121,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
       "timeout": 900000,
@@ -111,6 +141,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
       "timeout": 900000,
@@ -130,6 +161,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_CACHE_FOLDER": "/tmp/renovate/cache/yarn",
       },
       "maxBuffer": 10485760,
       "timeout": 900000,
@@ -154,8 +186,10 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
@@ -181,8 +215,10 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
@@ -203,8 +239,110 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/npm/post-update/yarn generates lock files using yarn v3.0.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install --mode=update-lockfile",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn dedupe --strategy highest --mode=update-lockfile",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/npm/post-update/yarn only skips build if skipInstalls is false 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install --mode=skip-build",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn dedupe --strategy highest --mode=skip-build",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,
@@ -330,6 +468,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
@@ -357,6 +496,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
@@ -379,6 +519,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
@@ -492,6 +633,7 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
         "YARN_HTTP_TIMEOUT": "100000",
@@ -514,8 +656,156 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
         "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/npm/post-update/yarn performs lock file updates using yarn v3.0.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install --mode=update-lockfile",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn up some-dep@^1.0.0 --mode=update-lockfile",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/npm/post-update/yarn performs yarn binary update using yarn v1.22.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn set version 3.0.1",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn install --mode=update-lockfile",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/npm/post-update/yarn performs yarn binary update using yarn v2.1.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn set version 3.0.1",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn install --mode=update-lockfile",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "CI": "true",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
         "YARN_HTTP_TIMEOUT": "100000",
       },
       "maxBuffer": 10485760,

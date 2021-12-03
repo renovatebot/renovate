@@ -3,12 +3,13 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setUtilConfig } from '../../util';
-import { BinarySource } from '../../util/exec/common';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import * as _hostRules from '../../util/host-rules';
+import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from './artifacts';
 
 jest.mock('fs-extra');
@@ -35,10 +36,13 @@ require gopkg.in/russross/blackfriday.v1 v1.0.0
 replace github.com/pkg/errors => ../errors
 `;
 
-const config = {
+const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+};
+
+const config: UpdateArtifactsConfig = {
   constraints: { go: '1.14' },
 };
 
@@ -50,15 +54,18 @@ const goEnv = {
   CGO_ENABLED: '1',
 };
 
-describe('.updateArtifacts()', () => {
-  beforeEach(async () => {
+describe('manager/gomod/artifacts', () => {
+  beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
 
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
-    await setUtilConfig(config);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
+  });
+  afterEach(() => {
+    GlobalConfig.reset();
   });
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
@@ -144,8 +151,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -158,15 +164,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Docker,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -179,17 +183,13 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Global,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode with credentials', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
@@ -205,17 +205,286 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          binarySource: BinarySource.Docker,
-        },
+        config,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
+  it('supports docker mode with 2 credentials', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'github.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '2',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+              GIT_CONFIG_VALUE_1: 'https://github.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode with single credential', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-enterprise-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode with multiple credentials for different paths', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token-repo1',
+        matchHost: 'https://gitlab.enterprise.com/repo1',
+      },
+      {
+        token: 'some-enterprise-token-repo2',
+        matchHost: 'https://gitlab.enterprise.com/repo2',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '2',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/repo1',
+              GIT_CONFIG_VALUE_1: 'https://gitlab.enterprise.com/repo2',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode and ignores non http credentials', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-token',
+        matchHost: 'ssh://github.enterprise.com',
+      },
+      {
+        token: 'some-gitlab-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0:
+                'url.https://some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode with many credentials', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-token',
+        matchHost: 'api.github.com',
+      },
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'github.enterprise.com',
+      },
+      {
+        token: 'some-gitlab-token',
+        matchHost: 'gitlab.enterprise.com',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '4',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://some-token@api.github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_3:
+                'url.https://some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+              GIT_CONFIG_VALUE_1: 'https://api.github.com/',
+              GIT_CONFIG_VALUE_2: 'https://github.enterprise.com/',
+              GIT_CONFIG_VALUE_3: 'https://gitlab.enterprise.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('supports docker mode and ignores non git credentials', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    hostRules.getAll.mockReturnValueOnce([
+      {
+        token: 'some-enterprise-token',
+        matchHost: 'github.enterprise.com',
+        hostType: 'npm',
+      },
+    ]);
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '1',
+              GIT_CONFIG_KEY_0: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'https://github.com/',
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
   it('supports docker mode with goModTidy', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
@@ -234,7 +503,6 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          binarySource: BinarySource.Docker,
           postUpdateOptions: ['gomodTidy'],
         },
       })
@@ -255,7 +523,14 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: gomod1,
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'go.sum',
+          stderr: 'This update totally doesnt work',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with gomodUpdateImportPaths', async () => {
@@ -272,7 +547,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -281,7 +556,11 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
@@ -297,13 +576,67 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/pkg/errors'],
+        updatedDeps: [{ depName: 'github.com/pkg/errors' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
           updateType: 'major',
           newMajor: 1,
           postUpdateOptions: ['gomodUpdateImportPaths'],
+        },
+      })
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('skips gomodTidy without gomodUpdateImportPaths on major update', async () => {
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readFile
+      .mockResolvedValueOnce('New go.sum' as any)
+      .mockResolvedValueOnce('New main.go' as any)
+      .mockResolvedValueOnce('New go.mod' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          newMajor: 28,
+          postUpdateOptions: ['gomodTidy'],
+        },
+      })
+    ).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set', async () => {
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'main.go'],
+    } as StatusResult);
+    fs.readFile
+      .mockResolvedValueOnce('New go.sum' as any)
+      .mockResolvedValueOnce('New main.go' as any)
+      .mockResolvedValueOnce('New go.mod' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          newMajor: 28,
         },
       })
     ).toMatchSnapshot();
@@ -323,7 +656,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -335,7 +668,11 @@ describe('.updateArtifacts()', () => {
           },
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('updates import paths with latest tool version on invalid version constraint', async () => {
@@ -352,7 +689,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['github.com/google/go-github/v24'],
+        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -364,7 +701,11 @@ describe('.updateArtifacts()', () => {
           },
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New main.go', name: 'main.go' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('skips updating import paths for gopkg.in dependencies', async () => {
@@ -380,7 +721,7 @@ describe('.updateArtifacts()', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: ['gopkg.in/yaml.v2'],
+        updatedDeps: [{ depName: 'gopkg.in/yaml.v2' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
@@ -389,7 +730,10 @@ describe('.updateArtifacts()', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { file: { contents: 'New go.sum', name: 'go.sum' } },
+      { file: { contents: 'New go.mod', name: 'go.mod' } },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
 });

@@ -1,12 +1,16 @@
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
-import type { RenovateConfig } from '../../../../config/types';
+import type {
+  RenovateConfig,
+  RenovateSharedConfig,
+} from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { clone } from '../../../../util/clone';
+import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 
-export async function getOnboardingConfig(
+async function getOnboardingConfig(
   config: RenovateConfig
-): Promise<string> {
+): Promise<RenovateSharedConfig> {
   let onboardingConfig = clone(config.onboardingConfig);
 
   let orgPreset: string;
@@ -65,5 +69,17 @@ export async function getOnboardingConfig(
   }
 
   logger.debug({ config: onboardingConfig }, 'onboarding config');
-  return JSON.stringify(onboardingConfig, null, 2) + '\n';
+  return onboardingConfig;
 }
+
+async function getOnboardingConfigContents(
+  config: RenovateConfig,
+  fileName: string
+): Promise<string> {
+  const codeFormat = await EditorConfig.getCodeFormat(fileName);
+  const jsonWriter = new JSONWriter(codeFormat);
+  const onboardingConfig = await getOnboardingConfig(config);
+  return jsonWriter.write(onboardingConfig);
+}
+
+export { getOnboardingConfig, getOnboardingConfigContents };

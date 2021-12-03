@@ -1,10 +1,6 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
-import {
-  PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../../constants/platforms';
+import { load } from 'js-yaml';
+import { PlatformId } from '../../constants';
 import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
@@ -55,9 +51,9 @@ function determineDatasource(
     return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    [PLATFORM_TYPE_GITEA, gitlabTagsId],
-    [PLATFORM_TYPE_GITHUB, githubTagsId],
-    [PLATFORM_TYPE_GITLAB, gitlabTagsId],
+    [PlatformId.Gitea, gitlabTagsId],
+    [PlatformId.Github, githubTagsId],
+    [PlatformId.Gitlab, gitlabTagsId],
   ]) {
     if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
@@ -93,12 +89,13 @@ function extractDependency(
     // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
     // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
-    /^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/,
+    regEx(/^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/),
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
     if (match) {
-      const { hostname, depName } = match.groups;
+      const hostname = match.groups.hostname;
+      const depName = match.groups.depName.replace(regEx(/\.git$/i), ''); // TODO 12071
       const sourceDef = determineDatasource(repository, hostname);
       return {
         ...sourceDef,
@@ -155,9 +152,10 @@ export function extractPackageFile(
   content: string,
   filename: string
 ): PackageFile | null {
-  let parsedContent: Record<string, unknown> | PreCommitConfig;
+  type ParsedContent = Record<string, unknown> | PreCommitConfig;
+  let parsedContent: ParsedContent;
   try {
-    parsedContent = yaml.safeLoad(content, { json: true }) as any;
+    parsedContent = load(content, { json: true }) as ParsedContent;
   } catch (err) {
     logger.debug({ filename, err }, 'Failed to parse pre-commit config YAML');
     return null;
@@ -183,7 +181,7 @@ export function extractPackageFile(
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ filename, err }, 'Error scanning parsed pre-commit config');
+    logger.warn({ filename, err }, 'Error scanning parsed pre-commit config');
   }
   return null;
 }

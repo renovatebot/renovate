@@ -38,8 +38,8 @@ Array [
 
 exports[`util/host-rules findAll() needs exact host matches 1`] = `
 Object {
-  "hostName": "nuget.org",
   "hostType": "nuget",
+  "matchHost": "nuget.org",
   "password": "p4$$w0rd",
   "resolvedHost": "nuget.org",
   "username": "root",

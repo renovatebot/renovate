@@ -1,22 +1,16 @@
-import { validRange } from 'semver';
-import { quote } from 'shlex';
 import { join } from 'upath';
-import { getAdminConfig } from '../../../config/admin';
+import { GlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import type { ToolConstraint } from '../../../util/exec/types';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
-
-export interface GenerateLockFileResult {
-  error?: boolean;
-  lockFile?: string;
-  stderr?: string;
-}
+import type { GenerateLockFileResult } from './types';
 
 export async function generateLockFile(
   cwd: string,
@@ -30,23 +24,10 @@ export async function generateLockFile(
 
   let lockFile = null;
   try {
-    let installNpm = 'npm i -g npm';
-    const npmCompatibility = config.constraints?.npm as string;
-    // istanbul ignore else
-    if (npmCompatibility) {
-      // istanbul ignore else
-      if (validRange(npmCompatibility)) {
-        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)} || true`;
-      } else {
-        logger.debug(
-          { npmCompatibility },
-          'npm compatibility range is not valid - skipping'
-        );
-      }
-    } else {
-      logger.debug('No npm compatibility range found - installing npm latest');
-    }
-    const preCommands = [installNpm, 'hash -d npm'];
+    const npmToolConstraint: ToolConstraint = {
+      toolName: 'npm',
+      constraint: config.constraints?.npm,
+    };
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
@@ -57,7 +38,7 @@ export async function generateLockFile(
       cmdOptions += '--package-lock-only --no-audit';
     }
 
-    if (!getAdminConfig().allowScripts || config.ignoreScripts) {
+    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       cmdOptions += ' --ignore-scripts';
     }
 
@@ -68,15 +49,15 @@ export async function generateLockFile(
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
       },
+      toolConstraints: [npmToolConstraint],
       docker: {
         image: 'node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
     };
     // istanbul ignore if
-    if (getAdminConfig().exposeAllEnv) {
+    if (GlobalConfig.get('exposeAllEnv')) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
@@ -109,8 +90,10 @@ export async function generateLockFile(
       commands.push('npm dedupe');
     }
 
+    // TODO: don't assume package-lock.json is in the same directory
+    const lockFileName = join(cwd, filename);
+
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
-      const lockFileName = join(cwd, filename);
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );

@@ -3,6 +3,17 @@
 We try to keep issues well-classified through use of labels.
 Any repository collaborator can apply labels according to the below guidelines.
 
+The general idea is that we have:
+
+- manager (`manager:`)
+- versioning (`versioning:`)
+- datasource (`datasource:`)
+- platform (`platform:`)
+- core functionality (`core:`)
+
+The majority of issues should have at least one of those labels.
+These labels should also map approximately to our Conventional Commit scopes.
+
 ## Basic knowledge about Renovate
 
 You should know about platforms, package managers, datasources and versioning to label issues effectively.
@@ -25,12 +36,14 @@ Most issues should have a label relating to either a platform, manager, datasour
     status:blocked
     status:ready
     status:in-progress
+    status:waiting-on-response
 
 </details>
 
 Use these to label the status of an issue.
 For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
-All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked) can identify any which are missing a status label.
+If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
+All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked+-label%3Astatus%3Awaiting-on-response+) can identify any which are missing a status label.
 
 ### Type of issue
 
@@ -92,6 +105,21 @@ Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is
 Use these to mark the platform that is affected by this issue.
 Keep in mind that an issue can be both affecting a platform and a self hosted instance.
 
+### Core
+
+<details>
+    <summary>Core labels</summary>
+
+    core:automerge
+    core:changelogs
+    core:dashboard
+    core:onboarding
+    core:schedule
+
+</details>
+
+The purpose of these labels is to allow browsing of open issues by the most commonly-used functionality, such as automerging or Dependency Dashboard.
+
 ### Manager
 
 "manager" is short for "package manager".
@@ -141,7 +169,6 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     logs:problem
     reproduction:needed
     reproduction:provided
-    reproduction:confirmed
     duplicate
 
 </details>
@@ -159,7 +186,6 @@ Add a label `logs:problem` to indicate that there's a problem with the logs, and
 
 Add a label `reproduction:needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduction:provided` once there is a public reproduction.
-A developer will add the `reproduction:confirmed` once they have checked and confirmed the reproduction.
 
 Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 

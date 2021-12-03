@@ -16,7 +16,7 @@ Renovate supports upgrading dependencies in `go.mod` files and their accompanyin
 1. Renovate runs `go get` to update the `go.sum` files
 1. If the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate uses [mod](https://github.com/marwan-at-work/mod) to update import paths on major updates, which can update any Go source file
 1. If the user has enabled the option `gomodTidy` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate runs `go mod tidy`, which itself can update `go.mod` and `go.sum`.
-   1. This is implicitly enabled for major updates
+   1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array
 1. `go mod vendor` is run if vendored modules are detected
 1. A PR will be created with `go.mod`,`go.sum`, and any updated vendored files updated in the one commit
 1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
@@ -40,8 +40,39 @@ Renovate will commit all files changed within the `vendor/` folder.
 
 ### Go binary version
 
-By default, Renovate will keep up with the very latest version of `go`.
+By default, Renovate will keep up with the latest version of the `go` binary.
 
-You can "pin" the `go` version that Renovate uses.
-Say you want Renovate to use Go version 1.14, you can do this by adding `go 1.14` to your `go.mod` file.
-We do not support pinning Go versions to a specific patch level, so you cannot use `go 1.14.12`, but you can use `go 1.14` in your `go.mod` file.
+You can force Renovate to use a specific version of Go by setting a constraint.
+As an example, say you want Renovate to use the latest patch version of the `1.16` Go binary, you'd put this in your Renovate config:
+
+```json
+{
+  "constraints": {
+    "go": "1.16"
+  }
+}
+```
+
+We do not support patch level versions for the minimum `go` version.
+This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a constraint.
+
+### Custom registry support, and authentication
+
+This example shows how you can use a `hostRules` configuration to configure Renovate for use with a custom private Go module source using Git to pull the modules when updating `go.sum` and vendored modules.
+All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, ... ) and host rules without a `hostType` are setup for authentication.
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'github.enterprise.com',
+      token: process.env.GO_GITHUB_TOKEN,
+      hostType: 'github',
+    },
+    {
+      matchHost: 'someGitHost.enterprise.com',
+      token: process.env.GO_GIT_TOKEN,
+    },
+  ],
+};
+```

@@ -1,9 +1,9 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const pkgContent = loadFixture(`SamplePackage.swift`);
 
-describe(getName(), () => {
+describe('manager/swift/index', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty content', () => {
       expect(extractPackageFile(null)).toBeNull();
@@ -101,32 +101,32 @@ describe(getName(), () => {
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]`
         )
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({ deps: [{ currentValue: 'from:"1.2.3"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"...)]`
         )
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"...' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..."1.2.4")]`
         )
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"..."1.2.4"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..<"1.2.4")]`
         )
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"..<"1.2.4"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..."1.2.3")]`
         )
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({ deps: [{ currentValue: '..."1.2.3"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..<"1.2.3")]`
         )
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({ deps: [{ currentValue: '..<"1.2.3"' }] });
     });
     it('parses multiple packages', () => {
       expect(extractPackageFile(pkgContent)).toMatchSnapshot();

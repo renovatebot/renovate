@@ -1,22 +1,20 @@
-import nock from 'nock';
-import { getName } from '../../../../test/util';
-import { setAdminConfig } from '../../admin';
+import * as httpMock from '../../../../test/http-mock';
+import { GlobalConfig } from '../../global';
 import * as npm from '.';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-describe(getName(), () => {
+describe('config/presets/npm/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    setAdminConfig();
-    nock.cleanAll();
+    GlobalConfig.reset();
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
   });
   it('should throw if no package', async () => {
-    nock('https://registry.npmjs.org').get('/nopackage').reply(404);
+    httpMock.scope('https://registry.npmjs.org').get('/nopackage').reply(404);
     await expect(
       npm.getPreset({ packageName: 'nopackage', presetName: 'default' })
     ).rejects.toThrow(/dep not found/);
@@ -45,7 +43,8 @@ describe(getName(), () => {
         '0.0.2': '2018-05-07T07:21:53+02:00',
       },
     };
-    nock('https://registry.npmjs.org')
+    httpMock
+      .scope('https://registry.npmjs.org')
       .get('/norenovateconfig')
       .reply(200, presetPackage);
     await expect(
@@ -77,7 +76,8 @@ describe(getName(), () => {
         '0.0.2': '2018-05-07T07:21:53+02:00',
       },
     };
-    nock('https://registry.npmjs.org')
+    httpMock
+      .scope('https://registry.npmjs.org')
       .get('/presetnamenotfound')
       .reply(200, presetPackage);
     await expect(
@@ -112,10 +112,11 @@ describe(getName(), () => {
         '0.0.2': '2018-05-07T07:21:53+02:00',
       },
     };
-    nock('https://registry.npmjs.org')
+    httpMock
+      .scope('https://registry.npmjs.org')
       .get('/workingpreset')
       .reply(200, presetPackage);
     const res = await npm.getPreset({ packageName: 'workingpreset' });
-    expect(res).toMatchSnapshot();
+    expect(res).toEqual({ rangeStrategy: 'auto' });
   });
 });

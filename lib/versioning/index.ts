@@ -16,7 +16,7 @@ export const getVersionings = (): Map<
 
 export function get(versioning: string): VersioningApi {
   if (!versioning) {
-    logger.debug('Missing versioning');
+    logger.trace('Missing versioning, using semver as fallback.');
     return versionings.get('semver') as VersioningApi;
   }
   let versioningName: string;
@@ -35,7 +35,6 @@ export function get(versioning: string): VersioningApi {
     return versionings.get('semver') as VersioningApi;
   }
   if (isVersioningApiConstructor(theVersioning)) {
-    // eslint-disable-next-line new-cap
     return new theVersioning(versioningConfig);
   }
   return theVersioning;

@@ -1,9 +1,10 @@
-import { getName } from '../../../test/util';
-import { id as gitTagDatasource } from '../../datasource/git-tags';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency } from '../types';
+import type { ExtractConfig, PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
 const fixturesDir = 'lib/manager/batect/__fixtures__';
@@ -20,27 +21,45 @@ function createGitDependency(repo: string, version: string): PackageDependency {
     depName: repo,
     currentValue: version,
     versioning: semverVersioning,
-    datasource: gitTagDatasource,
+    datasource: GitTagsDatasource.id,
     commitMessageTopic: 'bundle {{depName}}',
   };
 }
 
-describe(getName(), () => {
+const adminConfig: RepoGlobalConfig = {
+  localDir: '',
+};
+
+const config: ExtractConfig = {};
+
+describe('manager/batect/extract', () => {
   describe('extractPackageFile()', () => {
+    beforeEach(() => {
+      GlobalConfig.set(adminConfig);
+    });
+
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
     it('returns empty array for empty configuration file', async () => {
       expect(
-        await extractAllPackageFiles({}, [`${fixturesDir}/empty/batect.yml`])
+        await extractAllPackageFiles(config, [
+          `${fixturesDir}/empty/batect.yml`,
+        ])
       ).toEqual([]);
     });
 
     it('returns empty array for non-object configuration file', async () => {
       expect(
-        await extractAllPackageFiles({}, [`${fixturesDir}/invalid/batect.yml`])
+        await extractAllPackageFiles(config, [
+          `${fixturesDir}/invalid/batect.yml`,
+        ])
       ).toEqual([]);
     });
 
     it('returns an a package file with no dependencies for configuration file without containers or includes', async () => {
-      const result = await extractAllPackageFiles({}, [
+      const result = await extractAllPackageFiles(config, [
         `${fixturesDir}/no-containers-or-includes/batect.yml`,
       ]);
 
@@ -53,7 +72,7 @@ describe(getName(), () => {
     });
 
     it('extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files', async () => {
-      const result = await extractAllPackageFiles({}, [
+      const result = await extractAllPackageFiles(config, [
         `${fixturesDir}/valid/batect.yml`,
       ]);
 

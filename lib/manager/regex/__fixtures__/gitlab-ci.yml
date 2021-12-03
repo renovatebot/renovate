@@ -1,0 +1,6 @@
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+variables:
+  CHART_REPOSITORY_URL: "https://kubernetes-sigs.github.io/descheduler/"
+  CHART_NAME: "descheduler"
+  CHART_VERSION: 0.19.2

@@ -1,79 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "go.sum",
-      "stderr": "This update totally doesnt work",
-    },
-  },
-]
-`;
+exports[`manager/gomod/artifacts catches errors 1`] = `Array []`;
 
-exports[`.updateArtifacts() catches errors 2`] = `Array []`;
-
-exports[`.updateArtifacts() returns if no go.sum found 1`] = `Array []`;
-
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
-Array [
-  Object {
-    "cmd": "go get -d ./...",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "CGO_ENABLED": "1",
-        "GONOPROXY": "noproxy.example.com/*",
-        "GONOSUMDB": "1",
-        "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPRIVATE": "private.example.com/*",
-        "GOPROXY": "proxy.example.com",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() returns updated go.sum 1`] = `
-Array [
-  Object {
-    "cmd": "go get -d ./...",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "CGO_ENABLED": "1",
-        "GONOPROXY": "noproxy.example.com/*",
-        "GONOSUMDB": "1",
-        "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPRIVATE": "private.example.com/*",
-        "GOPROXY": "proxy.example.com",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() skips updating import paths for gopkg.in dependencies 1`] = `
+exports[`manager/gomod/artifacts does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set 1`] = `
 Array [
   Object {
     "file": Object {
@@ -83,14 +12,14 @@ Array [
   },
   Object {
     "file": Object {
-      "contents": "New go.mod",
+      "contents": "New main.go",
       "name": "go.mod",
     },
   },
 ]
 `;
 
-exports[`.updateArtifacts() skips updating import paths for gopkg.in dependencies 2`] = `
+exports[`manager/gomod/artifacts does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set 2`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -99,54 +28,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
-        "GONOPROXY": "noproxy.example.com/*",
-        "GONOSUMDB": "1",
-        "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPRIVATE": "private.example.com/*",
-        "GOPROXY": "proxy.example.com",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-  Object {
-    "cmd": "go mod tidy",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "CGO_ENABLED": "1",
-        "GONOPROXY": "noproxy.example.com/*",
-        "GONOSUMDB": "1",
-        "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPRIVATE": "private.example.com/*",
-        "GOPROXY": "proxy.example.com",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-  Object {
-    "cmd": "go mod tidy",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -167,7 +49,69 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() skips updating import paths with gomodUpdateImportPaths on v0 to v1 1`] = `
+exports[`manager/gomod/artifacts returns if no go.sum found 1`] = `Array []`;
+
+exports[`manager/gomod/artifacts returns null if unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
+        "GONOPROXY": "noproxy.example.com/*",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPRIVATE": "private.example.com/*",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/gomod/artifacts returns updated go.sum 1`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
+        "GONOPROXY": "noproxy.example.com/*",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPRIVATE": "private.example.com/*",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/gomod/artifacts skips gomodTidy without gomodUpdateImportPaths on major update 1`] = `
 Array [
   Object {
     "file": Object {
@@ -177,14 +121,14 @@ Array [
   },
   Object {
     "file": Object {
-      "contents": "New go.mod",
+      "contents": "New main.go",
       "name": "go.mod",
     },
   },
 ]
 `;
 
-exports[`.updateArtifacts() skips updating import paths with gomodUpdateImportPaths on v0 to v1 2`] = `
+exports[`manager/gomod/artifacts skips gomodTidy without gomodUpdateImportPaths on major update 2`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -193,6 +137,37 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
+        "GONOPROXY": "noproxy.example.com/*",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPRIVATE": "private.example.com/*",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/gomod/artifacts skips updating import paths for gopkg.in dependencies 1`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -217,6 +192,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -241,6 +217,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -261,130 +238,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports docker mode with credentials 1`] = `
-Array [
-  Object {
-    "cmd": "docker pull renovate/go:latest",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker ps --filter name=renovate_go -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"git config --global url.\\\\\\"https://some-token@github.com/\\\\\\".insteadOf \\\\\\"https://github.com/\\\\\\" && go get -d ./...\\"",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "CGO_ENABLED": "1",
-        "GONOPROXY": "noproxy.example.com/*",
-        "GONOSUMDB": "1",
-        "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPRIVATE": "private.example.com/*",
-        "GOPROXY": "proxy.example.com",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() supports docker mode with goModTidy 1`] = `
-Array [
-  Object {
-    "cmd": "docker pull renovate/go:latest",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker ps --filter name=renovate_go -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./... && go mod tidy && go mod tidy\\"",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "CGO_ENABLED": "1",
-        "GONOPROXY": "noproxy.example.com/*",
-        "GONOSUMDB": "1",
-        "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPRIVATE": "private.example.com/*",
-        "GOPROXY": "proxy.example.com",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() supports docker mode without credentials 1`] = `
-Array [
-  Object {
-    "cmd": "docker pull renovate/go:latest",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker ps --filter name=renovate_go -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -v \\"/tmp/renovate/cache/others/go\\":\\"/tmp/renovate/cache/others/go\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./...\\"",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "CGO_ENABLED": "1",
-        "GONOPROXY": "noproxy.example.com/*",
-        "GONOSUMDB": "1",
-        "GOPATH": "/tmp/renovate/cache/others/go",
-        "GOPRIVATE": "private.example.com/*",
-        "GOPROXY": "proxy.example.com",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() supports global mode 1`] = `
+exports[`manager/gomod/artifacts skips updating import paths with gomodUpdateImportPaths on v0 to v1 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -393,6 +247,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -413,7 +268,136 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() supports vendor directory update 1`] = `
+exports[`manager/gomod/artifacts supports docker mode with credentials 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/go:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_go -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -e GIT_CONFIG_KEY_0 -e GIT_CONFIG_VALUE_0 -e GIT_CONFIG_COUNT -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./...\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": "url.https://some-token@github.com/.insteadOf",
+        "GIT_CONFIG_VALUE_0": "https://github.com/",
+        "GOFLAGS": "-modcacherw",
+        "GONOPROXY": "noproxy.example.com/*",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPRIVATE": "private.example.com/*",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/gomod/artifacts supports docker mode with goModTidy 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/go:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_go -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./... && go mod tidy && go mod tidy\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
+        "GONOPROXY": "noproxy.example.com/*",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPRIVATE": "private.example.com/*",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/gomod/artifacts supports docker mode without credentials 1`] = `
+Array [
+  Object {
+    "cmd": "docker pull renovate/go:latest",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_go -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_go --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e GOPATH -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOFLAGS -e CGO_ENABLED -w \\"/tmp/github/some/repo\\" renovate/go:latest bash -l -c \\"go get -d ./...\\"",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
+        "GONOPROXY": "noproxy.example.com/*",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPRIVATE": "private.example.com/*",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/gomod/artifacts supports global mode 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -422,6 +406,37 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
+        "GONOPROXY": "noproxy.example.com/*",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPRIVATE": "private.example.com/*",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/gomod/artifacts supports vendor directory update 1`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -446,6 +461,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -470,6 +486,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -494,6 +511,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -518,6 +536,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -538,30 +557,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() updates import paths with gomodUpdateImportPaths 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New main.go",
-      "name": "main.go",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() updates import paths with gomodUpdateImportPaths 2`] = `
+exports[`manager/gomod/artifacts updates import paths with gomodUpdateImportPaths 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -570,6 +566,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -594,6 +591,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -618,6 +616,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -642,6 +641,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -666,6 +666,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -686,30 +687,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() updates import paths with latest tool version on invalid version constraint 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New main.go",
-      "name": "main.go",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() updates import paths with latest tool version on invalid version constraint 2`] = `
+exports[`manager/gomod/artifacts updates import paths with latest tool version on invalid version constraint 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -718,6 +696,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -742,6 +721,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -766,6 +746,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -790,6 +771,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -814,6 +796,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -834,30 +817,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() updates import paths with specific tool version from constraint 1`] = `
-Array [
-  Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New main.go",
-      "name": "main.go",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() updates import paths with specific tool version from constraint 2`] = `
+exports[`manager/gomod/artifacts updates import paths with specific tool version from constraint 1`] = `
 Array [
   Object {
     "cmd": "go get -d ./...",
@@ -866,6 +826,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -890,6 +851,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -914,6 +876,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -938,6 +901,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",
@@ -962,6 +926,7 @@ Array [
       "encoding": "utf-8",
       "env": Object {
         "CGO_ENABLED": "1",
+        "GOFLAGS": "-modcacherw",
         "GONOPROXY": "noproxy.example.com/*",
         "GONOSUMDB": "1",
         "GOPATH": "/tmp/renovate/cache/others/go",

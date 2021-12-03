@@ -1,133 +1,134 @@
 import * as utils from '../../platform/bitbucket/utils';
-import * as packageCache from '../../util/cache/package';
+import { cache } from '../../util/cache/package/decorator';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../util/url';
+import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BitbucketCommit, BitbucketTag } from './types';
 
-const bitbucketHttp = new BitbucketHttp();
+export class BitBucketTagsDatasource extends Datasource {
+  bitbucketHttp = new BitbucketHttp();
 
-export const id = 'bitbucket-tags';
-export const customRegistrySupport = true;
-export const registryStrategy = 'first';
-export const defaultRegistryUrls = ['https://bitbucket.org'];
+  static readonly id = 'bitbucket-tags';
 
-function getRegistryURL(registryUrl: string): string {
-  // fallback to default API endpoint if custom not provided
-  return registryUrl ?? defaultRegistryUrls[0];
-}
+  static readonly customRegistrySupport = true;
 
-const cacheNamespace = 'datasource-bitbucket';
+  static readonly registryStrategy = 'first';
 
-function getCacheKey(registryUrl: string, repo: string, type: string): string {
-  return `${getRegistryURL(registryUrl)}:${repo}:${type}`;
-}
+  static readonly defaultRegistryUrls = ['https://bitbucket.org'];
 
-// getReleases fetches list of tags for the repository
-export async function getReleases({
-  registryUrl,
-  lookupName: repo,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const cacheKey = getCacheKey(registryUrl, repo, 'tags');
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
+  static readonly cacheNamespace = `datasource-${BitBucketTagsDatasource.id}`;
+
+  constructor() {
+    super(BitBucketTagsDatasource.id);
   }
 
-  const url = `/2.0/repositories/${repo}/refs/tags`;
-
-  const bitbucketTags = (
-    await bitbucketHttp.getJson<utils.PagedResult<BitbucketTag>>(url)
-  ).body;
-
-  const dependency: ReleaseResult = {
-    sourceUrl: `${ensureTrailingSlash(getRegistryURL(registryUrl))}${repo}`,
-    releases: null,
-  };
-  dependency.releases = bitbucketTags.values.map(({ name, target }) => ({
-    version: name,
-    gitRef: name,
-    releaseTimestamp: target?.date,
-  }));
-
-  const cacheMinutes = 10;
-  await packageCache.set(cacheNamespace, cacheKey, dependency, cacheMinutes);
-  return dependency;
-}
-
-// getTagCommit fetched the commit has for specified tag
-async function getTagCommit(
-  registryUrl: string,
-  repo: string,
-  tag: string
-): Promise<string | null> {
-  const cacheKey = getCacheKey(registryUrl, repo, `tag-${tag}`);
-  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
+  static getRegistryURL(registryUrl: string): string {
+    // fallback to default API endpoint if custom not provided
+    return registryUrl ?? this.defaultRegistryUrls[0];
   }
 
-  const url = `/2.0/repositories/${repo}/refs/tags/${tag}`;
-
-  const bitbucketTag = (await bitbucketHttp.getJson<BitbucketTag>(url)).body;
-
-  const hash = bitbucketTag.target.hash;
-
-  const cacheMinutes = 10;
-  await packageCache.set(cacheNamespace, cacheKey, hash, cacheMinutes);
-
-  return hash;
-}
-
-// getDigest fetched the latest commit for repository main branch
-// however, if newValue is provided, then getTagCommit is called
-export async function getDigest(
-  { lookupName: repo, registryUrl }: DigestConfig,
-  newValue?: string
-): Promise<string | null> {
-  if (newValue?.length) {
-    return getTagCommit(registryUrl, repo, newValue);
+  static getCacheKey(registryUrl: string, repo: string, type: string): string {
+    return `${BitBucketTagsDatasource.getRegistryURL(
+      registryUrl
+    )}:${repo}:${type}`;
   }
 
-  const cacheKey = getCacheKey(registryUrl, repo, 'digest');
-  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
+  static getSourceUrl(lookupName: string, registryUrl?: string): string {
+    const url = BitBucketTagsDatasource.getRegistryURL(registryUrl);
+    const normalizedUrl = ensureTrailingSlash(url);
+    return `${normalizedUrl}${lookupName}`;
   }
 
-  const branchCacheKey = getCacheKey(registryUrl, repo, 'mainbranch');
-  let mainBranch = await packageCache.get<string>(
-    cacheNamespace,
-    branchCacheKey
-  );
-  if (!mainBranch) {
-    mainBranch = (
-      await bitbucketHttp.getJson<utils.RepoInfoBody>(
+  // getReleases fetches list of tags for the repository
+  @cache({
+    namespace: BitBucketTagsDatasource.cacheNamespace,
+    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
+      BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'tags'),
+  })
+  async getReleases({
+    registryUrl,
+    lookupName: repo,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const url = `/2.0/repositories/${repo}/refs/tags`;
+
+    const bitbucketTags = (
+      await this.bitbucketHttp.getJson<utils.PagedResult<BitbucketTag>>(url)
+    ).body;
+
+    const dependency: ReleaseResult = {
+      sourceUrl: BitBucketTagsDatasource.getSourceUrl(repo, registryUrl),
+      registryUrl: BitBucketTagsDatasource.getRegistryURL(registryUrl),
+      releases: null,
+    };
+    dependency.releases = bitbucketTags.values.map(({ name, target }) => ({
+      version: name,
+      gitRef: name,
+      releaseTimestamp: target?.date,
+    }));
+
+    return dependency;
+  }
+
+  // getTagCommit fetched the commit has for specified tag
+  @cache({
+    namespace: BitBucketTagsDatasource.cacheNamespace,
+    key: (registryUrl, repo, tag: string) =>
+      BitBucketTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
+  })
+  async getTagCommit(
+    registryUrl: string,
+    repo: string,
+    tag: string
+  ): Promise<string | null> {
+    const url = `/2.0/repositories/${repo}/refs/tags/${tag}`;
+
+    const bitbucketTag = (await this.bitbucketHttp.getJson<BitbucketTag>(url))
+      .body;
+
+    return bitbucketTag.target.hash;
+  }
+
+  @cache({
+    namespace: BitBucketTagsDatasource.cacheNamespace,
+    key: (registryUrl: string, repo: string) =>
+      BitBucketTagsDatasource.getCacheKey(registryUrl, repo, 'mainbranch'),
+    ttlMinutes: 60,
+  })
+  async getMainBranch(repo: string): Promise<string> {
+    return (
+      await this.bitbucketHttp.getJson<utils.RepoInfoBody>(
         `/2.0/repositories/${repo}`
       )
     ).body.mainbranch.name;
-    await packageCache.set(cacheNamespace, branchCacheKey, mainBranch, 60);
   }
 
-  const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
-  const bitbucketCommits = (
-    await bitbucketHttp.getJson<utils.PagedResult<BitbucketCommit>>(url)
-  ).body;
+  // getDigest fetched the latest commit for repository main branch
+  // however, if newValue is provided, then getTagCommit is called
+  @cache({
+    namespace: BitBucketTagsDatasource.cacheNamespace,
+    key: ({ registryUrl, lookupName }: DigestConfig) =>
+      BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'digest'),
+  })
+  override async getDigest(
+    { lookupName: repo, registryUrl }: DigestConfig,
+    newValue?: string
+  ): Promise<string | null> {
+    if (newValue?.length) {
+      return this.getTagCommit(registryUrl, repo, newValue);
+    }
 
-  if (bitbucketCommits.values.length === 0) {
-    return null;
+    const mainBranch = await this.getMainBranch(repo);
+
+    const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
+    const bitbucketCommits = (
+      await this.bitbucketHttp.getJson<utils.PagedResult<BitbucketCommit>>(url)
+    ).body;
+
+    if (bitbucketCommits.values.length === 0) {
+      return null;
+    }
+
+    return bitbucketCommits.values[0].hash;
   }
-
-  const latestCommit = bitbucketCommits.values[0].hash;
-
-  const cacheMinutes = 10;
-  await packageCache.set(cacheNamespace, cacheKey, latestCommit, cacheMinutes);
-
-  return latestCommit;
 }

@@ -6,13 +6,20 @@ description: Renovate's support for ESLint-like shareable configs
 # Shareable Config Presets
 
 Renovate's "config presets" are a convenient way to distribute config for reuse across multiple repositories.
-It is similar in design to `eslint`'s shareable configs, and can be used for whole repository configs and for individual rules.
+It is similar in design to ESLint's shareable configs, and can be used for whole repository configs and for individual rules.
 They are defined using the `extends` array within config and may also be nested.
 
 In short:
 
 - Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you
 - Publish your own if you wish to reuse them across repositories
+
+Shareable config presets can only be used with the JSON format, other formats are not supported.
+
+**Warning:** `default.json` is intended for use with presets only!
+**Warning:** Do not use a `renovate.json` file as a preset.
+
+**Info:** We've deprecated the use of a `renovate.json` file for presets as this can cause issues if the repository configuration uses a `renovate.json` file as well.
 
 ## Goals of Preset Configs
 
@@ -26,27 +33,63 @@ Renovate's configuration is self-documenting, because you can fill in the `"desc
 
 ## Implementation Approach
 
-In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an `eslint` config.
+In order to achieve these goals, preset configs allow for a very modular approach - preset configs can be as small as a partial package rule or as large as an entire configuration, like an ESLint config.
 
 ## Preset Hosting
 
 In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+
 An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
-| name                    | example use                | preset    | resolves as                          | filename                          |
-| ----------------------- | -------------------------- | --------- | ------------------------------------ | --------------------------------- |
-| GitHub default          | `github>abc/foo`           | `default` | `https://github.com/abc/foo`         | `default.json` or `renovate.json` |
-| GitHub with preset name | `github>abc/foo:xyz`       | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`                        |
-| GitHub with preset path | `github>abc/foo//path/xyz` | `xyz`     | `https://github.com/abc/foo`         | `path/xyz.json`                   |
-| GitLab default          | `gitlab>abc/foo`           | `default` | `https://gitlab.com/abc/foo`         | `default.json` or `renovate.json` |
-| GitLab with preset name | `gitlab>abc/foo:xyz`       | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`                        |
-| GitLab with preset path | `gitlab>abc/foo//path/xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `path/xyz.json`                   |
-| Gitea default           | `gitea>abc/foo`            | `default` | `https://gitea.com/abc/foo`          | `default.json` or `renovate.json` |
-| Gitea with preset name  | `gitea>abc/foo:xyz`        | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`                        |
-| Local default           | `local>abc/foo`            | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |
-| Local with preset path  | `local>abc/foo//path/xyz`  | `default` | `https://github.company.com/abc/foo` | `path/xyz.json`                   |
+You can set a Git tag (like a SemVer) to use a specific release of your shared config.
 
-Note that you can't combine the path and sub-preset syntaxes (i.e. anything in the form `provider>owner/repo//path/to/file:subsubpreset`) is not supported. One workaround is to use distinct files instead of sub-presets.
+### GitHub
+
+| name                                        | example use                      | preset    | resolves as                  | filename        | Git tag        |
+| ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
+| GitHub default                              | `github>abc/foo`                 | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
+| GitHub with preset name                     | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
+| GitHub default with a tag                   | `github>abc/foo#1.5.4`           | `default` | `https://github.com/abc/foo` | `default.json`  | `1.5.4`        |
+| GitHub with preset name with a tag          | `github>abc/foo:xyz#1.5.4`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| GitHub with preset name and path with a tag | `github>abc/foo//path/xyz#1.5.4` | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| GitHub with subpreset name and tag          | `github>abc/foo:xyz/sub#1.5.4`   | `sub`     | `https://github.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+
+### GitLab
+
+| name                                        | example use                     | preset    | resolves as                  | filename        | Git tag        |
+| ------------------------------------------- | ------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
+| GitLab default                              | `gitlab>abc/foo`                | `default` | `https://gitlab.com/abc/foo` | `default.json`  | Default branch |
+| GitLab with preset name                     | `gitlab>abc/foo:xyz`            | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | Default branch |
+| GitLab default with a tag                   | `gitlab>abc/foo#1.5.4`          | `default` | `https://gitlab.com/abc/foo` | `default.json`  | `1.5.4`        |
+| GitLab with preset name with a tag          | `gitlab>abc/foo:xyz#1.5.4`      | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| GitLab with preset name and path with a tag | `gitlab>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://gitlab.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| GitLab with subpreset name and tag          | `gitlab>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+
+### Gitea
+
+| name                                       | example use                    | preset    | resolves as                 | filename        | Git tag        |
+| ------------------------------------------ | ------------------------------ | --------- | --------------------------- | --------------- | -------------- |
+| Gitea default                              | `gitea>abc/foo`                | `default` | `https://gitea.com/abc/foo` | `default.json`  | Default branch |
+| Gitea with preset name                     | `gitea>abc/foo:xyz`            | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | Default branch |
+| Gitea default with a tag                   | `gitea>abc/foo#1.5.4`          | `default` | `https://gitea.com/abc/foo` | `default.json`  | `1.5.4`        |
+| Gitea with preset name with a tag          | `gitea>abc/foo:xyz#1.5.4`      | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| Gitea with preset name and path with a tag | `gitea>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://gitea.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| Gitea with subpreset name and tag          | `gitea>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+
+### Self-hosted Git
+
+| name                                       | example use                    | preset    | resolves as                          | filename        | Git tag        |
+| ------------------------------------------ | ------------------------------ | --------- | ------------------------------------ | --------------- | -------------- |
+| Local default                              | `local>abc/foo`                | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
+| Local with preset path                     | `local>abc/foo:path/xyz`       | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
+| Local default with a tag                   | `local>abc/foo#1.5.4`          | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.5.4`        |
+| Local with preset name with a tag          | `local>abc/foo:xyz#1.5.4`      | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| Local with preset name and path with a tag | `local>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+
+Note that you can't combine the path and sub-preset syntaxes.
+This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
+One workaround is to use distinct files instead of sub-presets.
 
 ## Example configs
 
@@ -89,28 +132,24 @@ You can find the Renovate team's preset configs at the "Config Presets" section 
 If you browse the "default" presets, you will see some that contain parameters, e.g.:
 
 ```json
-    "labels": {
-      "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
-      "labels": [
-        "{{arg0}}",
-        "{{arg1}}"
-      ]
-    },
-    "assignee": {
-      "description": "Assign PRs to <code>{{arg0}}</code>",
-      "assignees": [
-        "{{arg0}}"
-      ]
-    },
+{
+  "labels": {
+    "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
+    "labels": ["{{arg0}}", "{{arg1}}"]
+  },
+  "assignee": {
+    "description": "Assign PRs to <code>{{arg0}}</code>",
+    "assignees": ["{{arg0}}"]
+  }
+}
 ```
 
 Here is how you would use these in your Renovate config:
 
 ```json
-  "extends": [
-    ":labels(dependencies,devops)",
-    ":assignee(rarkins)"
-  ]
+{
+  "extends": [":labels(dependencies,devops)", ":assignee(rarkins)"]
+}
 ```
 
 In short, the number of `{{argx}}` parameters in the definition is how many parameters you need to provide.
@@ -122,16 +161,18 @@ Or if you think your preset would be valuable for others, please contribute a PR
 ## GitHub-hosted Presets
 
 It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `renovate.json` file in the default branch, e.g. `main`.
+In such cases Renovate will simply look for a `default.json` file in the default branch, e.g. `main`.
 
 To host your preset config on GitHub:
 
 - Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
-- Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked first and then `renovate.json`. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
+- Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
 - In other repos, reference it in an extends array like "github>owner/name", for example:
 
 ```json
+{
   "extends": ["github>rarkins/renovate-config"]
+}
 ```
 
 From then on Renovate will use the Renovate config from the preset repo's default branch.
@@ -140,23 +181,25 @@ You do not need to add it as a devDependency or add any other files to the prese
 ## GitLab-hosted Presets
 
 It is also possible to host your preset config using just a regular GitLab repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `renovate.json` file in the default branch.
+In such cases Renovate will simply look for a `default.json` file in the default branch.
+
+For a private GitLab repository Renovate requires at least _Reporter_ level access.
 
 To host your preset config on GitLab:
 
 - Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
-- Add a renovate.json to this new repo containing the preset config. No other files are necessary
+- Add a `default.json` to this new repo containing the preset config. No other files are necessary
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
 ## Gitea-hosted Presets
 
 It is also possible to host your preset config using just a regular Gitea repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a `renovate.json` file in the default branch.
+In such cases Renovate will simply look for a `default.json` file in the default branch.
 
 To host your preset config on Gitea:
 
 - Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
-- Add a `renovate.json` to this new repository containing the preset config. No other files are necessary
+- Add a `default.json` to this new repository containing the preset config. No other files are necessary
 - In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
 
 ## Local presets
@@ -175,6 +218,8 @@ But you also probably want the preset to be private too, so how can the other re
 The answer is to host your preset using GitHub or GitLab - not npmjs - and make sure you have added the preset's repo to Renovate too.
 GitHub will then allow Renovate to access the preset repo whenever it is processing any other repos within the same account/org.
 
+For a private GitLab repository Renovate requires at least _Reporter_ level access.
+
 ## Contributing to presets
 
 Have you configured a rule that you think others might benefit from?
@@ -185,7 +230,7 @@ Please consider contributing it to the [Renovate](https://github.com/renovatebot
 Whenever repository onboarding happens, Renovate checks if the current user/group/org contains a default config to extend.
 It looks for:
 
-- A repository called `renovate-config` under the same user/group/org with either `default.json` or `renovate.json`, or
+- A repository called `renovate-config` under the same user/group/org with a `default.json` file or
 - A repository named like `.{{platform}}` (e.g. `.github`) under the same user/group/org with `renovate-config.json`
 
 If found, that repository's preset will be suggested as the sole extended preset, and any existing `onboardingConfig` config will be ignored/overridden.
@@ -216,7 +261,6 @@ For example:
 {
   "name": "renovate-config-fastcore",
   "version": "0.0.1",
-  ...
   "renovate-config": {
     "default": {
       "extends": ["config:base", "schedule:nonOfficeHours"]
@@ -228,7 +272,9 @@ For example:
 Then in each of your repositories you can add your Renovate config like:
 
 ```json
+{
   "extends": ["fastcore"]
+}
 ```
 
 Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
@@ -236,5 +282,7 @@ Any repository including this config will then adopt the rules of the default `l
 Note: if you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
 
 ```json
+{
   "extends": ["@fastcore"]
+}
 ```

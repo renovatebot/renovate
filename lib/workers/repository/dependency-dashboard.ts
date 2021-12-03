@@ -1,17 +1,61 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
-import { getAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
-import { Pr, platform } from '../../platform';
-import { PrState } from '../../types';
+import { platform } from '../../platform';
+import { regEx } from '../../util/regex';
 import { BranchConfig, BranchResult } from '../types';
 
-function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
+interface DependencyDashboard {
+  dependencyDashboardChecks: Record<string, string>;
+  dependencyDashboardRebaseAllOpen: boolean;
+}
+
+function parseDashboardIssue(issueBody: string): DependencyDashboard {
+  const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
+  const checked = issueBody.match(regEx(checkMatch, 'g'));
+  const dependencyDashboardChecks: Record<string, string> = {};
+  if (checked?.length) {
+    const re = regEx(checkMatch);
+    checked.forEach((check) => {
+      const [, type, branchName] = re.exec(check);
+      dependencyDashboardChecks[branchName] = type;
+    });
+  }
+  const checkedRebaseAll = issueBody.includes(
+    ' - [x] <!-- rebase-all-open-prs -->'
+  );
+  let dependencyDashboardRebaseAllOpen = false;
+  if (checkedRebaseAll) {
+    dependencyDashboardRebaseAllOpen = true;
+  }
+  return { dependencyDashboardChecks, dependencyDashboardRebaseAllOpen };
+}
+
+export async function readDashboardBody(config: RenovateConfig): Promise<void> {
+  config.dependencyDashboardChecks = {};
+  const stringifiedConfig = JSON.stringify(config);
+  if (
+    config.dependencyDashboard ||
+    stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
+    stringifiedConfig.includes('"prCreation":"approval"')
+  ) {
+    config.dependencyDashboardTitle =
+      config.dependencyDashboardTitle || `Dependency Dashboard`;
+    const issue = await platform.findIssue(config.dependencyDashboardTitle);
+    if (issue) {
+      config.dependencyDashboardIssue = issue.number;
+      Object.assign(config, parseDashboardIssue(issue.body));
+    }
+  }
+}
+
+function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
-  if (pr) {
-    item += `[${branch.prTitle}](../pull/${pr.number})`;
+  if (branch.prNo) {
+    item += `[${branch.prTitle}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
@@ -49,7 +93,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   return newIssueBody;
 }
 
-export async function ensureMasterIssue(
+export async function ensureDependencyDashboard(
   config: RenovateConfig,
   branches: BranchConfig[]
 ): Promise<void> {
@@ -67,6 +111,15 @@ export async function ensureMasterIssue(
       )
     )
   ) {
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(
+        { title: config.dependencyDashboardTitle },
+        'DRY-RUN: Would close Dependency Dashboard'
+      );
+    } else {
+      logger.debug('Closing Dependency Dashboard');
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
+    }
     return;
   }
   // istanbul ignore if
@@ -79,10 +132,10 @@ export async function ensureMasterIssue(
     is.nonEmptyArray(branches) &&
     branches.some((branch) => branch.result !== BranchResult.Automerged);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
-    if (getAdminConfig().dryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info(
-        'DRY-RUN: Would close Dependency Dashboard ' +
-          config.dependencyDashboardTitle
+        { title: config.dependencyDashboardTitle },
+        'DRY-RUN: Would close Dependency Dashboard'
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
@@ -114,7 +167,7 @@ export async function ensureMasterIssue(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to ignore the schedule.\n';
+      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -141,7 +194,7 @@ export async function ensureMasterIssue(
   if (errorList.length) {
     issueBody += '## Errored\n\n';
     issueBody +=
-      'These updates encountered an error and will be retried. Click a checkbox below to force a retry now.\n\n';
+      'These updates encountered an error and will be retried. Click on a checkbox below to force a retry now.\n\n';
     for (const branch of errorList) {
       issueBody += getListItem(branch, 'retry');
     }
@@ -153,7 +206,7 @@ export async function ensureMasterIssue(
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
     issueBody +=
-      "These branches exist but PRs won't be created until you approve by ticking the checkbox.\n\n";
+      "These branches exist but PRs won't be created until you approve them by clicking on a checkbox.\n\n";
     for (const branch of awaitingPr) {
       issueBody += getListItem(branch, 'approvePr');
     }
@@ -164,10 +217,9 @@ export async function ensureMasterIssue(
   );
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
-    issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, check the box below.\n\n`;
+    issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.\n\n`;
     for (const branch of prEdited) {
-      const pr = await platform.getBranchPr(branch.branchName);
-      issueBody += getListItem(branch, 'rebase', pr);
+      issueBody += getListItem(branch, 'rebase');
     }
     issueBody += '\n';
   }
@@ -176,8 +228,19 @@ export async function ensureMasterIssue(
   );
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
-    issueBody += `These updates await pending status checks. To force their creation now, check the box below.\n\n`;
+    issueBody += `These updates await pending status checks. To force their creation now, click the checkbox below.\n\n`;
     for (const branch of prPending) {
+      issueBody += getListItem(branch, 'approvePr');
+    }
+    issueBody += '\n';
+  }
+  const prPendingBranchAutomerge = branches.filter(
+    (branch) => branch.prBlockedBy === 'BranchAutomerge'
+  );
+  if (prPendingBranchAutomerge.length) {
+    issueBody += '## Pending Branch Automerge\n\n';
+    issueBody += `These updates await pending status checks before automerging. Click on a checkbox to abort the branch automerge, and create a PR instead.\n\n`;
+    for (const branch of prPendingBranchAutomerge) {
       issueBody += getListItem(branch, 'approvePr');
     }
     issueBody += '\n';
@@ -195,22 +258,45 @@ export async function ensureMasterIssue(
     BranchResult.Automerged,
     BranchResult.PrEdited,
   ];
-  const inProgress = branches.filter(
-    (branch) => !otherRes.includes(branch.result)
+  let inProgress = branches.filter(
+    (branch) =>
+      !otherRes.includes(branch.result) &&
+      branch.prBlockedBy !== 'BranchAutomerge'
+  );
+  const otherBranches = inProgress.filter(
+    (branch) => branch.prBlockedBy || !branch.prNo
+  );
+  // istanbul ignore if
+  if (otherBranches.length) {
+    issueBody += '## Other Branches\n\n';
+    issueBody += `These updates are pending. To force PRs open, click the checkbox below.\n\n`;
+    for (const branch of otherBranches) {
+      logger.info(
+        {
+          prBlockedBy: branch.prBlockedBy,
+          prNo: branch.prNo,
+          result: branch.result,
+        },
+        'Blocked PR'
+      );
+      issueBody += getListItem(branch, 'other');
+    }
+    issueBody += '\n';
+  }
+  inProgress = inProgress.filter(
+    (branch) => branch.prNo && !branch.prBlockedBy
   );
   if (inProgress.length) {
     issueBody += '## Open\n\n';
     issueBody +=
       'These updates have all been created already. Click a checkbox below to force a retry/rebase of any.\n\n';
     for (const branch of inProgress) {
-      const pr = await platform.getBranchPr(branch.branchName);
-      issueBody += getListItem(branch, 'rebase', pr);
+      issueBody += getListItem(branch, 'rebase');
     }
     if (inProgress.length > 2) {
       issueBody += ' - [ ] ';
       issueBody += '<!-- rebase-all-open-prs -->';
-      issueBody +=
-        '**Check this option to rebase all the above open PRs at once**';
+      issueBody += '**Click on this checkbox to rebase all open PRs at once**';
       issueBody += '\n';
     }
     issueBody += '\n';
@@ -223,12 +309,7 @@ export async function ensureMasterIssue(
     issueBody +=
       'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
-      const pr = await platform.findPr({
-        branchName: branch.branchName,
-        prTitle: branch.prTitle,
-        state: PrState.NotOpen,
-      });
-      issueBody += getListItem(branch, 'recreate', pr);
+      issueBody += getListItem(branch, 'recreate');
     }
     issueBody += '\n';
   }
@@ -242,16 +323,40 @@ export async function ensureMasterIssue(
     issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 
-  if (getAdminConfig().dryRun) {
+  if (config.dependencyDashboardIssue) {
+    const updatedIssue = await platform.getIssue?.(
+      config.dependencyDashboardIssue,
+      false
+    );
+    if (updatedIssue) {
+      const { dependencyDashboardChecks } = parseDashboardIssue(
+        updatedIssue.body
+      );
+      for (const branchName of Object.keys(config.dependencyDashboardChecks)) {
+        delete dependencyDashboardChecks[branchName];
+      }
+      for (const branchName of Object.keys(dependencyDashboardChecks)) {
+        const checkText = `- [ ] <!-- ${dependencyDashboardChecks[branchName]}-branch=${branchName} -->`;
+        issueBody = issueBody.replace(
+          checkText,
+          checkText.replace('[ ]', '[x]')
+        );
+      }
+    }
+  }
+
+  if (GlobalConfig.get('dryRun')) {
     logger.info(
-      'DRY-RUN: Would ensure Dependency Dashboard ' +
-        config.dependencyDashboardTitle
+      { title: config.dependencyDashboardTitle },
+      'DRY-RUN: Would ensure Dependency Dashboard'
     );
   } else {
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle,
       reuseTitle,
       body: issueBody,
+      labels: config.dependencyDashboardLabels,
+      confidential: config.confidential,
     });
   }
 }

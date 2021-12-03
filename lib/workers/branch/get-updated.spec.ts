@@ -1,5 +1,5 @@
-import { defaultConfig, getName, git, mocked } from '../../../test/util';
-import * as datasourceGitRefs from '../../datasource/git-refs';
+import { defaultConfig, git, mocked } from '../../../test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
 import * as _helmv3 from '../../manager/helmv3';
@@ -21,7 +21,7 @@ jest.mock('../../manager/git-submodules');
 jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
-describe(getName(), () => {
+describe('workers/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
     beforeEach(() => {
@@ -36,12 +36,14 @@ describe(getName(), () => {
       config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles autoreplace branch no update', async () => {
       config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles autoreplace failure', async () => {
@@ -55,10 +57,12 @@ describe(getName(), () => {
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles empty', async () => {
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles null content', async () => {
@@ -75,6 +79,7 @@ describe(getName(), () => {
       } as never);
       npm.updateDependency.mockReturnValue('some new content');
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles lock files', async () => {
@@ -93,6 +98,7 @@ describe(getName(), () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileMaintenance', async () => {
@@ -109,6 +115,7 @@ describe(getName(), () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles isRemediation success', async () => {
@@ -120,6 +127,7 @@ describe(getName(), () => {
         'package-lock.json': 'new contents',
       });
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles isRemediation rebase', async () => {
@@ -133,6 +141,7 @@ describe(getName(), () => {
         'package-lock.json': 'new contents',
       });
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileMaintenance error', async () => {
@@ -149,6 +158,7 @@ describe(getName(), () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles lock file errors', async () => {
@@ -167,15 +177,17 @@ describe(getName(), () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles git submodules', async () => {
       config.upgrades.push({
         manager: 'git-submodules',
-        datasource: datasourceGitRefs.id,
+        datasource: GitRefsDatasource.id,
       } as never);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('update artifacts on update-lockfile strategy', async () => {
@@ -194,6 +206,7 @@ describe(getName(), () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('bumps versions in updateDependency managers', async () => {
@@ -205,6 +218,7 @@ describe(getName(), () => {
       npm.updateDependency.mockReturnValue('old version');
       npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('bumps versions in autoReplace managers', async () => {
@@ -218,6 +232,7 @@ describe(getName(), () => {
         bumpedContent: 'version: 0.0.2',
       });
       const res = await getUpdatedPackageFiles(config);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

@@ -7,6 +7,7 @@ import * as memCache from '../util/cache/memory';
 import * as packageCache from '../util/cache/package';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
+import { trimTrailingSlash } from '../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -15,7 +16,6 @@ import type {
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
-  Release,
   ReleaseResult,
 } from './types';
 
@@ -27,13 +27,14 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function load(datasource: string): DatasourceApi {
+function getDatasourceFor(datasource: string): DatasourceApi {
   return datasources.get(datasource);
 }
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
-function logError(datasource, lookupName, err): void {
+// TODO: fix error Type
+function logError(datasource: string, lookupName: string, err: any): void {
   const { statusCode, code: errCode, url } = err;
   if (statusCode === 404) {
     logger.debug({ datasource, lookupName, url }, 'Datasource 404');
@@ -62,7 +63,7 @@ async function getRegistryReleases(
     );
     // istanbul ignore if
     if (cachedResult) {
-      logger.debug({ cacheKey }, 'Returning cached datasource response');
+      logger.trace({ cacheKey }, 'Returning cached datasource response');
       return cachedResult;
     }
   }
@@ -100,7 +101,7 @@ async function huntRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let res: ReleaseResult;
-  let caughtError;
+  let caughtError: Error;
   for (const registryUrl of registryUrls) {
     try {
       res = await getRegistryReleases(datasource, config, registryUrl);
@@ -131,7 +132,7 @@ async function mergeRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let combinedRes: ReleaseResult;
-  let caughtError;
+  let caughtError: Error;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -188,7 +189,7 @@ function resolveRegistryUrls(
     if (is.nonEmptyArray(extractedUrls)) {
       logger.warn(
         { datasource: datasource.id, registryUrls: extractedUrls },
-        'Custom datasources are not allowed for this datasource and will be ignored'
+        'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
     return defaultRegistryUrls;
@@ -200,23 +201,39 @@ function resolveRegistryUrls(
   } else {
     registryUrls = [...defaultRegistryUrls];
   }
-  return registryUrls.filter(Boolean);
+  return registryUrls.filter(Boolean).map(trimTrailingSlash);
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
-  const datasource = load(datasourceName);
-  return datasource.defaultVersioning || 'semver';
+  const datasource = getDatasourceFor(datasourceName);
+  // istanbul ignore if: wrong regex manager config?
+  if (!datasource) {
+    logger.warn({ datasourceName }, 'Missing datasource!');
+  }
+  return datasource?.defaultVersioning || 'semver';
+}
+
+function applyReplacements(
+  config: GetReleasesInternalConfig
+): Pick<ReleaseResult, 'replacementName' | 'replacementVersion'> | undefined {
+  if (config.replacementName && config.replacementVersion) {
+    return {
+      replacementName: config.replacementName,
+      replacementVersion: config.replacementVersion,
+    };
+  }
+  return undefined;
 }
 
 async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const { datasource: datasourceName } = config;
-  if (!datasourceName || !datasources.has(datasourceName)) {
+  if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
     logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
-  const datasource = load(datasourceName);
+  const datasource = getDatasourceFor(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult = null;
   const registryStrategy = datasource.registryStrategy || 'hunt';
@@ -245,6 +262,7 @@ async function fetchReleases(
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
+  dep = { ...dep, ...applyReplacements(config) };
   return dep;
 }
 
@@ -313,15 +331,12 @@ export async function getPkgReleases(
   const versioning =
     config.versioning || getDefaultVersioning(config.datasource);
   const version = allVersioning.get(versioning);
-  // Return a sorted list of valid Versions
-  function sortReleases(release1: Release, release2: Release): number {
-    return version.sortVersions(release1.version, release2.version);
-  }
-  if (res.releases) {
-    res.releases = res.releases
-      .filter((release) => version.isVersion(release.version))
-      .sort(sortReleases);
-  }
+
+  // Filter and sort valid versions
+  res.releases = res.releases
+    .filter((release) => version.isVersion(release.version))
+    .sort((a, b) => version.sortVersions(a.version, b.version));
+
   // Filter versions for uniqueness
   res.releases = res.releases.filter(
     (filterRelease, filterIndex) =>
@@ -352,32 +367,35 @@ export async function getPkgReleases(
   }
   // Strip constraints from releases result
   res.releases.forEach((release) => {
-    delete release.constraints; // eslint-disable-line no-param-reassign
+    delete release.constraints;
   });
   return res;
 }
 
 export function supportsDigests(config: DigestConfig): boolean {
-  return 'getDigest' in load(config.datasource);
+  return 'getDigest' in getDatasourceFor(config.datasource);
 }
 
 export function getDigest(
   config: DigestConfig,
   value?: string
 ): Promise<string | null> {
-  const datasource = load(config.datasource);
+  const datasource = getDatasourceFor(config.datasource);
   const lookupName = config.lookupName || config.depName;
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  return datasource.getDigest(
-    { lookupName, registryUrl: registryUrls[0] },
-    value
-  );
+  const digestConfig: DigestConfig = {
+    registryUrl: registryUrls[0],
+    currentValue: config.currentValue,
+    currentDigest: config.currentDigest,
+    lookupName,
+  };
+  return datasource.getDigest(digestConfig, value);
 }
 
 export function getDefaultConfig(
   datasource: string
 ): Promise<Record<string, unknown>> {
-  const loadedDatasource = load(datasource);
+  const loadedDatasource = getDatasourceFor(datasource);
   return Promise.resolve<Record<string, unknown>>(
     loadedDatasource?.defaultConfig || Object.create({})
   );

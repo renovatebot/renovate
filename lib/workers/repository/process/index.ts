@@ -2,10 +2,10 @@ import { mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
-import { platform } from '../../../platform';
 import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import type { BranchConfig } from '../../types';
+import { readDashboardBody } from '../dependency-dashboard';
 import { ExtractResult, extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
@@ -25,38 +25,7 @@ function getBaseBranchConfig(
 export async function extractDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
-  logger.debug('processRepo()');
-  /* eslint-disable no-param-reassign */
-  config.dependencyDashboardChecks = {};
-  const stringifiedConfig = JSON.stringify(config);
-  // istanbul ignore next
-  if (
-    config.dependencyDashboard ||
-    stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
-    stringifiedConfig.includes('"prCreation":"approval"')
-  ) {
-    config.dependencyDashboardTitle =
-      config.dependencyDashboardTitle || `Dependency Dashboard`;
-    const issue = await platform.findIssue(config.dependencyDashboardTitle);
-    if (issue) {
-      const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
-      const checked = issue.body.match(new RegExp(checkMatch, 'g'));
-      if (checked?.length) {
-        const re = new RegExp(checkMatch);
-        checked.forEach((check) => {
-          const [, type, branchName] = re.exec(check);
-          config.dependencyDashboardChecks[branchName] = type;
-        });
-      }
-      const checkedRebaseAll = issue.body.includes(
-        ' - [x] <!-- rebase-all-open-prs -->'
-      );
-      if (checkedRebaseAll) {
-        config.dependencyDashboardRebaseAllOpen = true;
-        /* eslint-enable no-param-reassign */
-      }
-    }
-  }
+  await readDashboardBody(config);
   let res: ExtractResult = {
     branches: [],
     branchList: [],

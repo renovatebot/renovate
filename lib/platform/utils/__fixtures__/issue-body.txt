@@ -1,6 +1,6 @@
 ## Edited/Blocked
 
-These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, check the box below.
+These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.
 
 - [ ] <!-- rebase-branch=renovate/docker-renovate-renovate-16.x -->[Update renovate/renovate Docker tag to v16.13.8](../pull/2)
 

@@ -1,4 +1,4 @@
-import { getAdminConfig } from '../../../config/admin';
+import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
@@ -55,7 +55,7 @@ export async function raiseDeprecationWarnings(
         .join(', ')}`;
       issueBody += `\n\nIf you don't care about this, you can close this issue and not be warned about \`${depName}\`'s deprecation again. If you would like to completely disable all future deprecation warnings then add the following to your config:\n\n\`\`\`\n"suppressNotifications": ["deprecationWarningIssues"]\n\`\`\`\n\n`;
       // istanbul ignore if
-      if (getAdminConfig().dryRun) {
+      if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Ensure deprecation warning issue for ' + depName);
       } else {
         const ensureOnce = true;
@@ -63,6 +63,7 @@ export async function raiseDeprecationWarnings(
           title: issueTitle,
           body: issueBody,
           once: ensureOnce,
+          confidential: config.confidential,
         });
       }
     }

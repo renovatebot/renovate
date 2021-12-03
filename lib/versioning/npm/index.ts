@@ -35,7 +35,7 @@ export const isVersion = (input: string): string => valid(input);
 
 const isSingleVersion = (constraint: string): string =>
   isVersion(constraint) ||
-  (constraint.startsWith('=') && isVersion(constraint.substring(1).trim()));
+  (constraint?.startsWith('=') && isVersion(constraint.substring(1).trim()));
 
 export const api: VersioningApi = {
   equals,

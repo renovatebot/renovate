@@ -7,7 +7,7 @@ Object {
   "message": "some message",
   "options": Object {
     "headers": Object {
-      "authorization": "Bearer abc",
+      "authorization": "Bearer testtoken",
     },
   },
   "response": Object {
@@ -25,7 +25,7 @@ Array [
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic OnRva2Vu",
       "host": "github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
     "url": "https://:token@github.com/api",
@@ -41,7 +41,7 @@ Array [
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic OnRva2Vu",
       "host": "github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
     "url": "https://:token@github.com/api",
@@ -51,15 +51,16 @@ Array [
 
 exports[`logger/err-serializer got sanitize http error 2`] = `
 Object {
-  "code": undefined,
+  "code": "ERR_NON_2XX_3XX_RESPONSE",
   "message": "Response code 412 (Precondition Failed)",
   "name": "HTTPError",
   "options": Object {
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "hostType": "any",
     "http2": false,
     "method": "POST",
     "password": "***********",

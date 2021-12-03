@@ -13,6 +13,7 @@ export interface FilterConfig {
   ignoreDeprecated?: boolean;
   ignoreUnstable?: boolean;
   respectLatest?: boolean;
+  updatePinnedDependencies?: boolean;
   versioning: string;
 }
 
@@ -39,6 +40,7 @@ export interface LookupUpdateConfig
   separateMultipleMajor?: boolean;
   datasource: string;
   depName: string;
+  minimumConfidence?: string;
 }
 
 export interface UpdateResult {
@@ -55,4 +57,5 @@ export interface UpdateResult {
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
+  versioning?: string;
 }

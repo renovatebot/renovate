@@ -4,15 +4,16 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
+import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { getCocoaPodsHome } from './utils';
 
-const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;
+const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?<plugin>[^'"]+)(['"])`);
 
 function getPluginCommands(content: string): string[] {
   const result = new Set<string>();
@@ -62,7 +63,7 @@ export async function updateArtifacts({
     return null;
   }
 
-  const match = new RegExp(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
+  const match = regEx(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
     existingLockFileContent
   );
   const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
@@ -71,7 +72,7 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
-      CP_HOME_DIR: await getCocoaPodsHome(config),
+      CP_HOME_DIR: await ensureCacheDir('cocoapods'),
     },
     docker: {
       image: 'cocoapods',

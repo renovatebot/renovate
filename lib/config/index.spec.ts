@@ -1,7 +1,3 @@
-import upath from 'upath';
-import { getName } from '../../test/util';
-import { readFile } from '../util/fs';
-import getArgv from './config/__fixtures__/argv';
 import { getConfig } from './defaults';
 
 jest.mock('../datasource/npm');
@@ -13,112 +9,7 @@ try {
 
 const defaultConfig = getConfig();
 
-describe(getName(), () => {
-  describe('.parseConfigs(env, defaultArgv)', () => {
-    let configParser: typeof import('.');
-    let defaultArgv: string[];
-    let defaultEnv: NodeJS.ProcessEnv;
-    beforeEach(async () => {
-      jest.resetModules();
-      configParser = await import('./index');
-      defaultArgv = getArgv();
-      defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
-      jest.mock('delay', () => Promise.resolve());
-    });
-    it('supports token in env', async () => {
-      const env: NodeJS.ProcessEnv = { ...defaultEnv, RENOVATE_TOKEN: 'abc' };
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toContainEntries([['token', 'abc']]);
-    });
-
-    it('supports token in CLI options', async () => {
-      defaultArgv = defaultArgv.concat([
-        '--token=abc',
-        '--pr-footer=custom',
-        '--log-context=abc123',
-      ]);
-      const parsedConfig = await configParser.parseConfigs(
-        defaultEnv,
-        defaultArgv
-      );
-      expect(parsedConfig).toContainEntries([
-        ['token', 'abc'],
-        ['prFooter', 'custom'],
-        ['logContext', 'abc123'],
-      ]);
-    });
-
-    it('supports forceCli', async () => {
-      defaultArgv = defaultArgv.concat(['--force-cli=false']);
-      const env: NodeJS.ProcessEnv = {
-        ...defaultEnv,
-        RENOVATE_TOKEN: 'abc',
-      };
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toContainEntries([
-        ['token', 'abc'],
-        ['force', null],
-      ]);
-      expect(parsedConfig).not.toContainKey('configFile');
-    });
-    it('supports config.force', async () => {
-      const configPath = upath.join(
-        __dirname,
-        'config/__fixtures__/with-force.js'
-      );
-      const env: NodeJS.ProcessEnv = {
-        ...defaultEnv,
-        RENOVATE_CONFIG_FILE: configPath,
-      };
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toContainEntries([
-        ['token', 'abcdefg'],
-        [
-          'force',
-          {
-            schedule: null,
-          },
-        ],
-      ]);
-    });
-    it('reads private key from file', async () => {
-      const privateKeyPath = upath.join(
-        __dirname,
-        'keys/__fixtures__/private.pem'
-      );
-      const env: NodeJS.ProcessEnv = {
-        ...defaultEnv,
-        RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
-      };
-      const expected = await readFile(privateKeyPath);
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-
-      expect(parsedConfig).toContainEntries([['privateKey', expected]]);
-    });
-    it('supports Bitbucket username/passwod', async () => {
-      defaultArgv = defaultArgv.concat([
-        '--platform=bitbucket',
-        '--username=user',
-        '--password=pass',
-      ]);
-      const parsedConfig = await configParser.parseConfigs(
-        defaultEnv,
-        defaultArgv
-      );
-      expect(parsedConfig).toContainEntries([
-        ['platform', 'bitbucket'],
-        ['username', 'user'],
-        ['password', 'pass'],
-      ]);
-    });
-    it('massages trailing slash into endpoint', async () => {
-      defaultArgv = defaultArgv.concat([
-        '--endpoint=https://github.renovatebot.com/api/v3',
-      ]);
-      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
-      expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
-    });
-  });
+describe('config/index', () => {
   describe('mergeChildConfig(parentConfig, childConfig)', () => {
     it('merges', async () => {
       const parentConfig = { ...defaultConfig };
@@ -131,8 +22,8 @@ describe(getName(), () => {
       };
       const configParser = await import('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
-      expect(config.foo).toEqual('bar');
-      expect(config.rangeStrategy).toEqual('replace');
+      expect(config.foo).toBe('bar');
+      expect(config.rangeStrategy).toBe('replace');
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });
@@ -147,10 +38,7 @@ describe(getName(), () => {
       const configParser = await import('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules.map((rule) => rule.a)).toMatchObject([
-        1,
-        2,
-        3,
-        4,
+        1, 2, 3, 4,
       ]);
     });
     it('merges constraints', async () => {
@@ -169,7 +57,7 @@ describe(getName(), () => {
       const configParser = await import('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.constraints).toMatchSnapshot();
-      expect(config.constraints.node).toEqual('<15');
+      expect(config.constraints.node).toBe('<15');
     });
     it('handles null parent packageRules', async () => {
       const parentConfig = { ...defaultConfig };

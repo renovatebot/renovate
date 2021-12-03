@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import {
   extractContainer,
   extractPackageFile,
@@ -14,7 +14,7 @@ const azurePipelinesNoDependency = loadFixture(
   'azure-pipelines-no-dependency.yaml'
 );
 
-describe(getName(), () => {
+describe('manager/azure-pipelines/extract', () => {
   it('should parse a valid azure-pipelines file', () => {
     const file = parseAzurePipelines(azurePipelines, 'some-file');
     expect(file).not.toBeNull();
@@ -33,7 +33,10 @@ describe(getName(), () => {
           name: 'user/repo',
           ref: 'refs/tags/v1.0.0',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        depName: 'user/repo',
+        lookupName: 'https://github.com/user/repo.git',
+      });
     });
 
     it('should return null when repository type is not github', () => {
@@ -73,7 +76,11 @@ describe(getName(), () => {
         extractContainer({
           image: 'ubuntu:16.04',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        depName: 'ubuntu',
+        currentValue: '16.04',
+        datasource: 'docker',
+      });
     });
     it('should return null if image field is missing', () => {
       expect(extractContainer({ image: null })).toBeNull();

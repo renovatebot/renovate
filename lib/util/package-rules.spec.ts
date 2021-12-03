@@ -1,13 +1,8 @@
 import type { PackageRuleInputConfig, UpdateType } from '../config/types';
-import {
-  LANGUAGE_DOCKER,
-  LANGUAGE_JAVASCRIPT,
-  LANGUAGE_NODE,
-  LANGUAGE_PYTHON,
-} from '../constants/languages';
+import { ProgrammingLanguage } from '../constants';
 
 import * as datasourceDocker from '../datasource/docker';
-import * as datasourceOrb from '../datasource/orb';
+import { OrbDatasource } from '../datasource/orb';
 import { applyPackageRules } from './package-rules';
 
 type TestConfig = PackageRuleInputConfig & {
@@ -16,7 +11,7 @@ type TestConfig = PackageRuleInputConfig & {
   groupName?: string;
 };
 
-describe('applyPackageRules()', () => {
+describe('util/package-rules', () => {
   const config1: TestConfig = {
     foo: 'bar',
 
@@ -70,6 +65,7 @@ describe('applyPackageRules()', () => {
         },
       ],
     };
+    // FIXME: explicit assert condition
     expect(applyPackageRules(config)).toMatchSnapshot();
   });
   it('applies both rules for a', () => {
@@ -162,9 +158,9 @@ describe('applyPackageRules()', () => {
       ],
     };
     const res = applyPackageRules(dep);
-    expect(res.enabled).toBe(true);
+    expect(res.enabled).toBeTrue();
     const res2 = applyPackageRules({ ...dep, depName: 'anything' });
-    expect(res2.enabled).toBe(false);
+    expect(res2.enabled).toBeFalse();
   });
   it('matches anything if missing inclusive rules', () => {
     const config: TestConfig = {
@@ -250,7 +246,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_JAVASCRIPT,
+      language: ProgrammingLanguage.JavaScript,
       manager: 'meteor',
       depName: 'node',
     };
@@ -269,7 +265,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_PYTHON,
+      language: ProgrammingLanguage.Python,
       manager: 'pipenv',
       depName: 'node',
     };
@@ -280,7 +276,10 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: [LANGUAGE_JAVASCRIPT, LANGUAGE_NODE],
+          matchLanguages: [
+            ProgrammingLanguage.JavaScript,
+            ProgrammingLanguage.NodeJS,
+          ],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -288,7 +287,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_JAVASCRIPT,
+      language: ProgrammingLanguage.JavaScript,
       manager: 'meteor',
       depName: 'node',
     };
@@ -299,7 +298,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: [LANGUAGE_DOCKER],
+          matchLanguages: [ProgrammingLanguage.Docker],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -307,7 +306,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_PYTHON,
+      language: ProgrammingLanguage.Python,
       manager: 'pipenv',
       depName: 'node',
     };
@@ -318,14 +317,14 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [datasourceOrb.id, datasourceDocker.id],
+          matchDatasources: [OrbDatasource.id, datasourceDocker.id],
           x: 1,
         },
       ],
     };
     const dep = {
       depType: 'dependencies',
-      datasource: datasourceOrb.id,
+      datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -342,7 +341,7 @@ describe('applyPackageRules()', () => {
     };
     const dep = {
       depType: 'dependencies',
-      datasource: datasourceOrb.id,
+      datasource: OrbDatasource.id,
       baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -352,7 +351,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchDatasources: [datasourceOrb.id],
+          matchDatasources: [OrbDatasource.id],
           x: 1,
         },
       ],
@@ -710,8 +709,49 @@ describe('applyPackageRules()', () => {
     expect(res3.x).toBeDefined();
   });
   it('empty rules', () => {
+    // FIXME: explicit assert condition
     expect(
       applyPackageRules({ ...config1, packageRules: null })
     ).toMatchSnapshot();
+  });
+
+  it('creates groupSlug if necessary', () => {
+    const config: TestConfig = {
+      depName: 'foo',
+      packageRules: [
+        {
+          matchPackagePatterns: ['*'],
+          groupName: 'A',
+          groupSlug: 'a',
+        },
+        {
+          matchPackagePatterns: ['*'],
+          groupName: 'B',
+        },
+      ],
+    };
+    const res = applyPackageRules(config);
+    expect(res.groupSlug).toBe('b');
+  });
+  it('matches matchSourceUrlPrefixes(case-insensitive)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/Renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/renovatebot/Presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
   });
 });

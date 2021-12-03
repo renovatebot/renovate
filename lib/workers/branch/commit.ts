@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { getAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { commitFiles } from '../../util/git';
@@ -32,7 +32,7 @@ export function commitFilesToBranch(
   const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
-  if (getAdminConfig().dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     return null;
   }
@@ -41,6 +41,10 @@ export function commitFilesToBranch(
     config.branchName !== sanitize(config.branchName) ||
     config.commitMessage !== sanitize(config.commitMessage)
   ) {
+    logger.debug(
+      { branchName: config.branchName },
+      'Secrets exposed in branchName or commitMessage'
+    );
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
   // API will know whether to create new branch or not

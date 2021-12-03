@@ -5,14 +5,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "testName",
-            "owner": "testOwner",
+            "name": "$name",
+            "owner": "$name",
           },
           "testItem": Object {
             "__args": Object {
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -27,14 +41,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": null,
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "408",
+      "content-length": "494",
       "content-type": "application/json",
       "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
@@ -42,15 +60,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "testName",
-            "owner": "testOwner",
+            "name": "$name",
+            "owner": "$name",
           },
           "testItem": Object {
             "__args": Object {
-              "after": "cursor1",
-              "first": "100",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -65,14 +96,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 100,
+        "cursor": "cursor1",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "428",
+      "content-length": "499",
       "content-type": "application/json",
       "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
@@ -80,15 +115,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "testName",
-            "owner": "testOwner",
+            "name": "$name",
+            "owner": "$name",
           },
           "testItem": Object {
             "__args": Object {
-              "after": "cursor1",
-              "first": "50",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -103,14 +151,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 50,
+        "cursor": "cursor1",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "427",
+      "content-length": "498",
       "content-type": "application/json",
       "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
@@ -118,15 +170,28 @@ Array [
   Object {
     "graphql": Object {
       "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
         "repository": Object {
           "__args": Object {
-            "name": "testName",
-            "owner": "testOwner",
+            "name": "$name",
+            "owner": "$name",
           },
           "testItem": Object {
             "__args": Object {
-              "after": "cursor2",
-              "first": "50",
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
             },
             "nodes": Object {
               "body": null,
@@ -141,14 +206,18 @@ Array [
           },
         },
       },
+      "variables": Object {
+        "count": 50,
+        "cursor": "cursor2",
+      },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "427",
+      "content-length": "498",
       "content-type": "application/json",
       "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",

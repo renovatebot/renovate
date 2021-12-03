@@ -10,5 +10,8 @@ resources:
 - deployment.yaml
 - github.com/fluxcd/flux/deploy?ref=1.19.0
 
+components:
+- github.com/fluxcd/flux/memcache-dep?ref=1.18.0
+
 images:
 - name: nginx

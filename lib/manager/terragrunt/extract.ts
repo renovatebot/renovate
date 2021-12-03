@@ -1,14 +1,15 @@
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
+import { TerragruntDependencyTypes } from './common';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
+import type { TerraformManagerData } from './types';
 import {
-  TerraformManagerData,
-  TerragruntDependencyTypes,
   checkFileContainsDependency,
   getTerragruntDependencyType,
 } from './util';
 
-const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+{\s*$/;
+const dependencyBlockExtractionRegex = regEx(/^\s*(?<type>[a-z_]+)\s+{\s*$/);
 const contentCheckList = ['terraform {'];
 
 export function extractPackageFile(content: string): PackageFile | null {
@@ -60,7 +61,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       /* istanbul ignore next */
       default:
     }
-    // eslint-disable-next-line no-param-reassign
+
     delete dep.managerData;
   });
   return { deps };

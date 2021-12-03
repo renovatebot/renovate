@@ -1,12 +1,10 @@
-import * as datasourceHelm from '../../datasource/helm';
+import { HelmDatasource } from '../../datasource/helm';
 import { SkipReason } from '../../types';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
+import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import type { ExtractionResult, ResourceManagerData } from './types';
 import {
-  ExtractionResult,
-  ResourceManagerData,
-  TerraformDependencyTypes,
-  TerraformResourceTypes,
   checkIfStringIsPath,
   keyValueExtractionRegex,
   resourceTypeExtractionRegex,
@@ -67,8 +65,6 @@ export function extractTerraformResource(
 export function analyseTerraformResource(
   dep: PackageDependency<ResourceManagerData>
 ): void {
-  /* eslint-disable no-param-reassign */
-
   switch (dep.managerData.resourceType) {
     case TerraformResourceTypes.docker_container:
       if (dep.managerData.image) {
@@ -98,7 +94,7 @@ export function analyseTerraformResource(
       break;
 
     case TerraformResourceTypes.helm_release:
-      if (dep.managerData.chart == null) {
+      if (!dep.managerData.chart) {
         dep.skipReason = SkipReason.InvalidName;
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
         dep.skipReason = SkipReason.LocalChart;
@@ -106,12 +102,11 @@ export function analyseTerraformResource(
       dep.depType = 'helm_release';
       dep.registryUrls = [dep.managerData.repository];
       dep.depName = dep.managerData.chart;
-      dep.datasource = datasourceHelm.id;
+      dep.datasource = HelmDatasource.id;
       break;
 
     default:
       dep.skipReason = SkipReason.InvalidValue;
       break;
   }
-  /* eslint-enable no-param-reassign */
 }

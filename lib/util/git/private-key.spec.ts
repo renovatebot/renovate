@@ -1,4 +1,4 @@
-import { getName, mocked } from '../../../test/util';
+import { mocked } from '../../../test/util';
 import * as exec_ from '../exec';
 import {
   configSigningKey,
@@ -11,7 +11,7 @@ jest.mock('../exec');
 
 const exec = mocked(exec_);
 
-describe(getName(), () => {
+describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {
     it('returns if no private key', async () => {
       await expect(writePrivateKey()).resolves.not.toThrow();

@@ -1,10 +1,11 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
+import slugify from 'slugify';
 import { mergeChildConfig } from '../config';
 import type { PackageRule, PackageRuleInputConfig } from '../config/types';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
-import { configRegexPredicate, isConfigRegex, regEx } from './regex';
+import { configRegexPredicate, regEx } from './regex';
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -28,6 +29,7 @@ function matchesRule(
     manager,
     datasource,
   } = inputConfig;
+  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
   // Setting empty arrays simplifies our logic later
   const matchFiles = packageRule.matchFiles || [];
   const matchPaths = packageRule.matchPaths || [];
@@ -141,7 +143,7 @@ function matchesRule(
           packagePattern === '^*$' || packagePattern === '*'
             ? '.*'
             : packagePattern
-        );
+        ); // TODO #12071
         if (packageRegex.test(depName)) {
           logger.trace(`${depName} matches against ${String(packageRegex)}`);
           isMatch = true;
@@ -171,7 +173,7 @@ function matchesRule(
     for (const pattern of excludePackagePatterns) {
       const packageRegex = regEx(
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
-      );
+      ); // TODO #12071
       if (packageRegex.test(depName)) {
         logger.trace(`${depName} matches against ${String(packageRegex)}`);
         isMatch = true;
@@ -192,8 +194,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchSourceUrlPrefixes.length) {
+    const upperCaseSourceUrl = sourceUrl?.toUpperCase();
     const isMatch = matchSourceUrlPrefixes.some((prefix) =>
-      sourceUrl?.startsWith(prefix)
+      upperCaseSourceUrl?.startsWith(prefix.toUpperCase())
     );
     if (!isMatch) {
       return false;
@@ -203,16 +206,20 @@ function matchesRule(
   if (matchCurrentVersion) {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
-    if (isConfigRegex(matchCurrentVersionStr)) {
-      const matches = configRegexPredicate(matchCurrentVersionStr);
-      if (!matches(currentValue)) {
+    const matchCurrentVersionPred = configRegexPredicate(
+      matchCurrentVersionStr
+    );
+    if (matchCurrentVersionPred) {
+      if (!unconstrainedValue && !matchCurrentVersionPred(currentValue)) {
         return false;
       }
       positiveMatch = true;
     } else if (version.isVersion(matchCurrentVersionStr)) {
       let isMatch = false;
       try {
-        isMatch = version.matches(matchCurrentVersionStr, currentValue);
+        isMatch =
+          unconstrainedValue ||
+          version.matches(matchCurrentVersionStr, currentValue);
       } catch (err) {
         // Do nothing
       }
@@ -262,7 +269,14 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
     // This rule is considered matched if there was at least one positive match and no negative matches
     if (matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
-      config = mergeChildConfig(config, packageRule);
+      const toApply = { ...packageRule };
+      if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
+        // Need to apply groupSlug otherwise the existing one will take precedence
+        toApply.groupSlug = slugify(packageRule.groupName, {
+          lower: true,
+        });
+      }
+      config = mergeChildConfig(config, toApply);
       delete config.matchPackageNames;
       delete config.matchPackagePatterns;
       delete config.matchPackagePrefixes;

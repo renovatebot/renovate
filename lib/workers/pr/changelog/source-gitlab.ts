@@ -36,6 +36,7 @@ export async function getChangeLogJSON({
   releases,
   depName,
   manager,
+  sourceDirectory,
 }: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
@@ -45,8 +46,8 @@ export async function getChangeLogJSON({
   const apiBaseUrl = baseUrl.concat('api/v4/');
   const repository = pathname
     .slice(1)
-    .replace(/\/$/, '')
-    .replace(/\.git$/, '');
+    .replace(regEx(/\/$/), '')
+    .replace(regEx(/\.git$/), '');
   if (repository.split('/').length < 2) {
     logger.info({ sourceUrl }, 'Invalid gitlab URL found');
     return null;
@@ -130,9 +131,11 @@ export async function getChangeLogJSON({
     project: {
       apiBaseUrl,
       baseUrl,
-      gitlab: repository,
-      repository: sourceUrl,
+      type: 'gitlab',
+      repository,
+      sourceUrl,
       depName,
+      sourceDirectory,
     },
     versions: changelogReleases,
   };

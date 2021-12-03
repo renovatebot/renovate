@@ -2,8 +2,8 @@ import * as semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
-import { configRegexPredicate, isConfigRegex } from '../../../../util/regex';
-import * as allVersioning from '../../../../versioning';
+import { configRegexPredicate } from '../../../../util/regex';
+import type { VersioningApi } from '../../../../versioning';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440 from '../../../../versioning/pep440';
 import * as poetryVersioning from '../../../../versioning/poetry';
@@ -13,15 +13,11 @@ export function filterVersions(
   config: FilterConfig,
   currentVersion: string,
   latestVersion: string,
-  releases: Release[]
+  releases: Release[],
+  versioning: VersioningApi
 ): Release[] {
-  const {
-    ignoreUnstable,
-    ignoreDeprecated,
-    respectLatest,
-    allowedVersions,
-  } = config;
-  let versioning;
+  const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
+    config;
   function isVersionStable(version: string): boolean {
     if (!versioning.isStable(version)) {
       return false;
@@ -33,7 +29,7 @@ export function filterVersions(
     }
     return true;
   }
-  versioning = allVersioning.get(config.versioning);
+  // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
     return [];
   }
@@ -55,7 +51,7 @@ export function filterVersions(
         (release) => release.version === v.version
       );
       if (versionRelease.isDeprecated) {
-        logger.debug(
+        logger.trace(
           `Skipping ${config.depName}@${v.version} because it is deprecated`
         );
         return false;
@@ -65,10 +61,10 @@ export function filterVersions(
   }
 
   if (allowedVersions) {
-    if (isConfigRegex(allowedVersions)) {
-      const isAllowed = configRegexPredicate(allowedVersions);
+    const isAllowedPred = configRegexPredicate(allowedVersions);
+    if (isAllowedPred) {
       filteredVersions = filteredVersions.filter(({ version }) =>
-        isAllowed(version)
+        isAllowedPred(version)
       );
     } else if (versioning.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>
@@ -98,7 +94,7 @@ export function filterVersions(
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'config';
+      error.validationSource = 'config';
       error.validationError = 'Invalid `allowedVersions`';
       error.validationMessage =
         'The following allowedVersions does not parse as a valid version or range: ' +
@@ -107,45 +103,36 @@ export function filterVersions(
     }
   }
 
-  // Return all versions if we aren't ignore unstable. Also ignore latest
-  if (config.followTag || ignoreUnstable === false) {
+  if (config.followTag) {
     return filteredVersions;
   }
 
-  // if current is unstable then allow unstable in the current major only
-  if (!isVersionStable(currentVersion)) {
-    // Allow unstable only in current major
-    return filteredVersions.filter(
-      (v) =>
-        isVersionStable(v.version) ||
-        (versioning.getMajor(v.version) ===
-          versioning.getMajor(currentVersion) &&
-          versioning.getMinor(v.version) ===
-            versioning.getMinor(currentVersion) &&
-          versioning.getPatch(v.version) ===
-            versioning.getPatch(currentVersion))
+  if (
+    respectLatest &&
+    latestVersion &&
+    !versioning.isGreaterThan(currentVersion, latestVersion)
+  ) {
+    filteredVersions = filteredVersions.filter(
+      (v) => !versioning.isGreaterThan(v.version, latestVersion)
     );
   }
 
-  // Normal case: remove all unstable
-  filteredVersions = filteredVersions.filter((v) => isVersionStable(v.version));
+  if (!ignoreUnstable) {
+    return filteredVersions;
+  }
 
-  // Filter the latest
+  if (isVersionStable(currentVersion)) {
+    return filteredVersions.filter((v) => isVersionStable(v.version));
+  }
 
-  // No filtering if no latest
-  // istanbul ignore if
-  if (!latestVersion) {
-    return filteredVersions;
-  }
-  // No filtering if not respecting latest
-  if (respectLatest === false) {
-    return filteredVersions;
-  }
-  // No filtering if currentVersion is already past latest
-  if (versioning.isGreaterThan(currentVersion, latestVersion)) {
-    return filteredVersions;
-  }
+  // if current is unstable then allow unstable in the current major only
+  // Allow unstable only in current major
   return filteredVersions.filter(
-    (v) => !versioning.isGreaterThan(v.version, latestVersion)
+    (v) =>
+      isVersionStable(v.version) ||
+      (versioning.getMajor(v.version) === versioning.getMajor(currentVersion) &&
+        versioning.getMinor(v.version) ===
+          versioning.getMinor(currentVersion) &&
+        versioning.getPatch(v.version) === versioning.getPatch(currentVersion))
   );
 }

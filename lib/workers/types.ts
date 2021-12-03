@@ -14,8 +14,11 @@ import type {
   PackageFile,
 } from '../manager/types';
 import type { PlatformPrOptions } from '../platform/types';
-import type { File } from '../util/git';
-import type { ChangeLogResult } from './pr/changelog/types';
+import type { File } from '../util/git/types';
+import type { MergeConfidence } from '../util/merge-confidence';
+import type { ChangeLogRelease, ChangeLogResult } from './pr/changelog/types';
+
+export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
@@ -49,10 +52,10 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
-  releases?: Release[];
+  releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
-
+  minimumConfidence?: MergeConfidence;
   sourceDirectory?: string;
 
   updatedPackageFiles?: File[];
@@ -60,24 +63,19 @@ export interface BranchUpgradeConfig
 
   logJSON?: ChangeLogResult;
 
+  hasReleaseNotes?: boolean;
   homepage?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   sourceUrl?: string;
 }
 
-export enum PrResult {
-  AwaitingApproval = 'AwaitingApproval',
-  AwaitingGreenBranch = 'AwaitingGreenBranch',
-  AwaitingNotPending = 'AwaitingNotPending',
-  BlockedByBranchAutomerge = 'BlockedByBranchAutomerge',
-  Created = 'Created',
-  Error = 'Error',
-  ErrorAlreadyExists = 'ErrorAlreadyExists',
-  NotUpdated = 'NotUpdated',
-  Updated = 'Updated',
-  LimitReached = 'LimitReached',
-}
+export type PrBlockedBy =
+  | 'BranchAutomerge'
+  | 'NeedsApproval'
+  | 'AwaitingTests'
+  | 'RateLimited'
+  | 'Error';
 
 export enum BranchResult {
   AlreadyExisted = 'already-existed',
@@ -95,6 +93,7 @@ export enum BranchResult {
   CommitLimitReached = 'commit-limit-reached',
   BranchLimitReached = 'branch-limit-reached',
   Rebase = 'rebase',
+  UpdateNotScheduled = 'update-not-scheduled',
 }
 
 export interface BranchConfig
@@ -113,4 +112,6 @@ export interface BranchConfig
   result?: BranchResult;
   upgrades: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;
+  prBlockedBy?: PrBlockedBy;
+  prNo?: number;
 }

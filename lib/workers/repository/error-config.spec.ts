@@ -1,11 +1,6 @@
 import { mock } from 'jest-mock-extended';
-import {
-  RenovateConfig,
-  getConfig,
-  getName,
-  platform,
-} from '../../../test/util';
-import { setAdminConfig } from '../../config/admin';
+import { RenovateConfig, getConfig, platform } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { Pr } from '../../platform';
 import { PrState } from '../../types';
@@ -19,14 +14,14 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(), () => {
+describe('workers/repository/error-config', () => {
   describe('raiseConfigWarningIssue()', () => {
     beforeEach(() => {
-      setAdminConfig();
+      GlobalConfig.reset();
     });
     it('creates issues', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'package.json';
+      error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
       const res = await raiseConfigWarningIssue(config, error);
@@ -34,16 +29,16 @@ describe(getName(), () => {
     });
     it('creates issues (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'package.json';
+      error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
-      setAdminConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
     it('handles onboarding', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'package.json';
+      error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
@@ -55,14 +50,14 @@ describe(getName(), () => {
     });
     it('handles onboarding (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      error.location = 'package.json';
+      error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
         number: 1,
         state: PrState.Open,
       });
-      setAdminConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });

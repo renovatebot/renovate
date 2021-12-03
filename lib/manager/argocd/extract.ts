@@ -1,6 +1,7 @@
-import { safeLoadAll } from 'js-yaml';
-import * as gitTags from '../../datasource/git-tags';
-import * as helm from '../../datasource/helm';
+import is from '@sindresorhus/is';
+import { loadAll } from 'js-yaml';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { ApplicationDefinition } from './types';
 import { fileTestRegex } from './util';
@@ -8,9 +9,13 @@ import { fileTestRegex } from './util';
 function createDependency(
   definition: ApplicationDefinition
 ): PackageDependency {
-  const source = definition.spec?.source;
+  const source = definition?.spec?.source;
 
-  if (source == null) {
+  if (
+    !source ||
+    !is.nonEmptyString(source.repoURL) ||
+    !is.nonEmptyString(source.targetRevision)
+  ) {
     return null;
   }
 
@@ -20,13 +25,13 @@ function createDependency(
       depName: source.chart,
       registryUrls: [source.repoURL],
       currentValue: source.targetRevision,
-      datasource: helm.id,
+      datasource: HelmDatasource.id,
     };
   }
   return {
     depName: source.repoURL,
     currentValue: source.targetRevision,
-    datasource: gitTags.id,
+    datasource: GitTagsDatasource.id,
   };
 }
 
@@ -40,7 +45,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const definitions: ApplicationDefinition[] = safeLoadAll(content);
+  const definitions = loadAll(content) as ApplicationDefinition[];
 
   const deps = definitions
     .map((definition) => createDependency(definition))

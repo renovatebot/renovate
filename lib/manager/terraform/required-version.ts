@@ -1,11 +1,10 @@
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
-import {
-  ExtractionResult,
-  TerraformDependencyTypes,
-  keyValueExtractionRegex,
-} from './util';
+import { TerraformDependencyTypes } from './common';
+import type { ExtractionResult } from './types';
+import { keyValueExtractionRegex } from './util';
 
 export function extractTerraformRequiredVersion(
   startingLine: number,
@@ -22,8 +21,8 @@ export function extractTerraformRequiredVersion(
 
     const line = lines[lineNumber];
     // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-    const openBrackets = (line.match(/\{/g) || []).length;
-    const closedBrackets = (line.match(/\}/g) || []).length;
+    const openBrackets = (line.match(regEx(/\{/g)) || []).length;
+    const closedBrackets = (line.match(regEx(/\}/g)) || []).length;
     braceCounter = braceCounter + openBrackets - closedBrackets;
 
     const kvMatch = keyValueExtractionRegex.exec(line);
@@ -47,10 +46,8 @@ export function extractTerraformRequiredVersion(
 }
 
 export function analyseTerraformVersion(dep: PackageDependency): void {
-  /* eslint-disable no-param-reassign */
   dep.depType = 'required_version';
   dep.datasource = datasourceGithubTags.id;
   dep.depName = 'hashicorp/terraform';
   dep.extractVersion = 'v(?<version>.*)$';
-  /* eslint-enable no-param-reassign */
 }

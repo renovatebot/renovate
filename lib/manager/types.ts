@@ -4,66 +4,53 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../config/types';
+import type { ProgrammingLanguage } from '../constants';
 import type { RangeStrategy, SkipReason } from '../types';
-import type { File } from '../util/git';
+import type { File } from '../util/git/types';
 
 export type Result<T> = T | Promise<T>;
-
-export interface ManagerConfig {
-  binarySource?: string;
-  localDir?: string;
-  registryUrls?: string[];
-}
 
 export interface ManagerData<T> {
   managerData?: T;
 }
 
 export interface ExtractConfig {
-  binarySource?: string;
-  localDir?: string;
+  constraints?: Record<string, string>;
   registryUrls?: string[];
   endpoint?: string;
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   npmrc?: string;
-  yarnrc?: string;
+  npmrcMerge?: boolean;
   skipInstalls?: boolean;
   updateInternalDeps?: boolean;
+  deepExtract?: boolean;
 }
 
 export interface CustomExtractConfig extends ExtractConfig {
+  autoReplaceStringTemplate?: string;
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   depNameTemplate?: string;
   lookupNameTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
+  depTypeTemplate?: string;
 }
 
-export interface UpdateArtifactsConfig extends ManagerConfig {
+export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
-  cacheDir?: string;
-  composerIgnorePlatformReqs?: boolean;
+  composerIgnorePlatformReqs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
+  ignorePlugins?: boolean;
   ignoreScripts?: boolean;
   updateType?: UpdateType;
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
-}
-
-export interface PackageUpdateConfig {
-  currentValue?: string;
-  rangeStrategy?: RangeStrategy;
-  supportPolicy?: string[];
-}
-
-export interface PackageUpdateResult {
-  sourceUrl?: string;
-  updates: LookupUpdate[];
+  aliases?: Record<string, string>;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -87,6 +74,7 @@ export interface NpmLockFiles {
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
+  autoReplaceStringTemplate?: string;
   hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;
   datasource?: string;
@@ -102,7 +90,6 @@ export interface PackageFile<T = Record<string, any>>
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
-  yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
@@ -120,6 +107,7 @@ export interface Package<T> extends ManagerData<T> {
   repo?: string;
   target?: string;
   versioning?: string;
+  dataType?: string;
 
   // npm manager
   bumpVersion?: ReleaseType | string;
@@ -143,18 +131,21 @@ export interface LookupUpdate {
   isPin?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
+  isReplacement?: boolean;
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
+  newName?: string;
   newValue: string;
   semanticCommitType?: string;
-  pendingChecks?: string[];
+  pendingChecks?: boolean;
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+  newValue?: string;
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
   currentDigestShort?: string;
@@ -185,11 +176,11 @@ export interface Upgrade<T = Record<string, any>>
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
-  localDir?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;
   newMajor?: number;
+  newName?: string;
   newValue?: string;
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
@@ -198,6 +189,8 @@ export interface Upgrade<T = Record<string, any>>
   version?: string;
   isLockFileMaintenance?: boolean;
   isRemediation?: boolean;
+  isVulnerabilityAlert?: boolean;
+  deepExtract?: boolean;
 }
 
 export interface ArtifactError {
@@ -212,7 +205,7 @@ export interface UpdateArtifactsResult {
 
 export interface UpdateArtifact {
   packageFileName: string;
-  updatedDeps: string[];
+  updatedDeps: PackageDependency[];
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
@@ -236,9 +229,14 @@ export interface UpdateLockedConfig {
   newVersion?: string;
 }
 
+export interface GlobalManagerConfig {
+  npmrc?: string;
+  npmrcMerge?: boolean;
+}
+
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
-  language?: string;
+  language?: ProgrammingLanguage;
   supportsLockFileMaintenance?: boolean;
 
   bumpPackageVersion?(
@@ -246,6 +244,8 @@ export interface ManagerApi {
     currentValue: string,
     bumpVersion: ReleaseType | string
   ): Result<BumpPackageVersionResult>;
+
+  detectGlobalConfig?(): Result<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,
@@ -257,8 +257,6 @@ export interface ManagerApi {
     packageFile?: string,
     config?: ExtractConfig
   ): Result<PackageFile | null>;
-
-  getPackageUpdates?(config: PackageUpdateConfig): Result<PackageUpdateResult>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
@@ -276,8 +274,9 @@ export interface ManagerApi {
 }
 
 // TODO: name and properties used by npm manager
-export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
-  cacheDir?: string;
+export interface PostUpdateConfig<T = Record<string, any>>
+  extends Record<string, any>,
+    ManagerData<T> {
   updatedPackageFiles?: File[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean;

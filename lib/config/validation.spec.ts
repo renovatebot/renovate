@@ -1,19 +1,16 @@
-import { getName } from '../../test/util';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
-describe(getName(), () => {
+describe('config/validation', () => {
   describe('getParentName()', () => {
     it('ignores encrypted in root', () => {
-      expect(configValidation.getParentName('encrypted')).toEqual('');
+      expect(configValidation.getParentName('encrypted')).toBeEmptyString();
     });
     it('handles array types', () => {
-      expect(configValidation.getParentName('hostRules[1]')).toEqual(
-        'hostRules'
-      );
+      expect(configValidation.getParentName('hostRules[1]')).toBe('hostRules');
     });
     it('handles encrypted within array types', () => {
-      expect(configValidation.getParentName('hostRules[0].encrypted')).toEqual(
+      expect(configValidation.getParentName('hostRules[0].encrypted')).toBe(
         'hostRules'
       );
     });
@@ -299,16 +296,54 @@ describe(getName(), () => {
         regexManagers: [
           {
             fileMatch: [],
-            matchStrings: [],
           },
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as any,
         true
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "message": "Each Regex Manager must contain a non-empty fileMatch array",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+    it('errors if empty regexManager matchStrings', async () => {
+      const config = {
+        regexManagers: [
+          {
+            fileMatch: ['foo'],
+            matchStrings: [],
+          },
+          {
+            fileMatch: ['foo'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as RenovateConfig,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+      expect(errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "topic": "Configuration Error",
+          },
+          Object {
+            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
     });
     it('errors if no regexManager fileMatch', async () => {
       const config = {
@@ -352,6 +387,8 @@ describe(getName(), () => {
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             registryUrlTemplate: 'foobar',
+            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
+            depTypeTemplate: 'apple',
           },
         ],
       };
@@ -370,6 +407,7 @@ describe(getName(), () => {
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
+            depTypeTemplate: 'apple',
             automerge: true,
           },
         ],
@@ -460,7 +498,6 @@ describe(getName(), () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
-      expect(errors).toMatchSnapshot();
     });
 
     it('errors if aliases depth is more than 1', async () => {
@@ -475,8 +512,13 @@ describe(getName(), () => {
         config
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `aliases.aliases.sample` configuration: value is not a url',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
 
     it('errors if aliases have invalid url', async () => {
@@ -490,8 +532,13 @@ describe(getName(), () => {
         config
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `aliases.aliases.example1` configuration: value is not a url',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
 
     it('errors if fileMatch has wrong parent', async () => {
@@ -618,6 +665,39 @@ describe(getName(), () => {
       );
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
+    });
+
+    it('validates valid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 'https://www.example2.com/example',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+    it('errors on invalid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 123,
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
   });
 });

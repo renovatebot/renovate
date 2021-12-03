@@ -122,9 +122,11 @@ export function getConcurrentBranchesRemaining(
   return 99;
 }
 
-export function getBranchesRemaining(
+export async function getBranchesRemaining(
   config: RenovateConfig,
   branches: BranchConfig[]
-): number {
-  return getConcurrentBranchesRemaining(config, branches);
+): Promise<number> {
+  const hourlyRemaining = await getPrHourlyRemaining(config);
+  const concurrentRemaining = getConcurrentBranchesRemaining(config, branches);
+  return Math.min(hourlyRemaining, concurrentRemaining);
 }

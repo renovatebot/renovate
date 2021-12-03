@@ -6,6 +6,7 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "inlineSources": true,
+    "importHelpers": true,
     "allowJs": false,
     "checkJs": false,
     "types": ["node"]
@@ -16,6 +17,7 @@
     "**/__mocks__/**",
     "**/__fixtures__/**",
     "**/__testutil__/**",
+    "**/test/**",
     "**/*.spec.ts",
     "jest.config.ts",
     "./test",

@@ -1,255 +1,267 @@
-import { getName } from '../../../test/util';
 import { api as ubuntu } from '.';
 
-describe(getName(), () => {
-  // validation
-
-  it('isValid', () => {
-    expect(ubuntu.isValid(undefined)).toBe(false);
-    expect(ubuntu.isValid(null)).toBe(false);
-    expect(ubuntu.isValid('')).toBe(false);
-    expect(ubuntu.isValid('xenial')).toBe(false);
-
-    expect(ubuntu.isValid('04.10')).toBe(true);
-    expect(ubuntu.isValid('05.04')).toBe(true);
-    expect(ubuntu.isValid('05.10')).toBe(true);
-    expect(ubuntu.isValid('6.06')).toBe(true);
-    expect(ubuntu.isValid('6.10')).toBe(true);
-    expect(ubuntu.isValid('7.04')).toBe(true);
-    expect(ubuntu.isValid('7.10')).toBe(true);
-    expect(ubuntu.isValid('8.04')).toBe(true);
-    expect(ubuntu.isValid('8.10')).toBe(true);
-    expect(ubuntu.isValid('9.04')).toBe(true);
-    expect(ubuntu.isValid('9.10')).toBe(true);
-    expect(ubuntu.isValid('10.04.4')).toBe(true);
-    expect(ubuntu.isValid('10.10')).toBe(true);
-    expect(ubuntu.isValid('11.04')).toBe(true);
-    expect(ubuntu.isValid('11.10')).toBe(true);
-    expect(ubuntu.isValid('12.04.5')).toBe(true);
-    expect(ubuntu.isValid('12.10')).toBe(true);
-    expect(ubuntu.isValid('13.04')).toBe(true);
-    expect(ubuntu.isValid('13.10')).toBe(true);
-    expect(ubuntu.isValid('14.04.6')).toBe(true);
-    expect(ubuntu.isValid('14.10')).toBe(true);
-    expect(ubuntu.isValid('15.04')).toBe(true);
-    expect(ubuntu.isValid('15.10')).toBe(true);
-    expect(ubuntu.isValid('16.04.7')).toBe(true);
-    expect(ubuntu.isValid('16.10')).toBe(true);
-    expect(ubuntu.isValid('17.04')).toBe(true);
-    expect(ubuntu.isValid('17.10')).toBe(true);
-    expect(ubuntu.isValid('18.04.5')).toBe(true);
-    expect(ubuntu.isValid('18.10')).toBe(true);
-    expect(ubuntu.isValid('19.04')).toBe(true);
-    expect(ubuntu.isValid('19.10')).toBe(true);
-    expect(ubuntu.isValid('20.04')).toBe(true);
-    expect(ubuntu.isValid('20.10')).toBe(true);
-    expect(ubuntu.isValid('2020.04')).toBe(false);
+describe('versioning/ubuntu/index', () => {
+  test.each`
+    version      | expected
+    ${undefined} | ${false}
+    ${null}      | ${false}
+    ${''}        | ${false}
+    ${'xenial'}  | ${false}
+    ${'04.10'}   | ${true}
+    ${'05.04'}   | ${true}
+    ${'05.10'}   | ${true}
+    ${'6.06'}    | ${true}
+    ${'6.10'}    | ${true}
+    ${'7.04'}    | ${true}
+    ${'7.10'}    | ${true}
+    ${'8.04'}    | ${true}
+    ${'8.10'}    | ${true}
+    ${'9.04'}    | ${true}
+    ${'9.10'}    | ${true}
+    ${'10.04.4'} | ${true}
+    ${'10.10'}   | ${true}
+    ${'11.04'}   | ${true}
+    ${'11.10'}   | ${true}
+    ${'12.04.5'} | ${true}
+    ${'12.10'}   | ${true}
+    ${'13.04'}   | ${true}
+    ${'13.10'}   | ${true}
+    ${'14.04.6'} | ${true}
+    ${'14.10'}   | ${true}
+    ${'15.04'}   | ${true}
+    ${'15.10'}   | ${true}
+    ${'16.04.7'} | ${true}
+    ${'16.10'}   | ${true}
+    ${'17.04'}   | ${true}
+    ${'17.10'}   | ${true}
+    ${'18.04.5'} | ${true}
+    ${'18.10'}   | ${true}
+    ${'19.04'}   | ${true}
+    ${'19.10'}   | ${true}
+    ${'20.04'}   | ${true}
+    ${'20.10'}   | ${true}
+    ${'2020.04'} | ${false}
+  `('isValid("$version") === $expected', ({ version, expected }) => {
+    expect(!!ubuntu.isValid(version)).toBe(expected);
   });
 
-  it('isCompatible', () => {
-    expect(ubuntu.isCompatible(undefined)).toBe(false);
-    expect(ubuntu.isCompatible(null)).toBe(false);
-    expect(ubuntu.isCompatible('')).toBe(false);
+  test.each`
+    version      | range        | expected
+    ${undefined} | ${undefined} | ${false}
+    ${null}      | ${undefined} | ${false}
+    ${''}        | ${undefined} | ${false}
+    ${'04.10'}   | ${undefined} | ${true}
+    ${'20.10'}   | ${undefined} | ${true}
+  `(
+    'isCompatible("$version") === $expected',
+    ({ version, range, expected }) => {
+      const res = ubuntu.isCompatible(version, range);
+      expect(!!res).toBe(expected);
+    }
+  );
 
-    expect(ubuntu.isCompatible('04.10')).toBe(true);
-    expect(ubuntu.isCompatible('20.10')).toBe(true);
+  test.each`
+    version      | expected
+    ${undefined} | ${false}
+    ${null}      | ${false}
+    ${''}        | ${false}
+    ${'20.04'}   | ${true}
+    ${'>=20.04'} | ${false}
+  `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+    expect(!!ubuntu.isSingleVersion(version)).toBe(expected);
   });
 
-  it('isSingleVersion', () => {
-    expect(ubuntu.isSingleVersion(undefined)).toBeNull();
-    expect(ubuntu.isSingleVersion(null)).toBeNull();
-    expect(ubuntu.isSingleVersion('')).toBeNull();
-    expect(ubuntu.isSingleVersion('20.04')).toBe(true);
-    expect(ubuntu.isSingleVersion('>=20.04')).toBeNull();
+  test.each`
+    version      | expected
+    ${undefined} | ${false}
+    ${null}      | ${false}
+    ${''}        | ${false}
+    ${'04.10'}   | ${false}
+    ${'05.04'}   | ${false}
+    ${'05.10'}   | ${false}
+    ${'6.06'}    | ${false}
+    ${'6.10'}    | ${false}
+    ${'7.04'}    | ${false}
+    ${'7.10'}    | ${false}
+    ${'8.04'}    | ${true}
+    ${'8.10'}    | ${false}
+    ${'9.04'}    | ${false}
+    ${'9.10'}    | ${false}
+    ${'10.04.4'} | ${true}
+    ${'10.10'}   | ${false}
+    ${'11.04'}   | ${false}
+    ${'11.10'}   | ${false}
+    ${'12.04.5'} | ${true}
+    ${'12.10'}   | ${false}
+    ${'13.04'}   | ${false}
+    ${'13.10'}   | ${false}
+    ${'14.04.6'} | ${true}
+    ${'14.10'}   | ${false}
+    ${'15.04'}   | ${false}
+    ${'15.10'}   | ${false}
+    ${'16.04.7'} | ${true}
+    ${'16.10'}   | ${false}
+    ${'17.04'}   | ${false}
+    ${'17.10'}   | ${false}
+    ${'18.04.5'} | ${true}
+    ${'18.10'}   | ${false}
+    ${'19.04'}   | ${false}
+    ${'19.10'}   | ${false}
+    ${'20.04'}   | ${true}
+    ${'20.10'}   | ${false}
+    ${'42.01'}   | ${false}
+    ${'42.02'}   | ${false}
+    ${'42.03'}   | ${false}
+    ${'42.04'}   | ${true}
+    ${'42.05'}   | ${false}
+    ${'42.06'}   | ${false}
+    ${'42.07'}   | ${false}
+    ${'42.08'}   | ${false}
+    ${'42.09'}   | ${false}
+    ${'42.10'}   | ${false}
+    ${'42.11'}   | ${false}
+    ${'2020.04'} | ${false}
+    ${'22.04'}   | ${false}
+  `('isStable("$version") === $expected', ({ version, expected }) => {
+    const res = !!ubuntu.isStable(version);
+    expect(res).toBe(expected);
   });
 
-  it('isStable', () => {
-    expect(ubuntu.isStable(undefined)).toBe(false);
-    expect(ubuntu.isStable(null)).toBe(false);
-    expect(ubuntu.isStable('')).toBe(false);
-
-    expect(ubuntu.isStable('04.10')).toBe(false);
-    expect(ubuntu.isStable('05.04')).toBe(false);
-    expect(ubuntu.isStable('05.10')).toBe(false);
-    expect(ubuntu.isStable('6.06')).toBe(false); // it's okay
-    expect(ubuntu.isStable('6.10')).toBe(false);
-    expect(ubuntu.isStable('7.04')).toBe(false);
-    expect(ubuntu.isStable('7.10')).toBe(false);
-    expect(ubuntu.isStable('8.04')).toBe(true);
-    expect(ubuntu.isStable('8.10')).toBe(false);
-    expect(ubuntu.isStable('9.04')).toBe(false);
-    expect(ubuntu.isStable('9.10')).toBe(false);
-    expect(ubuntu.isStable('10.04.4')).toBe(true);
-    expect(ubuntu.isStable('10.10')).toBe(false);
-    expect(ubuntu.isStable('11.04')).toBe(false);
-    expect(ubuntu.isStable('11.10')).toBe(false);
-    expect(ubuntu.isStable('12.04.5')).toBe(true);
-    expect(ubuntu.isStable('12.10')).toBe(false);
-    expect(ubuntu.isStable('13.04')).toBe(false);
-    expect(ubuntu.isStable('13.10')).toBe(false);
-    expect(ubuntu.isStable('14.04.6')).toBe(true);
-    expect(ubuntu.isStable('14.10')).toBe(false);
-    expect(ubuntu.isStable('15.04')).toBe(false);
-    expect(ubuntu.isStable('15.10')).toBe(false);
-    expect(ubuntu.isStable('16.04.7')).toBe(true);
-    expect(ubuntu.isStable('16.10')).toBe(false);
-    expect(ubuntu.isStable('17.04')).toBe(false);
-    expect(ubuntu.isStable('17.10')).toBe(false);
-    expect(ubuntu.isStable('18.04.5')).toBe(true);
-    expect(ubuntu.isStable('18.10')).toBe(false);
-    expect(ubuntu.isStable('19.04')).toBe(false);
-    expect(ubuntu.isStable('19.10')).toBe(false);
-    expect(ubuntu.isStable('20.04')).toBe(true);
-    expect(ubuntu.isStable('20.10')).toBe(false);
-
-    expect(ubuntu.isStable('42.01')).toBe(false);
-    expect(ubuntu.isStable('42.02')).toBe(false);
-    expect(ubuntu.isStable('42.03')).toBe(false);
-    expect(ubuntu.isStable('42.04')).toBe(true);
-    expect(ubuntu.isStable('42.05')).toBe(false);
-    expect(ubuntu.isStable('42.06')).toBe(false);
-    expect(ubuntu.isStable('42.07')).toBe(false);
-    expect(ubuntu.isStable('42.08')).toBe(false);
-    expect(ubuntu.isStable('42.09')).toBe(false);
-    expect(ubuntu.isStable('42.10')).toBe(false);
-    expect(ubuntu.isStable('42.11')).toBe(false);
-
-    expect(ubuntu.isStable('2020.04')).toBe(false);
+  test.each`
+    version      | expected
+    ${undefined} | ${false}
+    ${null}      | ${false}
+    ${''}        | ${false}
+    ${'02.10'}   | ${false}
+    ${'04.10'}   | ${true}
+    ${'05.04'}   | ${true}
+    ${'6.06'}    | ${true}
+    ${'8.04'}    | ${true}
+    ${'9.04'}    | ${true}
+    ${'10.04.4'} | ${true}
+    ${'12.04.5'} | ${true}
+    ${'13.04'}   | ${true}
+    ${'14.04.6'} | ${true}
+    ${'15.04'}   | ${true}
+    ${'16.04.7'} | ${true}
+    ${'16.10'}   | ${true}
+    ${'17.04'}   | ${true}
+    ${'18.04.5'} | ${true}
+    ${'18.10'}   | ${true}
+    ${'20.04'}   | ${true}
+    ${'20.10'}   | ${true}
+    ${'30.11'}   | ${true}
+    ${'2020.04'} | ${false}
+  `('isVersion("$version") === $expected', ({ version, expected }) => {
+    expect(!!ubuntu.isVersion(version)).toBe(expected);
   });
 
-  it('isVersion', () => {
-    expect(ubuntu.isVersion(undefined)).toBe(false);
-    expect(ubuntu.isVersion(null)).toBe(false);
-    expect(ubuntu.isVersion('')).toBe(false);
+  test.each`
+    version      | major   | minor   | patch
+    ${undefined} | ${null} | ${null} | ${null}
+    ${null}      | ${null} | ${null} | ${null}
+    ${''}        | ${null} | ${null} | ${null}
+    ${'42'}      | ${null} | ${null} | ${null}
+    ${'2020.04'} | ${null} | ${null} | ${null}
+    ${'04.10'}   | ${4}    | ${10}   | ${null}
+    ${'18.04.5'} | ${18}   | ${4}    | ${5}
+    ${'20.04'}   | ${20}   | ${4}    | ${null}
+  `(
+    'getMajor, getMinor, getPatch for "$version"',
+    ({ version, major, minor, patch }) => {
+      expect(ubuntu.getMajor(version)).toBe(major);
+      expect(ubuntu.getMinor(version)).toBe(minor);
+      expect(ubuntu.getPatch(version)).toBe(patch);
+    }
+  );
 
-    expect(ubuntu.isVersion('02.10')).toBe(false);
-    expect(ubuntu.isVersion('04.10')).toBe(true);
-    expect(ubuntu.isVersion('05.04')).toBe(true);
-    expect(ubuntu.isVersion('6.06')).toBe(true);
-    expect(ubuntu.isVersion('8.04')).toBe(true);
-    expect(ubuntu.isVersion('9.04')).toBe(true);
-    expect(ubuntu.isVersion('10.04.4')).toBe(true);
-    expect(ubuntu.isVersion('12.04.5')).toBe(true);
-    expect(ubuntu.isVersion('13.04')).toBe(true);
-    expect(ubuntu.isVersion('14.04.6')).toBe(true);
-    expect(ubuntu.isVersion('15.04')).toBe(true);
-    expect(ubuntu.isVersion('16.04.7')).toBe(true);
-    expect(ubuntu.isVersion('16.10')).toBe(true);
-    expect(ubuntu.isVersion('17.04')).toBe(true);
-    expect(ubuntu.isVersion('18.04.5')).toBe(true);
-    expect(ubuntu.isVersion('18.10')).toBe(true);
-    expect(ubuntu.isVersion('20.04')).toBe(true);
-    expect(ubuntu.isVersion('20.10')).toBe(true);
-    expect(ubuntu.isVersion('30.11')).toBe(true);
-    expect(ubuntu.isVersion('2020.04')).toBe(false);
+  test.each`
+    a          | b            | expected
+    ${'20.04'} | ${'2020.04'} | ${false}
+    ${'focal'} | ${'20.04'}   | ${false}
+    ${'20.04'} | ${'focal'}   | ${false}
+    ${'19.10'} | ${'19.10'}   | ${true}
+  `('equals($a, $b) === $expected', ({ a, b, expected }) => {
+    expect(ubuntu.equals(a, b)).toBe(expected);
   });
 
-  // digestion of version
-
-  it('getMajor', () => {
-    expect(ubuntu.getMajor(undefined)).toBeNull();
-    expect(ubuntu.getMajor(null)).toBeNull();
-    expect(ubuntu.getMajor('')).toBeNull();
-    expect(ubuntu.getMajor('42')).toBeNull();
-    expect(ubuntu.getMajor('2020.04')).toBeNull();
-
-    expect(ubuntu.getMajor('04.10')).toBe(4);
-
-    expect(ubuntu.getMajor('18.04.5')).toBe(18);
-
-    expect(ubuntu.getMajor('20.04')).toBe(20);
+  test.each`
+    a            | b            | expected
+    ${'20.04'}   | ${'20.10'}   | ${false}
+    ${'20.10'}   | ${'20.04'}   | ${true}
+    ${'19.10'}   | ${'20.04'}   | ${false}
+    ${'20.04'}   | ${'19.10'}   | ${true}
+    ${'16.04'}   | ${'16.04.7'} | ${false}
+    ${'16.04.7'} | ${'16.04'}   | ${true}
+    ${'16.04.1'} | ${'16.04.7'} | ${false}
+    ${'16.04.7'} | ${'16.04.1'} | ${true}
+    ${'19.10.1'} | ${'20.04.1'} | ${false}
+    ${'20.04.1'} | ${'19.10.1'} | ${true}
+  `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
+    expect(ubuntu.isGreaterThan(a, b)).toBe(expected);
   });
 
-  it('getMinor', () => {
-    expect(ubuntu.getMinor(undefined)).toBeNull();
-    expect(ubuntu.getMinor(null)).toBeNull();
-    expect(ubuntu.getMinor('')).toBeNull();
-    expect(ubuntu.getMinor('42')).toBeNull();
-    expect(ubuntu.getMinor('2020.04')).toBeNull();
+  test.each`
+    versions                                | range        | expected
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'2020.04'} | ${null}
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'foobar'}  | ${null}
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'20.04'}   | ${'20.04'}
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'19.10'}   | ${'19.10'}
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'04.10'}   | ${null}
+  `(
+    'getSatisfyingVersion($versions, "$range") === "$expected"',
+    ({ versions, range, expected }) => {
+      expect(ubuntu.getSatisfyingVersion(versions, range)).toBe(expected);
+    }
+  );
 
-    expect(ubuntu.getMinor('04.10')).toBe(10);
+  test.each`
+    versions                                | range        | expected
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'2020.04'} | ${null}
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'foobar'}  | ${null}
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'20.04'}   | ${'20.04'}
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'19.10'}   | ${'19.10'}
+    ${['18.10', '19.04', '19.10', '20.04']} | ${'04.10'}   | ${null}
+  `(
+    'minSatisfyingVersion($versions, "$range") === "$expected"',
+    ({ versions, range, expected }) => {
+      expect(ubuntu.minSatisfyingVersion(versions, range)).toBe(expected);
+    }
+  );
 
-    expect(ubuntu.getMinor('18.04.5')).toBe(4);
+  test.each`
+    currentValue | rangeStrategy | currentVersion | newVersion  | expected
+    ${undefined} | ${undefined}  | ${undefined}   | ${'foobar'} | ${'foobar'}
+  `(
+    'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      expect(
+        ubuntu.getNewValue({
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        })
+      ).toBe(expected);
+    }
+  );
 
-    expect(ubuntu.getMinor('20.04')).toBe(4);
+  test.each`
+    versions                                        | expected
+    ${['17.03', '18.04', '18.04', '6.10', '19.10']} | ${['6.10', '17.03', '18.04', '18.04', '19.10']}
+  `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
+    expect(versions.sort(ubuntu.sortVersions)).toEqual(expected);
   });
 
-  it('getPatch', () => {
-    expect(ubuntu.getPatch(undefined)).toBeNull();
-    expect(ubuntu.getPatch(null)).toBeNull();
-    expect(ubuntu.getPatch('')).toBeNull();
-    expect(ubuntu.getPatch('42')).toBeNull();
-    expect(ubuntu.getPatch('2020.04')).toBeNull();
-
-    expect(ubuntu.getPatch('04.10')).toBeNull();
-
-    expect(ubuntu.getPatch('18.04.5')).toBe(5);
-
-    expect(ubuntu.getPatch('20.04')).toBeNull();
-  });
-
-  // comparison
-
-  it('equals', () => {
-    expect(ubuntu.equals('20.04', '2020.04')).toBe(false);
-
-    expect(ubuntu.equals('focal', '20.04')).toBe(false);
-    expect(ubuntu.equals('20.04', 'focal')).toBe(false);
-
-    expect(ubuntu.equals('19.10', '19.10')).toBe(true);
-  });
-
-  it('isGreaterThan', () => {
-    expect(ubuntu.isGreaterThan('20.04', '20.10')).toBe(false);
-    expect(ubuntu.isGreaterThan('20.10', '20.04')).toBe(true);
-
-    expect(ubuntu.isGreaterThan('19.10', '20.04')).toBe(false);
-    expect(ubuntu.isGreaterThan('20.04', '19.10')).toBe(true);
-
-    expect(ubuntu.isGreaterThan('16.04', '16.04.7')).toBe(false);
-    expect(ubuntu.isGreaterThan('16.04.7', '16.04')).toBe(true);
-    expect(ubuntu.isGreaterThan('16.04.1', '16.04.7')).toBe(false);
-    expect(ubuntu.isGreaterThan('16.04.7', '16.04.1')).toBe(true);
-    expect(ubuntu.isGreaterThan('19.10.1', '20.04.1')).toBe(false);
-    expect(ubuntu.isGreaterThan('20.04.1', '19.10.1')).toBe(true);
-  });
-
-  it('getSatisfyingVersion', () => {
-    const versions = ['18.10', '19.04', '19.10', '20.04'];
-    expect(ubuntu.getSatisfyingVersion(versions, '2020.04')).toBeNull();
-    expect(ubuntu.getSatisfyingVersion(versions, 'foobar')).toBeNull();
-    expect(ubuntu.getSatisfyingVersion(versions, '20.04')).toBe('20.04');
-    expect(ubuntu.getSatisfyingVersion(versions, '19.10')).toBe('19.10');
-    expect(ubuntu.getSatisfyingVersion(versions, '04.10')).toBeNull();
-  });
-
-  it('minSatisfyingVersion', () => {
-    const versions = ['18.10', '19.04', '19.10', '20.04'];
-    expect(ubuntu.minSatisfyingVersion(versions, '2020.04')).toBeNull();
-    expect(ubuntu.minSatisfyingVersion(versions, 'foobar')).toBeNull();
-    expect(ubuntu.minSatisfyingVersion(versions, '20.04')).toBe('20.04');
-    expect(ubuntu.minSatisfyingVersion(versions, '19.10')).toBe('19.10');
-    expect(ubuntu.minSatisfyingVersion(versions, '04.10')).toBeNull();
-  });
-
-  it('getNewValue simply returns newVersion', () => {
-    expect(ubuntu.getNewValue({ newVersion: 'foobar' } as never)).toEqual(
-      'foobar'
-    );
-  });
-
-  it('sortVersions', () => {
-    const sortedVersions = ['6.10', '17.03', '18.04', '18.04', '19.10'];
-    const versions = [
-      ...sortedVersions.slice(2),
-      ...sortedVersions.slice(0, 2),
-    ];
-    expect(versions.sort(ubuntu.sortVersions)).toEqual(sortedVersions);
-  });
-
-  it('matches', () => {
-    expect(ubuntu.matches('20.04', '2020.04')).toBe(false);
-    expect(ubuntu.matches('20.04', '20.04')).toBe(true);
-    expect(ubuntu.matches('20.04', '20.04.0')).toBe(false);
-  });
+  test.each`
+    version    | range        | expected
+    ${'20.04'} | ${'2020.04'} | ${false}
+    ${'20.04'} | ${'20.04'}   | ${true}
+    ${'20.04'} | ${'20.04.0'} | ${false}
+  `(
+    'matches("$version", "$range") === "$expected"',
+    ({ version, range, expected }) => {
+      expect(ubuntu.matches(version, range)).toBe(expected);
+    }
+  );
 });

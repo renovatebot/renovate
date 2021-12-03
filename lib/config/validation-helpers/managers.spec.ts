@@ -1,7 +1,6 @@
-import { getName } from '../../../test/util';
 import { check } from './managers';
 
-describe(getName(), () => {
+describe('config/validation-helpers/managers', () => {
   it('should have no errors', () => {
     const res = check({
       resolvedRule: { matchManagers: ['npm'] },

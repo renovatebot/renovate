@@ -22,20 +22,3 @@ Object {
   "sourceUrl": "https://github.com/nodejs/node",
 }
 `;
-
-exports[`datasource/index merges registries and returns success 1`] = `
-Object {
-  "releases": Array [
-    Object {
-      "registryUrl": "https://reg1.com",
-      "version": "1.0.0",
-    },
-    Object {
-      "registryUrl": "https://reg1.com",
-      "version": "1.1.0",
-    },
-  ],
-}
-`;
-
-exports[`datasource/index warns if multiple registryUrls for registryStrategy=first 1`] = `null`;

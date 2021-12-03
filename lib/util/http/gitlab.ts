@@ -1,7 +1,8 @@
 import parseLinkHeader from 'parse-link-header';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { parseUrl } from '../url';
 import { Http, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
@@ -19,11 +20,11 @@ export interface GitlabHttpOptions extends InternalHttpOptions {
 }
 
 export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
-  constructor(options?: GitlabHttpOptions) {
-    super(PLATFORM_TYPE_GITLAB, options);
+  constructor(type: string = PlatformId.Gitlab, options?: GitlabHttpOptions) {
+    super(type, options);
   }
 
-  protected async request<T>(
+  protected override async request<T>(
     url: string | URL,
     options?: GitlabInternalOptions & GitlabHttpOptions
   ): Promise<HttpResponse<T> | null> {
@@ -42,8 +43,15 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         try {
           const linkHeader = parseLinkHeader(result.headers.link as string);
           if (linkHeader?.next) {
+            const nextUrl = parseUrl(linkHeader.next.url);
+            if (process.env.GITLAB_IGNORE_REPO_URL) {
+              const defaultEndpoint = new URL(baseUrl);
+              nextUrl.protocol = defaultEndpoint.protocol;
+              nextUrl.host = defaultEndpoint.host;
+            }
+
             result.body = result.body.concat(
-              (await this.request<T>(linkHeader.next.url, opts)).body
+              (await this.request<T>(nextUrl, opts)).body
             );
           }
         } catch (err) /* istanbul ignore next */ {
@@ -62,7 +70,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         err.statusCode === 429 ||
         (err.statusCode >= 500 && err.statusCode < 600)
       ) {
-        throw new ExternalHostError(err, PLATFORM_TYPE_GITLAB);
+        throw new ExternalHostError(err, PlatformId.Gitlab);
       }
       const platformFailureCodes = [
         'EAI_AGAIN',
@@ -71,10 +79,10 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
       ];
       if (platformFailureCodes.includes(err.code)) {
-        throw new ExternalHostError(err, PLATFORM_TYPE_GITLAB);
+        throw new ExternalHostError(err, PlatformId.Gitlab);
       }
       if (err.name === 'ParseError') {
-        throw new ExternalHostError(err, PLATFORM_TYPE_GITLAB);
+        throw new ExternalHostError(err, PlatformId.Gitlab);
       }
       throw err;
     }

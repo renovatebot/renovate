@@ -1,12 +1,13 @@
-import { getName, loadFixture } from '../../../../../test/util';
+import { loadFixture } from '../../../../../test/util';
 import * as npmUpdater from '.';
 
 const readFixture = (x: string): string => loadFixture(x, '../..');
 
 const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');
+const input01PMContent = readFixture('inputs/01-package-manager.json');
 
-describe(getName(), () => {
+describe('manager/npm/update/dependency/index', () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {
@@ -38,6 +39,7 @@ describe(getName(), () => {
         fileContent: input,
         upgrade,
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('replaces a npm package alias', () => {
@@ -58,6 +60,7 @@ describe(getName(), () => {
         fileContent: input,
         upgrade,
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('replaces a github short hash', () => {
@@ -77,6 +80,7 @@ describe(getName(), () => {
         fileContent: input,
         upgrade,
       });
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('replaces a github fully specified version', () => {
@@ -109,8 +113,8 @@ describe(getName(), () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
-      expect(JSON.parse(testContent).resolutions.config).toEqual('1.22.0');
+      expect(JSON.parse(testContent).dependencies.config).toBe('1.22.0');
+      expect(JSON.parse(testContent).resolutions.config).toBe('1.22.0');
     });
     it('updates glob resolutions', () => {
       const upgrade = {
@@ -122,10 +126,8 @@ describe(getName(), () => {
         fileContent: input01GlobContent,
         upgrade,
       });
-      expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
-      expect(JSON.parse(testContent).resolutions['**/config']).toEqual(
-        '1.22.0'
-      );
+      expect(JSON.parse(testContent).dependencies.config).toBe('1.22.0');
+      expect(JSON.parse(testContent).resolutions['**/config']).toBe('1.22.0');
     });
     it('updates glob resolutions without dep', () => {
       const upgrade = {
@@ -138,7 +140,7 @@ describe(getName(), () => {
         fileContent: input01Content,
         upgrade,
       });
-      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toEqual(
+      expect(JSON.parse(testContent).resolutions['**/@angular/cli']).toBe(
         '8.1.0'
       );
     });
@@ -191,6 +193,63 @@ describe(getName(), () => {
         upgrade,
       });
       expect(testContent).toBeNull();
+    });
+
+    it('updates packageManager', () => {
+      const upgrade = {
+        depType: 'packageManager',
+        depName: 'yarn',
+        newValue: '3.1.0',
+      };
+      const outputContent = readFixture('outputs/014.json');
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01PMContent,
+        upgrade,
+      });
+      expect(testContent).toEqual(outputContent);
+    });
+
+    it('returns null if empty file', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'angular-touch-not',
+        newValue: '1.5.8',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: null,
+        upgrade,
+      });
+      expect(testContent).toBeNull();
+    });
+
+    it('replaces package', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'abc',
+        newValue: '2.0.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        upgrade,
+      });
+      expect(JSON.parse(testContent).dependencies.config).toBeUndefined();
+      expect(JSON.parse(testContent).dependencies.abc).toBe('2.0.0');
+    });
+
+    it('replaces glob package resolutions', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'abc',
+        newValue: '2.0.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01GlobContent,
+        upgrade,
+      });
+      expect(JSON.parse(testContent).resolutions.config).toBeUndefined();
+      expect(JSON.parse(testContent).resolutions['**/abc']).toBe('2.0.0');
     });
   });
 });

@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, getName } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import type { PackageFile } from '../../../../manager/types';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 
-describe(getName(), () => {
+describe('workers/repository/onboarding/pr/errors-warnings', () => {
   describe('getWarnings()', () => {
     let config: RenovateConfig;
     beforeEach(() => {
@@ -17,7 +17,17 @@ describe(getName(), () => {
         },
       ];
       const res = getWarnings(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        # Warnings (1)
+
+        Please correct - or verify that you can safely ignore - these warnings before you merge this PR.
+
+        -   \`foo\`: Failed to look up dependency
+
+        ---
+        "
+      `);
     });
   });
   describe('getDepWarnings()', () => {
@@ -57,7 +67,21 @@ describe(getName(), () => {
         ],
       };
       const res = getDepWarnings(packageFiles);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
+
+        Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.
+
+        -   \`Warning 1\`
+        -   \`Warning 2\`
+
+        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+
+        "
+      `);
     });
   });
   describe('getErrors()', () => {
@@ -74,7 +98,17 @@ describe(getName(), () => {
         },
       ];
       const res = getErrors(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        # Errors (1)
+
+        Renovate has found errors that you should fix (in this branch) before finishing this PR.
+
+        -   \`renovate.json\`: Failed to parse
+
+        ---
+        "
+      `);
     });
   });
 });

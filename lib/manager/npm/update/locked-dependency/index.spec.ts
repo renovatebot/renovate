@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../../test/http-mock';
-import { getName, loadFixture } from '../../../../../test/util';
+import { loadFixture } from '../../../../../test/util';
 import { clone } from '../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 import { updateLockedDependency } from '.';
@@ -13,11 +13,10 @@ const serveStaticJson = JSON.parse(loadFixture('serve-static.json'));
 const sendJson = JSON.parse(loadFixture('send.json'));
 const typeIsJson = JSON.parse(loadFixture('type-is.json'));
 
-describe(getName(), () => {
+describe('manager/npm/update/locked-dependency/index', () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
     beforeEach(() => {
-      httpMock.setup();
       config = {
         packageFile: 'package.json',
         packageFileContent,
@@ -28,9 +27,7 @@ describe(getName(), () => {
         newVersion: '1.0.1',
       };
     });
-    afterEach(() => {
-      httpMock.reset();
-    });
+
     it('validates filename', async () => {
       expect(
         await updateLockedDependency({ ...config, lockFile: 'yarn.lock' })
@@ -80,7 +77,7 @@ describe(getName(), () => {
       });
       expect(
         JSON.parse(res['package-lock.json']).dependencies.mime.version
-      ).toEqual('1.2.12');
+      ).toBe('1.2.12');
     });
     it('fails to remediate if parent dep cannot support', async () => {
       const acceptsModified = clone(acceptsJson);
@@ -108,20 +105,12 @@ describe(getName(), () => {
       const res = await updateLockedDependency(config);
       expect(res['package.json']).toContain('"express": "4.1.0"');
       const packageLock = JSON.parse(res['package-lock.json']);
-      expect(packageLock.dependencies.express.version).toEqual('4.1.0');
+      expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
     it('remediates mime', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.11';
       config.newVersion = '1.4.1';
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/accepts')
-        .reply(200, acceptsJson);
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/express')
-        .reply(200, expressJson);
       httpMock
         .scope('https://registry.npmjs.org')
         .get('/mime')
@@ -140,8 +129,9 @@ describe(getName(), () => {
         .reply(200, typeIsJson);
       const res = await updateLockedDependency(config);
       const packageLock = JSON.parse(res['package-lock.json']);
-      expect(packageLock.dependencies.mime.version).toEqual('1.4.1');
-      expect(packageLock.dependencies.express.version).toEqual('4.16.0');
+      expect(packageLock.dependencies.mime.version).toBe('1.4.1');
+      expect(packageLock.dependencies.express.version).toBe('4.16.0');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const upath = require('upath');
-const { getOptions } = require('../lib/config/definitions');
+const { getOptions } = require('../lib/config/options');
 
 const schema = {
   title: 'JSON schema for Renovate config files (https://renovatebot.com/)',
@@ -86,9 +86,8 @@ function addChildrenArrayInParents() {
 function createSchemaForChildConfigs() {
   for (const option of options) {
     if (option.parent) {
-      properties[option.parent].items.allOf[0].properties[
-        option.name
-      ] = createSingleConfig(option);
+      properties[option.parent].items.allOf[0].properties[option.name] =
+        createSingleConfig(option);
     }
   }
 }

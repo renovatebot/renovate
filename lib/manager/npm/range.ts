@@ -4,13 +4,8 @@ import type { RangeStrategy } from '../../types';
 import type { RangeConfig } from '../types';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
-  const {
-    depType,
-    depName,
-    packageJsonType,
-    currentValue,
-    rangeStrategy,
-  } = config;
+  const { depType, depName, packageJsonType, currentValue, rangeStrategy } =
+    config;
   const isComplexRange = parseRange(currentValue).length > 1;
   if (rangeStrategy === 'bump' && isComplexRange) {
     logger.debug(

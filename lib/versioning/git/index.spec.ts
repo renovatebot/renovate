@@ -1,6 +1,6 @@
 import git from '.';
 
-describe('git.', () => {
+describe('versioning/git/index', () => {
   describe('isValid(version)', () => {
     it('should return true', () => {
       expect(git.isValid('a1')).toBeTruthy();
@@ -18,7 +18,7 @@ describe('git.', () => {
   });
   describe('valueToVersion(version)', () => {
     it('should return same as input', () => {
-      expect(git.valueToVersion('')).toEqual('');
+      expect(git.valueToVersion('')).toBe('');
     });
   });
 });

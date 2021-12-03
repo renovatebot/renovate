@@ -1,14 +1,17 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
+import type { GitlabRelease } from '../../../../datasource/gitlab-releases/types';
+import type { GitlabTag } from '../../../../datasource/gitlab-tags/types';
 import { logger } from '../../../../logger';
 import type { GitlabTreeNode } from '../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../util/http/gitlab';
+import { regEx } from '../../../../util/regex';
 import { ensureTrailingSlash } from '../../../../util/url';
 import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
 const http = new GitlabHttp();
 
 function getRepoId(repository: string): string {
-  return repository.replace(/\//g, '%2f');
+  return repository.replace(regEx(/\//g), '%2f');
 }
 
 export async function getTags(
@@ -20,7 +23,7 @@ export async function getTags(
     repository
   )}/repository/tags?per_page=100`;
   try {
-    const res = await http.getJson<{ name: string }[]>(url, {
+    const res = await http.getJson<GitlabTag[]>(url, {
       paginate: true,
     });
 
@@ -32,7 +35,10 @@ export async function getTags(
 
     return tags.map((tag) => tag.name).filter(Boolean);
   } catch (err) {
-    logger.info({ sourceRepo: repository }, 'Failed to fetch Gitlab tags');
+    logger.debug(
+      { sourceRepo: repository, err },
+      'Failed to fetch Gitlab tags'
+    );
     // istanbul ignore if
     if (err.message?.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
@@ -44,7 +50,8 @@ export async function getTags(
 
 export async function getReleaseNotesMd(
   repository: string,
-  apiBaseUrl: string
+  apiBaseUrl: string,
+  sourceDirectory?: string
 ): Promise<ChangeLogFile> | null {
   logger.trace('gitlab.getReleaseNotesMd()');
   const repoid = getRepoId(repository);
@@ -53,15 +60,21 @@ export async function getReleaseNotesMd(
   )}projects/${repoid}/repository/`;
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
-  let files = (
-    await http.getJson<GitlabTreeNode[]>(`${apiPrefix}tree?per_page=100`, {
-      paginate: true,
-    })
+  const tree = (
+    await http.getJson<GitlabTreeNode[]>(
+      `${apiPrefix}tree?per_page=100${
+        sourceDirectory ? `&path=${sourceDirectory}` : ''
+      }`,
+      {
+        paginate: true,
+      }
+    )
   ).body;
-
-  files = files
-    .filter((f) => f.type === 'blob')
-    .filter((f) => changelogFilenameRegex.test(f.path));
+  const allFiles = tree.filter((f) => f.type === 'blob');
+  let files: GitlabTreeNode[] = [];
+  if (!files.length) {
+    files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
+  }
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;
@@ -90,18 +103,13 @@ export async function getReleaseList(
   const apiUrl = `${ensureTrailingSlash(
     apiBaseUrl
   )}projects/${repoId}/releases`;
-  const res = await http.getJson<
-    {
-      name: string;
-      release: string;
-      description: string;
-      tag_name: string;
-    }[]
-  >(`${apiUrl}?per_page=100`, {
+
+  const res = await http.getJson<GitlabRelease[]>(`${apiUrl}?per_page=100`, {
     paginate: true,
   });
   return res.body.map((release) => ({
     url: `${apiUrl}/${release.tag_name}`,
+    notesSourceUrl: apiUrl,
     name: release.name,
     body: release.description,
     tag: release.tag_name,

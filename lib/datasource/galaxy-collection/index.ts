@@ -1,8 +1,8 @@
 import pMap from 'p-map';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { cache } from '../../util/cache/package/decorator';
+import type { HttpResponse } from '../../util/http';
+import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
   BaseProjectResult,
@@ -10,33 +10,36 @@ import type {
   VersionsProjectResult,
 } from './types';
 
-export const id = 'galaxy-collection';
-export const defaultRegistryUrls = ['https://galaxy.ansible.com/'];
-export const customRegistrySupport = false;
+export class GalaxyCollectionDatasource extends Datasource {
+  static readonly id = 'galaxy-collection';
 
-const http = new Http(id);
-
-export async function getReleases({
-  lookupName,
-  registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const cacheNamespace = 'datasource-galaxy-collection';
-  const cacheKey = lookupName;
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
+  constructor() {
+    super(GalaxyCollectionDatasource.id);
   }
 
-  const [namespace, projectName] = lookupName.split('.');
+  override readonly customRegistrySupport = false;
 
-  const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
+  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
 
-  try {
-    const baseUrlResponse = await http.getJson<BaseProjectResult>(baseUrl);
+  @cache({
+    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+    key: ({ lookupName }: GetReleasesConfig) => lookupName,
+  })
+  async getReleases({
+    lookupName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const [namespace, projectName] = lookupName.split('.');
+
+    const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
+
+    let baseUrlResponse: HttpResponse<BaseProjectResult>;
+    try {
+      baseUrlResponse = await this.http.getJson<BaseProjectResult>(baseUrl);
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
+
     if (!baseUrlResponse || !baseUrlResponse.body) {
       logger.warn(
         { dependency: lookupName },
@@ -48,9 +51,16 @@ export async function getReleases({
     const baseProject = baseUrlResponse.body;
 
     const versionsUrl = `${baseUrl}versions/`;
-    const versionsUrlResponse = await http.getJson<VersionsProjectResult>(
-      versionsUrl
-    );
+
+    let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
+    try {
+      versionsUrlResponse = await this.http.getJson<VersionsProjectResult>(
+        versionsUrl
+      );
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
+
     const versionsProject = versionsUrlResponse.body;
 
     const releases: Release[] = versionsProject.results.map((value) => {
@@ -66,7 +76,7 @@ export async function getReleases({
     const enrichedReleases: Release[] = await pMap(
       releases,
       (basicRelease) =>
-        http
+        this.http
           .getJson<VersionsDetailResult>(
             `${versionsUrl}${basicRelease.version}/`
           )
@@ -99,7 +109,7 @@ export async function getReleases({
       { concurrency: 5 } // allow 5 requests at maximum in parallel
     );
     // filter failed versions
-    const filteredReleases = enrichedReleases.filter((value) => value != null);
+    const filteredReleases = enrichedReleases.filter(Boolean);
     // extract base information which are only provided on the release from the newest release
     const result: ReleaseResult = {
       releases: filteredReleases,
@@ -107,17 +117,6 @@ export async function getReleases({
       homepage: newestVersionDetails?.metadata.homepage,
       tags: newestVersionDetails?.metadata.tags,
     };
-
-    const cacheMinutes = 30;
-    await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
-  } catch (err) {
-    if (
-      err.statusCode === 429 ||
-      (err.statusCode >= 500 && err.statusCode < 600)
-    ) {
-      throw new ExternalHostError(err);
-    }
-    throw err;
   }
 }

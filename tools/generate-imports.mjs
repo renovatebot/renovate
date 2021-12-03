@@ -28,7 +28,10 @@ async function updateFile(file, code) {
   newFiles.add(file);
 }
 
-const dataPaths = ['data'];
+const dataPaths = [
+  'data',
+  'node_modules/emojibase-data/en/shortcodes/github.json',
+];
 
 /**
  *
@@ -70,7 +73,7 @@ async function generateData() {
   /** @type {string[]} */
   const contentMapAssignments = [];
   for (const file of files) {
-    const key = file.replace(/\\/g, '/');
+    const key = file.replace(/\\/g, '/'); // TODO #12071
 
     const rawFileContent = await fs.readFile(file, 'utf8');
     const value = JSON.stringify(rawFileContent);

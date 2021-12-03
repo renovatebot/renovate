@@ -1,5 +1,8 @@
 export interface GitlabIssue {
   iid: number;
+
+  labels?: string[];
+
   title: string;
 }
 
@@ -44,12 +47,14 @@ export interface RepoResponse {
   mirror: boolean;
   default_branch: string;
   empty_repo: boolean;
+  ssh_url_to_repo: string;
   http_url_to_repo: string;
   forked_from_project: boolean;
   repository_access_level: 'disabled' | 'private' | 'enabled';
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   merge_method: MergeMethod;
   path_with_namespace: string;
+  squash_option?: 'never' | 'always' | 'default_on' | 'default_off';
 }
 
 // See https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/user_status_type.rb

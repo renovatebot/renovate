@@ -1,6 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
-import { getName, partial } from '../../../test/util';
+import { partial } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import * as hostRules from '../../util/host-rules';
 import type { PackageFile } from '../types';
 import extractPackageFile from './extract';
@@ -9,9 +10,7 @@ jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 const Git: typeof _simpleGit = jest.requireActual('simple-git');
 
-const localDir = `${__dirname}/__fixtures__`;
-
-describe(getName(), () => {
+describe('manager/git-submodules/extract', () => {
   // flaky ci tests
   jest.setTimeout(10 * 1000);
 
@@ -45,21 +44,20 @@ describe(getName(), () => {
   });
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
-      hostRules.add({ hostName: 'github.com', token: 'abc123' });
+      GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
+      hostRules.add({ matchHost: 'github.com', token: '123test' });
       let res: PackageFile;
-      expect(
-        await extractPackageFile('', '.gitmodules.1', { localDir })
-      ).toBeNull();
-      res = await extractPackageFile('', '.gitmodules.2', { localDir });
+      expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
+      res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res.deps).toHaveLength(1);
-      expect(res.deps[0].currentValue).toEqual('main');
-      res = await extractPackageFile('', '.gitmodules.3', { localDir });
+      expect(res.deps[0].currentValue).toBe('main');
+      res = await extractPackageFile('', '.gitmodules.3', {});
       expect(res.deps).toHaveLength(1);
-      res = await extractPackageFile('', '.gitmodules.4', { localDir });
+      res = await extractPackageFile('', '.gitmodules.4', {});
       expect(res.deps).toHaveLength(1);
-      res = await extractPackageFile('', '.gitmodules.5', { localDir });
+      res = await extractPackageFile('', '.gitmodules.5', {});
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[2].lookupName).toEqual(
+      expect(res.deps[2].lookupName).toBe(
         'https://github.com/renovatebot/renovate-config.git'
       );
     });

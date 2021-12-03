@@ -1,5 +1,5 @@
-import { getName } from '../../../../test/util';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import * as httpMock from '../../../../test/http-mock';
+import { PlatformId } from '../../../constants';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import type { BranchUpgradeConfig } from '../../types';
@@ -29,16 +29,22 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
-describe(getName(), () => {
+describe('workers/pr/changelog/github', () => {
+  afterEach(() => {
+    // FIXME: add missing http mocks
+    httpMock.clear(false);
+  });
+
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
-        baseUrl: 'https://api.github.com/',
+        hostType: PlatformId.Github,
+        matchHost: 'https://api.github.com/',
         token: 'abc',
       });
     });
+
     it('returns null if @types', async () => {
       expect(
         await getChangeLogJSON({
@@ -47,6 +53,7 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('returns null if no currentVersion', async () => {
       expect(
         await getChangeLogJSON({
@@ -55,6 +62,7 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('returns null if currentVersion equals newVersion', async () => {
       expect(
         await getChangeLogJSON({
@@ -64,6 +72,7 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('skips invalid repos', async () => {
       expect(
         await getChangeLogJSON({
@@ -72,21 +81,27 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('works without Github', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
       ).toMatchSnapshot();
     });
+
     it('uses GitHub tags', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
       ).toMatchSnapshot();
     });
+
     it('filters unnecessary warns', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -94,7 +109,9 @@ describe(getName(), () => {
         })
       ).toMatchSnapshot();
     });
+
     it('supports node engines', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -102,6 +119,7 @@ describe(getName(), () => {
         })
       ).toMatchSnapshot();
     });
+
     it('handles no sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
@@ -110,6 +128,7 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('handles invalid sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
@@ -118,6 +137,7 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('handles missing Github token', async () => {
       expect(
         await getChangeLogJSON({
@@ -126,6 +146,7 @@ describe(getName(), () => {
         })
       ).toEqual({ error: ChangeLogError.MissingGithubToken });
     });
+
     it('handles no releases', async () => {
       expect(
         await getChangeLogJSON({
@@ -134,6 +155,7 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('handles not enough releases', async () => {
       expect(
         await getChangeLogJSON({
@@ -142,12 +164,14 @@ describe(getName(), () => {
         })
       ).toBeNull();
     });
+
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
+        hostType: PlatformId.Github,
         token: 'super_secret',
-        baseUrl: 'https://github-enterprise.example.com/',
+        matchHost: 'https://github-enterprise.example.com/',
       });
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -155,13 +179,15 @@ describe(getName(), () => {
         })
       ).toMatchSnapshot();
     });
+
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITHUB,
-        baseUrl: 'https://github-enterprise.example.com/',
+        hostType: PlatformId.Github,
+        matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,

@@ -1,6 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getName } from '../../../../test/util';
-import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
+import { PlatformId } from '../../../constants';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import type { BranchUpgradeConfig } from '../../types';
@@ -29,24 +28,26 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
-const baseUrl = 'https://gitlab.com/';
+const matchHost = 'https://gitlab.com/';
 
-describe(getName(), () => {
+describe('workers/pr/changelog/gitlab', () => {
+  afterEach(() => {
+    // FIXME: add missing http mocks
+    httpMock.clear(false);
+  });
+
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      httpMock.setup();
       hostRules.clear();
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITLAB,
-        baseUrl,
+        hostType: PlatformId.Gitlab,
+        matchHost,
         token: 'abc',
       });
     });
-    afterEach(() => {
-      httpMock.reset();
-    });
+
     it('returns null if @types', async () => {
-      httpMock.scope(baseUrl);
+      httpMock.scope(matchHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -56,7 +57,7 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toBeEmpty();
     });
     it('returns null if currentVersion equals newVersion', async () => {
-      httpMock.scope(baseUrl);
+      httpMock.scope(matchHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -75,6 +76,7 @@ describe(getName(), () => {
       ).toBeNull();
     });
     it('works without GitLab', async () => {
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -83,7 +85,7 @@ describe(getName(), () => {
     });
     it('uses GitLab tags', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(matchHost)
         .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .reply(200, [
           { name: 'v5.2.0' },
@@ -99,6 +101,7 @@ describe(getName(), () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -108,7 +111,7 @@ describe(getName(), () => {
     });
     it('handles empty GitLab tags response', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(matchHost)
         .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .reply(200, [])
         .persist()
@@ -117,6 +120,7 @@ describe(getName(), () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -126,7 +130,7 @@ describe(getName(), () => {
     });
     it('uses GitLab tags with error', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(matchHost)
         .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .replyWithError('Unknown GitLab Repo')
         .persist()
@@ -135,6 +139,7 @@ describe(getName(), () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -176,11 +181,12 @@ describe(getName(), () => {
     });
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITLAB,
-        baseUrl: 'https://gitlab-enterprise.example.com/',
+        hostType: PlatformId.Gitlab,
+        matchHost: 'https://gitlab-enterprise.example.com/',
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -192,15 +198,16 @@ describe(getName(), () => {
     it('supports self-hosted gitlab changelog', async () => {
       httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
       hostRules.add({
-        hostType: PLATFORM_TYPE_GITLAB,
-        baseUrl: 'https://git.test.com/',
+        hostType: PlatformId.Gitlab,
+        matchHost: 'https://git.test.com/',
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
+      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: PLATFORM_TYPE_GITLAB,
+          platform: PlatformId.Gitlab,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
           endpoint: 'https://git.test.com/api/v4/',
         })

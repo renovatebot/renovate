@@ -1,21 +1,23 @@
 import is from '@sindresorhus/is';
-import { NormalizedOptions } from 'got';
+import type { NormalizedOptions } from 'got';
 import {
-  PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
-} from '../../constants/platforms';
-import { GotOptions } from './types';
+  GITHUB_API_USING_HOST_TYPES,
+  GITLAB_API_USING_HOST_TYPES,
+  PlatformId,
+} from '../../constants';
+import type { GotOptions } from './types';
 
 export function applyAuthorization(inOptions: GotOptions): GotOptions {
-  const options = { ...inOptions };
-  if (options.headers?.authorization) {
+  const options: GotOptions = { ...inOptions };
+
+  if (options.headers?.authorization || options.noAuth) {
     return options;
   }
+
   if (options.token) {
-    if (options.hostType === PLATFORM_TYPE_GITEA) {
+    if (options.hostType === PlatformId.Gitea) {
       options.headers.authorization = `token ${options.token}`;
-    } else if (options.hostType === PLATFORM_TYPE_GITHUB) {
+    } else if (GITHUB_API_USING_HOST_TYPES.includes(options.hostType)) {
       options.headers.authorization = `token ${options.token}`;
       if (options.token.startsWith('x-access-token:')) {
         const appToken = options.token.replace('x-access-token:', '');
@@ -27,7 +29,7 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
           );
         }
       }
-    } else if (options.hostType === PLATFORM_TYPE_GITLAB) {
+    } else if (GITLAB_API_USING_HOST_TYPES.includes(options.hostType)) {
       // GitLab versions earlier than 12.2 only support authentication with
       // a personal access token, which is 20 characters long.
       if (options.token.length === 20) {
@@ -38,7 +40,12 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
     } else {
       // Custom Auth type, eg `Basic XXXX_TOKEN`
       const type = options.context?.authType ?? 'Bearer';
-      options.headers.authorization = `${type} ${options.token}`;
+
+      if (type === 'Token-Only') {
+        options.headers.authorization = options.token;
+      } else {
+        options.headers.authorization = `${type} ${options.token}`;
+      }
     }
     delete options.token;
   } else if (options.password !== undefined) {
@@ -79,14 +86,13 @@ export function removeAuthorization(options: NormalizedOptions): void {
     const portInUrl = options.href.split('/')[2].split(':')[1];
     // istanbul ignore next
     if (!portInUrl) {
-      // eslint-disable-next-line no-param-reassign
       delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
     }
 
     // registry is hosted on Amazon or Azure blob, redirect url includes
     // authentication which is not required and should be removed
-    delete options.headers.authorization; // eslint-disable-line no-param-reassign
-    delete options.username; // eslint-disable-line no-param-reassign
-    delete options.password; // eslint-disable-line no-param-reassign
+    delete options.headers.authorization;
+    delete options.username;
+    delete options.password;
   }
 }

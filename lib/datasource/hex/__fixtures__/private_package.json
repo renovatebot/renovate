@@ -1,0 +1,45 @@
+{
+  "configs": {
+    "erlang.mk": "dep_private_package = hex 0.1.1",
+    "mix.exs": "{:private_package, \"~> 0.1.1\", organization: \"renovate_test\"}",
+    "rebar.config": "{private_package, \"0.1.1\"}"
+  },
+  "docs_html_url": "https://renovate_test.hexdocs.pm/private_package/",
+  "downloads": {
+    "all": 4,
+    "recent": 4,
+    "week": 4
+  },
+  "html_url": "https://hex.pm/packages/renovate_test/private_package",
+  "inserted_at": "2021-08-04T15:26:26.495641Z",
+  "latest_stable_version": "0.1.1",
+  "latest_version": "0.1.1",
+  "meta": {
+    "description": "A test private package",
+    "licenses": [
+      "MIT"
+    ],
+    "links": {},
+    "maintainers": []
+  },
+  "name": "private_package",
+  "owners": [],
+  "releases": [
+    {
+      "has_docs": true,
+      "inserted_at": "2021-08-04T17:46:00.274628Z",
+      "url": "https://hex.pm/api/repos/renovate_test/packages/private_package/releases/0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "has_docs": true,
+      "inserted_at": "2021-08-04T15:26:26.500933Z",
+      "url": "https://hex.pm/api/repos/renovate_test/packages/private_package/releases/0.1.0",
+      "version": "0.1.0"
+    }
+  ],
+  "repository": "renovate_test",
+  "retirements": {},
+  "updated_at": "2021-08-04T17:46:03.254128Z",
+  "url": "https://hex.pm/api/repos/renovate_test/packages/private_package"
+}

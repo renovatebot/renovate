@@ -1,6 +1,8 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
+import JSON5 from 'json5';
 import { lt } from 'semver';
+import { PlatformId } from '../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -9,7 +11,6 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -25,6 +26,7 @@ import type {
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   Platform,
   PlatformParams,
   PlatformResult,
@@ -39,7 +41,6 @@ import { smartLinks } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
-  localDir: string;
   mergeMethod: helper.PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
@@ -50,7 +51,7 @@ interface GiteaRepoConfig {
 }
 
 const defaults = {
-  hostType: PLATFORM_TYPE_GITEA,
+  hostType: PlatformId.Gitea,
   endpoint: 'https://gitea.com/api/v1/',
   version: '0.0.0',
 };
@@ -210,30 +211,34 @@ const platform: Platform = {
 
   async getRawFile(
     fileName: string,
-    repo: string = config.repository
+    repoName?: string,
+    branchOrTag?: string
   ): Promise<string | null> {
-    const contents = await helper.getRepoContents(repo, fileName);
+    const repo = repoName ?? config.repository;
+    const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
     return contents.contentString;
   },
 
   async getJsonFile(
     fileName: string,
-    repo: string = config.repository
+    repoName?: string,
+    branchOrTag?: string
   ): Promise<any | null> {
-    const raw = await platform.getRawFile(fileName, repo);
+    const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
+    if (fileName.endsWith('.json5')) {
+      return JSON5.parse(raw);
+    }
     return JSON.parse(raw);
   },
 
   async initRepo({
     repository,
-    localDir,
     cloneSubmodules,
   }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
     config = {} as any;
     config.repository = repository;
-    config.localDir = localDir;
     config.cloneSubmodules = cloneSubmodules;
 
     // Attempt to fetch information about repository
@@ -289,7 +294,7 @@ const platform: Platform = {
 
     // Find options for current host and determine Git endpoint
     const opts = hostRules.find({
-      hostType: PLATFORM_TYPE_GITEA,
+      hostType: PlatformId.Gitea,
       url: defaults.endpoint,
     });
     const gitEndpoint = URL.parse(repo.clone_url);
@@ -299,8 +304,6 @@ const platform: Platform = {
     await git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
     });
 
     // Reset cached resources
@@ -354,19 +357,7 @@ const platform: Platform = {
     }
   },
 
-  async getBranchStatus(
-    branchName: string,
-    requiredStatusChecks?: string[] | null
-  ): Promise<BranchStatus> {
-    if (!requiredStatusChecks) {
-      return BranchStatus.green;
-    }
-
-    if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
-      logger.warn({ requiredStatusChecks }, 'Unsupported requiredStatusChecks');
-      return BranchStatus.red;
-    }
-
+  async getBranchStatus(branchName: string): Promise<BranchStatus> {
     let ccs: helper.CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
@@ -566,12 +557,12 @@ const platform: Platform = {
     });
   },
 
-  async mergePr(number: number, branchName: string): Promise<boolean> {
+  async mergePr({ id }: MergePRConfig): Promise<boolean> {
     try {
-      await helper.mergePR(config.repository, number, config.mergeMethod);
+      await helper.mergePR(config.repository, id, config.mergeMethod);
       return true;
     } catch (err) {
-      logger.warn({ err, number }, 'Merging of PR failed');
+      logger.warn({ err, id }, 'Merging of PR failed');
       return false;
     }
   },
@@ -590,22 +581,41 @@ const platform: Platform = {
     return config.issueList;
   },
 
+  async getIssue(number: number, useCache = true): Promise<Issue> {
+    try {
+      const body = (
+        await helper.getIssue(config.repository, number, {
+          useCache,
+        })
+      ).body;
+      return {
+        number,
+        body,
+      };
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err, number }, 'Error getting issue');
+      return null;
+    }
+  },
+
   async findIssue(title: string): Promise<Issue> {
     const issueList = await platform.getIssueList();
     const issue = issueList.find(
       (i) => i.state === 'open' && i.title === title
     );
 
-    if (issue) {
-      logger.debug(`Found Issue #${issue.number}`);
+    if (!issue) {
+      return null;
     }
-    return issue ?? null;
+    logger.debug(`Found Issue #${issue.number}`);
+    return platform.getIssue(issue.number);
   },
 
   async ensureIssue({
     title,
     reuseTitle,
     body: content,
+    labels: labelNames,
     shouldReOpen,
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
@@ -618,6 +628,11 @@ const platform: Platform = {
       if (!issues.length) {
         issues = issueList.filter((i) => i.title === reuseTitle);
       }
+
+      const labels = Array.isArray(labelNames)
+        ? await Promise.all(labelNames.map(lookupLabelByName))
+        : undefined;
+
       // Update any matching issues which currently exist
       if (issues.length) {
         let activeIssue = issues.find((i) => i.state === 'open');
@@ -658,13 +673,36 @@ const platform: Platform = {
 
         // Update issue body and re-open if enabled
         logger.debug(`Updating Issue #${activeIssue.number}`);
-        await helper.updateIssue(config.repository, activeIssue.number, {
-          body,
-          title,
-          state: shouldReOpen
-            ? 'open'
-            : (activeIssue.state as helper.IssueState),
-        });
+        const existingIssue = await helper.updateIssue(
+          config.repository,
+          activeIssue.number,
+          {
+            body,
+            title,
+            state: shouldReOpen
+              ? 'open'
+              : (activeIssue.state as helper.IssueState),
+          }
+        );
+
+        // Test whether the issues need to be updated
+        const existingLabelIds = (existingIssue.labels ?? []).map(
+          (label) => label.id
+        );
+        if (
+          labels &&
+          (labels.length !== existingLabelIds.length ||
+            labels.filter((labelId) => !existingLabelIds.includes(labelId))
+              .length !== 0)
+        ) {
+          await helper.updateIssueLabels(
+            config.repository,
+            activeIssue.number,
+            {
+              labels,
+            }
+          );
+        }
 
         return 'updated';
       }
@@ -673,6 +711,7 @@ const platform: Platform = {
       const issue = await helper.createIssue(config.repository, {
         body,
         title,
+        labels,
       });
       logger.debug(`Created new Issue #${issue.number}`);
       config.issueList = null;
@@ -839,6 +878,7 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
+  getIssue,
   getRawFile,
   getJsonFile,
   getIssueList,

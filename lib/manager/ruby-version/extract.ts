@@ -1,4 +1,4 @@
-import * as datasourceRubyVersion from '../../datasource/ruby-version';
+import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { logger } from '../../logger';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -7,7 +7,7 @@ export function extractPackageFile(content: string): PackageFile {
   const dep: PackageDependency = {
     depName: 'ruby',
     currentValue: content.trim(),
-    datasource: datasourceRubyVersion.id,
+    datasource: RubyVersionDatasource.id,
   };
   return { deps: [dep] };
 }

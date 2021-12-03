@@ -1,12 +1,14 @@
-import { getName, logger, mocked } from '../../test/util';
+import * as httpMock from '../../test/http-mock';
+import { logger, mocked } from '../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
 } from '../constants/error-messages';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
+import { Datasource } from './datasource';
 import * as datasourceDocker from './docker';
-import * as datasourceGalaxy from './galaxy';
+import { GalaxyDatasource } from './galaxy';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
 import * as datasourceNpm from './npm';
@@ -15,18 +17,16 @@ import type { DatasourceApi } from './types';
 import * as datasource from '.';
 
 jest.mock('./docker');
-jest.mock('./galaxy');
 jest.mock('./maven');
 jest.mock('./npm');
 jest.mock('./packagist');
 
 const dockerDatasource = mocked(datasourceDocker);
-const galaxyDatasource = mocked(datasourceGalaxy);
 const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-describe(getName(), () => {
+describe('datasource/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -34,30 +34,40 @@ describe(getName(), () => {
     expect(datasource.getDatasources()).toBeDefined();
     expect(datasource.getDatasourceList()).toBeDefined();
   });
-  it('validates dataource', () => {
+  it('validates datasource', () => {
     function validateDatasource(module: DatasourceApi, name: string): boolean {
       if (!module.getReleases) {
         return false;
       }
-      if (module.id !== name) {
-        return false;
-      }
-      return true;
+      return module.id === name;
     }
-    const dss = datasource.getDatasources();
+    function filterClassBasedDatasources(name: string): boolean {
+      return !(datasource.getDatasources().get(name) instanceof Datasource);
+    }
+    const dss = new Map(datasource.getDatasources());
 
-    const loadedDs = loadModules(__dirname, validateDatasource);
+    for (const ds of dss.values()) {
+      if (ds instanceof Datasource) {
+        dss.delete(ds.id);
+      }
+    }
+
+    const loadedDs = loadModules(
+      __dirname,
+      validateDatasource,
+      filterClassBasedDatasources
+    );
     expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
 
     for (const dsName of dss.keys()) {
       const ds = dss.get(dsName);
-      expect(validateDatasource(ds, dsName)).toBe(true);
+      expect(validateDatasource(ds, dsName)).toBeTrue();
     }
   });
   it('returns if digests are supported', () => {
     expect(
       datasource.supportsDigests({ datasource: datasourceGithubTags.id })
-    ).toBe(true);
+    ).toBeTrue();
   });
   it('returns null for no datasource', async () => {
     expect(
@@ -83,6 +93,14 @@ describe(getName(), () => {
       })
     ).toBeNull();
   });
+  it('returns class datasource', async () => {
+    expect(
+      await datasource.getPkgReleases({
+        datasource: 'cdnjs',
+        depName: null,
+      })
+    ).toBeNull();
+  });
   it('returns getDigest', async () => {
     expect(
       await datasource.getDigest({
@@ -99,9 +117,10 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'react-native',
     });
-    expect(res).toMatchSnapshot();
-    expect(res.changelogUrl).toBeDefined();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res).toMatchSnapshot({
+      changelogUrl:
+        'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
+    });
   });
   it('applies extractVersion', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -118,7 +137,7 @@ describe(getName(), () => {
       versioning: 'loose',
     });
     expect(res.releases).toHaveLength(1);
-    expect(res.releases[0].version).toEqual('v1.0');
+    expect(res.releases[0].version).toBe('v1.0');
   });
   it('adds sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -128,13 +147,18 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'node',
     });
-    expect(res).toMatchSnapshot();
-    expect(res.sourceUrl).toBeDefined();
+    expect(res).toMatchSnapshot({
+      sourceUrl: 'https://github.com/nodejs/node',
+    });
   });
   it('ignores and warns for registryUrls', async () => {
-    galaxyDatasource.getReleases.mockResolvedValue(null);
+    httpMock
+      .scope('https://galaxy.ansible.com')
+      .get('/api/v1/roles/')
+      .query({ owner__username: 'some', name: 'dep' })
+      .reply(200, {});
     await datasource.getPkgReleases({
-      datasource: datasourceGalaxy.id,
+      datasource: GalaxyDatasource.id,
       depName: 'some.dep',
       registryUrls: ['https://google.com/'],
     });
@@ -147,7 +171,7 @@ describe(getName(), () => {
       depName: 'something',
       registryUrls: ['https://docker.com', 'https://docker.io'],
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toBeNull();
   });
   it('hunts registries and returns success', async () => {
     packagistDatasource.getReleases.mockResolvedValueOnce(null);
@@ -212,8 +236,18 @@ describe(getName(), () => {
       depName: 'something',
       registryUrls: ['https://reg1.com', 'https://reg2.io'],
     });
-    expect(res).toMatchSnapshot();
-    expect(res.releases).toHaveLength(2);
+    expect(res).toEqual({
+      releases: [
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.0.0',
+        },
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.1.0',
+        },
+      ],
+    });
   });
   it('merges registries and aborts on ExternalHostError', async () => {
     mavenDatasource.getReleases.mockImplementationOnce(() => {
@@ -251,7 +285,7 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'abc',
     });
-    expect(res.sourceUrl).toEqual('https://abc.com');
+    expect(res.sourceUrl).toBe('https://abc.com');
   });
   it('massages sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -262,6 +296,20 @@ describe(getName(), () => {
       datasource: datasourceNpm.id,
       depName: 'cas',
     });
-    expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');
+    expect(res.sourceUrl).toBe('https://github.com/Jasig/cas');
+  });
+
+  it('applies replacements', async () => {
+    npmDatasource.getReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceNpm.id,
+      depName: 'abc',
+      replacementName: 'def',
+      replacementVersion: '2.0.0',
+    });
+    expect(res.replacementName).toBe('def');
+    expect(res.replacementVersion).toBe('2.0.0');
   });
 });

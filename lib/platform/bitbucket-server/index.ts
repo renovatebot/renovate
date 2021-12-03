@@ -1,13 +1,14 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
+import { PlatformId } from '../../constants';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { GitProtocol } from '../../types/git';
@@ -20,6 +21,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../util/http/bitbucket-server';
+import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../util/url';
 import type {
@@ -31,6 +33,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  MergePRConfig,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -67,7 +70,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
+  hostType: PlatformId.BitbucketServer,
 };
 
 /* istanbul ignore next */
@@ -120,10 +123,14 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
+  const repo = repoName ?? config.repository;
   const [project, slug] = repo.split('/');
-  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000`;
+  const fileUrl =
+    `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
+    (branchOrTag ? '&at=' + branchOrTag : '');
   const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
@@ -136,22 +143,23 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
 // Initialize BitBucket Server by getting base branch
 export async function initRepo({
   repository,
-  localDir,
   cloneSubmodules,
   ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(
-    `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
-  );
+  logger.debug(`initRepo("${JSON.stringify({ repository }, null, 2)}")`);
   const opts = hostRules.find({
     hostType: defaults.hostType,
     url: defaults.endpoint,
@@ -215,17 +223,15 @@ export async function initRepo({
 
     await git.initRepo({
       ...config,
-      localDir,
       url: gitUrl,
-      gitAuthorName: global.gitAuthor?.name,
-      gitAuthorEmail: global.gitAuthor?.email,
       cloneSubmodules,
+      fullClone: true,
     });
 
     config.mergeMethod = 'merge';
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
-      isFork: !!info.parent,
+      isFork: !!info.origin,
     };
 
     return repoConfig;
@@ -312,14 +318,12 @@ function matchesState(state: string, desiredState: string): boolean {
 
 // TODO: coverage (#9624)
 // istanbul ignore next
-const isRelevantPr = (
-  branchName: string,
-  prTitle: string | null | undefined,
-  state: string
-) => (p: Pr): boolean =>
-  p.sourceBranch === branchName &&
-  (!prTitle || p.title === prTitle) &&
-  matchesState(p.state, state);
+const isRelevantPr =
+  (branchName: string, prTitle: string | null | undefined, state: string) =>
+  (p: Pr): boolean =>
+    p.sourceBranch === branchName &&
+    (!prTitle || p.title === prTitle) &&
+    matchesState(p.state, state);
 
 // TODO: coverage (#9624)
 export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
@@ -403,18 +407,9 @@ async function getStatus(
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
-  branchName: string,
-  requiredStatusChecks?: string[] | null
+  branchName: string
 ): Promise<BranchStatus> {
-  logger.debug(
-    `getBranchStatus(${branchName}, requiredStatusChecks=${!!requiredStatusChecks})`
-  );
-
-  if (!requiredStatusChecks) {
-    // null means disable status checks, so it always succeeds
-    logger.debug('Status checks disabled = returning "success"');
-    return BranchStatus.green;
-  }
+  logger.debug(`getBranchStatus(${branchName})`);
 
   if (!git.branchExists(branchName)) {
     logger.debug('Branch does not exist - cannot fetch status');
@@ -800,7 +795,7 @@ export async function ensureCommentRemoval({
 // Pull Request
 
 const escapeHash = (input: string): string =>
-  input ? input.replace(/#/g, '%23') : input;
+  input ? input.replace(regEx(/#/g), '%23') : input;
 
 export async function createPr({
   sourceBranch,
@@ -968,10 +963,10 @@ export async function updatePr({
 }
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp261
-export async function mergePr(
-  prNo: number,
-  branchName: string
-): Promise<boolean> {
+export async function mergePr({
+  branchName,
+  id: prNo,
+}: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // Used for "automerge" feature
   try {
@@ -996,8 +991,6 @@ export async function mergePr(
   }
 
   logger.debug({ pr: prNo }, 'PR merged');
-  // Delete branch
-  await deleteBranch(branchName);
   return true;
 }
 
@@ -1009,10 +1002,10 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
-    .replace(/<\/?summary>/g, '**')
-    .replace(/<\/?details>/g, '')
-    .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(new RegExp('<!--.*?-->', 'g'), '');
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
+    .replace(regEx('<!--.*?-->', 'g'), '');
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

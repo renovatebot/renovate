@@ -2,13 +2,18 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   angularJs: {
-    description: 'All angular.js packages',
+    description: 'All AngularJS packages',
     matchPackageNames: [
       'angular',
       'angular-animate',
       'angular-scroll',
       'angular-sanitize',
     ],
+  },
+  react: {
+    description: 'All React packages',
+    matchPackageNames: ['@types/react'],
+    matchPackagePrefixes: ['react'],
   },
   apollographql: {
     description: 'All packages published by Apollo GraphQL',
@@ -23,8 +28,8 @@ export const presets: Record<string, Preset> = {
     matchPackagePrefixes: ['ember-template-lint'],
   },
   eslint: {
-    description: 'All eslint packages',
-    matchPackageNames: ['babel-eslint'],
+    description: 'All ESLint packages',
+    matchPackageNames: ['@types/eslint', 'babel-eslint'],
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   stylelint: {
@@ -32,7 +37,7 @@ export const presets: Record<string, Preset> = {
     matchPackagePrefixes: ['stylelint'],
   },
   tslint: {
-    description: 'All tslint packages',
+    description: 'All TSLint packages',
     matchPackageNames: ['codelyzer'],
     matchPackagePatterns: ['\\btslint\\b'],
   },
@@ -47,25 +52,46 @@ export const presets: Record<string, Preset> = {
     matchPackageNames: ['remark-lint'],
   },
   postcss: {
-    description: 'All postcss packages',
+    description: 'All PostCSS packages',
     matchPackageNames: ['postcss'],
     matchPackagePrefixes: ['postcss-'],
   },
   jsUnitTest: {
-    description: 'Unit test packages for javascript',
+    description: 'Unit test packages for JavaScript',
     matchPackageNames: [
+      '@types/chai',
+      '@types/ember-mocha',
+      '@types/ember-qunit',
+      '@types/enzyme',
+      '@types/istanbul',
+      '@types/jest',
+      '@types/mocha',
+      '@types/mock-fs',
+      '@types/proxyquire',
+      '@types/sinon',
+      '@types/supertest',
       'coveralls',
       'ember-exam',
       'ember-mocha',
       'ember-qunit',
+      'enzyme',
       'istanbul',
       'mock-fs',
       'nock',
       'nyc',
       'proxyquire',
       'supertest',
+      'ts-jest',
     ],
-    matchPackagePrefixes: ['chai', 'jest', 'mocha', 'qunit', 'sinon', 'should'],
+    matchPackagePrefixes: [
+      '@testing-library',
+      'chai',
+      'jest',
+      'mocha',
+      'qunit',
+      'should',
+      'sinon',
+    ],
   },
   unitTest: {
     description: 'All unit test packages',

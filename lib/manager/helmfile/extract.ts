@@ -1,23 +1,14 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
-import * as datasourceHelm from '../../datasource/helm';
+import { loadAll } from 'js-yaml';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { Doc } from './types';
 
 const isValidChartName = (name: string): boolean =>
-  !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
-
-interface Doc {
-  releases?: {
-    chart: string;
-    version: string;
-  }[];
-  repositories?: {
-    name: string;
-    url: string;
-  }[];
-}
+  !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
 
 export function extractPackageFile(
   content: string,
@@ -28,14 +19,14 @@ export function extractPackageFile(
   let docs: Doc[];
   const aliases: Record<string, string> = {};
   try {
-    docs = yaml.safeLoadAll(content, null, { json: true });
+    docs = loadAll(content, null, { json: true });
   } catch (err) {
     logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
     return null;
   }
   for (const doc of docs) {
     if (!(doc && is.array(doc.releases))) {
-      continue; // eslint-disable-line no-continue
+      continue;
     }
 
     if (doc.repositories) {
@@ -49,12 +40,19 @@ export function extractPackageFile(
       let depName = dep.chart;
       let repoName = null;
 
+      if (!is.string(dep.chart)) {
+        return {
+          depName: dep.name,
+          skipReason: SkipReason.InvalidName,
+        };
+      }
+
       // If starts with ./ is for sure a local path
       if (dep.chart.startsWith('./')) {
         return {
           depName,
-          skipReason: 'local-chart',
-        } as PackageDependency;
+          skipReason: SkipReason.LocalChart,
+        };
       }
 
       if (dep.chart.includes('/')) {
@@ -98,5 +96,5 @@ export function extractPackageFile(
     return null;
   }
 
-  return { deps, datasource: datasourceHelm.id } as PackageFile;
+  return { deps, datasource: HelmDatasource.id } as PackageFile;
 }

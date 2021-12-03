@@ -1,11 +1,11 @@
-import { getName, partial } from '../../../../test/util';
+import { partial } from '../../../../test/util';
 import * as datasource from '../../../datasource';
 import * as dockerVersioning from '../../../versioning/docker';
 import * as npmVersioning from '../../../versioning/npm';
 import type { BranchUpgradeConfig } from '../../types';
 import * as releases from './releases';
 
-describe(getName(), () => {
+describe('workers/pr/changelog/releases', () => {
   describe('getReleaseNotes()', () => {
     beforeEach(() => {
       jest.spyOn(datasource, 'getPkgReleases').mockResolvedValueOnce({

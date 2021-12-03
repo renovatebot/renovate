@@ -1,9 +1,4 @@
-import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
-import {
-  PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITHUB,
-} from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { bootstrap } from '../../proxy';
 import * as hostRules from '../host-rules';
 import { applyHostRules } from './host-rules';
@@ -12,9 +7,9 @@ const url = 'https://github.com';
 
 jest.mock('global-agent');
 
-describe(getName(), () => {
+describe('util/http/host-rules', () => {
   const options = {
-    hostType: PLATFORM_TYPE_GITHUB,
+    hostType: PlatformId.Github,
   };
   beforeEach(() => {
     // reset module
@@ -25,11 +20,11 @@ describe(getName(), () => {
     // clean up hostRules
     hostRules.clear();
     hostRules.add({
-      hostType: PLATFORM_TYPE_GITHUB,
+      hostType: PlatformId.Github,
       token: 'token',
     });
     hostRules.add({
-      hostType: PLATFORM_TYPE_GITEA,
+      hostType: PlatformId.Gitea,
       password: 'password',
     });
 
@@ -39,13 +34,20 @@ describe(getName(), () => {
       token: 'XXX',
     });
 
-    httpMock.reset();
-    httpMock.setup();
+    hostRules.add({
+      hostType: PlatformId.Gitlab,
+      token: 'abc',
+    });
+
+    hostRules.add({
+      hostType: 'github-releases',
+      username: 'some',
+      password: 'xxx',
+    });
   });
 
   afterEach(() => {
     delete process.env.HTTP_PROXY;
-    httpMock.reset();
   });
 
   it('adds token', () => {
@@ -61,7 +63,7 @@ describe(getName(), () => {
   });
 
   it('adds auth', () => {
-    expect(applyHostRules(url, { hostType: PLATFORM_TYPE_GITEA }))
+    expect(applyHostRules(url, { hostType: PlatformId.Gitea }))
       .toMatchInlineSnapshot(`
       Object {
         "hostType": "gitea",
@@ -114,6 +116,52 @@ describe(getName(), () => {
       Object {
         "hostType": "github",
         "token": "xxx",
+      }
+    `);
+  });
+
+  it('noAuth', () => {
+    expect(applyHostRules(url, { ...options, noAuth: true }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "hostType": "github",
+        "noAuth": true,
+      }
+    `);
+  });
+
+  it('no fallback', () => {
+    expect(
+      applyHostRules(url, { ...options, hostType: 'github-releases' })
+    ).toEqual({
+      hostType: 'github-releases',
+      username: 'some',
+      password: 'xxx',
+    });
+  });
+
+  it('fallback to github', () => {
+    expect(applyHostRules(url, { ...options, hostType: 'github-tags' }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "context": Object {
+          "authType": undefined,
+        },
+        "hostType": "github-tags",
+        "token": "token",
+      }
+    `);
+  });
+
+  it('fallback to gitlab', () => {
+    expect(applyHostRules(url, { ...options, hostType: 'gitlab-tags' }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "context": Object {
+          "authType": undefined,
+        },
+        "hostType": "gitlab-tags",
+        "token": "abc",
       }
     `);
   });

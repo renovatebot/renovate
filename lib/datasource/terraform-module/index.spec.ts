@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
-import { id as datasource } from '.';
+import { loadFixture } from '../../../test/util';
+import { TerraformModuleDatasource } from '.';
 
 const consulData: any = loadFixture('registry-consul.json');
 const serviceDiscoveryResult: any = loadFixture('service-discovery.json');
@@ -9,18 +9,14 @@ const serviceDiscoveryCustomResult: any = loadFixture(
   'service-custom-discovery.json'
 );
 
+const datasource = TerraformModuleDatasource.id;
 const baseUrl = 'https://registry.terraform.io';
 const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
-describe(getName(), () => {
+describe('datasource/terraform-module/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
     });
 
     it('returns null for empty result', async () => {

@@ -17,384 +17,11 @@ Object {
 }
 `;
 
-exports[`config/presets/index getPreset gets parameterised configs 1`] = `
-Object {
-  "description": Array [
-    "Group eslint packages into same branch/PR",
-  ],
-  "packageRules": Array [
-    Object {
-      "extends": Array [
-        "packages:eslint",
-      ],
-      "groupName": "eslint",
-    },
-  ],
-}
-`;
-
 exports[`config/presets/index getPreset handles 404 packages 1`] = `undefined`;
 
 exports[`config/presets/index getPreset handles 404 packages 2`] = `undefined`;
 
 exports[`config/presets/index getPreset handles 404 packages 3`] = `undefined`;
-
-exports[`config/presets/index getPreset handles missing params 1`] = `
-Object {
-  "description": Array [
-    "Group {{arg1}} packages into same branch/PR",
-  ],
-  "packageRules": Array [
-    Object {
-      "extends": Array [],
-      "groupName": "{{arg1}}",
-    },
-  ],
-}
-`;
-
-exports[`config/presets/index getPreset handles no config 1`] = `undefined`;
-
-exports[`config/presets/index getPreset handles no config 2`] = `undefined`;
-
-exports[`config/presets/index getPreset handles no config 3`] = `undefined`;
-
-exports[`config/presets/index getPreset handles preset not found 1`] = `undefined`;
-
-exports[`config/presets/index getPreset handles preset not found 2`] = `undefined`;
-
-exports[`config/presets/index getPreset handles preset not found 3`] = `undefined`;
-
-exports[`config/presets/index getPreset handles removed presets with a migration 1`] = `
-Object {
-  "dependencyDashboard": true,
-  "description": Array [
-    "Enable Renovate Dependency Dashboard creation",
-  ],
-}
-`;
-
-exports[`config/presets/index getPreset handles throw errors 1`] = `undefined`;
-
-exports[`config/presets/index getPreset handles throw errors 2`] = `undefined`;
-
-exports[`config/presets/index getPreset handles throw errors 3`] = `undefined`;
-
-exports[`config/presets/index getPreset ignores irrelevant params 1`] = `
-Object {
-  "description": Array [
-    "Use version pinning (maintain a single version only and not semver ranges)",
-  ],
-  "rangeStrategy": "pin",
-}
-`;
-
-exports[`config/presets/index parsePreset parses gitea 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "gitea",
-}
-`;
-
-exports[`config/presets/index parsePreset parses github 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "github",
-}
-`;
-
-exports[`config/presets/index parsePreset parses github subdirectories 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "somefile",
-  "presetPath": "somepath/somesubpath",
-  "presetSource": "github",
-}
-`;
-
-exports[`config/presets/index parsePreset parses github subfiles 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "somefile",
-  "presetPath": undefined,
-  "presetSource": "github",
-}
-`;
-
-exports[`config/presets/index parsePreset parses github subfiles with preset and sub-preset name 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "somefile/somepreset/somesubpreset",
-  "presetPath": undefined,
-  "presetSource": "github",
-}
-`;
-
-exports[`config/presets/index parsePreset parses github subfiles with preset name 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "somefile/somepreset",
-  "presetPath": undefined,
-  "presetSource": "github",
-}
-`;
-
-exports[`config/presets/index parsePreset parses github toplevel file using subdirectory syntax 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "somefile",
-  "presetPath": undefined,
-  "presetSource": "github",
-}
-`;
-
-exports[`config/presets/index parsePreset parses gitlab 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "gitlab",
-}
-`;
-
-exports[`config/presets/index parsePreset parses local 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "local",
-}
-`;
-
-exports[`config/presets/index parsePreset parses local with subdirectory 1`] = `
-Object {
-  "packageName": "some-group/some-repo",
-  "params": undefined,
-  "presetName": "some-file",
-  "presetPath": "some-dir",
-  "presetSource": "local",
-}
-`;
-
-exports[`config/presets/index parsePreset parses no prefix as local 1`] = `
-Object {
-  "packageName": "some/repo",
-  "params": undefined,
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "local",
-}
-`;
-
-exports[`config/presets/index parsePreset returns default package name 1`] = `
-Object {
-  "packageName": "default",
-  "params": undefined,
-  "presetName": "base",
-  "presetPath": undefined,
-  "presetSource": "internal",
-}
-`;
-
-exports[`config/presets/index parsePreset returns default package name with params 1`] = `
-Object {
-  "packageName": "default",
-  "params": Array [
-    "packages/eslint",
-    "eslint",
-  ],
-  "presetName": "group",
-  "presetPath": undefined,
-  "presetSource": "internal",
-}
-`;
-
-exports[`config/presets/index parsePreset returns non-scoped default 1`] = `
-Object {
-  "packageName": "renovate-config-somepackage",
-  "params": undefined,
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns non-scoped package name 1`] = `
-Object {
-  "packageName": "renovate-config-somepackage",
-  "params": undefined,
-  "presetName": "webapp",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns non-scoped package name full 1`] = `
-Object {
-  "packageName": "renovate-config-somepackage",
-  "params": undefined,
-  "presetName": "webapp",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns non-scoped package name with params 1`] = `
-Object {
-  "packageName": "renovate-config-somepackage",
-  "params": Array [
-    "param1",
-  ],
-  "presetName": "webapp",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns scope with packageName and default 1`] = `
-Object {
-  "packageName": "@somescope/somepackagename",
-  "params": undefined,
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns scope with packageName and params and default 1`] = `
-Object {
-  "packageName": "@somescope/somepackagename",
-  "params": Array [
-    "param1",
-    "param2",
-    "param3",
-  ],
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns scope with packageName and presetName 1`] = `
-Object {
-  "packageName": "@somescope/somepackagename",
-  "params": undefined,
-  "presetName": "somePresetName",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns scope with packageName and presetName and params 1`] = `
-Object {
-  "packageName": "@somescope/somepackagename",
-  "params": Array [
-    "param1",
-    "param2",
-  ],
-  "presetName": "somePresetName",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns scope with presetName 1`] = `
-Object {
-  "packageName": "@somescope/renovate-config",
-  "params": undefined,
-  "presetName": "somePresetName",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns scope with presetName and params 1`] = `
-Object {
-  "packageName": "@somescope/renovate-config",
-  "params": Array [
-    "param1",
-  ],
-  "presetName": "somePresetName",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns simple scope 1`] = `
-Object {
-  "packageName": "@somescope/renovate-config",
-  "params": undefined,
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index parsePreset returns simple scope and params 1`] = `
-Object {
-  "packageName": "@somescope/renovate-config",
-  "params": Array [
-    "param1",
-  ],
-  "presetName": "default",
-  "presetPath": undefined,
-  "presetSource": "npm",
-}
-`;
-
-exports[`config/presets/index replaceArgs replaces args in strings 1`] = `"c foo ab"`;
-
-exports[`config/presets/index replaceArgs replaces arrays 1`] = `
-Object {
-  "foo": Array [
-    "a",
-    Object {
-      "bar": "b",
-      "baz": 5,
-    },
-  ],
-}
-`;
-
-exports[`config/presets/index replaceArgs replaces objects 1`] = `
-Object {
-  "bar": Object {
-    "aaa": Object {
-      "bbb": "woo c",
-    },
-    "baz": "b boo",
-  },
-  "foo": "ha a",
-}
-`;
-
-exports[`config/presets/index resolvePreset combines two package alls 1`] = `
-Object {
-  "matchPackageNames": Array [
-    "babel-eslint",
-  ],
-  "matchPackagePrefixes": Array [
-    "@typescript-eslint/",
-    "eslint",
-    "stylelint",
-  ],
-}
-`;
-
-exports[`config/presets/index resolvePreset ignores presets 1`] = `Object {}`;
 
 exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = `
 Object {
@@ -404,8 +31,9 @@ Object {
     "Use <code>renovate/</code> as prefix for all branch names",
     "If semantic commits detected, use semantic commit type <code>fix</code> for dependencies and <code>chore</code> for all others",
     "Require all status checks to pass before any automerging",
-    "Pin dependency versions for <code>devDependencies</code> and retain semver ranges for others",
+    "Pin dependency versions for <code>devDependencies</code> and retain SemVer ranges for others",
   ],
+  "ignoreTests": false,
   "ignoreUnstable": true,
   "labels": Array [
     "dependencies",
@@ -458,7 +86,6 @@ Object {
   ],
   "prCreation": "immediate",
   "rebaseWhen": "behind-base-branch",
-  "requiredStatusChecks": Array [],
   "respectLatest": true,
   "schedule": Array [
     "before 8am",
@@ -473,6 +100,7 @@ Object {
 exports[`config/presets/index resolvePreset resolves eslint 1`] = `
 Object {
   "matchPackageNames": Array [
+    "@types/eslint",
     "babel-eslint",
   ],
   "matchPackagePrefixes": Array [
@@ -488,6 +116,7 @@ Object {
     "All lint-related packages",
   ],
   "matchPackageNames": Array [
+    "@types/eslint",
     "babel-eslint",
     "codelyzer",
     "remark-lint",
@@ -516,6 +145,7 @@ Object {
         "All lint-related packages",
       ],
       "matchPackageNames": Array [
+        "@types/eslint",
         "babel-eslint",
         "codelyzer",
         "remark-lint",
@@ -534,83 +164,10 @@ Object {
 }
 `;
 
-exports[`config/presets/index resolvePreset resolves packageRule 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "groupName": "eslint",
-      "matchPackageNames": Array [
-        "babel-eslint",
-      ],
-      "matchPackagePrefixes": Array [
-        "@typescript-eslint/",
-        "eslint",
-      ],
-    },
-  ],
-}
-`;
-
 exports[`config/presets/index resolvePreset resolves self-hosted presets without baseConfig 1`] = `
 Object {
   "labels": Array [
     "self-hosted resolved",
   ],
-}
-`;
-
-exports[`config/presets/index resolvePreset returns same if no presets 1`] = `
-Object {
-  "foo": 1,
-}
-`;
-
-exports[`config/presets/index resolvePreset throws if invalid preset 1`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if invalid preset 2`] = `"Preset name not found within published preset config (wrongpreset:invalid-preset)"`;
-
-exports[`config/presets/index resolvePreset throws if invalid preset 3`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if invalid preset file 1`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if invalid preset file 2`] = `"Cannot find preset's package (notfound)"`;
-
-exports[`config/presets/index resolvePreset throws if invalid preset file 3`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if path + invalid syntax 1`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if path + invalid syntax 2`] = `"Preset is invalid (github>user/repo//)"`;
-
-exports[`config/presets/index resolvePreset throws if path + invalid syntax 3`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if path + sub-preset 1`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if path + sub-preset 2`] = `"Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)"`;
-
-exports[`config/presets/index resolvePreset throws if path + sub-preset 3`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if valid and invalid 1`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws if valid and invalid 2`] = `"Preset name not found within published preset config (wrongpreset:invalid-preset)"`;
-
-exports[`config/presets/index resolvePreset throws if valid and invalid 3`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws noconfig 1`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws noconfig 2`] = `"Preset package is missing a renovate-config entry (noconfig:base)"`;
-
-exports[`config/presets/index resolvePreset throws noconfig 3`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws throw 1`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws throw 2`] = `undefined`;
-
-exports[`config/presets/index resolvePreset throws throw 3`] = `undefined`;
-
-exports[`config/presets/index resolvePreset works with valid 1`] = `
-Object {
-  "foo": 1,
-  "ignoreDeps": Array [],
-  "rangeStrategy": "pin",
 }
 `;

@@ -1,8 +1,7 @@
-import { getName } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import { sortBranches } from './sort';
 
-describe(getName(), () => {
+describe('workers/repository/process/sort', () => {
   describe('sortBranches()', () => {
     it('sorts based on updateType and prTitle', () => {
       const branches = [
@@ -24,6 +23,7 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
+      // FIXME: explicit assert condition
       expect(branches).toMatchSnapshot();
     });
     it('sorts based on prPriority', () => {
@@ -50,6 +50,7 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
+      // FIXME: explicit assert condition
       expect(branches).toMatchSnapshot();
     });
     it('sorts based on isVulnerabilityAlert', () => {
@@ -77,6 +78,7 @@ describe(getName(), () => {
         },
       ];
       sortBranches(branches);
+      // FIXME: explicit assert condition
       expect(branches).toMatchSnapshot();
     });
   });

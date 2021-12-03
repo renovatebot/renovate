@@ -1,47 +1,57 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http } from '../../util/http';
+import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { CdnjsResponse } from './types';
 
-export const id = 'cdnjs';
-export const customRegistrySupport = false;
-export const defaultRegistryUrls = ['https://api.cdnjs.com/'];
-export const caching = true;
+export class CdnJsDatasource extends Datasource {
+  static readonly id = 'cdnjs';
 
-const http = new Http(id);
+  constructor() {
+    super(CdnJsDatasource.id);
+  }
 
-export async function getReleases({
-  lookupName,
-  registryUrl,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  // Each library contains multiple assets, so we cache at the library level instead of per-asset
-  const library = lookupName.split('/')[0];
-  const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
-  try {
-    const { assets, homepage, repository } = (
-      await http.getJson<CdnjsResponse>(url)
-    ).body;
-    if (!assets) {
-      return null;
-    }
-    const assetName = lookupName.replace(`${library}/`, '');
-    const releases = assets
-      .filter(({ files }) => files.includes(assetName))
-      .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
+  override readonly customRegistrySupport = false;
 
-    const result: ReleaseResult = { releases };
+  override readonly defaultRegistryUrls = ['https://api.cdnjs.com/'];
 
-    if (homepage) {
-      result.homepage = homepage;
+  override readonly caching = true;
+
+  // this.handleErrors will always throw
+
+  async getReleases({
+    lookupName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // Each library contains multiple assets, so we cache at the library level instead of per-asset
+    const library = lookupName.split('/')[0];
+    const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
+    let result: ReleaseResult;
+    try {
+      const { assets, homepage, repository } = (
+        await this.http.getJson<CdnjsResponse>(url)
+      ).body;
+      if (!assets) {
+        return null;
+      }
+      const assetName = lookupName.replace(`${library}/`, '');
+      const releases = assets
+        .filter(({ files }) => files.includes(assetName))
+        .map(({ version, sri }) => ({ version, newDigest: sri[assetName] }));
+
+      result = { releases };
+
+      if (homepage) {
+        result.homepage = homepage;
+      }
+      if (repository?.url) {
+        result.sourceUrl = repository.url;
+      }
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw new ExternalHostError(err);
+      }
+      this.handleGenericErrors(err);
     }
-    if (repository?.url) {
-      result.sourceUrl = repository.url;
-    }
-    return result;
-  } catch (err) {
-    if (err.statusCode !== 404) {
-      throw new ExternalHostError(err);
-    }
-    throw err;
+    return result || null;
   }
 }

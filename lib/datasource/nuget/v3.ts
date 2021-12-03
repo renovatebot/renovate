@@ -3,9 +3,11 @@ import pAll from 'p-all';
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { HttpError } from '../../util/http/types';
+import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import { id, removeBuildMeta } from './common';
@@ -86,6 +88,10 @@ export async function getResourceUrl(
     await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
     return serviceId;
   } catch (err) {
+    // istanbul ignore if: not easy testable with nock
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
     logger.debug(
       { err, url },
       `nuget registry failure: can't get ${resourceType}`
@@ -111,13 +117,13 @@ export async function getReleases(
   feedUrl: string,
   pkgName: string
 ): Promise<ReleaseResult | null> {
-  const baseUrl = feedUrl.replace(/\/*$/, '');
+  const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
   const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
   const packageRegistration = await http.getJson<PackageRegistration>(url);
   const catalogPages = packageRegistration.body.items || [];
-  const catalogPagesQueue = catalogPages.map((page) => (): Promise<
-    CatalogEntry[]
-  > => getCatalogEntry(page));
+  const catalogPagesQueue = catalogPages.map(
+    (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(page)
+  );
   const catalogEntries = (
     await pAll(catalogPagesQueue, { concurrency: 5 })
   ).flat();
@@ -174,6 +180,10 @@ export async function getReleases(
       }
     }
   } catch (err) {
+    // istanbul ignore if: not easy testable with nock
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
     // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
     if (err instanceof HttpError && err.response?.statusCode === 404) {
       logger.debug(

@@ -1,11 +1,12 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { getAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 import { addMeta, logger } from '../../logger';
 import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { File, getRepoStatus } from '../../util/git';
+import { getRepoStatus } from '../../util/git';
+import type { File } from '../../util/git/types';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { compile } from '../../util/template';
@@ -22,10 +23,8 @@ export async function postUpgradeCommandsExecutor(
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts || [])];
   const artifactErrors = [...(config.artifactErrors || [])];
-  const {
-    allowedPostUpgradeCommands,
-    allowPostUpgradeCommandTemplating,
-  } = getAdminConfig();
+  const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
+    GlobalConfig.get();
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -64,7 +63,7 @@ export async function postUpgradeCommandsExecutor(
 
             logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
-              cwd: config.localDir,
+              cwd: GlobalConfig.get('localDir'),
             });
 
             logger.debug(
@@ -151,7 +150,7 @@ export async function postUpgradeCommandsExecutor(
 export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
-  const { allowedPostUpgradeCommands } = getAdminConfig();
+  const { allowedPostUpgradeCommands } = GlobalConfig.get();
 
   const hasChangedFiles =
     config.updatedPackageFiles?.length > 0 ||
@@ -184,10 +183,8 @@ export default async function executePostUpgradeCommands(
       postUpgradeTasks.executionMode === 'update'
   );
 
-  const {
-    updatedArtifacts,
-    artifactErrors,
-  } = await postUpgradeCommandsExecutor(updateUpgradeCommands, config);
+  const { updatedArtifacts, artifactErrors } =
+    await postUpgradeCommandsExecutor(updateUpgradeCommands, config);
   return postUpgradeCommandsExecutor(branchUpgradeCommands, {
     ...config,
     updatedArtifacts,

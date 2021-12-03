@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig, getName } from '../../../test/util';
+import { RenovateConfig, getConfig } from '../../../test/util';
 import { processResult } from './result';
 
 let config: RenovateConfig;
@@ -7,7 +7,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(), () => {
+describe('workers/repository/result', () => {
   describe('processResult()', () => {
     it('runs', () => {
       const result = processResult(config, 'done');

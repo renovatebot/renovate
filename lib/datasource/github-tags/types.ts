@@ -5,3 +5,7 @@ export interface TagResponse {
     sha: string;
   };
 }
+
+export interface GitHubTag {
+  name: string;
+}

@@ -1,9 +1,12 @@
-import { getAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 
 const basicEnvVars = [
   'HTTP_PROXY',
   'HTTPS_PROXY',
   'NO_PROXY',
+  'http_proxy',
+  'https_proxy',
+  'no_proxy',
   'HOME',
   'PATH',
   'LC_ALL',
@@ -17,7 +20,7 @@ export function getChildProcessEnv(
   customEnvVars: string[] = []
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
-  if (getAdminConfig().exposeAllEnv) {
+  if (GlobalConfig.get('exposeAllEnv')) {
     return { ...env, ...process.env };
   }
   const envVars = [...basicEnvVars, ...customEnvVars];

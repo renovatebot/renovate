@@ -1,11 +1,14 @@
-import * as datasourceHex from '../../datasource/hex';
+import { HexDatasource } from '../../datasource/hex';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { getSiblingFileName, localPathExists } from '../../util/fs';
+import { findLocalSiblingOrParent, localPathExists } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 
-const depSectionRegExp = /defp\s+deps.*do/g;
-const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;
+const depSectionRegExp = regEx(/defp\s+deps.*do/g);
+const depMatchRegExp = regEx(
+  /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm
+);
 
 export async function extractPackageFile(
   content: string,
@@ -38,9 +41,9 @@ export async function extractPackageFile(
             managerData: {},
           };
 
-          dep.datasource = datasource || datasourceHex.id;
+          dep.datasource = datasource || HexDatasource.id;
 
-          if (dep.datasource === datasourceHex.id) {
+          if (dep.datasource === HexDatasource.id) {
             dep.currentValue = currentValue;
             dep.lookupName = depName;
           }
@@ -49,7 +52,7 @@ export async function extractPackageFile(
             dep.lookupName += ':' + organization;
           }
 
-          if (dep.datasource !== datasourceHex.id) {
+          if (dep.datasource !== HexDatasource.id) {
             dep.skipReason = SkipReason.NonHexDeptypes;
           }
 
@@ -66,7 +69,8 @@ export async function extractPackageFile(
     }
   }
   const res: PackageFile = { deps };
-  const lockFileName = getSiblingFileName(fileName, 'mix.lock');
+  const lockFileName =
+    (await findLocalSiblingOrParent(fileName, 'mix.lock')) || 'mix.lock';
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];

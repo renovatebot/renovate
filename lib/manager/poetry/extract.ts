@@ -1,6 +1,6 @@
 import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
-import * as datasourcePypi from '../../datasource/pypi';
+import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import {
@@ -65,7 +65,7 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as string,
       managerData: { nestedVersion },
-      datasource: datasourcePypi.id,
+      datasource: PypiDatasource.id,
     };
     if (dep.depName in poetryLockfile) {
       dep.lockedVersion = poetryLockfile[dep.depName].version;

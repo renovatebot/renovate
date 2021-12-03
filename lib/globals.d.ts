@@ -3,16 +3,10 @@
  */
 
 declare interface Error {
-  location?: string;
+  validationSource?: string;
 
   validationError?: string;
   validationMessage?: string;
-}
-
-declare namespace NodeJS {
-  interface Global {
-    gitAuthor?: { name: string; email: string };
-  }
 }
 
 // can't use `resolveJsonModule` because it will copy json files and change dist path

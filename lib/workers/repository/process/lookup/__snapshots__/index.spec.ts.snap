@@ -90,6 +90,7 @@ Object {
       "updateType": "pin",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -103,6 +104,7 @@ Object {
       "updateType": "pin",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -122,6 +124,7 @@ Object {
       "updateType": "pin",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -151,6 +154,7 @@ Object {
       "updateType": "digest",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -164,6 +168,7 @@ Object {
       "updateType": "digest",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -179,6 +184,7 @@ Object {
       "updateType": "digest",
     },
   ],
+  "versioning": "git",
   "warnings": Array [],
 }
 `;
@@ -188,6 +194,26 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles github
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles packagist 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles pypi 404 1`] = `Array []`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles replacements 1`] = `
+Object {
+  "changelogUrl": undefined,
+  "currentVersion": "1.4.1",
+  "dependencyUrl": undefined,
+  "fixedVersion": "1.4.1",
+  "homepage": undefined,
+  "sourceUrl": "https://github.com/kriskowal/q",
+  "updates": Array [
+    Object {
+      "newName": "r",
+      "newValue": "2.0.0",
+      "updateType": "replacement",
+    },
+  ],
+  "versioning": "npm",
+  "warnings": Array [],
+}
+`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
 Object {
@@ -209,11 +235,28 @@ Object {
       "updateType": "major",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles unknown datasource 1`] = `Array []`;
+
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles update-lockfile 1`] = `
+Array [
+  Object {
+    "bucket": "non-major",
+    "isLockfileUpdate": true,
+    "isRange": true,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "^1.2.1",
+    "newVersion": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "updateType": "minor",
+  },
+]
+`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() ignores deprecated 1`] = `
 Object {
@@ -240,6 +283,7 @@ Marking the latest version of an npm package as deprecated results in the entire
       "updateType": "minor",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -285,6 +329,7 @@ Object {
       "updateType": "minor",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -433,6 +478,7 @@ Object {
       "updateType": "minor",
     },
   ],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -728,6 +774,20 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup/index .lookupUpdates() should update pinned versions if updatePinnedDependencies=true 1`] = `
+Array [
+  Object {
+    "bucket": "non-major",
+    "newMajor": 0,
+    "newMinor": 0,
+    "newValue": "0.0.35",
+    "newVersion": "0.0.35",
+    "releaseTimestamp": "2017-04-27T16:59:06.479Z",
+    "updateType": "patch",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup/index .lookupUpdates() should warn if no version matches dist-tag 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8 1`] = `
@@ -749,6 +809,7 @@ Object {
       "updateType": "major",
     },
   ],
+  "versioning": "docker",
   "warnings": Array [],
 }
 `;
@@ -780,6 +841,7 @@ Object {
       "updateType": "major",
     },
   ],
+  "versioning": "docker",
   "warnings": Array [],
 }
 `;
@@ -803,6 +865,7 @@ Object {
       "updateType": "minor",
     },
   ],
+  "versioning": "docker",
   "warnings": Array [],
 }
 `;
@@ -811,6 +874,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips undefine
 Object {
   "skipReason": "invalid-value",
   "updates": Array [],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;
@@ -819,6 +883,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips unsuppor
 Object {
   "skipReason": "invalid-value",
   "updates": Array [],
+  "versioning": "npm",
   "warnings": Array [],
 }
 `;

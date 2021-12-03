@@ -26,13 +26,8 @@ function matchesUnstable(
 export async function getInRangeReleases(
   config: BranchUpgradeConfig
 ): Promise<Release[] | null> {
-  const {
-    versioning,
-    currentVersion,
-    newVersion,
-    depName,
-    datasource,
-  } = config;
+  const { versioning, currentVersion, newVersion, depName, datasource } =
+    config;
   // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
     return null;

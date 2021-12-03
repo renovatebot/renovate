@@ -10,11 +10,10 @@ For example, if you think anything is unclear, or you think something needs to b
 
 You need the following dependencies for local development:
 
-- Git
+- Git `>=2.33.0`
 - Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
-- Python `^3.8`
 - Java between `8` and `12`
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
@@ -31,7 +30,7 @@ curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
-sudo apt-get install -y git python-minimal build-essential nodejs yarn default-jre-headless
+sudo apt-get install -y git build-essential nodejs yarn default-jre-headless
 ```
 
 You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
@@ -43,7 +42,7 @@ If you already installed a component, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
-- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`
+- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
 - Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
 - Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
 
@@ -53,8 +52,6 @@ If you already installed a component, skip the corresponding step.
   PS C:\Windows\system32> git --version
   PS C:\Windows\system32> node --version
   PS C:\Windows\system32> yarn --version
-  PS C:\Windows\system32> python --version
-  PS C:\Windows\system32> python -c "from unittest import mock; print(mock.__version__)"
   PS C:\Windows\system32> java -version
   ```
 
@@ -70,7 +67,7 @@ The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/inte
 
 ## Fork and Clone
 
-If you want to contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
+If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.
 The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
@@ -80,7 +77,7 @@ To ensure everything is working properly on your end, you must:
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`
 1. Verify the installation by running `yarn start`. You must see this error: `You must configure a GitHub personal access token`
 
-You only need to do these 5 steps this one time.
+You only need to do these steps once.
 
 Before you submit a pull request you should:
 
@@ -147,6 +144,8 @@ We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again.
 You usually don't need to fix any Prettier errors by hand.
 
+If you're only working on the documentation files, you can use the `yarn doc-fix` command to format your work.
+
 ## Keeping your Renovate fork up to date
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
@@ -179,17 +178,17 @@ It's usually easier to have the logs in a file that you can open with a text edi
 You can use a command like this to put the log messages in a file:
 
 ```
-rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
+LOG_LEVEL=debug yarn start myaccount/therepo > debug.log
 ```
 
-The example command will delete any existing `debug.log` and then save Renovate's output to a new `debug.log` file.
+The example command will redirect/save Renovate's output to the `debug.log` file (and overwrite `debug.log` if it already exists).
 
 ### Adding configuration options
 
 We want stay backwards-compatible as much as possible, as well as make the code configurable.
 So most new functionality should be controllable via configuration options.
 
-Create your new configuration option in the `lib/config/definitions.ts` file.
+Create your new configuration option in the `lib/config/options/index.ts` file.
 Also create documentation for the option in the `website/docs/configuration-options.md` file.
 
 ## Debugging

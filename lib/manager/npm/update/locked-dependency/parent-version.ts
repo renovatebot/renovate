@@ -14,6 +14,11 @@ export async function findFirstParentVersion(
   targetDepName: string,
   targetVersion: string
 ): Promise<string | null> {
+  // istanbul ignore if
+  if (!semver.isVersion(parentStartingVersion)) {
+    logger.debug('parentStartingVersion is not a version - cannot remediate');
+    return null;
+  }
   logger.debug(
     `Finding first version of ${parentName} starting with ${parentStartingVersion} which supports >= ${targetDepName}@${targetVersion}`
   );
@@ -23,10 +28,19 @@ export async function findFirstParentVersion(
       depName: targetDepName,
     };
     const targetDep = await getPkgReleases(lookupConfig);
+    // istanbul ignore if
+    if (!targetDep) {
+      logger.warn(
+        { targetDepName },
+        'Could not look up target dependency for remediation'
+      );
+      return null;
+    }
     const targetVersions = targetDep.releases
       .map((release) => release.version)
       .filter(
         (version) =>
+          semver.isVersion(version) &&
           semver.isStable(version) &&
           (version === targetVersion ||
             semver.isGreaterThan(version, targetVersion))
@@ -36,10 +50,19 @@ export async function findFirstParentVersion(
       depName: parentName,
     };
     const parentDep = await getPkgReleases(lookupConfig);
+    // istanbul ignore if
+    if (!parentDep) {
+      logger.info(
+        { parentName },
+        'Could not look up parent dependency for remediation'
+      );
+      return null;
+    }
     const parentVersions = parentDep.releases
       .map((release) => release.version)
       .filter(
         (version) =>
+          semver.isVersion(version) &&
           semver.isStable(version) &&
           (version === parentStartingVersion ||
             semver.isGreaterThan(version, parentStartingVersion))
@@ -83,7 +106,10 @@ export async function findFirstParentVersion(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'findFirstSupportingVersion error');
+    logger.warn(
+      { parentName, parentStartingVersion, targetDepName, targetVersion, err },
+      'findFirstParentVersion error'
+    );
     return null;
   }
   logger.debug(`Could not find a matching version`);

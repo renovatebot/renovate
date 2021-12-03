@@ -1,19 +1,33 @@
-import { getName, logger } from '../../../test/util';
-import type { PackageDependency } from '../types';
+import { logger } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
+import type { RepoGlobalConfig } from '../../config/types';
+import type { ExtractConfig, PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
 
-describe(getName(), () => {
+const config: ExtractConfig = {};
+
+const adminConfig: RepoGlobalConfig = { localDir: '' };
+
+describe('manager/gitlabci/extract', () => {
+  beforeEach(() => {
+    GlobalConfig.set(adminConfig);
+  });
+
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('extractAllPackageFiles()', () => {
     it('returns null for empty', async () => {
       expect(
-        await extractAllPackageFiles({}, [
+        await extractAllPackageFiles(config, [
           'lib/manager/gitlabci/__fixtures__/gitlab-ci.2.yaml',
         ])
       ).toBeNull();
     });
 
     it('extracts multiple included image lines', async () => {
-      const res = await extractAllPackageFiles({}, [
+      const res = await extractAllPackageFiles(config, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml',
       ]);
       expect(res).toMatchSnapshot();
@@ -29,7 +43,7 @@ describe(getName(), () => {
     });
 
     it('extracts named services', async () => {
-      const res = await extractAllPackageFiles({}, [
+      const res = await extractAllPackageFiles(config, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml',
       ]);
       expect(res).toMatchSnapshot();
@@ -38,7 +52,7 @@ describe(getName(), () => {
     });
 
     it('extracts multiple image lines', async () => {
-      const res = await extractAllPackageFiles({}, [
+      const res = await extractAllPackageFiles(config, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.yaml',
       ]);
       expect(res).toMatchSnapshot();
@@ -50,13 +64,13 @@ describe(getName(), () => {
           deps.push(d);
         });
       });
-      expect(deps).toHaveLength(7);
+      expect(deps).toHaveLength(8);
 
-      expect(deps.some((dep) => dep.currentValue.includes("'"))).toBe(false);
+      expect(deps.some((dep) => dep.currentValue.includes("'"))).toBeFalse();
     });
 
     it('extracts multiple image lines with comments', async () => {
-      const res = await extractAllPackageFiles({}, [
+      const res = await extractAllPackageFiles(config, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.1.yaml',
       ]);
       expect(res).toMatchSnapshot();
@@ -72,7 +86,7 @@ describe(getName(), () => {
     });
 
     it('catches errors', async () => {
-      const res = await extractAllPackageFiles({}, [
+      const res = await extractAllPackageFiles(config, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.4.yaml',
       ]);
       expect(res).toBeNull();

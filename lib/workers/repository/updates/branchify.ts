@@ -50,13 +50,8 @@ export async function branchifyUpgrades(
     branchUpgrades[branchName] = branchUpgrades[branchName]
       .reverse()
       .filter((upgrade) => {
-        const {
-          manager,
-          packageFile,
-          depName,
-          currentValue,
-          newValue,
-        } = upgrade;
+        const { manager, packageFile, depName, currentValue, newValue } =
+          upgrade;
         const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
         const previousNewValue = seenUpdates[upgradeKey];
         if (previousNewValue && previousNewValue !== newValue) {

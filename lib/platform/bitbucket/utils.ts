@@ -1,8 +1,10 @@
 import url from 'url';
+import type { MergeStrategy } from '../../config/types';
 import { BranchStatus, PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import type { Pr } from '../types';
+import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -54,6 +56,29 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
     mergeMethod: 'merge',
     has_issues: repoInfoBody.has_issues,
   };
+}
+
+const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
+  new Map([
+    ['squash', 'squash'],
+    ['merge-commit', 'merge_commit'],
+    ['fast-forward', 'fast_forward'],
+  ]);
+
+export function mergeBodyTransformer(
+  mergeStrategy: MergeStrategy
+): MergeRequestBody {
+  const body: MergeRequestBody = {
+    close_source_branch: true,
+    message: 'auto merged',
+  };
+
+  // The `auto` strategy will use the strategy configured inside Bitbucket.
+  if (mergeStrategy !== 'auto') {
+    body.merge_strategy = bitbucketMergeStrategies.get(mergeStrategy);
+  }
+
+  return body;
 }
 
 export const prStates = {
@@ -165,7 +190,7 @@ export interface PrResponse {
       name: string;
     };
   };
-  reviewers: Array<any>;
+  reviewers: Array<PrReviewer>;
   created_on: string;
 }
 
@@ -182,4 +207,17 @@ export function prInfo(pr: PrResponse): Pr {
       : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
+}
+
+export interface UserResponse {
+  display_name: string;
+  account_id: string;
+  nickname: string;
+  account_status: string;
+}
+
+export interface PrReviewer {
+  display_name: string;
+  account_id: string;
+  nickname: string;
 }

@@ -1,6 +1,4 @@
-import nock from 'nock';
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -169,7 +167,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe(getName(), () => {
+describe('platform/bitbucket-server/index', () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -181,7 +179,7 @@ describe(getName(), () => {
       const username = 'abc';
       const password = '123';
 
-      async function initRepo(config = {}): Promise<nock.Scope> {
+      async function initRepo(config = {}): Promise<httpMock.Scope> {
         const scope = httpMock
           .scope(urlHost)
           .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
@@ -195,7 +193,6 @@ describe(getName(), () => {
         await bitbucket.initRepo({
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
-          localDir: '',
           ...config,
         });
         return scope;
@@ -204,8 +201,6 @@ describe(getName(), () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        httpMock.reset();
-        httpMock.setup();
         jest.mock('delay');
         jest.mock('../../util/git');
         jest.mock('../../util/host-rules');
@@ -230,9 +225,6 @@ describe(getName(), () => {
           username,
           password,
         });
-      });
-      afterEach(() => {
-        httpMock.reset();
       });
 
       describe('initPlatform()', () => {
@@ -294,7 +286,6 @@ describe(getName(), () => {
             await bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-              localDir: '',
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -318,7 +309,6 @@ describe(getName(), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({ url: sshLink('SOME', 'repo') })
@@ -345,7 +335,6 @@ describe(getName(), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -379,7 +368,6 @@ describe(getName(), () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
-            localDir: '',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -404,7 +392,6 @@ describe(getName(), () => {
             bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-              localDir: '',
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -423,7 +410,7 @@ describe(getName(), () => {
               mergeConfig: null,
             });
           const actual = await bitbucket.getRepoForceRebase();
-          expect(actual).toBe(false);
+          expect(actual).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -440,7 +427,7 @@ describe(getName(), () => {
               },
             });
           const actual = await bitbucket.getRepoForceRebase();
-          expect(actual).toBe(false);
+          expect(actual).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -461,7 +448,7 @@ describe(getName(), () => {
                 },
               });
             const actual = await bitbucket.getRepoForceRebase();
-            expect(actual).toBe(true);
+            expect(actual).toBeTrue();
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
@@ -483,7 +470,7 @@ describe(getName(), () => {
                 },
               });
             const actual = await bitbucket.getRepoForceRebase();
-            expect(actual).toBe(false);
+            expect(actual).toBeFalse();
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
@@ -690,7 +677,7 @@ describe(getName(), () => {
             topic: 'topic',
             content: 'content',
           });
-          expect(res).toBe(false);
+          expect(res).toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -734,7 +721,7 @@ describe(getName(), () => {
               topic: 'topic',
               content: 'content',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -778,7 +765,7 @@ describe(getName(), () => {
               topic: null,
               content: 'content',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -828,7 +815,7 @@ describe(getName(), () => {
               topic: 'some-subject',
               content: 'some\ncontent',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -872,7 +859,7 @@ describe(getName(), () => {
               topic: null,
               content: 'some\ncontent',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -912,7 +899,7 @@ describe(getName(), () => {
               topic: 'some-subject',
               content: 'blablabla',
             })
-          ).toBe(true);
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -951,7 +938,7 @@ describe(getName(), () => {
             topic: null,
             content: '!merge',
           });
-          expect(res).toBe(true);
+          expect(res).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1324,18 +1311,13 @@ describe(getName(), () => {
             .twice()
             .reply(200, { conflicted: false });
 
-          const author = global.gitAuthor;
-          try {
-            expect(await bitbucket.getPr(3)).toMatchSnapshot();
+          expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-            expect(await bitbucket.getPr(5)).toMatchSnapshot();
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            expect(await bitbucket.getPr(5)).toMatchSnapshot();
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            expect(httpMock.getTrace()).toMatchSnapshot();
-          } finally {
-            global.gitAuthor = author;
-          }
+          expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('gets a closed PR', async () => {
@@ -1610,13 +1592,21 @@ describe(getName(), () => {
             )
             .reply(200);
 
-          expect(await bitbucket.mergePr(5, 'branch')).toBe(true);
+          expect(
+            await bitbucket.mergePr({
+              branchName: 'branch',
+              id: 5,
+            })
+          ).toBeTrue();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('throws not-found 1', async () => {
           await initRepo();
-          const res = bitbucket.mergePr(null as any, 'branch');
+          const res = bitbucket.mergePr({
+            branchName: 'branch',
+            id: null as any,
+          });
           await expect(res).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1629,9 +1619,12 @@ describe(getName(), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.mergePr(4, 'branch')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.mergePr({
+              branchName: 'branch',
+              id: 4,
+            })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1651,9 +1644,12 @@ describe(getName(), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.mergePr({
+              branchName: 'branch',
+              id: 5,
+            })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1673,7 +1669,12 @@ describe(getName(), () => {
             )
             .reply(409);
 
-          expect(await bitbucket.mergePr(5, 'branch')).toBeFalsy();
+          expect(
+            await bitbucket.mergePr({
+              branchName: 'branch',
+              id: 5,
+            })
+          ).toBeFalsy();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1693,7 +1694,12 @@ describe(getName(), () => {
             )
             .reply(405);
 
-          await expect(bitbucket.mergePr(5, 'branch')).resolves.toBe(false);
+          await expect(
+            bitbucket.mergePr({
+              branchName: 'branch',
+              id: 5,
+            })
+          ).resolves.toBeFalse();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1710,7 +1716,7 @@ describe(getName(), () => {
         it('sanitizes HTML comments in the body', () => {
           const prBody = bitbucket.massageMarkdown(`---
 
-- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box
+- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
 - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
 ---
@@ -1743,10 +1749,6 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
-            BranchStatus.green
-          );
-
           expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.green
           );
@@ -1766,7 +1768,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.yellow
           );
 
@@ -1780,7 +1782,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.yellow
           );
 
@@ -1799,7 +1801,7 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.red
           );
 
@@ -1809,7 +1811,7 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch', [])).toEqual(
+          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
             BranchStatus.red
           );
 
@@ -1819,9 +1821,9 @@ Followed by some information.
         it('throws repository-changed', async () => {
           git.branchExists.mockReturnValue(false);
           await initRepo();
-          await expect(
-            bitbucket.getBranchStatus('somebranch', [])
-          ).rejects.toThrow(REPOSITORY_CHANGED);
+          await expect(bitbucket.getBranchStatus('somebranch')).rejects.toThrow(
+            REPOSITORY_CHANGED
+          );
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -2107,6 +2109,67 @@ Followed by some information.
           expect(res).toEqual(data);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
+
+        it('returns file content in json5 format', async () => {
+          const json5Data = `
+          { 
+            // json5 comment
+            foo: 'bar' 
+          }
+        `;
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json5?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: json5Data }],
+            });
+          const res = await bitbucket.getJsonFile('file.json5');
+          expect(res).toEqual({ foo: 'bar' });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('returns file content from given repo', async () => {
+          const data = { foo: 'bar' };
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/DIFFERENT/repos/repo/browse/file.json?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: JSON.stringify(data) }],
+            });
+          const res = await bitbucket.getJsonFile(
+            'file.json',
+            'DIFFERENT/repo'
+          );
+          expect(res).toEqual(data);
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('returns file content from branch or tag', async () => {
+          const data = { foo: 'bar' };
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000&at=dev`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: JSON.stringify(data) }],
+            });
+          const res = await bitbucket.getJsonFile(
+            'file.json',
+            'SOME/repo',
+            'dev'
+          );
+          expect(res).toEqual(data);
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
         it('throws on malformed JSON', async () => {
           const scope = await initRepo();
           scope

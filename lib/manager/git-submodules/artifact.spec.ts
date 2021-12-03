@@ -1,27 +1,29 @@
-import { getName } from '../../../test/util';
 import updateArtifacts from './artifacts';
 
-describe(getName(), () => {
+describe('manager/git-submodules/artifact', () => {
   describe('updateArtifacts()', () => {
     it('returns empty content', () => {
       expect(
         updateArtifacts({
           packageFileName: '',
-          updatedDeps: [''],
+          updatedDeps: [{ depName: '' }],
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([{ file: { contents: '', name: '' } }]);
     });
     it('returns two modules', () => {
       expect(
         updateArtifacts({
           packageFileName: '',
-          updatedDeps: ['renovate', 'renovate-pro'],
+          updatedDeps: [{ depName: 'renovate' }, { depName: 'renovate-pro' }],
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([
+        { file: { name: 'renovate' } },
+        { file: { name: 'renovate-pro' } },
+      ]);
     });
   });
 });

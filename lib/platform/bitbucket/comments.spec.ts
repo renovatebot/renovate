@@ -1,23 +1,16 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import * as comments from './comments';
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe(getName(), () => {
+describe('platform/bitbucket/comments', () => {
   const config: comments.CommentsConfig = { repository: 'some/repo' };
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    httpMock.reset();
-    httpMock.setup();
-
     setBaseUrl(baseUrl);
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('ensureComment()', () => {
@@ -34,7 +27,7 @@ describe(getName(), () => {
           topic: 'topic',
           content: 'content',
         })
-      ).toBe(false);
+      ).toBeFalse();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -54,7 +47,7 @@ describe(getName(), () => {
           topic: 'topic',
           content: 'content',
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -79,7 +72,7 @@ describe(getName(), () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(res).toBe(true);
+      expect(res).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -103,7 +96,7 @@ describe(getName(), () => {
           topic: null,
           content: 'blablabla',
         })
-      ).toBe(true);
+      ).toBeTrue();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

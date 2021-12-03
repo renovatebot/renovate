@@ -1,6 +1,6 @@
-import { getName } from '../../test/util';
-import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
+import { GlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
   MigratedConfig,
@@ -11,16 +11,16 @@ import type {
 const defaultConfig = getConfig();
 
 interface TestRenovateConfig extends RenovateConfig {
-  node?: RenovateSharedConfig & { supportPolicy?: unknown };
+  node?: RenovateSharedConfig;
 }
 
-describe(getName(), () => {
+describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
       const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
-        platform: PLATFORM_TYPE_GITHUB,
+        platform: PlatformId.Github,
         hostRules: [
           {
             platform: 'docker',
@@ -155,6 +155,7 @@ describe(getName(), () => {
           },
         ],
         raiseDeprecationWarnings: false,
+        enabledManagers: ['yarn'],
       } as any;
       const parentConfig = { ...defaultConfig, semanticCommits: 'disabled' };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -162,9 +163,9 @@ describe(getName(), () => {
         parentConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBe(true);
-      expect(migratedConfig.depTypes).not.toBeDefined();
-      expect(migratedConfig.automerge).toEqual(false);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig.depTypes).toBeUndefined();
+      expect(migratedConfig.automerge).toBe(false);
       expect(migratedConfig.packageRules).toHaveLength(9);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
@@ -183,18 +184,14 @@ describe(getName(), () => {
         parentConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBe(true);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig.major.schedule).toHaveLength(2);
-      expect(migratedConfig.major.schedule[0]).toEqual('after 10pm');
-      expect(migratedConfig.major.schedule[1]).toEqual('before 7am');
+      expect(migratedConfig.major.schedule[0]).toBe('after 10pm');
+      expect(migratedConfig.major.schedule[1]).toBe('before 7am');
       expect(migratedConfig.minor.schedule).toMatchSnapshot();
       expect(migratedConfig.minor.schedule).toHaveLength(2);
-      expect(migratedConfig.minor.schedule[0]).toEqual(
-        'after 10pm every weekday'
-      );
-      expect(migratedConfig.minor.schedule[1]).toEqual(
-        'before 7am every weekday'
-      );
+      expect(migratedConfig.minor.schedule[0]).toBe('after 10pm every weekday');
+      expect(migratedConfig.minor.schedule[1]).toBe('before 7am every weekday');
     });
     it('migrates every friday', () => {
       const config = {
@@ -205,8 +202,8 @@ describe(getName(), () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBe(true);
-      expect(migratedConfig.schedule).toEqual('on friday');
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig.schedule).toBe('on friday');
     });
     it('migrates semantic prefix with no scope', () => {
       const config = {
@@ -217,7 +214,7 @@ describe(getName(), () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBe(true);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig.semanticCommitScope).toBeNull();
     });
     it('does not migrate every weekday', () => {
@@ -229,7 +226,7 @@ describe(getName(), () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBe(false);
+      expect(isMigrated).toBeFalse();
       expect(migratedConfig.schedule).toEqual(config.schedule);
     });
     it('does not migrate multi days', () => {
@@ -242,7 +239,7 @@ describe(getName(), () => {
         parentConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBe(false);
+      expect(isMigrated).toBeFalse();
       expect(migratedConfig.schedule).toEqual(config.schedule);
     });
     it('does not migrate hour range', () => {
@@ -255,7 +252,7 @@ describe(getName(), () => {
         parentConfig
       );
       expect(migratedConfig.schedule).toEqual(config.schedule);
-      expect(isMigrated).toBe(false);
+      expect(isMigrated).toBeFalse();
     });
     it('migrates packages', () => {
       const config = {
@@ -271,8 +268,15 @@ describe(getName(), () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBe(true);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            matchPackagePatterns: '^(@angular|typescript)',
+            groupName: 'angular packages',
+          },
+        ],
+      });
     });
     it('overrides existing automerge setting', () => {
       const config: TestRenovateConfig = {
@@ -289,19 +293,18 @@ describe(getName(), () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBe(true);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.packageRules[0].minor.automerge).toBe(false);
+      expect(migratedConfig.packageRules[0].minor.automerge).toBeFalse();
     });
     it('does not migrate config', () => {
       const config: TestRenovateConfig = {
         enabled: true,
         separateMinorPatch: true,
       };
-      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-        config
-      );
-      expect(isMigrated).toBe(false);
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeFalse();
       expect(migratedConfig).toMatchObject(config);
     });
     it('migrates subconfig', () => {
@@ -320,12 +323,12 @@ describe(getName(), () => {
         config,
         defaultConfig
       );
-      expect(isMigrated).toBe(true);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.lockFileMaintenance.packageRules).toHaveLength(1);
       expect(
         migratedConfig.lockFileMaintenance.packageRules[0].respectLatest
-      ).toBe(false);
+      ).toBeFalse();
     });
 
     it('migrates packageRules objects', () => {
@@ -341,7 +344,7 @@ describe(getName(), () => {
         config,
         defaultConfig
       );
-      expect(isMigrated).toBe(true);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.packageRules).toHaveLength(1);
     });
@@ -349,7 +352,6 @@ describe(getName(), () => {
       const config: TestRenovateConfig = {
         node: {
           enabled: true,
-          supportPolicy: ['lts'],
           automerge: 'none' as never,
         },
       };
@@ -358,16 +360,13 @@ describe(getName(), () => {
         defaultConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBe(true);
+      expect(isMigrated).toBeTrue();
       expect(
         (migratedConfig.node as RenovateSharedConfig).enabled
       ).toBeUndefined();
       expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
         true
       );
-      expect(
-        (migratedConfig.node as TestRenovateConfig).supportPolicy
-      ).toBeDefined();
     });
     it('migrates packageFiles', () => {
       const config: TestRenovateConfig = {
@@ -387,7 +386,7 @@ describe(getName(), () => {
         defaultConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBe(true);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig.includePaths).toHaveLength(4);
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(4);
@@ -417,7 +416,7 @@ describe(getName(), () => {
         defaultConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBe(true);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig.includePaths).toHaveLength(1);
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(2);
@@ -444,8 +443,14 @@ describe(getName(), () => {
         config,
         defaultConfig
       );
-      expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBe(true);
+      expect(migratedConfig).toEqual({
+        baseBranches: [],
+        commitMessage: 'test',
+        ignorePaths: [],
+        includePaths: ['test'],
+        rebaseWhen: 'auto',
+      });
+      expect(isMigrated).toBeTrue();
     });
     it('it migrates semanticCommits', () => {
       let config: TestRenovateConfig;
@@ -453,27 +458,27 @@ describe(getName(), () => {
 
       config = { semanticCommits: true as never };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
 
       config = { semanticCommits: false as never };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
 
       config = { semanticCommits: null as never };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'auto' });
 
       config = { semanticCommits: 'enabled' };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(false);
+      expect(res.isMigrated).toBeFalse();
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
 
       config = { semanticCommits: 'disabled' };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(false);
+      expect(res.isMigrated).toBeFalse();
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
     });
 
@@ -483,17 +488,17 @@ describe(getName(), () => {
 
       config = { extends: ':js-app' } as never;
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ extends: ['config:js-app'] });
 
       config = { extends: 'foo' } as never;
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ extends: ['foo'] });
 
       config = { extends: ['foo', ':js-app', 'bar'] } as never;
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'config:js-app', 'bar'],
       });
@@ -505,28 +510,28 @@ describe(getName(), () => {
 
       config = { unpublishSafe: true };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['npm:unpublishSafe'],
       });
 
       config = { unpublishSafe: true, extends: 'foo' } as never;
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'npm:unpublishSafe'],
       });
 
       config = { unpublishSafe: true, extends: [] };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['npm:unpublishSafe'],
       });
 
       config = { unpublishSafe: true, extends: ['foo', 'bar'] };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'bar', 'npm:unpublishSafe'],
       });
@@ -536,7 +541,7 @@ describe(getName(), () => {
         extends: ['foo', ':unpublishSafe', 'bar'],
       };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'npm:unpublishSafe', 'bar'],
       });
@@ -546,7 +551,7 @@ describe(getName(), () => {
         extends: ['foo', 'default:unpublishSafe', 'bar'],
       };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'npm:unpublishSafe', 'bar'],
       });
@@ -556,7 +561,7 @@ describe(getName(), () => {
         extends: ['foo', 'bar'],
       };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'bar'],
       });
@@ -566,7 +571,7 @@ describe(getName(), () => {
         extends: ['foo', 'bar'],
       };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'bar', 'npm:unpublishSafe'],
       });
@@ -576,7 +581,7 @@ describe(getName(), () => {
         extends: [':unpublishSafeDisabled'],
       };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: [':unpublishSafeDisabled', 'npm:unpublishSafe'],
       });
@@ -590,7 +595,7 @@ describe(getName(), () => {
         packageRules: { matchPackageNames: [] },
       } as never;
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig.packageRules).toHaveLength(2);
 
       config = {
@@ -598,7 +603,7 @@ describe(getName(), () => {
         packages: [{ matchPackagePatterns: ['*'] }],
       } as never;
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig.packageRules).toHaveLength(2);
     });
     it('it migrates packageRules', () => {
@@ -624,8 +629,25 @@ describe(getName(), () => {
         config,
         defaultConfig
       );
-      expect(isMigrated).toBe(true);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            excludePackageNames: ['baz'],
+            excludePackagePatterns: ['^baz'],
+            matchBaseBranches: ['master'],
+            matchDatasources: ['orb'],
+            matchDepTypes: ['peerDependencies'],
+            matchLanguages: ['python'],
+            matchManagers: ['dockerfile'],
+            matchPackageNames: ['foo'],
+            matchPackagePatterns: ['^bar'],
+            matchPaths: ['package.json'],
+            matchSourceUrlPrefixes: ['https://github.com/vuejs/vue'],
+            matchUpdateTypes: ['major'],
+          },
+        ],
+      });
     });
   });
   it('it migrates nested packageRules', () => {
@@ -655,8 +677,157 @@ describe(getName(), () => {
       config,
       defaultConfig
     );
-    expect(isMigrated).toBe(true);
+    expect(isMigrated).toBeTrue();
     expect(migratedConfig).toMatchSnapshot();
     expect(migratedConfig.packageRules).toHaveLength(3);
+  });
+  it('it migrates hostRules fields', () => {
+    const config: RenovateConfig = {
+      hostRules: [
+        { baseUrl: 'https://some.domain.com', token: '123test' },
+        { domainName: 'domain.com', token: '123test' },
+        { hostName: 'some.domain.com', token: '123test' },
+      ],
+    } as any;
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toEqual({
+      hostRules: [
+        { matchHost: 'https://some.domain.com', token: '123test' },
+        { matchHost: 'domain.com', token: '123test' },
+        { matchHost: 'some.domain.com', token: '123test' },
+      ],
+    });
+  });
+  it('it migrates presets', () => {
+    GlobalConfig.set({
+      migratePresets: {
+        '@org': 'local>org/renovate-config',
+        '@org2/foo': '',
+      },
+    });
+    const config: RenovateConfig = {
+      extends: ['@org', '@org2/foo'],
+    } as any;
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
+  });
+
+  it('it migrates composerIgnorePlatformReqs values', () => {
+    let config: TestRenovateConfig;
+    let res: MigratedConfig;
+
+    config = {
+      composerIgnorePlatformReqs: true,
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
+
+    config = {
+      composerIgnorePlatformReqs: false,
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toBeNull();
+
+    config = {
+      composerIgnorePlatformReqs: [],
+    } as never;
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeFalse();
+    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
+  });
+
+  it('it migrates gradle-lite', () => {
+    const config: RenovateConfig = {
+      gradle: {
+        enabled: false,
+      },
+      'gradle-lite': {
+        enabled: true,
+        fileMatch: ['foo'],
+      },
+      packageRules: [
+        {
+          matchManagers: ['gradle-lite'],
+          separateMinorPatch: true,
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchSnapshot();
+  });
+  it('migrates empty requiredStatusChecks', () => {
+    const config: RenovateConfig = {
+      requiredStatusChecks: [],
+    };
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+      config,
+      defaultConfig
+    );
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
+  });
+
+  it('migrates azureAutoComplete', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
+
+    expect(migrate({ azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: true },
+    });
+
+    expect(migrate({ azureAutoComplete: false })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: false },
+    });
+
+    expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, platformAutomerge: true },
+    });
+
+    expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, platformAutomerge: true },
+    });
+  });
+
+  it('migrates gitLabAutomerge', () => {
+    const migrate = (config: RenovateConfig): MigratedConfig =>
+      configMigration.migrateConfig(config, defaultConfig);
+
+    expect(migrate({ gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: true },
+    });
+
+    expect(migrate({ gitLabAutomerge: false })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: false },
+    });
+
+    expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, platformAutomerge: true },
+    });
+
+    expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, platformAutomerge: true },
+    });
   });
 });

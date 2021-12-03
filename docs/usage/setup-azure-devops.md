@@ -67,7 +67,7 @@ module.exports = {
   hostRules: [
     {
       hostType: 'npm',
-      hostName: 'pkgs.dev.azure.com',
+      matchHost: 'pkgs.dev.azure.com',
       username: 'apikey',
       password: process.env.TOKEN,
     },
@@ -81,8 +81,8 @@ For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure Dev
 
 ### Yarn users
 
-To do a succesfull `yarn install` you need to match the URL of the registry fully.
-Use the `baseUrl` config option to specify the full path to the registry.
+To do a successful `yarn install` you need to match the URL of the registry fully.
+Use the `matchHost` config option to specify the full path to the registry.
 
 ```javascript
 module.exports = {
@@ -91,13 +91,13 @@ module.exports = {
   token: process.env.TOKEN,
   hostRules: [
     {
-      baseUrl:
+      matchHost:
         'https://myorg.pkgs.visualstudio.com/_packaging/myorg/npm/registry/',
       token: process.env.TOKEN,
       hostType: 'npm',
     },
     {
-      domainName: 'github.com',
+      matchHost: 'github.com',
       token: process.env.GITHUB_COM_TOKEN,
     },
   ],
@@ -114,7 +114,7 @@ always-auth=true
 
 ### Add renovate.json file
 
-Additionally, you can create a `renovate.json` file which holds the Renovate configuration, in the root of the repo.
+Additionally, you can create a `renovate.json` file (which holds the Renovate configuration) in the root of the repository you want to update.
 [Read more about the Renovate configuration options](https://docs.renovatebot.com/configuration-options/)
 
 ### Using a single pipeline to update multiple repositories

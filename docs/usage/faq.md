@@ -18,6 +18,31 @@ Renovate will:
 - Update `yarn.lock` and/or `package-lock.json` files if found
 - Create Pull Requests immediately after branch creation
 
+## Which Renovate versions are officially supported?
+
+The Renovate maintainers only support the latest version of Renovate.
+The Renovate team will only create bugfixes for an older version if the hosted app needs to stay on an older major version for a short time or if some critical bug needs to be fixed and the new major is blocked.
+
+If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
+If you're self hosting Renovate, use the latest release if possible.
+
+## Renovate core features not supported on all platforms
+
+| Feature              | Platforms which lack feature                      | See Renovate issue(s)                                        |
+| -------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
+| Dependency Dashboard | BitBucket, BitBucket Server, Azure                | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| Hosted app           | GitLab, BitBucket, BitBucket Server, Azure, Gitea |                                                              |
+
+## Major platform features not supported by Renovate
+
+Some major platform features are not supported at all by Renovate.
+
+| Feature name                            | Platform               | See Renovate issue(s)                                                                                                                                                                                                                                       |
+| --------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jira issues                             | BitBucket              | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                                                                                |
+| Merge trains                            | GitLab                 | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                                                                                |
+| Configurable merge strategy and message | Only BitBucket for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10868](https://github.com/renovatebot/renovate/issues/10868) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
+
 ## What is this `main` branch I see in the documentation?
 
 When you create a new repository with Git, Git creates a base branch for you.
@@ -32,6 +57,57 @@ A branch name has no special meaning within the Git program, it's just a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
 ## What if I need to .. ?
+
+### Troubleshoot Renovate
+
+If you have problems with Renovate, or need to know where Renovate keeps the logging output then read our [troubleshooting documentation](https://docs.renovatebot.com/troubleshooting/).
+
+### Tell Renovate to ask for approval before creating a Pull Request
+
+The default behavior is that Renovate creates a pull request right away whenever there's an update.
+But maybe you want Renovate to ask for your approval _before_ it creates a pull request.
+Use the "Dependency Dashboard approval" workflow to get updates for certain packages - or certain types of updates - only after you give approval via the Dependency Dashboard.
+
+The basic idea is that you create a new `packageRules` entry and describe what kind of package, or type of updates you want to approve beforehand.
+
+Say you want to manually approve all major `npm` package manager updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "matchManagers": ["npm"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
+
+Or say you want to manually approve all major Jest updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^jest"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
+```
+
+You could even configure Renovate bot to ask for approval for _all_ updates.
+The `dependencyDashboardApproval` is not part of a `packageRules` array, and so applies to all updates:
+
+```json
+{
+  "dependencyDashboardApproval": true
+}
+```
+
+Read our documentation on the [dependencyDashboardApproval](https://docs.renovatebot.com/configuration-options/#dependencydashboardapproval) config option.
 
 ### Use an alternative branch as my Pull Request target
 
@@ -50,58 +126,11 @@ You can set more than one PR target branch in the `baseBranches` array.
 
 ### Support private npm modules
 
-See the dedicated [Private npm module support](./private-modules.md) page.
+See the dedicated [Private npm module support](./getting-started/private-packages.md) page.
 
 ### Control Renovate's schedule
 
-Renovate itself will run as often as its administrator has configured it (e.g. hourly, daily, etc).
-You may want to update certain repositories less often.
-Or you may even want to use different schedules for specific packages.
-
-To control the days of the week or times of day that Renovate updates packages, use the `timezone` and `schedule` configuration options.
-By default, Renovate schedules use the UTC timezone, but you can override this in the global config.
-
-You can set a specific time zone in your local config file as well:
-
-```json
-{
-  "timezone": "America/Los_Angeles"
-}
-```
-
-The timezone must be a valid [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-
-With the timezone set, you can define days of week or hours of the day in which Renovate will make changes.
-Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text.
-Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
-The _@breejs/later_ library also handles the concepts of "days", time_before", and "time_after".
-Renovate does not support scheduled minutes or "at an exact time" granularity.
-
-Examples of the kind of schedules you can create:
-
-```
-every weekend
-before 5:00am
-[after 10pm, before 5:00am]
-[after 10pm every weekday, before 5am every weekday]
-on friday and saturday
-```
-
-The scheduling feature can be very useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
-
-To restrict `aws-sdk` to weekly updates, you could add this package rule:
-
-```json
-  "packageRules": [
-    {
-      "matchPackageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
-    }
-  ]
-```
-
-The "schedule" propery must always be defined in an array, even if you only set a single schedule.
-Multiple entries in the array means "or".
+To learn all about controlling Renovate schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
 
 ### Disable Renovate for certain dependency types
 
@@ -151,12 +180,14 @@ Set the configuration option `labels` to an array of labels to use.
 e.g.
 
 ```json
-"packageRules": [
-  {
-    "matchPackageNames": ["abc"],
-    "assignees": ["importantreviewer"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["abc"],
+      "assignees": ["importantreviewer"]
+    }
+  ]
+}
 ```
 
 ### Apply a rule, but only for packages starting with `abc`
@@ -164,12 +195,14 @@ e.g.
 Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns` and a regex:
 
 ```json
-"packageRules": [
-  {
-    "matchPackagePatterns": "^abc",
-    "assignees": ["importantreviewer"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": "^abc",
+      "assignees": ["importantreviewer"]
+    }
+  ]
+}
 ```
 
 ### Group all packages starting with `abc` together in one PR
@@ -177,12 +210,14 @@ Do the same as above, but instead of using `matchPackageNames`, use `matchPackag
 As above, but apply a `groupName`:
 
 ```json
-"packageRules": [
-  {
-    "matchPackagePatterns": "^abc",
-    "groupName": ["abc packages"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": "^abc",
+      "groupName": ["abc packages"]
+    }
+  ]
+}
 ```
 
 ### Change the default values for branch name, commit message, PR title or PR description
@@ -191,7 +226,7 @@ You can use the `branchName`, `commitMessage`, `prTitle` or `prBody` configurati
 
 ### Automatically merge passing Pull Requests
 
-Set the configuration option `autoMerge` to `true`.
+Set the configuration option `automerge` to `true`.
 Nest it inside config objects `patch` or `minor` if you want it to apply to certain types only.
 
 ### Separate patch releases from minor releases

@@ -1,27 +1,9 @@
-import { safeLoad } from 'js-yaml';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { load } from 'js-yaml';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-
-interface Container {
-  image: string;
-}
-
-interface Repository {
-  type: 'git' | 'github' | 'bitbucket';
-  name: string;
-  ref: string;
-}
-
-interface Resources {
-  repositories: Repository[];
-  containers: Container[];
-}
-
-interface AzurePipelines {
-  resources: Resources;
-}
+import type { AzurePipelines, Container, Repository } from './types';
 
 export function extractRepository(
   repository: Repository
@@ -37,7 +19,7 @@ export function extractRepository(
   return {
     autoReplaceStringTemplate: 'refs/tags/{{newValue}}',
     currentValue: repository.ref.replace('refs/tags/', ''),
-    datasource: datasourceGitTags.id,
+    datasource: GitTagsDatasource.id,
     depName: repository.name,
     depType: 'gitTags',
     lookupName: `https://github.com/${repository.name}.git`,
@@ -72,7 +54,7 @@ export function parseAzurePipelines(
 ): AzurePipelines | null {
   let pkg = null;
   try {
-    pkg = safeLoad(content, { json: true });
+    pkg = load(content, { json: true });
   } catch (err) /* istanbul ignore next */ {
     logger.info({ filename, err }, 'Error parsing azure-pipelines content');
     return null;

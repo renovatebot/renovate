@@ -1,20 +1,22 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
+import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
-let baseUrl = 'https://api.github.com/';
+const githubBaseUrl = 'https://api.github.com/';
+let baseUrl = githubBaseUrl;
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
@@ -25,15 +27,22 @@ interface GithubInternalOptions extends InternalHttpOptions {
 
 export interface GithubHttpOptions extends InternalHttpOptions {
   paginate?: boolean | string;
+  paginationField?: string;
   pageLimit?: number;
   token?: string;
 }
 
+interface GithubGraphqlRepoData<T = unknown> {
+  repository?: T;
+}
+
 interface GithubGraphqlResponse<T = unknown> {
-  data?: {
-    repository?: T;
-  };
-  errors?: { message: string; locations: unknown }[];
+  data?: T;
+  errors?: {
+    type?: string;
+    message: string;
+    locations: unknown;
+  }[];
 }
 
 function handleGotError(
@@ -47,28 +56,34 @@ function handleGotError(
     message = String(err.response.body.message);
   }
   if (
-    err.name === 'RequestError' &&
-    (err.code === 'ENOTFOUND' ||
-      err.code === 'ETIMEDOUT' ||
-      err.code === 'EAI_AGAIN' ||
-      err.code === 'ECONNRESET')
+    err.code === 'ENOTFOUND' ||
+    err.code === 'ETIMEDOUT' ||
+    err.code === 'EAI_AGAIN' ||
+    err.code === 'ECONNRESET'
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (err.name === 'ParseError') {
     logger.debug({ err }, '');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
   }
   if (
     err.statusCode === 403 &&
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.debug({ err }, 'GitHub failure: abuse detection');
+    throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+  }
+  if (
+    err.statusCode === 403 &&
+    message.startsWith('You have exceeded a secondary rate limit')
+  ) {
+    logger.debug({ err }, 'GitHub failure: secondary rate limit');
     throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
@@ -99,7 +114,7 @@ function handleGotError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+      throw new ExternalHostError(err, PlatformId.Github);
     }
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
@@ -119,7 +134,13 @@ function handleGotError(
       throw err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
-    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
+    throw new ExternalHostError(err, PlatformId.Github);
+  }
+  if (
+    err.statusCode === 410 &&
+    err.body?.message === 'Issues are disabled for this repo'
+  ) {
+    throw err;
   }
   if (err.statusCode === 404) {
     logger.debug({ url: path }, 'GitHub 404');
@@ -130,16 +151,18 @@ function handleGotError(
 }
 
 interface GraphqlOptions {
+  variables?: Record<string, string | number | null>;
   paginate?: boolean;
   count?: number;
   limit?: number;
+  cursor?: string;
   acceptHeader?: string;
-  fromEnd?: boolean;
 }
 
 function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
-  const acceptStrings = typeof input === 'string' ? input.split(/\s*,\s*/) : [];
+  const acceptStrings =
+    typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
   if (
     !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
     acceptStrings.length < 2
@@ -150,11 +173,14 @@ function constructAcceptString(input?: any): string {
 }
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
-  constructor(options?: GithubHttpOptions) {
-    super(PLATFORM_TYPE_GITHUB, options);
+  constructor(
+    hostType: string = PlatformId.Github,
+    options?: GithubHttpOptions
+  ) {
+    super(hostType, options);
   }
 
-  protected async request<T>(
+  protected override async request<T>(
     url: string | URL,
     options?: GithubInternalOptions & GithubHttpOptions,
     okToRetry = true
@@ -208,9 +234,19 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
               }
             );
             const pages = await pAll(queue, { concurrency: 5 });
-            result.body = result.body.concat(
-              ...pages.filter(Boolean).map((page) => page.body)
-            );
+            if (opts.paginationField) {
+              result.body[opts.paginationField] = result.body[
+                opts.paginationField
+              ].concat(
+                ...pages
+                  .filter(Boolean)
+                  .map((page) => page.body[opts.paginationField])
+              );
+            } else {
+              result.body = result.body.concat(
+                ...pages.filter(Boolean).map((page) => page.body)
+              );
+            }
           }
         }
       }
@@ -221,17 +257,28 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     return result;
   }
 
-  public async queryRepo<T = unknown>(
+  public async requestGraphql<T = unknown>(
     query: string,
     options: GraphqlOptions = {}
-  ): Promise<T> {
+  ): Promise<GithubGraphqlResponse<T>> {
     let result = null;
 
     const path = 'graphql';
 
+    const { paginate, count = 100, cursor = null } = options;
+    let { variables } = options;
+    if (paginate) {
+      variables = {
+        ...variables,
+        count,
+        cursor,
+      };
+    }
+    const body = variables ? { query, variables } : { query };
+
     const opts: HttpPostOptions = {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
-      body: { query },
+      body,
       headers: { accept: options?.acceptHeader },
     };
 
@@ -242,22 +289,12 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         'graphql',
         opts
       );
-      result = res?.body?.data?.repository;
+      result = res?.body;
     } catch (err) {
-      if (err instanceof ExternalHostError) {
-        const gotError = err.err as GotLegacyError;
-        const statusCode = gotError?.statusCode;
-        const count = options.count;
-        if (
-          count &&
-          count > 10 &&
-          statusCode &&
-          statusCode >= 500 &&
-          statusCode < 600
-        ) {
-          logger.info('Reducing pagination count to workaround graphql 5xx');
-          return null;
-        }
+      logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
+      if (err instanceof ExternalHostError && count && count > 10) {
+        logger.info('Reducing pagination count to workaround graphql errors');
+        return null;
       }
       handleGotError(err, path, opts);
     }
@@ -265,30 +302,33 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   }
 
   async queryRepoField<T = Record<string, unknown>>(
-    queryOrig: string,
+    query: string,
     fieldName: string,
     options: GraphqlOptions = {}
   ): Promise<T[]> {
     const result: T[] = [];
 
-    const regex = new RegExp(`(\\W)${fieldName}(\\s*)\\(`);
-
     const { paginate = true } = options;
-    let count = options.count || 100;
+
+    let optimalCount: null | number = null;
+    const initialCount = options.count || 100;
+    let count = initialCount;
     let limit = options.limit || 1000;
     let cursor: string = null;
 
     let isIterating = true;
     while (isIterating) {
-      let query = queryOrig;
-      if (paginate) {
-        let replacement = `$1${fieldName}$2(first: ${Math.min(count, limit)}`;
-        replacement += cursor ? `, after: "${cursor}", ` : ', ';
-        query = query.replace(regex, replacement);
-      }
-      const gqlRes = await this.queryRepo<T>(query, { ...options, count });
-      if (gqlRes?.[fieldName]) {
-        const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
+      const res = await this.requestGraphql<GithubGraphqlRepoData<T>>(query, {
+        ...options,
+        count: Math.min(count, limit),
+        cursor,
+        paginate,
+      });
+      const fieldData = res?.data?.repository?.[fieldName];
+      if (fieldData) {
+        optimalCount = count;
+
+        const { nodes = [], edges = [], pageInfo } = fieldData;
         result.push(...nodes);
         result.push(...edges);
 
@@ -307,7 +347,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error({ gqlRes }, 'Error fetching GraphQL nodes');
+          logger.warn({ query, options, res }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }
@@ -315,6 +355,19 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       if (!paginate) {
         isIterating = false;
       }
+    }
+
+    // See: https://github.com/renovatebot/renovate/issues/12703
+    // istanbul ignore if
+    if (
+      optimalCount &&
+      optimalCount < initialCount && // log only shrinked results
+      baseUrl === githubBaseUrl
+    ) {
+      logger.debug(
+        { optimalCount },
+        'Successful GraphQL query with shrinked pagination size'
+      );
     }
 
     return result;

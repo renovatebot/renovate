@@ -5,6 +5,8 @@ import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { readFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
+import type { Registry } from './types';
 
 async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
   try {
@@ -13,11 +15,6 @@ async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
     logger.debug({ err }, `failed to parse '${file}' as XML document`);
     return undefined;
   }
-}
-
-export interface Registry {
-  readonly url: string;
-  readonly name?: string;
 }
 
 /* istanbul ignore next */
@@ -72,7 +69,7 @@ export async function getConfiguredRegistries(
         logger.debug(`clearing registry URLs`);
         registries.length = 0;
       } else if (child.name === 'add') {
-        const isHttpUrl = /^https?:\/\//i.test(child.attr.value);
+        const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value); // TODO #12071
         if (isHttpUrl) {
           let registryUrl = child.attr.value;
           if (child.attr.protocolVersion) {

@@ -1,4 +1,4 @@
-import { getOptions } from '../config/definitions';
+import { getOptions } from '../config/options';
 import { loadModules } from '../util/modules';
 import { isVersioningApiConstructor } from './common';
 import { GenericVersion, GenericVersioningApi } from './loose/generic';
@@ -10,8 +10,9 @@ const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning'
 ).allowedValues;
 
-describe('allVersioning.get(versioning)', () => {
+describe('versioning/index', () => {
   it('has api', () => {
+    // FIXME: explicit assert condition
     expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
   });
   it('validates', () => {
@@ -19,7 +20,6 @@ describe('allVersioning.get(versioning)', () => {
       module: VersioningApi | VersioningApiConstructor,
       name: string
     ): boolean {
-      // eslint-disable-next-line new-cap
       const mod = isVersioningApiConstructor(module) ? new module() : module;
 
       // TODO: test required api (#9715)
@@ -36,7 +36,7 @@ describe('allVersioning.get(versioning)', () => {
 
     for (const name of vers.keys()) {
       const ver = vers.get(name);
-      expect(validate(ver, name)).toBe(true);
+      expect(validate(ver, name)).toBeTrue();
     }
   });
 
@@ -80,7 +80,6 @@ describe('allVersioning.get(versioning)', () => {
             props.push(prop);
           }
         });
-        // eslint-disable-next-line no-cond-assign
       } while ((o = Object.getPrototypeOf(o)));
 
       return props;
@@ -111,12 +110,10 @@ describe('allVersioning.get(versioning)', () => {
 
     it('dummy', () => {
       class DummyScheme extends GenericVersioningApi {
-        // eslint-disable-next-line class-methods-use-this
-        protected _compare(_version: string, _other: string): number {
+        protected override _compare(_version: string, _other: string): number {
           throw new Error('Method not implemented.');
         }
 
-        // eslint-disable-next-line class-methods-use-this
         protected _parse(_version: string): GenericVersion {
           throw new Error('Method not implemented.');
         }

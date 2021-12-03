@@ -1,4 +1,6 @@
 import type { PackageJson } from 'type-fest';
+import { logger } from '../../../../logger';
+import { regEx } from '../../../../util/regex';
 import { api as semver } from '../../../../versioning/npm';
 import type { PackageLockOrEntry, ParentDependency } from './types';
 
@@ -28,17 +30,28 @@ export function findDepConstraints(
   }
   const { dependencies, requires, version } = lockEntry;
   if (parentDepName && requires) {
-    const constraint = requires[depName];
-    if (constraint && semver.matches(currentVersion, constraint)) {
-      if (constraint === currentVersion) {
-        // Workaround for old versions of npm which wrote the exact version in requires instead of the constraint
-        requires[depName] = newVersion;
+    let constraint = requires[depName];
+    if (constraint) {
+      constraint = constraint.replace(regEx(/(\d)rc$/), '$1-rc');
+      // istanbul ignore else
+      if (semver.isValid(constraint)) {
+        if (semver.matches(currentVersion, constraint)) {
+          if (constraint === currentVersion) {
+            // Workaround for old versions of npm which wrote the exact version in requires instead of the constraint
+            requires[depName] = newVersion;
+          }
+          parents.push({
+            parentDepName,
+            parentVersion: version,
+            constraint,
+          });
+        }
+      } else {
+        logger.warn(
+          { parentDepName, depName, currentVersion, constraint },
+          'Parent constraint is invalid'
+        );
       }
-      parents.push({
-        parentDepName,
-        parentVersion: version,
-        constraint,
-      });
     }
   }
   if (dependencies) {

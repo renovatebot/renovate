@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
-
-import { id as datasource } from '.';
+import { loadFixture } from '../../../test/util';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import { GalaxyCollectionDatasource } from '.';
 
 const communityKubernetesBase = loadFixture('community_kubernetes_base.json');
 const communityKubernetesVersions = loadFixture(
@@ -20,34 +20,29 @@ const communityKubernetesDetails0111 = loadFixture(
 
 const baseUrl = 'https://galaxy.ansible.com';
 
-describe(getName(), () => {
+const datasource = GalaxyCollectionDatasource.id;
+
+describe('datasource/galaxy-collection/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
-    });
-
     it('returns null for 404 result', async () => {
       httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(404);
       expect(
-        await getPkgReleases({ datasource, depName: 'foo.bar' })
+        await getPkgReleases({
+          datasource,
+          depName: 'foo.bar',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('returns null for remote host error', async () => {
+    it('throws for remote host error', async () => {
       httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(500);
-      let e;
-      try {
-        await getPkgReleases({ datasource, depName: 'foo.bar' });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-      expect(e).toMatchSnapshot();
+      await expect(
+        getPkgReleases({
+          datasource,
+          depName: 'foo.bar',
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -57,7 +52,10 @@ describe(getName(), () => {
         .get('/api/v2/collections/community/kubernetes/')
         .reply(200, '');
       expect(
-        await getPkgReleases({ datasource, depName: 'community.kubernetes' })
+        await getPkgReleases({
+          datasource,
+          depName: 'community.kubernetes',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -70,8 +68,27 @@ describe(getName(), () => {
         .get('/api/v2/collections/community/kubernetes/versions/')
         .reply(200, '');
       expect(
-        await getPkgReleases({ datasource, depName: 'community.kubernetes' })
+        await getPkgReleases({
+          datasource,
+          depName: 'community.kubernetes',
+        })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('throws error for remote host versions error', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v2/collections/community/kubernetes/')
+        .reply(200, communityKubernetesBase)
+        .get('/api/v2/collections/community/kubernetes/versions/')
+        .reply(500);
+      await expect(
+        getPkgReleases({
+          datasource,
+          depName: 'community.kubernetes',
+        })
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -101,12 +118,22 @@ describe(getName(), () => {
     });
 
     it('returns null for empty lookup', async () => {
-      expect(await getPkgReleases({ datasource, depName: '' })).toBeNull();
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName: '',
+        })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for null lookupName ', async () => {
-      expect(await getPkgReleases({ datasource, depName: null })).toBeNull();
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName: null,
+        })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -116,7 +143,10 @@ describe(getName(), () => {
         .get('/api/v2/collections/foo/bar/')
         .replyWithError('some unknown error');
       expect(
-        await getPkgReleases({ datasource, depName: 'foo.bar' })
+        await getPkgReleases({
+          datasource,
+          depName: 'foo.bar',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

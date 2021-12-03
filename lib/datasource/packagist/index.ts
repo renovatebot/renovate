@@ -6,6 +6,7 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
+import { regEx } from '../../util/regex';
 import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
@@ -38,7 +39,7 @@ function getHostOpts(url: string): HttpOptions {
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-  const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
+  const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json'); // TODO #12070
   const opts = getHostOpts(url);
   const res = (await http.getJson<PackageMeta>(url, opts)).body;
   const meta: RegistryMeta = {
@@ -124,7 +125,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
       dep.sourceUrl = release.source.url;
     }
     return {
-      version: version.replace(/^v/, ''),
+      version: version.replace(regEx(/^v/), ''),
       gitRef: version,
       releaseTimestamp: release.time,
     };
@@ -143,8 +144,8 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
     providerPackages,
   } = registryMeta;
   if (files) {
-    const queue = files.map((file) => (): Promise<PackagistFile> =>
-      getPackagistFile(regUrl, file)
+    const queue = files.map(
+      (file) => (): Promise<PackagistFile> => getPackagistFile(regUrl, file)
     );
     const resolvedFiles = await pAll(queue, { concurrency: 5 });
     for (const res of resolvedFiles) {

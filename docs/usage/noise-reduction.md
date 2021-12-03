@@ -28,12 +28,14 @@ You may wish to take this further, for example you might want to group together 
 In that case you might create a config like this:
 
 ```json
+{
   "packageRules": [
     {
-      "matchPackagePatterns": [ "eslint" ],
+      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint"
     }
   ]
+}
 ```
 
 By setting `matchPackagePatterns` to "eslint", it means that any package with ESLint anywhere in its name will be grouped into a `renovate/eslint` branch and related PR.
@@ -45,6 +47,8 @@ If you weren't grouping, then you could keep upgrading all dependencies except t
 You will also have less flexibility about what to do when one or more in the group have a major upgrade and may break the others.
 
 ## Scheduling Renovate
+
+For a high level overview of scheduling when Renovate bot runs, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
 
 On its own, the Renovate CLI tool runs once and then exits.
 Hence, it only runs as often as its administrator sets it to (e.g. via `cron`).
@@ -77,30 +81,35 @@ If you think about it, updates to `eslint` rules don't exactly need to be applie
 You don't want to get too far behind, so how about we update `eslint` packages only once a month?
 
 ```json
+{
   "packageRules": [
     {
-      "matchPackagePatterns": [ "eslint" ],
+      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
       "schedule": ["on the first day of the month"]
     }
   ]
+}
 ```
 
 Or perhaps at least weekly:
 
 ```json
+{
   "packageRules": [
     {
-      "matchPackagePatterns": [ "eslint" ],
+      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
       "schedule": ["before 2am on monday"]
     }
   ]
+}
 ```
 
 If you're wondering what is supported and not, under the hood, the schedule is parsed using [@breejs/later](https://github.com/breejs/later) using the `later.parse.text(scheduleString)` API.
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
+Granularity must be at least one hour.
 
 ## Automerging
 
@@ -146,15 +155,17 @@ Remember our running `eslint` example?
 Let's automerge it if all the linting updates pass:
 
 ```json
+{
   "packageRules": [
     {
-      "matchPackagePatterns": [ "eslint" ],
+      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
       "schedule": ["before 2am on monday"],
       "automerge": true,
       "automergeType": "branch"
     }
   ]
+}
 ```
 
 Have you come up with a rule that you think others would benefit from?

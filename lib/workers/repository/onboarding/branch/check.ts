@@ -7,6 +7,7 @@ import {
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
 import { PrState } from '../../../../types';
+import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
 
@@ -51,11 +52,33 @@ const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
-  // Repo is onboarded if admin is bypassing onboarding and does not require a
+  // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
   if (config.requireConfig === false && config.onboarding === false) {
     // Return early and avoid checking for config files
     return true;
+  }
+  const cache = getCache();
+  if (cache.configFileName) {
+    logger.debug('Checking cached config file name');
+    try {
+      const configFileContent = await platform.getJsonFile(
+        cache.configFileName
+      );
+      if (configFileContent) {
+        if (
+          cache.configFileName !== 'package.json' ||
+          configFileContent.renovate
+        ) {
+          logger.debug('Existing config file confirmed');
+          return true;
+        }
+      }
+    } catch (err) {
+      // probably file doesn't exist
+    }
+    logger.debug('Existing config file no longer exists');
+    delete cache.configFileName;
   }
   if (await configFileExists()) {
     await platform.ensureIssueClosing(title);
@@ -98,5 +121,4 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
 
 export const onboardingPrExists = async (
   config: RenovateConfig
-): Promise<boolean> =>
-  (await platform.getBranchPr(config.onboardingBranch)) != null;
+): Promise<boolean> => !!(await platform.getBranchPr(config.onboardingBranch));

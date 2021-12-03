@@ -19,3 +19,7 @@ export interface LockFile {
   lockfileVersion?: number; // cache version for Yarn
   isYarn1?: boolean;
 }
+
+export interface PnpmWorkspaceFile {
+  packages: string[];
+}

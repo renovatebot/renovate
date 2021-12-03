@@ -1,12 +1,13 @@
 import fs from 'fs-extra';
-import { setAdminConfig } from '../../config/admin';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger, setMeta } from '../../logger';
+import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
-import { ensureMasterIssue } from './dependency-dashboard';
+import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
@@ -18,26 +19,28 @@ import { printRequestStats } from './stats';
 let renovateVersion = 'unknown';
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
+  renovateVersion = require('../../../package.json').version;
 } catch (err) /* istanbul ignore next */ {
   logger.debug({ err }, 'Error getting renovate version');
 }
 
 // istanbul ignore next
 export async function renovateRepository(
-  repoConfig: RenovateConfig
+  repoConfig: RenovateConfig,
+  canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = { ...repoConfig };
-  setAdminConfig(config);
+  let config = GlobalConfig.set(repoConfig);
+  await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
   let repoResult: ProcessResult;
   queue.clear();
+  const { localDir } = GlobalConfig.get();
   try {
-    await fs.ensureDir(config.localDir);
-    logger.debug('Using localDir: ' + config.localDir);
+    await fs.ensureDir(localDir);
+    logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
     const { branches, branchList, packageFiles } = await extractDependencies(
@@ -45,10 +48,18 @@ export async function renovateRepository(
     );
     await ensureOnboardingPr(config, packageFiles, branches);
     const res = await updateRepo(config, branches);
+    setMeta({ repository: config.repository });
     addSplit('update');
     await setBranchCache(branches);
-    if (res !== 'automerged') {
-      await ensureMasterIssue(config, branches);
+    if (res === 'automerged') {
+      if (canRetry) {
+        logger.info('Renovating repository again after automerge result');
+        const recursiveRes = await renovateRepository(repoConfig, false);
+        return recursiveRes;
+      }
+      logger.debug(`Automerged but already retried once`);
+    } else {
+      await ensureDependencyDashboard(config, branches);
     }
     await finaliseRepo(config, branchList);
     repoResult = processResult(config, res);
@@ -57,7 +68,7 @@ export async function renovateRepository(
     const errorRes = await handleError(config, err);
     repoResult = processResult(config, errorRes);
   }
-  if (config.localDir && !config.persistRepoData) {
+  if (localDir && !config.persistRepoData) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {

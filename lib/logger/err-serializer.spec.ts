@@ -1,11 +1,11 @@
 import * as httpMock from '../../test/http-mock';
-import { getName, partial } from '../../test/util';
+import { partial } from '../../test/util';
 import * as hostRules from '../util/host-rules';
 import { Http } from '../util/http';
 import errSerializer from './err-serializer';
 import { sanitizeValue } from './utils';
 
-describe(getName(), () => {
+describe('logger/err-serializer', () => {
   it('expands errors', () => {
     const err = partial<Error & Record<string, unknown>>({
       a: 1,
@@ -17,10 +17,11 @@ describe(getName(), () => {
       },
       options: {
         headers: {
-          authorization: 'Bearer abc',
+          authorization: 'Bearer testtoken',
         },
       },
     });
+    // FIXME: explicit assert condition
     expect(errSerializer(err)).toMatchSnapshot();
   });
   it('handles missing fields', () => {
@@ -29,6 +30,7 @@ describe(getName(), () => {
       stack: 'foo',
       body: 'some body',
     });
+    // FIXME: explicit assert condition
     expect(errSerializer(err)).toMatchSnapshot();
   });
 
@@ -38,16 +40,14 @@ describe(getName(), () => {
     beforeEach(() => {
       // reset module
       jest.resetAllMocks();
-      httpMock.setup();
       // clean up hostRules
       hostRules.clear();
       hostRules.add({
         hostType: 'any',
-        baseUrl,
+        matchHost: baseUrl,
         token: 'token',
       });
     });
-    afterEach(() => httpMock.reset());
 
     it('handles http error', async () => {
       httpMock
@@ -87,7 +87,15 @@ describe(getName(), () => {
       delete err.stack;
 
       // sanitize like Bunyan
-      expect(sanitizeValue(err)).toMatchSnapshot();
+      expect(sanitizeValue(err)).toMatchSnapshot({
+        name: 'HTTPError',
+        options: {
+          method: 'POST',
+          password: '***********',
+          url: 'https://:**redacted**@github.com/api',
+          username: '',
+        },
+      });
     });
   });
 });

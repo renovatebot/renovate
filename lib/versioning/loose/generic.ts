@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export interface GenericVersion {
@@ -124,7 +125,8 @@ export const create = ({
 
 export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion
-> implements VersioningApi {
+> implements VersioningApi
+{
   private _getSection(version: string, index: number): number {
     const parsed = this._parse(version);
     return parsed && parsed.release.length > index
@@ -132,7 +134,51 @@ export abstract class GenericVersioningApi<
       : null;
   }
 
-  protected abstract _compare(version: string, other: string): number;
+  protected _compare(version: string, other: string): number {
+    const left = this._parse(version);
+    const right = this._parse(other);
+
+    // istanbul ignore if
+    if (!(left && right)) {
+      return 1;
+    }
+
+    // support variable length compare
+    const length = Math.max(left.release.length, right.release.length);
+    for (let i = 0; i < length; i += 1) {
+      // 2.1 and 2.1.0 are equivalent
+      const part1 = left.release[i] ?? 0;
+      const part2 = right.release[i] ?? 0;
+      if (part1 !== part2) {
+        return part1 - part2;
+      }
+    }
+
+    if (
+      is.nonEmptyString(left.prerelease) &&
+      is.nonEmptyString(right.prerelease)
+    ) {
+      const pre = left.prerelease.localeCompare(right.prerelease);
+
+      if (pre !== 0) {
+        return pre;
+      }
+    } else if (is.nonEmptyString(left.prerelease)) {
+      return -1;
+    } else if (is.nonEmptyString(right.prerelease)) {
+      return 1;
+    }
+
+    return this._compareOther(left, right);
+  }
+
+  /*
+   * virtual
+   */
+
+  protected _compareOther(_left: T, _right: T): number {
+    return 0;
+  }
 
   protected abstract _parse(version: string): T | null;
 
@@ -189,7 +235,6 @@ export abstract class GenericVersioningApi<
     return versions.find((v) => this.equals(v, range)) || null;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getNewValue(newValueConfig: NewValueConfig): string {
     const { newVersion } = newValueConfig || {};
     return newVersion;

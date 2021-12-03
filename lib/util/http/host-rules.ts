@@ -1,19 +1,66 @@
+import {
+  GITHUB_API_USING_HOST_TYPES,
+  GITLAB_API_USING_HOST_TYPES,
+  PlatformId,
+} from '../../constants';
 import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
+import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
-import { GotOptions } from './types';
+import type { GotOptions } from './types';
+
+function findMatchingRules(options: GotOptions, url: string): HostRule {
+  const { hostType } = options;
+  let res = hostRules.find({ hostType, url });
+
+  if (res.token || res.username || res.password) {
+    // do not fallback if we already have auth infos
+    return res;
+  }
+
+  // Fallback to `github` hostType
+  if (
+    GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== PlatformId.Github
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: PlatformId.Github,
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  // Fallback to `gitlab` hostType
+  if (
+    GITLAB_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== PlatformId.Gitlab
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: PlatformId.Gitlab,
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  return res;
+}
 
 // Apply host rules to requests
-
 export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
-  const options = { ...inOptions };
-  const foundRules =
-    hostRules.find({
-      hostType: options.hostType,
-      url,
-    }) || /* istanbul ignore next: can only happen in tests */ {};
+  const options: GotOptions = { ...inOptions };
+  const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
-  if (options.headers?.authorization || options.password || options.token) {
+  if (options.noAuth) {
+    logger.trace({ url }, `Authorization disabled`);
+  } else if (
+    options.headers?.authorization ||
+    options.password ||
+    options.token
+  ) {
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {
     logger.trace({ url }, `Applying Basic authentication`);

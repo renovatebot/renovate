@@ -2,10 +2,6 @@
 
 exports[`manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
 Object {
-  "constraints": Object {
-    "composer": "^1.10.0",
-    "php": ">=5.3.2",
-  },
   "deps": Array [
     Object {
       "currentValue": ">=5.3.2",
@@ -79,14 +75,12 @@ Object {
       "datasource": "packagist",
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "fzaninotto/faker",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "1.0.1",
@@ -99,7 +93,6 @@ Object {
       "datasource": "packagist",
       "depName": "jms/payment-core-bundle",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "1.1.0",
@@ -178,28 +171,24 @@ Object {
       "datasource": "packagist",
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/sahi-client",
       "depType": "require-dev",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/common-contexts",
       "depType": "require-dev",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "^1.10.0",
@@ -216,10 +205,6 @@ Object {
 
 exports[`manager/composer/extract extractPackageFile() extracts dependencies with no lock file 1`] = `
 Object {
-  "constraints": Object {
-    "composer": "^1.10.0",
-    "php": ">=5.3.2",
-  },
   "deps": Array [
     Object {
       "currentValue": ">=5.3.2",
@@ -293,14 +278,12 @@ Object {
       "datasource": "packagist",
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "fzaninotto/faker",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "1.0.1",
@@ -313,7 +296,6 @@ Object {
       "datasource": "packagist",
       "depName": "jms/payment-core-bundle",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "1.1.0",
@@ -392,28 +374,24 @@ Object {
       "datasource": "packagist",
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/sahi-client",
       "depType": "require-dev",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/common-contexts",
       "depType": "require-dev",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "^1.10.0",
@@ -427,10 +405,6 @@ Object {
 
 exports[`manager/composer/extract extractPackageFile() extracts object registryUrls 1`] = `
 Object {
-  "constraints": Object {
-    "composer": "1.*",
-    "php": ">=5.5",
-  },
   "deps": Array [
     Object {
       "currentValue": ">=5.5",
@@ -450,7 +424,6 @@ Object {
       "datasource": "packagist",
       "depName": "johnpbloch/wordpress",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "^2.0.1",
@@ -469,56 +442,48 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-plugin/tinymce-advanced",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/acf-content-analysis-for-yoast-seo",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/duplicate-post",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/simple-image-sizes",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/wordpress-seo",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/timber-library",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wp-sync-db/wp-sync-db",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "asha23/wp-seed-timber",
       "depType": "require",
-      "skipReason": "any-version",
     },
   ],
   "managerData": Object {
@@ -532,16 +497,12 @@ Object {
 
 exports[`manager/composer/extract extractPackageFile() extracts object repositories and registryUrls with lock file 1`] = `
 Object {
-  "constraints": Object {
-    "composer": "1.*",
-  },
   "deps": Array [
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "aws/aws-sdk-php",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "dev-trunk",
@@ -572,16 +533,12 @@ Object {
 
 exports[`manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
 Object {
-  "constraints": Object {
-    "composer": "^1.10.0",
-  },
   "deps": Array [
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "aws/aws-sdk-php",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "^1.10.0",
@@ -606,7 +563,6 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-theme/hueman",
       "depType": "require",
-      "skipReason": "any-version",
     },
   ],
   "registryUrls": Array [
@@ -617,16 +573,12 @@ Object {
 
 exports[`manager/composer/extract extractPackageFile() extracts repositories and registryUrls 1`] = `
 Object {
-  "constraints": Object {
-    "composer": "1.*",
-  },
   "deps": Array [
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "aws/aws-sdk-php",
       "depType": "require",
-      "skipReason": "any-version",
     },
     Object {
       "currentValue": "dev-trunk",

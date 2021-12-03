@@ -6,6 +6,7 @@ import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import type { HttpError } from '../../util/http/types';
+import { regEx } from '../../util/regex';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const id = 'pod';
@@ -17,7 +18,7 @@ export const registryStrategy = 'hunt';
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
 
-const githubHttp = new GithubHttp();
+const githubHttp = new GithubHttp(id);
 const http = new Http(id);
 
 function shardParts(lookupName: string): string[] {
@@ -93,7 +94,9 @@ async function requestGithub<T = unknown>(
   return null;
 }
 
-const githubRegex = /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/;
+const githubRegex = regEx(
+  /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+);
 
 async function getReleasesFromGithub(
   lookupName: string,
@@ -133,7 +136,8 @@ async function getReleasesFromCDN(
     for (let idx = 0; idx < lines.length; idx += 1) {
       const line = lines[idx];
       const [name, ...versions] = line.split('/');
-      if (name === lookupName.replace(/\/.*$/, '')) {
+      if (name === lookupName.replace(regEx(/\/.*$/), '')) {
+        // TODO #12071
         const releases = versions.map((version) => ({ version }));
         return { releases };
       }
@@ -157,7 +161,7 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const podName = lookupName.replace(/\/.*$/, '');
+  const podName = lookupName.replace(regEx(/\/.*$/), '');
 
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
@@ -170,7 +174,7 @@ export async function getReleases({
     return cachedResult;
   }
 
-  let baseUrl = registryUrl.replace(/\/+$/, '');
+  let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
 
   // In order to not abuse github API limits, query CDN instead
   if (isDefaultRepo(baseUrl)) {

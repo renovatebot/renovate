@@ -1,7 +1,6 @@
-import { getName } from '../../test/util';
 import { hasKey } from './object';
 
-describe(getName(), () => {
+describe('util/object', () => {
   beforeEach(() => {
     jest.resetModules();
   });

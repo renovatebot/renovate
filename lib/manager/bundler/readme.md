@@ -8,8 +8,8 @@ If you need Bundler to authenticate with a private registry - and it's not the s
 {
   "hostRules": [
     {
-      "hostName": "private-registry.company.com",
-      "hostType": "bundler",
+      "matchHost": "private-registry.company.com",
+      "hostType": "rubygems",
       "token": "abc123"
     }
   ]
@@ -18,7 +18,11 @@ If you need Bundler to authenticate with a private registry - and it's not the s
 
 Important notes regarding the above:
 
-`hostType=bundler` is essential. If the registry is used for multiple package types then you may need multiple `hostRules`. You cannot leave off `hostType`.
+`hostType` is a required field, and you must provide a value.
+If you use Renovate `v26` or higher, set `hostType=rubygems`.
+If you use Renovate `v25` or lower, set `hostType=bundler`.
+
+If the registry is used for multiple package types then you may need multiple `hostRules`.
 
 Instead of `token`, you may also supply `username` and `password` instead.
 

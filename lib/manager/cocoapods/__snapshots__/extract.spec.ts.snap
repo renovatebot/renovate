@@ -1,74 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/cocoapods/extract extractPackageFile() extracts all dependencies 1`] = `
-Array [
-  Object {
-    "depName": "a",
-    "groupName": "a",
-    "skipReason": "unknown-version",
-  },
-  Object {
-    "depName": "a/sub",
-    "groupName": "a",
-    "skipReason": "unknown-version",
-  },
-  Object {
-    "currentValue": "1.2.3",
-    "datasource": "pod",
-    "depName": "b",
-    "groupName": "b",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
-    "registryUrls": Array [
-      "https://github.com/Artsy/Specs.git",
-    ],
-  },
-  Object {
-    "currentValue": "1.2.3",
-    "datasource": "pod",
-    "depName": "c",
-    "groupName": "c",
-    "managerData": Object {
-      "lineNumber": 5,
-    },
-    "registryUrls": Array [
-      "https://github.com/Artsy/Specs.git",
-    ],
-  },
-  Object {
-    "depName": "d",
-    "groupName": "d",
-    "skipReason": "path-dependency",
-  },
-  Object {
-    "depName": "e",
-    "groupName": "e",
-    "skipReason": "git-dependency",
-  },
-  Object {
-    "depName": "f",
-    "groupName": "f",
-    "skipReason": "git-dependency",
-  },
-  Object {
-    "managerData": Object {
-      "lineNumber": 9,
-    },
-  },
-  Object {
-    "currentValue": "0.0.1",
-    "datasource": "github-tags",
-    "depName": "h",
-    "lookupName": "foo/bar",
-    "managerData": Object {
-      "lineNumber": 10,
-    },
-  },
-]
-`;
-
-exports[`manager/cocoapods/extract extractPackageFile() extracts all dependencies 2`] = `
+exports[`manager/cocoapods/extract extractPackageFile() extracts from complex file 1`] = `
 Array [
   Object {
     "currentValue": "~> 6.5.0",
@@ -389,6 +321,123 @@ Array [
     "depName": "FBMemoryProfiler",
     "groupName": "FBMemoryProfiler",
     "skipReason": "unknown-version",
+  },
+]
+`;
+
+exports[`manager/cocoapods/extract extractPackageFile() extracts from simple file 1`] = `
+Array [
+  Object {
+    "depName": "a",
+    "groupName": "a",
+    "skipReason": "unknown-version",
+  },
+  Object {
+    "depName": "a/sub",
+    "groupName": "a",
+    "skipReason": "unknown-version",
+  },
+  Object {
+    "currentValue": "1.2.3",
+    "datasource": "pod",
+    "depName": "b",
+    "groupName": "b",
+    "managerData": Object {
+      "lineNumber": 4,
+    },
+    "registryUrls": Array [
+      "https://github.com/Artsy/Specs.git",
+    ],
+  },
+  Object {
+    "currentValue": "1.2.3",
+    "datasource": "pod",
+    "depName": "c",
+    "groupName": "c",
+    "managerData": Object {
+      "lineNumber": 5,
+    },
+    "registryUrls": Array [
+      "https://github.com/Artsy/Specs.git",
+    ],
+  },
+  Object {
+    "depName": "d",
+    "groupName": "d",
+    "skipReason": "path-dependency",
+  },
+  Object {
+    "depName": "e",
+    "groupName": "e",
+    "skipReason": "git-dependency",
+  },
+  Object {
+    "depName": "f",
+    "groupName": "f",
+    "skipReason": "git-dependency",
+  },
+  Object {
+    "currentValue": "3.2.1",
+    "datasource": "git-tags",
+    "depName": "g",
+    "lookupName": "g.git",
+    "managerData": Object {
+      "lineNumber": 9,
+    },
+  },
+  Object {
+    "currentValue": "0.0.1",
+    "datasource": "github-tags",
+    "depName": "h",
+    "lookupName": "foo/foo",
+    "managerData": Object {
+      "lineNumber": 10,
+    },
+  },
+  Object {
+    "currentValue": "0.0.1",
+    "datasource": "github-tags",
+    "depName": "i",
+    "lookupName": "foo/foo",
+    "managerData": Object {
+      "lineNumber": 11,
+    },
+  },
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "gitlab-tags",
+    "depName": "j",
+    "lookupName": "bar/bar",
+    "managerData": Object {
+      "lineNumber": 12,
+    },
+  },
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "gitlab-tags",
+    "depName": "k",
+    "lookupName": "bar/bar",
+    "managerData": Object {
+      "lineNumber": 13,
+    },
+  },
+  Object {
+    "currentValue": "1.0.0",
+    "datasource": "git-tags",
+    "depName": "l",
+    "lookupName": "https://example.com/baz/baz.git",
+    "managerData": Object {
+      "lineNumber": 14,
+    },
+  },
+  Object {
+    "currentValue": "1.0.0",
+    "datasource": "git-tags",
+    "depName": "m",
+    "lookupName": "git@example.com:baz/baz.git",
+    "managerData": Object {
+      "lineNumber": 15,
+    },
   },
 ]
 `;

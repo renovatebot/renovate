@@ -96,10 +96,43 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/certifi",
+  },
+]
+`;
+
+exports[`datasource/hex/index getReleases processes a private repo with auth 1`] = `
+Object {
+  "homepage": "https://hex.pm/packages/renovate_test/private_package",
+  "registryUrl": "https://hex.pm/",
+  "releases": Array [
+    Object {
+      "releaseTimestamp": "2021-08-04T15:26:26.500Z",
+      "version": "0.1.0",
+    },
+    Object {
+      "releaseTimestamp": "2021-08-04T17:46:00.274Z",
+      "version": "0.1.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/hex/index getReleases processes a private repo with auth 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "abc",
+      "host": "hex.pm",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://hex.pm/api/repos/renovate_test/packages/private_package",
   },
 ]
 `;
@@ -200,7 +233,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/certifi",
@@ -215,7 +248,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/some_package",
@@ -230,7 +263,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/some_package",
@@ -245,7 +278,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/non_existent_package",
@@ -260,7 +293,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/non_existent_package",
@@ -275,7 +308,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/some_package",
@@ -289,9 +322,9 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
-      "authorization": "Bearer this_simple_token",
+      "authorization": "abc",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/certifi",
@@ -306,7 +339,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/some_crate",
@@ -321,7 +354,7 @@ Array [
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "host": "hex.pm",
-      "user-agent": "https://github.com/renovatebot/renovate",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
     "url": "https://hex.pm/api/packages/some_crate",

@@ -1,15 +1,25 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceTerraformModule from '../../datasource/terraform-module';
+import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
+import { TerraformDependencyTypes } from './common';
 import { extractTerraformProvider } from './providers';
-import { ExtractionResult, TerraformDependencyTypes } from './util';
+import type { ExtractionResult } from './types';
 
-export const githubRefMatchRegex = /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i;
-export const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
-const hostnameMatchRegex = /^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/;
+export const githubRefMatchRegex = regEx(
+  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
+);
+export const bitbucketRefMatchRegex = regEx(
+  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?ref=(?<tag>.*)$/
+);
+export const gitTagsRefMatchRegex = regEx(
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
+);
+const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
 export function extractTerraformModule(
   startingLine: number,
@@ -18,7 +28,6 @@ export function extractTerraformModule(
 ): ExtractionResult {
   const result = extractTerraformProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line no-param-reassign
     dep.managerData.terraformDependencyType = TerraformDependencyTypes.module;
   });
   return result;
@@ -26,14 +35,24 @@ export function extractTerraformModule(
 
 export function analyseTerraformModule(dep: PackageDependency): void {
   const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
+  const bitbucketRefMatch = bitbucketRefMatchRegex.exec(dep.managerData.source);
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
-  /* eslint-disable no-param-reassign */
+
   if (githubRefMatch) {
-    dep.lookupName = githubRefMatch.groups.project.replace(/\.git$/, '');
+    dep.lookupName = githubRefMatch.groups.project.replace(regEx(/\.git$/), '');
     dep.depType = 'module';
     dep.depName = 'github.com/' + dep.lookupName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = datasourceGithubTags.id;
+  } else if (bitbucketRefMatch) {
+    dep.depType = 'module';
+    dep.depName =
+      bitbucketRefMatch.groups.workspace +
+      '/' +
+      bitbucketRefMatch.groups.project;
+    dep.lookupName = dep.depName;
+    dep.currentValue = bitbucketRefMatch.groups.tag;
+    dep.datasource = BitBucketTagsDatasource.id;
   } else if (gitTagsRefMatch) {
     dep.depType = 'module';
     if (gitTagsRefMatch.groups.path.includes('//')) {
@@ -46,7 +65,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
       dep.lookupName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = datasourceGitTags.id;
+    dep.datasource = GitTagsDatasource.id;
   } else if (dep.managerData.source) {
     const moduleParts = dep.managerData.source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
@@ -58,11 +77,10 @@ export function analyseTerraformModule(dep: PackageDependency): void {
       }
       dep.depType = 'module';
       dep.depName = moduleParts.join('/');
-      dep.datasource = datasourceTerraformModule.id;
+      dep.datasource = TerraformModuleDatasource.id;
     }
   } else {
     logger.debug({ dep }, 'terraform dep has no source');
     dep.skipReason = SkipReason.NoSource;
   }
-  /* eslint-enable no-param-reassign */
 }

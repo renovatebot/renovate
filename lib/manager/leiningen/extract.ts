@@ -1,14 +1,16 @@
-import * as datasourceClojure from '../../datasource/clojure';
+import { ClojureDatasource } from '../../datasource/clojure';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractContext, ExtractedVariables } from './types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
-  const regex = new RegExp(`:${kwName}(?=\\s)`);
+  const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12872 lookahead
   const keyOffset = str.search(regex);
   if (keyOffset < 0) {
     return null;
   }
   const withSpaces = str.slice(keyOffset + kwName.length + 1);
-  const valueOffset = withSpaces.search(/[^\s]/);
+  const valueOffset = withSpaces.search(regEx(/[^\s]/));
   if (valueOffset < 0) {
     return null;
   }
@@ -19,15 +21,10 @@ export function expandDepName(name: string): string {
   return name.includes('/') ? name.replace('/', ':') : `${name}:${name}`;
 }
 
-export interface ExtractContext {
-  depType?: string;
-  registryUrls?: string[];
-}
-
 export function extractFromVectors(
   str: string,
-  offset = 0,
-  ctx: ExtractContext = {}
+  ctx: ExtractContext = {},
+  vars: ExtractedVariables = {}
 ): PackageDependency[] {
   if (!str.startsWith('[')) {
     return [];
@@ -38,21 +35,35 @@ export function extractFromVectors(
   let vecPos = 0;
   let artifactId = '';
   let version = '';
-  let fileReplacePosition: number = null;
 
-  const isSpace = (ch: string): boolean => ch && /[\s,]/.test(ch);
+  const isSpace = (ch: string): boolean => ch && regEx(/[\s,]/).test(ch);
 
   const cleanStrLiteral = (s: string): string =>
-    s.replace(/^"/, '').replace(/"$/, '');
+    s.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
 
   const yieldDep = (): void => {
-    if (artifactId && version && fileReplacePosition) {
-      result.push({
-        ...ctx,
-        datasource: datasourceClojure.id,
-        depName: expandDepName(cleanStrLiteral(artifactId)),
-        currentValue: cleanStrLiteral(version),
-      });
+    if (artifactId && version) {
+      const depName = expandDepName(cleanStrLiteral(artifactId));
+      if (version.startsWith('~')) {
+        const varName = version.replace(regEx(/^~\s*/), '');
+        const currentValue = vars[varName];
+        if (currentValue) {
+          result.push({
+            ...ctx,
+            datasource: ClojureDatasource.id,
+            depName,
+            currentValue,
+            groupName: varName,
+          });
+        }
+      } else {
+        result.push({
+          ...ctx,
+          datasource: ClojureDatasource.id,
+          depName,
+          currentValue: cleanStrLiteral(version),
+        });
+      }
     }
     artifactId = '';
     version = '';
@@ -81,9 +92,6 @@ export function extractFromVectors(
       } else if (vecPos === 0) {
         artifactId += char;
       } else if (vecPos === 1) {
-        if (isSpace(prevChar)) {
-          fileReplacePosition = offset + idx + 1;
-        }
         version += char;
       }
     }
@@ -97,7 +105,7 @@ function extractLeinRepos(content: string): string[] {
   const result = [];
 
   const repoContent = trimAtKey(
-    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments
+    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12872 lookahead
     'repositories'
   );
 
@@ -117,49 +125,63 @@ function extractLeinRepos(content: string): string[] {
       }
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
-    const matches = repoSectionContent.match(/"https?:\/\/[^"]*"/g) || [];
-    const urls = matches.map((x) => x.replace(/^"/, '').replace(/"$/, ''));
+    const matches =
+      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) || [];
+    const urls = matches.map((x) =>
+      x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
+    );
     urls.forEach((url) => result.push(url));
   }
 
   return result;
 }
 
-export function extractPackageFile(content: string): PackageFile {
-  const collect = (key: string, ctx: ExtractContext): PackageDependency[] => {
-    let result: PackageDependency[] = [];
-    let restContent = trimAtKey(content, key);
-    while (restContent) {
-      const offset = content.length - restContent.length;
-      result = [...result, ...extractFromVectors(restContent, offset, ctx)];
-      restContent = trimAtKey(restContent, key);
-    }
-    return result;
-  };
+const defRegex = regEx(
+  /^[\s,]*\([\s,]*def[\s,]+(?<varName>[-+*=<>.!?#$%&_|a-zA-Z][-+*=<>.!?#$%&_|a-zA-Z0-9']+)[\s,]*"(?<stringValue>[^"]*)"[\s,]*\)[\s,]*$/
+);
 
+export function extractVariables(content: string): ExtractedVariables {
+  const result: ExtractedVariables = {};
+  const lines = content.split('\n');
+  for (let idx = 0; idx < lines.length; idx += 1) {
+    const line = lines[idx];
+    const match = defRegex.exec(line);
+    if (match) {
+      const { varName: key, stringValue: val } = match.groups;
+      result[key] = val;
+    }
+  }
+  return result;
+}
+
+function collectDeps(
+  content: string,
+  key: string,
+  registryUrls: string[],
+  vars: ExtractedVariables
+): PackageDependency[] {
+  const ctx = {
+    depType: key,
+    registryUrls,
+  };
+  let result: PackageDependency[] = [];
+  let restContent = trimAtKey(content, key);
+  while (restContent) {
+    result = [...result, ...extractFromVectors(restContent, ctx, vars)];
+    restContent = trimAtKey(restContent, key);
+  }
+  return result;
+}
+
+export function extractPackageFile(content: string): PackageFile {
   const registryUrls = extractLeinRepos(content);
+  const vars = extractVariables(content);
 
   const deps: PackageDependency[] = [
-    ...collect('dependencies', {
-      depType: 'dependencies',
-      registryUrls,
-    }),
-    ...collect('managed-dependencies', {
-      depType: 'managed-dependencies',
-      registryUrls,
-    }),
-    ...collect('dev-dependencies', {
-      depType: 'managed-dependencies',
-      registryUrls,
-    }),
-    ...collect('plugins', {
-      depType: 'plugins',
-      registryUrls,
-    }),
-    ...collect('pom-plugins', {
-      depType: 'pom-plugins',
-      registryUrls,
-    }),
+    ...collectDeps(content, 'dependencies', registryUrls, vars),
+    ...collectDeps(content, 'managed-dependencies', registryUrls, vars),
+    ...collectDeps(content, 'plugins', registryUrls, vars),
+    ...collectDeps(content, 'pom-plugins', registryUrls, vars),
   ];
 
   return { deps };

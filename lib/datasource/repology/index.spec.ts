@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import type { RepologyPackage } from './types';
@@ -52,14 +52,8 @@ const fixtureGcc = loadFixture(`gcc.json`);
 const fixturePulseaudio = loadFixture(`pulseaudio.json`);
 const fixtureJdk = loadFixture(`openjdk.json`);
 
-describe(getName(), () => {
+describe('datasource/repology/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => httpMock.reset());
-
     it('returns null for empty result', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {
         status: 200,
@@ -187,6 +181,22 @@ describe(getName(), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
+    it('returns null on Resolver ambiguous binary package', async () => {
+      mockResolverCall('ubuntu_20_04', 'git', 'binname', {
+        status: 300,
+        body: '[]',
+      });
+
+      expect(
+        await getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'ubuntu_20_04/git',
+        })
+      ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('throws without repository and package name', async () => {
       await expect(
         getPkgReleases({
@@ -211,7 +221,7 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.14.2-2+deb10u1');
+      expect(res.releases[0].version).toBe('1.14.2-2+deb10u1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -231,7 +241,7 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.181');
+      expect(res.releases[0].version).toBe('1.181');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -248,7 +258,7 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.181');
+      expect(res.releases[0].version).toBe('1.181');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -265,7 +275,7 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('9.3.0-r2');
+      expect(res.releases[0].version).toBe('9.3.0-r2');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -282,7 +292,7 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('12.2-4+deb10u1');
+      expect(res.releases[0].version).toBe('12.2-4+deb10u1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -302,8 +312,8 @@ describe(getName(), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(6);
-      expect(res.releases[0].version).toEqual('1:11.0.7.10-1.el8_1');
-      expect(res.releases[5].version).toEqual('1:11.0.9.11-3.el8_3');
+      expect(res.releases[0].version).toBe('1:11.0.7.10-1.el8_1');
+      expect(res.releases[5].version).toBe('1:11.0.9.11-3.el8_3');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 

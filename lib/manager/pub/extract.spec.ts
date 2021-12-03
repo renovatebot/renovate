@@ -1,10 +1,10 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from '.';
 
 const brokenYaml = loadFixture('update.yaml');
 const packageFile = loadFixture('extract.yaml');
 
-describe(getName(), () => {
+describe('manager/pub/extract', () => {
   describe('extractPackageFile', () => {
     it('should return null if package does not contain any deps', () => {
       const res = extractPackageFile('foo: bar', 'pubspec.yaml');
@@ -16,6 +16,7 @@ describe(getName(), () => {
     });
     it('should return valid dependencies', () => {
       const res = extractPackageFile(packageFile, 'pubspec.yaml');
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

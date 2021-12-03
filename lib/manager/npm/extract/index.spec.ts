@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../../test/util';
+import { loadFixture } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
@@ -9,6 +9,7 @@ const fs: any = _fs;
 const defaultConfig = getConfig();
 
 const input01Content = loadFixture('inputs/01.json', '..');
+const input01GlobContent = loadFixture('inputs/01-glob.json', '..');
 const workspacesContent = loadFixture('inputs/workspaces.json', '..');
 const workspacesSimpleContent = loadFixture(
   'inputs/workspaces-simple.json',
@@ -17,10 +18,11 @@ const workspacesSimpleContent = loadFixture(
 const vendorisedContent = loadFixture('is-object.json', '..');
 const invalidNameContent = loadFixture('invalid-name.json', '..');
 
-describe(getName(), () => {
+describe('manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
       fs.readLocalFile = jest.fn(() => null);
+      fs.localPathExists = jest.fn(() => false);
     });
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractPackageFile(
@@ -36,6 +38,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('ignores vendorised package.json', async () => {
@@ -77,6 +80,17 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
+      expect(res).toMatchSnapshot();
+    });
+    it('returns an array of dependencies with resolution comments', async () => {
+      const res = await npmExtract.extractPackageFile(
+        input01GlobContent,
+        'package.json',
+        defaultConfig
+      );
+      expect(res?.deps).toHaveLength(13);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds a lock file', async () => {
@@ -91,6 +105,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds and filters .npmrc', async () => {
@@ -107,7 +122,7 @@ describe(getName(), () => {
       );
       expect(res.npmrc).toBeDefined();
     });
-    it('ignores .npmrc when config.npmrc is defined', async () => {
+    it('ignores .npmrc when config.npmrc is defined and npmrcMerge=false', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           return 'some-npmrc\n';
@@ -121,10 +136,23 @@ describe(getName(), () => {
       );
       expect(res.npmrc).toBeUndefined();
     });
+    it('reads .npmrc when config.npmrc is merged', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.npmrc') {
+          return 'repo-npmrc\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { npmrc: 'config-npmrc', npmrcMerge: true }
+      );
+      expect(res.npmrc).toEqual(`config-npmrc\nrepo-npmrc\n`);
+    });
     it('finds and filters .npmrc with variables', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
-          // eslint-disable-next-line
           return 'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
         }
         return null;
@@ -134,7 +162,7 @@ describe(getName(), () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toEqual('registry=https://registry.npmjs.org\n');
+      expect(res.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
@@ -148,6 +176,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds "npmClient":"npm" in lerna.json', async () => {
@@ -162,6 +191,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds "npmClient":"yarn" in lerna.json', async () => {
@@ -176,6 +206,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds simple yarn workspaces', async () => {
@@ -190,6 +221,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
@@ -204,6 +236,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('finds complex yarn workspaces', async () => {
@@ -218,6 +251,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts engines', async () => {
@@ -248,6 +282,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts volta', async () => {
@@ -260,6 +295,7 @@ describe(getName(), () => {
           node: '8.9.2',
           yarn: '1.12.3',
           npm: '5.9.0',
+          pnpm: '6.11.2',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -268,6 +304,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
 
@@ -288,6 +325,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts non-npmjs', async () => {
@@ -307,6 +345,7 @@ describe(getName(), () => {
           l: 'github:owner/l.git#abcdef0',
           m: 'https://github.com/owner/m.git#v1.0.0',
           n: 'git+https://github.com/owner/n#v2.0.0',
+          o: 'git@github.com:owner/o.git#v2.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -315,6 +354,7 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('extracts npm package alias', async () => {
@@ -337,6 +377,40 @@ describe(getName(), () => {
         'package.json',
         defaultConfig
       );
+      // FIXME: explicit assert condition
+      expect(res).toMatchSnapshot();
+    });
+
+    it('sets skipInstalls false if Yarn zero-install is used', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === 'yarn.lock') {
+          return '# yarn.lock';
+        }
+        if (fileName === '.yarnrc.yml') {
+          return 'pnpEnableInlining: false';
+        }
+        return null;
+      });
+      fs.localPathExists = jest.fn(() => true);
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+
+    it('extracts packageManager', async () => {
+      const pJson = {
+        packageManager: 'yarn@3.0.0',
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

@@ -7,14 +7,9 @@ Array [
     "default",
     undefined,
     undefined,
+    undefined,
   ],
 ]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to azure 2`] = `
-Object {
-  "resolved": "preset",
-}
 `;
 
 exports[`config/presets/local/index getPreset() forwards to bitbucket 1`] = `
@@ -24,14 +19,9 @@ Array [
     "default",
     undefined,
     undefined,
+    undefined,
   ],
 ]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to bitbucket 2`] = `
-Object {
-  "resolved": "preset",
-}
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom bitbucket-server 1`] = `
@@ -41,14 +31,9 @@ Array [
     "default",
     undefined,
     "https://git.example.com",
+    undefined,
   ],
 ]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to custom bitbucket-server 2`] = `
-Object {
-  "resolved": "preset",
-}
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom gitea 1`] = `
@@ -58,14 +43,9 @@ Array [
     "default",
     undefined,
     "https://api.gitea.example.com",
+    undefined,
   ],
 ]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to custom gitea 2`] = `
-Object {
-  "resolved": "preset",
-}
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom github 1`] = `
@@ -75,14 +55,21 @@ Array [
     "default",
     undefined,
     "https://api.github.example.com",
+    undefined,
   ],
 ]
 `;
 
-exports[`config/presets/local/index getPreset() forwards to custom github 2`] = `
-Object {
-  "resolved": "preset",
-}
+exports[`config/presets/local/index getPreset() forwards to custom github with a tag 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "default",
+    undefined,
+    "https://api.github.example.com",
+    "someTag",
+  ],
+]
 `;
 
 exports[`config/presets/local/index getPreset() forwards to custom gitlab 1`] = `
@@ -92,14 +79,21 @@ Array [
     "default",
     undefined,
     "https://gitlab.example.com/api/v4",
+    undefined,
   ],
 ]
 `;
 
-exports[`config/presets/local/index getPreset() forwards to custom gitlab 2`] = `
-Object {
-  "resolved": "preset",
-}
+exports[`config/presets/local/index getPreset() forwards to custom gitlab with a tag 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "default",
+    undefined,
+    "https://gitlab.example.com/api/v4",
+    "someTag",
+  ],
+]
 `;
 
 exports[`config/presets/local/index getPreset() forwards to gitea 1`] = `
@@ -109,14 +103,9 @@ Array [
     "default",
     undefined,
     undefined,
+    undefined,
   ],
 ]
-`;
-
-exports[`config/presets/local/index getPreset() forwards to gitea 2`] = `
-Object {
-  "resolved": "preset",
-}
 `;
 
 exports[`config/presets/local/index getPreset() forwards to github 1`] = `
@@ -126,14 +115,21 @@ Array [
     "default",
     undefined,
     undefined,
+    undefined,
   ],
 ]
 `;
 
-exports[`config/presets/local/index getPreset() forwards to github 2`] = `
-Object {
-  "resolved": "preset",
-}
+exports[`config/presets/local/index getPreset() forwards to github with a tag 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "default",
+    undefined,
+    undefined,
+    "someTag",
+  ],
+]
 `;
 
 exports[`config/presets/local/index getPreset() forwards to gitlab 1`] = `
@@ -143,12 +139,19 @@ Array [
     "default",
     undefined,
     undefined,
+    undefined,
   ],
 ]
 `;
 
-exports[`config/presets/local/index getPreset() forwards to gitlab 2`] = `
-Object {
-  "resolved": "preset",
-}
+exports[`config/presets/local/index getPreset() forwards to gitlab with a tag 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "default",
+    undefined,
+    undefined,
+    "someTag",
+  ],
+]
 `;

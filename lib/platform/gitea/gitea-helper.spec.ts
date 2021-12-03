@@ -1,10 +1,9 @@
 import * as httpMock from '../../../test/http-mock';
-import { getName } from '../../../test/util';
 import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
-describe(getName(), () => {
+describe('platform/gitea/gitea-helper', () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
@@ -85,6 +84,7 @@ describe(getName(), () => {
     title: 'Some Issue',
     body: 'just some issue',
     assignees: [mockUser],
+    labels: [],
   };
 
   const mockComment: ght.Comment = {
@@ -140,12 +140,7 @@ describe(getName(), () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    httpMock.reset();
-    httpMock.setup();
     setBaseUrl(baseUrl);
-  });
-  afterEach(() => {
-    httpMock.reset();
   });
 
   describe('getCurrentUser', () => {
@@ -474,6 +469,30 @@ describe(getName(), () => {
     });
   });
 
+  describe('updateIssueLabels', () => {
+    it('should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint', async () => {
+      const updatedMockLabels: Partial<ght.Label>[] = [
+        { id: 1, name: 'Renovate' },
+        { id: 3, name: 'Maintenance' },
+      ];
+
+      httpMock
+        .scope(baseUrl)
+        .put(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}/labels`)
+        .reply(200, updatedMockLabels);
+
+      const res = await ght.updateIssueLabels(
+        mockRepo.full_name,
+        mockIssue.number,
+        {
+          labels: [1, 3],
+        }
+      );
+      expect(res).toEqual(updatedMockLabels);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
   describe('closeIssue', () => {
     it('should call /api/v1/repos/[repo]/issues/[issue] endpoint', async () => {
       httpMock
@@ -509,6 +528,19 @@ describe(getName(), () => {
         state: 'open',
       });
       expect(res).toEqual([mockIssue]);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('getIssue', () => {
+    it('should call /api/v1/repos/[repo]/issues/[issue] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
+        .reply(200, mockIssue);
+
+      const res = await ght.getIssue(mockRepo.full_name, mockIssue.number);
+      expect(res).toEqual(mockIssue);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -660,7 +692,7 @@ describe(getName(), () => {
         mockRepo.full_name,
         mockBranch.name
       );
-      expect(res.worstStatus).not.toEqual('unknown');
+      expect(res.worstStatus).not.toBe('unknown');
       expect(res.statuses).toEqual([mockCommitStatus, otherMockCommitStatus]);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

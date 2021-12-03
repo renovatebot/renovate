@@ -8,16 +8,17 @@ import * as configParser from '../../config';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
 import type {
-  GlobalConfig,
+  AllConfig,
   RenovateConfig,
   RenovateRepository,
 } from '../../config/types';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { getProblems, logger, setMeta } from '../../logger';
-import { setUtilConfig } from '../../util';
+import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
+import { parseConfigs } from './config/parse';
 import { globalFinalize, globalInitialize } from './initialize';
 import { Limit, isLimitReached } from './limits';
 
@@ -39,7 +40,7 @@ export async function getRepositoryConfig(
 }
 
 function getGlobalConfig(): Promise<RenovateConfig> {
-  return configParser.parseConfigs(process.env, process.argv);
+  return parseConfigs(process.env, process.argv);
 }
 
 function haveReachedLimits(): boolean {
@@ -72,7 +73,7 @@ function checkEnv(): void {
   }
 }
 
-export async function validatePresets(config: GlobalConfig): Promise<void> {
+export async function validatePresets(config: AllConfig): Promise<void> {
   try {
     await resolveConfigPresets(config);
   } catch (err) /* istanbul ignore next */ {
@@ -81,7 +82,7 @@ export async function validatePresets(config: GlobalConfig): Promise<void> {
 }
 
 export async function start(): Promise<number> {
-  let config: GlobalConfig;
+  let config: AllConfig;
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
@@ -97,13 +98,22 @@ export async function start(): Promise<number> {
 
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
+
+    if (is.nonEmptyString(config.writeDiscoveredRepos)) {
+      const content = JSON.stringify(config.repositories);
+      await writeFile(config.writeDiscoveredRepos, content);
+      logger.info(
+        `Written discovered repositories to ${config.writeDiscoveredRepos}`
+      );
+      return 0;
+    }
+
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (haveReachedLimits()) {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
-      await setUtilConfig(repoConfig);
       if (repoConfig.hostRules) {
         hostRules.clear();
         repoConfig.hostRules.forEach((rule) => hostRules.add(rule));

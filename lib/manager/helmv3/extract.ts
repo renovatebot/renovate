@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
-import * as datasourceHelm from '../../datasource/helm';
+import { load } from 'js-yaml';
+import * as datasourceDocker from '../../datasource/docker';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
@@ -19,7 +20,7 @@ export async function extractPackageFile(
   };
   try {
     // TODO: fix me (#9610)
-    chart = yaml.safeLoad(content, { json: true }) as any;
+    chart = load(content, { json: true }) as any;
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { fileName },
@@ -75,8 +76,16 @@ export async function extractPackageFile(
       } else {
         try {
           const url = new URL(dep.repository);
-          if (url.protocol === 'file:') {
-            res.skipReason = SkipReason.LocalDependency;
+          switch (url.protocol) {
+            case 'oci:':
+              res.datasource = datasourceDocker.id;
+              res.lookupName = dep.repository.replace('oci://', '');
+              res.registryUrls = [];
+              break;
+            case 'file:':
+              res.skipReason = SkipReason.LocalDependency;
+              break;
+            default:
           }
         } catch (err) {
           logger.debug({ err }, 'Error parsing url');
@@ -90,7 +99,7 @@ export async function extractPackageFile(
   });
   const res: PackageFile = {
     deps,
-    datasource: datasourceHelm.id,
+    datasource: HelmDatasource.id,
     packageFileVersion,
   };
   const lockFileName = getSiblingFileName(fileName, 'Chart.lock');

@@ -3,6 +3,7 @@
 exports[`workers/branch/index processBranch branch pr no rebase (dry run) 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "pr-edited",
 }
 `;
@@ -10,6 +11,7 @@ Object {
 exports[`workers/branch/index processBranch branch pr no schedule (dry run) 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "done",
 }
 `;
@@ -17,6 +19,7 @@ Object {
 exports[`workers/branch/index processBranch branch pr no schedule 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "done",
 }
 `;
@@ -24,6 +27,7 @@ Object {
 exports[`workers/branch/index processBranch branch pr no schedule lockfile (dry run) 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "done",
 }
 `;
@@ -31,6 +35,7 @@ Object {
 exports[`workers/branch/index processBranch closed pr (dry run) 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "already-existed",
 }
 `;
@@ -38,6 +43,7 @@ Object {
 exports[`workers/branch/index processBranch continues branch if branch edited and but PR found 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "error",
 }
 `;
@@ -45,6 +51,7 @@ Object {
 exports[`workers/branch/index processBranch does not skip branch if edited PR found with rebaseLabel 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "error",
 }
 `;
@@ -52,6 +59,7 @@ Object {
 exports[`workers/branch/index processBranch executes post-upgrade tasks if trust is high 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "done",
 }
 `;
@@ -59,6 +67,7 @@ Object {
 exports[`workers/branch/index processBranch executes post-upgrade tasks once when set to branch mode 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "done",
 }
 `;
@@ -66,6 +75,7 @@ Object {
 exports[`workers/branch/index processBranch executes post-upgrade tasks with disabled post-upgrade command templating 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "done",
 }
 `;
@@ -73,6 +83,39 @@ Object {
 exports[`workers/branch/index processBranch executes post-upgrade tasks with multiple dependecy in one branch 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
+  "result": "done",
+}
+`;
+
+exports[`workers/branch/index processBranch handles unknown PrBlockedBy 1`] = `
+Object {
+  "branchExists": true,
+  "prBlockedBy": "whoops",
+  "result": "error",
+}
+`;
+
+exports[`workers/branch/index processBranch processes branch if minimumConfidence is met 1`] = `
+Object {
+  "branchExists": false,
+  "prNo": undefined,
+  "result": "error",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if PR creation failed 1`] = `
+Object {
+  "branchExists": true,
+  "prBlockedBy": "Error",
+  "result": "error",
+}
+`;
+
+exports[`workers/branch/index processBranch returns if branch automerge is pending 1`] = `
+Object {
+  "branchExists": true,
+  "prBlockedBy": "BranchAutomerge",
   "result": "done",
 }
 `;
@@ -80,6 +123,7 @@ Object {
 exports[`workers/branch/index processBranch returns if branch creation limit exceeded 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "branch-limit-reached",
 }
 `;
@@ -87,6 +131,7 @@ Object {
 exports[`workers/branch/index processBranch returns if branch exists and prCreation set to approval 1`] = `
 Object {
   "branchExists": true,
+  "prBlockedBy": "NeedsApproval",
   "result": "needs-pr-approval",
 }
 `;
@@ -94,6 +139,7 @@ Object {
 exports[`workers/branch/index processBranch returns if branch exists but pending 1`] = `
 Object {
   "branchExists": true,
+  "prBlockedBy": "AwaitingTests",
   "result": "pending",
 }
 `;
@@ -101,6 +147,7 @@ Object {
 exports[`workers/branch/index processBranch returns if branch exists but updated 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "pending",
 }
 `;
@@ -108,6 +155,7 @@ Object {
 exports[`workers/branch/index processBranch returns if commit limit exceeded 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "commit-limit-reached",
 }
 `;
@@ -115,6 +163,7 @@ Object {
 exports[`workers/branch/index processBranch returns if no work 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "no-work",
 }
 `;
@@ -122,6 +171,7 @@ Object {
 exports[`workers/branch/index processBranch returns if pending checks 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "pending",
 }
 `;
@@ -129,6 +179,7 @@ Object {
 exports[`workers/branch/index processBranch returns if pr creation limit exceeded and branch exists 1`] = `
 Object {
   "branchExists": true,
+  "prBlockedBy": "RateLimited",
   "result": "pr-limit-reached",
 }
 `;
@@ -136,6 +187,7 @@ Object {
 exports[`workers/branch/index processBranch skips branch for fresh release with stabilityDays 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "pending",
 }
 `;
@@ -143,6 +195,7 @@ Object {
 exports[`workers/branch/index processBranch skips branch if branch edited and and PR found with sha mismatch 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "pr-edited",
 }
 `;
@@ -150,6 +203,7 @@ Object {
 exports[`workers/branch/index processBranch skips branch if branch edited and no PR found 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "pr-edited",
 }
 `;
@@ -157,13 +211,23 @@ Object {
 exports[`workers/branch/index processBranch skips branch if edited PR found 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "pr-edited",
+}
+`;
+
+exports[`workers/branch/index processBranch skips branch if minimumConfidence not met 1`] = `
+Object {
+  "branchExists": false,
+  "prNo": undefined,
+  "result": "error",
 }
 `;
 
 exports[`workers/branch/index processBranch skips branch if not scheduled and branch does not exist 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "not-scheduled",
 }
 `;
@@ -171,13 +235,15 @@ Object {
 exports[`workers/branch/index processBranch skips branch if not scheduled and not updating out of schedule 1`] = `
 Object {
   "branchExists": true,
-  "result": "not-scheduled",
+  "prNo": undefined,
+  "result": "update-not-scheduled",
 }
 `;
 
 exports[`workers/branch/index processBranch skips branch if not stabilityDays not met 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "pending",
 }
 `;
@@ -185,6 +251,7 @@ Object {
 exports[`workers/branch/index processBranch skips branch if target branch changed 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "pr-edited",
 }
 `;
@@ -192,6 +259,7 @@ Object {
 exports[`workers/branch/index processBranch swallows branch errors 1`] = `
 Object {
   "branchExists": false,
+  "prNo": undefined,
   "result": "error",
 }
 `;
@@ -199,6 +267,7 @@ Object {
 exports[`workers/branch/index processBranch swallows pr errors 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "done",
 }
 `;
@@ -206,6 +275,7 @@ Object {
 exports[`workers/branch/index processBranch throws and swallows branch errors 1`] = `
 Object {
   "branchExists": true,
+  "prNo": undefined,
   "result": "pr-created",
 }
 `;

@@ -1,8 +1,7 @@
-import { getName } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import { generateBranchName } from './branch-name';
 
-describe(getName(), () => {
+describe('workers/repository/updates/branch-name', () => {
   describe('getBranchName()', () => {
     it('uses groupName if no slug defined', () => {
       const upgrade: RenovateConfig = {
@@ -13,7 +12,7 @@ describe(getName(), () => {
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('some-group-name-grouptopic');
+      expect(upgrade.branchName).toBe('some-group-name-grouptopic');
     });
     it('uses groupSlug if defined', () => {
       const upgrade: RenovateConfig = {
@@ -25,7 +24,7 @@ describe(getName(), () => {
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('some-group-slug-grouptopic');
+      expect(upgrade.branchName).toBe('some-group-slug-grouptopic');
     });
     it('separates major with groups', () => {
       const upgrade: RenovateConfig = {
@@ -41,7 +40,7 @@ describe(getName(), () => {
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('major-2-some-group-slug-grouptopic');
+      expect(upgrade.branchName).toBe('major-2-some-group-slug-grouptopic');
     });
     it('uses single major with groups', () => {
       const upgrade: RenovateConfig = {
@@ -57,7 +56,7 @@ describe(getName(), () => {
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('major-some-group-slug-grouptopic');
+      expect(upgrade.branchName).toBe('major-some-group-slug-grouptopic');
     });
     it('separates patch groups and uses update topic', () => {
       const upgrade: RenovateConfig = {
@@ -72,7 +71,7 @@ describe(getName(), () => {
         group: {},
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual(
+      expect(upgrade.branchName).toBe(
         'update-branch-patch-some-group-slug-update-topic'
       );
     });
@@ -84,7 +83,7 @@ describe(getName(), () => {
         group: {},
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('dep');
+      expect(upgrade.branchName).toBe('dep');
     });
     it('separates patches when separateMinorPatch=true', () => {
       const upgrade: RenovateConfig = {
@@ -103,7 +102,7 @@ describe(getName(), () => {
         group: {},
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('renovate/lodash-4.17.x');
+      expect(upgrade.branchName).toBe('renovate/lodash-4.17.x');
     });
     it('does not separate patches when separateMinorPatch=false', () => {
       const upgrade: RenovateConfig = {
@@ -122,7 +121,7 @@ describe(getName(), () => {
         group: {},
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('renovate/lodash-4.x');
+      expect(upgrade.branchName).toBe('renovate/lodash-4.x');
     });
 
     it('realistic defaults', () => {
@@ -137,7 +136,7 @@ describe(getName(), () => {
         group: {},
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('renovate/jest-42.x');
+      expect(upgrade.branchName).toBe('renovate/jest-42.x');
     });
 
     it('hashedBranchLength hashing', () => {
@@ -153,7 +152,7 @@ describe(getName(), () => {
         group: {},
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('dep-df9ca0f348');
+      expect(upgrade.branchName).toBe('dep-df9ca0f348');
     });
 
     it('hashedBranchLength hashing with group name', () => {
@@ -171,7 +170,7 @@ describe(getName(), () => {
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('dep-df9ca0f34833f3e0');
+      expect(upgrade.branchName).toBe('dep-df9ca0f34833f3e0');
     });
 
     it('hashedBranchLength too short', () => {
@@ -189,7 +188,7 @@ describe(getName(), () => {
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toEqual('dep-df9ca0');
+      expect(upgrade.branchName).toBe('dep-df9ca0');
     });
 
     it('enforces valid git branch name', () => {
@@ -221,15 +220,15 @@ describe(getName(), () => {
         },
         {
           upgrade: { branchName: 'renovate/~bad-branch-name2' },
-          expectedBranchName: 'renovate/-bad-branch-name2',
+          expectedBranchName: 'renovate/bad-branch-name2',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-^-name3' },
-          expectedBranchName: 'renovate/bad-branch---name3',
+          expectedBranchName: 'renovate/bad-branch-name3',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name : 4' },
-          expectedBranchName: 'renovate/bad-branch-name---4',
+          expectedBranchName: 'renovate/bad-branch-name-4',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name5/' },
@@ -250,6 +249,18 @@ describe(getName(), () => {
         {
           upgrade: { branchName: 'renovate/bad-branch-name9.' },
           expectedBranchName: 'renovate/bad-branch-name9',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch--name10' },
+          expectedBranchName: 'renovate/bad-branch-name10',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad--branch---name11' },
+          expectedBranchName: 'renovate/bad-branch-name11',
+        },
+        {
+          upgrade: { branchName: 'renovate-/[start]-something-[end]' },
+          expectedBranchName: 'renovate/start-something-end',
         },
       ];
       fixtures.forEach((fixture) => {

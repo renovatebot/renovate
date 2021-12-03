@@ -25,7 +25,7 @@ export async function writeUpdates(
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining);
 
-  const branchesRemaining = getBranchesRemaining(config, branches);
+  const branchesRemaining = await getBranchesRemaining(config, branches);
   logger.debug(
     { branchesRemaining },
     'Calculated maximum branches remaining this run'
@@ -36,6 +36,8 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     const res = await processBranch(branch);
+    branch.prBlockedBy = res?.prBlockedBy;
+    branch.prNo = res?.prNo;
     branch.result = res?.result;
     if (
       branch.result === BranchResult.Automerged &&

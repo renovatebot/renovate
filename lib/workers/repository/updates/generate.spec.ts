@@ -1,4 +1,4 @@
-import { defaultConfig, getName, partial } from '../../../../test/util';
+import { defaultConfig, partial } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import * as datasourceNpm from '../../../datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
@@ -8,7 +8,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe(getName(), () => {
+describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade', () => {
       const branch = [
@@ -38,6 +38,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileUpdate', () => {
@@ -54,6 +55,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
     it('does not group same upgrades', () => {
@@ -144,8 +146,8 @@ describe(getName(), () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
-      expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
-      expect(res.automerge).toBe(false);
+      expect(res.releaseTimestamp).toBe('2017-02-07T20:01:41+00:00');
+      expect(res.automerge).toBeFalse();
       expect(res.constraints).toEqual({
         foo: '1.0.0',
         bar: '2.0.0',
@@ -187,9 +189,9 @@ describe(getName(), () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBe(true);
+      expect(res.recreateClosed).toBeTrue();
       expect(res.groupName).toBeDefined();
-      expect(res.releaseTimestamp).toEqual('2017-02-08T20:01:41+00:00');
+      expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
     it('groups multiple digest updates', () => {
       const branch = [
@@ -225,7 +227,7 @@ describe(getName(), () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBe(true);
+      expect(res.recreateClosed).toBeTrue();
       expect(res.groupName).toBeDefined();
     });
     it('fixes different messages', () => {
@@ -283,7 +285,7 @@ describe(getName(), () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
+      expect(res.prTitle).toBe(
         'chore(package): update dependency some-dep to v1.2.0'
       );
     });
@@ -307,9 +309,7 @@ describe(getName(), () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
-        'chore(): update dependency some-dep to v1.2.0'
-      );
+      expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
     });
     it('scopes monorepo commits with nested package files using parent directory', () => {
       const branch = [
@@ -332,7 +332,7 @@ describe(getName(), () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
+      expect(res.prTitle).toBe(
         'chore(bar): update dependency some-dep to v1.2.0'
       );
     });
@@ -356,7 +356,7 @@ describe(getName(), () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
+      expect(res.prTitle).toBe(
         'chore(foo/bar): update dependency some-dep to v1.2.0'
       );
     });
@@ -385,6 +385,7 @@ describe(getName(), () => {
         }),
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res.prTitle).toMatchSnapshot();
     });
     it('handles @types specially', () => {
@@ -424,8 +425,9 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.recreateClosed).toBe(false);
+      expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeUndefined();
+      // FIXME: explicit assert condition
       expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles @types specially (reversed)', () => {
@@ -460,6 +462,7 @@ describe(getName(), () => {
           group: {},
         },
       ];
+      // FIXME: explicit assert condition
       expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles upgrades', () => {
@@ -508,6 +511,7 @@ describe(getName(), () => {
         },
       ];
       const res = generateBranchConfig(branch);
+      // FIXME: explicit assert condition
       expect(res.prTitle).toMatchSnapshot();
     });
     it('sorts upgrades, without position first', () => {
@@ -545,6 +549,47 @@ describe(getName(), () => {
       expect(
         res.upgrades.map((upgrade) => upgrade.fileReplacePosition)
       ).toStrictEqual([undefined, undefined, 4, 1]);
+    });
+    it('passes through pendingChecks', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          pendingChecks: true,
+        },
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          pendingChecks: true,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.pendingChecks).toBeTrue();
+      expect(res.upgrades).toHaveLength(2);
+    });
+    it('filters pendingChecks', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          pendingChecks: true,
+        },
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.pendingChecks).toBeUndefined();
+      expect(res.upgrades).toHaveLength(1);
     });
   });
 });

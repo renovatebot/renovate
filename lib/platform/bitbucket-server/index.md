@@ -8,6 +8,7 @@
 ## Features awaiting implementation
 
 - Creating issues not implemented yet, used to alert users when there is a config error
+- The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will implicitly use the merge strategy configured as 'default' in the Bitbucket Server repository itself, and this cannot be overridden yet
 
 ## Testing
 
@@ -25,7 +26,7 @@ Once it's running and initialized, the quickest way to testing with Renovate is:
 1. Create the admin user as prompted
 2. Create a new project and a repository for that project
 3. Make sure the repository has a package file in it for Renovate to find, e.g. `.nvmrc` or `package.json`
-4. Create a dedicated REnovate user `@renovate-bot` and grant it write access to the project
+4. Create a dedicated Renovate user `@renovate-bot` and grant it write access to the project
 5. Note down the password for `@renovate-bot` and use it in the Renovate CLI
 
 At this point you should have a project ready for Renovate, and the `@renovate-bot` account ready to run on it. You can then run like this:

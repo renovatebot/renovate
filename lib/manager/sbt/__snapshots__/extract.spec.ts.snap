@@ -69,6 +69,36 @@ Object {
         "https://repo.maven.apache.org/maven2",
       ],
     },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc-a",
+      "groupName": "abcVersion for com.abc",
+      "lookupName": "com.abc:abc-a",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc-b",
+      "groupName": "abcVersion for com.abc",
+      "lookupName": "com.abc:abc-b",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc-c",
+      "groupName": "abcVersion for com.abc",
+      "lookupName": "com.abc:abc-c",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
   ],
   "packageFileVersion": undefined,
 }

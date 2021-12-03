@@ -1,3 +1,5 @@
+import { regEx } from '../../util/regex';
+
 export enum TokenType {
   Number = 1,
   String,
@@ -20,11 +22,11 @@ function iterateChars(str: string, cb: (p: string, n: string) => void): void {
 }
 
 function isSeparator(char: string): boolean {
-  return /^[-._+]$/i.test(char);
+  return regEx(/^[-._+]$/i).test(char);
 }
 
 function isDigit(char: string): boolean {
-  return /^\d$/.test(char);
+  return regEx(/^\d$/).test(char);
 }
 
 function isLetter(char: string): boolean {
@@ -48,7 +50,7 @@ export function tokenize(versionStr: string): Token[] | null {
     }
     if (result) {
       const val = currentVal;
-      if (/^\d+$/.test(val)) {
+      if (regEx(/^\d+$/).test(val)) {
         result.push({
           type: TokenType.Number,
           val: parseInt(val, 10),
@@ -83,8 +85,11 @@ export enum QualifierRank {
   Dev = -1,
   Default = 0,
   RC,
-  Release,
+  Snapshot,
   Final,
+  GA,
+  Release,
+  SP,
 }
 
 export function qualifierRank(input: string): number {
@@ -95,11 +100,20 @@ export function qualifierRank(input: string): number {
   if (val === 'rc' || val === 'cr') {
     return QualifierRank.RC;
   }
-  if (val === 'ga' || val === 'release' || val === 'latest' || val === 'sr') {
-    return QualifierRank.Release;
+  if (val === 'snapshot') {
+    return QualifierRank.Snapshot;
+  }
+  if (val === 'ga') {
+    return QualifierRank.GA;
   }
   if (val === 'final') {
     return QualifierRank.Final;
+  }
+  if (val === 'release' || val === 'latest' || val === 'sr') {
+    return QualifierRank.Release;
+  }
+  if (val === 'sp') {
+    return QualifierRank.SP;
   }
   return QualifierRank.Default;
 }
@@ -108,22 +122,12 @@ function stringTokenCmp(left: string, right: string): number {
   const leftRank = qualifierRank(left);
   const rightRank = qualifierRank(right);
   if (leftRank === 0 && rightRank === 0) {
-    if (left === 'SNAPSHOT' || right === 'SNAPSHOT') {
-      if (left.toLowerCase() < right.toLowerCase()) {
-        return -1;
-      }
+    if (left < right) {
+      return -1;
+    }
 
-      if (left.toLowerCase() > right.toLowerCase()) {
-        return 1;
-      }
-    } else {
-      if (left < right) {
-        return -1;
-      }
-
-      if (left > right) {
-        return 1;
-      }
+    if (left > right) {
+      return 1;
     }
   } else {
     if (leftRank < rightRank) {
@@ -189,11 +193,11 @@ export function isVersion(input: string): boolean {
     return false;
   }
 
-  if (!/^[-._+a-zA-Z0-9]+$/i.test(input)) {
+  if (!regEx(/^[-._+a-zA-Z0-9]+$/i).test(input)) {
     return false;
   }
 
-  if (/^latest\.?/i.test(input)) {
+  if (regEx(/^latest\.?/i).test(input)) {
     return false;
   }
 
@@ -229,9 +233,9 @@ export function parsePrefixRange(input: string): PrefixRange | null {
     return { tokens: [] };
   }
 
-  const postfixRegex = /[-._]\+$/;
+  const postfixRegex = regEx(/[-._]\+$/);
   if (postfixRegex.test(input)) {
-    const prefixValue = input.replace(/[-._]\+$/, '');
+    const prefixValue = input.replace(regEx(/[-._]\+$/), '');
     const tokens = tokenize(prefixValue);
     return tokens ? { tokens } : null;
   }
@@ -239,7 +243,9 @@ export function parsePrefixRange(input: string): PrefixRange | null {
   return null;
 }
 
-const mavenBasedRangeRegex = /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/;
+const mavenBasedRangeRegex = regEx(
+  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/
+);
 
 export function parseMavenBasedRange(input: string): MavenBasedRange | null {
   if (!input) {

@@ -41,5 +41,6 @@ exports[`util/git/index initRepo()) should fetch latest 2`] = `
 Array [
   "past message2",
   "master message",
+  "past message",
 ]
 `;

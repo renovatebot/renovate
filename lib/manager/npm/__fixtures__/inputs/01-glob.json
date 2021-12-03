@@ -25,6 +25,7 @@
     "@angular/core": "4.0.0-beta.1"
   },
   "resolutions": {
+    "//": ["This is a comment"],
     "**/config": "1.21.0"
   },
   "homepage": "https://keylocation.sg",

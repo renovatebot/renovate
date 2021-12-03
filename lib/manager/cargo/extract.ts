@@ -1,5 +1,5 @@
 import { parse } from '@iarna/toml';
-import * as datasourceCrate from '../../datasource/crate';
+import { CrateDatasource } from '../../datasource/crate';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../util/fs';
@@ -27,12 +27,16 @@ function extractFromSection(
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     let registryUrls: string[] | undefined;
+    let lookupName: string | undefined;
 
     if (typeof currentValue !== 'string') {
       const version = currentValue.version;
       const path = currentValue.path;
       const git = currentValue.git;
       const registryName = currentValue.registry;
+
+      lookupName = currentValue.package;
+
       if (version) {
         currentValue = version;
         nestedVersion = true;
@@ -66,7 +70,7 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as any,
       managerData: { nestedVersion },
-      datasource: datasourceCrate.id,
+      datasource: CrateDatasource.id,
     };
     if (registryUrls) {
       dep.registryUrls = registryUrls;
@@ -76,6 +80,9 @@ function extractFromSection(
     }
     if (target) {
       dep.target = target;
+    }
+    if (lookupName) {
+      dep.lookupName = lookupName;
     }
     deps.push(dep);
   });

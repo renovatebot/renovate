@@ -1,9 +1,10 @@
-import { fs, getName } from '../../../test/util';
+import { fs } from '../../../test/util';
+import * as datasourceDocker from '../../datasource/docker';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
-describe(getName(), () => {
+describe('manager/helmv3/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -34,7 +35,7 @@ describe(getName(), () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toEqual(true);
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(true);
     });
     it('parses simple Chart.yaml correctly', async () => {
       const content = `
@@ -59,9 +60,51 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          { depName: 'redis', currentValue: '0.9.0' },
+          { depName: 'postgresql', currentValue: '0.8.1' },
+        ],
+      });
     });
+
+    it('extract correctly oci references', async () => {
+      const content = `
+      apiVersion: v2
+      name: app2
+      description: A Helm chart for Kubernetes
+      type: application
+      version: 0.1.0
+      appVersion: "1.16.0"
+      dependencies:
+      - name: library
+        version: 0.1.0
+        repository: oci://ghcr.io/ankitabhopatkar13/library
+        import-values:
+          - defaults
+      - name: postgresql
+        version: 0.8.1
+        repository: https://charts.helm.sh/stable
+        condition: postgresql.enabled
+      `;
+      const fileName = 'Chart.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchSnapshot({
+        deps: [
+          {
+            depName: 'library',
+            datasource: datasourceDocker.id,
+            currentValue: '0.1.0',
+          },
+          { depName: 'postgresql', currentValue: '0.8.1' },
+        ],
+      });
+    });
+
     it('resolves aliased registry urls', async () => {
       const content = `
       apiVersion: v2
@@ -86,7 +129,7 @@ describe(getName(), () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason)).toEqual(false);
+      expect(result.deps.every((dep) => dep.skipReason)).toBe(false);
     });
     it("doesn't fail if Chart.yaml is invalid", async () => {
       const content = `
@@ -123,8 +166,12 @@ describe(getName(), () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot({
+        deps: [
+          { depName: 'redis' },
+          { depName: 'postgresql', skipReason: 'local-dependency' },
+        ],
+      });
     });
     it('returns null if no dependencies key', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`

@@ -1,6 +1,7 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
 import type { HostRule } from '../types';
+import type { GitNoVerifyOption } from '../util/git/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -20,11 +21,13 @@ export interface GroupConfig extends Record<string, unknown> {
 export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
+  automergeStrategy?: MergeStrategy;
   branchPrefix?: string;
   branchName?: string;
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  confidential?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -36,11 +39,13 @@ export interface RenovateSharedConfig {
   includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
+  ignoreTests?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
   hashedBranchLength?: number;
   npmrc?: string;
+  npmrcMerge?: boolean;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
@@ -53,7 +58,6 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
-  requiredStatusChecks?: string[];
   schedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string;
@@ -70,35 +74,44 @@ export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string;
   baseDir?: string;
+  cacheDir?: string;
+  detectHostRulesFromEnv?: boolean;
   forceCli?: boolean;
+  gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   logFile?: string;
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
+  privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
 }
 
 // Config options used within the repository worker, but not user configurable
-// The below should contain config options where admin=true
-export interface RepoAdminConfig {
+// The below should contain config options where globalOnly=true
+export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
+  allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
+  binarySource?: 'docker' | 'global';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
+  executionTimeout?: number;
   exposeAllEnv?: boolean;
-  privateKey?: string | Buffer;
+  migratePresets?: Record<string, string>;
+  privateKey?: string;
+  privateKeyOld?: string;
+  localDir?: string;
+  cacheDir?: string;
 }
 
 export interface LegacyAdminConfig {
-  cacheDir?: string;
-
   endpoint?: string;
 
   localDir?: string;
@@ -108,6 +121,7 @@ export interface LegacyAdminConfig {
   onboarding?: boolean;
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
+  onboardingNoDeps?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
@@ -123,9 +137,8 @@ export type PostUpgradeTasks = {
   executionMode: ExecutionMode;
 };
 
-type UpdateConfig<
-  T extends RenovateSharedConfig = RenovateSharedConfig
-> = Partial<Record<UpdateType, T>>;
+type UpdateConfig<T extends RenovateSharedConfig = RenovateSharedConfig> =
+  Partial<Record<UpdateType, T>>;
 
 export type RenovateRepository =
   | string
@@ -142,6 +155,7 @@ export interface CustomManager {
   datasourceTemplate?: string;
   lookupNameTemplate?: string;
   versioningTemplate?: string;
+  autoReplaceStringTemplate?: string;
 }
 
 // TODO: Proper typings
@@ -173,10 +187,12 @@ export interface RenovateConfig
   dependencyDashboard?: boolean;
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
+  dependencyDashboardIssue?: number;
   dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
+  dependencyDashboardLabels?: string[];
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
@@ -197,7 +213,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 }
 
-export interface GlobalConfig extends RenovateConfig, GlobalOnlyConfig {}
+export interface AllConfig extends RenovateConfig, GlobalOnlyConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
@@ -219,9 +235,17 @@ export type UpdateType =
   | 'lockFileMaintenance'
   | 'lockfileUpdate'
   | 'rollback'
-  | 'bump';
+  | 'bump'
+  | 'replacement';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
+
+export type MergeStrategy =
+  | 'auto'
+  | 'fast-forward'
+  | 'merge-commit'
+  | 'rebase'
+  | 'squash';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -252,7 +276,11 @@ export interface ValidationMessage {
 }
 
 export interface RenovateOptionBase {
-  admin?: boolean;
+  /**
+   * If true, the option can only be configured by people with access to the Renovate instance.
+   * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
+   */
+  globalOnly?: boolean;
 
   allowedValues?: string[];
 
@@ -264,7 +292,11 @@ export interface RenovateOptionBase {
 
   env?: false | string;
 
+  /**
+   * Do not validate object children
+   */
   freeChoice?: boolean;
+
   mergeable?: boolean;
 
   autogenerated?: boolean;
@@ -288,25 +320,35 @@ export interface RenovateArrayOption<
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
   subType: 'string';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
   subType: 'number';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
   default?: boolean;
   type: 'boolean';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
   default?: number;
   type: 'integer';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
@@ -316,6 +358,8 @@ export interface RenovateStringOption extends RenovateOptionBase {
   // Not used
   replaceLineReturns?: boolean;
   type: 'string';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
@@ -323,6 +367,8 @@ export interface RenovateObjectOption extends RenovateOptionBase {
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export type RenovateOptions =
@@ -351,15 +397,6 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
-}
-
-export interface ManagerConfig extends RenovateConfig {
-  language: string;
-  manager: string;
-}
-
-export interface RenovateCliConfig extends Record<string, any> {
-  repositories?: string[];
 }
 
 export interface MigratedConfig {

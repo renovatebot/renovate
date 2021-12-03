@@ -1,4 +1,4 @@
-import { getName, loadFixture } from '../../../test/util';
+import { loadFixture } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const tg1 = loadFixture('2.hcl');
@@ -7,7 +7,7 @@ const tg2 = `terragrunt {
 }
 `;
 
-describe(getName(), () => {
+describe('manager/terragrunt/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here')).toBeNull();

@@ -1,10 +1,4 @@
-import {
-  RenovateConfig,
-  getConfig,
-  getName,
-  git,
-  mocked,
-} from '../../../../test/util';
+import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
 import * as _branchWorker from '../../branch';
 import { Limit, isLimitReached } from '../../global/limits';
 import { BranchConfig, BranchResult } from '../../types';
@@ -19,7 +13,7 @@ const limits = mocked(_limits);
 branchWorker.processBranch = jest.fn();
 
 limits.getPrsRemaining = jest.fn().mockResolvedValue(99);
-limits.getBranchesRemaining = jest.fn().mockReturnValue(99);
+limits.getBranchesRemaining = jest.fn().mockResolvedValue(99);
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -27,13 +21,13 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe(getName(), () => {
+describe('workers/repository/process/write', () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
       const branches: BranchConfig[] = [
         {},
         {},
-        { automergeType: 'pr-comment', requiredStatusChecks: null },
+        { automergeType: 'pr-comment', ignoreTests: true },
         {},
         {},
       ] as never;
@@ -55,7 +49,7 @@ describe(getName(), () => {
         result: BranchResult.Automerged,
       });
       const res = await writeUpdates(config, branches);
-      expect(res).toEqual('automerged');
+      expect(res).toBe('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
     it('increments branch counter', async () => {
@@ -66,7 +60,7 @@ describe(getName(), () => {
       });
       git.branchExists.mockReturnValueOnce(false);
       git.branchExists.mockReturnValueOnce(true);
-      limits.getBranchesRemaining.mockReturnValueOnce(1);
+      limits.getBranchesRemaining.mockResolvedValueOnce(1);
       expect(isLimitReached(Limit.Branches)).toBeFalse();
       await writeUpdates({ config }, branches);
       expect(isLimitReached(Limit.Branches)).toBeTrue();

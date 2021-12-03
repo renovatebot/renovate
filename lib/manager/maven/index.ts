@@ -1,10 +1,10 @@
-import { LANGUAGE_JAVA } from '../../constants/languages';
+import { ProgrammingLanguage } from '../../constants';
 import * as mavenVersioning from '../../versioning/maven';
 
 export { extractAllPackageFiles } from './extract';
 export { updateDependency } from './update';
 
-export const language = LANGUAGE_JAVA;
+export const language = ProgrammingLanguage.Java;
 
 export const defaultConfig = {
   fileMatch: ['\\.pom\\.xml$', '(^|/)pom\\.xml$'],

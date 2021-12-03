@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 // istanbul ignore file
 import { dequal } from 'dequal';
-import { readFileSync } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import JSON5 from 'json5';
 import { configFileNames } from './config/app-strings';
-import { getConfig as getFileConfig } from './config/file';
 import { massageConfig } from './config/massage';
 import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
 import { validateConfig } from './config/validation';
 import { logger } from './logger';
-
-/* eslint-disable no-console */
+import { getConfig as getFileConfig } from './workers/global/config/parse/file';
 
 let returnVal = 0;
+
+/* eslint-disable no-console */
 
 async function validate(
   desc: string,
@@ -52,7 +52,7 @@ type PackageJson = {
     (name) => name !== 'package.json'
   )) {
     try {
-      const rawContent = readFileSync(file, 'utf8');
+      const rawContent = await readFile(file, 'utf8');
       logger.info(`Validating ${file}`);
       try {
         let jsonContent: RenovateConfig;
@@ -72,7 +72,7 @@ type PackageJson = {
   }
   try {
     const pkgJson = JSON.parse(
-      readFileSync('package.json', 'utf8')
+      await readFile('package.json', 'utf8')
     ) as PackageJson;
     if (pkgJson.renovate) {
       logger.info(`Validating package.json > renovate`);
@@ -88,7 +88,7 @@ type PackageJson = {
     // ignore
   }
   try {
-    const fileConfig = getFileConfig(process.env);
+    const fileConfig = await getFileConfig(process.env);
     if (!dequal(fileConfig, {})) {
       const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
       logger.info(`Validating ${file}`);

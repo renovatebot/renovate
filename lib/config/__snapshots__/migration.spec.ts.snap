@@ -1,5 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/migration it migrates gradle-lite 1`] = `
+Object {
+  "gradle": Object {
+    "enabled": true,
+    "fileMatch": Array [
+      "foo",
+    ],
+  },
+  "packageRules": Array [
+    Object {
+      "matchManagers": Array [
+        "gradle",
+      ],
+      "separateMinorPatch": true,
+    },
+  ],
+}
+`;
+
 exports[`config/migration it migrates nested packageRules 1`] = `
 Object {
   "packageRules": Array [
@@ -35,51 +54,6 @@ Object {
 exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
 Object {
   "schedule": "after 5:00pm on wednesday and thursday",
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) it migrates packageRules 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "excludePackageNames": Array [
-        "baz",
-      ],
-      "excludePackagePatterns": Array [
-        "^baz",
-      ],
-      "matchBaseBranches": Array [
-        "master",
-      ],
-      "matchDatasources": Array [
-        "orb",
-      ],
-      "matchDepTypes": Array [
-        "peerDependencies",
-      ],
-      "matchLanguages": Array [
-        "python",
-      ],
-      "matchManagers": Array [
-        "dockerfile",
-      ],
-      "matchPackageNames": Array [
-        "foo",
-      ],
-      "matchPackagePatterns": Array [
-        "^bar",
-      ],
-      "matchPaths": Array [
-        "package.json",
-      ],
-      "matchSourceUrlPrefixes": Array [
-        "https://github.com/vuejs/vue",
-      ],
-      "matchUpdateTypes": Array [
-        "major",
-      ],
-    },
-  ],
 }
 `;
 
@@ -128,6 +102,9 @@ Object {
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "foo",
   "enabled": true,
+  "enabledManagers": Array [
+    "npm",
+  ],
   "exposeAllEnv": true,
   "extends": Array [
     ":automergeBranch",
@@ -314,9 +291,6 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates node to t
 Object {
   "node": Object {
     "automerge": false,
-    "supportPolicy": Array [
-      "lts",
-    ],
   },
   "travis": Object {
     "enabled": true,
@@ -383,17 +357,6 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates packages 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "groupName": "angular packages",
-      "matchPackagePatterns": "^(@angular|typescript)",
-    },
-  ],
-}
-`;
-
 exports[`config/migration migrateConfig(config, parentConfig) migrates subconfig 1`] = `
 Object {
   "lockFileMaintenance": Object {
@@ -431,17 +394,5 @@ Object {
       },
     },
   ],
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) removes invalid configs 1`] = `
-Object {
-  "baseBranches": Array [],
-  "commitMessage": "test",
-  "ignorePaths": Array [],
-  "includePaths": Array [
-    "test",
-  ],
-  "rebaseWhen": "auto",
 }
 `;

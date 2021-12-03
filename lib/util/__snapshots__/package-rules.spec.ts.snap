@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`applyPackageRules() applies 1`] = `
+exports[`util/package-rules applies 1`] = `
 Object {
   "currentValue": "1.0.0",
   "depName": "a",
@@ -49,7 +49,7 @@ Object {
 }
 `;
 
-exports[`applyPackageRules() empty rules 1`] = `
+exports[`util/package-rules empty rules 1`] = `
 Object {
   "foo": "bar",
   "packageRules": null,

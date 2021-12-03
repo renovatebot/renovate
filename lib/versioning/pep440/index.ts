@@ -1,7 +1,7 @@
 import * as pep440 from '@renovate/pep440';
 import { filter } from '@renovate/pep440/lib/specifier';
 import type { VersioningApi } from '../types';
-import { getNewValue } from './range';
+import { getNewValue, isLessThanRange } from './range';
 
 export const id = 'pep440';
 export const displayName = 'PEP440';
@@ -46,7 +46,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string => {
 
 export const isSingleVersion = (constraint: string): string =>
   isVersion(constraint) ||
-  (constraint.startsWith('==') && isVersion(constraint.substring(2).trim()));
+  (constraint?.startsWith('==') && isVersion(constraint.substring(2).trim()));
 
 export { isVersion, matches };
 
@@ -69,6 +69,7 @@ export const api: VersioningApi = {
   minSatisfyingVersion,
   getNewValue,
   sortVersions,
+  isLessThanRange,
 };
 
 export default api;
