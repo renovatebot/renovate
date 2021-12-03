@@ -464,9 +464,9 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: ['preCommand1', 'preCommand2', null],
-            postCommands: ['postCommand1', undefined, 'postCommand2'],
           },
+          preCommands: ['preCommand1', 'preCommand2', null],
+          postCommands: ['postCommand1', undefined, 'postCommand2'],
         },
         outCmd: [
           dockerPullCmd,
@@ -496,8 +496,6 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: null,
-            postCommands: undefined,
           },
         },
         outCmd: [

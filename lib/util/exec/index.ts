@@ -5,6 +5,7 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { generateInstallCommands } from './buildpack';
 import {
+  DockerExtraCommands,
   DockerOptions,
   ExecResult,
   Opt,
@@ -22,6 +23,8 @@ export interface ExecOptions extends ChildProcessExecOptions {
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;
+  preCommands?: DockerExtraCommands;
+  postCommands?: DockerExtraCommands;
 }
 
 function getChildEnv({
@@ -74,6 +77,8 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   delete execOptions.docker;
   delete execOptions.cwdFile;
   delete execOptions.toolConstraints;
+  delete execOptions.preCommands;
+  delete execOptions.postCommands;
 
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
@@ -125,12 +130,14 @@ async function prepareRawExec(
     const envVars = dockerEnvVars(extraEnv, childEnv);
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
-    dockerOptions.preCommands = [
+    const preCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(dockerOptions.preCommands || []),
+      ...(opts.preCommands || []),
     ];
     const dockerCommand = await generateDockerCommand(
       rawCommands,
+      preCommands,
+      opts.postCommands,
       dockerOptions
     );
     rawCommands = [dockerCommand];

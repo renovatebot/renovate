@@ -40,8 +40,8 @@ export async function updateArtifacts({
       docker: {
         image: 'python',
         tagScheme: 'pip_requirements',
-        preCommands: ['pip install hashin'],
       },
+      preCommands: ['pip install hashin'],
     };
     await exec(cmd, execOptions);
     const newContent = await readLocalFile(packageFileName, 'utf8');

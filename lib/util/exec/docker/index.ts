@@ -199,13 +199,13 @@ export async function removeDanglingContainers(): Promise<void> {
 
 export async function generateDockerCommand(
   commands: string[],
+  preCommands: string[] = [],
+  postCommands: string[] = [],
   options: DockerOptions
 ): Promise<string> {
   const { envVars, cwd, tagScheme, tagConstraint } = options;
   let image = options.image;
   const volumes = options.volumes || [];
-  const preCommands = options.preCommands || [];
-  const postCommands = options.postCommands || [];
   const {
     localDir,
     cacheDir,
