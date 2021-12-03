@@ -209,12 +209,10 @@ describe('util/exec/docker/index', () => {
   describe('generateDockerCommand', () => {
     const preCommands = [null, 'foo', undefined];
     const commands = ['bar'];
-    const postCommands = [undefined, 'baz', null];
     const envVars = ['FOO', 'BAR'];
     const image = 'sample_image';
     const dockerOptions = {
       preCommands,
-      postCommands,
       image,
       cwd: '/tmp/foobar',
       envVars,
@@ -228,7 +226,7 @@ describe('util/exec/docker/index', () => {
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
       `renovate/${img} ` +
-      `bash -l -c "foo && bar && baz"`;
+      `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
       GlobalConfig.set({ dockerUser: 'some-user' });
