@@ -209,7 +209,6 @@ describe('util/exec/docker/index', () => {
   describe('generateDockerCommand', () => {
     const preCommands = [null, 'foo', undefined];
     const commands = ['bar'];
-    const postCommands = [undefined, 'baz', null];
     const envVars = ['FOO', 'BAR'];
     const image = 'sample_image';
     const dockerOptions = {
@@ -237,7 +236,6 @@ describe('util/exec/docker/index', () => {
       const res = await generateDockerCommand(
         commands,
         preCommands,
-        postCommands,
         dockerOptions
       );
       expect(res).toBe(command(image));
@@ -250,15 +248,10 @@ describe('util/exec/docker/index', () => {
         ['/tmp/bar', `/tmp/bar`],
         ['/tmp/baz', `/home/baz`],
       ];
-      const res = await generateDockerCommand(
-        commands,
-        preCommands,
-        postCommands,
-        {
-          ...dockerOptions,
-          volumes: [...volumes, ...volumes],
-        }
-      );
+      const res = await generateDockerCommand(commands, preCommands, {
+        ...dockerOptions,
+        volumes: [...volumes, ...volumes],
+      });
       expect(res).toBe(
         command(
           image,
@@ -269,15 +262,10 @@ describe('util/exec/docker/index', () => {
 
     it('handles tag parameter', async () => {
       mockExecAll(exec);
-      const res = await generateDockerCommand(
-        commands,
-        preCommands,
-        postCommands,
-        {
-          ...dockerOptions,
-          tag: '1.2.3',
-        }
-      );
+      const res = await generateDockerCommand(commands, preCommands, {
+        ...dockerOptions,
+        tag: '1.2.3',
+      });
       expect(res).toBe(command(`${image}:1.2.3`));
     });
 
@@ -290,16 +278,11 @@ describe('util/exec/docker/index', () => {
           { version: '2.0.0' },
         ],
       } as never);
-      const res = await generateDockerCommand(
-        commands,
-        preCommands,
-        postCommands,
-        {
-          ...dockerOptions,
-          tagScheme: 'npm',
-          tagConstraint: '^1.2.3',
-        }
-      );
+      const res = await generateDockerCommand(commands, preCommands, {
+        ...dockerOptions,
+        tagScheme: 'npm',
+        tagConstraint: '^1.2.3',
+      });
       expect(res).toBe(command(`${image}:1.2.4`));
     });
   });

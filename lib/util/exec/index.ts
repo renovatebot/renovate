@@ -24,7 +24,6 @@ export interface ExecOptions extends ChildProcessExecOptions {
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;
   preCommands?: DockerExtraCommands;
-  postCommands?: DockerExtraCommands;
 }
 
 function getChildEnv({
@@ -78,7 +77,6 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   delete execOptions.cwdFile;
   delete execOptions.toolConstraints;
   delete execOptions.preCommands;
-  delete execOptions.postCommands;
 
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
@@ -137,7 +135,6 @@ async function prepareRawExec(
     const dockerCommand = await generateDockerCommand(
       rawCommands,
       preCommands,
-      opts.postCommands,
       dockerOptions
     );
     rawCommands = [dockerCommand];
