@@ -1104,6 +1104,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'separateMultipleMinor',
+    description:
+      'If set to true, PRs will be raised separately for each available minor upgrade version for each major upgrade version.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'separateMinorPatch',
     description:
       'If set to true, it will separate minor and patch updates into separate branches.',
@@ -1464,7 +1471,7 @@ const options: RenovateOptions[] = [
     description: 'Branch topic.',
     type: 'string',
     default:
-      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isMajor}}{{#if separateMultipleMinor}}.{{{newMinor}}}{{/if}}{{/if}}{{#if isMinor}}{{#if separateMultipleMinor}}.{{{newMinor}}}{{/if}}{{/if}}{{#if isPatch}}{{#if separateMinorPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
     cli: false,
   },
   {
@@ -1517,7 +1524,7 @@ const options: RenovateOptions[] = [
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
     default:
-      'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      'to {{#if isMajor}}v{{{newMajor}}}{{#if separateMultipleMinor}}.{{{newMinor}}}{{/if}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
     cli: false,
   },
   {

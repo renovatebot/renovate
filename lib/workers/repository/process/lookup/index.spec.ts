@@ -1072,6 +1072,32 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(3);
     });
+    it('should upgrade to many major/minors', async () => {
+      config.currentValue = '1.0.0';
+      config.separateMultipleMajor = true;
+      config.separateMultipleMinor = true;
+      config.depName = 'webpack';
+      config.datasource = datasourceNpmId;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(30);
+    });
+    it('should upgrade to many minors of single major', async () => {
+      config.currentValue = '1.0.0';
+      config.separateMultipleMajor = false;
+      config.separateMultipleMinor = true;
+      config.depName = 'webpack';
+      config.datasource = datasourceNpmId;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(24);
+    });
     it('does not jump  major unstable', async () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';

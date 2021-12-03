@@ -41,6 +41,7 @@ export const exposedConfigOptions = [
   'semanticCommitType',
   'separateMajorMinor',
   'separateMinorPatch',
+  'separateMultipleMinor',
 ];
 
 export const allowedFields = {
@@ -61,6 +62,7 @@ export const allowedFields = {
   hasReleaseNotes: 'true if the upgrade has release notes',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
+  isMinor: 'true if thr upgrade is minor',
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
   isRollback: 'true if the upgrade is a rollback PR',

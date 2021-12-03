@@ -35,7 +35,7 @@ export const registryStrategy = 'first';
 export const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
   commitMessageExtra:
-    'to v{{#if isMajor}}{{{newMajor}}}{{else}}{{{newVersion}}}{{/if}}',
+    'to v{{#if isMajor}}{{{newMajor}}}{{#if separateMultipleMinor}}.{{{newMinor}}}{{/if}}{{else}}{{{newVersion}}}{{/if}}',
   digest: {
     branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
     commitMessageExtra: 'to {{newDigestShort}}',

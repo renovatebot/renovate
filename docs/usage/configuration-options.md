@@ -2445,6 +2445,10 @@ Configure this to `true` if you wish to receive one PR for every separate major 
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
+## separateMultipleMinor
+
+Configure this to `true` if you wish to receive one PR for every available minor version upgrade of a dependency for each major upgrade.
+
 ## stabilityDays
 
 If this is set to a non-zero value, _and_ an update contains a release timestamp header, then Renovate will check if the "stability days" have passed.

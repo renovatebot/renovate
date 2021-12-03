@@ -42,10 +42,24 @@ export function generateBranchName(update: RenovateConfig): void {
     if (update.updateType === 'major' && update.separateMajorMinor) {
       if (update.separateMultipleMajor) {
         const newMajor = String(update.newMajor);
-        update.groupSlug = `major-${newMajor}-${update.groupSlug}`;
+        if (update.separateMultipleMinor) {
+          const newMinor = String(update.newMinor);
+          update.groupSlug = `major-${newMajor}-minor-${newMinor}-${update.groupSlug}`;
+        } else {
+          update.groupSlug = `major-${newMajor}-${update.groupSlug}`;
+        }
       } else {
-        update.groupSlug = `major-${update.groupSlug}`;
+        if (update.separateMultipleMinor) {
+          const newMinor = String(update.newMinor);
+          update.groupSlug = `major-minor-${newMinor}-${update.groupSlug}`;
+        } else {
+          update.groupSlug = `major-${update.groupSlug}`;
+        }
       }
+    }
+    if (update.updateType === 'minor' && update.separateMultipleMinor) {
+      const newMinor = String(update.newMinor);
+      update.groupSlug = `minor-${newMinor}-${update.groupSlug}`;
     }
     if (update.updateType === 'patch' && update.separateMinorPatch) {
       update.groupSlug = `patch-${update.groupSlug}`;
