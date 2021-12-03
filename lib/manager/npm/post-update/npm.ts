@@ -55,6 +55,7 @@ export async function generateLockFile(
         tagScheme: 'node',
         tagConstraint,
       },
+      preCommands,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {

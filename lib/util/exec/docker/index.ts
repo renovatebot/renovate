@@ -199,13 +199,12 @@ export async function removeDanglingContainers(): Promise<void> {
 
 export async function generateDockerCommand(
   commands: string[],
+  preCommands: string[],
   options: DockerOptions
 ): Promise<string> {
   const { envVars, cwd, tagScheme, tagConstraint } = options;
   let image = options.image;
   const volumes = options.volumes || [];
-  const preCommands = options.preCommands || [];
-  const postCommands = options.postCommands || [];
   const {
     localDir,
     cacheDir,
@@ -256,11 +255,9 @@ export async function generateDockerCommand(
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
-  const bashCommand = [
-    ...prepareCommands(preCommands),
-    ...commands,
-    ...prepareCommands(postCommands),
-  ].join(' && ');
+  const bashCommand = [...prepareCommands(preCommands), ...commands].join(
+    ' && '
+  );
   result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');

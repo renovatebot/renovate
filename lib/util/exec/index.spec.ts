@@ -464,14 +464,13 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: ['preCommand1', 'preCommand2', null],
-            postCommands: ['postCommand1', undefined, 'postCommand2'],
           },
+          preCommands: ['preCommand1', 'preCommand2', null],
         },
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -496,8 +495,6 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: null,
-            postCommands: undefined,
           },
         },
         outCmd: [

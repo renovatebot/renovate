@@ -67,10 +67,10 @@ export async function updateArtifacts({
         image: 'python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: [
-          `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
-        ],
       },
+      preCommands: [
+        `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
+      ],
     };
     logger.debug({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
