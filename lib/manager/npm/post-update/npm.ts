@@ -28,6 +28,7 @@ export async function generateLockFile(
       toolName: 'npm',
       constraint: config.constraints?.npm,
     };
+    const preCommands = ['hash -d npm'];
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
