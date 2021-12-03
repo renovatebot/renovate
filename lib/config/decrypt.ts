@@ -174,7 +174,7 @@ export async function decryptConfig(
           }
           logger.debug(`Decrypted ${eKey}`);
           if (eKey === 'npmToken') {
-            const token = decryptedStr.replace(regEx(/\n$/), ''); // TODO #12071
+            const token = decryptedStr.replace(regEx(/\n$/), '');
             add(token);
             logger.debug(
               { decryptedToken: maskToken(token) },
