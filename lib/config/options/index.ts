@@ -1104,6 +1104,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'separateMultipleMinor',
+    description:
+      'If set to true, PRs will be raised separately for each available minor upgrade version for each major upgrade version.',
+    stage: 'package',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'separateMinorPatch',
     description:
       'If set to true, it will separate minor and patch updates into separate branches.',
@@ -1464,7 +1472,7 @@ const options: RenovateOptions[] = [
     description: 'Branch topic.',
     type: 'string',
     default:
-      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isMinor}}{{#if separateMultipleMinor}}.{{{newMinor}}}{{/if}}{{/if}}{{#if isPatch}}{{#if separateMinorPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
     cli: false,
   },
   {

@@ -42,6 +42,61 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('major-2-some-group-slug-grouptopic');
     });
+    it('separates minors with groups', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'minor',
+        separateMultipleMinor: true,
+        newMinor: 3,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('minor-3-some-group-slug-grouptopic');
+    });
+    it('separates minors for single major with groups', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'major',
+        separateMultipleMajor: false,
+        separateMajorMinor: true,
+        separateMultipleMinor: true,
+        newMajor: 2,
+        newMinor: 3,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'major-minor-3-some-group-slug-grouptopic'
+      );
+    });
+    it('separates major and minor with groups', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'major',
+        separateMajorMinor: true,
+        separateMultipleMajor: true,
+        separateMultipleMinor: true,
+        newMajor: 2,
+        newMinor: 3,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'major-2-minor-3-some-group-slug-grouptopic'
+      );
+    });
     it('uses single major with groups', () => {
       const upgrade: RenovateConfig = {
         groupName: 'some group name',
@@ -85,6 +140,25 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('dep');
     });
+    it('separates minors when separateMultipleMinor=true', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchPrefix: 'renovate/',
+        additionalBranchPrefix: '',
+        depNameSanitized: 'lodash',
+        newMajor: 4,
+        separateMultipleMinor: true,
+        isMinor: true,
+        newMinor: 17,
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isMinor}}{{#if separateMultipleMinor}}.{{{newMinor}}}{{/if}}{{/if}}{{#if isPatch}}B{{#if separateMinorPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        depName: 'dep',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/lodash-4.17.x');
+    });
     it('separates patches when separateMinorPatch=true', () => {
       const upgrade: RenovateConfig = {
         branchName:
@@ -97,7 +171,7 @@ describe('workers/repository/updates/branch-name', () => {
         isPatch: true,
         newMinor: 17,
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isMinor}}{{#if separateMultipleMinor}}.{{{newMinor}}}{{/if}}{{/if}}{{#if isPatch}}{{#if separateMinorPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         depName: 'dep',
         group: {},
       };
@@ -116,7 +190,7 @@ describe('workers/repository/updates/branch-name', () => {
         isPatch: true,
         newMinor: 17,
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isMinor}}{{#if separateMultipleMinor}}.{{{newMinor}}}{{/if}}{{/if}}{{#if isPatch}}{{#if separateMinorPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         depName: 'dep',
         group: {},
       };
