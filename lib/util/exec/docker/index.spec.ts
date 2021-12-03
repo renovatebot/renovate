@@ -225,7 +225,7 @@ describe('util/exec/docker/index', () => {
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
       `renovate/${img} ` +
-      `bash -l -c "foo && bar && baz"`;
+      `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
       GlobalConfig.set({ dockerUser: 'some-user' });
