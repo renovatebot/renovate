@@ -8,7 +8,7 @@ import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import * as dockerModule from './docker';
 import type { RawExecOptions, VolumeOption } from './types';
-import { ExecOptions } from './types';
+import type { ExecOptions } from './types';
 import { exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
