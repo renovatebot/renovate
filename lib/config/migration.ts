@@ -13,7 +13,7 @@ import type {
 // Returns a migrated config
 export function migrateConfig(config: RenovateConfig): MigratedConfig {
   try {
-    const newConfig = MigrationsService.run(config);
+    const newConfig = MigrationsService.run(config).migratedConfig;
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',

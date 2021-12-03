@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../types';
+import { dequal } from 'dequal';
+import type { MigratedConfig, RenovateConfig } from '../types';
 import { AbstractMigration } from './base/abstract-migration';
 import { MigrationByValueType } from './base/migration-by-value-type';
 import { RemovePropertyMigration } from './base/remove-property-migration';
@@ -121,7 +122,7 @@ export class MigrationsService {
     VersionStrategyMigration,
   ];
 
-  static run(originalConfig: RenovateConfig): RenovateConfig {
+  static run(originalConfig: RenovateConfig): MigratedConfig {
     const migratedConfig: RenovateConfig = {};
     const migrations = MigrationsService.getMigrations(
       originalConfig,
@@ -146,7 +147,10 @@ export class MigrationsService {
       }
     }
 
-    return migratedConfig;
+    return {
+      isMigrated: !dequal(originalConfig, migratedConfig),
+      migratedConfig,
+    };
   }
 
   static runMigration(
