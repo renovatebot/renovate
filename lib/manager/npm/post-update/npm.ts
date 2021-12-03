@@ -28,7 +28,6 @@ export async function generateLockFile(
       toolName: 'npm',
       constraint: config.constraints?.npm,
     };
-    const preCommands = ['hash -d npm'];
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
@@ -56,7 +55,6 @@ export async function generateLockFile(
         tagScheme: 'node',
         tagConstraint,
       },
-      preCommands,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {
