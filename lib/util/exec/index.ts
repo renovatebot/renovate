@@ -14,7 +14,6 @@ import type {
   RawExecOptions,
 } from './types';
 
-
 function getChildEnv({
   extraEnv = {},
   env: forcedEnv = {},

@@ -6,8 +6,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
-import type { ToolConstraint } from '../../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';

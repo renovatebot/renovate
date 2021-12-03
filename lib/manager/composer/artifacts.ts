@@ -8,8 +8,7 @@ import {
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
-import type { ExecOptions } from '../../util/exec/types';
-import type { ToolConstraint } from '../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
 import {
   ensureCacheDir,
   ensureLocalDir,
