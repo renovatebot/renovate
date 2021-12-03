@@ -818,6 +818,8 @@ export async function mergePr({
     );
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err: err }, `Failed to rebase merge PR`);
+    logger.info({ pr: prNo }, 'Merge attempt failed');
     return false;
   }
   return true;
