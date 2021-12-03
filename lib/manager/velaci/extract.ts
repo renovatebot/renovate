@@ -11,7 +11,7 @@ export function extractPackageFile(file: string): PackageFile | null {
     logger.warn({ err, file }, 'Failed to parse Vela file.');
     return null;
   }
-  let deps: PackageDependency[] = [];
+  const deps: PackageDependency[] = [];
   try {
     const lines = doc.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
