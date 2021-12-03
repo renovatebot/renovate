@@ -70,10 +70,11 @@ export async function resolveConstraint(
   return latestVersion;
 }
 
+const hashedTools = ['npm'];
+
 export async function generateInstallCommands(
   toolConstraints: ToolConstraint[]
 ): Promise<string[]> {
-  const hashedTools = ['npm'];
   const installCommands = [];
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
