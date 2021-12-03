@@ -465,7 +465,6 @@ describe('util/exec/index', () => {
           docker: {
             image,
             preCommands: ['preCommand1', 'preCommand2', null],
-            postCommands: ['postCommand1', undefined, 'postCommand2'],
           },
         },
         outCmd: [
@@ -497,7 +496,6 @@ describe('util/exec/index', () => {
           docker: {
             image,
             preCommands: null,
-            postCommands: undefined,
           },
         },
         outCmd: [

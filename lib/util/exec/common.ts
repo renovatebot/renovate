@@ -21,7 +21,6 @@ export interface DockerOptions {
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
   preCommands?: DockerExtraCommands;
-  postCommands?: DockerExtraCommands;
 }
 
 export interface RawExecOptions extends ChildProcessExecOptions {

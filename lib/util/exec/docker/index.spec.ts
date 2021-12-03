@@ -209,12 +209,10 @@ describe('util/exec/docker/index', () => {
   describe('generateDockerCommand', () => {
     const preCommands = [null, 'foo', undefined];
     const commands = ['bar'];
-    const postCommands = [undefined, 'baz', null];
     const envVars = ['FOO', 'BAR'];
     const image = 'sample_image';
     const dockerOptions = {
       preCommands,
-      postCommands,
       image,
       cwd: '/tmp/foobar',
       envVars,
