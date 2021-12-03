@@ -183,8 +183,8 @@ export async function updateArtifacts(
         image: 'ruby',
         tagScheme: 'ruby',
         tagConstraint: await getRubyConstraint(updateArtifact),
-        preCommands,
       },
+      preCommands,
     };
     await exec(cmd, execOptions);
 

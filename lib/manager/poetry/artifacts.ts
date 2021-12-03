@@ -139,8 +139,8 @@ export async function updateArtifacts({
         image: 'python',
         tagConstraint,
         tagScheme: 'poetry',
-        preCommands: [poetryInstall],
       },
+      preCommands: [poetryInstall],
     };
     await exec(cmd, execOptions);
     const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');
