@@ -73,14 +73,17 @@ export async function resolveConstraint(
 export async function generateInstallCommands(
   toolConstraints: ToolConstraint[]
 ): Promise<string[]> {
+  const hashedTools = ['npm'];
   const installCommands = [];
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);
-      const installCommand = `install-tool ${toolConstraint.toolName} ${quote(
-        toolVersion
-      )}`;
+      const { toolName } = toolConstraint;
+      const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
+      if (hashedTools.includes(toolName)) {
+        installCommands.push(`hash -d ${toolName}`);
+      }
     }
   }
   return installCommands;
