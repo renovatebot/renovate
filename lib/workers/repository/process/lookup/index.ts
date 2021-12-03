@@ -169,7 +169,11 @@ export async function lookupUpdates(
       const nonDeprecatedVersions = dependency.releases
         .filter((release) => !release.isDeprecated)
         .map((release) => release.version);
-      const currentVersion =
+      let currentVersion: string;
+      if (rangeStrategy === 'update-lockfile') {
+        currentVersion = lockedVersion;
+      }
+      currentVersion ??=
         getCurrentVersion(
           currentValue,
           lockedVersion,
@@ -209,22 +213,15 @@ export async function lookupUpdates(
           newMajor: versioning.getMajor(currentVersion),
         });
       }
-      let filterStart = currentVersion;
-      if (lockedVersion) {
-        // istanbul ignore if
-        if (!versioning.isVersion(lockedVersion)) {
-          res.skipReason = SkipReason.InvalidVersion;
-          return res;
-        }
-        if (rangeStrategy === 'update-lockfile') {
-          // Look for versions greater than the current locked version that still satisfy the package.json range
-          filterStart = lockedVersion;
-        }
+      // istanbul ignore if
+      if (!versioning.isVersion(currentVersion)) {
+        res.skipReason = SkipReason.InvalidVersion;
+        return res;
       }
       // Filter latest, unstable, etc
       let filteredReleases = filterVersions(
         config,
-        filterStart,
+        currentVersion,
         latestVersion,
         allVersions,
         versioning

@@ -74,8 +74,8 @@ export async function executeGradle(
       tagConstraint:
         config.constraints?.java ?? (await getDockerConstraint(gradleRoot)),
       tagScheme: getJavaVersioning(),
-      preCommands: await getDockerPreCommands(gradleRoot),
     },
+    preCommands: await getDockerPreCommands(gradleRoot),
     extraEnv,
   };
   try {

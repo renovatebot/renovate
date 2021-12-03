@@ -75,8 +75,8 @@ export async function updateArtifacts({
     cwdFile: packageFileName,
     docker: {
       image: 'elixir',
-      preCommands,
     },
+    preCommands,
   };
   const command = [
     'mix',

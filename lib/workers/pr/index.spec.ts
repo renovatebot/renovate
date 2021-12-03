@@ -282,6 +282,7 @@ describe('workers/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalled();
     });
     it('should create group PR', async () => {
+      const depsWithSameNotesSourceUrl = ['e', 'f'];
       config.upgrades = config.upgrades.concat([
         {
           depName: 'a',
@@ -305,12 +306,44 @@ describe('workers/pr/index', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
         },
+        {
+          depName: depsWithSameNotesSourceUrl[0],
+          updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
+        },
+        {
+          depName: depsWithSameNotesSourceUrl[1],
+          updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
+        },
       ] as never);
       config.updateType = 'lockFileMaintenance';
       config.recreateClosed = true;
       config.rebaseWhen = 'never';
       for (const upgrade of config.upgrades) {
         upgrade.logJSON = await changelogHelper.getChangeLogJSON(upgrade);
+
+        if (depsWithSameNotesSourceUrl.includes(upgrade.depName)) {
+          upgrade.sourceDirectory = `packages/${upgrade.depName}`;
+
+          upgrade.logJSON = {
+            ...upgrade.logJSON,
+            project: {
+              ...upgrade.logJSON.project,
+              repository: 'renovateapp/dummymonorepo',
+            },
+            versions: upgrade.logJSON.versions.map((V) => {
+              return {
+                ...V,
+                releaseNotes: {
+                  ...V.releaseNotes,
+                  notesSourceUrl:
+                    'https://github.com/renovateapp/dummymonorepo/blob/changelogfile.md',
+                },
+              };
+            }),
+          };
+        }
       }
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
