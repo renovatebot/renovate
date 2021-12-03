@@ -8,7 +8,9 @@ describe('config/migrations/migrations-service', () => {
         [property]: 'test',
       };
 
-      const migratedConfig = MigrationsService.run(originalConfig);
+      const { isMigrated, migratedConfig } =
+        MigrationsService.run(originalConfig);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig).not.toHaveProperty(property);
     }
   });
@@ -22,7 +24,9 @@ describe('config/migrations/migrations-service', () => {
         [oldPropertyName]: 'test',
       };
 
-      const migratedConfig = MigrationsService.run(originalConfig);
+      const { isMigrated, migratedConfig } =
+        MigrationsService.run(originalConfig);
+      expect(isMigrated).toBeTrue();
       expect(migratedConfig).not.toHaveProperty(oldPropertyName);
       expect(migratedConfig[newPropertyName]).toBe('test');
     }
@@ -34,12 +38,27 @@ describe('config/migrations/migrations-service', () => {
       versionScheme: 'test',
       excludedPackageNames: ['test'],
     };
-    const migratedConfig = MigrationsService.run(originalConfig);
+    const { isMigrated, migratedConfig } =
+      MigrationsService.run(originalConfig);
 
     const mappedProperties = Object.keys(originalConfig).map((property) =>
       MigrationsService.renamedProperties.get(property)
     );
 
+    expect(isMigrated).toBeTrue();
     expect(mappedProperties).toEqual(Object.keys(migratedConfig));
+  });
+
+  it('does not migrate config', () => {
+    const originalConfig: RenovateConfig = {
+      enabled: true,
+      separateMinorPatch: true,
+    };
+
+    const { isMigrated, migratedConfig } =
+      MigrationsService.run(originalConfig);
+
+    expect(isMigrated).toBeFalse();
+    expect(migratedConfig).toMatchObject(originalConfig);
   });
 });

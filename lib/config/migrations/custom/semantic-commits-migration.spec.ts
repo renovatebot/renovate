@@ -1,37 +1,57 @@
 import { MigrationsService } from '../migrations-service';
-import { SemanticCommitsMigration } from './semantic-commits-migration';
 
 describe('config/migrations/custom/semantic-commits-migration', () => {
   it('should migrate true to "enabled"', () => {
-    const migratedConfig = MigrationsService.runMigration(
-      {
-        semanticCommits: true,
-      } as any,
-      SemanticCommitsMigration
-    );
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      semanticCommits: true,
+    } as any);
 
-    expect(migratedConfig.semanticCommits).toBe('enabled');
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
   });
 
   it('should migrate false to "disabled"', () => {
-    const migratedConfig = MigrationsService.runMigration(
-      {
-        semanticCommits: false,
-      } as any,
-      SemanticCommitsMigration
-    );
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      semanticCommits: false,
+    } as any);
 
-    expect(migratedConfig.semanticCommits).toBe('disabled');
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
+  });
+
+  it('should migrate null to "auto"', () => {
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      semanticCommits: null,
+    } as any);
+
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({ semanticCommits: 'auto' });
   });
 
   it('should migrate random string to "auto"', () => {
-    const migratedConfig = MigrationsService.runMigration(
-      {
-        semanticCommits: 'test',
-      } as any,
-      SemanticCommitsMigration
-    );
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      semanticCommits: 'test',
+    } as any);
 
-    expect(migratedConfig.semanticCommits).toBe('auto');
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({ semanticCommits: 'auto' });
+  });
+
+  it('should not migrate valid enabled config', () => {
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      semanticCommits: 'enabled',
+    });
+
+    expect(isMigrated).toBeFalse();
+    expect(migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
+  });
+
+  it('should not migrate valid disabled config', () => {
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      semanticCommits: 'disabled',
+    });
+
+    expect(isMigrated).toBeFalse();
+    expect(migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
   });
 });

@@ -1,29 +1,62 @@
 import { MigrationsService } from '../migrations-service';
-import { UnpublishSafeMigration } from './unpublish-safe-migration';
 
 describe('config/migrations/custom/unpublish-safe-migration', () => {
   it('should migrate true', () => {
-    const migratedConfig = MigrationsService.runMigration(
-      {
-        unpublishSafe: true,
-      },
-      UnpublishSafeMigration
-    );
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      unpublishSafe: true,
+    });
 
-    expect(migratedConfig).not.toHaveProperty('unpublishSafe');
-    expect(migratedConfig.extends).toEqual(['npm:unpublishSafe']);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({
+      extends: ['npm:unpublishSafe'],
+    });
   });
 
-  it('should migrate true and handle extends field', () => {
-    const migratedConfig = MigrationsService.runMigration(
-      {
-        extends: 'test',
-        unpublishSafe: true,
-      } as any,
-      UnpublishSafeMigration
-    );
+  it('should migrate true and non empty extends array', () => {
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      extends: 'foo',
+      unpublishSafe: true,
+    } as any);
 
-    expect(migratedConfig).not.toHaveProperty('unpublishSafe');
-    expect(migratedConfig.extends).toEqual(['test', 'npm:unpublishSafe']);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({
+      extends: ['foo', 'npm:unpublishSafe'],
+    });
+  });
+
+  it('should migrate true and empty extends array', () => {
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      extends: [],
+      unpublishSafe: true,
+    });
+
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({
+      extends: ['npm:unpublishSafe'],
+    });
+  });
+
+  it('should modify extends array', () => {
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      extends: ['foo', ':unpublishSafe', 'bar'],
+      unpublishSafe: true,
+    });
+
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({
+      extends: ['foo', 'npm:unpublishSafe', 'bar'],
+    });
+  });
+
+  it('should not modify extends array when unpublishSafe=false', () => {
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      extends: ['foo', 'bar'],
+      unpublishSafe: false,
+    });
+
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchObject({
+      extends: ['foo', 'bar'],
+    });
   });
 });

@@ -1,26 +1,30 @@
 import { MigrationsService } from '../migrations-service';
-import { ComposerIgnorePlatformReqsMigration } from './composer-ignore-platform-reqs-migration';
 
 describe('config/migrations/custom/composer-ignore-platform-reqs-migration', () => {
   it('should migrate true to empty array', () => {
-    const migratedConfig = MigrationsService.runMigration(
-      {
-        composerIgnorePlatformReqs: true,
-      },
-      ComposerIgnorePlatformReqsMigration
-    );
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      composerIgnorePlatformReqs: true,
+    });
 
-    expect(migratedConfig.composerIgnorePlatformReqs).toEqual([]);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
   });
 
   it('should migrate false to null', () => {
-    const migratedConfig = MigrationsService.runMigration(
-      {
-        composerIgnorePlatformReqs: false,
-      },
-      ComposerIgnorePlatformReqsMigration
-    );
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      composerIgnorePlatformReqs: false,
+    });
 
+    expect(isMigrated).toBeTrue();
     expect(migratedConfig.composerIgnorePlatformReqs).toBeNull();
+  });
+
+  it('should not migrate array', () => {
+    const { isMigrated, migratedConfig } = MigrationsService.run({
+      composerIgnorePlatformReqs: [],
+    });
+
+    expect(isMigrated).toBeFalse();
+    expect(migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
   });
 });

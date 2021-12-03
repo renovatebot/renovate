@@ -1,5 +1,4 @@
 import { PlatformId } from '../constants';
-import { GlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
   MigratedConfig,
@@ -194,15 +193,6 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.schedule).toBe('on friday');
     });
-    it('migrates semantic prefix with no scope', () => {
-      const config = {
-        semanticPrefix: 'fix',
-      };
-      const { isMigrated, migratedConfig } =
-        configMigration.migrateConfig(config);
-      expect(isMigrated).toBeTrue();
-      expect(migratedConfig.semanticCommitScope).toBeNull();
-    });
     it('does not migrate every weekday', () => {
       const config = {
         schedule: 'every weekday' as never,
@@ -267,16 +257,6 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.packageRules[0].minor.automerge).toBeFalse();
-    });
-    it('does not migrate config', () => {
-      const config: TestRenovateConfig = {
-        enabled: true,
-        separateMinorPatch: true,
-      };
-      const { isMigrated, migratedConfig } =
-        configMigration.migrateConfig(config);
-      expect(isMigrated).toBeFalse();
-      expect(migratedConfig).toMatchObject(config);
     });
     it('migrates subconfig', () => {
       const config: TestRenovateConfig = {
@@ -411,140 +391,7 @@ describe('config/migration', () => {
       });
       expect(isMigrated).toBeTrue();
     });
-    it('it migrates semanticCommits', () => {
-      let config: TestRenovateConfig;
-      let res: MigratedConfig;
 
-      config = { semanticCommits: true as never };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
-
-      config = { semanticCommits: false as never };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
-
-      config = { semanticCommits: null as never };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'auto' });
-
-      config = { semanticCommits: 'enabled' };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeFalse();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
-
-      config = { semanticCommits: 'disabled' };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeFalse();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
-    });
-
-    it('it migrates preset strings to array', () => {
-      let config: TestRenovateConfig;
-      let res: MigratedConfig;
-
-      config = { extends: ':js-app' } as never;
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({ extends: ['config:js-app'] });
-
-      config = { extends: 'foo' } as never;
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({ extends: ['foo'] });
-
-      config = { extends: ['foo', ':js-app', 'bar'] } as never;
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'config:js-app', 'bar'],
-      });
-    });
-
-    it('it migrates unpublishSafe', () => {
-      let config: TestRenovateConfig;
-      let res: MigratedConfig;
-
-      config = { unpublishSafe: true };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['npm:unpublishSafe'],
-      });
-
-      config = { unpublishSafe: true, extends: 'foo' } as never;
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe'],
-      });
-
-      config = { unpublishSafe: true, extends: [] };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['npm:unpublishSafe'],
-      });
-
-      config = { unpublishSafe: true, extends: ['foo', 'bar'] };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'bar', 'npm:unpublishSafe'],
-      });
-
-      config = {
-        unpublishSafe: true,
-        extends: ['foo', ':unpublishSafe', 'bar'],
-      };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
-      });
-
-      config = {
-        unpublishSafe: true,
-        extends: ['foo', 'default:unpublishSafe', 'bar'],
-      };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
-      });
-
-      config = {
-        unpublishSafe: false,
-        extends: ['foo', 'bar'],
-      };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'bar'],
-      });
-
-      config = {
-        unpublishSafe: true,
-        extends: ['foo', 'bar'],
-      };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'bar', 'npm:unpublishSafe'],
-      });
-
-      config = {
-        unpublishSafe: true,
-        extends: [':unpublishSafeDisabled'],
-      };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: [':unpublishSafeDisabled', 'npm:unpublishSafe'],
-      });
-    });
     it('migrates combinations of packageRules', () => {
       let config: TestRenovateConfig;
       let res: MigratedConfig;
@@ -636,66 +483,6 @@ describe('config/migration', () => {
     expect(migratedConfig).toMatchSnapshot();
     expect(migratedConfig.packageRules).toHaveLength(3);
   });
-  it('it migrates hostRules fields', () => {
-    const config: RenovateConfig = {
-      hostRules: [
-        { baseUrl: 'https://some.domain.com', token: '123test' },
-        { domainName: 'domain.com', token: '123test' },
-        { hostName: 'some.domain.com', token: '123test' },
-      ],
-    } as any;
-    const { isMigrated, migratedConfig } =
-      configMigration.migrateConfig(config);
-    expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toEqual({
-      hostRules: [
-        { matchHost: 'https://some.domain.com', token: '123test' },
-        { matchHost: 'domain.com', token: '123test' },
-        { matchHost: 'some.domain.com', token: '123test' },
-      ],
-    });
-  });
-  it('it migrates presets', () => {
-    GlobalConfig.set({
-      migratePresets: {
-        '@org': 'local>org/renovate-config',
-        '@org2/foo': '',
-      },
-    });
-    const config: RenovateConfig = {
-      extends: ['@org', '@org2/foo'],
-    } as any;
-    const { isMigrated, migratedConfig } =
-      configMigration.migrateConfig(config);
-    expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
-  });
-
-  it('it migrates composerIgnorePlatformReqs values', () => {
-    let config: TestRenovateConfig;
-    let res: MigratedConfig;
-
-    config = {
-      composerIgnorePlatformReqs: true,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
-
-    config = {
-      composerIgnorePlatformReqs: false,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toBeNull();
-
-    config = {
-      composerIgnorePlatformReqs: [],
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeFalse();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
-  });
 
   it('it migrates gradle-lite', () => {
     const config: RenovateConfig = {
@@ -717,64 +504,5 @@ describe('config/migration', () => {
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
     expect(migratedConfig).toMatchSnapshot();
-  });
-  it('migrates empty requiredStatusChecks', () => {
-    const config: RenovateConfig = {
-      requiredStatusChecks: [],
-    };
-    const { isMigrated, migratedConfig } =
-      configMigration.migrateConfig(config);
-    expect(isMigrated).toBe(true);
-    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
-  });
-
-  it('migrates azureAutoComplete', () => {
-    const migrate = (config: RenovateConfig): MigratedConfig =>
-      configMigration.migrateConfig(config);
-
-    expect(migrate({ azureAutoComplete: true })).toEqual({
-      isMigrated: true,
-      migratedConfig: { platformAutomerge: true },
-    });
-
-    expect(migrate({ azureAutoComplete: false })).toEqual({
-      isMigrated: true,
-      migratedConfig: { platformAutomerge: false },
-    });
-
-    expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
-      isMigrated: true,
-      migratedConfig: { automerge: false, platformAutomerge: true },
-    });
-
-    expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
-      isMigrated: true,
-      migratedConfig: { automerge: true, platformAutomerge: true },
-    });
-  });
-
-  it('migrates gitLabAutomerge', () => {
-    const migrate = (config: RenovateConfig): MigratedConfig =>
-      configMigration.migrateConfig(config);
-
-    expect(migrate({ gitLabAutomerge: true })).toEqual({
-      isMigrated: true,
-      migratedConfig: { platformAutomerge: true },
-    });
-
-    expect(migrate({ gitLabAutomerge: false })).toEqual({
-      isMigrated: true,
-      migratedConfig: { platformAutomerge: false },
-    });
-
-    expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
-      isMigrated: true,
-      migratedConfig: { automerge: false, platformAutomerge: true },
-    });
-
-    expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
-      isMigrated: true,
-      migratedConfig: { automerge: true, platformAutomerge: true },
-    });
   });
 });
