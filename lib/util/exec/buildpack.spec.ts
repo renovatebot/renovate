@@ -95,5 +95,11 @@ describe('util/exec/buildpack', () => {
         ]
       `);
     });
+    it('hashes npm', async () => {
+      const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
+      const res = await generateInstallCommands(toolConstraints);
+      expect(res).toHaveLength(2);
+      expect(res[1]).toBe('hash -d npm');
+    });
   });
 });
