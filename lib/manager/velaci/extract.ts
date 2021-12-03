@@ -1,42 +1,56 @@
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
+import { VelaPipelineConfiguration } from './types';
 
 export function extractPackageFile(file: string): PackageFile | null {
-  let doc;
+  let doc: VelaPipelineConfiguration;
+
   try {
-    doc = yaml.safeLoad(file, { json: true });
+    doc = load(file, { json: true }) as VelaPipelineConfiguration;
   } catch (err) {
     logger.warn({ err, file }, 'Failed to parse Vela file.');
     return null;
   }
+
   const deps: PackageDependency[] = [];
   try {
-    const lines = doc.split('\n');
-    for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      const line = lines[lineNumber];
-      const match = /^\s* image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
-      if (match) {
-        const currentFrom = match[1];
-        const dep = getDep(currentFrom);
-        logger.debug(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-            currentDigest: dep.currentDigest,
-          },
-          'VelaCI docker image'
-        );
+    // iterate over steps
+    doc.steps?.forEach((step) => {
+      const dep: PackageDependency = getDep(step.image as string);
+
+      dep.depType = 'docker';
+      deps.push(dep);
+    });
+
+    // iterate over stages
+    for (const stage in doc.stages) {
+      logger.debug(doc.stages[stage]);
+      doc.stages[stage].steps.forEach((step) => {
+        const dep: PackageDependency = getDep(step.image as string);
+
+        dep.depType = 'docker';
+        deps.push(dep);
+      });
+    }
+
+    // check secrets
+    doc.secrets?.forEach((secret) => {
+      if (secret.origin) {
+        const dep: PackageDependency = getDep(secret.origin.image);
+
         dep.depType = 'docker';
         deps.push(dep);
       }
-    }
+    });
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting VelaCI images');
   }
+
   if (!deps.length) {
     return null;
   }
+
   return { deps };
 }

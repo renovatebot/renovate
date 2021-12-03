@@ -11,11 +11,13 @@ describe('manager/velaci/extract', () => {
       const res = extractPackageFile(invalidYAML);
       expect(res).toBeNull();
     });
+
     it('extracts multiple step pipeline image lines', () => {
       const res = extractPackageFile(stepsPipeline);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(5);
     });
+
     it('extracts multiple stages pipeline image lines', () => {
       const res = extractPackageFile(stagesPipeline);
       expect(res.deps).toMatchSnapshot();

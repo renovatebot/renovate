@@ -1,42 +1,75 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/velaci/extract extractPackageFile() extracts multiple image lines 1`] = `
+exports[`manager/velaci/extract extractPackageFile() extracts multiple stages pipeline image lines 1`] = `
 Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
-    "currentValue": "1.8.1-alpine",
+    "currentValue": "1.13",
     "datasource": "docker",
-    "depName": "elixir",
+    "depName": "golang",
     "depType": "docker",
-    "replaceString": "elixir:1.8.1-alpine",
+    "replaceString": "golang:1.13",
   },
   Object {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-    "currentDigest": "sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
+    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": "sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
     "currentValue": "10.0.0",
     "datasource": "docker",
-    "depName": "amd64/node",
+    "depName": "node",
     "depType": "docker",
-    "replaceString": "amd64/node:10.0.0@sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201",
+    "lookupName": "amd64/node",
+    "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
+  },
+  Object {
+    "depType": "docker",
+    "skipReason": "invalid-value",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
-    "currentValue": "5.7.24",
+    "currentValue": "v0.1.0",
     "datasource": "docker",
-    "depName": "mysql",
+    "depName": "target/secret-vault",
     "depType": "docker",
-    "replaceString": "mysql:5.7.24",
+    "replaceString": "target/secret-vault:v0.1.0",
+  },
+]
+`;
+
+exports[`manager/velaci/extract extractPackageFile() extracts multiple step pipeline image lines 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "1.13",
+    "datasource": "docker",
+    "depName": "golang",
+    "depType": "docker",
+    "replaceString": "golang:1.13",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{lookupName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": "sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
+    "currentValue": "10.0.0",
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "lookupName": "amd64/node",
+    "replaceString": "amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28",
+  },
+  Object {
+    "depType": "docker",
+    "skipReason": "invalid-value",
   },
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
-    "currentValue": "alpine",
+    "currentValue": "v0.1.0",
     "datasource": "docker",
-    "depName": "redis",
+    "depName": "target/secret-vault",
     "depType": "docker",
-    "replaceString": "redis:alpine",
+    "replaceString": "target/secret-vault:v0.1.0",
   },
 ]
 `;
