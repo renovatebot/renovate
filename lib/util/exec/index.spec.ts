@@ -6,8 +6,8 @@ import { envMock } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
+import { RawExecOptions, VolumeOption } from './types';
 import { ExecOptions, exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
