@@ -2,7 +2,7 @@ import mockDate from 'mockdate';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as datasource, getNpmrc, resetCache, setNpmrc } from '.';
@@ -17,7 +17,7 @@ let npmResponse: any;
 describe('datasource/npm/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    setGlobalConfig();
+    GlobalConfig.reset();
     hostRules.clear();
     resetCache();
     setNpmrc();
@@ -357,7 +357,7 @@ describe('datasource/npm/index', () => {
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
     process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
-    setGlobalConfig({ exposeAllEnv: true });
+    GlobalConfig.set({ exposeAllEnv: true });
 
     const npmrc = 'registry=${REGISTRY}';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
@@ -366,7 +366,7 @@ describe('datasource/npm/index', () => {
   });
 
   it('should throw error if necessary env var is not present', () => {
-    setGlobalConfig({ exposeAllEnv: true });
+    GlobalConfig.set({ exposeAllEnv: true });
 
     expect(() => setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
       Error('env-replace')

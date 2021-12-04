@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 import { IndentationType } from './indentation-type';
 
@@ -9,7 +9,7 @@ const defaultConfigFile = configFileNames[0];
 
 describe('util/json-writer/editor-config', () => {
   beforeAll(() => {
-    setGlobalConfig({
+    GlobalConfig.set({
       localDir: '',
     });
   });

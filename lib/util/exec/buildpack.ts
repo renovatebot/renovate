@@ -3,6 +3,8 @@ import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import * as allVersioning from '../../versioning';
 import { id as composerVersioningId } from '../../versioning/composer';
+import { id as npmVersioningId } from '../../versioning/npm';
+import { id as semverVersioningId } from '../../versioning/semver';
 import type { ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
@@ -10,6 +12,17 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     depName: 'composer/composer',
     versioning: composerVersioningId,
+  },
+  jb: {
+    datasource: 'github-releases',
+    depName: 'jsonnet-bundler/jsonnet-bundler',
+    versioning: semverVersioningId,
+  },
+  npm: {
+    datasource: 'npm',
+    depName: 'npm',
+    hash: true,
+    versioning: npmVersioningId,
   },
 };
 
@@ -65,10 +78,12 @@ export async function generateInstallCommands(
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);
-      const installCommand = `install-tool ${toolConstraint.toolName} ${quote(
-        toolVersion
-      )}`;
+      const { toolName } = toolConstraint;
+      const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
+      if (allToolConfig[toolName].hash) {
+        installCommands.push(`hash -d ${toolName}`);
+      }
     }
   }
   return installCommands;

@@ -341,6 +341,31 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].updateType).toBe('minor');
     });
+    it('handles unconstrainedValue values', async () => {
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.depName = 'q';
+      config.datasource = datasourceNpmId;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "bucket": "non-major",
+            "isLockfileUpdate": true,
+            "isRange": true,
+            "newMajor": 1,
+            "newMinor": 4,
+            "newValue": undefined,
+            "newVersion": "1.4.1",
+            "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+            "updateType": "minor",
+          },
+        ]
+      `);
+      expect(res.updates[0].newValue).toBeUndefined();
+      expect(res.updates[0].updateType).toBe('minor');
+    });
     it('widens minor ranged versions if configured', async () => {
       config.currentValue = '~1.3.0';
       config.rangeStrategy = 'widen';

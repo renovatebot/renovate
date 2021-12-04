@@ -1,16 +1,9 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import Git, {
-  DiffResult as DiffResult_,
-  Options,
-  ResetMode,
-  SimpleGit,
-  StatusResult as StatusResult_,
-  TaskOptions,
-} from 'simple-git';
+import Git, { Options, ResetMode, SimpleGit, TaskOptions } from 'simple-git';
 import { join } from 'upath';
 import { configFileNames } from '../../config/app-strings';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -22,43 +15,25 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { GitOptions, GitProtocol } from '../../types/git';
+import type { GitProtocol } from '../../types/git';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
+import { getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
+import type {
+  CommitFilesConfig,
+  CommitSha,
+  LocalConfig,
+  StatusResult,
+  StorageConfig,
+} from './types';
 
-export { GitNoVerifyOption, setNoVerify } from './config';
+export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
-}
-
-export type StatusResult = StatusResult_;
-
-export type DiffResult = DiffResult_;
-
-export type CommitSha = string;
-
-interface StorageConfig {
-  currentBranch?: string;
-  url: string;
-  extraCloneOpts?: GitOptions;
-  cloneSubmodules?: boolean;
-  fullClone?: boolean;
-}
-
-interface LocalConfig extends StorageConfig {
-  additionalBranches: string[];
-  currentBranch: string;
-  currentBranchSha: string;
-  branchCommits: Record<string, CommitSha>;
-  branchIsModified: Record<string, boolean>;
-  ignoredAuthors: string[];
-  gitAuthorName?: string;
-  gitAuthorEmail?: string;
 }
 
 // istanbul ignore next
@@ -108,6 +83,11 @@ function checkForPlatformFailure(err: Error): void {
       error: 'TF401027:',
       message:
         'You need the Git `GenericContribute` permission to perform this action',
+    },
+    {
+      error: 'matches more than one',
+      message:
+        "Renovate cannot push branches if there are tags with names the same as Renovate's branches. Please remove conflicting tag names or change Renovate's branchPrefix to avoid conflicts.",
     },
   ];
   for (const { error, message } of configErrorStrings) {
@@ -194,7 +174,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   git = Git(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
@@ -293,7 +273,7 @@ export async function syncGit(): Promise<void> {
     return;
   }
   gitInitialized = true;
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   logger.debug('Initializing git repository into ' + localDir);
   const gitHead = join(localDir, '.git/HEAD');
   let clone = true;
@@ -655,33 +635,6 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
-/**
- * File to commit
- */
-export interface File {
-  /**
-   * Relative file path
-   */
-  name: string;
-
-  /**
-   * file contents
-   */
-  contents: string | Buffer;
-
-  /**
-   * the executable bit
-   */
-  executable?: boolean;
-}
-
-export type CommitFilesConfig = {
-  branchName: string;
-  files: File[];
-  message: string;
-  force?: boolean;
-};
-
 export async function commitFiles({
   branchName,
   files,
@@ -694,7 +647,7 @@ export async function commitFiles({
     await writePrivateKey();
     privateKeySet = true;
   }
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   await configSigningKey(localDir);
   await writeGitAuthor();
   try {
@@ -759,7 +712,7 @@ export async function commitFiles({
     }
 
     const commitOptions: Options = {};
-    if (getNoVerify().includes(GitNoVerifyOption.Commit)) {
+    if (getNoVerify().includes('commit')) {
       commitOptions['--no-verify'] = null;
     }
 
@@ -790,7 +743,7 @@ export async function commitFiles({
       '--force-with-lease': null,
       '-u': null,
     };
-    if (getNoVerify().includes(GitNoVerifyOption.Push)) {
+    if (getNoVerify().includes('push')) {
       pushOptions['--no-verify'] = null;
     }
 

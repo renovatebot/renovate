@@ -207,7 +207,9 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
-  const cacheKey = `getReleaseNotesMdFile-${project.repository}-${project.apiBaseUrl}`;
+  const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
+    project.sourceDirectory ? `-${project.sourceDirectory}` : ''
+  }-${project.apiBaseUrl}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -258,8 +260,11 @@ export async function getReleaseNotesMd(
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
-              let url = `${baseUrl}${repository}/blob/master/${changelogFile}#`;
-              url += title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), ''); // TODO #12071
+              const notesSourceUrl = `${baseUrl}${repository}/blob/master/${changelogFile}`;
+              const url =
+                notesSourceUrl +
+                '#' +
+                title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), ''); // TODO #12071
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
@@ -273,6 +278,7 @@ export async function getReleaseNotesMd(
               return {
                 body,
                 url,
+                notesSourceUrl,
               };
             }
           }
@@ -320,10 +326,12 @@ export async function addReleaseNotes(
     return input;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
-  const repository = input.project.repository;
-  const cacheNamespace = `changelog-${input.project.type}-notes`;
+  const { repository, sourceDirectory } = input.project;
+  const cacheNamespace = `changelog-${input.project.type}-notes@v2`;
   function getCacheKey(version: string): string {
-    return `${repository}:${version}`;
+    return `${repository}:${
+      sourceDirectory ? `${sourceDirectory}:` : ''
+    }${version}`;
   }
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes;
@@ -338,7 +346,7 @@ export async function addReleaseNotes(
       }
       // Small hack to force display of release notes when there is a compare url
       if (!releaseNotes && v.compare.url) {
-        releaseNotes = { url: v.compare.url };
+        releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
       }
       const cacheMinutes = releaseNotesCacheMinutes(v.date);
       await packageCache.set(

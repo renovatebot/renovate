@@ -1,13 +1,13 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { PlatformId } from '../../constants';
 import * as _datasource from '../../datasource';
 import * as datasourcePackagist from '../../datasource/packagist';
 import * as docker from '../../util/exec/docker';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from './artifacts';
@@ -46,7 +46,7 @@ describe('manager/composer/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     fs.ensureCacheDir.mockResolvedValue('/tmp/renovate/cache/others/composer');
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
@@ -62,7 +62,7 @@ describe('manager/composer/artifacts', () => {
   });
 
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   it('returns if no composer.lock found', async () => {
@@ -81,7 +81,11 @@ describe('manager/composer/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValueOnce(repoStatus);
-    setGlobalConfig({ ...adminConfig, allowScripts: true, allowPlugins: true });
+    GlobalConfig.set({
+      ...adminConfig,
+      allowScripts: true,
+      allowPlugins: true,
+    });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -220,7 +224,7 @@ describe('manager/composer/artifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('{}');
 
     const execSnapshots = mockExecAll(exec);
@@ -255,7 +259,7 @@ describe('manager/composer/artifacts', () => {
   });
 
   it('supports global mode', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{ }');
@@ -422,7 +426,7 @@ describe('manager/composer/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValueOnce(repoStatus);
-    setGlobalConfig({ ...adminConfig, allowPlugins: true });
+    GlobalConfig.set({ ...adminConfig, allowPlugins: true });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -439,7 +443,7 @@ describe('manager/composer/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValueOnce(repoStatus);
-    setGlobalConfig({ ...adminConfig, allowPlugins: true });
+    GlobalConfig.set({ ...adminConfig, allowPlugins: true });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',

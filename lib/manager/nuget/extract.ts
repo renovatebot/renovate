@@ -1,9 +1,10 @@
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import { hasKey } from '../../util/object';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest } from './types';
@@ -20,8 +21,9 @@ import { getConfiguredRegistries } from './util';
  * The update of the right boundary does not make sense regarding to the lowest version restore rule,
  * so we don't include it in the extracting regexp
  */
-const checkVersion =
-  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/; // TODO #12070
+const checkVersion = regEx(
+  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`
+);
 const elemNames = new Set([
   'PackageReference',
   'PackageVersion',
@@ -72,7 +74,7 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
 
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   const registries = await getConfiguredRegistries(packageFile, localDir);
   const registryUrls = registries
     ? registries.map((registry) => registry.url)

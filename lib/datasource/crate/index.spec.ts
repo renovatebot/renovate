@@ -6,7 +6,7 @@ import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as memCache from '../../util/cache/memory';
 import { RegistryFlavor, RegistryInfo } from './types';
@@ -98,7 +98,7 @@ describe('datasource/crate/index', () => {
         localDir: join(tmpDir.path, 'local'),
         cacheDir: join(tmpDir.path, 'cache'),
       };
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
 
       simpleGit.mockReset();
       memCache.init();
@@ -107,7 +107,7 @@ describe('datasource/crate/index', () => {
     afterEach(async () => {
       await tmpDir.cleanup();
       tmpDir = null;
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
 
     it('returns null for missing registry url', async () => {
@@ -249,7 +249,7 @@ describe('datasource/crate/index', () => {
     });
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
@@ -263,7 +263,7 @@ describe('datasource/crate/index', () => {
     });
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -277,7 +277,7 @@ describe('datasource/crate/index', () => {
     });
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
       await getPkgReleases({
         datasource,
@@ -293,7 +293,7 @@ describe('datasource/crate/index', () => {
     });
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       await Promise.all([
@@ -319,7 +319,7 @@ describe('datasource/crate/index', () => {
     });
     it('returns null when git clone fails', async () => {
       setupErrorGitMock();
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       const result = await getPkgReleases({

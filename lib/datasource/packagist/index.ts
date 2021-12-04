@@ -6,6 +6,7 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
+import { regEx } from '../../util/regex';
 import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
@@ -124,7 +125,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
       dep.sourceUrl = release.source.url;
     }
     return {
-      version: version.replace(/^v/, ''), // TODO #12070
+      version: version.replace(regEx(/^v/), ''),
       gitRef: version,
       releaseTimestamp: release.time,
     };
