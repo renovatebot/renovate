@@ -34,6 +34,7 @@ const config: InitialOptionsTsJest = {
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   testEnvironment: 'node',
   testRunner: 'jest-circus/runner',
+  watchPathIgnorePatterns: ['<rootDir>/.cache/', '<rootDir>/coverage/'],
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',
