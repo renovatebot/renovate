@@ -5,8 +5,8 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { ExecOptions, exec } from '../../../util/exec';
-import type { ToolConstraint } from '../../../util/exec/types';
+import { exec } from '../../../util/exec';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';

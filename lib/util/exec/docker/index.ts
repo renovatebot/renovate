@@ -6,13 +6,8 @@ import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import { regEx } from '../../regex';
 import { ensureTrailingSlash } from '../../url';
-import {
-  DockerOptions,
-  Opt,
-  VolumeOption,
-  VolumesPair,
-  rawExec,
-} from '../common';
+import { rawExec } from '../common';
+import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
 const prefetchedImages = new Set<string>();
 
