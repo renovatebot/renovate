@@ -113,7 +113,13 @@ For this to work, `docker` needs to be installed and the Docker socket available
 
 Additionally, when Renovate is run inside a container built using [`containerbase/buildpack`](https://github.com/containerbase/buildpack), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
 This mode means that Renovate will dynamically install the version of tools available, if supported.
-Supported tools for dynamic install are `composer`, `jb` and `npm`.
+
+Supported tools for dynamic install are:
+
+- `composer`
+- `jb`
+- `npm`
+
 Unsupported tools will fall back to `binarySource=global`.
 
 ## cacheDir
