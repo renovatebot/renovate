@@ -104,7 +104,7 @@ e.g.
 
 ## binarySource
 
-Renovate often needs to use third party binaries in its PRs, e.g. `npm` to update `package-lock.json` or `go` to update `go.sum`.
+Renovate often needs to use third-party binaries in its PRs, e.g. `npm` to update `package-lock.json` or `go` to update `go.sum`.
 By default, Renovate will use a child process to run such tools, so they need to be pre-installed before running Renovate and available in the path.
 
 Renovate can instead use "sidecar" containers for third-party tools when `binarySource=docker`.

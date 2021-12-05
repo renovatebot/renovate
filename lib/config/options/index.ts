@@ -262,7 +262,7 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Controls whether third party tools like npm or Gradle are called directly, via Docker sidecar containers, or dynamic install.',
+      'Controls whether third-party tools like npm or Gradle are called directly, via Docker sidecar containers, or dynamic install.',
     globalOnly: true,
     type: 'string',
     allowedValues: ['global', 'docker', 'install'],
