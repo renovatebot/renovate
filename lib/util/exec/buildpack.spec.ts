@@ -99,7 +99,7 @@ describe('util/exec/buildpack', () => {
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       const res = await generateInstallCommands(toolConstraints);
       expect(res).toHaveLength(2);
-      expect(res[1]).toBe('hash -d npm');
+      expect(res[1]).toBe('hash -d npm 2>/dev/null || true');
     });
   });
 });
