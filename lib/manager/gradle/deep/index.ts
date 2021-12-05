@@ -5,7 +5,8 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as datasourceMaven from '../../../datasource/maven';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { ExecOptions, exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile, stat } from '../../../util/fs';
 import {
   extraEnv,

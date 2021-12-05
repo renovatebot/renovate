@@ -7,7 +7,8 @@ import {
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   deleteLocalFile,
   ensureCacheDir,
