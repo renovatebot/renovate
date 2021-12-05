@@ -2,7 +2,7 @@ import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { generateInstallCommands } from './buildpack';
+import { generateInstallCommands, isDynamicInstall } from './buildpack';
 import { rawExec } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
@@ -120,6 +120,12 @@ async function prepareRawExec(
       dockerOptions
     );
     rawCommands = [dockerCommand];
+  } else if (isDynamicInstall(opts.toolConstraints)) {
+    logger.debug('Using buildpack dynamic installs');
+    rawCommands = [
+      ...(await generateInstallCommands(opts.toolConstraints)),
+      ...rawCommands,
+    ];
   }
 
   return { rawCommands, rawOptions };
