@@ -7,7 +7,7 @@ import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
-import type { VolumeOption } from '../common';
+import type { VolumeOption } from '../types';
 import {
   generateDockerCommand,
   getDockerTag,
