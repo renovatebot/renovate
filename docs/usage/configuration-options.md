@@ -392,7 +392,7 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 ## constraints
 
-Constraints are used in package managers which use third party tools to update "artifacts" like lock files or checksum files.
+Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
 Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
 
