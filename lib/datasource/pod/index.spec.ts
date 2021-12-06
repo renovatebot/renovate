@@ -59,7 +59,6 @@ describe('datasource/pod/index', () => {
         registryUrls: [...config.registryUrls, 'https://github.com/foo/bar'],
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404 Github enterprise', async () => {
       httpMock
@@ -80,7 +79,6 @@ describe('datasource/pod/index', () => {
         ],
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 401', async () => {
       httpMock
@@ -88,7 +86,6 @@ describe('datasource/pod/index', () => {
         .get('/all_pods_versions_a_c_b.txt')
         .reply(401);
       expect(await getPkgReleases(config)).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 429', async () => {
       httpMock
@@ -96,7 +93,6 @@ describe('datasource/pod/index', () => {
         .get('/all_pods_versions_a_c_b.txt')
         .reply(429);
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
       httpMock
@@ -104,7 +100,6 @@ describe('datasource/pod/index', () => {
         .get('/all_pods_versions_a_c_b.txt')
         .replyWithError('foobar');
       expect(await getPkgReleases(config)).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from CDN', async () => {
       httpMock
@@ -124,7 +119,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from Github with shard with specs', async () => {
       httpMock
@@ -143,7 +137,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from Github with shard without specs', async () => {
       httpMock
@@ -164,7 +157,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from Github with specs without shard', async () => {
       httpMock
@@ -187,7 +179,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from Github without specs without shard', async () => {
       httpMock
@@ -212,7 +203,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from Github Enterprise with shard with specs', async () => {
       httpMock
@@ -231,7 +221,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from Github Enterprise with shard without specs', async () => {
       httpMock
@@ -252,7 +241,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from Github Enterprise with specs without shard', async () => {
       httpMock
@@ -275,7 +263,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from Github Enterprise without specs without shard', async () => {
       httpMock
@@ -300,7 +287,6 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
