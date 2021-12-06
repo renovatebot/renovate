@@ -21,7 +21,7 @@
     "generate": "run-s generate:*",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
-    "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal TZ=UTC node --expose-gc node_modules/jest/bin/jest.js --logHeapUsage",
+    "jest": "cross-env LOG_LEVEL=fatal node --expose-gc node_modules/jest/bin/jest.js --logHeapUsage",
     "jest-debug": "cross-env NODE_OPTIONS=--inspect-brk yarn jest --testTimeout=100000000",
     "jest-silent": "cross-env yarn jest --reporters jest-silent-reporter",
     "lint": "run-s ls-lint eslint prettier markdown-lint git-check doc-fence-check",
@@ -109,7 +109,8 @@
     "Sebastian Poxhofer <sebastian@poxhofer.at>",
     "Henry Sachs <henrysachs@gmail.com>",
     "Arkadiusz Kosmala <kosmala.arkadiusz@gmail.com>",
-    "Markus Siebert <mail@markussiebert.com>"
+    "Markus Siebert <mail@markussiebert.com>",
+    "Sergey Vedmak <serg.vedmak@gmail.com>"
   ],
   "license": "AGPL-3.0",
   "bugs": {
@@ -274,16 +275,16 @@
     "mockdate": "3.0.5",
     "nock": "13.2.1",
     "npm-run-all": "4.1.5",
-    "prettier": "2.4.1",
+    "prettier": "2.5.0",
     "pretty-quick": "3.1.2",
     "rimraf": "3.0.2",
-    "semantic-release": "18.0.0",
+    "semantic-release": "18.0.1",
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.1",
     "tmp-promise": "3.0.3",
     "ts-jest": "27.0.7",
     "ts-node": "10.4.0",
-    "type-fest": "2.5.4",
+    "type-fest": "2.6.0",
     "typescript": "4.5.2",
     "unified": "9.2.2"
   },

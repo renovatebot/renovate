@@ -3,6 +3,8 @@ export interface ChangeLogNotes {
   id?: number;
   name?: string;
   tag?: string;
+  // url to changelog.md file or github/gitlab release api
+  notesSourceUrl: string;
   url: string;
 }
 
