@@ -1751,6 +1751,8 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 ## postUpgradeTasks
 
+Note: post-upgrade tasks can only be used on self-hosted Renovate instances.
+
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
