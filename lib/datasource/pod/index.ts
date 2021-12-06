@@ -23,10 +23,10 @@ const githubHttp = new GithubHttp(id);
 const http = new Http(id);
 
 const enum URLFormatOptions {
-  WithSharedWithSpec = 0,
-  WithSharedWithoutSpec = 1,
-  WithSpecsWithoutShard = 2,
-  WithoutSpecsWithoutShard = 3,
+  WithSharedWithSpec,
+  WithSharedWithoutSpec,
+  WithSpecsWithoutShard,
+  WithoutSpecsWithoutShard,
 }
 
 function shardParts(lookupName: string): string[] {
