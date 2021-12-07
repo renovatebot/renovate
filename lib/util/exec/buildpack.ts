@@ -107,7 +107,7 @@ export async function generateInstallCommands(
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
       if (allToolConfig[toolName].hash) {
-        installCommands.push(`hash -d ${toolName}`);
+        installCommands.push(`hash -d ${toolName} 2>/dev/null || true`);
       }
     }
   }
