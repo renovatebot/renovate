@@ -2,10 +2,10 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
-import { GitNoVerifyOption, setNoVerify } from '.';
+import { setNoVerify } from '.';
 
 describe('util/git/index', () => {
   jest.setTimeout(15000);
@@ -71,7 +71,7 @@ describe('util/git/index', () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setGlobalConfig({ localDir: tmpDir.path });
+    GlobalConfig.set({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
     });
@@ -363,7 +363,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Commit]);
+      setNoVerify(['commit']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -393,7 +393,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Push]);
+      setNoVerify(['push']);
 
       await git.commitFiles({
         branchName: 'renovate/something',

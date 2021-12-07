@@ -1,8 +1,10 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
+import { regEx } from '../../util/regex';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
@@ -11,6 +13,7 @@ import { MAVEN_REPO } from './common';
 import type { MavenDependency, ReleaseMap } from './types';
 import {
   checkHttpResource,
+  downloadHttpProtocol,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,
@@ -82,6 +85,63 @@ async function fetchReleasesFromMetadata(
   if (!authorization) {
     await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
   }
+  return releaseMap;
+}
+
+const mavenCentralHtmlVersionRegex = regEx(
+  '^<a href="(?<version>[^"]+)\\/" title="(?:[^"]+)\\/">(?:[^"]+)\\/<\\/a>\\s+(?<releaseTimestamp>\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d)\\s+-$',
+  'i'
+);
+
+async function addReleasesFromIndexPage(
+  inputReleaseMap: ReleaseMap,
+  dependency: MavenDependency,
+  repoUrl: string
+): Promise<ReleaseMap> {
+  const cacheNs = 'datasource-maven:index-html-releases';
+  const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
+  let workingReleaseMap = await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
+  if (!workingReleaseMap) {
+    workingReleaseMap = {};
+    let retryEarlier = false;
+    try {
+      if (repoUrl.startsWith(MAVEN_REPO)) {
+        const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
+        const res = await downloadHttpProtocol(indexUrl);
+        const { body = '' } = res;
+        for (const line of body.split('\n')) {
+          const match = line.trim().match(mavenCentralHtmlVersionRegex);
+          if (match) {
+            const { version, releaseTimestamp: timestamp } =
+              match?.groups || {};
+            if (version && timestamp) {
+              const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
+                zone: 'UTC',
+              });
+              if (date.isValid) {
+                const releaseTimestamp = date.toISO();
+                workingReleaseMap[version] = { version, releaseTimestamp };
+              }
+            }
+          }
+        }
+      }
+    } catch (err) /* istanbul ignore next */ {
+      retryEarlier = true;
+      logger.debug(
+        { dependency, err },
+        'Failed to get releases from index.html'
+      );
+    }
+    const cacheTTL = retryEarlier ? 60 : 24 * 60;
+    await packageCache.set(cacheNs, cacheKey, workingReleaseMap, cacheTTL);
+  }
+
+  const releaseMap = { ...inputReleaseMap };
+  for (const version of Object.keys(releaseMap)) {
+    releaseMap[version] ||= workingReleaseMap[version] ?? null;
+  }
+
   return releaseMap;
 }
 
@@ -246,11 +306,12 @@ export async function getReleases({
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const dependency = getDependencyParts(lookupName);
-  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12070
+  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12071
 
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 
   let releaseMap = await fetchReleasesFromMetadata(dependency, repoUrl);
+  releaseMap = await addReleasesFromIndexPage(releaseMap, dependency, repoUrl);
   releaseMap = await addReleasesUsingHeadRequests(
     releaseMap,
     dependency,

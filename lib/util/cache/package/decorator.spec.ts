@@ -36,7 +36,10 @@ describe('util/cache/package/decorator', () => {
   it('Do cache null', async () => {
     class MyClass {
       @cache({ namespace: 'namespace', key: (cacheKey, test) => cacheKey })
-      public async getString(cacheKey: string, test: string): Promise<string> {
+      public async getString(
+        cacheKey: string,
+        test: string | null
+      ): Promise<string | null> {
         await spy();
         return test;
       }
@@ -52,7 +55,7 @@ describe('util/cache/package/decorator', () => {
   it('Do not cache undefined', async () => {
     class MyClass {
       @cache({ namespace: 'namespace', key: 'undefined' })
-      public async getString(): Promise<string> {
+      public async getString(): Promise<string | undefined> {
         await spy();
         return undefined;
       }
@@ -66,7 +69,7 @@ describe('util/cache/package/decorator', () => {
   it('should cache function', async () => {
     class MyClass {
       @cache({
-        namespace: (arg: GetReleasesConfig) => arg.registryUrl,
+        namespace: (arg: GetReleasesConfig) => arg.registryUrl ?? 'default',
         key: () => 'key',
       })
       public async getNumber(_: GetReleasesConfig): Promise<number> {

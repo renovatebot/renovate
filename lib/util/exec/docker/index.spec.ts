@@ -3,11 +3,11 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../../test/exec-util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
-import type { VolumeOption } from '../common';
+import type { VolumeOption } from '../types';
 import {
   generateDockerCommand,
   getDockerTag,
@@ -141,12 +141,12 @@ describe('util/exec/docker/index', () => {
 
   describe('removeDanglingContainers', () => {
     beforeEach(() => {
-      setGlobalConfig({ binarySource: 'docker' });
+      GlobalConfig.set({ binarySource: 'docker' });
     });
 
     it('short-circuits in non-Docker environment', async () => {
       const execSnapshots = mockExecAll(exec);
-      setGlobalConfig({ binarySource: 'global' });
+      GlobalConfig.set({ binarySource: 'global' });
       await removeDanglingContainers();
       expect(execSnapshots).toBeEmpty();
     });
@@ -209,12 +209,9 @@ describe('util/exec/docker/index', () => {
   describe('generateDockerCommand', () => {
     const preCommands = [null, 'foo', undefined];
     const commands = ['bar'];
-    const postCommands = [undefined, 'baz', null];
     const envVars = ['FOO', 'BAR'];
     const image = 'sample_image';
     const dockerOptions = {
-      preCommands,
-      postCommands,
       image,
       cwd: '/tmp/foobar',
       envVars,
@@ -228,15 +225,19 @@ describe('util/exec/docker/index', () => {
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
       `renovate/${img} ` +
-      `bash -l -c "foo && bar && baz"`;
+      `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
-      setGlobalConfig({ dockerUser: 'some-user' });
+      GlobalConfig.set({ dockerUser: 'some-user' });
     });
 
     it('returns executable command', async () => {
       mockExecAll(exec);
-      const res = await generateDockerCommand(commands, dockerOptions);
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        dockerOptions
+      );
       expect(res).toBe(command(image));
     });
 
@@ -247,7 +248,7 @@ describe('util/exec/docker/index', () => {
         ['/tmp/bar', `/tmp/bar`],
         ['/tmp/baz', `/home/baz`],
       ];
-      const res = await generateDockerCommand(commands, {
+      const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
         volumes: [...volumes, ...volumes],
       });
@@ -261,7 +262,7 @@ describe('util/exec/docker/index', () => {
 
     it('handles tag parameter', async () => {
       mockExecAll(exec);
-      const res = await generateDockerCommand(commands, {
+      const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
         tag: '1.2.3',
       });
@@ -277,7 +278,7 @@ describe('util/exec/docker/index', () => {
           { version: '2.0.0' },
         ],
       } as never);
-      const res = await generateDockerCommand(commands, {
+      const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
         tagScheme: 'npm',
         tagConstraint: '^1.2.3',

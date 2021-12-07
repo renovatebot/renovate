@@ -9,7 +9,7 @@ import {
   fs,
   loadFixture,
 } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import {
   ReleaseResult,
@@ -122,11 +122,11 @@ describe('manager/gradle/deep/index', () => {
   }
 
   beforeAll(() => {
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
   });
 
   afterAll(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   beforeEach(() => {
@@ -304,7 +304,7 @@ describe('manager/gradle/deep/index', () => {
     });
 
     it('should use docker if required', async () => {
-      setGlobalConfig(dockerAdminConfig);
+      GlobalConfig.set(dockerAdminConfig);
       const execSnapshots = setupMocks({
         wrapperFilename: null,
         wrapperPropertiesFilename: null,
@@ -326,7 +326,7 @@ describe('manager/gradle/deep/index', () => {
     });
 
     it('should use docker even if gradlew is available', async () => {
-      setGlobalConfig(dockerAdminConfig);
+      GlobalConfig.set(dockerAdminConfig);
       const execSnapshots = setupMocks();
       getPkgReleases.mockResolvedValueOnce(javaReleases);
       const dependencies = await extractAllPackageFiles(config, [
@@ -345,7 +345,7 @@ describe('manager/gradle/deep/index', () => {
     });
 
     it('should use docker even if gradlew.bat is available on Windows', async () => {
-      setGlobalConfig(dockerAdminConfig);
+      GlobalConfig.set(dockerAdminConfig);
       jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
       const execSnapshots = setupMocks({ wrapperFilename: 'gradlew.bat' });
       getPkgReleases.mockResolvedValueOnce(javaReleases);

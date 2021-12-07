@@ -3,7 +3,7 @@ import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 
-export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
+export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config';
   if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
@@ -11,7 +11,8 @@ export function getConfig(env: NodeJS.ProcessEnv): AllConfig {
   }
   let config: AllConfig = {};
   try {
-    config = require(configFile);
+    const tmpConfig = await import(configFile);
+    config = tmpConfig.default ? tmpConfig.default : tmpConfig;
   } catch (err) {
     // istanbul ignore if
     if (err instanceof SyntaxError || err instanceof TypeError) {
