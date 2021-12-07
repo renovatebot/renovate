@@ -10,7 +10,7 @@ describe('manager/metadata', () => {
   test.each(managerList)('%s has readme with no h1 or h2', async (manager) => {
     let readme: string;
     try {
-      readme = await fs.readFile(`${__dirname}/${manager}/readme.md`, 'utf8');
+      readme = await fs.readLocalFile(`${manager}/readme.md`, 'utf8');
     } catch (err) {
       // do nothing
     }

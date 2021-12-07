@@ -10,6 +10,7 @@ import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as pipCompile from './artifacts';
+import * as fsutil from '../../util/fs';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -17,10 +18,20 @@ jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../util/host-rules');
 jest.mock('../../util/http');
+jest.mock('../../util/fs', () => {
+  const originalModule = jest.requireActual('../../util/fs');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    readLocalFile: jest.fn(),
+  };
+});
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
+const readLocalFile = mocked(fsutil.readLocalFile);
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -56,9 +67,9 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    fs.readFile.mockResolvedValueOnce('content' as any);
+    readLocalFile.mockResolvedValueOnce('content' as any);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('content' as any);
+    readLocalFile.mockReturnValueOnce('content' as any);
     expect(
       await pipCompile.updateArtifacts({
         packageFileName: 'requirements.in',
@@ -71,12 +82,12 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   it('returns updated requirements.txt', async () => {
-    fs.readFile.mockResolvedValueOnce('current requirements.txt' as any);
+    readLocalFile.mockResolvedValueOnce('current requirements.txt' as any);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('New requirements.txt' as any);
+    readLocalFile.mockReturnValueOnce('New requirements.txt' as any);
     expect(
       await pipCompile.updateArtifacts({
         packageFileName: 'requirements.in',
@@ -94,7 +105,7 @@ describe('manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('new lock' as any);
+    readLocalFile.mockReturnValueOnce('new lock' as any);
     expect(
       await pipCompile.updateArtifacts({
         packageFileName: 'requirements.in',
@@ -107,7 +118,7 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   it('catches errors', async () => {
-    fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
+    readLocalFile.mockResolvedValueOnce('Current requirements.txt' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -126,12 +137,12 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
-    fs.readFile.mockResolvedValueOnce('Current requirements.txt' as any);
+    readLocalFile.mockResolvedValueOnce('Current requirements.txt' as any);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('New requirements.txt' as any);
+    readLocalFile.mockReturnValueOnce('New requirements.txt' as any);
     expect(
       await pipCompile.updateArtifacts({
         packageFileName: 'requirements.in',
@@ -149,7 +160,7 @@ describe('manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
     } as StatusResult);
-    fs.readFile.mockReturnValueOnce('new lock' as any);
+    readLocalFile.mockReturnValueOnce('new lock' as any);
     expect(
       await pipCompile.updateArtifacts({
         packageFileName: 'requirements.in',

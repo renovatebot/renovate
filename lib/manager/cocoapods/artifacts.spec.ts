@@ -10,6 +10,7 @@ import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
+import * as fsutil from '../../util/fs';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -17,11 +18,21 @@ jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../platform');
 jest.mock('../../datasource');
+jest.mock('../../util/fs', () => {
+  const originalModule = jest.requireActual('../../util/fs');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    readLocalFile: jest.fn(),
+  };
+});
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const datasource = mocked(_datasource);
+const readLocalFile = mocked(fsutil.readLocalFile);
 
 delete process.env.CP_HOME_DIR;
 
@@ -107,11 +118,11 @@ describe('manager/cocoapods/artifacts', () => {
   });
   it('returns null if unchanged', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
+    readLocalFile.mockResolvedValueOnce('Current Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
+    readLocalFile.mockResolvedValueOnce('Current Podfile' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -125,11 +136,11 @@ describe('manager/cocoapods/artifacts', () => {
   it('returns updated Podfile', async () => {
     const execSnapshots = mockExecAll(exec);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    fs.readFile.mockResolvedValueOnce('Old Podfile' as any);
+    readLocalFile.mockResolvedValueOnce('Old Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
+    readLocalFile.mockResolvedValueOnce('New Podfile' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -143,9 +154,9 @@ describe('manager/cocoapods/artifacts', () => {
   it('returns updated Podfile and Pods files', async () => {
     const execSnapshots = mockExecAll(exec);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    fs.readFile.mockResolvedValueOnce('Old Manifest.lock' as any);
-    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
-    fs.readFile.mockResolvedValueOnce('Pods manifest' as any);
+    readLocalFile.mockResolvedValueOnce('Old Manifest.lock' as any);
+    readLocalFile.mockResolvedValueOnce('New Podfile' as any);
+    readLocalFile.mockResolvedValueOnce('Pods manifest' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       not_added: ['Pods/New'],
       modified: ['Podfile.lock', 'Pods/Manifest.lock'],
@@ -168,7 +179,7 @@ describe('manager/cocoapods/artifacts', () => {
   });
   it('catches write error', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
+    readLocalFile.mockResolvedValueOnce('Current Podfile' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -186,9 +197,9 @@ describe('manager/cocoapods/artifacts', () => {
   });
   it('returns pod exec error', async () => {
     const execSnapshots = mockExecAll(exec, new Error('exec exception'));
-    fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
+    readLocalFile.mockResolvedValueOnce('Old Podfile.lock' as any);
     fs.outputFile.mockResolvedValueOnce(null as never);
-    fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
+    readLocalFile.mockResolvedValueOnce('Old Podfile.lock' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -206,9 +217,9 @@ describe('manager/cocoapods/artifacts', () => {
 
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 
-    fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
+    readLocalFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
 
-    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
+    readLocalFile.mockResolvedValueOnce('New Podfile' as any);
 
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
@@ -231,12 +242,12 @@ describe('manager/cocoapods/artifacts', () => {
 
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
 
-    fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
+    readLocalFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [],
     });
 
-    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
+    readLocalFile.mockResolvedValueOnce('New Podfile' as any);
 
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],

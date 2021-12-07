@@ -2,12 +2,25 @@ import _fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
+import * as fsutil from '../../util/fs';
+import { mocked } from '../../../test/util';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec');
+jest.mock('../../util/fs', () => {
+  const originalModule = jest.requireActual('../../util/fs');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    readLocalFile: jest.fn(),
+  };
+});
+
+const readLocalFile = mocked(fsutil.readLocalFile);
 
 const config: UpdateArtifactsConfig = {};
 
@@ -32,7 +45,7 @@ describe('manager/pip_requirements/artifacts', () => {
     ).toBeNull();
   });
   it('returns null if no hashes', async () => {
-    fs.readFile.mockResolvedValueOnce('eventlet==0.30.2\npbr>=1.9\n' as any);
+    readLocalFile.mockResolvedValueOnce('eventlet==0.30.2\npbr>=1.9\n' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
@@ -43,7 +56,7 @@ describe('manager/pip_requirements/artifacts', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    fs.readFile.mockResolvedValueOnce(newPackageFileContent as any);
+    readLocalFile.mockResolvedValueOnce(newPackageFileContent as any);
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
@@ -54,7 +67,7 @@ describe('manager/pip_requirements/artifacts', () => {
     ).toBeNull();
   });
   it('returns updated file', async () => {
-    fs.readFile.mockResolvedValueOnce('new content' as any);
+    readLocalFile.mockResolvedValueOnce('new content' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'requirements.txt',
@@ -65,7 +78,7 @@ describe('manager/pip_requirements/artifacts', () => {
     ).toHaveLength(1);
   });
   it('catches and returns errors', async () => {
-    fs.readFile.mockResolvedValueOnce('new content' as any);
+    readLocalFile.mockResolvedValueOnce('new content' as any);
     expect(
       await updateArtifacts({
         packageFileName: null,

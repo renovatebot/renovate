@@ -15,7 +15,6 @@ import {
   getSiblingFileName,
   getSubDirectory,
   outputFile,
-  readFile,
   readLocalFile,
   remove,
   unlink,
@@ -295,10 +294,10 @@ export async function writeUpdatedPackageFiles(
 
 // istanbul ignore next
 async function getNpmrcContent(dir: string): Promise<string | null> {
-  const npmrcFilePath = upath.join(dir, '.npmrc');
+  const npmrcFilePath = '.npmrc';
   let originalNpmrcContent = null;
   try {
-    originalNpmrcContent = await readFile(npmrcFilePath, 'utf8');
+    originalNpmrcContent = await readLocalFile(npmrcFilePath, 'utf8');
     logger.debug('npmrc file found in repository');
   } catch {
     logger.debug('No npmrc file found in repository');
@@ -386,10 +385,9 @@ async function updateYarnOffline(
       const status = await getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {
         if (resolvedPaths.some((p) => f.startsWith(p))) {
-          const localModified = upath.join(localDir, f);
           updatedArtifacts.push({
             name: f,
-            contents: await readFile(localModified),
+            contents: await readLocalFile(f),
           });
         }
       }
@@ -827,14 +825,13 @@ export async function getAdditionalFiles(
         );
         if (existingContent) {
           logger.trace('Found lock file');
-          const lockFilePath = upath.join(localDir, filename);
           logger.trace('Checking against ' + lockFilePath);
           try {
             let newContent: string;
             try {
-              newContent = await readFile(lockFilePath, 'utf8');
+              newContent = await readLocalFile(filename, 'utf8');
             } catch (err) {
-              newContent = await readFile(
+              newContent = await readLocalFile(
                 lockFilePath.replace(
                   'npm-shrinkwrap.json',
                   'package-lock.json'

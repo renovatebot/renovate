@@ -54,7 +54,7 @@ allprojects {
     it('executes an executable gradle wrapper', async () => {
       const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
       await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-      await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
+      await expect(fsExtra.readLocalFile(successFile, 'utf8')).resolves.toBe(
         'success'
       );
     }, 120000);
@@ -64,7 +64,7 @@ allprojects {
       const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
 
       await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-      await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
+      await expect(fsExtra.readLocalFile(successFile, 'utf8')).resolves.toBe(
         'success'
       );
     }, 120000);

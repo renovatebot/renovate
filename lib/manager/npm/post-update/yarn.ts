@@ -11,7 +11,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { exists, readFile, remove, writeFile } from '../../../util/fs';
+import { exists, readLocalFile, remove, writeFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -23,7 +23,7 @@ export async function checkYarnrc(
   let offlineMirror = false;
   let yarnPath: string = null;
   try {
-    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await readLocalFile(`.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
@@ -225,7 +225,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

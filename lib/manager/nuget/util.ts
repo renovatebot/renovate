@@ -4,13 +4,13 @@ import * as upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { readFile } from '../../util/fs';
+import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { Registry } from './types';
 
 async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
   try {
-    return new XmlDocument(await readFile(file, 'utf8'));
+    return new XmlDocument(await readLocalFile(file, 'utf8'));
   } catch (err) {
     logger.debug({ err }, `failed to parse '${file}' as XML document`);
     return undefined;
@@ -39,7 +39,7 @@ export async function getConfiguredRegistries(
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
   const normalizedLocalDir = upath.normalizeSafe(localDir);
-  const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
+  let nuGetConfigPath = await findUp(nuGetConfigFileNames, {
     cwd: upath.dirname(upath.join(normalizedLocalDir, packageFile)),
     type: 'file',
   });
@@ -50,6 +50,8 @@ export async function getConfiguredRegistries(
   ) {
     return undefined;
   }
+
+  nuGetConfigPath = nuGetConfigPath.substr(normalizedLocalDir.length);
 
   logger.debug({ nuGetConfigPath }, 'found NuGet.config');
   const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);

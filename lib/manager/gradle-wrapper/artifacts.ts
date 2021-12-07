@@ -23,6 +23,7 @@ async function addIfUpdated(
   status: StatusResult,
   fileProjectPath: string
 ): Promise<UpdateArtifactsResult | null> {
+  console.log(fileProjectPath);
   if (status.modified.includes(fileProjectPath)) {
     return {
       file: {

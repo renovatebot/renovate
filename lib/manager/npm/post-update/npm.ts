@@ -8,7 +8,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import { move, pathExists, readFile, remove } from '../../../util/fs';
+import { move, pathExists, readLocalFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -136,7 +136,7 @@ export async function generateLockFile(
     }
 
     // Read the result
-    lockFile = await readFile(join(cwd, filename), 'utf8');
+    lockFile = await readLocalFile(filename, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

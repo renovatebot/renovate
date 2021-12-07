@@ -6,7 +6,7 @@ jest.mock('../../util/fs');
 describe('manager/npm/detect', () => {
   describe('.detectGlobalConfig()', () => {
     it('detects .npmrc in home directory', async () => {
-      fs.readFile.mockResolvedValueOnce(
+      fs.readLocalFile.mockResolvedValueOnce(
         'registry=https://registry.npmjs.org\n'
       );
       const res = await detectGlobalConfig();
@@ -21,7 +21,7 @@ Object {
       expect(res.npmrcMerge).toBe(true);
     });
     it('handles no .npmrc', async () => {
-      fs.readFile.mockImplementationOnce(() => Promise.reject());
+      fs.readLocalFile.mockImplementationOnce(() => Promise.reject());
       const res = await detectGlobalConfig();
       expect(res).toEqual({});
     });

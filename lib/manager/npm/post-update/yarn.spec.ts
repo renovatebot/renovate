@@ -10,7 +10,18 @@ import * as _yarnHelper from './yarn';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
+jest.mock('../../../util/fs', () => {
+  const originalModule = jest.requireActual('../../../util/fs');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    readLocalFile: jest.fn(),
+    writeFile: jest.fn(),
+    exists: jest.fn(),
+    remove: jest.fn(),
+  };
+});
 jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -45,7 +56,7 @@ describe('manager/npm/post-update/yarn', () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile.mockImplementation((filename, encoding) => {
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) =>
             resolve('yarn-path ./.yarn/cli.js\n')
@@ -69,7 +80,7 @@ describe('manager/npm/post-update/yarn', () => {
         },
         config
       );
-      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -81,7 +92,7 @@ describe('manager/npm/post-update/yarn', () => {
       stdout: '3.0.0',
       stderr: '',
     });
-    fs.readFile.mockResolvedValueOnce('package-lock-contents');
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const config = {
       constraints: {
         yarn: '3.0.0',
@@ -99,7 +110,7 @@ describe('manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    fs.readFile.mockResolvedValueOnce('package-lock-contents');
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const config = {
       constraints: {
         yarn: '>= 2.0.0',
@@ -123,7 +134,7 @@ describe('manager/npm/post-update/yarn', () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile.mockImplementation((filename, encoding) => {
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) => resolve(null));
         }
@@ -155,7 +166,7 @@ describe('manager/npm/post-update/yarn', () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile
+      fs.readLocalFile
         .mockResolvedValueOnce(
           'yarn-offline-mirror ./npm-packages-offline-cache'
         )
@@ -182,7 +193,7 @@ describe('manager/npm/post-update/yarn', () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile.mockImplementation((filename, encoding) => {
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) => resolve(null));
         }
@@ -199,7 +210,7 @@ describe('manager/npm/post-update/yarn', () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         { isLockFileMaintenance: true },
       ]);
-      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -216,7 +227,7 @@ describe('manager/npm/post-update/yarn', () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile.mockImplementation((filename, encoding) => {
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) => resolve(null));
         }
@@ -246,11 +257,11 @@ describe('manager/npm/post-update/yarn', () => {
       stdout: '1.9.4',
       stderr: 'some-error',
     });
-    fs.readFile.mockResolvedValueOnce(null).mockRejectedValueOnce(() => {
+    fs.readLocalFile.mockResolvedValueOnce(null).mockRejectedValueOnce(() => {
       throw new Error('not-found');
     });
     const res = await yarnHelper.generateLockFile('some-dir', {});
-    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -264,7 +275,7 @@ describe('manager/npm/post-update/yarn', () => {
         }
         return new Promise<boolean>((resolve) => resolve(false));
       });
-      fs.readFile.mockImplementation((filename, encoding) => {
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) =>
             resolve(
@@ -285,7 +296,7 @@ describe('manager/npm/post-update/yarn', () => {
         }
         return new Promise<boolean>((resolve) => resolve(false));
       });
-      fs.readFile.mockImplementation((filename, encoding) => {
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) =>
             resolve('yarn-path ./.yarn/cli.js\n')
@@ -305,7 +316,7 @@ describe('manager/npm/post-update/yarn', () => {
         }
         return new Promise<void>((resolve) => resolve());
       });
-      fs.readFile.mockImplementation((filename, encoding) => {
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) => resolve(yarnrcContents));
         }

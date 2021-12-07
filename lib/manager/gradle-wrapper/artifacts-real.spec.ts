@@ -1,4 +1,5 @@
-import { readFile, readFileSync } from 'fs-extra';
+import { readFileSync } from 'fs-extra';
+import { readLocalFile } from '../../util/fs';
 import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
@@ -12,7 +13,8 @@ import * as gradleWrapper from '.';
 
 jest.mock('../../util/git');
 
-const fixtures = resolve(__dirname, './__fixtures__');
+const fixtures = '__fixtures__';
+const fixturesFullPath = resolve(__dirname, './__fixtures__');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: resolve(fixtures, './testFiles'),
@@ -23,11 +25,11 @@ const config: UpdateArtifactsConfig = {
 };
 
 function readString(...paths: string[]): Promise<string> {
-  return readFile(resolve(fixtures, ...paths), 'utf8');
+  return readLocalFile(resolve(fixtures, ...paths), 'utf8');
 }
 
 function readBinSync(...paths: string[]): Buffer {
-  return readFileSync(resolve(fixtures, ...paths));
+  return readFileSync(resolve(fixturesFullPath, ...paths));
 }
 
 function compareFile(file: string, path: string) {

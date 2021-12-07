@@ -9,15 +9,26 @@ import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from './artifacts';
+import * as fsutil from '../../util/fs';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/http');
+jest.mock('../../util/fs', () => {
+  const originalModule = jest.requireActual('../../util/fs');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    readLocalFile: jest.fn(),
+  };
+});
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
+const readLocalFile = mocked(fsutil.readLocalFile);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
@@ -59,9 +70,9 @@ describe('manager/helmv3/artifacts', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    fs.readFile.mockResolvedValueOnce('Current Chart.lock' as any);
+    readLocalFile.mockResolvedValueOnce('Current Chart.lock' as any);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('Current Chart.lock' as any);
+    readLocalFile.mockResolvedValueOnce('Current Chart.lock' as any);
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -74,9 +85,9 @@ describe('manager/helmv3/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Chart.lock', async () => {
-    fs.readFile.mockResolvedValueOnce('Old Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('Old Chart.lock' as never);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('New Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('New Chart.lock' as never);
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -92,9 +103,9 @@ describe('manager/helmv3/artifacts', () => {
   });
 
   it('returns updated Chart.lock for lockfile maintenance', async () => {
-    fs.readFile.mockResolvedValueOnce('Old Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('Old Chart.lock' as never);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('New Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('New Chart.lock' as never);
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -110,9 +121,9 @@ describe('manager/helmv3/artifacts', () => {
 
   it('returns updated Chart.lock with docker', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    fs.readFile.mockResolvedValueOnce('Old Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('Old Chart.lock' as never);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('New Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('New Chart.lock' as never);
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -127,7 +138,7 @@ describe('manager/helmv3/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    fs.readFile.mockResolvedValueOnce('Current Chart.lock' as any);
+    readLocalFile.mockResolvedValueOnce('Current Chart.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -150,9 +161,9 @@ describe('manager/helmv3/artifacts', () => {
   });
 
   it('sets repositories from aliases', async () => {
-    fs.readFile.mockResolvedValueOnce('Old Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('Old Chart.lock' as never);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('New Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('New Chart.lock' as never);
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -172,9 +183,9 @@ describe('manager/helmv3/artifacts', () => {
 
   it('sets repositories from aliases with docker', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    fs.readFile.mockResolvedValueOnce('Old Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('Old Chart.lock' as never);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('New Chart.lock' as never);
+    readLocalFile.mockResolvedValueOnce('New Chart.lock' as never);
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
