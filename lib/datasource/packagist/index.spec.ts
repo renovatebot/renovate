@@ -305,6 +305,35 @@ describe('datasource/packagist/index', () => {
       expect(res).not.toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('supports providers without a hash', async () => {
+      const packagesJson = {
+        packages: [],
+        'providers-url': '/p/%package%.json',
+        providers: {
+          'wpackagist-plugin/1337-rss-feed-made-for-sharing': {
+            sha256: null,
+          },
+          'wpackagist-plugin/1beyt': {
+            sha256: null,
+          },
+        },
+      };
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/packages.json')
+        .reply(200, packagesJson)
+        .get('/p/wpackagist-plugin/1beyt.json')
+        .reply(200, beytJson);
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'wpackagist-plugin/1beyt',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('handles providers miss', async () => {
       const packagesJson = {
         packages: [],
