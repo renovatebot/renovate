@@ -1,0 +1,8 @@
+*
+!lib
+!package.json
+!tsconfig.json
+!tsconfig.app.json
+!node_modules
+!data
+!tools
