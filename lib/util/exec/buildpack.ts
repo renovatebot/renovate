@@ -22,7 +22,6 @@ const allToolConfig: Record<string, ToolConfig> = {
   npm: {
     datasource: 'npm',
     depName: 'npm',
-    hash: true,
     versioning: npmVersioningId,
   },
 };
