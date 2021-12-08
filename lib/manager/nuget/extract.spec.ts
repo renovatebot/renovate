@@ -132,6 +132,26 @@ describe('manager/nuget/extract', () => {
         ],
       });
     });
+
+    it('handles NuGet.config with whitespaces in package source keys', async () => {
+      const packageFile = 'with-whitespaces/with-whitespaces.csproj';
+      const contents = loadFixture(packageFile);
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '12.0.3',
+            datasource: 'nuget',
+            depName: 'Newtonsoft.Json',
+            depType: 'nuget',
+            registryUrls: [
+              'https://api.nuget.org/v3/index.json#protocolVersion=3',
+              'https://my.myget.org/F/my/auth/guid/api/v3/index.json',
+            ],
+          },
+        ],
+      });
+    });
+
     it('ignores local feed in NuGet.config', async () => {
       const packageFile =
         'with-local-feed-in-config-file/with-local-feed-in-config-file.csproj';

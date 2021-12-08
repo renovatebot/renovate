@@ -149,6 +149,7 @@ const repoGroups = {
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',

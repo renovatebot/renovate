@@ -2545,6 +2545,31 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
 
+## userStrings
+
+User-facing strings pertaining to the PR comment that gets posted when a PR is closed.
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+
+The following strings can currently be customized:
+
+- `ignoreDigest`: Text of the PR comment for digest upgrades.
+- `ignoreMajor`: Text of the PR comment for major upgrades.
+- `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
+- `ignoreTopic`: Topic of the PR comment.
+
+Example:
+
+```json
+{
+  "userStrings": {
+    "ignoreTopic": "Custom topic for PR comment",
+    "ignoreMajor": "Custom text for major upgrades.",
+    "ignoreDigest": "Custom text for digest upgrades.",
+    "ignoreOther": "Custom text for other upgrades."
+  }
+}
+```
+
 ## versioning
 
 Usually, each language or package manager has a specific type of "versioning":
