@@ -34,6 +34,7 @@ const repoGroups = {
   deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'dnd-kit': 'https://github.com/clauderic/dnd-kit',
+  'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
