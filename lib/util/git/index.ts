@@ -520,6 +520,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
     // author matches - branch has not been modified
+    logger.debug({ branchName }, 'Branch has not been modified');
     config.branchIsModified[branchName] = false;
     return false;
   }
