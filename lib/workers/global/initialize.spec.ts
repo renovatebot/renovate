@@ -1,11 +1,8 @@
-import { mocked } from '../../../test/util';
+import { git } from '../../../test/util';
 import { RenovateConfig } from '../../config/types';
-import * as _git from '../../util/git';
 import { globalInitialize } from './initialize';
 
 jest.mock('../../util/git');
-
-const git = mocked(_git);
 
 describe('workers/global/initialize', () => {
   describe('checkVersions()', () => {
