@@ -68,7 +68,7 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
 
 function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter<string>(
-    (command): command is string => !!command && typeof command === 'string'
+    (command): command is string => !!command && is.string(command)
   );
 }
 
@@ -230,7 +230,7 @@ export async function generateDockerCommand(
   if (envVars) {
     result.push(
       ...uniq(envVars)
-        .filter((x) => typeof x === 'string')
+        .filter(is.string)
         .map((e) => `-e ${e}`)
     );
   }
