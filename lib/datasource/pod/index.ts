@@ -128,7 +128,7 @@ async function getReleasesFromGithub(
   opts: { hostURL: string; account: string; repo: string },
   useShard = true,
   useSpecs = true,
-  urtFormatOptions = URLFormatOptions.WithShardWithSpec
+  urlFormatOptions = URLFormatOptions.WithShardWithSpec
 ): Promise<ReleaseResult | null> {
   const url = releasesGithubUrl(lookupName, { ...opts, useShard, useSpecs });
   const resp = await requestGithub<{ name: string }[]>(url, lookupName);
@@ -138,7 +138,7 @@ async function getReleasesFromGithub(
   }
 
   // iterating through enum to support different url formats
-  switch (urtFormatOptions) {
+  switch (urlFormatOptions) {
     case URLFormatOptions.WithShardWithSpec:
       return getReleasesFromGithub(
         lookupName,
