@@ -264,7 +264,7 @@
     "glob": "7.2.0",
     "graphql": "15.7.2",
     "husky": "7.0.4",
-    "jest": "27.4.2",
+    "jest": "27.4.3",
     "jest-extended": "1.2.0",
     "jest-github-actions-reporter": "1.0.3",
     "jest-junit": "13.0.0",
