@@ -63,7 +63,7 @@ function prepareVolumes(volumes: VolumeOption[] = []): string[] {
 
 function prepareCommands(commands: Opt<string>[]): string[] {
   return commands.filter<string>(
-    (command): command is string => !!command && is.string(command)
+    (command): command is string => is.string(command)
   );
 }
 
