@@ -50,7 +50,7 @@ function releasesGithubUrl(
 ): string {
   const { hostURL, account, repo, useShard, useSpecs } = opts;
   const prefix =
-    hostURL && !hostURL.startsWith('https://github.com')
+    hostURL && hostURL !== 'https://github.com'
       ? `${hostURL}/api/v3/repos`
       : 'https://api.github.com/repos';
   const shard = shardParts(lookupName).join('/');
