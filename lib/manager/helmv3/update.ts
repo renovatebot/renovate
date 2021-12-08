@@ -1,5 +1,6 @@
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { BumpPackageVersionResult } from '../types';
 
 export function bumpPackageVersion(
@@ -20,7 +21,7 @@ export function bumpPackageVersion(
     }
     logger.debug({ newChartVersion });
     bumpedContent = content.replace(
-      /^(?<version>version:\s*).*$/m, // TODO #12070
+      regEx(`^(?<version>version:\\s*).*$`, 'm'),
       `$<version>${newChartVersion}`
     );
     if (bumpedContent === content) {

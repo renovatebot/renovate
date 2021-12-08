@@ -351,7 +351,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toMatchInlineSnapshot(`
         Array [
           Object {
-            "bucket": "major",
+            "bucket": "non-major",
             "isLockfileUpdate": true,
             "isRange": true,
             "newMajor": 1,
