@@ -12,6 +12,7 @@ import type {
   ExecOptions,
   ExecResult,
   ExtraEnv,
+  Opt,
   RawExecOptions,
 } from './types';
 
