@@ -21,6 +21,7 @@ You can override default configuration using a configuration file, with default 
 If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
 
 **Note:** `RENOVATE_CONFIG_FILE` must be provided with an explicit file extension.
+For example `RENOVATE_CONFIG_FILE=myconfig.js` or `RENOVATE_CONFIG_FILE=myconfig.json` and not `RENOVATE_CONFIG_FILE=myconfig`.
 If none is provided, or the file type is invalid, Renovate will fail.
 
 Using a configuration file gives you very granular configuration options.
