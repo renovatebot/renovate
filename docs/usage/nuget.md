@@ -9,24 +9,28 @@ Renovate supports upgrading dependencies in `.csproj`, `.fsproj`, and `.vbproj` 
 
 ## Version Support
 
-Only SDK-style `.csproj`/`.fsproj`/`.vbproj`files are currently supported. By default, this includes:
+Only SDK-style `.csproj`/`.fsproj`/`.vbproj` files are currently supported.
+By default, this includes:
 
 - .NET Core 1.0 and above
 - .NET Standard class libraries
 - Any `.csproj`/`.fsproj`/`.vbproj` in the SDK-style syntax
 
-To convert your .NET Framework `.csproj`/`.fsproj`/`.vbproj` into an SDK-style project, one can follow the [following guide](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/).
+To convert your .NET Framework `.csproj`/`.fsproj`/`.vbproj` into an SDK-style project, follow the steps in this [guide](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/).
 
-## How It Works
+## How it works
 
 1. Renovate searches in each repository for any files with a `.csproj`, `.fsproj`, or `.vbproj` extension
 1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
 1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or on [alternate feeds](#Alternate%20feeds)) to determine if any upgrades are available
-1. If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version are embedded in the generated PR
+1. If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then release notes for each version are embedded in the generated PR
+
+If your project file references a `packages.config` file, no dependencies will be extracted.
+Find out here how to [migrate from `packages.config` to `PackageReference`](https://docs.microsoft.com/en-us/nuget/consume-packages/migrate-packages-config-to-package-reference).
 
 ## Alternate feeds
 
-Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json`, but it also supports alternative NuGet feeds.
+By default Renovate performs all lookups on `https://api.nuget.org/v3/index.json`, but you can configure alternative NuGet feeds.
 Alternative feeds can be specified either [in a `NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository) or in Renovate configuration options:
 
 ```json
@@ -76,7 +80,7 @@ Credentials for authenticated/private feeds can be provided via host rules in th
 }
 ```
 
-Please note that at the moment only Basic HTTP authentication (via username and password) is supported.
+At the moment only Basic HTTP authentication (via username and password) is supported.
 
 ## Future work
 

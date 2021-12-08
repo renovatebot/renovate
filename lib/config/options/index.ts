@@ -262,7 +262,7 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Controls whether third party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
+      'Controls whether third-party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
     globalOnly: true,
     type: 'string',
     allowedValues: ['global', 'docker'],
@@ -746,6 +746,14 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+  },
+  {
+    name: 'executionTimeout',
+    description:
+      'Default execution timeout in minutes for child processes Renovate creates.',
+    type: 'integer',
+    default: 15,
+    globalOnly: true,
   },
   {
     name: 'aliases',
@@ -1663,6 +1671,14 @@ const options: RenovateOptions[] = [
   {
     name: 'filterUnavailableUsers',
     description: 'Filter reviewers and assignees based on their availability.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
+    name: 'confidential',
+    description:
+      'If enabled, issues created by Renovate are set as confidential.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],
