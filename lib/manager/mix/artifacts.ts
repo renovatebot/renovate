@@ -1,7 +1,8 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
@@ -75,8 +76,8 @@ export async function updateArtifacts({
     cwdFile: packageFileName,
     docker: {
       image: 'elixir',
-      preCommands,
     },
+    preCommands,
   };
   const command = [
     'mix',
@@ -92,7 +93,7 @@ export async function updateArtifacts({
       throw err;
     }
 
-    logger.warn(
+    logger.debug(
       { err, message: err.message, command },
       'Failed to update Mix lock file'
     );

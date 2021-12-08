@@ -1,11 +1,12 @@
 import type { Stats } from 'fs';
 import upath from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as datasourceMaven from '../../../datasource/maven';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { ExecOptions, exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile, stat } from '../../../util/fs';
 import {
   extraEnv,
@@ -74,8 +75,8 @@ export async function executeGradle(
       tagConstraint:
         config.constraints?.java ?? (await getDockerConstraint(gradleRoot)),
       tagScheme: getJavaVersioning(),
-      preCommands: await getDockerPreCommands(gradleRoot),
     },
+    preCommands: await getDockerPreCommands(gradleRoot),
     extraEnv,
   };
   try {
@@ -101,7 +102,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   let rootBuildGradle: string | undefined;
   let gradlew: Stats | null;
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
     const gradlewPath = upath.join(dirname, gradleWrapperFileName());

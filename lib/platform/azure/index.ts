@@ -5,6 +5,7 @@ import {
   GitPullRequestMergeStrategy,
   GitStatus,
   GitStatusState,
+  GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import delay from 'delay';
@@ -113,7 +114,8 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repoName?: string
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   const azureApiGit = await azureApi.gitApi();
 
@@ -126,16 +128,32 @@ export async function getRawFile(
     repoId = config.repoId;
   }
 
-  const buf = await azureApiGit.getItemContent(repoId, fileName);
+  const versionDescriptor: GitVersionDescriptor = {
+    version: branchOrTag,
+  } as GitVersionDescriptor;
+
+  const buf = await azureApiGit.getItemContent(
+    repoId,
+    fileName,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    branchOrTag ? versionDescriptor : undefined
+  );
+
   const str = await streamToString(buf);
   return str;
 }
 
 export async function getJsonFile(
   fileName: string,
-  repoName?: string
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
@@ -167,7 +185,9 @@ export async function initRepo({
   const names = getProjectAndRepo(repository);
   config.defaultMergeMethod = await azureHelper.getMergeMethod(
     repo.id,
-    names.project
+    names.project,
+    null,
+    defaultBranch
   );
   config.mergeMethods = {};
   config.repoForceRebase = false;
@@ -410,7 +430,7 @@ export async function createPr({
     );
   }
   if (platformOptions?.azureAutoApprove) {
-    pr = await azureApiGit.createPullRequestReviewer(
+    await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy.url,
         vote: AzurePrVote.Approved,
@@ -616,7 +636,8 @@ export async function mergePr({
     (config.mergeMethods[pr.targetRefName] = await azureHelper.getMergeMethod(
       config.repoId,
       config.project,
-      pr.targetRefName
+      pr.targetRefName,
+      config.defaultBranch
     ));
 
   const objToUpdate: GitPullRequest = {
@@ -719,7 +740,6 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const members = await Promise.all(
     teams.map(
       async (t) =>
-        /* eslint-disable no-return-await,@typescript-eslint/return-await */
         await azureApiCore.getTeamMembersWithExtendedProperties(
           repo.project.id,
           t.id

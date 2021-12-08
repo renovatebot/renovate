@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 
 import { RenovateConfig, getConfig, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import * as _process from './process';
 import { ExtractResult } from './process/extract-update';
 import { renovateRepository } from '.';
@@ -18,13 +18,12 @@ describe('workers/repository/index', () => {
     let config: RenovateConfig;
     beforeEach(() => {
       config = getConfig();
-      setGlobalConfig({ localDir: '' });
+      GlobalConfig.set({ localDir: '' });
     });
     it('runs', async () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
       const res = await renovateRepository(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeUndefined();
     });
   });
 });

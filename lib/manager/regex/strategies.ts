@@ -56,7 +56,7 @@ export function handleRecursive(
     regEx(matchString, 'g')
   );
   // abort if we have no matchString anymore
-  if (regexes[index] == null) {
+  if (!regexes[index]) {
     return [];
   }
   return regexMatchAll(regexes[index], content).flatMap((match) => {

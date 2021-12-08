@@ -389,6 +389,7 @@ Object {
       "datasource": "npm",
       "depName": "yarn",
       "depType": "packageManager",
+      "lookupName": "@yarnpkg/cli",
       "prettyDepType": "packageManager",
     },
   ],

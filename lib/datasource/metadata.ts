@@ -107,10 +107,23 @@ const manualSourceUrls = {
   },
 };
 
-function massageGithubUrl(url: string): string {
-  return url
+const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
+const gitPrefix = regEx('^git:/?/?');
+
+export function massageGithubUrl(url: string): string {
+  let massagedUrl = url;
+
+  if (url.startsWith('git@')) {
+    massagedUrl = url.replace(':', '/').replace('git@', 'https://');
+  }
+
+  return massagedUrl
     .replace('http:', 'https:')
-    .replace(regEx(/^git:\/?\/?/), 'https://')
+    .replace('http+git:', 'https:')
+    .replace('https+git:', 'https:')
+    .replace('ssh://git@', 'https://')
+    .replace(gitPrefix, 'https://')
+    .replace(githubPages, 'https://github.com/$1/$2')
     .replace('www.github.com', 'github.com')
     .split('/')
     .slice(0, 5)
@@ -126,7 +139,7 @@ function massageGitlabUrl(url: string): string {
     .replace('.git', '');
 }
 
-function normalizeDate(input: any): string | null {
+export function normalizeDate(input: any): string | null {
   if (
     typeof input === 'number' &&
     !Number.isNaN(input) &&
@@ -175,7 +188,6 @@ function massageTimestamps(dep: ReleaseResult): void {
   }
 }
 
-/* eslint-disable no-param-reassign */
 export function addMetaData(
   dep?: ReleaseResult,
   datasource?: string,

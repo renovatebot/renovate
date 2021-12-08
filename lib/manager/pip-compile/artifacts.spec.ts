@@ -3,11 +3,11 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as pipCompile from './artifacts';
 
@@ -40,7 +40,7 @@ describe('manager/pip-compile/artifacts', () => {
       LANG: 'en_US.UTF-8',
       LC_ALL: 'en_US',
     });
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
 
@@ -89,7 +89,7 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    setGlobalConfig(dockerAdminConfig);
+    GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],
@@ -111,7 +111,6 @@ describe('manager/pip-compile/artifacts', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await pipCompile.updateArtifacts({
         packageFileName: 'requirements.in',
@@ -119,7 +118,11 @@ describe('manager/pip-compile/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
+      },
+    ]);
   });
 
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
@@ -141,7 +144,7 @@ describe('manager/pip-compile/artifacts', () => {
   });
 
   it('uses pipenv version from config', async () => {
-    setGlobalConfig(dockerAdminConfig);
+    GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
       modified: ['requirements.txt'],

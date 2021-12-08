@@ -42,8 +42,8 @@ export function extractTerraformProvider(
     // istanbul ignore else
     if (is.string(line)) {
       // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-      const openBrackets = (line.match(/\{/g) || []).length; // TODO #12071 #12070
-      const closedBrackets = (line.match(/\}/g) || []).length; // TODO #12071 #12070
+      const openBrackets = (line.match(regEx(/\{/g)) || []).length; // TODO #12071
+      const closedBrackets = (line.match(regEx(/\}/g)) || []).length; // TODO #12071
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       // only update fields inside the root block
@@ -75,7 +75,6 @@ export function analyzeTerraformProvider(
   dep: PackageDependency,
   locks: ProviderLock[]
 ): void {
-  /* eslint-disable no-param-reassign */
   dep.depType = 'provider';
   dep.depName = dep.managerData.moduleName;
   dep.datasource = TerraformProviderDatasource.id;
@@ -100,5 +99,8 @@ export function analyzeTerraformProvider(
   massageProviderLookupName(dep);
 
   dep.lockedVersion = getLockedVersion(dep, locks);
-  /* eslint-enable no-param-reassign */
+
+  if (!dep.currentValue) {
+    dep.skipReason = SkipReason.NoVersion;
+  }
 }

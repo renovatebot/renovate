@@ -15,7 +15,8 @@ import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
-let baseUrl = 'https://api.github.com/';
+const githubBaseUrl = 'https://api.github.com/';
+let baseUrl = githubBaseUrl;
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
@@ -55,11 +56,10 @@ function handleGotError(
     message = String(err.response.body.message);
   }
   if (
-    err.name === 'RequestError' &&
-    (err.code === 'ENOTFOUND' ||
-      err.code === 'ETIMEDOUT' ||
-      err.code === 'EAI_AGAIN' ||
-      err.code === 'ECONNRESET')
+    err.code === 'ENOTFOUND' ||
+    err.code === 'ETIMEDOUT' ||
+    err.code === 'EAI_AGAIN' ||
+    err.code === 'ECONNRESET'
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
     throw new ExternalHostError(err, PlatformId.Github);
@@ -77,6 +77,13 @@ function handleGotError(
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.debug({ err }, 'GitHub failure: abuse detection');
+    throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+  }
+  if (
+    err.statusCode === 403 &&
+    message.startsWith('You have exceeded a secondary rate limit')
+  ) {
+    logger.debug({ err }, 'GitHub failure: secondary rate limit');
     throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
@@ -285,19 +292,9 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       result = res?.body;
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
-      if (err instanceof ExternalHostError) {
-        const gotError = err.err as GotLegacyError;
-        const statusCode = gotError?.statusCode;
-        if (
-          count &&
-          count > 10 &&
-          statusCode &&
-          statusCode >= 500 &&
-          statusCode < 600
-        ) {
-          logger.info('Reducing pagination count to workaround graphql 5xx');
-          return null;
-        }
+      if (err instanceof ExternalHostError && count && count > 10) {
+        logger.info('Reducing pagination count to workaround graphql errors');
+        return null;
       }
       handleGotError(err, path, opts);
     }
@@ -312,7 +309,10 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const result: T[] = [];
 
     const { paginate = true } = options;
-    let count = options.count || 100;
+
+    let optimalCount: null | number = null;
+    const initialCount = options.count || 100;
+    let count = initialCount;
     let limit = options.limit || 1000;
     let cursor: string = null;
 
@@ -326,6 +326,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       });
       const fieldData = res?.data?.repository?.[fieldName];
       if (fieldData) {
+        optimalCount = count;
+
         const { nodes = [], edges = [], pageInfo } = fieldData;
         result.push(...nodes);
         result.push(...edges);
@@ -353,6 +355,19 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       if (!paginate) {
         isIterating = false;
       }
+    }
+
+    // See: https://github.com/renovatebot/renovate/issues/12703
+    // istanbul ignore if
+    if (
+      optimalCount &&
+      optimalCount < initialCount && // log only shrinked results
+      baseUrl === githubBaseUrl
+    ) {
+      logger.debug(
+        { fieldName, optimalCount },
+        'Successful GraphQL query with shrinked pagination size'
+      );
     }
 
     return result;

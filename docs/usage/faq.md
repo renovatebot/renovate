@@ -18,19 +18,6 @@ Renovate will:
 - Update `yarn.lock` and/or `package-lock.json` files if found
 - Create Pull Requests immediately after branch creation
 
-## What is this `main` branch I see in the documentation?
-
-When you create a new repository with Git, Git creates a base branch for you.
-The default branch name that Git uses is `master` (this will be changed to `main` later).
-
-The Git-hosting ecosystem has settled on using `main` to replace `master`.
-When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
-
-It therefore makes sense for Renovate to replace `master` with `main` where possible as well.
-
-A branch name has no special meaning within the Git program, it's just a name.
-The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
-
 ## Which Renovate versions are officially supported?
 
 The Renovate maintainers only support the latest version of Renovate.
@@ -55,6 +42,19 @@ Some major platform features are not supported at all by Renovate.
 | Jira issues                             | BitBucket              | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                                                                                |
 | Merge trains                            | GitLab                 | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                                                                                |
 | Configurable merge strategy and message | Only BitBucket for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10868](https://github.com/renovatebot/renovate/issues/10868) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
+
+## What is this `main` branch I see in the documentation?
+
+When you create a new repository with Git, Git creates a base branch for you.
+The default branch name that Git uses is `master` (this will be changed to `main` later).
+
+The Git-hosting ecosystem has settled on using `main` to replace `master`.
+When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
+
+It therefore makes sense for Renovate to replace `master` with `main` where possible as well.
+
+A branch name has no special meaning within the Git program, it's just a name.
+The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
 ## What if I need to .. ?
 
@@ -180,12 +180,14 @@ Set the configuration option `labels` to an array of labels to use.
 e.g.
 
 ```json
-"packageRules": [
-  {
-    "matchPackageNames": ["abc"],
-    "assignees": ["importantreviewer"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["abc"],
+      "assignees": ["importantreviewer"]
+    }
+  ]
+}
 ```
 
 ### Apply a rule, but only for packages starting with `abc`
@@ -193,12 +195,14 @@ e.g.
 Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns` and a regex:
 
 ```json
-"packageRules": [
-  {
-    "matchPackagePatterns": "^abc",
-    "assignees": ["importantreviewer"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": "^abc",
+      "assignees": ["importantreviewer"]
+    }
+  ]
+}
 ```
 
 ### Group all packages starting with `abc` together in one PR
@@ -206,12 +210,14 @@ Do the same as above, but instead of using `matchPackageNames`, use `matchPackag
 As above, but apply a `groupName`:
 
 ```json
-"packageRules": [
-  {
-    "matchPackagePatterns": "^abc",
-    "groupName": ["abc packages"]
-  }
-]
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": "^abc",
+      "groupName": ["abc packages"]
+    }
+  ]
+}
 ```
 
 ### Change the default values for branch name, commit message, PR title or PR description

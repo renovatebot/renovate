@@ -1,4 +1,5 @@
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
 import type {
@@ -8,13 +9,16 @@ import type {
   ProviderSlice,
 } from './types';
 
-const providerStartLineRegex =
-  /^provider "(?<registryUrl>[^/]*)\/(?<namespace>[^/]*)\/(?<depName>[^/]*)"/; // TODO #12070
-const versionLineRegex =
-  /^(?<prefix>[\s]*version[\s]*=[\s]*")(?<version>[^"']+)(?<suffix>".*)$/; // TODO #12070
-const constraintLineRegex =
-  /^(?<prefix>[\s]*constraints[\s]*=[\s]*")(?<constraint>[^"']+)(?<suffix>".*)$/; // TODO #12070
-const hashLineRegex = /^(?<prefix>\s*")(?<hash>[^"]+)(?<suffix>",.*)$/; // TODO #12070
+const providerStartLineRegex = regEx(
+  `^provider "(?<registryUrl>[^/]*)\\/(?<namespace>[^/]*)\\/(?<depName>[^/]*)"`
+);
+const versionLineRegex = regEx(
+  `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`
+);
+const constraintLineRegex = regEx(
+  `^(?<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?<constraint>[^"']+)(?<suffix>".*)$`
+);
+const hashLineRegex = regEx(`^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`);
 
 const lockFile = '.terraform.lock.hcl';
 
