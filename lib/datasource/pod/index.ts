@@ -41,7 +41,7 @@ function shardParts(lookupName: string): string[] {
 function releasesGithubUrl(
   lookupName: string,
   opts: {
-    hostURL?: string;
+    hostURL: string;
     account: string;
     repo: string;
     useShard: boolean;
@@ -49,9 +49,10 @@ function releasesGithubUrl(
   }
 ): string {
   const { hostURL, account, repo, useShard, useSpecs } = opts;
-  const prefix = hostURL
-    ? `${hostURL}/api/v3/repos`
-    : 'https://api.github.com/repos';
+  const prefix =
+    hostURL && !hostURL.startsWith('https://github.com')
+      ? `${hostURL}/api/v3/repos`
+      : 'https://api.github.com/repos';
   const shard = shardParts(lookupName).join('/');
   // `Specs` in the pods repo URL is a new requirement for legacy support also allow pod repo URL without `Specs`
   const lookupNamePath = useSpecs ? `Specs/${lookupName}` : lookupName;
@@ -116,11 +117,7 @@ async function requestGithub<T = unknown>(
 }
 
 const githubRegex = regEx(
-  /^https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
-);
-
-const githubEnterpriseRegex = regEx(
-  /(?<hostURL>(^https:\/\/github\..+\.[a-zA-z0-9-]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+  /(?<hostURL>(^https:\/\/[a-zA-z0-9-.]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
 );
 
 async function getReleasesFromGithub(
@@ -231,8 +228,7 @@ export async function getReleases({
   }
 
   let result: ReleaseResult | null = null;
-  const match =
-    githubRegex.exec(baseUrl) || githubEnterpriseRegex.exec(baseUrl);
+  const match = githubRegex.exec(baseUrl);
   if (match) {
     const { hostURL, account, repo } = match?.groups || {};
     const opts = { hostURL, account, repo };
