@@ -11,25 +11,14 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from './artifacts';
 import * as fsutil from '../../util/fs';
 
-jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../util/http');
-jest.mock('../../util/fs', () => {
-  const originalModule = jest.requireActual('../../util/fs');
+jest.mock('../../util/fs');
 
-  return {
-    __esModule: true,
-    ...originalModule,
-    readLocalFile: jest.fn(),
-  };
-});
-
-const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const readLocalFile = mocked(fsutil.readLocalFile);
 
 const config: UpdateArtifactsConfig = {};
 
