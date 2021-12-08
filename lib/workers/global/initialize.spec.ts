@@ -1,5 +1,5 @@
 import { git } from '../../../test/util';
-import { RenovateConfig } from '../../config/types';
+import type { RenovateConfig } from '../../config/types';
 import { globalInitialize } from './initialize';
 
 jest.mock('../../util/git');
