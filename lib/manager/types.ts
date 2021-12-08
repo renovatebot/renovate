@@ -142,6 +142,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  userStrings?: Record<string, string>;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
