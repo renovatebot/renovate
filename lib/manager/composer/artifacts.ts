@@ -7,8 +7,8 @@ import {
 } from '../../constants/error-messages';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
-import type { ToolConstraint } from '../../util/exec/types';
+import { exec } from '../../util/exec';
+import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
 import {
   ensureCacheDir,
   ensureLocalDir,

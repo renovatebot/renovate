@@ -1,7 +1,8 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -103,10 +104,8 @@ export async function updateArtifacts({
         image: 'python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: [
-          `pip install --user ${quote(`pipenv${pipenvConstraint}`)}`,
-        ],
       },
+      preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
     };
     logger.debug({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
