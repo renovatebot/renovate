@@ -60,7 +60,7 @@ export async function shouldReuseExistingBranch(
         logger.debug('Cannot rebase branch as it has been modified');
         return { reuseExistingBranch: true, isModified: true };
       }
-      logger.debug('Branch has no changes, but we will not use it');
+      logger.debug('Branch is unmodified, so can be rebased');
       return { reuseExistingBranch: false };
     }
     logger.debug('Branch is up-to-date');
