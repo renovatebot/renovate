@@ -332,7 +332,6 @@ describe('datasource/packagist/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles providers miss', async () => {
       const packagesJson = {
