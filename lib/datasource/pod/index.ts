@@ -41,7 +41,7 @@ function shardParts(lookupName: string): string[] {
 function releasesGithubUrl(
   lookupName: string,
   opts: {
-    hostURL: string;
+    hostURL?: string;
     account: string;
     repo: string;
     useShard: boolean;
