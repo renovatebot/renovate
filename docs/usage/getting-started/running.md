@@ -22,8 +22,8 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 
 Renovate's Open Source CLI is built and distributed as the npm package `renovate`.
 You can run this directly in any Node.js environment - even via `npx` - and it will process all the repositories it is configured with, before exiting.
-When you install Renovate from npm it naturally does not come bundled with any third party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
-Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third party tools are pre-installed in the same environment alongside Renovate before you run it.
+When you install Renovate from npm it naturally does not come bundled with any third-party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
+Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third-party tools are pre-installed in the same environment alongside Renovate before you run it.
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 

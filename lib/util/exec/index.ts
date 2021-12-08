@@ -1,29 +1,19 @@
-import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import is from '@sindresorhus/is';
 import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { generateInstallCommands } from './buildpack';
-import {
-  DockerOptions,
-  ExecResult,
-  Opt,
-  RawExecOptions,
-  rawExec,
-} from './common';
+import { rawExec } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
-import type { ToolConstraint } from './types';
-
-type ExtraEnv = Record<string, string | null | undefined>;
-
-export interface ExecOptions extends ChildProcessExecOptions {
-  cwdFile?: string;
-  extraEnv?: Opt<ExtraEnv>;
-  docker?: Opt<DockerOptions>;
-  toolConstraints?: Opt<ToolConstraint[]>;
-}
+import type {
+  DockerOptions,
+  ExecOptions,
+  ExecResult,
+  ExtraEnv,
+  RawExecOptions,
+} from './types';
 
 function getChildEnv({
   extraEnv,
@@ -69,19 +59,14 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string {
 
 function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
-  const execOptions: ExecOptions = { ...opts };
-  delete execOptions.extraEnv;
-  delete execOptions.docker;
-  delete execOptions.cwdFile;
-  delete execOptions.toolConstraints;
-
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
   const rawExecOptions: RawExecOptions = {
-    encoding: 'utf-8',
-    ...execOptions,
-    env: childEnv,
     cwd,
+    encoding: 'utf-8',
+    env: childEnv,
+    maxBuffer: opts.maxBuffer,
+    timeout: opts.timeout,
   };
   // Set default timeout config.executionTimeout if specified; othrwise to 15 minutes
   if (!rawExecOptions.timeout) {
@@ -125,16 +110,13 @@ async function prepareRawExec(
     const envVars = dockerEnvVars(extraEnv, childEnv);
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
-    dockerOptions.preCommands ??= [];
-    if (opts.toolConstraints) {
-      const toolInstallCommands = await generateInstallCommands(
-        opts.toolConstraints
-      );
-      dockerOptions.preCommands.unshift(...toolInstallCommands);
-    }
-
+    const preCommands = [
+      ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(opts.preCommands ?? []),
+    ];
     const dockerCommand = await generateDockerCommand(
       rawCommands,
+      preCommands,
       dockerOptions
     );
     rawCommands = [dockerCommand];

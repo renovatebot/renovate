@@ -3,7 +3,8 @@ import { quote } from 'shlex';
 import { parse } from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import { deleteLocalFile, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
@@ -67,10 +68,10 @@ export async function updateArtifacts({
         image: 'python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: [
-          `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
-        ],
       },
+      preCommands: [
+        `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
+      ],
     };
     logger.debug({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
