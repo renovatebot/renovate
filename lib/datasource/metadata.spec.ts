@@ -1,5 +1,5 @@
 import * as datasourceMaven from './maven';
-import { addMetaData } from './metadata';
+import { addMetaData, massageGithubUrl } from './metadata';
 import * as datasourceNpm from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
@@ -226,5 +226,31 @@ describe('datasource/metadata', () => {
       { releaseTimestamp: '2000-01-02T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-03T12:34:56.000Z' },
     ]);
+  });
+
+  it('Should massage github git@ url to valid https url', () => {
+    expect(massageGithubUrl('git@example.com:foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
+  });
+  it('Should massage github http url to valid https url', () => {
+    expect(massageGithubUrl('http://example.com/foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
+  });
+  it('Should massage github http and git url to valid https url', () => {
+    expect(massageGithubUrl('http+git://example.com/foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
+  });
+  it('Should massage github ssh git@ url to valid https url', () => {
+    expect(massageGithubUrl('ssh://git@example.com/foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
+  });
+  it('Should massage github git url to valid https url', () => {
+    expect(massageGithubUrl('git://example.com/foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
   });
 });

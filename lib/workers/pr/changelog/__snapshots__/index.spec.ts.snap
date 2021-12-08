@@ -34,6 +34,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -45,6 +46,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -191,6 +193,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -202,6 +205,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -392,6 +396,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -403,6 +408,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -593,6 +599,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -604,6 +611,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -794,6 +802,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -805,6 +814,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",
@@ -840,6 +850,7 @@ Object {
       },
       "date": "2017-12-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/v2.3.0...v2.4.2",
       },
       "version": "2.4.2",
@@ -851,6 +862,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/2.2.2...v2.3.0",
       },
       "version": "2.3.0",
@@ -862,6 +874,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/1.0.0...2.2.2",
       },
       "version": "2.2.2",
@@ -1052,6 +1065,7 @@ Object {
       },
       "date": "2017-10-24T03:20:46.238Z",
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
@@ -1063,6 +1077,7 @@ Object {
       },
       "date": undefined,
       "releaseNotes": Object {
+        "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "version": "2.2.2",

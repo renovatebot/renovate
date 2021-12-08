@@ -801,6 +801,8 @@ export async function mergePr({
     );
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, `PR merge error`);
+    logger.info({ pr: prNo }, 'PR automerge failed');
     return false;
   }
   return true;
