@@ -1,7 +1,5 @@
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
-import type { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -81,18 +79,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
     logger.trace({ dep }, 'dep');
     return dep;
-  }
-
-  override handleSpecificErrors(err: HttpError): void {
-    const failureCodes = ['EAI_AGAIN'];
-    // istanbul ignore if
-    if (failureCodes.includes(err.code)) {
-      throw new ExternalHostError(err);
-    }
-    // istanbul ignore if
-    if (err.response?.statusCode === 503) {
-      throw new ExternalHostError(err);
-    }
   }
 
   private static getRegistryRepository(

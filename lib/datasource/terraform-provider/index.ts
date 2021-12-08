@@ -2,7 +2,6 @@ import pMap from 'p-map';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
-import { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { parseUrl } from '../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
@@ -62,18 +61,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     }
 
     return dep;
-  }
-
-  override handleSpecificErrors(err: HttpError): void {
-    const failureCodes = ['EAI_AGAIN'];
-    // istanbul ignore if
-    if (failureCodes.includes(err.code)) {
-      throw new ExternalHostError(err);
-    }
-    // istanbul ignore if
-    if (err.response?.statusCode === 503) {
-      throw new ExternalHostError(err);
-    }
   }
 
   private static getRepository({ lookupName }: GetReleasesConfig): string {
