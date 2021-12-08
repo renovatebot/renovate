@@ -1,5 +1,4 @@
 import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
@@ -9,13 +8,15 @@ import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from './artifacts';
-import * as fsutil from '../../util/fs';
+import * as fs from '../../util/fs';
+import * as fsExtra from 'fs-extra';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../util/http');
 jest.mock('../../util/fs');
+jest.mock('fs-extra');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
@@ -55,6 +56,7 @@ describe('manager/cargo/artifacts', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if updatedDeps is empty', async () => {
     expect(
       await cargo.updateArtifacts({
@@ -65,11 +67,13 @@ describe('manager/cargo/artifacts', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if unchanged', async () => {
-    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
-    readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
+    fsExtra.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     const execSnapshots = mockExecAll(exec);
-    readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
 
     const updatedDeps = [
       {
@@ -86,11 +90,14 @@ describe('manager/cargo/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated Cargo.lock', async () => {
-    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fsExtra.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = [
       {
         depName: 'dep1',
@@ -108,10 +115,11 @@ describe('manager/cargo/artifacts', () => {
   });
 
   it('updates Cargo.lock based on the lookupName, when given', async () => {
-    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fsExtra.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = [
       {
         depName: 'renamedDep1',
@@ -130,13 +138,18 @@ describe('manager/cargo/artifacts', () => {
   });
 
   it('returns updated workspace Cargo.lock', async () => {
-    fs.stat.mockRejectedValueOnce(new Error('crates/one/Cargo.lock not found'));
-    fs.stat.mockRejectedValueOnce(new Error('crates/Cargo.lock not found'));
-    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fsExtra.stat.mockRejectedValueOnce(
+      new Error('crates/one/Cargo.lock not found')
+    );
+    fsExtra.stat.mockRejectedValueOnce(
+      new Error('crates/Cargo.lock not found')
+    );
+    fsExtra.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
 
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = [
       {
         depName: 'dep1',
@@ -154,10 +167,11 @@ describe('manager/cargo/artifacts', () => {
   });
 
   it('returns updated Cargo.lock for lockfile maintenance', async () => {
-    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fsExtra.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -170,11 +184,12 @@ describe('manager/cargo/artifacts', () => {
   });
 
   it('returns updated Cargo.lock with docker', async () => {
-    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fsExtra.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = [
       {
         depName: 'dep1',
@@ -190,10 +205,12 @@ describe('manager/cargo/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
-    fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
-    readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
-    fs.outputFile.mockImplementationOnce(() => {
+    fsExtra.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
+    fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     const updatedDeps = [
