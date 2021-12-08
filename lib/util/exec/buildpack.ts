@@ -21,6 +21,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   npm: {
     datasource: 'npm',
     depName: 'npm',
+    hash: true,
     versioning: npmVersioningId,
   },
 };
@@ -77,10 +78,12 @@ export async function generateInstallCommands(
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);
-      const installCommand = `install-tool ${toolConstraint.toolName} ${quote(
-        toolVersion
-      )}`;
+      const { toolName } = toolConstraint;
+      const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
+      if (allToolConfig[toolName].hash) {
+        installCommands.push(`hash -d ${toolName} 2>/dev/null || true`);
+      }
     }
   }
   return installCommands;
