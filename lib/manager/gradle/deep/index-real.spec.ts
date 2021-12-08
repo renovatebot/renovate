@@ -1,6 +1,6 @@
 import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig } from '../../types';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
@@ -26,7 +26,7 @@ describe('manager/gradle/deep/index-real', () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });
       successFile = '';
       adminConfig = { localDir: workingDir.path };
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
       testRunConfig = { ...baseConfig };
       await fsExtra.copy(`${fixtures}/minimal-project`, workingDir.path);
       await fsExtra.copy(`${fixtures}/gradle-wrappers/6`, workingDir.path);
@@ -48,7 +48,7 @@ allprojects {
 
     afterEach(async () => {
       await workingDir.cleanup();
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
 
     it('executes an executable gradle wrapper', async () => {

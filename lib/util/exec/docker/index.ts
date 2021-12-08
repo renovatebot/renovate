@@ -1,18 +1,13 @@
 import is from '@sindresorhus/is';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import { regEx } from '../../regex';
 import { ensureTrailingSlash } from '../../url';
-import {
-  DockerOptions,
-  Opt,
-  VolumeOption,
-  VolumesPair,
-  rawExec,
-} from '../common';
+import { rawExec } from '../common';
+import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
 const prefetchedImages = new Set<string>();
 
@@ -76,7 +71,10 @@ export async function getDockerTag(
   const ver = versioning.get(scheme);
 
   if (!ver.isValid(constraint)) {
-    logger.warn({ constraint }, `Invalid ${scheme} version constraint`);
+    logger.warn(
+      { scheme, constraint },
+      `Invalid Docker image version constraint`
+    );
     return 'latest';
   }
 
@@ -156,7 +154,7 @@ export async function removeDockerContainer(
 }
 
 export async function removeDanglingContainers(): Promise<void> {
-  const { binarySource, dockerChildPrefix } = getGlobalConfig();
+  const { binarySource, dockerChildPrefix } = GlobalConfig.get();
   if (binarySource !== 'docker') {
     return;
   }
@@ -196,20 +194,19 @@ export async function removeDanglingContainers(): Promise<void> {
 
 export async function generateDockerCommand(
   commands: string[],
+  preCommands: string[],
   options: DockerOptions
 ): Promise<string> {
   const { envVars, cwd, tagScheme, tagConstraint } = options;
   let image = options.image;
   const volumes = options.volumes || [];
-  const preCommands = options.preCommands || [];
-  const postCommands = options.postCommands || [];
   const {
     localDir,
     cacheDir,
     dockerUser,
     dockerChildPrefix,
     dockerImagePrefix,
-  } = getGlobalConfig();
+  } = GlobalConfig.get();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);
@@ -253,11 +250,9 @@ export async function generateDockerCommand(
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
-  const bashCommand = [
-    ...prepareCommands(preCommands),
-    ...commands,
-    ...prepareCommands(postCommands),
-  ].join(' && ');
+  const bashCommand = [...prepareCommands(preCommands), ...commands].join(
+    ' && '
+  );
   result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
 
   return result.join(' ');

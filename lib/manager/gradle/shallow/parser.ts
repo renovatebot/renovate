@@ -160,6 +160,7 @@ function processDepString({
 function processDepInterpolation({
   tokenMap,
   variables,
+  packageFile: packageFileOrig,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const token = tokenMap.depInterpolation as StringInterpolation;
   const interpolationResult = interpolateString(token.children, variables);
@@ -180,8 +181,18 @@ function processDepInterpolation({
         }
       });
       if (!dep.managerData) {
+        const lastToken = token.children[token.children.length - 1];
+        if (
+          lastToken.type === TokenType.String &&
+          lastToken.value.startsWith(`:${dep.currentValue}`)
+        ) {
+          packageFile = packageFileOrig;
+          fileReplacePosition = lastToken.offset + 1;
+          delete dep.groupName;
+        } else {
+          dep.skipReason = SkipReason.ContainsVariable;
+        }
         dep.managerData = { fileReplacePosition, packageFile };
-        dep.skipReason = SkipReason.ContainsVariable;
       }
       return { deps: [dep] };
     }
@@ -263,6 +274,7 @@ function processLongFormDep({
     const versionToken: Token = tokenMap.version;
     if (versionToken.type === TokenType.Word) {
       const variable = variables[versionToken.value];
+      dep.groupName = variable.key;
       dep.managerData = {
         fileReplacePosition: variable.fileReplacePosition,
         packageFile: variable.packageFile,

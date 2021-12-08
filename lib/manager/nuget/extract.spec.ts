@@ -1,6 +1,6 @@
 import * as upath from 'upath';
 import { loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
@@ -14,10 +14,10 @@ const adminConfig: RepoGlobalConfig = {
 describe('manager/nuget/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
     afterEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('returns empty for invalid csproj', async () => {
       expect(await extractPackageFile('nothing here', 'bogus', config)).toEqual(
@@ -132,6 +132,26 @@ describe('manager/nuget/extract', () => {
         ],
       });
     });
+
+    it('handles NuGet.config with whitespaces in package source keys', async () => {
+      const packageFile = 'with-whitespaces/with-whitespaces.csproj';
+      const contents = loadFixture(packageFile);
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '12.0.3',
+            datasource: 'nuget',
+            depName: 'Newtonsoft.Json',
+            depType: 'nuget',
+            registryUrls: [
+              'https://api.nuget.org/v3/index.json#protocolVersion=3',
+              'https://my.myget.org/F/my/auth/guid/api/v3/index.json',
+            ],
+          },
+        ],
+      });
+    });
+
     it('ignores local feed in NuGet.config', async () => {
       const packageFile =
         'with-local-feed-in-config-file/with-local-feed-in-config-file.csproj';
