@@ -1,6 +1,6 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
-import { HttpError } from '../../util/http/types';
+import type { HttpError } from '../../util/http/types';
 import { ensureTrailingSlash } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { ServiceDiscoveryResult } from './types';
