@@ -150,9 +150,6 @@ export async function extractPackageFile(
           if (!depName.includes('/')) {
             dep.skipReason = SkipReason.Unsupported;
           }
-          if (currentValue === '*') {
-            dep.skipReason = SkipReason.AnyVersion;
-          }
           if (lockParsed) {
             const lockField =
               depType === 'require'
