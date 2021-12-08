@@ -1,4 +1,4 @@
-import { readFile } from 'fs-extra';
+import { readFile } from '../../../../util/fs';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
