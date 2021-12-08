@@ -13,6 +13,7 @@ const config = {
 
 const githubApiHost = 'https://api.github.com';
 const githubEntApiHost = 'https://github.foo.com';
+const githubEntApiHost2 = 'https://ghe.foo.com';
 const cocoapodsHost = 'https://cdn.cocoapods.org';
 
 describe('datasource/pod/index', () => {
@@ -77,6 +78,23 @@ describe('datasource/pod/index', () => {
           ...config.registryUrls,
           'https://github.foo.com/foo/bar',
         ],
+      });
+      expect(res).toBeNull();
+    });
+    it('returns null for 404 Github enterprise with different url style', async () => {
+      httpMock
+        .scope(githubEntApiHost2)
+        .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/Specs/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/foo')
+        .reply(404);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: [...config.registryUrls, 'https://ghe.foo.com/foo/bar'],
       });
       expect(res).toBeNull();
     });
