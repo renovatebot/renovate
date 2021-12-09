@@ -247,7 +247,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -280,7 +280,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -313,7 +313,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -346,7 +346,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -450,7 +450,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -483,7 +483,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -516,7 +516,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -549,7 +549,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -653,7 +653,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -686,7 +686,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -719,7 +719,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -752,7 +752,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -916,7 +916,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -949,7 +949,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -982,7 +982,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
@@ -1015,7 +1015,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/HEAD",
   },
   Object {
     "headers": Object {
