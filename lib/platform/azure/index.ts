@@ -5,6 +5,7 @@ import {
   GitPullRequestMergeStrategy,
   GitStatus,
   GitStatusState,
+  GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import delay from 'delay';
@@ -127,7 +128,22 @@ export async function getRawFile(
     repoId = config.repoId;
   }
 
-  const buf = await azureApiGit.getItemContent(repoId, fileName);
+  const versionDescriptor: GitVersionDescriptor = {
+    version: branchOrTag,
+  } as GitVersionDescriptor;
+
+  const buf = await azureApiGit.getItemContent(
+    repoId,
+    fileName,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    branchOrTag ? versionDescriptor : undefined
+  );
+
   const str = await streamToString(buf);
   return str;
 }
@@ -169,7 +185,9 @@ export async function initRepo({
   const names = getProjectAndRepo(repository);
   config.defaultMergeMethod = await azureHelper.getMergeMethod(
     repo.id,
-    names.project
+    names.project,
+    null,
+    defaultBranch
   );
   config.mergeMethods = {};
   config.repoForceRebase = false;
@@ -618,7 +636,8 @@ export async function mergePr({
     (config.mergeMethods[pr.targetRefName] = await azureHelper.getMergeMethod(
       config.repoId,
       config.project,
-      pr.targetRefName
+      pr.targetRefName,
+      config.defaultBranch
     ));
 
   const objToUpdate: GitPullRequest = {

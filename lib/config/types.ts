@@ -1,7 +1,7 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
 import type { HostRule } from '../types';
-import type { GitNoVerifyOption } from '../util/git';
+import type { GitNoVerifyOption } from '../util/git/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -102,6 +102,7 @@ export interface RepoGlobalConfig {
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
+  executionTimeout?: number;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;

@@ -7,7 +7,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import * as _hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from './artifacts';

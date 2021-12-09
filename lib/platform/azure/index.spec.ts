@@ -1265,7 +1265,7 @@ describe('platform/azure/index', () => {
       expect(res).toEqual({ foo: 'bar' });
     });
 
-    it('ignores branchOrTag', async () => {
+    it('returns file content from branch or tag', async () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
         () =>

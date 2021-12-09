@@ -1,28 +1,18 @@
-import type { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { generateInstallCommands } from './buildpack';
-import {
-  DockerOptions,
-  ExecResult,
-  Opt,
-  RawExecOptions,
-  rawExec,
-} from './common';
+import { rawExec } from './common';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
-import type { ToolConstraint } from './types';
-
-type ExtraEnv<T = unknown> = Record<string, T>;
-
-export interface ExecOptions extends ChildProcessExecOptions {
-  cwdFile?: string;
-  extraEnv?: Opt<ExtraEnv>;
-  docker?: Opt<DockerOptions>;
-  toolConstraints?: Opt<ToolConstraint[]>;
-}
+import type {
+  DockerOptions,
+  ExecOptions,
+  ExecResult,
+  ExtraEnv,
+  RawExecOptions,
+} from './types';
 
 function getChildEnv({
   extraEnv = {},
@@ -68,22 +58,25 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string {
 }
 
 function getRawExecOptions(opts: ExecOptions): RawExecOptions {
-  const execOptions: ExecOptions = { ...opts };
-  delete execOptions.extraEnv;
-  delete execOptions.docker;
-  delete execOptions.cwdFile;
-  delete execOptions.toolConstraints;
-
+  const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
   const rawExecOptions: RawExecOptions = {
-    encoding: 'utf-8',
-    ...execOptions,
-    env: childEnv,
     cwd,
+    encoding: 'utf-8',
+    env: childEnv,
+    maxBuffer: opts.maxBuffer,
+    timeout: opts.timeout,
   };
-  // Set default timeout to 15 minutes
-  rawExecOptions.timeout = rawExecOptions.timeout || 15 * 60 * 1000;
+  // Set default timeout config.executionTimeout if specified; othrwise to 15 minutes
+  if (!rawExecOptions.timeout) {
+    if (defaultExecutionTimeout) {
+      rawExecOptions.timeout = defaultExecutionTimeout * 60 * 1000;
+    } else {
+      rawExecOptions.timeout = 15 * 60 * 1000;
+    }
+  }
+
   // Set default max buffer size to 10MB
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
   return rawExecOptions;
@@ -117,12 +110,13 @@ async function prepareRawExec(
     const envVars = dockerEnvVars(extraEnv, childEnv);
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
-    dockerOptions.preCommands = [
+    const preCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(dockerOptions.preCommands || []),
+      ...(opts.preCommands || []),
     ];
     const dockerCommand = await generateDockerCommand(
       rawCommands,
+      preCommands,
       dockerOptions
     );
     rawCommands = [dockerCommand];

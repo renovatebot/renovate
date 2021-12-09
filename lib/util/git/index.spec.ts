@@ -5,7 +5,7 @@ import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
-import { GitNoVerifyOption, setNoVerify } from '.';
+import { setNoVerify } from '.';
 
 describe('util/git/index', () => {
   jest.setTimeout(15000);
@@ -92,6 +92,13 @@ describe('util/git/index', () => {
 
   afterAll(async () => {
     await base.cleanup();
+  });
+
+  describe('validateGitVersion()', () => {
+    it('has a git version greater or equal to the minimum required', async () => {
+      const res = await git.validateGitVersion();
+      expect(res).toBeTrue();
+    });
   });
 
   describe('checkoutBranch(branchName)', () => {
@@ -363,7 +370,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Commit]);
+      setNoVerify(['commit']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -393,7 +400,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Push]);
+      setNoVerify(['push']);
 
       await git.commitFiles({
         branchName: 'renovate/something',

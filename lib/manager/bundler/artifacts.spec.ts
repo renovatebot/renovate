@@ -7,7 +7,7 @@ import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';

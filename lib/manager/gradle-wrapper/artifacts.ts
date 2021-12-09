@@ -3,9 +3,11 @@ import { resolve } from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import { readLocalFile, stat, writeLocalFile } from '../../util/fs';
-import { StatusResult, getRepoStatus } from '../../util/git';
+import { getRepoStatus } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import { Http } from '../../util/http';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {

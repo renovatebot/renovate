@@ -6,9 +6,9 @@ import { envMock } from '../../../test/exec-util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
-import { ExecOptions, exec } from '.';
+import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
+import { exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
@@ -464,14 +464,13 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: ['preCommand1', 'preCommand2', null],
-            postCommands: ['postCommand1', undefined, 'postCommand2'],
           },
+          preCommands: ['preCommand1', 'preCommand2', null],
         },
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -496,8 +495,6 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: null,
-            postCommands: undefined,
           },
         },
         outCmd: [
@@ -539,6 +536,26 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: { binarySource: 'docker' },
+      },
+    ],
+
+    [
+      'Default timeout from executionTimeout config option',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 30 * 60 * 1000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { executionTimeout: 30 },
       },
     ],
 

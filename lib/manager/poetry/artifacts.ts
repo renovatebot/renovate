@@ -3,7 +3,8 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   deleteLocalFile,
   getSiblingFileName,
@@ -139,8 +140,8 @@ export async function updateArtifacts({
         image: 'python',
         tagConstraint,
         tagScheme: 'poetry',
-        preCommands: [poetryInstall],
       },
+      preCommands: [poetryInstall],
     };
     await exec(cmd, execOptions);
     const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');
