@@ -99,4 +99,8 @@ export function analyzeTerraformProvider(
   massageProviderLookupName(dep);
 
   dep.lockedVersion = getLockedVersion(dep, locks);
+
+  if (!dep.currentValue) {
+    dep.skipReason = SkipReason.NoVersion;
+  }
 }

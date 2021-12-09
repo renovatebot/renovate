@@ -34,6 +34,7 @@ const repoGroups = {
   deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'dnd-kit': 'https://github.com/clauderic/dnd-kit',
+  'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -148,6 +149,7 @@ const repoGroups = {
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
