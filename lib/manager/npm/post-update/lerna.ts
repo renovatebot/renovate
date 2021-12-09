@@ -3,7 +3,8 @@ import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { ExecOptions, exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -57,7 +58,7 @@ export async function generateLockFiles(
       if (validRange(npmCompatibility)) {
         installNpm += `@${quote(npmCompatibility)} || true`;
       }
-      preCommands.push(installNpm, 'hash -d npm');
+      preCommands.push(installNpm, 'hash -d npm 2>/dev/null || true');
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
@@ -83,8 +84,8 @@ export async function generateLockFiles(
         image: 'node',
         tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
+      preCommands,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {

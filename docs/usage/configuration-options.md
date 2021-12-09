@@ -392,7 +392,7 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 ## constraints
 
-Constraints are used in package managers which use third party tools to update "artifacts" like lock files or checksum files.
+Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
 Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
 
@@ -1751,6 +1751,8 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 ## postUpgradeTasks
 
+Note: post-upgrade tasks can only be used on self-hosted Renovate instances.
+
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
@@ -1773,16 +1775,17 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 ### commands
 
-A list of commands that are executed after Renovate has updated a dependency but before the commit it made
+A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
 ### fileFilters
 
-A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
 
 ### executionMode
 
-Defaults to `update`, but can also be set to `branch`. This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask
-will be executed for every dependency on the branch. If set to `branch` the postUpgradeTask is executed for the whole branch.
+Defaults to `update`, but can also be set to `branch`.
+This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
+If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 ## prBodyColumns
 
@@ -2541,6 +2544,31 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
+## userStrings
+
+User-facing strings pertaining to the PR comment that gets posted when a PR is closed.
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+
+The following strings can currently be customized:
+
+- `ignoreDigest`: Text of the PR comment for digest upgrades.
+- `ignoreMajor`: Text of the PR comment for major upgrades.
+- `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
+- `ignoreTopic`: Topic of the PR comment.
+
+Example:
+
+```json
+{
+  "userStrings": {
+    "ignoreTopic": "Custom topic for PR comment",
+    "ignoreMajor": "Custom text for major upgrades.",
+    "ignoreDigest": "Custom text for digest upgrades.",
+    "ignoreOther": "Custom text for other upgrades."
+  }
+}
+```
 
 ## versioning
 
