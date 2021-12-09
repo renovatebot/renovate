@@ -96,6 +96,6 @@ export interface DatasourceApi extends ModuleApi {
    */
   caching?: boolean;
 
-  /** optional urls to add do docs as references */
+  /** optional URLs to add to docs as references */
   urls?: string[];
 }
