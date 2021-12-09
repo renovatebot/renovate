@@ -39,6 +39,12 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
         temp.items.enum = option.allowedValues;
       }
     }
+    if (option.subType === 'string' && option.allowString === true) {
+      const items = temp.items;
+      delete temp.items;
+      delete temp.type;
+      temp.oneOf = [{ type: 'array', items }, { ...items }];
+    }
   } else {
     if (hasKey('format', option) && option.format) {
       temp.format = option.format;
@@ -100,6 +106,6 @@ export async function generateSchema(dist: string): Promise<void> {
   createSchemaForChildConfigs();
   await updateFile(
     `${dist}/renovate-schema.json`,
-    JSON.stringify(schema, null, 2)
+    `${JSON.stringify(schema, null, 2)}\n`
   );
 }

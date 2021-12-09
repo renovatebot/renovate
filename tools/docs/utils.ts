@@ -49,7 +49,7 @@ export function replaceContent(content: string, txt: string): string {
 }
 
 export function formatUrls(urls: string[] | null | undefined): string {
-  if (Array.isArray(urls)) {
+  if (Array.isArray(urls) && urls.length) {
     return `**References**:\n\n${urls
       .map((url) => ` - [${url}](${url})`)
       .join('\n')}\n\n`;
@@ -61,7 +61,7 @@ export async function formatDescription(
   type: string,
   name: string
 ): Promise<string> {
-  const content = await readFile(`../../lib/${type}/${name}/readme.md`);
+  const content = await readFile(`lib/${type}/${name}/readme.md`);
   if (!content) {
     return '';
   }

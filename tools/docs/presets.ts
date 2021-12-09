@@ -12,9 +12,11 @@ function jsUcfirst(string: string): string {
  */
 function generateFrontMatter(name: string, order: number): string {
   return `---
+date: 2017-12-07
 title: ${name} Presets
 categories:
     - config-presets
+type: Document
 order: ${order}
 ---
 `;

@@ -11,7 +11,7 @@ function getTitle(manager: string, displayName: string): string {
 }
 
 function getManagerLink(manager: string): string {
-  return `[${manager}](./manager/${manager}.md)`;
+  return `[\`${manager}\`](${manager}/)`;
 }
 
 export async function generateManagers(dist: string): Promise<void> {
@@ -66,7 +66,7 @@ sidebar_label: ${displayName}
     }
     md += managerReadmeContent + '\n\n';
 
-    await updateFile(`${dist}/modules/manager/${manager}.md`, md);
+    await updateFile(`${dist}/modules/manager/${manager}/index.md`, md);
   }
   const languages = Object.keys(allLanguages).filter(
     (language) => language !== 'other'
