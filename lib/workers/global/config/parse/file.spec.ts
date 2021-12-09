@@ -61,12 +61,11 @@ describe('workers/global/config/parse/file', () => {
       async (fileName, fileContent) => {
         const mockProcessExit = jest
           .spyOn(process, 'exit')
-          .mockImplementation(() => undefined as never);
+          .mockImplementationOnce(() => undefined as never);
         const configFile = upath.resolve(tmp.path, fileName);
         fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
         expect(mockProcessExit).toHaveBeenCalledWith(1);
-        mockProcessExit.mockRestore();
         fs.unlinkSync(configFile);
       }
     );
@@ -88,13 +87,12 @@ describe('workers/global/config/parse/file', () => {
     ])('fatal error and exit if %s', async (fileType, filePath) => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
-        .mockImplementation(() => undefined as never);
+        .mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, filePath);
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(mockProcessExit).toHaveBeenCalledWith(1);
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
-      mockProcessExit.mockRestore();
       fs.unlinkSync(configFile);
     });
   });
