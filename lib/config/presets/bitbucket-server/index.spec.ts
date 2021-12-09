@@ -40,7 +40,7 @@ describe('config/presets/bitbucket-server/index', () => {
       httpMock
         .scope(bitbucketApiHost)
         .get(`${basePath}/some-filename.json`)
-        .query({ limit: 20000, at: 'refs/heads/feature/branch' })
+        .query({ limit: 20000, at: 'feature/branch' })
         .reply(200, {
           isLastPage: true,
           lines: [{ text: '{"from":"api"' }, { text: '}' }],

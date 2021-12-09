@@ -12,7 +12,7 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://git.company.org/rest/api/1.0/projects/some/repos/repo/browse/some-filename.json?limit=20000&at=refs%2Fheads%2Ffeature%2Fbranch",
+    "url": "https://git.company.org/rest/api/1.0/projects/some/repos/repo/browse/some-filename.json?limit=20000&at=feature%2Fbranch",
   },
 ]
 `;
