@@ -86,10 +86,6 @@ describe('workers/branch/schedule', () => {
       expect(schedule.hasValidSchedule(['* 5 * * *'])[0]).toBeTrue();
     });
 
-    it('returns false if schedule uses cron syntax with minutes', () => {
-      expect(schedule.hasValidSchedule(['*/30 5 * * *'])[0]).toBeFalse();
-    });
-
     it('massages schedules', () => {
       expect(
         schedule.hasValidSchedule([
