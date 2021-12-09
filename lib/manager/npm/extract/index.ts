@@ -108,7 +108,7 @@ export async function extractPackageFile(
     } else {
       npmrc = config.npmrc || '';
       if (npmrc.length) {
-        npmrc = npmrc.replace(/\n?$/, '\n'); // TODO #12070 add \n to front when used with re2
+        npmrc = npmrc.replace(/\n?$/, '\n'); // TODO #12875 add \n to front when used with re2
       }
       if (repoNpmrc?.includes('package-lock')) {
         logger.debug('Stripping package-lock setting from .npmrc');

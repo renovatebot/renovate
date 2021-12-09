@@ -615,7 +615,7 @@ describe('config/presets/index', () => {
           ':ignoreModulesAndTests',
           ':autodetectPinVersions',
           ':prHourlyLimit2',
-          ':prConcurrentLimit20',
+          ':prConcurrentLimit10',
           'group:monorepos',
           'group:recommended',
           'workarounds:all',

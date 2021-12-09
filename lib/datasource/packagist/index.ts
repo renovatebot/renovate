@@ -7,6 +7,7 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { regEx } from '../../util/regex';
+import { ensureTrailingSlash } from '../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
@@ -39,7 +40,7 @@ function getHostOpts(url: string): HttpOptions {
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-  const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json'); // TODO #12070
+  const url = URL.resolve(ensureTrailingSlash(regUrl), 'packages.json');
   const opts = getHostOpts(url);
   const res = (await http.getJson<PackageMeta>(url, opts)).body;
   const meta: RegistryMeta = {
@@ -237,7 +238,7 @@ async function packageLookup(
       return includesPackages[name];
     }
     let pkgUrl;
-    if (providerPackages?.[name]) {
+    if (name in providerPackages) {
       pkgUrl = URL.resolve(
         regUrl,
         providersUrl
