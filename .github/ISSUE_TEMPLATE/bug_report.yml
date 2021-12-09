@@ -52,6 +52,24 @@ body:
       required: true
 
   - type: textarea
+    id: renovate-configuration
+    attributes:
+      label: Renovate configuration
+      description: |
+        Copy/paste your Renovate configuration file(s) here.
+        Remove secret and private information before posting.
+      value: |
+        <details><summary>Renovate configuration</summary>
+
+        ```
+        Copy/paste your Renovate configuration file(s) here, between the starting and ending backticks.
+        ```
+
+        </details>
+    validations:
+      required: true
+
+  - type: textarea
     id: debug-logs
     attributes:
       label: Relevant debug logs
@@ -64,7 +82,7 @@ body:
         <details><summary>Logs</summary>
 
         ```
-        Copy/paste any log here, between the starting and ending backticks
+        Copy/paste any log here, between the starting and ending backticks.
         ```
 
         </details>
