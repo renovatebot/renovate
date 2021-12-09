@@ -11,6 +11,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import { exists, readLocalFile, remove, writeFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
@@ -148,8 +149,8 @@ export async function generateLockFile(
         image: 'node',
         tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
+      preCommands,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {

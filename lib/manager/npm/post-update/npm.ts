@@ -1,5 +1,3 @@
-import { validRange } from 'semver';
-import { quote } from 'shlex';
 import { join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import {
@@ -8,6 +6,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import { move, pathExists, readLocalFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -25,23 +24,10 @@ export async function generateLockFile(
 
   let lockFile = null;
   try {
-    let installNpm = 'npm i -g npm';
-    const npmCompatibility = config.constraints?.npm as string;
-    // istanbul ignore else
-    if (npmCompatibility) {
-      // istanbul ignore else
-      if (validRange(npmCompatibility)) {
-        installNpm = `npm i -g ${quote(`npm@${npmCompatibility}`)} || true`;
-      } else {
-        logger.debug(
-          { npmCompatibility },
-          'npm compatibility range is not valid - skipping'
-        );
-      }
-    } else {
-      logger.debug('No npm compatibility range found - installing npm latest');
-    }
-    const preCommands = [installNpm, 'hash -d npm'];
+    const npmToolConstraint: ToolConstraint = {
+      toolName: 'npm',
+      constraint: config.constraints?.npm,
+    };
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
@@ -63,11 +49,11 @@ export async function generateLockFile(
         NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
         npm_config_store: env.npm_config_store,
       },
+      toolConstraints: [npmToolConstraint],
       docker: {
         image: 'node',
         tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
     };
     // istanbul ignore if
