@@ -3,7 +3,7 @@
   "compilerOptions": {
     "strictNullChecks": true,
     "noImplicitAny": true,
-    "lib": ["es2019"]
+    "lib": ["es2020"]
   },
   "include": [
     "lib/config/app-strings.ts",

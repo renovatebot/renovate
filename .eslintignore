@@ -16,3 +16,4 @@ coverage
 **/*.generated.ts
 /tools/dist
 /patches
+tmp/
