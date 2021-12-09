@@ -7,8 +7,8 @@ import {
   logger,
   platform,
 } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { GlobalConfig } from '../../config/global';
+import { PlatformId } from '../../constants';
 import type { Platform } from '../../platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
@@ -19,20 +19,20 @@ let config: RenovateConfig;
 beforeEach(() => {
   jest.clearAllMocks();
   config = getConfig();
-  config.platform = PLATFORM_TYPE_GITHUB;
+  config.platform = PlatformId.Github;
   config.errors = [];
   config.warnings = [];
 });
 
 async function dryRun(
   branches: BranchConfig[],
-  // eslint-disable-next-line @typescript-eslint/no-shadow
+
   platform: jest.Mocked<Platform>,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0
 ) {
   jest.clearAllMocks();
-  setGlobalConfig({ dryRun: true });
+  GlobalConfig.set({ dryRun: true });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
@@ -53,14 +53,21 @@ describe('workers/repository/dependency-dashboard', () => {
           '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
-      // FIXME: explicit assert condition
-      expect(conf).toMatchSnapshot();
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName1: 'approve',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: true,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
     });
   });
 
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];

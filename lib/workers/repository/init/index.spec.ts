@@ -1,5 +1,5 @@
 import { logger, mocked } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
@@ -24,10 +24,10 @@ const secrets = mocked(_secrets);
 
 describe('workers/repository/init/index', () => {
   beforeEach(() => {
-    setGlobalConfig({ localDir: '', cacheDir: '' });
+    GlobalConfig.set({ localDir: '', cacheDir: '' });
   });
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   describe('initRepo', () => {
@@ -38,8 +38,7 @@ describe('workers/repository/init/index', () => {
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
       const renovateConfig = await initRepo({});
-      // FIXME: explicit assert condition
-      expect(renovateConfig).toMatchSnapshot();
+      expect(renovateConfig).toEqual({});
     });
     it('warns on unsupported options', async () => {
       apis.initApis.mockResolvedValue({} as never);

@@ -1,4 +1,4 @@
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import { getManagers } from '../../manager';
 import { getPlatformList } from '../../platform';
 import { getVersioningList } from '../../versioning';
@@ -7,6 +7,22 @@ import * as pep440Versioning from '../../versioning/pep440';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
+  {
+    name: 'detectGlobalManagerConfig',
+    description:
+      'If true, Renovate will attempt to read global manager config from the file system.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'detectHostRulesFromEnv',
+    description:
+      'If true, Renovate tries to detect host rules from environment variables.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
   {
     name: 'allowPostUpgradeCommandTemplating',
     description: 'If true allow templating for post-upgrade commands.',
@@ -90,6 +106,13 @@ const options: RenovateOptions[] = [
     default: 'renovate.json',
     globalOnly: true,
     cli: false,
+  },
+  {
+    name: 'onboardingNoDeps',
+    description: 'Onboard repository even if no dependencies found.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
   },
   {
     name: 'onboardingPrTitle',
@@ -184,6 +207,7 @@ const options: RenovateOptions[] = [
     default: false,
     cli: false,
     env: false,
+    supportedManagers: ['gradle'],
   },
   {
     name: 'repositoryCache',
@@ -217,6 +241,7 @@ const options: RenovateOptions[] = [
     description: 'If enabled, the PR created by Renovate is set to a draft.',
     type: 'boolean',
     default: false,
+    supportedPlatforms: ['github', 'gitlab', 'azure'],
   },
   {
     name: 'dryRun',
@@ -237,7 +262,7 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Controls whether third party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
+      'Controls whether third-party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
     globalOnly: true,
     type: 'string',
     allowedValues: ['global', 'docker'],
@@ -453,8 +478,23 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'privateKeyOld',
+    description: 'Secondary/old private key to try.',
+    stage: 'repository',
+    type: 'string',
+    replaceLineReturns: true,
+    globalOnly: true,
+  },
+  {
     name: 'privateKeyPath',
     description: 'Path to the Server-side private key.',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
+    name: 'privateKeyPathOld',
+    description: 'Path to the Server-side old private key.',
     stage: 'repository',
     type: 'string',
     globalOnly: true,
@@ -509,6 +549,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'allowPlugins',
+    description:
+      'Configure this to true if repositories are allowed to run install plugins.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'allowScripts',
     description:
       'Configure this to true if repositories are allowed to run install scripts.',
@@ -525,18 +573,26 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'ignorePlugins',
+    description:
+      'Configure this to true if allowPlugins=true but you wish to skip running plugins when updating lock files.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'ignoreScripts',
     description:
       'Configure this to true if allowScripts=true but you wish to skip running scripts when updating lock files.',
     type: 'boolean',
     default: false,
+    supportedManagers: ['npm', 'composer'],
   },
   {
     name: 'platform',
     description: 'Platform type of repository.',
     type: 'string',
     allowedValues: getPlatformList(),
-    default: PLATFORM_TYPE_GITHUB,
+    default: PlatformId.Github,
     globalOnly: true,
   },
   {
@@ -573,6 +629,14 @@ const options: RenovateOptions[] = [
     description: 'String copy of npmrc file. Use \\n instead of line breaks.',
     stage: 'branch',
     type: 'string',
+  },
+  {
+    name: 'npmrcMerge',
+    description:
+      'Whether to merge config.npmrc with repo .npmrc content if both are found.',
+    stage: 'branch',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'npmToken',
@@ -684,6 +748,14 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
+    name: 'executionTimeout',
+    description:
+      'Default execution timeout in minutes for child processes Renovate creates.',
+    type: 'integer',
+    default: 15,
+    globalOnly: true,
+  },
+  {
     name: 'aliases',
     description: 'Aliases for registries, package manager specific.',
     type: 'object',
@@ -692,6 +764,7 @@ const options: RenovateOptions[] = [
       type: 'string',
       format: 'uri',
     },
+    supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
   },
   {
     name: 'registryUrls',
@@ -722,18 +795,12 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'azureAutoComplete',
-    description:
-      'If set to true, Azure DevOps PRs will be set to auto-complete after all (if any) branch policies have been met.',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'azureWorkItemId',
     description:
       'The id of an existing work item on Azure Boards to link to each PR.',
     type: 'integer',
     default: 0,
+    supportedPlatforms: ['azure'],
   },
   {
     name: 'azureAutoApprove',
@@ -741,6 +808,7 @@ const options: RenovateOptions[] = [
       'If set to true, Azure DevOps PRs will be automatically approved.',
     type: 'boolean',
     default: false,
+    supportedPlatforms: ['azure'],
   },
   // depType
   {
@@ -938,6 +1006,28 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementName',
+    description:
+      'The name of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replacementVersion',
+    description:
+      'The version of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchUpdateTypes',
     description:
       'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',
@@ -1076,6 +1166,7 @@ const options: RenovateOptions[] = [
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
+    supportedManagers: ['helmv3', 'npm', 'sbt'],
   },
   // Major/Minor/Patch
   {
@@ -1146,6 +1237,23 @@ const options: RenovateOptions[] = [
       branchTopic: '{{{depNameSanitized}}}-rollback',
       commitMessageAction: 'Roll back',
       semanticCommitType: 'fix',
+    },
+    cli: false,
+    mergeable: true,
+  },
+  {
+    name: 'replacement',
+    description: 'Configuration to apply when replacing a dependency.',
+    stage: 'package',
+    type: 'object',
+    default: {
+      branchTopic: '{{{depNameSanitized}}}-replacement',
+      commitMessageAction: 'Replace',
+      commitMessageExtra:
+        'with {{newName}} {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      prBodyNotes: [
+        'This is a special PR that replaces `{{{depNameSanitized}}}` with the community suggested minimal stable replacement version.',
+      ],
     },
     cli: false,
     mergeable: true,
@@ -1270,6 +1378,7 @@ const options: RenovateOptions[] = [
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
+    supportedPlatforms: ['bitbucket'],
   },
   // Automatic merging
   {
@@ -1293,6 +1402,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
+    supportedPlatforms: ['bitbucket'],
   },
   {
     name: 'automergeComment',
@@ -1302,19 +1412,18 @@ const options: RenovateOptions[] = [
     default: 'automergeComment',
   },
   {
-    name: 'requiredStatusChecks',
-    description:
-      'List of status checks that must pass before automerging. Set to null to enable automerging without tests.',
-    type: 'array',
-    subType: 'string',
-    cli: false,
-    env: false,
+    name: 'ignoreTests',
+    description: 'Set to true to enable automerging without tests.',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'transitiveRemediation',
     description: 'Enable remediation of transitive dependencies.',
     type: 'boolean',
     default: false,
+    supportedManagers: ['npm'],
+    supportedPlatforms: ['github'],
   },
   {
     name: 'vulnerabilityAlerts',
@@ -1333,6 +1442,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    supportedPlatforms: ['github'],
   },
   // Default templates
   {
@@ -1563,6 +1673,15 @@ const options: RenovateOptions[] = [
     description: 'Filter reviewers and assignees based on their availability.',
     type: 'boolean',
     default: false,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
+    name: 'confidential',
+    description:
+      'If enabled, issues created by Renovate are set as confidential.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'reviewersSampleSize',
@@ -1694,6 +1813,14 @@ const options: RenovateOptions[] = [
     default: {},
     mergeable: true,
     cli: false,
+    supportedManagers: [
+      'bundler',
+      'composer',
+      'gomod',
+      'npm',
+      'pipenv',
+      'poetry',
+    ],
   },
   {
     name: 'java',
@@ -1883,12 +2010,6 @@ const options: RenovateOptions[] = [
     default: true,
   },
   {
-    name: 'gitLabAutomerge',
-    description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging MRs.`,
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'gitLabIgnoreApprovals',
     description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
@@ -1953,6 +2074,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'depTypeTemplate',
+    description:
+      'Optional depType for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'currentValueTemplate',
     description:
       'Optional currentValue for extracted dependencies. Valid only within a `regexManagers` object.',
@@ -1981,6 +2111,15 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'extractVersionTemplate',
+    description:
+      'Optional extractVersion for extracted dependencies. Valid only within a `regexManagers` object.',
+    type: 'string',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'autoReplaceStringTemplate',
     description:
       'Optional extractVersion for extracted dependencies. Valid only within a `regexManagers` object.',
     type: 'string',
@@ -2038,6 +2177,34 @@ const options: RenovateOptions[] = [
     default: 'default',
     stage: 'repository',
     globalOnly: true,
+  },
+  {
+    name: 'writeDiscoveredRepos',
+    description: 'Writes discovered repositories to a JSON file and then exit.',
+    type: 'string',
+    globalOnly: true,
+    env: false,
+  },
+  {
+    name: 'platformAutomerge',
+    description: `Enable or disable usage of platform-native auto-merge capabilities when available.`,
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'userStrings',
+    description:
+      'User-facing strings pertaining to the PR comment that gets posted when a PR is closed.',
+    type: 'object',
+    default: {
+      ignoreTopic: 'Renovate Ignore Notification',
+      ignoreMajor:
+        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{newMajor}}}.x releases. However, if you upgrade to {{{newMajor}}}.x manually then Renovate will reenable minor and patch updates automatically.',
+      ignoreDigest:
+        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{depName}}}:{{{currentValue}}} digest updates. Digest updates will resume if you update the specified tag at any time.',
+      ignoreOther:
+        'As this PR has been closed unmerged, Renovate will now ignore this update ({{{newValue}}}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the `ignoreDeps` array of your renovate config.',
+    },
   },
 ];
 

@@ -36,12 +36,14 @@ Most issues should have a label relating to either a platform, manager, datasour
     status:blocked
     status:ready
     status:in-progress
+    status:waiting-on-response
 
 </details>
 
 Use these to label the status of an issue.
 For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
-All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked) can identify any which are missing a status label.
+If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
+All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked+-label%3Astatus%3Awaiting-on-response+) can identify any which are missing a status label.
 
 ### Type of issue
 

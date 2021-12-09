@@ -1,5 +1,5 @@
 import { mergeChildConfig } from '../../../../config';
-import { getGlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_FORKED,
@@ -56,7 +56,9 @@ export async function checkOnboardingBranch(
     if (
       Object.entries(await extractAllDependencies(mergedConfig)).length === 0
     ) {
-      throw new Error(REPOSITORY_NO_PACKAGE_FILES);
+      if (!config?.onboardingNoDeps) {
+        throw new Error(REPOSITORY_NO_PACKAGE_FILES);
+      }
     }
     logger.debug('Need to create onboarding PR');
     const commit = await createOnboardingBranch(mergedConfig);
@@ -68,7 +70,7 @@ export async function checkOnboardingBranch(
       );
     }
   }
-  if (!getGlobalConfig().dryRun) {
+  if (!GlobalConfig.get('dryRun')) {
     await checkoutBranch(onboardingBranch);
   }
   const branchList = [onboardingBranch];

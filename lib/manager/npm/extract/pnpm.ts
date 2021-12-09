@@ -85,13 +85,13 @@ export async function detectPnpmWorkspaces(
         { packageFile, pnpmShrinkwrap },
         'Found an existing pnpm shrinkwrap file; skipping pnpm monorepo check.'
       );
-      continue; // eslint-disable-line no-continue
+      continue;
     }
 
     // search for corresponding pnpm workspace
     const pnpmWorkspace = await findPnpmWorkspace(packageFile);
     if (pnpmWorkspace === null) {
-      continue; // eslint-disable-line no-continue
+      continue;
     }
     const { workspaceYamlPath, lockFilePath } = pnpmWorkspace;
 
@@ -105,7 +105,7 @@ export async function detectPnpmWorkspaces(
       packageFilters !== null &&
       matchesAnyPattern(
         packageFile,
-        packageFilters.map((filter) => filter.replace(/\/?$/, '/package.json'))
+        packageFilters.map((filter) => filter.replace(/\/?$/, '/package.json')) // TODO #12875
       );
     if (isPackageInWorkspace) {
       p.pnpmShrinkwrap = lockFilePath;

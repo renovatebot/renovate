@@ -30,6 +30,8 @@ export interface GetPkgReleasesConfig extends ReleasesConfigBase {
   versioning?: string;
   extractVersion?: string;
   constraints?: Record<string, string>;
+  replacementName?: string;
+  replacementVersion?: string;
 }
 
 export interface Release {
@@ -46,6 +48,8 @@ export interface Release {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;
+  sourceUrl?: string;
+  sourceDirectory?: string;
 }
 
 export interface ReleaseResult {
@@ -60,6 +64,8 @@ export interface ReleaseResult {
   sourceUrl?: string;
   sourceDirectory?: string;
   registryUrl?: string;
+  replacementName?: string;
+  replacementVersion?: string;
 }
 
 export interface DatasourceApi extends ModuleApi {

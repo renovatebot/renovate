@@ -8,10 +8,10 @@ jobs:
   WS_SCAN:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
       - name: Download UA
         run: curl -LJO https://github.com/whitesource/unified-agent-distribution/releases/latest/download/wss-unified-agent.jar
 
       - name: Run UA scan
-        run: java -jar wss-unified-agent.jar -d $GITHUB_WORKSPACE -noConfig true -apiKey ${{ secrets.WS_ORG_TOKEN }} -product W4D -project "Renovate OS - main" -resolveAllDependencies false -npm_resolveDependencies true
+        run: java -jar wss-unified-agent.jar -d $GITHUB_WORKSPACE -noConfig true -apiKey ${{ secrets.WS_ORG_TOKEN }} -product W4D -project "Renovate OS - main" -resolveAllDependencies false -npm_resolveDependencies true || true

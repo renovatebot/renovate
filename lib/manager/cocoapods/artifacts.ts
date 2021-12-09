@@ -2,7 +2,8 @@ import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -10,9 +11,10 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
+import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;
+const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?<plugin>[^'"]+)(['"])`);
 
 function getPluginCommands(content: string): string[] {
   const result = new Set<string>();
@@ -62,7 +64,7 @@ export async function updateArtifacts({
     return null;
   }
 
-  const match = new RegExp(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
+  const match = regEx(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
     existingLockFileContent
   );
   const tagConstraint = match?.groups?.cocoapodsVersion ?? null;

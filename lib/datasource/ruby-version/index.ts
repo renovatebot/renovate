@@ -56,7 +56,6 @@ export class RubyVersionDatasource extends Datasource {
     return res;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   override handleSpecificErrors(err: HttpError): never | void {
     throw new ExternalHostError(err);
   }

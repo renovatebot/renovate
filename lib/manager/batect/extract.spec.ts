@@ -1,6 +1,6 @@
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
-import { id as gitTagDatasource } from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
@@ -21,7 +21,7 @@ function createGitDependency(repo: string, version: string): PackageDependency {
     depName: repo,
     currentValue: version,
     versioning: semverVersioning,
-    datasource: gitTagDatasource,
+    datasource: GitTagsDatasource.id,
     commitMessageTopic: 'bundle {{depName}}',
   };
 }
@@ -35,11 +35,11 @@ const config: ExtractConfig = {};
 describe('manager/batect/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
 
     afterEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
 
     it('returns empty array for empty configuration file', async () => {

@@ -37,9 +37,9 @@ const githubTreeResponse = {
 };
 
 const gitlabTreeResponse = [
-  { path: 'lib', type: 'tree' },
-  { path: 'CHANGELOG.md', type: 'blob', id: 'abcd' },
-  { path: 'README.md', type: 'blob' },
+  { path: 'lib', name: 'lib', type: 'tree' },
+  { path: 'CHANGELOG.md', name: 'CHANGELOG.md', type: 'blob', id: 'abcd' },
+  { path: 'README.md', name: 'README.md', type: 'blob' },
 ];
 
 const githubProject = {
@@ -75,11 +75,11 @@ describe('workers/pr/changelog/release-notes', () => {
     });
 
     it('handles date object', () => {
-      expect(releaseNotesCacheMinutes(new Date())).toEqual(55);
+      expect(releaseNotesCacheMinutes(new Date())).toBe(55);
     });
 
     it.each([null, undefined, 'fake', 123])('handles invalid: %s', (date) => {
-      expect(releaseNotesCacheMinutes(date as never)).toEqual(55);
+      expect(releaseNotesCacheMinutes(date as never)).toBe(55);
     });
   });
 
@@ -125,7 +125,7 @@ describe('workers/pr/changelog/release-notes', () => {
   describe('getReleaseList()', () => {
     it('should return empty array if no apiBaseUrl', async () => {
       const res = await getReleaseList({} as ChangeLogProject);
-      expect(res).toEqual([]);
+      expect(res).toBeEmptyArray();
     });
 
     it('should return release list for github repo', async () => {
@@ -615,7 +615,7 @@ describe('workers/pr/changelog/release-notes', () => {
         httpMock
           .scope('https://gitlab.com/')
           .get(
-            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100'
+            `/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100&path=${sourceDirectory}`
           )
           .reply(200, response)
           .get(

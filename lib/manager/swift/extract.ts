@@ -1,21 +1,22 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { MatchResult } from './types';
 
 const regExps = {
-  wildcard: /^.*?/,
-  space: /(\s+|\/\/[^\n]*|\/\*.*\*\/)+/s,
-  depsKeyword: /dependencies/,
-  colon: /:/,
-  beginSection: /\[/,
-  endSection: /],?/,
-  package: /\s*.\s*package\s*\(\s*/,
-  urlKey: /url/,
-  stringLiteral: /"[^"]+"/,
-  comma: /,/,
-  from: /from/,
-  rangeOp: /\.\.[.<]/,
-  exactVersion: /\.\s*exact\s*\(\s*/,
+  wildcard: regEx(/^.*?/),
+  space: regEx(/(\s+|\/\/[^\n]*|\/\*.*\*\/)+/, 's'),
+  depsKeyword: regEx(/dependencies/),
+  colon: regEx(/:/),
+  beginSection: regEx(/\[/),
+  endSection: regEx(/],?/),
+  package: regEx(/\s*.\s*package\s*\(\s*/),
+  urlKey: regEx(/url/),
+  stringLiteral: regEx(/"[^"]+"/),
+  comma: regEx(/,/),
+  from: regEx(/from/),
+  rangeOp: regEx(/\.\.[.<]/),
+  exactVersion: regEx(/\.\s*exact\s*\(\s*/),
 };
 
 const WILDCARD = 'wildcard';
@@ -116,9 +117,9 @@ function getDepName(url: string): string | null {
     const { host, pathname } = new URL(url);
     if (host === 'github.com' || host === 'gitlab.com') {
       return pathname
-        .replace(/^\//, '')
-        .replace(/\.git$/, '')
-        .replace(/\/$/, '');
+        .replace(regEx(/^\//), '')
+        .replace(regEx(/\.git$/), '')
+        .replace(regEx(/\/$/), '');
     }
     return url;
   } catch (e) {
@@ -151,7 +152,7 @@ export function extractPackageFile(
     const depName = getDepName(lookupName);
     if (depName && currentValue) {
       const dep: PackageDependency = {
-        datasource: datasourceGitTags.id,
+        datasource: GitTagsDatasource.id,
         depName,
         lookupName,
         currentValue,
@@ -165,7 +166,7 @@ export function extractPackageFile(
 
   while (match) {
     const { idx, len, label, substr } = match;
-    // eslint-disable-next-line default-case
+
     switch (state) {
       case null:
         if (deps.length) {
@@ -224,7 +225,7 @@ export function extractPackageFile(
           yieldDep();
           state = null;
         } else if (label === STRING_LITERAL) {
-          lookupName = substr.replace(/^"/, '').replace(/"$/, '');
+          lookupName = substr.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
           state = '.package(url: [depName]';
         } else if (label === PACKAGE) {
           yieldDep();

@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -32,10 +32,12 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../util/merge-confidence';
+import { regEx } from '../../util/regex';
 import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../types';
+import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
@@ -56,7 +58,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   return titleRebase || labelRebase || prRebaseChecked;
 }
 
-const rebasingRegex = /\*\*Rebasing\*\*: .*/;
+const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
@@ -287,7 +289,7 @@ export async function processBranch(
               'Update has not passed stability days'
             );
             config.stabilityStatus = BranchStatus.yellow;
-            continue; // eslint-disable-line no-continue
+            continue;
           }
         }
         const {
@@ -314,7 +316,7 @@ export async function processBranch(
               'Update does not meet minimum confidence scores'
             );
             config.confidenceStatus = BranchStatus.yellow;
-            continue; // eslint-disable-line no-continue
+            continue;
           }
         }
       }
@@ -416,7 +418,7 @@ export async function processBranch(
     } else if (config.updatedArtifacts?.length && branchPr) {
       // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
       // istanbul ignore if
-      if (getGlobalConfig().dryRun) {
+      if (GlobalConfig.get('dryRun')) {
         logger.info(
           `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`
         );
@@ -456,15 +458,18 @@ export async function processBranch(
       logger.info({ commitSha }, `Branch ${action}`);
     }
     // Set branch statuses
+    await setArtifactErrorStatus(config);
     await setStability(config);
     await setConfidence(config);
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
+    // but do not break when there are artifact errors
     if (
+      !config.artifactErrors?.length &&
       !dependencyDashboardCheck &&
       !config.rebaseRequested &&
       commitSha &&
-      (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
+      config.prCreation !== 'immediate'
     ) {
       logger.debug({ commitSha }, `Branch status pending`);
       return {
@@ -475,11 +480,11 @@ export async function processBranch(
     }
 
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    if (branchExists || !config.requiredStatusChecks) {
+    if (branchExists || config.ignoreTests) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
-        if (getGlobalConfig().dryRun) {
+        if (GlobalConfig.get('dryRun')) {
           logger.info('DRY-RUN: Would delete branch' + config.branchName);
         } else {
           await deleteBranchSilently(config.branchName);
@@ -642,7 +647,7 @@ export async function processBranch(
           ' - any of the package files in this branch needs updating, or \n';
         content += ' - the branch becomes conflicted, or\n';
         content +=
-          ' - you check the rebase/retry checkbox if found above, or\n';
+          ' - you click the rebase/retry checkbox if found above, or\n';
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
@@ -657,7 +662,7 @@ export async function processBranch(
             config.suppressNotifications.includes('lockFileErrors')
           )
         ) {
-          if (getGlobalConfig().dryRun) {
+          if (GlobalConfig.get('dryRun')) {
             logger.info(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );
@@ -666,29 +671,6 @@ export async function processBranch(
               number: pr.number,
               topic: artifactErrorTopic,
               content,
-            });
-          }
-        }
-        const context = `renovate/artifacts`;
-        const description = 'Artifact file update failure';
-        const state = BranchStatus.red;
-        const existingState = await platform.getBranchStatusCheck(
-          config.branchName,
-          context
-        );
-        // Check if state needs setting
-        if (existingState !== state) {
-          logger.debug(`Updating status check state to failed`);
-          if (getGlobalConfig().dryRun) {
-            logger.info(
-              'DRY-RUN: Would set branch status in ' + config.branchName
-            );
-          } else {
-            await platform.setBranchStatus({
-              branchName: config.branchName,
-              context,
-              description,
-              state,
             });
           }
         }

@@ -12,6 +12,13 @@ body:
     validations:
       required: true
 
+  - type: input
+    id: renovate-version-if-selfhosting
+    attributes:
+      label: If you're self-hosting Renovate, tell us what version of Renovate you run.
+    validations:
+      required: false
+
   - type: dropdown
     id: platform-select
     attributes:
@@ -30,9 +37,9 @@ body:
       required: false
 
   - type: input
-    id: renovate-version-if-selfhosting
+    id: platform-version-if-selfhosting
     attributes:
-      label: If you're self-hosting Renovate, tell us what version of Renovate you run.
+      label: If you're self-hosting Renovate, tell us what version of the platform you run.
     validations:
       required: false
 
@@ -40,7 +47,7 @@ body:
     id: describe-bug
     attributes:
       label: Describe the bug
-      description: 'Do not report any security concerns here. Email renovate-disclosure@whitesourcesoftware.com instead.'
+      description: 'Do not report any security concerns here. Email [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com) instead.'
     validations:
       required: true
 

@@ -1,9 +1,11 @@
 import { join } from 'path';
-import { getGlobalConfig } from '../../config/global';
+import { quote } from 'shlex';
+import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { id, parseRegistryUrl } from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -13,6 +15,7 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -29,7 +32,7 @@ async function addSourceCmds(
   config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   const registries =
     (await getConfiguredRegistries(packageFileName, localDir)) ||
     getDefaultRegistries();
@@ -43,7 +46,7 @@ async function addSourceCmds(
     let addSourceCmd = `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile}`;
     if (registry.name) {
       // Add name for registry, if known.
-      addSourceCmd += ` --name ${registry.name}`;
+      addSourceCmd += ` --name ${quote(registry.name)}`;
     }
     if (username && password) {
       // Add registry credentials from host rules, if configured.
@@ -88,7 +91,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
-  if (!/(?:cs|vb|fs)proj$/i.test(packageFileName)) {
+  if (!regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)) {
     // This could be implemented in the future if necessary.
     // It's not that easy though because the questions which
     // project file to restore how to determine which lock files

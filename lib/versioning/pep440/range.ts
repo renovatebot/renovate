@@ -2,6 +2,7 @@ import { gte, lt, lte, satisfies } from '@renovate/pep440';
 import { parse as parseRange } from '@renovate/pep440/lib/specifier';
 import { parse as parseVersion } from '@renovate/pep440/lib/version';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { NewValueConfig } from '../types';
 
 function getFutureVersion(
@@ -79,7 +80,10 @@ export function getNewValue({
   }
   if (ranges.some((range) => range.operator === '===')) {
     // the operator "===" is used for legacy non PEP440 versions
-    logger.warn('Arbitrary equality not supported: ' + currentValue);
+    logger.warn(
+      { currentValue },
+      'PEP440 arbitrary equality (===) not supported'
+    );
     return null;
   }
   let result = ranges
@@ -140,7 +144,7 @@ export function getNewValue({
     .join(', ');
 
   if (result.includes(', ') && !currentValue.includes(', ')) {
-    result = result.replace(/, /g, ',');
+    result = result.replace(regEx(/, /g), ',');
   }
 
   if (!satisfies(newVersion, result)) {
@@ -163,8 +167,8 @@ export function isLessThanRange(input: string, range: string): boolean {
       .split(',')
       .map((x) =>
         x
-          .replace(/\s*/g, '')
-          .split(/(~=|==|!=|<=|>=|<|>|===)/)
+          .replace(regEx(/\s*/g), '') // TODO #12071
+          .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/)) // TODO #12071
           .slice(1)
       )
       .map(([op, version]) => {

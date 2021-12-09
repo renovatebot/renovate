@@ -9,6 +9,10 @@ on:
   schedule:
     - cron: '0 13 * * 1'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   security-events: write
 
@@ -18,11 +22,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # renovate: tag=v2.3.4
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2.4.0
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@89d78ba4572c7854683ec144d212bf0b52cd2a2a # renovate: tag=v1.0.13
+        uses: github/codeql-action/init@546b30f35ae5a3db0e0be1843008c2224f71c3b0 # renovate: tag=v1.0.25
+        with:
+          config-file: ./.github/codeql/codeql-config.yml
 
         # Override language selection by uncommenting this and choosing your languages
         # with:
@@ -30,7 +36,7 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
-        uses: github/codeql-action/autobuild@89d78ba4572c7854683ec144d212bf0b52cd2a2a # renovate: tag=v1.0.13
+        uses: github/codeql-action/autobuild@546b30f35ae5a3db0e0be1843008c2224f71c3b0 # renovate: tag=v1.0.25
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
@@ -44,4 +50,4 @@ jobs:
       #   make release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@89d78ba4572c7854683ec144d212bf0b52cd2a2a # renovate: tag=v1.0.13
+        uses: github/codeql-action/analyze@546b30f35ae5a3db0e0be1843008c2224f71c3b0 # renovate: tag=v1.0.25

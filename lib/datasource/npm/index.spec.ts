@@ -2,7 +2,7 @@ import mockDate from 'mockdate';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as datasource, getNpmrc, resetCache, setNpmrc } from '.';
@@ -17,7 +17,7 @@ let npmResponse: any;
 describe('datasource/npm/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    setGlobalConfig();
+    GlobalConfig.reset();
     hostRules.clear();
     resetCache();
     setNpmrc();
@@ -270,11 +270,11 @@ describe('datasource/npm/index', () => {
     hostRules.add({
       hostType: 'npm',
       matchHost: 'npm.mycustomregistry.com',
-      token: 'abcde',
+      token: 'abc',
     });
     httpMock
       .scope('https://npm.mycustomregistry.com', {
-        reqheaders: { authorization: 'Bearer abcde' },
+        reqheaders: { authorization: 'Bearer abc' },
       })
       .get('/foobar')
       .reply(200, npmResponse);
@@ -289,13 +289,13 @@ describe('datasource/npm/index', () => {
       hostType: 'npm',
       matchHost:
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry/',
-      token: 'abcde',
+      token: 'abc',
     });
     httpMock
       .scope(
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry',
         {
-          reqheaders: { authorization: 'Bearer abcde' },
+          reqheaders: { authorization: 'Bearer abc' },
         }
       )
       .get('/foobar')
@@ -312,7 +312,7 @@ describe('datasource/npm/index', () => {
     setNpmrc(npmrcContent);
     setNpmrc(npmrcContent);
     setNpmrc();
-    expect(getNpmrc()).toEqual({});
+    expect(getNpmrc()).toBeEmptyObject();
   });
 
   it('should use default registry if missing from npmrc', async () => {
@@ -357,8 +357,8 @@ describe('datasource/npm/index', () => {
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
     process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
-    setGlobalConfig({ exposeAllEnv: true });
-    // eslint-disable-next-line no-template-curly-in-string
+    GlobalConfig.set({ exposeAllEnv: true });
+
     const npmrc = 'registry=${REGISTRY}';
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
@@ -366,8 +366,8 @@ describe('datasource/npm/index', () => {
   });
 
   it('should throw error if necessary env var is not present', () => {
-    setGlobalConfig({ exposeAllEnv: true });
-    // eslint-disable-next-line no-template-curly-in-string
+    GlobalConfig.set({ exposeAllEnv: true });
+
     expect(() => setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
       Error('env-replace')
     );

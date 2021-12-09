@@ -1,8 +1,10 @@
 import is from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
@@ -18,7 +20,7 @@ export async function updateArtifacts({
   }
   try {
     const cmd: string[] = [];
-    const rewrittenContent = newPackageFileContent.replace(/\\\n/g, '');
+    const rewrittenContent = newPackageFileContent.replace(regEx(/\\\n/g), '');
     const lines = rewrittenContent.split('\n').map((line) => line.trim());
     for (const dep of updatedDeps) {
       const hashLine = lines.find(
@@ -39,8 +41,8 @@ export async function updateArtifacts({
       docker: {
         image: 'python',
         tagScheme: 'pip_requirements',
-        preCommands: ['pip install hashin'],
       },
+      preCommands: ['pip install hashin'],
     };
     await exec(cmd, execOptions);
     const newContent = await readLocalFile(packageFileName, 'utf8');

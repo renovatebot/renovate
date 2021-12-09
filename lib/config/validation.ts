@@ -40,7 +40,7 @@ const ignoredNodes = [
 
 function isManagerPath(parentPath: string): boolean {
   return (
-    /^regexManagers\[[0-9]+]$/.test(parentPath) ||
+    regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
     managerList.includes(parentPath)
   );
 }
@@ -85,8 +85,8 @@ function getDeprecationMessage(option: string): string {
 export function getParentName(parentPath: string): string {
   return parentPath
     ? parentPath
-        .replace(/\.?encrypted$/, '')
-        .replace(/\[\d+\]$/, '')
+        .replace(regEx(/\.?encrypted$/), '')
+        .replace(regEx(/\[\d+\]$/), '')
         .split('.')
         .pop()
     : '.';
@@ -122,7 +122,7 @@ export async function validateConfig(
         topic: 'Config security error',
         message: '__proto__',
       });
-      continue; // eslint-disable-line
+      continue;
     }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({
@@ -228,7 +228,7 @@ export async function validateConfig(
             message: `${currentPath}: ${errorMessage}`,
           });
         }
-      } else if (val != null) {
+      } else if (val !== null) {
         const type = optionTypes[key];
         if (type === 'boolean') {
           if (val !== true && val !== false) {
@@ -253,7 +253,7 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
-              const tzRe = /^:timezone\((.+)\)$/;
+              const tzRe = regEx(/^:timezone\((.+)\)$/); // TODO #12071
               for (const subval of val) {
                 if (is.string(subval)) {
                   if (
@@ -388,6 +388,8 @@ export async function validateConfig(
                 'registryUrlTemplate',
                 'currentValueTemplate',
                 'extractVersionTemplate',
+                'autoReplaceStringTemplate',
+                'depTypeTemplate',
               ];
               // TODO: fix types
               for (const regexManager of val as any[]) {
@@ -406,44 +408,51 @@ export async function validateConfig(
                     )}`,
                   });
                 } else if (is.nonEmptyArray(regexManager.fileMatch)) {
-                  let validRegex = false;
-                  for (const matchString of regexManager.matchStrings) {
-                    try {
-                      regEx(matchString);
-                      validRegex = true;
-                    } catch (e) {
-                      errors.push({
-                        topic: 'Configuration Error',
-                        message: `Invalid regExp for ${currentPath}: \`${String(
-                          matchString
-                        )}\``,
-                      });
-                    }
-                  }
-                  if (validRegex) {
-                    const mandatoryFields = [
-                      'depName',
-                      'currentValue',
-                      'datasource',
-                    ];
-                    for (const field of mandatoryFields) {
-                      if (
-                        !regexManager[`${field}Template`] &&
-                        !regexManager.matchStrings.some((matchString) =>
-                          matchString.includes(`(?<${field}>`)
-                        )
-                      ) {
+                  if (is.nonEmptyArray(regexManager.matchStrings)) {
+                    let validRegex = false;
+                    for (const matchString of regexManager.matchStrings) {
+                      try {
+                        regEx(matchString);
+                        validRegex = true;
+                      } catch (e) {
                         errors.push({
                           topic: 'Configuration Error',
-                          message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          message: `Invalid regExp for ${currentPath}: \`${String(
+                            matchString
+                          )}\``,
                         });
                       }
                     }
+                    if (validRegex) {
+                      const mandatoryFields = [
+                        'depName',
+                        'currentValue',
+                        'datasource',
+                      ];
+                      for (const field of mandatoryFields) {
+                        if (
+                          !regexManager[`${field}Template`] &&
+                          !regexManager.matchStrings.some((matchString) =>
+                            matchString.includes(`(?<${field}>`)
+                          )
+                        ) {
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          });
+                        }
+                      }
+                    }
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                    });
                   }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
+                    message: `Each Regex Manager must contain a non-empty fileMatch array`,
                   });
                 }
               }
@@ -479,7 +488,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !/p.*Rules\[\d+\]$/.test(parentPath) && // Inside a packageRule
+              !regEx(/p.*Rules\[\d+\]$/).test(parentPath) && // Inside a packageRule  // TODO #12071
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({

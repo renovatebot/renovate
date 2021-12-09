@@ -3,11 +3,11 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { git, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import type { StatusResult } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as pipenv from './artifacts';
 
@@ -42,7 +42,7 @@ describe('manager/pipenv/artifacts', () => {
       LC_ALL: 'en_US',
     });
 
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
     pipFileLock = {
       _meta: { requires: {} },
@@ -108,7 +108,7 @@ describe('manager/pipenv/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
-    setGlobalConfig(dockerAdminConfig);
+    GlobalConfig.set(dockerAdminConfig);
     pipFileLock._meta.requires.python_version = '3.7';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
@@ -131,7 +131,6 @@ describe('manager/pipenv/artifacts', () => {
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
@@ -139,7 +138,9 @@ describe('manager/pipenv/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      { artifactError: { lockFile: 'Pipfile.lock', stderr: 'not found' } },
+    ]);
   });
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Current Pipfile.lock' as any);
@@ -159,7 +160,7 @@ describe('manager/pipenv/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses pipenv version from Pipfile', async () => {
-    setGlobalConfig(dockerAdminConfig);
+    GlobalConfig.set(dockerAdminConfig);
     pipFileLock.default.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
@@ -178,7 +179,7 @@ describe('manager/pipenv/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses pipenv version from Pipfile dev packages', async () => {
-    setGlobalConfig(dockerAdminConfig);
+    GlobalConfig.set(dockerAdminConfig);
     pipFileLock.develop.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
@@ -197,7 +198,7 @@ describe('manager/pipenv/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses pipenv version from config', async () => {
-    setGlobalConfig(dockerAdminConfig);
+    GlobalConfig.set(dockerAdminConfig);
     pipFileLock.default.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);

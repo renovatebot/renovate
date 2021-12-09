@@ -1,9 +1,10 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
-  getSiblingFileName,
+  findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
@@ -24,7 +25,8 @@ export async function updateArtifacts({
     return null;
   }
 
-  const lockFileName = getSiblingFileName(packageFileName, 'mix.lock');
+  const lockFileName =
+    (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) || 'mix.lock';
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
@@ -74,8 +76,8 @@ export async function updateArtifacts({
     cwdFile: packageFileName,
     docker: {
       image: 'elixir',
-      preCommands,
     },
+    preCommands,
   };
   const command = [
     'mix',
@@ -91,7 +93,7 @@ export async function updateArtifacts({
       throw err;
     }
 
-    logger.warn(
+    logger.debug(
       { err, message: err.message, command },
       'Failed to update Mix lock file'
     );

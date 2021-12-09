@@ -5,7 +5,7 @@ As a Renovate end user, there are two main categories of use:
 - You self-host Renovate, e.g. by running the pre-built Docker image, or
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
-If someone else is hosting Renovate for you, or you are using the WhiteSource Renovate App on GitHub, then you can skip ahead to the Installing Renovate into Repositories section.
+If someone else is hosting Renovate for you, or you are using the WhiteSource Renovate App on GitHub, then you can skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
 ## Self-Hosting Renovate
 
@@ -22,10 +22,12 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 
 Renovate's Open Source CLI is built and distributed as the npm package `renovate`.
 You can run this directly in any Node.js environment - even via `npx` - and it will process all the repositories it is configured with, before exiting.
-When you install Renovate from npm it naturally does not come bundled with any third party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
-Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third party tools are pre-installed in the same environment alongside Renovate before you run it.
+When you install Renovate from npm it naturally does not come bundled with any third-party tools or languages such as Ruby, Python, Composer, Bundler, Poetry, etc.
+Therefore if you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third-party tools are pre-installed in the same environment alongside Renovate before you run it.
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
+
+Renovate requires Node.js >=14.15.0 as well as Git >=2.33.0.
 
 #### Docker image
 
@@ -161,9 +163,9 @@ Auto discovery does not work with a GitHub App.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
-#### GitLab CE/EE
+#### GitLab
 
-First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes).
+First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes, or `read_user`, `read_api` and `read_repository` for dry runs).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=gitlab` somewhere in config.
 

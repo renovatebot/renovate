@@ -1,47 +1,37 @@
-import { getPkgReleases } from '../../datasource';
+import { quote } from 'shlex';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { api, id as composerVersioningId } from '../../versioning/composer';
+import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
 
-export async function getComposerConstraint(
-  constraints: Record<string, string>
-): Promise<string> {
-  const { composer } = constraints;
+const depRequireInstall = new Set(['symfony/flex']);
 
-  if (api.isSingleVersion(composer)) {
-    logger.debug(
-      { version: composer },
-      'Using composer constraint from config'
-    );
-    return composer;
+export function getComposerArguments(config: UpdateArtifactsConfig): string {
+  let args = '';
+
+  if (config.composerIgnorePlatformReqs) {
+    if (config.composerIgnorePlatformReqs.length === 0) {
+      args += ' --ignore-platform-reqs';
+    } else {
+      config.composerIgnorePlatformReqs.forEach((req) => {
+        args += ' --ignore-platform-req ' + quote(req);
+      });
+    }
   }
 
-  const release = await getPkgReleases({
-    depName: 'composer/composer',
-    datasource: 'github-releases',
-    versioning: composerVersioningId,
-  });
-
-  if (!release?.releases?.length) {
-    throw new Error('No composer releases found.');
-  }
-  let versions = release.releases.map((r) => r.version);
-
-  if (composer) {
-    versions = versions.filter(
-      (v) => api.isValid(v) && api.matches(v, composer)
-    );
+  args += ' --no-ansi --no-interaction';
+  if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+    args += ' --no-scripts --no-autoloader';
   }
 
-  if (!versions.length) {
-    throw new Error('No compatible composer releases found.');
+  if (!GlobalConfig.get('allowPlugins') || config.ignorePlugins) {
+    args += ' --no-plugins';
   }
 
-  const version = versions.pop();
-  logger.debug({ range: composer, version }, 'Using composer constraint');
-  return version;
+  return args;
 }
 
 export function getPhpConstraint(constraints: Record<string, string>): string {
@@ -53,6 +43,15 @@ export function getPhpConstraint(constraints: Record<string, string>): string {
   }
 
   return null;
+}
+
+export function requireComposerDependencyInstallation(
+  lock: ComposerLock
+): boolean {
+  return (
+    lock.packages?.some((p) => depRequireInstall.has(p.name)) === true ||
+    lock['packages-dev']?.some((p) => depRequireInstall.has(p.name)) === true
+  );
 }
 
 export function extractContraints(

@@ -2,10 +2,10 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
-import { GitNoVerifyOption, setNoVerify } from '.';
+import { setNoVerify } from '.';
 
 describe('util/git/index', () => {
   jest.setTimeout(15000);
@@ -71,11 +71,11 @@ describe('util/git/index', () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setGlobalConfig({ localDir: tmpDir.path });
+    GlobalConfig.set({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
     });
-    await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+    git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     git.setGitAuthor('Jest <Jest@example.com>');
     setNoVerify([]);
     await git.syncGit();
@@ -92,6 +92,13 @@ describe('util/git/index', () => {
 
   afterAll(async () => {
     await base.cleanup();
+  });
+
+  describe('validateGitVersion()', () => {
+    it('has a git version greater or equal to the minimum required', async () => {
+      const res = await git.validateGitVersion();
+      expect(res).toBeTrue();
+    });
   });
 
   describe('checkoutBranch(branchName)', () => {
@@ -124,10 +131,10 @@ describe('util/git/index', () => {
   });
   describe('branchExists(branchName)', () => {
     it('should return true if found', () => {
-      expect(git.branchExists('renovate/future_branch')).toBe(true);
+      expect(git.branchExists('renovate/future_branch')).toBeTrue();
     });
     it('should return false if not found', () => {
-      expect(git.branchExists('not_found')).toBe(false);
+      expect(git.branchExists('not_found')).toBeFalse();
     });
   });
   describe('getBranchList()', () => {
@@ -140,32 +147,32 @@ describe('util/git/index', () => {
   });
   describe('isBranchStale()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchStale('renovate/future_branch')).toBeFalse();
     });
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
+      expect(await git.isBranchStale('renovate/past_branch')).toBeTrue();
     });
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchStale('develop')).toBe(true);
-      expect(await git.isBranchStale('develop')).toBe(true); // cache
+      expect(await git.isBranchStale('develop')).toBeTrue();
+      expect(await git.isBranchStale('develop')).toBeTrue(); // cache
     });
   });
   describe('isBranchModified()', () => {
     it('should return false when branch is not found', async () => {
-      expect(await git.isBranchModified('renovate/not_found')).toBe(false);
+      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
     });
     it('should return false when author matches', async () => {
-      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
-      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
     });
     it('should return false when author is ignored', async () => {
-      await git.setUserRepoConfig({
+      git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
-      expect(await git.isBranchModified('renovate/custom_author')).toBe(false);
+      expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
     });
     it('should return true when custom author is unknown', async () => {
-      expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
+      expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
     });
   });
 
@@ -363,7 +370,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Commit]);
+      setNoVerify(['commit']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -393,7 +400,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Push]);
+      setNoVerify(['push']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -411,6 +418,24 @@ describe('util/git/index', () => {
         expect.anything(),
         expect.objectContaining({ '--no-verify': null })
       );
+    });
+
+    it('creates file with the executable bit', async () => {
+      const file = {
+        name: 'some-executable',
+        contents: 'some new-contents',
+        executable: true,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/past_branch',
+        files: [file],
+        message: 'Create something',
+      });
+      expect(commit).not.toBeNull();
+
+      const repo = Git(tmpDir.path);
+      const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
+      expect(result).toStartWith('100755');
     });
   });
 
@@ -431,14 +456,14 @@ describe('util/git/index', () => {
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('https://user:pass@host/some/repo.git');
+      ).toBe('https://user:pass@host/some/repo.git');
       expect(
         getUrl({
           auth: 'user:pass',
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('https://user:pass@host/some/repo.git');
+      ).toBe('https://user:pass@host/some/repo.git');
     });
 
     it('returns ssh url', () => {
@@ -449,7 +474,7 @@ describe('util/git/index', () => {
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('git@host:some/repo.git');
+      ).toBe('git@host:some/repo.git');
     });
   });
 
@@ -494,8 +519,8 @@ describe('util/git/index', () => {
         url: base.path,
       });
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
-      expect(git.branchExists('renovate/test')).toBe(true);
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      expect(git.branchExists('renovate/test')).toBeTrue();
 
       await git.initRepo({
         url: base.path,
@@ -504,8 +529,8 @@ describe('util/git/index', () => {
       await repo.checkout('renovate/test');
       await repo.commit('past message3', ['--amend']);
 
-      await git.setUserRepoConfig({ branchPrefix: 'renovate/' });
-      expect(git.branchExists('renovate/test')).toBe(true);
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      expect(git.branchExists('renovate/test')).toBeTrue();
     });
 
     it('should fail clone ssh submodule', async () => {
@@ -540,6 +565,7 @@ describe('util/git/index', () => {
         extraCloneOpts: {
           '-c': 'extra.clone.config=test-extra-config-value',
         },
+        fullClone: true,
       });
       git.getBranchCommit(defaultBranch);
       await git.syncGit();

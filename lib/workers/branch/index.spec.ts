@@ -1,6 +1,6 @@
 import * as _fs from 'fs-extra';
 import { defaultConfig, git, mocked, platform } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import {
   MANAGER_LOCKFILE_ERROR,
@@ -10,7 +10,7 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
-import { File, StatusResult } from '../../util/git';
+import type { File, StatusResult } from '../../util/git/types';
 import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
@@ -82,7 +82,7 @@ describe('workers/branch/index', () => {
         upgrades: [{ depName: 'some-dep-name' }],
       } as BranchConfig;
       schedule.isScheduledNow.mockReturnValue(true);
-      commit.commitFilesToBranch.mockResolvedValue('abc123');
+      commit.commitFilesToBranch.mockResolvedValue('123test');
 
       platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
@@ -93,7 +93,7 @@ describe('workers/branch/index', () => {
           body: '',
         },
       });
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
       sanitize.sanitize.mockImplementation((input) => input);
     });
     afterEach(() => {
@@ -101,7 +101,7 @@ describe('workers/branch/index', () => {
       platform.ensureCommentRemoval.mockClear();
       commit.commitFilesToBranch.mockClear();
       jest.resetAllMocks();
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -297,8 +297,8 @@ describe('workers/branch/index', () => {
     it('continues branch if branch edited and but PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValueOnce('abc123');
-      platform.findPr.mockResolvedValueOnce({ sha: 'abc123' } as any);
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
       const res = await branchWorker.processBranch(config);
       // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
@@ -306,7 +306,7 @@ describe('workers/branch/index', () => {
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValueOnce('abc123');
+      git.getBranchCommit.mockReturnValueOnce('123test');
       platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
       const res = await branchWorker.processBranch(config);
       // FIXME: explicit assert condition
@@ -410,7 +410,7 @@ describe('workers/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({
         ...config,
-        requiredStatusChecks: null,
+        ignoreTests: true,
       });
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -427,7 +427,7 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
-      setGlobalConfig({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -535,7 +535,7 @@ describe('workers/branch/index', () => {
       expect(
         await branchWorker.processBranch({
           ...config,
-          requiredStatusChecks: null,
+          ignoreTests: true,
           prCreation: 'not-pending',
         })
       ).toMatchSnapshot();
@@ -732,7 +732,7 @@ describe('workers/branch/index', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
       } as Pr);
-      setGlobalConfig({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
@@ -743,7 +743,7 @@ describe('workers/branch/index', () => {
         state: PrState.Open,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
-      setGlobalConfig({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       // FIXME: explicit assert condition
       expect(await branchWorker.processBranch(config)).toMatchSnapshot();
     });
@@ -766,7 +766,7 @@ describe('workers/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setGlobalConfig({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
@@ -799,7 +799,7 @@ describe('workers/branch/index', () => {
         pr: {},
       } as EnsurePrResult);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setGlobalConfig({ ...adminConfig, dryRun: true });
+      GlobalConfig.set({ ...adminConfig, dryRun: true });
       // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
@@ -875,7 +875,7 @@ describe('workers/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      setGlobalConfig({
+      GlobalConfig.set({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: true,
@@ -953,7 +953,7 @@ describe('workers/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      setGlobalConfig({
+      GlobalConfig.set({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^exit 1$'],
         allowPostUpgradeCommandTemplating: true,
@@ -1022,7 +1022,7 @@ describe('workers/branch/index', () => {
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      setGlobalConfig({
+      GlobalConfig.set({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
         allowPostUpgradeCommandTemplating: false,
@@ -1103,7 +1103,7 @@ describe('workers/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      setGlobalConfig({
+      GlobalConfig.set({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
         allowPostUpgradeCommandTemplating: true,
@@ -1196,7 +1196,7 @@ describe('workers/branch/index', () => {
           (f) =>
             f.contents === 'modified_then_deleted_file' && f.name === '|delete|'
         )
-      ).not.toBeUndefined();
+      ).toBeDefined();
     });
 
     it('executes post-upgrade tasks once when set to branch mode', async () => {
@@ -1238,7 +1238,7 @@ describe('workers/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      setGlobalConfig({
+      GlobalConfig.set({
         ...adminConfig,
         allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
         allowPostUpgradeCommandTemplating: true,

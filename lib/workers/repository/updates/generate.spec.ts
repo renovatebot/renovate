@@ -146,8 +146,8 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
-      expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
-      expect(res.automerge).toBe(false);
+      expect(res.releaseTimestamp).toBe('2017-02-07T20:01:41+00:00');
+      expect(res.automerge).toBeFalse();
       expect(res.constraints).toEqual({
         foo: '1.0.0',
         bar: '2.0.0',
@@ -189,9 +189,9 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBe(true);
+      expect(res.recreateClosed).toBeTrue();
       expect(res.groupName).toBeDefined();
-      expect(res.releaseTimestamp).toEqual('2017-02-08T20:01:41+00:00');
+      expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
     it('groups multiple digest updates', () => {
       const branch = [
@@ -227,7 +227,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBe(true);
+      expect(res.recreateClosed).toBeTrue();
       expect(res.groupName).toBeDefined();
     });
     it('fixes different messages', () => {
@@ -285,7 +285,7 @@ describe('workers/repository/updates/generate', () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
+      expect(res.prTitle).toBe(
         'chore(package): update dependency some-dep to v1.2.0'
       );
     });
@@ -309,9 +309,7 @@ describe('workers/repository/updates/generate', () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
-        'chore(): update dependency some-dep to v1.2.0'
-      );
+      expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
     });
     it('scopes monorepo commits with nested package files using parent directory', () => {
       const branch = [
@@ -334,7 +332,7 @@ describe('workers/repository/updates/generate', () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
+      expect(res.prTitle).toBe(
         'chore(bar): update dependency some-dep to v1.2.0'
       );
     });
@@ -358,7 +356,7 @@ describe('workers/repository/updates/generate', () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual(
+      expect(res.prTitle).toBe(
         'chore(foo/bar): update dependency some-dep to v1.2.0'
       );
     });
@@ -427,7 +425,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.recreateClosed).toBe(false);
+      expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeUndefined();
       // FIXME: explicit assert condition
       expect(generateBranchConfig(branch)).toMatchSnapshot();
@@ -570,7 +568,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.pendingChecks).toBe(true);
+      expect(res.pendingChecks).toBeTrue();
       expect(res.upgrades).toHaveLength(2);
     });
     it('filters pendingChecks', () => {

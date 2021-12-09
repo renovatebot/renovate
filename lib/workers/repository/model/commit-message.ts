@@ -1,9 +1,9 @@
 export class CommitMessage {
   public static readonly SEPARATOR: string = ':';
 
-  private message: string;
+  private message = '';
 
-  private prefix: string;
+  private prefix = '';
 
   constructor(message = '') {
     this.setMessage(message);
@@ -22,17 +22,17 @@ export class CommitMessage {
   }
 
   public setMessage(message: string): void {
-    this.message = message.trim();
+    this.message = (message || '').trim();
   }
 
-  public setCustomPrefix(prefix = ''): void {
-    this.prefix = prefix.trim();
+  public setCustomPrefix(prefix?: string): void {
+    this.prefix = (prefix ?? '').trim();
   }
 
-  public setSemanticPrefix(type = '', scope = ''): void {
-    this.prefix = type.trim();
+  public setSemanticPrefix(type?: string, scope?: string): void {
+    this.prefix = (type ?? '').trim();
 
-    if (scope.trim()) {
+    if (scope?.trim()) {
       this.prefix += `(${scope.trim()})`;
     }
   }

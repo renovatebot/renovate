@@ -123,8 +123,28 @@ Any `hostRules` with `hostType=packagist` are also included.
 
 ### gomod
 
-If a `github.com` token is found in `hostRules`, then it is written out to local git config prior to running `go` commands.
-The command run is `git config --global url."https://${token}@github.com/".insteadOf "https://github.com/"`.
+If a `github.com` token is found in `hostRules`, then it is written out to local [GIT*CONFIG*](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT) variables prior to running `go` commands.
+The environment variables used are: `GIT_CONFIG_KEY_0=url.https://${token}@github.com/.insteadOf GIT_CONFIG_VALUE_0=https://github.com/ GIT_CONFIG_COUNT=1`.
+
+### helm
+
+Maybe you're running your own ChartMuseum server to host your private Helm Charts.
+This is how you connect to a private Helm repository:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'your.host.io',
+      hostType: 'helm'
+      username: '<your-username>',
+      password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
+    },
+  ],
+};
+```
+
+If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`).
 
 ### npm
 
@@ -180,6 +200,8 @@ You can add an `.npmrc` authentication line to your Renovate config under the fi
 ```
 
 If configured like this, Renovate will use this to authenticate with npm and will ignore any `.npmrc` files(s) it finds checked into the repository.
+If you wish for the values in your `config.npmrc` to be _merged_ (prepended) with any values found in repos then also set `config.npmrcMerge=true`.
+This merge approach is similar to how `npm` itself behaves if `.npmrc` is found in both the user home directory as well as a project.
 
 #### Add npmToken to Renovate config
 
@@ -195,7 +217,7 @@ If you are using the main npmjs registry then you can configure just the `npmTok
 
 If you don't want all users of the repository to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Go to <https://renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
+Go to <https://app.renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
 
 Paste the encrypted result inside an `encrypted` object like this:
 
@@ -227,7 +249,7 @@ Renovate will then use the following logic:
 
 #### Encrypted entire .npmrc file into config
 
-Copy the entire `.npmrc`, replace newlines with `\n` characters , and then try encrypting it at <https://renovatebot.com/encrypt>.
+Copy the entire `.npmrc`, replace newlines with `\n` characters , and then try encrypting it at <https://app.renovatebot.com/encrypt>.
 
 You will then get an encrypted string that you can substitute into your `renovate.json` instead.
 The end-result looks like this:
@@ -239,8 +261,6 @@ The end-result looks like this:
   }
 }
 ```
-
-However be aware that if your `.npmrc` is too big to encrypt then the above command will fail.
 
 #### Automatically authenticate for npm package stored in private GitHub npm repository
 
@@ -257,6 +277,40 @@ However be aware that if your `.npmrc` is too big to encrypt then the above comm
   ],
   "npmrc": "@organizationName:registry=https://npm.pkg.github.com/"
 }
+```
+
+#### Yarn 2+
+
+Renovate doesn't support reading `npmRegistries` and `npmScopes` from `.yarnrc.yml`, so `hostRules` (or `npmToken`) and `npmrc` should be configured like above.
+Renovate updates `npmRegistries` in `.yarnrc.yml` with resolved `hostRules` before running Yarn.
+For Renovate to overwrite existing `npmRegistries` entry, the key should match the `matchHost` minus the protocol (`http:` or `https:`) plus the trailing slash.
+
+For example, the Renovate configuration:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://npm.pkg.github.com/",
+      "hostType": "npm",
+      "encrypted": {
+        "token": "<Encrypted PAT Token>"
+      }
+    }
+  ]
+}
+```
+
+will update `.yarnrc.yml` as following:
+
+```yaml
+npmRegistries:
+  //npm.pkg.github.com/:
+    npmAuthToken: <Decrypted PAT Token>
+  //npm.pkg.github.com:
+    # this will not be overwritten and may conflict
+  https://npm.pkg.github.com/:
+    # this will not be overwritten and may conflict
 ```
 
 ### nuget
@@ -338,68 +392,4 @@ Note: Encrypted values can't be used in the "Admin/Bot config".
 
 ### hostRules configuration using environment variables
 
-Self-hosted users can use environment variables to configure the most common types of `hostRules` for authentication.
-
-The format of the environment variables must follow:
-
-- Datasource name (e.g. `NPM`, `PYPI`)
-- Underscore (`_`)
-- `matchHost`
-- Underscore (`_`)
-- Field name (`TOKEN`, `USER_NAME`, or `PASSWORD`)
-
-Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
-Periods (`.`) in host names must be replaced with a single underscore (`_`).
-
-Note: the following prefixes cannot be supported for this functionality: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
-
-#### npmjs registry token example
-
-`NPM_REGISTRY_NPMJS_ORG_TOKEN=abc123`:
-
-```json
-{
-  "hostRules": [
-    {
-      "hostType": "npm",
-      "matchHost": "registry.npmjs.org",
-      "token": "abc123"
-    }
-  ]
-}
-```
-
-#### GitLab Tags username/password example
-
-`GITLAB__TAGS_CODE__HOST_COMPANY_COM_USERNAME=bot GITLAB__TAGS_CODE__HOST_COMPANY_COM_PASSWORD=botpass123`:
-
-```json
-{
-  "hostRules": [
-    {
-      "hostType": "gitlab-tags",
-      "matchHost": "code-host.company.com",
-      "username": "bot",
-      "password": "botpass123"
-    }
-  ]
-}
-```
-
-#### Datasource and credentials only
-
-You can skip the host part, and use just the datasource and credentials.
-
-`DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
-
-```json
-{
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "username": "bot",
-      "password": "botpass123"
-    }
-  ]
-}
-```
+Self-hosted users can enable the option [`detectHostRulesFromEnv`](../self-hosted-configuration.md#detectHostRulesFromEnv) to configure the most common types of `hostRules` via environment variables.

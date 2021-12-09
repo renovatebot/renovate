@@ -46,6 +46,7 @@ Array [
     "body": undefined,
     "id": undefined,
     "name": undefined,
+    "notesSourceUrl": "https://api.github.com/repos/some/yet-other-repository/releases",
     "tag": "v1.0.0",
     "url": undefined,
   },
@@ -53,6 +54,7 @@ Array [
     "body": "some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)",
     "id": undefined,
     "name": undefined,
+    "notesSourceUrl": "https://api.github.com/repos/some/yet-other-repository/releases",
     "tag": "v1.0.1",
     "url": undefined,
   },
@@ -79,12 +81,14 @@ Array [
   Object {
     "body": undefined,
     "name": undefined,
+    "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases",
     "tag": "v1.0.0",
     "url": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0",
   },
   Object {
     "body": undefined,
     "name": undefined,
+    "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases",
     "tag": "v1.0.1",
     "url": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1",
   },
@@ -111,12 +115,14 @@ Array [
   Object {
     "body": undefined,
     "name": undefined,
+    "notesSourceUrl": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases",
     "tag": "v1.0.0",
     "url": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0",
   },
   Object {
     "body": undefined,
     "name": undefined,
+    "notesSourceUrl": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases",
     "tag": "v1.0.1",
     "url": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1",
   },
@@ -145,6 +151,7 @@ Object {
 ",
   "id": undefined,
   "name": undefined,
+  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
   "tag": "1.0.1",
   "url": "https://github.com/some/other-repository/releases/1.0.1",
 }
@@ -171,6 +178,7 @@ Object {
 ",
   "id": undefined,
   "name": undefined,
+  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
   "tag": "other@1.0.1",
   "url": "https://github.com/some/other-repository/releases/other@1.0.1",
 }
@@ -197,6 +205,7 @@ Object {
 ",
   "id": undefined,
   "name": undefined,
+  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
   "tag": "other_v1.0.1",
   "url": "https://github.com/some/other-repository/releases/other_v1.0.1",
 }
@@ -223,6 +232,7 @@ Object {
 ",
   "id": undefined,
   "name": undefined,
+  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
   "tag": "other-1.0.1",
   "url": "https://github.com/some/other-repository/releases/other-1.0.1",
 }
@@ -249,6 +259,7 @@ Object {
 ",
   "id": undefined,
   "name": undefined,
+  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
   "tag": "v1.0.1",
   "url": "https://github.com/some/other-repository/releases/v1.0.1",
 }
@@ -273,6 +284,7 @@ exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes
 Object {
   "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
   "name": undefined,
+  "notesSourceUrl": "https://api.gitlab.com/projects/some%2fother-repository/releases",
   "tag": "1.0.1",
   "url": "https://gitlab.com/some/other-repository/tags/1.0.1",
 }
@@ -297,6 +309,7 @@ exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes
 Object {
   "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
   "name": undefined,
+  "notesSourceUrl": "https://api.gitlab.com/projects/some%2fother-repository/releases",
   "tag": "other-1.0.1",
   "url": "https://gitlab.com/some/other-repository/tags/other-1.0.1",
 }
@@ -321,6 +334,7 @@ exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes
 Object {
   "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
   "name": undefined,
+  "notesSourceUrl": "https://api.gitlab.com/projects/some%2fother-repository/releases",
   "tag": "v1.0.1",
   "url": "https://gitlab.com/some/other-repository/tags/v1.0.1",
 }
@@ -366,7 +380,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100&path=packages/foo",
   },
   Object {
     "headers": Object {
@@ -390,6 +404,7 @@ See merge request itentialopensource/adapter-utils!177
 
 ***
 ",
+  "notesSourceUrl": "https://gitlab.com/itentialopensource/adapter-utils/blob/master/packages/foo/CHANGELOG.md",
   "url": "https://gitlab.com/itentialopensource/adapter-utils/blob/master/packages/foo/CHANGELOG.md#4330-05-15-2020",
 }
 `;
@@ -428,6 +443,7 @@ See merge request itentialopensource/adapter-utils!177
 
 ***
 ",
+  "notesSourceUrl": "https://gitlab.com/itentialopensource/adapter-utils/blob/master/CHANGELOG.md",
   "url": "https://gitlab.com/itentialopensource/adapter-utils/blob/master/CHANGELOG.md#4330-05-15-2020",
 }
 `;
@@ -493,6 +509,7 @@ Object {
 -   **translations:** fix pluralization in error messages. ([#1557](https://www.github.com/yargs/yargs/issues/1557)) ([94fa38c](https://www.github.com/yargs/yargs/commit/94fa38cbab8d86943e87bf41d368ed56dffa6835))
 -   **yargs:** correct support of bundled electron apps ([#1554](https://www.github.com/yargs/yargs/issues/1554)) ([a0b61ac](https://www.github.com/yargs/yargs/commit/a0b61ac21e2b554aa73dbf1a66d4a7af94047c2f))
 ",
+  "notesSourceUrl": "https://github.com/yargs/yargs/blob/master/CHANGELOG.md",
   "url": "https://github.com/yargs/yargs/blob/master/CHANGELOG.md#1520-httpswwwgithubcomyargsyargscomparev1510v1520-2020-03-01",
 }
 `;
@@ -543,6 +560,7 @@ Object {
 
 -   address ambiguity between nargs of 1 and requiresArg ([#1572](https://www.github.com/yargs/yargs/issues/1572)) ([a5edc32](https://www.github.com/yargs/yargs/commit/a5edc328ecb3f90d1ba09cfe70a0040f68adf50a))
 ",
+  "notesSourceUrl": "https://github.com/yargs/yargs/blob/master/CHANGELOG.md",
   "url": "https://github.com/yargs/yargs/blob/master/CHANGELOG.md#1530-httpswwwgithubcomyargsyargscomparev1520v1530-2020-03-08",
 }
 `;
@@ -647,6 +665,7 @@ Object {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
+  "notesSourceUrl": "https://github.com/nodeca/js-yaml/blob/master/packages/foo/CHANGELOG.md",
   "url": "https://github.com/nodeca/js-yaml/blob/master/packages/foo/CHANGELOG.md#3100--2017-09-10",
 }
 `;
@@ -712,6 +731,7 @@ Object {
     [#15085](https://github.com/angular/angular.js/issues/15085),
     [#15105](https://github.com/angular/angular.js/issues/15105))
 ",
+  "notesSourceUrl": "https://github.com/angular/angular.js/blob/master/CHANGELOG.md",
   "url": "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#169-fiery-basilisk-2018-02-02",
 }
 `;
@@ -787,6 +807,7 @@ Object {
 -   Update Polish translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1882>
     -   Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution
 ",
+  "notesSourceUrl": "https://gitlab.com/gitlab-org/gitter/webapp/blob/master/CHANGELOG.md",
   "url": "https://gitlab.com/gitlab-org/gitter/webapp/blob/master/CHANGELOG.md#20260---2020-05-18",
 }
 `;
@@ -1014,6 +1035,7 @@ Object {
 -   \`[docs]\` Update \`expect.anything()\` sample code
     ([#5007](https://github.com/facebook/jest/pull/5007))
 ",
+  "notesSourceUrl": "https://github.com/facebook/jest/blob/master/CHANGELOG.md",
   "url": "https://github.com/facebook/jest/blob/master/CHANGELOG.md#jest-2200",
 }
 `;
@@ -1058,6 +1080,7 @@ Object {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
+  "notesSourceUrl": "https://github.com/nodeca/js-yaml/blob/master/CHANGELOG.md",
   "url": "https://github.com/nodeca/js-yaml/blob/master/CHANGELOG.md#3100--2017-09-10",
 }
 `;
@@ -1100,6 +1123,7 @@ Object {
 -   Update Polish translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1882>
     -   Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution
 ",
+  "notesSourceUrl": "https://my.custom.domain/gitlab-org/gitter/webapp/blob/master/CHANGELOG.md",
   "url": "https://my.custom.domain/gitlab-org/gitter/webapp/blob/master/CHANGELOG.md#20260---2020-05-18",
 }
 `;

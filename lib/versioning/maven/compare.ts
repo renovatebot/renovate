@@ -1,3 +1,5 @@
+import { regEx } from '../../util/regex';
+
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
 
@@ -35,11 +37,11 @@ function iterateChars(str: string, cb: (p: string, n: string) => void): void {
 }
 
 function isDigit(char: string): boolean {
-  return /^\d$/.test(char);
+  return regEx(/^\d$/).test(char);
 }
 
 function isLetter(char: string): boolean {
-  return /^[a-z]$/i.test(char);
+  return regEx(/^[a-z]$/i).test(char);
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
@@ -55,7 +57,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
 
   function yieldToken(transition = false): void {
     const val = currentVal || '0';
-    if (/^\d+$/.test(val)) {
+    if (regEx(/^\d+$/).test(val)) {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
@@ -117,7 +119,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
-  iterateTokens(versionStr.toLowerCase().replace(/^v/i, ''), (token) => {
+  iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
     if (token.prefix === PREFIX_HYPHEN) {
       buf = [];
     }
@@ -182,7 +184,7 @@ export function qualifierType(token: Token): number {
   if (val === 'milestone' || (token.isTransition && val === 'm')) {
     return QualifierTypes.Milestone;
   }
-  if (val === 'rc' || val === 'cr') {
+  if (val === 'rc' || val === 'cr' || val === 'preview') {
     return QualifierTypes.RC;
   }
   if (val === 'snapshot' || val === 'snap') {
@@ -276,13 +278,13 @@ function isVersion(version: string): boolean {
   if (!version) {
     return false;
   }
-  if (!/^[a-z0-9.-]+$/i.test(version)) {
+  if (!regEx(/^[a-z0-9.-]+$/i).test(version)) {
     return false;
   }
-  if (/^[.-]/.test(version)) {
+  if (regEx(/^[.-]/).test(version)) {
     return false;
   }
-  if (/[.-]$/.test(version)) {
+  if (regEx(/[.-]$/).test(version)) {
     return false;
   }
   if (['latest', 'release'].includes(version.toLowerCase())) {
@@ -316,7 +318,7 @@ function parseRange(rangeStr: string): Range[] {
       return;
     }
     if (interval.leftType === null) {
-      if (/^\[.*]$/.test(subStr)) {
+      if (regEx(/^\[.*]$/).test(subStr)) {
         const ver = subStr.slice(1, -1);
         result.push({
           leftType: INCLUDING_POINT,

@@ -78,11 +78,10 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   azureAutoApprove?: boolean;
-  azureAutoComplete?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
-  gitLabAutomerge?: boolean;
   gitLabIgnoreApprovals?: boolean;
+  usePlatformAutomerge?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -107,6 +106,7 @@ export interface EnsureIssueConfig {
   labels?: string[];
   once?: boolean;
   shouldReOpen?: boolean;
+  confidential?: boolean;
 }
 export interface BranchStatusConfig {
   branchName: string;
@@ -153,8 +153,16 @@ export interface Platform {
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, useCache?: boolean): Promise<Issue>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
-  getRawFile(fileName: string, repo?: string): Promise<string | null>;
-  getJsonFile(fileName: string, repo?: string): Promise<any | null>;
+  getRawFile(
+    fileName: string,
+    repoName?: string,
+    branchOrTag?: string
+  ): Promise<string | null>;
+  getJsonFile(
+    fileName: string,
+    repoName?: string,
+    branchOrTag?: string
+  ): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
@@ -184,10 +192,7 @@ export interface Platform {
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;
-  getBranchStatus(
-    branchName: string,
-    requiredStatusChecks?: string[] | null
-  ): Promise<BranchStatus>;
+  getBranchStatus(branchName: string): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;

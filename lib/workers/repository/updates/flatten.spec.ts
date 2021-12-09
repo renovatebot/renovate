@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig } from '../../../../test/util';
 
-import { LANGUAGE_DOCKER } from '../../../constants/languages';
+import { ProgrammingLanguage } from '../../../constants';
 import { flattenUpdates } from './flatten';
 
 let config: RenovateConfig;
@@ -66,6 +66,16 @@ describe('workers/repository/updates/flatten', () => {
                 updateTypes: ['pin'],
                 updates: [{ newValue: '2.0.0' }],
               },
+              {
+                depName: 'abc',
+                updates: [
+                  {
+                    newName: 'def',
+                    newValue: '2.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
             ],
           },
           {
@@ -88,7 +98,7 @@ describe('workers/repository/updates/flatten', () => {
             deps: [
               {
                 depName: 'amd64/node',
-                language: LANGUAGE_DOCKER,
+                language: ProgrammingLanguage.Docker,
                 sourceUrl: 'https://github.com/nodejs/node',
                 updates: [{ newValue: '10.0.1' }],
               },
@@ -99,7 +109,7 @@ describe('workers/repository/updates/flatten', () => {
             deps: [
               {
                 depName: 'calico/node',
-                language: LANGUAGE_DOCKER,
+                language: ProgrammingLanguage.Docker,
                 sourceUrl: 'https://calico.com',
                 updates: [{ newValue: '3.2.0', updateType: 'minor' }],
               },
@@ -131,7 +141,7 @@ describe('workers/repository/updates/flatten', () => {
         ],
       };
       const res = await flattenUpdates(config, packageFiles);
-      expect(res).toHaveLength(13);
+      expect(res).toHaveLength(14);
       expect(res.filter((update) => update.sourceRepoSlug)).toHaveLength(3);
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')

@@ -1,6 +1,6 @@
 import yaml from 'js-yaml';
 import { getFixturePath, logger } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import * as fs from '../../../util/fs';
 import {
   detectPnpmWorkspaces,
@@ -10,7 +10,7 @@ import {
 
 describe('manager/npm/extract/pnpm', () => {
   beforeAll(() => {
-    setGlobalConfig({ localDir: getFixturePath('pnpm-monorepo/', '..') });
+    GlobalConfig.set({ localDir: getFixturePath('pnpm-monorepo/', '..') });
   });
 
   describe('.extractPnpmFilters()', () => {
@@ -24,8 +24,7 @@ describe('manager/npm/extract/pnpm', () => {
         '..'
       );
       const res = await extractPnpmFilters(workSpaceFilePath);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         {
           fileName: expect.any(String),
@@ -40,8 +39,7 @@ describe('manager/npm/extract/pnpm', () => {
       });
 
       const res = await extractPnpmFilters('pnpm-workspace.yml');
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           fileName: expect.any(String),
@@ -58,8 +56,7 @@ describe('manager/npm/extract/pnpm', () => {
 
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({ packageFile }),
         'Failed to locate pnpm-workspace.yaml in a parent directory.'
@@ -71,8 +68,7 @@ describe('manager/npm/extract/pnpm', () => {
 
       const packageFile = 'package.json';
       const res = await findPnpmWorkspace(packageFile);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({
           workspaceYamlPath: 'pnpm-workspace.yaml',
@@ -126,7 +122,7 @@ describe('manager/npm/extract/pnpm', () => {
       expect(packageFiles).toMatchSnapshot();
       expect(
         packageFiles.every((packageFile) => packageFile.pnpmShrinkwrap)
-      ).toBe(true);
+      ).toBeTrue();
     });
 
     it('skips when pnpm shrinkwrap file has already been provided', async () => {
@@ -138,8 +134,12 @@ describe('manager/npm/extract/pnpm', () => {
       ];
 
       await detectPnpmWorkspaces(packageFiles);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toEqual([
+        {
+          packageFile: 'package.json',
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+      ]);
     });
 
     it('filters none matching packages', async () => {
@@ -161,14 +161,28 @@ describe('manager/npm/extract/pnpm', () => {
       ];
 
       await detectPnpmWorkspaces(packageFiles);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toEqual([
+        {
+          packageFile: 'package.json',
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+        {
+          packageFile: 'nested-packages/group/a/package.json',
+          packageJsonName: '@demo/nested-group-a',
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+        {
+          packageFile: 'not-matching/b/package.json',
+          packageJsonName: '@not-matching/b',
+          pnpmShrinkwrap: undefined,
+        },
+      ]);
       expect(
         packageFiles.find(
           (packageFile) =>
             packageFile.packageFile === 'not-matching/b/package.json'
         ).pnpmShrinkwrap
-      ).not.toBeDefined();
+      ).toBeUndefined();
     });
   });
 });

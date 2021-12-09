@@ -1,5 +1,5 @@
 import { mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import * as _sanitize from '../../util/sanitize';
 import { getNpmrc, setNpmrc } from './npmrc';
 
@@ -10,7 +10,7 @@ const sanitize = mocked(_sanitize);
 describe('datasource/npm/npmrc', () => {
   beforeEach(() => {
     setNpmrc('');
-    setGlobalConfig();
+    GlobalConfig.reset();
     jest.resetAllMocks();
   });
 
@@ -21,7 +21,6 @@ describe('datasource/npm/npmrc', () => {
   });
 
   it('sanitize _authtoken', () => {
-    // eslint-disable-next-line no-template-curly-in-string
     setNpmrc('//registry.test.com:_authToken=test\n_authToken=${NPM_TOKEN}');
     expect(sanitize.add).toHaveBeenCalledWith('test');
     expect(sanitize.add).toHaveBeenCalledTimes(1);
@@ -38,10 +37,9 @@ describe('datasource/npm/npmrc', () => {
   });
 
   it('sanitize _authtoken with high trust', () => {
-    setGlobalConfig({ exposeAllEnv: true });
+    GlobalConfig.set({ exposeAllEnv: true });
     process.env.TEST_TOKEN = 'test';
     setNpmrc(
-      // eslint-disable-next-line no-template-curly-in-string
       '//registry.test.com:_authToken=${TEST_TOKEN}\n_authToken=\nregistry=http://localhost'
     );
     expect(sanitize.add).toHaveBeenCalledWith('test');
@@ -51,6 +49,6 @@ describe('datasource/npm/npmrc', () => {
   it('ignores localhost', () => {
     setNpmrc(`registry=http://localhost`);
     expect(sanitize.add).toHaveBeenCalledTimes(0);
-    expect(getNpmrc()).toEqual({});
+    expect(getNpmrc()).toBeEmptyObject();
   });
 });

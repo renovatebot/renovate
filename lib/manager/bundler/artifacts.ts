@@ -7,7 +7,8 @@ import {
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -16,6 +17,7 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
+import { regEx } from '../../util/regex';
 import { add } from '../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -46,8 +48,8 @@ async function getRubyConstraint(
     if (rubyVersionFileContent) {
       logger.debug('Using ruby version specified in .ruby-version');
       rubyConstraint = rubyVersionFileContent
-        .replace(/^ruby-/, '')
-        .replace(/\n/g, '')
+        .replace(regEx(/^ruby-/), '')
+        .replace(regEx(/\n/g), '')
         .trim();
     }
   }
@@ -182,8 +184,8 @@ export async function updateArtifacts(
         image: 'ruby',
         tagScheme: 'ruby',
         tagConstraint: await getRubyConstraint(updateArtifact),
-        preCommands,
       },
+      preCommands,
     };
     await exec(cmd, execOptions);
 
@@ -234,7 +236,7 @@ export async function updateArtifacts(
       memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
+    const resolveMatchRe = regEx('\\s+(.*) was resolved to', 'g');
     if (output.match(resolveMatchRe) && !config.isLockFileMaintenance) {
       logger.debug({ err }, 'Bundler has a resolve error');
       const resolveMatches = [];

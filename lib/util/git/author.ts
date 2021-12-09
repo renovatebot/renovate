@@ -1,10 +1,7 @@
 import addrs from 'email-addresses';
 import { logger } from '../../logger';
-
-export interface GitAuthor {
-  name?: string;
-  address?: string;
-}
+import { regEx } from '../regex';
+import type { GitAuthor } from './types';
 
 export function parseGitAuthor(input: string): GitAuthor | null {
   let result: GitAuthor = null;
@@ -20,7 +17,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     let massagedBotEmail = false;
     if (input.includes('<') && input.includes('>')) {
       // try wrapping the name part in quotations
-      massagedInput = '"' + input.replace(/(\s?<)/, '"$1');
+      massagedInput = '"' + input.replace(regEx(/(\s?<)/), '"$1');
     }
     if (input.includes('[bot]@')) {
       // invalid github app/bot addresses
@@ -33,7 +30,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     const parsed = addrs.parseOneAddress(massagedInput) as addrs.ParsedMailbox;
     if (parsed?.address) {
       result = {
-        name: parsed.name || input.replace(/@.*/, ''),
+        name: parsed.name || input.replace(regEx(/@.*/), ''),
         address: parsed.address,
       };
       if (massagedBotEmail) {

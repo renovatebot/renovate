@@ -1,7 +1,7 @@
 import _simpleGit from 'simple-git';
-import { dir } from 'tmp-promise';
+import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { Upgrade } from '../types';
 import updateDependency from './update';
@@ -13,15 +13,17 @@ describe('manager/git-submodules/update', () => {
   describe('updateDependency', () => {
     let upgrade: Upgrade;
     let adminConfig: RepoGlobalConfig;
+    let tmpDir: DirectoryResult;
     beforeAll(async () => {
       upgrade = { depName: 'renovate' };
 
-      const tmpDir = await dir();
+      tmpDir = await dir({ unsafeCleanup: true });
       adminConfig = { localDir: join(tmpDir.path) };
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
-    afterAll(() => {
-      setGlobalConfig();
+    afterAll(async () => {
+      await tmpDir.cleanup();
+      GlobalConfig.reset();
     });
     it('returns null on error', async () => {
       simpleGit.mockReturnValue({
@@ -48,7 +50,7 @@ describe('manager/git-submodules/update', () => {
         fileContent: '',
         upgrade,
       });
-      expect(update).toEqual('');
+      expect(update).toBe('');
     });
   });
 });

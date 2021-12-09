@@ -42,7 +42,7 @@ export async function detectMonorepos(
       if (!updateInternalDeps) {
         p.deps?.forEach((dep) => {
           if (internalPackageNames.includes(dep.depName)) {
-            dep.skipReason = SkipReason.InternalPackage; // eslint-disable-line no-param-reassign
+            dep.skipReason = SkipReason.InternalPackage;
           }
         });
       }
@@ -61,7 +61,7 @@ export async function detectMonorepos(
         if (!updateInternalDeps) {
           subPackage.deps?.forEach((dep) => {
             if (internalPackageNames.includes(dep.depName)) {
-              dep.skipReason = SkipReason.InternalPackage; // eslint-disable-line no-param-reassign
+              dep.skipReason = SkipReason.InternalPackage;
             }
           });
         }

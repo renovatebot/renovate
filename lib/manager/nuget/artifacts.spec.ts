@@ -2,7 +2,7 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { fs, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
@@ -49,12 +49,12 @@ describe('manager/nuget/artifacts', () => {
       Promise.resolve(`others/${dirName}`)
     );
     getRandomString.mockReturnValue('not-so-random' as any);
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
 
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   it('aborts if no lock file found', async () => {
@@ -150,7 +150,7 @@ describe('manager/nuget/artifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -166,7 +166,7 @@ describe('manager/nuget/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'global' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
@@ -187,7 +187,6 @@ describe('manager/nuget/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    // FIXME: explicit assert condition
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -195,7 +194,14 @@ describe('manager/nuget/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'packages.lock.json',
+          stderr: 'not found',
+        },
+      },
+    ]);
   });
   it('authenticates at registries', async () => {
     const execSnapshots = mockExecAll(exec);

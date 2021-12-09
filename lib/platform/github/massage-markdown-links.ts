@@ -3,6 +3,7 @@ import remark from 'remark';
 import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../logger';
 import { hasKey } from '../../util/object';
+import { regEx } from '../../util/regex';
 
 interface UrlMatch {
   start: number;
@@ -11,10 +12,10 @@ interface UrlMatch {
 }
 
 const urlRegex =
-  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-_a-z0-9]+\/[-_a-z0-9]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i;
+  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-_a-z0-9]+\/[-_a-z0-9]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i; // TODO #12872 (?<!re) after text not matching
 
 function massageLink(input: string): string {
-  return input.replace(/(?:to)?github\.com/i, 'togithub.com');
+  return input.replace(regEx(/(?:to)?github\.com/i), 'togithub.com');
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {

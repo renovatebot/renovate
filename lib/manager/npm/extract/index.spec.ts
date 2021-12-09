@@ -122,7 +122,7 @@ describe('manager/npm/extract/index', () => {
       );
       expect(res.npmrc).toBeDefined();
     });
-    it('ignores .npmrc when config.npmrc is defined', async () => {
+    it('ignores .npmrc when config.npmrc is defined and npmrcMerge=false', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           return 'some-npmrc\n';
@@ -136,10 +136,23 @@ describe('manager/npm/extract/index', () => {
       );
       expect(res.npmrc).toBeUndefined();
     });
+    it('reads .npmrc when config.npmrc is merged', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.npmrc') {
+          return 'repo-npmrc\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { npmrc: 'config-npmrc', npmrcMerge: true }
+      );
+      expect(res.npmrc).toEqual(`config-npmrc\nrepo-npmrc\n`);
+    });
     it('finds and filters .npmrc with variables', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
-          // eslint-disable-next-line
           return 'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
         }
         return null;
@@ -149,7 +162,7 @@ describe('manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res.npmrc).toEqual('registry=https://registry.npmjs.org\n');
+      expect(res.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
@@ -384,6 +397,20 @@ describe('manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
+      expect(res).toMatchSnapshot();
+    });
+
+    it('extracts packageManager', async () => {
+      const pJson = {
+        packageManager: 'yarn@3.0.0',
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot();
     });
   });

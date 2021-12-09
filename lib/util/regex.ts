@@ -1,8 +1,11 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
+
 import { logger } from '../logger';
 
 let RegEx: RegExpConstructor;
+
+const cache = new Map<string, RegExp>();
 
 try {
   // eslint-disable-next-line
@@ -16,23 +19,32 @@ try {
   RegEx = RegExp;
 }
 
-export function regEx(pattern: string, flags?: string): RegExp {
+export function regEx(pattern: string | RegExp, flags?: string): RegExp {
+  const key = `${pattern.toString()}:${flags}`;
+
+  const cachedResult = cache.get(key);
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   try {
-    return new RegEx(pattern, flags);
+    const instance = new RegEx(pattern, flags);
+    cache.set(key, instance);
+    return instance;
   } catch (err) {
     const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = pattern;
-    error.validationError = `Invalid regular expression: ${pattern}`;
+    error.validationSource = pattern.toString();
+    error.validationError = `Invalid regular expression: ${pattern.toString()}`;
     throw error;
   }
 }
 
 export function escapeRegExp(input: string): string {
-  return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string // TODO #12071
 }
 
-const configValStart = /^!?\//;
-const configValEnd = /\/$/;
+const configValStart = regEx(/^!?\//);
+const configValEnd = regEx(/\/$/);
 
 export function isConfigRegex(input: unknown): input is string {
   return (
@@ -52,16 +64,20 @@ function parseConfigRegex(input: string): RegExp | null {
   return null;
 }
 
-type ConfigRegexPredicate = (string) => boolean;
+type ConfigRegexPredicate = (s: string) => boolean;
 
-export function configRegexPredicate(input: string): ConfigRegexPredicate {
-  const configRegex = parseConfigRegex(input);
-  if (configRegex) {
-    const isPositive = !input.startsWith('!');
-    return (x: string): boolean => {
-      const res = configRegex.test(x);
-      return isPositive ? res : !res;
-    };
+export function configRegexPredicate(
+  input: string
+): ConfigRegexPredicate | null {
+  if (isConfigRegex(input)) {
+    const configRegex = parseConfigRegex(input);
+    if (configRegex) {
+      const isPositive = !input.startsWith('!');
+      return (x: string): boolean => {
+        const res = configRegex.test(x);
+        return isPositive ? res : !res;
+      };
+    }
   }
   return null;
 }

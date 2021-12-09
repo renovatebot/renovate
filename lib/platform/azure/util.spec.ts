@@ -117,7 +117,7 @@ describe('platform/azure/util', () => {
   describe('streamToString', () => {
     it('converts Readable stream to string', async () => {
       const res = await streamToString(Readable.from('foobar'));
-      expect(res).toEqual('foobar');
+      expect(res).toBe('foobar');
     });
     it('handles error', async () => {
       const stream = Readable.from('foobar');
@@ -137,7 +137,7 @@ describe('platform/azure/util', () => {
     });
     it('should configure personal access token', () => {
       const res = getStorageExtraCloneOpts({
-        token: '1234567890123456789012345678901234567890123456789012',
+        token: '123456789012345678901234567890123456789012345678test',
       });
       expect(res).toMatchSnapshot();
     });

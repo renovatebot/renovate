@@ -6,11 +6,11 @@ import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as memCache from '../../util/cache/memory';
 import { RegistryFlavor, RegistryInfo } from './types';
-import { id as datasource, fetchCrateRecordsPayload, getIndexSuffix } from '.';
+import { CrateDatasource } from '.';
 
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
@@ -21,6 +21,8 @@ const res3 = loadFixture('mypkg');
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
+
+const datasource = CrateDatasource.id;
 
 function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
   const mockClone = jest
@@ -63,13 +65,29 @@ function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
 describe('datasource/crate/index', () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
-      expect(getIndexSuffix('a')).toStrictEqual(['1', 'a']);
-      expect(getIndexSuffix('1')).toStrictEqual(['1', '1']);
-      expect(getIndexSuffix('1234567')).toStrictEqual(['12', '34', '1234567']);
-      expect(getIndexSuffix('ab')).toStrictEqual(['2', 'ab']);
-      expect(getIndexSuffix('abc')).toStrictEqual(['3', 'a', 'abc']);
-      expect(getIndexSuffix('abcd')).toStrictEqual(['ab', 'cd', 'abcd']);
-      expect(getIndexSuffix('abcde')).toStrictEqual(['ab', 'cd', 'abcde']);
+      expect(CrateDatasource.getIndexSuffix('a')).toStrictEqual(['1', 'a']);
+      expect(CrateDatasource.getIndexSuffix('1')).toStrictEqual(['1', '1']);
+      expect(CrateDatasource.getIndexSuffix('1234567')).toStrictEqual([
+        '12',
+        '34',
+        '1234567',
+      ]);
+      expect(CrateDatasource.getIndexSuffix('ab')).toStrictEqual(['2', 'ab']);
+      expect(CrateDatasource.getIndexSuffix('abc')).toStrictEqual([
+        '3',
+        'a',
+        'abc',
+      ]);
+      expect(CrateDatasource.getIndexSuffix('abcd')).toStrictEqual([
+        'ab',
+        'cd',
+        'abcd',
+      ]);
+      expect(CrateDatasource.getIndexSuffix('abcde')).toStrictEqual([
+        'ab',
+        'cd',
+        'abcde',
+      ]);
     });
   });
 
@@ -78,22 +96,22 @@ describe('datasource/crate/index', () => {
     let adminConfig: RepoGlobalConfig;
 
     beforeEach(async () => {
-      tmpDir = await dir();
+      tmpDir = await dir({ unsafeCleanup: true });
 
       adminConfig = {
         localDir: join(tmpDir.path, 'local'),
         cacheDir: join(tmpDir.path, 'cache'),
       };
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
 
       simpleGit.mockReset();
       memCache.init();
     });
 
-    afterEach(() => {
-      fs.rmdirSync(tmpDir.path, { recursive: true });
+    afterEach(async () => {
+      await tmpDir.cleanup();
       tmpDir = null;
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
 
     it('returns null for missing registry url', async () => {
@@ -229,7 +247,7 @@ describe('datasource/crate/index', () => {
     });
     it('clones cloudsmith private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
@@ -243,7 +261,7 @@ describe('datasource/crate/index', () => {
     });
     it('clones other private registry', async () => {
       const { mockClone } = setupGitMocks();
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -257,7 +275,7 @@ describe('datasource/crate/index', () => {
     });
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
       await getPkgReleases({
         datasource,
@@ -273,7 +291,7 @@ describe('datasource/crate/index', () => {
     });
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       await Promise.all([
@@ -299,7 +317,7 @@ describe('datasource/crate/index', () => {
     });
     it('returns null when git clone fails', async () => {
       setupErrorGitMock();
-      setGlobalConfig({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       const result = await getPkgReleases({
@@ -323,7 +341,10 @@ describe('datasource/crate/index', () => {
       const info: RegistryInfo = {
         flavor: RegistryFlavor.Cloudsmith,
       };
-      await expect(fetchCrateRecordsPayload(info, 'benedict')).toReject();
+      const crateDatasource = new CrateDatasource();
+      await expect(
+        crateDatasource.fetchCrateRecordsPayload(info, 'benedict')
+      ).toReject();
     });
   });
 });

@@ -1,10 +1,5 @@
 import type { PackageRuleInputConfig, UpdateType } from '../config/types';
-import {
-  LANGUAGE_DOCKER,
-  LANGUAGE_JAVASCRIPT,
-  LANGUAGE_NODE,
-  LANGUAGE_PYTHON,
-} from '../constants/languages';
+import { ProgrammingLanguage } from '../constants';
 
 import * as datasourceDocker from '../datasource/docker';
 import { OrbDatasource } from '../datasource/orb';
@@ -163,9 +158,9 @@ describe('util/package-rules', () => {
       ],
     };
     const res = applyPackageRules(dep);
-    expect(res.enabled).toBe(true);
+    expect(res.enabled).toBeTrue();
     const res2 = applyPackageRules({ ...dep, depName: 'anything' });
-    expect(res2.enabled).toBe(false);
+    expect(res2.enabled).toBeFalse();
   });
   it('matches anything if missing inclusive rules', () => {
     const config: TestConfig = {
@@ -251,7 +246,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_JAVASCRIPT,
+      language: ProgrammingLanguage.JavaScript,
       manager: 'meteor',
       depName: 'node',
     };
@@ -270,7 +265,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_PYTHON,
+      language: ProgrammingLanguage.Python,
       manager: 'pipenv',
       depName: 'node',
     };
@@ -281,7 +276,10 @@ describe('util/package-rules', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: [LANGUAGE_JAVASCRIPT, LANGUAGE_NODE],
+          matchLanguages: [
+            ProgrammingLanguage.JavaScript,
+            ProgrammingLanguage.NodeJS,
+          ],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -289,7 +287,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_JAVASCRIPT,
+      language: ProgrammingLanguage.JavaScript,
       manager: 'meteor',
       depName: 'node',
     };
@@ -300,7 +298,7 @@ describe('util/package-rules', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: [LANGUAGE_DOCKER],
+          matchLanguages: [ProgrammingLanguage.Docker],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -308,7 +306,7 @@ describe('util/package-rules', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: LANGUAGE_PYTHON,
+      language: ProgrammingLanguage.Python,
       manager: 'pipenv',
       depName: 'node',
     };
@@ -733,6 +731,27 @@ describe('util/package-rules', () => {
       ],
     };
     const res = applyPackageRules(config);
-    expect(res.groupSlug).toEqual('b');
+    expect(res.groupSlug).toBe('b');
+  });
+  it('matches matchSourceUrlPrefixes(case-insensitive)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/Renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/renovatebot/Presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
   });
 });

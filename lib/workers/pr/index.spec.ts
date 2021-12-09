@@ -1,5 +1,5 @@
 import { getConfig, git, mocked, partial, platform } from '../../../test/util';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { PlatformId } from '../../constants';
 import type { Pr } from '../../platform/types';
 import { BranchStatus } from '../../types';
 import * as _limits from '../global/limits';
@@ -214,14 +214,14 @@ describe('workers/pr/index', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.red);
       config.prCreation = 'status-success';
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('AwaitingTests');
+      expect(prBlockedBy).toBe('AwaitingTests');
       expect(pr).toBeUndefined();
     });
     it('should return needs-approval if prCreation set to approval', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'approval';
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('NeedsApproval');
+      expect(prBlockedBy).toBe('NeedsApproval');
       expect(pr).toBeUndefined();
     });
     it('should create PR if success for gitlab deps', async () => {
@@ -265,7 +265,7 @@ describe('workers/pr/index', () => {
       config.schedule = ['before 5am'];
       limits.isLimitReached.mockReturnValueOnce(true);
       const { prBlockedBy } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('RateLimited');
+      expect(prBlockedBy).toBe('RateLimited');
       expect(platform.createPr.mock.calls).toBeEmpty();
     });
     it('should create PR if limit is reached but dashboard checked', async () => {
@@ -282,6 +282,7 @@ describe('workers/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalled();
     });
     it('should create group PR', async () => {
+      const depsWithSameNotesSourceUrl = ['e', 'f'];
       config.upgrades = config.upgrades.concat([
         {
           depName: 'a',
@@ -305,12 +306,44 @@ describe('workers/pr/index', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
         },
+        {
+          depName: depsWithSameNotesSourceUrl[0],
+          updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
+        },
+        {
+          depName: depsWithSameNotesSourceUrl[1],
+          updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
+        },
       ] as never);
       config.updateType = 'lockFileMaintenance';
       config.recreateClosed = true;
       config.rebaseWhen = 'never';
       for (const upgrade of config.upgrades) {
         upgrade.logJSON = await changelogHelper.getChangeLogJSON(upgrade);
+
+        if (depsWithSameNotesSourceUrl.includes(upgrade.depName)) {
+          upgrade.sourceDirectory = `packages/${upgrade.depName}`;
+
+          upgrade.logJSON = {
+            ...upgrade.logJSON,
+            project: {
+              ...upgrade.logJSON.project,
+              repository: 'renovateapp/dummymonorepo',
+            },
+            versions: upgrade.logJSON.versions.map((V) => {
+              return {
+                ...V,
+                releaseNotes: {
+                  ...V.releaseNotes,
+                  notesSourceUrl:
+                    'https://github.com/renovateapp/dummymonorepo/blob/changelogfile.md',
+                },
+              };
+            }),
+          };
+        }
       }
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
@@ -341,7 +374,7 @@ describe('workers/pr/index', () => {
       });
       config.prCreation = 'status-success';
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('Error');
+      expect(prBlockedBy).toBe('Error');
       expect(pr).toBeUndefined();
     });
     it('should return null if waiting for not pending', async () => {
@@ -351,7 +384,7 @@ describe('workers/pr/index', () => {
       );
       config.prCreation = 'not-pending';
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('AwaitingTests');
+      expect(prBlockedBy).toBe('AwaitingTests');
       expect(pr).toBeUndefined();
     });
     it('should not create PR if waiting for not pending with stabilityStatus yellow', async () => {
@@ -362,7 +395,7 @@ describe('workers/pr/index', () => {
       config.prCreation = 'not-pending';
       config.stabilityStatus = BranchStatus.yellow;
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('AwaitingTests');
+      expect(prBlockedBy).toBe('AwaitingTests');
       expect(pr).toBeUndefined();
     });
     it('should create PR if pending timeout hit', async () => {
@@ -579,7 +612,7 @@ describe('workers/pr/index', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('BranchAutomerge');
+      expect(prBlockedBy).toBe('BranchAutomerge');
       expect(pr).toBeUndefined();
     });
     it('should return PR if branch automerging taking too long', async () => {
@@ -597,7 +630,7 @@ describe('workers/pr/index', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date('2018-01-01'));
       const { prBlockedBy, pr } = await prWorker.ensurePr(config);
-      expect(prBlockedBy).toEqual('BranchAutomerge');
+      expect(prBlockedBy).toBe('BranchAutomerge');
       expect(pr).toBeUndefined();
     });
     it('handles duplicate upgrades', async () => {
@@ -621,19 +654,19 @@ describe('workers/pr/index', () => {
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       config.prCreation = 'not-pending';
       config.artifactErrors = [{}];
-      config.platform = PLATFORM_TYPE_GITLAB;
+      config.platform = PlatformId.Gitlab;
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
 
     it('should trigger GitLab automerge when configured', async () => {
-      config.gitLabAutomerge = true;
+      config.platformAutomerge = true;
       config.gitLabIgnoreApprovals = true;
       config.automerge = true;
       await prWorker.ensurePr(config);
       const args = platform.createPr.mock.calls[0];
       expect(args[0].platformOptions).toMatchObject({
-        gitLabAutomerge: true,
+        usePlatformAutomerge: true,
         gitLabIgnoreApprovals: true,
       });
     });

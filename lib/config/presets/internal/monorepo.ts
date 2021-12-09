@@ -12,6 +12,9 @@ const repoGroups = {
     'https://github.com/arcus-azure/arcus.backgroundjobs',
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
+  'algoliasearch-client-javascript':
+    'https://github.com/algolia/algoliasearch-client-javascript',
+  'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
   'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',
   'apollo-server': 'https://github.com/apollographql/apollo-server',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
@@ -28,7 +31,10 @@ const repoGroups = {
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
+  deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
+  'dnd-kit': 'https://github.com/clauderic/dnd-kit',
+  'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -115,13 +121,16 @@ const repoGroups = {
     'https://github.com/loopbackio/loopback-next',
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
+  mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
     'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   'material-ui': 'https://github.com/mui-org/material-ui',
+  mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
   nest: 'https://github.com/nestjs/nest',
+  netty: 'https://github.com/netty/netty',
   neutrino: [
     'https://github.com/neutrinojs/neutrino',
     'https://github.com/mozilla-neutrino/neutrino-dev',
@@ -140,6 +149,7 @@ const repoGroups = {
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
@@ -147,7 +157,10 @@ const repoGroups = {
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
   react: 'https://github.com/facebook/react',
-  'react-router': 'https://github.com/ReactTraining/react-router',
+  'react-router': [
+    'https://github.com/ReactTraining/react-router', // old repo
+    'https://github.com/remix-run/react-router',
+  ],
   reakit: 'https://github.com/reakit/reakit',
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
@@ -171,6 +184,7 @@ const repoGroups = {
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
+  xterm: 'https://github.com/xtermjs/xterm.js',
 };
 
 const patternGroups = {

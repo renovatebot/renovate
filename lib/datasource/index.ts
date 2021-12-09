@@ -63,7 +63,7 @@ async function getRegistryReleases(
     );
     // istanbul ignore if
     if (cachedResult) {
-      logger.debug({ cacheKey }, 'Returning cached datasource response');
+      logger.trace({ cacheKey }, 'Returning cached datasource response');
       return cachedResult;
     }
   }
@@ -206,7 +206,23 @@ function resolveRegistryUrls(
 
 export function getDefaultVersioning(datasourceName: string): string {
   const datasource = getDatasourceFor(datasourceName);
-  return datasource.defaultVersioning || 'semver';
+  // istanbul ignore if: wrong regex manager config?
+  if (!datasource) {
+    logger.warn({ datasourceName }, 'Missing datasource!');
+  }
+  return datasource?.defaultVersioning || 'semver';
+}
+
+function applyReplacements(
+  config: GetReleasesInternalConfig
+): Pick<ReleaseResult, 'replacementName' | 'replacementVersion'> | undefined {
+  if (config.replacementName && config.replacementVersion) {
+    return {
+      replacementName: config.replacementName,
+      replacementVersion: config.replacementVersion,
+    };
+  }
+  return undefined;
 }
 
 async function fetchReleases(
@@ -246,6 +262,7 @@ async function fetchReleases(
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
+  dep = { ...dep, ...applyReplacements(config) };
   return dep;
 }
 
@@ -350,7 +367,7 @@ export async function getPkgReleases(
   }
   // Strip constraints from releases result
   res.releases.forEach((release) => {
-    delete release.constraints; // eslint-disable-line no-param-reassign
+    delete release.constraints;
   });
   return res;
 }

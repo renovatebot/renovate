@@ -1,10 +1,17 @@
 import * as url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
-import { GOOGLE_REPO, JCENTER_REPO, MAVEN_REPO, TokenType } from './common';
+import {
+  GOOGLE_REPO,
+  GRADLE_PLUGIN_PORTAL_REPO,
+  JCENTER_REPO,
+  MAVEN_REPO,
+  TokenType,
+} from './common';
 import { tokenize } from './tokenizer';
 import type {
   MatchConfig,
@@ -106,14 +113,32 @@ function handleAssignment({
   packageFile,
   tokenMap,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
-  const { keyToken, valToken } = tokenMap;
-  const variableData: VariableData = {
-    key: keyToken.value,
+  const { objectToken, keyToken, valToken } = tokenMap;
+  const obj = objectToken?.value;
+  const key = obj ? `${obj}.${keyToken.value}` : keyToken.value;
+
+  const dep = parseDependencyString(valToken.value);
+  if (dep) {
+    dep.groupName = key;
+    dep.managerData = {
+      fileReplacePosition: valToken.offset + dep.depName.length + 1,
+      packageFile,
+    };
+  }
+
+  const varData: VariableData = {
+    key,
     value: valToken.value,
     fileReplacePosition: valToken.offset,
     packageFile,
   };
-  return { vars: { [variableData.key]: variableData } };
+
+  const result: SyntaxHandlerOutput = {
+    vars: { [key]: varData },
+    deps: dep ? [dep] : [],
+  };
+
+  return result;
 }
 
 function processDepString({
@@ -135,26 +160,40 @@ function processDepString({
 function processDepInterpolation({
   tokenMap,
   variables,
+  packageFile: packageFileOrig,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const token = tokenMap.depInterpolation as StringInterpolation;
   const interpolationResult = interpolateString(token.children, variables);
   if (interpolationResult && isDependencyString(interpolationResult)) {
     const dep = parseDependencyString(interpolationResult);
     if (dep) {
+      let packageFile: string;
+      let fileReplacePosition: number;
       token.children.forEach((child) => {
         const variable = variables[child.value];
-        if (
-          child?.type === TokenType.Variable &&
-          variable &&
-          variable?.value === dep.currentValue
-        ) {
-          dep.managerData = {
-            fileReplacePosition: variable.fileReplacePosition,
-            packageFile: variable.packageFile,
-          };
-          dep.groupName = variable.key;
+        if (child?.type === TokenType.Variable && variable) {
+          packageFile = variable.packageFile;
+          fileReplacePosition = variable.fileReplacePosition;
+          if (variable?.value === dep.currentValue) {
+            dep.managerData = { fileReplacePosition, packageFile };
+            dep.groupName = variable.key;
+          }
         }
       });
+      if (!dep.managerData) {
+        const lastToken = token.children[token.children.length - 1];
+        if (
+          lastToken.type === TokenType.String &&
+          lastToken.value.startsWith(`:${dep.currentValue}`)
+        ) {
+          packageFile = packageFileOrig;
+          fileReplacePosition = lastToken.offset + 1;
+          delete dep.groupName;
+        } else {
+          dep.skipReason = SkipReason.ContainsVariable;
+        }
+        dep.managerData = { fileReplacePosition, packageFile };
+      }
       return { deps: [dep] };
     }
   }
@@ -215,9 +254,12 @@ function processPredefinedRegistryUrl({
     mavenCentral: MAVEN_REPO,
     jcenter: JCENTER_REPO,
     google: GOOGLE_REPO,
+    gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
   }[registryName];
   return { urls: [registryUrl] };
 }
+
+const annoyingMethods = new Set(['createXmlValueRemover']);
 
 function processLongFormDep({
   tokenMap,
@@ -232,6 +274,7 @@ function processLongFormDep({
     const versionToken: Token = tokenMap.version;
     if (versionToken.type === TokenType.Word) {
       const variable = variables[versionToken.value];
+      dep.groupName = variable.key;
       dep.managerData = {
         fileReplacePosition: variable.fileReplacePosition,
         packageFile: variable.packageFile,
@@ -242,12 +285,29 @@ function processLongFormDep({
         packageFile,
       };
     }
+    const methodName = tokenMap.methodName?.value;
+    if (annoyingMethods.has(methodName)) {
+      dep.skipReason = SkipReason.Ignored;
+    }
+
     return { deps: [dep] };
   }
   return null;
 }
 
 const matcherConfigs: SyntaxMatchConfig[] = [
+  {
+    // foo.bar = 'baz'
+    matchers: [
+      { matchType: TokenType.Word, tokenMapKey: 'objectToken' },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
   {
     // foo = 'bar'
     matchers: [
@@ -330,7 +390,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     matchers: [
       {
         matchType: TokenType.Word,
-        matchValue: ['mavenCentral', 'jcenter', 'google'],
+        matchValue: ['mavenCentral', 'jcenter', 'google', 'gradlePluginPortal'],
         tokenMapKey: 'registryName',
       },
       { matchType: TokenType.LeftParen },
@@ -451,6 +511,20 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
       { matchType: TokenType.RightParen },
       endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
+    // fooBarBaz("com.example", "my.dependency", "1.2.3")
+    matchers: [
+      { matchType: TokenType.Word, tokenMapKey: 'methodName' },
+      { matchType: TokenType.LeftParen },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.RightParen },
     ],
     handler: processLongFormDep,
   },
