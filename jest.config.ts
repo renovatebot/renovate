@@ -18,7 +18,7 @@ const config: InitialOptionsTsJest = {
     : ['html', 'text-summary'],
   coverageThreshold: {
     global: {
-      branches: 94,
+      branches: 98,
       functions: 100,
       lines: 100,
       statements: 100,
