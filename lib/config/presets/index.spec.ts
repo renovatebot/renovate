@@ -455,6 +455,22 @@ describe('config/presets/index', () => {
         packageTag: '1.2.3',
       });
     });
+
+    it('parses local with subdirectory and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository//path/to/preset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset',
+        presetPath: 'path/to',
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
     it('parses no prefix as local', () => {
       expect(presets.parsePreset('some/repo')).toEqual({
         packageName: 'some/repo',
