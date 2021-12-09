@@ -206,7 +206,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Upload docs
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v2.3.0
         with:
           name: docs
           path: tmp/docs
