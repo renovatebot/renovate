@@ -2547,10 +2547,10 @@ You can set this option to `false` if you wish to disable updating for pinned (s
 
 ## userStrings
 
-User-facing strings pertaining to the PR comment that gets posted when a PR is closed.
 When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+If you want, you can change the text in the comment with the `userStrings` config option.
 
-The following strings can currently be customized:
+You can edit these user-facing strings:
 
 - `ignoreDigest`: Text of the PR comment for digest upgrades.
 - `ignoreMajor`: Text of the PR comment for major upgrades.
