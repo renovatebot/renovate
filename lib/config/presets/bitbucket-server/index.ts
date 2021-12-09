@@ -24,7 +24,7 @@ export async function fetchJSONFile(
   setBaseUrl(endpoint);
   let url = `rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
   if (branchOrTag) {
-    url += '&at=' + encodeURIComponent(`refs/heads/${branchOrTag}`);
+    url += '&at=' + encodeURIComponent(`${branchOrTag}`);
   }
 
   let res: { body: FileData };
