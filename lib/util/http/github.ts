@@ -14,9 +14,9 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../../util/cache/repository';
 import { maskToken } from '../mask';
 import { regEx } from '../regex';
+import { ensureTrailingSlash } from '../url';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
-import { ensureTrailingSlash } from '../url';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
@@ -176,9 +176,15 @@ function constructAcceptString(input?: any): string {
 }
 
 function getGraphqlPageSize(
+  baseUrl: string,
   fieldName: string,
-  options: GraphqlOptions
+  initialCount = 100
 ): number {
+  let count = initialCount;
+  if (ensureTrailingSlash(baseUrl) !== ensureTrailingSlash(githubBaseUrl)) {
+    return count;
+  }
+
   const cache = getCache();
   cache.githubGraphql ??= {};
   const cachedRecord = cache.githubGraphql[fieldName];
@@ -186,9 +192,12 @@ function getGraphqlPageSize(
 
   const now = DateTime.local();
   let timestamp = now.toISO();
-  let count = options.count ?? 100;
 
   if (cachedRecord) {
+    logger.debug(
+      { fieldName, ...cachedRecord },
+      'Found cached GraphQL page size'
+    );
     const then = DateTime.fromISO(cachedRecord.timestamp);
     const expiry = then.plus({ hours: 24 });
     const isExpired = now > expiry;
@@ -203,12 +212,23 @@ function getGraphqlPageSize(
   return count;
 }
 
-function setGraphqlPageSize(fieldName: string, count: number): void {
-  const cache = getCache();
-  cache.githubGraphql ??= {};
-  const now = DateTime.local();
-  const timestamp = now.toISO();
-  cache.githubGraphql[fieldName] = { timestamp, count };
+function setGraphqlPageSize(
+  baseUrl: string,
+  fieldName: string,
+  count: number
+): void {
+  const oldCount = getGraphqlPageSize(baseUrl, fieldName);
+  if (count !== oldCount) {
+    const now = DateTime.local();
+    const timestamp = now.toISO();
+    logger.debug(
+      { fieldName, count, timestamp },
+      'Saving new GraphQL page size'
+    );
+    const cache = getCache();
+    cache.githubGraphql ??= {};
+    cache.githubGraphql[fieldName] = { timestamp, count };
+  }
 }
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
@@ -350,8 +370,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const { paginate = true } = options;
 
     let optimalCount: null | number = null;
-    const initialCount = getGraphqlPageSize(fieldName, options);
-    let count = initialCount;
+    let count = getGraphqlPageSize(baseUrl, fieldName, options.count ?? 100);
     let limit = options.limit || 1000;
     let cursor: string = null;
 
@@ -396,19 +415,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       }
     }
 
-    // See: https://github.com/renovatebot/renovate/issues/12703
-    // istanbul ignore if
-    if (
-      optimalCount &&
-      optimalCount < initialCount && // log only shrinked results
-      ensureTrailingSlash(baseUrl) === ensureTrailingSlash(githubBaseUrl)
-    ) {
-      setGraphqlPageSize(fieldName, optimalCount);
-      logger.debug(
-        { fieldName, optimalCount },
-        'Successful GraphQL query with shrinked pagination size'
-      );
-    }
+    setGraphqlPageSize(baseUrl, fieldName, optimalCount);
 
     return result;
   }
