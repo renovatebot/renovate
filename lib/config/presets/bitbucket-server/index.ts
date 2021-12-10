@@ -18,13 +18,13 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  packageTag?: string
+  branchOrTag?: string
 ): Promise<Preset> {
   const [projectKey, repositorySlug] = repo.split('/');
   setBaseUrl(endpoint);
   let url = `rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
-  if (packageTag) {
-    url += '&at=' + encodeURIComponent(packageTag);
+  if (branchOrTag) {
+    url += '&at=' + encodeURIComponent(branchOrTag);
   }
 
   let res: { body: FileData };
