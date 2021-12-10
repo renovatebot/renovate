@@ -1,3 +1,7 @@
+---
+title: Managers
+---
+
 # Managers
 
 Renovate is based around the concept of "package managers", or "managers" for short.
