@@ -1,24 +1,36 @@
-import { defaultConfig, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
+import { defaultConfig } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
 import type { BranchUpgradeConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
-const sampleHtml = loadFixture('sample.html', `../../manager/html`);
+const sampleHtml = Fixtures.get('sample.html', `../../manager/html`);
 
-jest.mock('../../util/fs');
+jest.mock('fs-extra', () => Fixtures.fsExtra());
 
 describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;
+    beforeAll(() => {
+      GlobalConfig.set({
+        localDir: '/temp',
+      });
+    });
     beforeEach(() => {
       upgrade = {
         ...JSON.parse(JSON.stringify(defaultConfig)),
         manager: 'html',
+        packageFile: 'test',
       };
       reuseExistingBranch = false;
     });
+    afterAll(() => {
+      GlobalConfig.reset();
+    });
+
     it('rebases if the deps list has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
       reuseExistingBranch = true;
@@ -154,7 +166,6 @@ describe('workers/branch/auto-replace', () => {
       upgrade.depIndex = 0;
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
-      upgrade.packageFile = 'k8s/base/defaults.yaml';
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
