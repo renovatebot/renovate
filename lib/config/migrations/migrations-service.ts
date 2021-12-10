@@ -1,6 +1,5 @@
 import { dequal } from 'dequal';
 import type { MigratedConfig, RenovateConfig } from '../types';
-import { AbstractMigration } from './base/abstract-migration';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
@@ -8,7 +7,7 @@ import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
-import type { MigrationConstructor } from './types';
+import type { Migration, MigrationConstructor } from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
@@ -66,8 +65,8 @@ export class MigrationsService {
   private static getMigrations(
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig
-  ): AbstractMigration[] {
-    const migrations: AbstractMigration[] = [];
+  ): ReadonlyArray<Migration> {
+    const migrations: Migration[] = [];
 
     for (const propertyName of MigrationsService.removedProperties) {
       migrations.push(
@@ -93,8 +92,8 @@ export class MigrationsService {
       );
     }
 
-    for (const Migration of this.customMigrations) {
-      migrations.push(new Migration(originalConfig, migratedConfig));
+    for (const CustomMigration of this.customMigrations) {
+      migrations.push(new CustomMigration(originalConfig, migratedConfig));
     }
 
     return migrations;
