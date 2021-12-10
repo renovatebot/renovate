@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
 import { PlatformId } from '../../constants';
@@ -10,10 +11,12 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getCache } from '../../util/cache/repository';
 import { maskToken } from '../mask';
 import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
+import { ensureTrailingSlash } from '../url';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
@@ -172,6 +175,42 @@ function constructAcceptString(input?: any): string {
   return acceptStrings.join(', ');
 }
 
+function getGraphqlPageSize(
+  fieldName: string,
+  options: GraphqlOptions
+): number {
+  const cache = getCache();
+  cache.githubGraphql ??= {};
+  const cachedRecord = cache.githubGraphql[fieldName];
+  delete cache.githubGraphql[fieldName];
+
+  const now = DateTime.local();
+  let timestamp = now.toISO();
+  let count = options.count ?? 100;
+
+  if (cachedRecord) {
+    const then = DateTime.fromISO(cachedRecord.timestamp);
+    const expiry = then.plus({ hours: 24 });
+    const isExpired = now > expiry;
+    timestamp = isExpired ? now.toISO() : then.toISO();
+    count = isExpired ? Math.min(count * 2, 100) : cachedRecord.count;
+  }
+
+  if (count < 100) {
+    cache.githubGraphql[fieldName] = { timestamp, count };
+  }
+
+  return count;
+}
+
+function setGraphqlPageSize(fieldName: string, count: number): void {
+  const cache = getCache();
+  cache.githubGraphql ??= {};
+  const now = DateTime.local();
+  const timestamp = now.toISO();
+  cache.githubGraphql[fieldName] = { timestamp, count };
+}
+
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   constructor(
     hostType: string = PlatformId.Github,
@@ -311,7 +350,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const { paginate = true } = options;
 
     let optimalCount: null | number = null;
-    const initialCount = options.count || 100;
+    const initialCount = getGraphqlPageSize(fieldName, options);
     let count = initialCount;
     let limit = options.limit || 1000;
     let cursor: string = null;
@@ -362,8 +401,9 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     if (
       optimalCount &&
       optimalCount < initialCount && // log only shrinked results
-      baseUrl === githubBaseUrl
+      ensureTrailingSlash(baseUrl) === ensureTrailingSlash(githubBaseUrl)
     ) {
+      setGraphqlPageSize(fieldName, optimalCount);
       logger.debug(
         { fieldName, optimalCount },
         'Successful GraphQL query with shrinked pagination size'

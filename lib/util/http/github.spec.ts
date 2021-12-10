@@ -1,4 +1,6 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
+import { mocked } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -7,8 +9,13 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import { id as GITHUB_RELEASES_ID } from '../../datasource/github-releases';
+import * as _repositoryCache from '../../util/cache/repository';
+import type { Cache } from '../../util/cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
+
+jest.mock('../../util/cache/repository');
+const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
 
@@ -40,10 +47,14 @@ query(
 
 describe('util/http/github', () => {
   let githubApi: GithubHttp;
+  let repoCache: Cache = {};
+
   beforeEach(() => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
+    repoCache = {};
+    repositoryCache.getCache.mockReturnValue(repoCache);
   });
 
   afterEach(() => {
@@ -473,6 +484,13 @@ describe('util/http/github', () => {
       expect(items).toHaveLength(2);
     });
     it('shrinks items count on 50x', async () => {
+      repoCache.githubGraphql = {
+        testItem: {
+          timestamp: DateTime.local().toISO(),
+          count: 50,
+        },
+      };
+
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
@@ -486,6 +504,8 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
+
+      expect(repoCache?.githubGraphql?.testItem?.count).toBe(25);
 
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(4);

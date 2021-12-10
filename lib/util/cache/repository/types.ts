@@ -31,6 +31,11 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
+export interface GithubGraphqlCache {
+  timestamp: string;
+  count: number;
+}
+
 export interface Cache {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
@@ -40,4 +45,5 @@ export interface Cache {
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
+  githubGraphql?: Record<string, GithubGraphqlCache>;
 }
