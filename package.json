@@ -182,6 +182,7 @@
     "moo": "0.5.1",
     "nanoid": "3.1.30",
     "node-html-parser": "3.3.6",
+    "npm-upgrade": "3.0.0",
     "openpgp": "5.0.1",
     "p-all": "3.0.0",
     "p-map": "4.0.0",

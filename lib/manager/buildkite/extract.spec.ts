@@ -5,6 +5,7 @@ const pipeline1 = loadFixture('pipeline1.yml');
 const pipeline2 = loadFixture('pipeline2.yml');
 const pipeline3 = loadFixture('pipeline3.yml');
 const pipeline4 = loadFixture('pipeline4.yml');
+const pipeline5 = loadFixture('pipeline5.yml');
 
 describe('manager/buildkite/extract', () => {
   describe('extractPackageFile()', () => {
@@ -30,6 +31,11 @@ describe('manager/buildkite/extract', () => {
       const res = extractPackageFile(pipeline4).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
+    });
+    it('extracts git-based plugins', () => {
+      const res = extractPackageFile(pipeline5).deps;
+      expect(res.toMatchSnapshot());
+      expect(res).toHaveLength(3);
     });
   });
 });

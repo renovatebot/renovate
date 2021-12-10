@@ -75,10 +75,21 @@ Array [
 exports[`manager/buildkite/extract extractPackageFile() extracts simple single plugin 1`] = `
 Array [
   Object {
-    "currentValue": "v2.0.0",
-    "datasource": "github-tags",
-    "depName": "abc/detect-clowns",
-    "lookupName": "abc/detect-clowns-buildkite-plugin",
+    "currentValue": "v3.2.7",
+    "datasource": "github-releases",
+    "depName": "some-org/some-plugin",
+    "skipReason": undefined,
+  },
+  Object {
+    "currentValue": "v33.3.7",
+    "datasource": "github-releases",
+    "depName": "some-other-org/some-other-plugin",
+    "skipReason": undefined,
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "github-releases",
+    "depName": "some-third-org/some-third-plugin",
     "skipReason": undefined,
   },
 ]
