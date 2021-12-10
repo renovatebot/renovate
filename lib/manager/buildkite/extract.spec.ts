@@ -1,10 +1,10 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const pipeline1 = loadFixture('pipeline1.yml');
-const pipeline2 = loadFixture('pipeline2.yml');
-const pipeline3 = loadFixture('pipeline3.yml');
-const pipeline4 = loadFixture('pipeline4.yml');
+const pipeline1 = Fixtures.get('pipeline1.yml');
+const pipeline2 = Fixtures.get('pipeline2.yml');
+const pipeline3 = Fixtures.get('pipeline3.yml');
+const pipeline4 = Fixtures.get('pipeline4.yml');
 
 describe('manager/buildkite/extract', () => {
   describe('extractPackageFile()', () => {

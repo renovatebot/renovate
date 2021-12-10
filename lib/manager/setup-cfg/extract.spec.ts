@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const content = loadFixture('setup-cfg-1.txt');
+const content = Fixtures.get('setup-cfg-1.txt');
 
 describe('manager/setup-cfg/extract', () => {
   describe('extractPackageFile()', () => {

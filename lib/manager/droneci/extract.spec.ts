@@ -1,8 +1,8 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 
 import { extractPackageFile } from './extract';
 
-const droneYAML = loadFixture('.drone.yml');
+const droneYAML = Fixtures.get('.drone.yml');
 
 describe('manager/droneci/extract', () => {
   describe('extractPackageFile()', () => {

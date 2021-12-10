@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const pkgContent = loadFixture(`SamplePackage.swift`);
+const pkgContent = Fixtures.get(`SamplePackage.swift`);
 
 describe('manager/swift/index', () => {
   describe('extractPackageFile()', () => {

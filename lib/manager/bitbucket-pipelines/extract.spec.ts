@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const bitbucketPipelinesYAML = loadFixture('bitbucket-pipelines.yaml');
+const bitbucketPipelinesYAML = Fixtures.get('bitbucket-pipelines.yaml');
 
 describe('manager/bitbucket-pipelines/extract', () => {
   describe('extractPackageFile()', () => {

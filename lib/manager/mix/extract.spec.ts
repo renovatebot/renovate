@@ -1,8 +1,8 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { GlobalConfig } from '../../config/global';
 import { extractPackageFile } from '.';
 
-const sample = loadFixture('mix.exs');
+const sample = Fixtures.get('mix.exs');
 
 describe('manager/mix/extract', () => {
   beforeEach(() => {

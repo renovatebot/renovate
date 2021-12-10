@@ -1,8 +1,8 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackage } from './extract';
 
-const minimumContent = loadFixture(`minimum.pom.xml`);
-const simpleContent = loadFixture(`simple.pom.xml`);
+const minimumContent = Fixtures.get(`minimum.pom.xml`);
+const simpleContent = Fixtures.get(`simple.pom.xml`);
 
 describe('manager/maven/extract', () => {
   describe('extractDependencies', () => {

@@ -1,8 +1,8 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const brokenYaml = loadFixture('update.yaml');
-const packageFile = loadFixture('extract.yaml');
+const brokenYaml = Fixtures.get('update.yaml');
+const packageFile = Fixtures.get('extract.yaml');
 
 describe('manager/pub/extract', () => {
   describe('extractPackageFile', () => {

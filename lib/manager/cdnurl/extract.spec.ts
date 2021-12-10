@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const input = loadFixture(`sample.txt`);
+const input = Fixtures.get(`sample.txt`);
 
 describe('manager/cdnurl/extract', () => {
   it('extractPackageFile', () => {

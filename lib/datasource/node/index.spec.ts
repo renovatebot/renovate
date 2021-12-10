@@ -1,10 +1,10 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { datasource, defaultRegistryUrl } from './common';
 
-const res1 = loadFixture('index.json');
+const res1 = Fixtures.get('index.json');
 
 describe('datasource/node/index', () => {
   describe('getReleases', () => {

@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const multidocYaml = loadFixture('multidoc.yaml');
+const multidocYaml = Fixtures.get('multidoc.yaml');
 
 describe('manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {

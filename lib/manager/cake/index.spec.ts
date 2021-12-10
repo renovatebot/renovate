@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const content = loadFixture('build.cake');
+const content = Fixtures.get('build.cake');
 
 describe('manager/cake/index', () => {
   it('extracts', () => {

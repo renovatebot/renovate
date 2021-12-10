@@ -1,9 +1,9 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
-const gomod1 = loadFixture('1/go.mod');
-const gomod2 = loadFixture('2/go.mod');
+const gomod1 = Fixtures.get('1/go.mod');
+const gomod2 = Fixtures.get('2/go.mod');
 
 describe('manager/gomod/update', () => {
   describe('updateDependency', () => {

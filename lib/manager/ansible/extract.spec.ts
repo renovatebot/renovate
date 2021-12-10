@@ -1,8 +1,8 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import extractPackageFile from './extract';
 
-const yamlFile1 = loadFixture('main1.yaml');
-const yamlFile2 = loadFixture('main2.yaml');
+const yamlFile1 = Fixtures.get('main1.yaml');
+const yamlFile2 = Fixtures.get('main2.yaml');
 
 describe('manager/ansible/extract', () => {
   describe('extractPackageFile()', () => {

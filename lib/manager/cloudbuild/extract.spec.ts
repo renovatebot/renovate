@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const file1 = loadFixture('cloudbuild.yml');
+const file1 = Fixtures.get('cloudbuild.yml');
 
 describe('manager/cloudbuild/extract', () => {
   describe('extractPackageFile()', () => {

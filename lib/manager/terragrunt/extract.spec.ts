@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const tg1 = loadFixture('2.hcl');
+const tg1 = Fixtures.get('2.hcl');
 const tg2 = `terragrunt {
   source = "../../modules/fe"
 }

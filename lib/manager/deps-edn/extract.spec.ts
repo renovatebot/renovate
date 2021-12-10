@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const depsEdn = loadFixture('deps.edn');
+const depsEdn = Fixtures.get('deps.edn');
 
 describe('manager/deps-edn/extract', () => {
   it('extractPackageFile', () => {
