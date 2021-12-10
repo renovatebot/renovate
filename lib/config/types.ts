@@ -96,7 +96,7 @@ export interface RepoGlobalConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
-  binarySource?: 'docker' | 'global';
+  binarySource?: 'docker' | 'global' | 'install';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;

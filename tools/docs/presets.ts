@@ -34,7 +34,7 @@ export async function generatePresets(dist: string): Promise<void> {
     let content = `\n`;
     for (const [preset, value] of Object.entries(presetConfig)) {
       let header = `\n### ${name === 'default' ? '' : name}:${preset}`;
-      let presetDescription = value.description;
+      let presetDescription = value.description as string;
       delete value.description;
       if (!presetDescription) {
         if (value.packageRules?.[0].description) {
