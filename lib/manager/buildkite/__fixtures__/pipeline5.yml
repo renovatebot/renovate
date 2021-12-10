@@ -1,0 +1,8 @@
+steps:
+  - plugins:
+      - ssh://git@github.company.com/org/some-plugin#v3.2.7:
+          username: abc
+      - git@github.company.com/org/some-plugin#v3.2.7:
+          username: zyx
+      - https://@github:csnzoo:com/secure/docker-buildkite-plugin#v3:2:7:
+          build: app
