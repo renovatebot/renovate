@@ -1,4 +1,5 @@
 import { quote } from 'shlex';
+import { GlobalConfig } from '../../config/global';
 import { getPkgReleases } from '../../datasource';
 import { logger } from '../../logger';
 import * as allVersioning from '../../versioning';
@@ -25,6 +26,30 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: npmVersioningId,
   },
 };
+
+export function supportsDynamicInstall(toolName: string): boolean {
+  return !!allToolConfig[toolName];
+}
+
+export function isBuildpack(): boolean {
+  return !!process.env.BUILDPACK;
+}
+
+export function isDynamicInstall(toolConstraints?: ToolConstraint[]): boolean {
+  const { binarySource } = GlobalConfig.get();
+  if (binarySource !== 'install') {
+    return false;
+  }
+  if (!isBuildpack()) {
+    logger.warn(
+      'binarySource=install is only compatible with images derived from containerbase/buildpack'
+    );
+    return false;
+  }
+  return !!toolConstraints?.every((toolConstraint) =>
+    supportsDynamicInstall(toolConstraint.toolName)
+  );
+}
 
 export async function resolveConstraint(
   toolConstraint: ToolConstraint
