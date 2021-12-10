@@ -5,7 +5,7 @@ import type {
   ValidationMessage,
 } from '../config/types';
 import type { ProgrammingLanguage } from '../constants';
-import type { RangeStrategy, SkipReason } from '../types';
+import type { ModuleApi, RangeStrategy, SkipReason } from '../types';
 import type { File } from '../util/git/types';
 
 export type Result<T> = T | Promise<T>;
@@ -142,6 +142,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  userStrings?: Record<string, string>;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -234,7 +235,7 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
-export interface ManagerApi {
+export interface ManagerApi extends ModuleApi {
   defaultConfig: Record<string, unknown>;
   language?: ProgrammingLanguage;
   supportsLockFileMaintenance?: boolean;

@@ -132,6 +132,30 @@ describe('platform/github/index', () => {
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('should support custom endpoint without version', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com')
+        .head('/')
+        .reply(200)
+
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, [
+          {
+            email: 'user@domain.com',
+          },
+        ]);
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: '123test',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
   describe('getRepos', () => {
