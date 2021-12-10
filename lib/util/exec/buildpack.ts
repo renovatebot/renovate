@@ -74,21 +74,21 @@ export async function resolveConstraint(
   }
 
   const pkgReleases = await getPkgReleases(toolConfig);
-  if (!pkgReleases?.releases?.length) {
-    throw new Error('No tool releases found.');
-  }
+  const releases = pkgReleases?.releases ?? [];
+  const versions = releases.map((r) => r.version);
+  const resolvedVersion = versions
+    .filter((v) => !constraint || versioning.matches(v, constraint))
+    .pop();
 
-  const allVersions = pkgReleases.releases.map((r) => r.version);
-  const matchingVersions = allVersions.filter(
-    (v) => !constraint || versioning.matches(v, constraint)
-  );
-
-  if (matchingVersions.length) {
-    const resolvedVersion = matchingVersions.pop();
+  if (resolvedVersion) {
     logger.debug({ toolName, constraint, resolvedVersion }, 'Resolved version');
     return resolvedVersion;
   }
-  const latestVersion = allVersions.filter((v) => versioning.isStable(v)).pop();
+
+  const latestVersion = versions.filter((v) => versioning.isStable(v)).pop();
+  if (!latestVersion) {
+    throw new Error('No tool releases found.');
+  }
   logger.warn(
     { toolName, constraint, latestVersion },
     'No matching tool versions found for constraint - using latest version'
