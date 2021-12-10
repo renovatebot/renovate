@@ -41,7 +41,15 @@ export function hasValidSchedule(
   const hasFailedSchedules = schedule.some((scheduleText) => {
     const parsedCron = parseCron(scheduleText);
     if (parsedCron !== undefined) {
-      // It was valid cron syntax
+      if (
+        parsedCron.minutes.length !== 60 ||
+        scheduleText.indexOf(minutesChar) !== 0
+      ) {
+        message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
+        return true;
+      }
+
+      // It was valid cron syntax and * as minutes
       return false;
     }
 
