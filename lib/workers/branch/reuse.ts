@@ -68,6 +68,7 @@ export async function shouldReuseExistingBranch(
         result.reuseExistingBranch = true;
         result.isModified = true;
       }
+      logger.debug('Branch is unmodified, so can be rebased');
       return result;
     }
     logger.debug('Branch is up-to-date');

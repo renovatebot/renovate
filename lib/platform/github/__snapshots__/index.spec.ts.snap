@@ -7154,6 +7154,14 @@ Array [
 ]
 `;
 
+exports[`platform/github/index initPlatform() should support custom endpoint without version 1`] = `
+Object {
+  "endpoint": "https://ghe.renovatebot.com/",
+  "gitAuthor": "undefined <user@domain.com>",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
 exports[`platform/github/index initPlatform() should support default endpoint no email access 1`] = `
 Object {
   "endpoint": "https://api.github.com/",

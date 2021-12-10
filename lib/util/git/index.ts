@@ -16,6 +16,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
+import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
@@ -142,6 +143,41 @@ let git: SimpleGit | undefined;
 let gitInitialized: boolean;
 
 let privateKeySet = false;
+
+export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
+
+export async function validateGitVersion(): Promise<boolean> {
+  let version: string;
+  const globalGit = Git();
+  try {
+    const raw = await globalGit.raw(['--version']);
+    for (const section of raw.split(/\s+/)) {
+      if (semverCoerced.isVersion(section)) {
+        version = section;
+        break;
+      }
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Error fetching git version');
+    return false;
+  }
+  // istanbul ignore if
+  if (
+    !(
+      version &&
+      (version === GIT_MINIMUM_VERSION ||
+        semverCoerced.isGreaterThan(version, GIT_MINIMUM_VERSION))
+    )
+  ) {
+    logger.error(
+      { detectedVersion: version, minimumVersion: GIT_MINIMUM_VERSION },
+      'Git version needs upgrading'
+    );
+    return false;
+  }
+  logger.debug(`Found valid git version: ${version}`);
+  return true;
+}
 
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
@@ -520,6 +556,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
     // author matches - branch has not been modified
+    logger.debug({ branchName }, 'Branch has not been modified');
     config.branchIsModified[branchName] = false;
     return false;
   }
