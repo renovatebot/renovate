@@ -64,7 +64,7 @@ export async function lookupUpdates(
       res.skipReason = SkipReason.InvalidConfig;
       return res;
     }
-    const isValid = currentValue && versioning.isValid(currentValue);
+    const isValid = is.string(currentValue) && versioning.isValid(currentValue);
     if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
