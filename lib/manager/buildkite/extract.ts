@@ -4,7 +4,6 @@ import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
-import { id as githubReleaseDatasource } from '../../datasource/github-releases';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];
@@ -38,25 +37,20 @@ export function extractPackageFile(content: string): PackageFile | null {
           logger.trace('depLineMatch');
           let skipReason: SkipReason;
           let repo: string;
-          if (
-            depName.startsWith('https://') ||
-            depName.startsWith('git@') ||
-            depName.startsWith('ssh://')
-          ) {
+          const gitPluginMatch = regEx(
+            /(ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/
+          ).exec(depName);
+          if (gitPluginMatch) {
             logger.debug('Examining git plugin');
-            // pull out registry URL eg ssh://git@github.company.com/some-org/some-plugin
-            const gitPlugin = regEx(
-              /(ssh:\/\/\|https:\/\/)?git@(?<registry>[^\/]+)\/(?<gitPluginName>.*)[^\/]*/
-            ).exec(depName);
-            const { registry, gitPluginName, gitPluginVersion } =
-              gitPlugin.groups;
+            const { registry, gitPluginName } = gitPluginMatch.groups;
             const dep: PackageDependency = {
               depName: gitPluginName,
-              currentValue: gitPluginVersion,
+              currentValue: currentValue,
               registryUrls: ['https://' + registry],
-              datasource: githubReleaseDatasource,
+              datasource: datasourceGithubTags.id,
             };
             deps.push(dep);
+            continue;
           } else if (isVersion(currentValue)) {
             const splitName = depName.split('/');
             if (splitName.length === 1) {

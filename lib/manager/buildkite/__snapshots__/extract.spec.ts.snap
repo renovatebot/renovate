@@ -9,11 +9,6 @@ Array [
   },
   Object {
     "currentValue": "v1.3.2",
-    "depName": "https://github.com/buildkite/plugin-docker-compose",
-    "skipReason": "git-plugin",
-  },
-  Object {
-    "currentValue": "v1.3.2",
     "depName": "github.com/buildkite/plugin-docker-compose",
     "skipReason": "invalid-dependency-specification",
   },
@@ -53,6 +48,27 @@ Array [
 ]
 `;
 
+exports[`manager/buildkite/extract extractPackageFile() extracts git-based plugins 1`] = `
+Array [
+  Object {
+    "currentValue": "v3.2.7",
+    "datasource": "github-tags",
+    "depName": "some-org/some-plugin",
+    "registryUrls": Array [
+      "https://github.company.com",
+    ],
+  },
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "github-tags",
+    "depName": "some-third-org/some-third-plugin",
+    "registryUrls": Array [
+      "https://github.company.com",
+    ],
+  },
+]
+`;
+
 exports[`manager/buildkite/extract extractPackageFile() extracts multiple plugins in same file 1`] = `
 Array [
   Object {
@@ -75,21 +91,10 @@ Array [
 exports[`manager/buildkite/extract extractPackageFile() extracts simple single plugin 1`] = `
 Array [
   Object {
-    "currentValue": "v3.2.7",
-    "datasource": "github-releases",
-    "depName": "some-org/some-plugin",
-    "skipReason": undefined,
-  },
-  Object {
-    "currentValue": "v33.3.7",
-    "datasource": "github-releases",
-    "depName": "some-other-org/some-other-plugin",
-    "skipReason": undefined,
-  },
-  Object {
-    "currentValue": "v0.0.1",
-    "datasource": "github-releases",
-    "depName": "some-third-org/some-third-plugin",
+    "currentValue": "v2.0.0",
+    "datasource": "github-tags",
+    "depName": "abc/detect-clowns",
+    "lookupName": "abc/detect-clowns-buildkite-plugin",
     "skipReason": undefined,
   },
 ]

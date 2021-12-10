@@ -25,7 +25,7 @@ describe('manager/buildkite/extract', () => {
     it('adds skipReason', () => {
       const res = extractPackageFile(pipeline3).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res).toHaveLength(2);
     });
     it('extracts arrays of plugins', () => {
       const res = extractPackageFile(pipeline4).deps;
@@ -34,8 +34,8 @@ describe('manager/buildkite/extract', () => {
     });
     it('extracts git-based plugins', () => {
       const res = extractPackageFile(pipeline5).deps;
-      expect(res.toMatchSnapshot());
-      expect(res).toHaveLength(3);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
     });
   });
 });
