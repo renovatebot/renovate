@@ -180,10 +180,12 @@ function getGraphqlPageSize(
   fieldName: string,
   initialCount = 100
 ): number {
-  let count = initialCount;
+  // istanbul ignore if
   if (ensureTrailingSlash(baseUrl) !== ensureTrailingSlash(githubBaseUrl)) {
-    return count;
+    return initialCount;
   }
+
+  let count = initialCount;
 
   const cache = getCache();
   cache.githubGraphql ??= {};
@@ -217,8 +219,10 @@ function setGraphqlPageSize(
   fieldName: string,
   count: number
 ): void {
-  const oldCount = getGraphqlPageSize(baseUrl, fieldName);
-  if (count !== oldCount) {
+  if (
+    ensureTrailingSlash(baseUrl) === ensureTrailingSlash(githubBaseUrl) &&
+    count !== getGraphqlPageSize(baseUrl, fieldName)
+  ) {
     const now = DateTime.local();
     const timestamp = now.toISO();
     logger.debug(
