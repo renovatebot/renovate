@@ -365,7 +365,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       baseUrl === githubBaseUrl
     ) {
       logger.debug(
-        { optimalCount },
+        { fieldName, optimalCount },
         'Successful GraphQL query with shrinked pagination size'
       );
     }

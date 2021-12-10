@@ -56,36 +56,36 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 
 ### GitLab
 
-| name                                        | example use                     | preset    | resolves as                  | filename        | Git tag        |
-| ------------------------------------------- | ------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
-| GitLab default                              | `gitlab>abc/foo`                | `default` | `https://gitlab.com/abc/foo` | `default.json`  | Default branch |
-| GitLab with preset name                     | `gitlab>abc/foo:xyz`            | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | Default branch |
-| GitLab default with a tag                   | `gitlab>abc/foo#1.5.4`          | `default` | `https://gitlab.com/abc/foo` | `default.json`  | `1.5.4`        |
-| GitLab with preset name with a tag          | `gitlab>abc/foo:xyz#1.5.4`      | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.5.4`        |
-| GitLab with preset name and path with a tag | `gitlab>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://gitlab.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
-| GitLab with subpreset name and tag          | `gitlab>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| name                                        | example use                      | preset    | resolves as                  | filename        | Git tag        |
+| ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
+| GitLab default                              | `gitlab>abc/foo`                 | `default` | `https://gitlab.com/abc/foo` | `default.json`  | Default branch |
+| GitLab with preset name                     | `gitlab>abc/foo:xyz`             | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | Default branch |
+| GitLab default with a tag                   | `gitlab>abc/foo#1.5.4`           | `default` | `https://gitlab.com/abc/foo` | `default.json`  | `1.5.4`        |
+| GitLab with preset name with a tag          | `gitlab>abc/foo:xyz#1.5.4`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| GitLab with preset name and path with a tag | `gitlab>abc/foo//path/xyz#1.5.4` | `xyz`     | `https://gitlab.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| GitLab with subpreset name and tag          | `gitlab>abc/foo:xyz/sub#1.5.4`   | `sub`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 
 ### Gitea
 
-| name                                       | example use                    | preset    | resolves as                 | filename        | Git tag        |
-| ------------------------------------------ | ------------------------------ | --------- | --------------------------- | --------------- | -------------- |
-| Gitea default                              | `gitea>abc/foo`                | `default` | `https://gitea.com/abc/foo` | `default.json`  | Default branch |
-| Gitea with preset name                     | `gitea>abc/foo:xyz`            | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | Default branch |
-| Gitea default with a tag                   | `gitea>abc/foo#1.5.4`          | `default` | `https://gitea.com/abc/foo` | `default.json`  | `1.5.4`        |
-| Gitea with preset name with a tag          | `gitea>abc/foo:xyz#1.5.4`      | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.5.4`        |
-| Gitea with preset name and path with a tag | `gitea>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://gitea.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
-| Gitea with subpreset name and tag          | `gitea>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| name                                       | example use                     | preset    | resolves as                 | filename        | Git tag        |
+| ------------------------------------------ | ------------------------------- | --------- | --------------------------- | --------------- | -------------- |
+| Gitea default                              | `gitea>abc/foo`                 | `default` | `https://gitea.com/abc/foo` | `default.json`  | Default branch |
+| Gitea with preset name                     | `gitea>abc/foo:xyz`             | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | Default branch |
+| Gitea default with a tag                   | `gitea>abc/foo#1.5.4`           | `default` | `https://gitea.com/abc/foo` | `default.json`  | `1.5.4`        |
+| Gitea with preset name with a tag          | `gitea>abc/foo:xyz#1.5.4`       | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| Gitea with preset name and path with a tag | `gitea>abc/foo//path/xyz#1.5.4` | `xyz`     | `https://gitea.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| Gitea with subpreset name and tag          | `gitea>abc/foo:xyz/sub#1.5.4`   | `sub`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 
 ### Self-hosted Git
 
-| name                                       | example use                    | preset    | resolves as                          | filename        | Git tag        |
-| ------------------------------------------ | ------------------------------ | --------- | ------------------------------------ | --------------- | -------------- |
-| Local default                              | `local>abc/foo`                | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
-| Local with preset path                     | `local>abc/foo:path/xyz`       | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
-| Local default with a tag                   | `local>abc/foo#1.5.4`          | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.5.4`        |
-| Local with preset name with a tag          | `local>abc/foo:xyz#1.5.4`      | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
-| Local with preset name and path with a tag | `local>abc/foo:path/xyz#1.5.4` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
-| Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.5.4`  | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| name                                       | example use                     | preset    | resolves as                          | filename        | Git tag        |
+| ------------------------------------------ | ------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
+| Local default                              | `local>abc/foo`                 | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
+| Local with preset path                     | `local>abc/foo:xyz`             | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | Default branch |
+| Local default with a tag                   | `local>abc/foo#1.5.4`           | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.5.4`        |
+| Local with preset name with a tag          | `local>abc/foo:xyz#1.5.4`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
+| Local with preset name and path with a tag | `local>abc/foo//path/xyz#1.5.4` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
+| Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.5.4`   | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 
 Note that you can't combine the path and sub-preset syntaxes.
 This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.

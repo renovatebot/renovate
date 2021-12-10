@@ -94,6 +94,13 @@ describe('util/git/index', () => {
     await base.cleanup();
   });
 
+  describe('validateGitVersion()', () => {
+    it('has a git version greater or equal to the minimum required', async () => {
+      const res = await git.validateGitVersion();
+      expect(res).toBeTrue();
+    });
+  });
+
   describe('checkoutBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
       await expect(git.checkoutBranch(defaultBranch)).resolves.not.toThrow();
