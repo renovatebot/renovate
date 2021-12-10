@@ -4,5 +4,5 @@ steps:
           username: abc
       - git@github.company.com/some-other-org/some-other-plugin#v33.3.7:
           username: zyx
-      - https://@github:csnzoo:com/some-third-org/some-third-plugin#v0:0:1:
+      - https://@github:company:com/some-third-org/some-third-plugin#v0:0:1:
           build: app
