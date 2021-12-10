@@ -8,7 +8,8 @@
   },
   "scripts": {
     "build": "run-s clean generate:* compile:*",
-    "clean": "rimraf dist",
+    "build:docs": "run-s \"release:prepare {@}\"",
+    "clean": "rimraf dist tmp",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
     "config-validator": "node -r ts-node/register/transpile-only -- lib/config-validator.ts",
@@ -38,7 +39,8 @@
     "pretest": "run-s generate:* ",
     "prettier": "prettier --check \"**/*.{ts,js,mjs,json,md,yml}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,mjs,json,md,yml}\"",
-    "release": "node tools/release.mjs",
+    "release:prepare": "node -r ts-node/register/transpile-only -- tools/generate-docs.ts",
+    "release:publish": "node tools/release.mjs",
     "start": "node -r ts-node/register/transpile-only -- lib/renovate.ts",
     "test": "run-s lint test-schema type-check null-check jest",
     "test-dirty": "git diff --exit-code",
@@ -118,12 +120,12 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^12.22.0 || >=14.15.0",
+    "node": "^14.15.0 || >=16.13.0",
     "yarn": "^1.17.0"
   },
   "engines-next": {
     "description": "Versions other than the below are deprecated and a warning will be logged",
-    "node": ">=14.15.0"
+    "node": "^14.15.0 || >=16.13.0"
   },
   "dependencies": {
     "@aws-sdk/client-ec2": "3.35.0",
@@ -194,7 +196,7 @@
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.1.0",
-    "simple-git": "2.47.1",
+    "simple-git": "2.48.0",
     "slugify": "1.6.3",
     "traverse": "0.6.6",
     "tslib": "2.3.1",
@@ -259,7 +261,7 @@
     "eslint-formatter-gha": "1.3.0",
     "eslint-plugin-import": "2.25.3",
     "eslint-plugin-jest": "25.3.0",
-    "eslint-plugin-promise": "5.1.1",
+    "eslint-plugin-promise": "5.2.0",
     "expect-more-jest": "5.4.0",
     "glob": "7.2.0",
     "graphql": "15.7.2",
