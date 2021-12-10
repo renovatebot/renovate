@@ -1,6 +1,5 @@
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
-import * as semver from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { GitDatasource } from './base';
@@ -32,8 +31,7 @@ export class GitRefsDatasource extends Datasource {
 
     const refs = rawRefs
       .filter((ref) => ref.type === 'tags' || ref.type === 'heads')
-      .map((ref) => ref.value)
-      .filter((ref) => semver.isVersion(ref));
+      .map((ref) => ref.value);
 
     const uniqueRefs = [...new Set(refs)];
 
