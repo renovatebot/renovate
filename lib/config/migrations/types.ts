@@ -1,4 +1,4 @@
-import { RenovateConfig } from './../types';
+import type { RenovateConfig } from './../types';
 export interface MigrationConstructor {
   new (
     originalConfig: RenovateConfig,
