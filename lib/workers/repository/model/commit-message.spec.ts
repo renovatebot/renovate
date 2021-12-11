@@ -55,6 +55,7 @@ describe('workers/repository/model/commit-message', () => {
     });
 
     it('should format commit message casing', () => {
+      expect(CommitMessage.formatCasing('')).toBe('');
       expect(CommitMessage.formatCasing('fix: Upgrade something')).toBe(
         'fix: upgrade something'
       );
