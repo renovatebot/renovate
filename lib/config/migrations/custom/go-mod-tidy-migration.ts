@@ -1,19 +1,18 @@
-import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class GoModTidyMigration extends AbstractMigration {
-  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
-    super('gomodTidy', originalConfig, migratedConfig);
-  }
+  readonly propertyName = 'gomodTidy';
 
-  override run(): void {
-    const { gomodTidy, postUpdateOptions } = this.originalConfig;
+  override run(value): void {
+    const postUpdateOptions = this.get('postUpdateOptions');
 
     this.delete(this.propertyName);
 
-    if (gomodTidy) {
-      this.migratedConfig.postUpdateOptions ??= postUpdateOptions ?? [];
-      this.migratedConfig.postUpdateOptions.push('gomodTidy');
+    if (value) {
+      const newPostUpdateOptions = Array.isArray(postUpdateOptions)
+        ? postUpdateOptions.concat(['gomodTidy'])
+        : ['gomodTidy'];
+      this.setHard('postUpdateOptions', newPostUpdateOptions);
     }
   }
 }
