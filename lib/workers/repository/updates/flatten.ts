@@ -20,7 +20,7 @@ function sanitizeDepName(depName: string): string {
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-') // TODO #12071
-    .replace(regEx(/\s+/g), '-') // TODO #12071
+    .replace(regEx(/\s+/g), '-')
     .replace(regEx(/-+/), '-')
     .toLowerCase();
 }

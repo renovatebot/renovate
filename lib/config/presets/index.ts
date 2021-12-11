@@ -50,7 +50,7 @@ export function replaceArgs(
   if (is.string(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
-      const re = regEx(`{{${arg}}}`, 'g'); // TODO #12071
+      const re = regEx(`{{${arg}}}`, 'g');
       returnStr = returnStr.replace(re, argVal);
     }
     return returnStr;

@@ -155,7 +155,7 @@ async function fetchBranchCommits(): Promise<void> {
     (await git.raw(opts))
       .split('\n')
       .filter(Boolean)
-      .map((line) => line.trim().split(regEx(/\s+/))) // TODO #12071
+      .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });

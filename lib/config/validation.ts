@@ -37,7 +37,8 @@ const ignoredNodes = [
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag
 ];
-
+const tzRe = regEx(/^:timezone\((.+)\)$/);
+const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 function isManagerPath(parentPath: string): boolean {
   return (
     regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
@@ -253,7 +254,6 @@ export async function validateConfig(
               }
             }
             if (key === 'extends') {
-              const tzRe = regEx(/^:timezone\((.+)\)$/); // TODO #12071
               for (const subval of val) {
                 if (is.string(subval)) {
                   if (
@@ -488,7 +488,7 @@ export async function validateConfig(
             }
             if (
               (selectors.includes(key) || key === 'matchCurrentVersion') &&
-              !regEx(/p.*Rules\[\d+\]$/).test(parentPath) && // Inside a packageRule  // TODO #12071
+              !rulesRe.test(parentPath) && // Inside a packageRule
               (parentPath || !isPreset) // top level in a preset
             ) {
               errors.push({

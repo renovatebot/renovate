@@ -191,7 +191,7 @@ export async function decryptConfig(
               } else {
                 logger.debug('Appending _authToken= to end of existing npmrc');
                 decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\n?$/), // TODO #12071
+                  regEx(/\n?$/),
                   `\n_authToken=${token}\n`
                 );
               }

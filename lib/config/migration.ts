@@ -4,6 +4,7 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
+import { fixShortHours } from '../workers/branch/schedule';
 import { GlobalConfig } from './global';
 import { MigrationsService } from './migrations';
 import { getOptions } from './options';
@@ -19,7 +20,9 @@ import { mergeChildConfig } from './utils';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-
+const afterBeforeRe = regEx(
+  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
+);
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
@@ -157,12 +160,12 @@ export function migrateConfig(
         }
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
-          regEx(/{{baseDir}}/g), // TODO #12071
+          regEx(/{{baseDir}}/g),
           '{{packageFileDir}}'
         );
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(
-          regEx(/{{depNameShort}}/g), // TODO #12071
+          regEx(/{{depNameShort}}/g),
           '{{depName}}'
         );
       } else if (key === 'gitFs') {
@@ -348,28 +351,16 @@ export function migrateConfig(
           ) {
             const parsedSchedule = later.parse.text(
               // We need to massage short hours first before we can parse it
-              schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2') // TODO #12071
+              fixShortHours(schedules[i])
             ).schedules[0];
             // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
             if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
               const toSplit = schedules[i];
               schedules[i] = toSplit
-                .replace(
-                  regEx(
-                    /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
-                  ), // TODO #12071
-                  '$1$2 $3 $7'
-                )
+                .replace(afterBeforeRe, '$1$2 $3 $7')
                 .trim();
               schedules.push(
-                toSplit
-                  .replace(
-                    regEx(
-                      /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
-                    ), // TODO #12071
-                    '$1$4 $5 $7'
-                  )
-                  .trim()
+                toSplit.replace(afterBeforeRe, '$1$4 $5 $7').trim()
               );
             }
           }
@@ -393,10 +384,10 @@ export function migrateConfig(
           if (
             regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/).test(
               schedules[i]
-            ) // TODO #12071
+            )
           ) {
             schedules[i] = schedules[i].replace(
-              regEx(/every ([a-z]*day)$/), // TODO #12071
+              regEx(/every ([a-z]*day)$/),
               'on $1'
             );
           }
@@ -514,7 +505,7 @@ export function migrateConfig(
       if (is.string(migratedConfig[key])) {
         for (const [from, to] of Object.entries(migratedTemplates)) {
           migratedConfig[key] = (migratedConfig[key] as string).replace(
-            regEx(from, 'g'), // TODO #12071
+            regEx(from, 'g'),
             to
           );
         }

@@ -203,7 +203,7 @@ export function generateBranchConfig(
       upgrade.prTitle = template
         .compile(upgrade.prTitle, upgrade)
         .trim()
-        .replace(regEx(/\s+/g), ' '); // TODO #12071
+        .replace(regEx(/\s+/g), ' ');
       // istanbul ignore if
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
         logger.debug(
