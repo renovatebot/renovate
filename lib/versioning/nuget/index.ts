@@ -1,5 +1,6 @@
 import { regEx } from '../../util/regex';
 import * as generic from '../loose/generic';
+import type { GenericVersion } from '../loose/generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'nuget';
@@ -11,7 +12,7 @@ export const supportsRanges = false;
 
 const pattern = regEx(/^(\d+(?:\.\d+)*)(-[^+]+)?(\+.*)?$/);
 
-function parse(version: string): any {
+function parse(version: string): GenericVersion {
   const matches = pattern.exec(version);
   if (!matches) {
     return null;
@@ -38,7 +39,11 @@ function compare(version1: string, version2: string): number {
     }
   }
   // numeric version equals
-  const suffixComparison = parsed1.suffix.localeCompare(parsed2.suffix);
+  const suffixComparison = parsed1.suffix.localeCompare(
+    parsed2.suffix,
+    undefined,
+    { numeric: true }
+  );
   if (suffixComparison !== 0) {
     // Empty suffix should compare greater than non-empty suffix
     if (parsed1.suffix === '') {
