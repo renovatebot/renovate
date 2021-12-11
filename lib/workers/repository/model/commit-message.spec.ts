@@ -61,14 +61,14 @@ describe('workers/repository/model/commit-message', () => {
       expect(CommitMessage.formatCasing('fix(docs): Something else')).toBe(
         'fix(docs): something else'
       );
-      expect(CommitMessage.formatCasing('fix: Upgrade Something')).toBe(
-        'fix: upgrade Something'
-      );
+      expect(
+        CommitMessage.formatCasing('fix(docs/foo): Upgrade Something')
+      ).toBe('fix(docs/foo): upgrade Something');
       expect(
         CommitMessage.formatCasing('fix(docs/foo): Upgrade Something')
       ).toBe('fix(docs/foo): upgrade Something');
       expect(CommitMessage.formatCasing('Really Great feature: Foo')).toBe(
-        'really Great feature: Foo'
+        'really Great feature: foo'
       );
     });
   });

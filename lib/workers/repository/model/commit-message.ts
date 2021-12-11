@@ -1,5 +1,3 @@
-import { regEx } from '../../../util/regex';
-
 export class CommitMessage {
   public static readonly SEPARATOR: string = ':';
 
@@ -46,13 +44,18 @@ export class CommitMessage {
     return [prefix, message].join(' ').trim();
   }
 
-  public static formatCasing(commitMessage: string): string {
-    return commitMessage.replace(
-      regEx(/^([\w]+:|[\w]+\(.*\):)/).test(commitMessage)
-        ? regEx(/: \w+/)
-        : regEx(/^\w+/),
-      (match) => match.toLowerCase()
-    );
+  public static formatCasing(commitMessage: any): string {
+    if (commitMessage.includes(':')) {
+      // eslint-disable-next-line no-param-reassign
+      commitMessage = commitMessage.split(':');
+      commitMessage[1] = lowerCaseFirstWord(commitMessage[1]);
+      commitMessage[0] = lowerCaseFirstWord(commitMessage[0]);
+      // eslint-disable-next-line no-param-reassign
+      commitMessage = commitMessage.join(': ');
+    } else {
+      return lowerCaseFirstWord(commitMessage);
+    }
+    return commitMessage;
   }
 
   private formatMessage(): string {
@@ -62,4 +65,15 @@ export class CommitMessage {
 
     return this.message.charAt(0).toUpperCase() + this.message.slice(1);
   }
+}
+function lowerCaseFirstWord(message: any): string {
+  if (!message) {
+    return message;
+  }
+  // eslint-disable-next-line no-param-reassign
+  message = message.trim().split(' ');
+  message[0] = message[0].toLowerCase();
+  // eslint-disable-next-line no-param-reassign
+  message = message.join(' ');
+  return message;
 }
