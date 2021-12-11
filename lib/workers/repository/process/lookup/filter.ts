@@ -29,6 +29,7 @@ export function filterVersions(
     }
     return true;
   }
+  // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
     return [];
   }

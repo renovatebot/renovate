@@ -1,9 +1,11 @@
 import { join } from 'path';
+import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { id, parseRegistryUrl } from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -44,7 +46,7 @@ async function addSourceCmds(
     let addSourceCmd = `dotnet nuget add source ${registryInfo.feedUrl} --configfile ${nugetConfigFile}`;
     if (registry.name) {
       // Add name for registry, if known.
-      addSourceCmd += ` --name ${registry.name}`;
+      addSourceCmd += ` --name ${quote(registry.name)}`;
     }
     if (username && password) {
       // Add registry credentials from host rules, if configured.

@@ -1,6 +1,11 @@
 import { mocked } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import * as _datasource from '../../datasource';
-import { generateInstallCommands, resolveConstraint } from './buildpack';
+import {
+  generateInstallCommands,
+  isDynamicInstall,
+  resolveConstraint,
+} from './buildpack';
 import type { ToolConstraint } from './types';
 
 jest.mock('../../../lib/datasource');
@@ -8,6 +13,34 @@ jest.mock('../../../lib/datasource');
 const datasource = mocked(_datasource);
 
 describe('util/exec/buildpack', () => {
+  describe('isDynamicInstall()', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+      delete process.env.BUILDPACK;
+    });
+    it('returns false if binarySource is not install', () => {
+      expect(isDynamicInstall()).toBeFalse();
+    });
+    it('returns false if not buildpack', () => {
+      GlobalConfig.set({ binarySource: 'install' });
+      expect(isDynamicInstall()).toBeFalse();
+    });
+    it('returns false if any unsupported tools', () => {
+      GlobalConfig.set({ binarySource: 'install' });
+      process.env.BUILDPACK = 'true';
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'node' },
+        { toolName: 'npm' },
+      ];
+      expect(isDynamicInstall(toolConstraints)).toBeFalse();
+    });
+    it('returns false if supported tools', () => {
+      GlobalConfig.set({ binarySource: 'install' });
+      process.env.BUILDPACK = 'true';
+      const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
+      expect(isDynamicInstall(toolConstraints)).toBeTrue();
+    });
+  });
   describe('resolveConstraint()', () => {
     beforeEach(() => {
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -94,6 +127,12 @@ describe('util/exec/buildpack', () => {
           "install-tool composer 2.1.0",
         ]
       `);
+    });
+    it('hashes npm', async () => {
+      const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
+      const res = await generateInstallCommands(toolConstraints);
+      expect(res).toHaveLength(2);
+      expect(res[1]).toBe('hash -d npm 2>/dev/null || true');
     });
   });
 });
