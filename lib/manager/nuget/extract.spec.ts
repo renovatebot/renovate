@@ -1,6 +1,6 @@
 import * as upath from 'upath';
 import { loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from './extract';
@@ -14,16 +14,15 @@ const adminConfig: RepoGlobalConfig = {
 describe('manager/nuget/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
     afterEach(() => {
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('returns empty for invalid csproj', async () => {
-      // FIXME: explicit assert condition
-      expect(
-        await extractPackageFile('nothing here', 'bogus', config)
-      ).toMatchSnapshot();
+      expect(await extractPackageFile('nothing here', 'bogus', config)).toEqual(
+        { deps: [] }
+      );
     });
     it('extracts package version dependency', async () => {
       const packageFile =
@@ -50,68 +49,160 @@ describe('manager/nuget/extract', () => {
     it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
-      expect(
-        await extractPackageFile(contents, packageFile, config)
-      ).toMatchSnapshot();
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '4.5.0',
+            datasource: 'nuget',
+            depName: 'Autofac',
+            depType: 'nuget',
+            registryUrls: [
+              'https://api.nuget.org/v3/index.json#protocolVersion=3',
+              'https://contoso.com/packages/',
+            ],
+          },
+        ],
+      });
     });
     it('considers lower-case nuget.config', async () => {
       const packageFile =
         'with-lower-case-config-file/with-lower-case-config-file.csproj';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
-      expect(
-        await extractPackageFile(contents, packageFile, config)
-      ).toMatchSnapshot();
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '4.5.0',
+            datasource: 'nuget',
+            depName: 'Autofac',
+            depType: 'nuget',
+            registryUrls: [
+              'https://api.nuget.org/v3/index.json#protocolVersion=3',
+              'https://contoso.com/packages/',
+            ],
+          },
+        ],
+      });
     });
     it('considers pascal-case NuGet.Config', async () => {
       const packageFile =
         'with-pascal-case-config-file/with-pascal-case-config-file.csproj';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
-      expect(
-        await extractPackageFile(contents, packageFile, config)
-      ).toMatchSnapshot();
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '4.5.0',
+            datasource: 'nuget',
+            depName: 'Autofac',
+            depType: 'nuget',
+            registryUrls: [
+              'https://api.nuget.org/v3/index.json#protocolVersion=3',
+              'https://contoso.com/packages/',
+            ],
+          },
+        ],
+      });
     });
     it('handles malformed NuGet.config', async () => {
       const packageFile =
         'with-malformed-config-file/with-malformed-config-file.csproj';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
-      expect(
-        await extractPackageFile(contents, packageFile, config)
-      ).toMatchSnapshot();
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '4.5.0',
+            datasource: 'nuget',
+            depName: 'Autofac',
+            depType: 'nuget',
+          },
+        ],
+      });
     });
     it('handles NuGet.config without package sources', async () => {
       const packageFile =
         'without-package-sources/without-package-sources.csproj';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
-      expect(
-        await extractPackageFile(contents, packageFile, config)
-      ).toMatchSnapshot();
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '4.5.0',
+            datasource: 'nuget',
+            depName: 'Autofac',
+            depType: 'nuget',
+          },
+        ],
+      });
     });
+
+    it('handles NuGet.config with whitespaces in package source keys', async () => {
+      const packageFile = 'with-whitespaces/with-whitespaces.csproj';
+      const contents = loadFixture(packageFile);
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '12.0.3',
+            datasource: 'nuget',
+            depName: 'Newtonsoft.Json',
+            depType: 'nuget',
+            registryUrls: [
+              'https://api.nuget.org/v3/index.json#protocolVersion=3',
+              'https://my.myget.org/F/my/auth/guid/api/v3/index.json',
+            ],
+          },
+        ],
+      });
+    });
+
     it('ignores local feed in NuGet.config', async () => {
       const packageFile =
         'with-local-feed-in-config-file/with-local-feed-in-config-file.csproj';
       const contents = loadFixture(packageFile);
-      // FIXME: explicit assert condition
-      expect(
-        await extractPackageFile(contents, packageFile, config)
-      ).toMatchSnapshot();
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '4.5.0',
+            datasource: 'nuget',
+            depName: 'Autofac',
+            depType: 'nuget',
+            registryUrls: ['https://contoso.com/packages/'],
+          },
+        ],
+      });
     });
     it('extracts registry URLs independently', async () => {
       const packageFile = 'multiple-package-files/one/one.csproj';
       const contents = loadFixture(packageFile);
       const otherPackageFile = 'multiple-package-files/two/two.csproj';
       const otherContents = loadFixture(otherPackageFile);
-      // FIXME: explicit assert condition
-      expect(
-        await extractPackageFile(contents, packageFile, config)
-      ).toMatchSnapshot();
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            currentValue: '4.5.0',
+            datasource: 'nuget',
+            depName: 'Autofac',
+            depType: 'nuget',
+            registryUrls: [
+              'https://api.nuget.org/v3/index.json',
+              'https://example.org/one',
+            ],
+          },
+        ],
+      });
       expect(
         await extractPackageFile(otherContents, otherPackageFile, config)
-      ).toMatchSnapshot();
+      ).toEqual({
+        deps: [
+          {
+            currentValue: '4.5.0',
+            datasource: 'nuget',
+            depName: 'Autofac',
+            depType: 'nuget',
+            registryUrls: [
+              'https://api.nuget.org/v3/index.json',
+              'https://example.org/two',
+            ],
+          },
+        ],
+      });
     });
 
     it('extracts msbuild-sdks from global.json', async () => {
@@ -172,33 +263,44 @@ describe('manager/nuget/extract', () => {
 
     describe('.config/dotnet-tools.json', () => {
       const packageFile = '.config/dotnet-tools.json';
-      const contents = `{
-  "version": 1,
-  "isRoot": true,
-  "tools": {
-    "minver-cli": {
-      "version": "2.0.0",
-      "commands": ["minver"]
-    }
-  }
-}`;
+      const contents = loadFixture('dotnet-tools.json');
 
       it('works', async () => {
-        // FIXME: explicit assert condition
-        expect(
-          await extractPackageFile(contents, packageFile, config)
-        ).toMatchSnapshot();
+        expect(await extractPackageFile(contents, packageFile, config)).toEqual(
+          {
+            deps: [
+              {
+                currentValue: '2.0.0',
+                datasource: 'nuget',
+                depName: 'minver-cli',
+                depType: 'nuget',
+              },
+            ],
+          }
+        );
       });
 
       it('with-config', async () => {
-        // FIXME: explicit assert condition
         expect(
           await extractPackageFile(
             contents,
             `with-config-file/${packageFile}`,
             config
           )
-        ).toMatchSnapshot();
+        ).toEqual({
+          deps: [
+            {
+              currentValue: '2.0.0',
+              datasource: 'nuget',
+              depName: 'minver-cli',
+              depType: 'nuget',
+              registryUrls: [
+                'https://api.nuget.org/v3/index.json#protocolVersion=3',
+                'https://contoso.com/packages/',
+              ],
+            },
+          ],
+        });
       });
 
       it('wrong version', async () => {

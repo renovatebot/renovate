@@ -23,7 +23,7 @@ export function readFile(
   fileName: string,
   encoding?: string
 ): Promise<string | Buffer> {
-  return fs.readFile(fileName, encoding);
+  return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
 }
 
 // istanbul ignore next

@@ -86,14 +86,13 @@ export function removeAuthorization(options: NormalizedOptions): void {
     const portInUrl = options.href.split('/')[2].split(':')[1];
     // istanbul ignore next
     if (!portInUrl) {
-      // eslint-disable-next-line no-param-reassign
       delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
     }
 
     // registry is hosted on Amazon or Azure blob, redirect url includes
     // authentication which is not required and should be removed
-    delete options.headers.authorization; // eslint-disable-line no-param-reassign
-    delete options.username; // eslint-disable-line no-param-reassign
-    delete options.password; // eslint-disable-line no-param-reassign
+    delete options.headers.authorization;
+    delete options.username;
+    delete options.password;
   }
 }

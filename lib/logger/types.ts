@@ -30,5 +30,9 @@ export interface BunyanRecord extends Record<string, any> {
 
 export type BunyanStream = (NodeJS.WritableStream | Stream) & {
   writable?: boolean;
-  write: (chunk: BunyanRecord, enc, cb) => void;
+  write: (
+    chunk: BunyanRecord,
+    enc: BufferEncoding,
+    cb: (err?: Error | null) => void
+  ) => void;
 };

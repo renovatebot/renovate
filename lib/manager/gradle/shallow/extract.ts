@@ -46,7 +46,8 @@ export async function extractAllPackageFiles(
   const registry: VariableRegistry = {};
   const packageFilesByName: Record<string, PackageFile> = {};
   const registryUrls = [];
-  for (const packageFile of reorderFiles(packageFiles)) {
+  const reorderedFiles = reorderFiles(packageFiles);
+  for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
       datasource,

@@ -24,10 +24,11 @@ function cleanBranchName(branchName: string): string {
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
     .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: : ? [ \ ^ ~
+    .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
+    .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
-/* eslint-disable no-param-reassign */
 export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {

@@ -3,7 +3,8 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import type { ArtifactError, PackageDependency } from '../../manager/types';
-import { File, getFile } from '../../util/git';
+import { getFile } from '../../util/git';
+import { File } from '../../util/git/types';
 import type { BranchConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
@@ -120,7 +121,7 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
           }
-          continue; // eslint-disable-line no-continue
+          continue;
         } else if (reuseExistingBranch) {
           return getUpdatedPackageFiles({
             ...config,

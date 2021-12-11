@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -10,7 +10,8 @@ import {
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { ExecOptions, exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import { exists, readFile, remove, writeFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
@@ -128,7 +129,7 @@ export async function generateLockFile(
         extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
       }
     }
-    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
+    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
       } else if (isYarnModeAvailable) {
@@ -148,11 +149,11 @@ export async function generateLockFile(
         image: 'node',
         tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
+      preCommands,
     };
     // istanbul ignore if
-    if (getGlobalConfig().exposeAllEnv) {
+    if (GlobalConfig.get('exposeAllEnv')) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
@@ -249,7 +250,7 @@ export async function generateLockFile(
         throw new ExternalHostError(err, npmId);
       }
     }
-    return { error: true, stderr: err.stderr };
+    return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
   return { lockFile };
 }

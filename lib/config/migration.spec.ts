@@ -1,6 +1,6 @@
 import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
-import { setGlobalConfig } from './global';
+import { GlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
   MigratedConfig,
@@ -164,8 +164,8 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
-      expect(migratedConfig.depTypes).not.toBeDefined();
-      expect(migratedConfig.automerge).toEqual(false);
+      expect(migratedConfig.depTypes).toBeUndefined();
+      expect(migratedConfig.automerge).toBe(false);
       expect(migratedConfig.packageRules).toHaveLength(9);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
@@ -186,16 +186,12 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.major.schedule).toHaveLength(2);
-      expect(migratedConfig.major.schedule[0]).toEqual('after 10pm');
-      expect(migratedConfig.major.schedule[1]).toEqual('before 7am');
+      expect(migratedConfig.major.schedule[0]).toBe('after 10pm');
+      expect(migratedConfig.major.schedule[1]).toBe('before 7am');
       expect(migratedConfig.minor.schedule).toMatchSnapshot();
       expect(migratedConfig.minor.schedule).toHaveLength(2);
-      expect(migratedConfig.minor.schedule[0]).toEqual(
-        'after 10pm every weekday'
-      );
-      expect(migratedConfig.minor.schedule[1]).toEqual(
-        'before 7am every weekday'
-      );
+      expect(migratedConfig.minor.schedule[0]).toBe('after 10pm every weekday');
+      expect(migratedConfig.minor.schedule[1]).toBe('before 7am every weekday');
     });
     it('migrates every friday', () => {
       const config = {
@@ -207,7 +203,7 @@ describe('config/migration', () => {
         parentConfig
       );
       expect(isMigrated).toBeTrue();
-      expect(migratedConfig.schedule).toEqual('on friday');
+      expect(migratedConfig.schedule).toBe('on friday');
     });
     it('migrates semantic prefix with no scope', () => {
       const config = {
@@ -707,7 +703,7 @@ describe('config/migration', () => {
     });
   });
   it('it migrates presets', () => {
-    setGlobalConfig({
+    GlobalConfig.set({
       migratePresets: {
         '@org': 'local>org/renovate-config',
         '@org2/foo': '',

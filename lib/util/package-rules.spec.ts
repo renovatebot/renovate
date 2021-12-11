@@ -731,6 +731,27 @@ describe('util/package-rules', () => {
       ],
     };
     const res = applyPackageRules(config);
-    expect(res.groupSlug).toEqual('b');
+    expect(res.groupSlug).toBe('b');
+  });
+  it('matches matchSourceUrlPrefixes(case-insensitive)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/Renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/renovatebot/Presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
   });
 });

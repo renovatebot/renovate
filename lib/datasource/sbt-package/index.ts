@@ -1,6 +1,7 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
+import { ensureTrailingSlash } from '../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MAVEN_REPO } from '../maven/common';
@@ -13,8 +14,6 @@ export const customRegistrySupport = true;
 export const defaultRegistryUrls = [MAVEN_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
-
-const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/'); // TODO #12070
 
 export async function getArtifactSubdirs(
   searchRoot: string,

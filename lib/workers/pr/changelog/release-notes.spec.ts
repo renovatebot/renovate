@@ -75,11 +75,11 @@ describe('workers/pr/changelog/release-notes', () => {
     });
 
     it('handles date object', () => {
-      expect(releaseNotesCacheMinutes(new Date())).toEqual(55);
+      expect(releaseNotesCacheMinutes(new Date())).toBe(55);
     });
 
     it.each([null, undefined, 'fake', 123])('handles invalid: %s', (date) => {
-      expect(releaseNotesCacheMinutes(date as never)).toEqual(55);
+      expect(releaseNotesCacheMinutes(date as never)).toBe(55);
     });
   });
 

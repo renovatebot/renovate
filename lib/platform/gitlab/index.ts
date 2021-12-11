@@ -158,10 +158,14 @@ function urlEscape(str: string): string {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=HEAD`;
+  const repo = repoName ?? config.repository;
+  const url =
+    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
+    (branchOrTag || `HEAD`);
   const res = await gitlabApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -170,9 +174,10 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
@@ -328,6 +333,7 @@ type BranchState =
   | 'pending'
   | 'created'
   | 'running'
+  | 'waiting_for_resource'
   | 'manual'
   | 'success'
   | 'failed'
@@ -368,6 +374,7 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
   created: BranchStatus.yellow,
   manual: BranchStatus.yellow,
   running: BranchStatus.yellow,
+  waiting_for_resource: BranchStatus.yellow,
   success: BranchStatus.green,
   failed: BranchStatus.red,
   canceled: BranchStatus.red,
@@ -686,6 +693,8 @@ export function massageMarkdown(input: string): string {
     );
 
     desc = smartTruncate(desc, 25000);
+  } else {
+    desc = smartTruncate(desc, 1000000);
   }
 
   return desc;
@@ -861,6 +870,7 @@ export async function ensureIssue({
   reuseTitle,
   body,
   labels,
+  confidential,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
@@ -885,6 +895,7 @@ export async function ensureIssue({
               title,
               description,
               labels: (labels || issue.labels || []).join(','),
+              confidential: confidential ?? false,
             },
           }
         );
@@ -896,6 +907,7 @@ export async function ensureIssue({
           title,
           description,
           labels: (labels || []).join(','),
+          confidential: confidential ?? false,
         },
       });
       logger.info('Issue created');

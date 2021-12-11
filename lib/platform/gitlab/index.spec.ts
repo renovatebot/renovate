@@ -786,7 +786,7 @@ describe('platform/gitlab/index', () => {
         title: 'new-title',
         body: 'new-content',
       });
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -804,7 +804,7 @@ describe('platform/gitlab/index', () => {
         body: 'new-content',
         labels: ['Renovate', 'Maintenance'],
       });
-      expect(res).toEqual('created');
+      expect(res).toBe('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -832,7 +832,7 @@ describe('platform/gitlab/index', () => {
         title: 'title-2',
         body: 'newer-content',
       });
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -861,7 +861,7 @@ describe('platform/gitlab/index', () => {
         body: 'newer-content',
         labels: ['Renovate', 'Maintenance'],
       });
-      expect(res).toEqual('updated');
+      expect(res).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -888,6 +888,63 @@ describe('platform/gitlab/index', () => {
         body: 'newer-content',
       });
       expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('creates confidential issue', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            title: 'title-1',
+          },
+          {
+            iid: 2,
+            title: 'title-2',
+          },
+        ])
+        .post('/api/v4/projects/undefined/issues')
+        .reply(200);
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+        confidential: true,
+      });
+      expect(res).toBe('created');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('updates confidential issue', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            title: 'title-1',
+          },
+          {
+            iid: 2,
+            title: 'title-2',
+          },
+        ])
+        .get('/api/v4/projects/undefined/issues/2')
+        .reply(200, { description: 'new-content' })
+        .put('/api/v4/projects/undefined/issues/2')
+        .reply(200);
+      const res = await gitlab.ensureIssue({
+        title: 'title-2',
+        body: 'newer-content',
+        labels: ['Renovate', 'Maintenance'],
+        confidential: true,
+      });
+      expect(res).toBe('updated');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1870,6 +1927,16 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(smartTruncate).toHaveBeenCalledTimes(1);
       expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 25000);
     });
+
+    it('truncates description for API version gt 13.4', async () => {
+      jest.mock('../utils/pr-body');
+      const { smartTruncate } = require('../utils/pr-body');
+
+      await initFakePlatform('13.4.1');
+      gitlab.massageMarkdown(prBody);
+      expect(smartTruncate).toHaveBeenCalledTimes(1);
+      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 1000000);
+    });
   });
 
   describe('getVulnerabilityAlerts()', () => {
@@ -1917,6 +1984,7 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         { 
@@ -1936,6 +2004,41 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('returns file content from given repo', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/different%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
+        )
+        .reply(200, {
+          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+        });
+      const res = await gitlab.getJsonFile('dir/file.json', 'different%2Frepo');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns file content from branch or tag', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=dev'
+        )
+        .reply(200, {
+          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+        });
+      const res = await gitlab.getJsonFile(
+        'dir/file.json',
+        'some%2Frepo',
+        'dev'
+      );
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('throws on malformed JSON', async () => {
       const scope = await initRepo();
       scope

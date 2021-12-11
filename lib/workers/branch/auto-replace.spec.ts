@@ -103,7 +103,7 @@ describe('workers/branch/auto-replace', () => {
         reuseExistingBranch
       );
       // FIXME: explicit assert condition
-      expect(res).toEqual('wrong source');
+      expect(res).toBe('wrong source');
     });
     it('updates version and integrity', async () => {
       const script =
