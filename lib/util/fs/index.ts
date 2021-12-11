@@ -30,11 +30,13 @@ export async function readLocalFile(
 export async function readLocalFile(
   fileName: string,
   encoding?: string
-): Promise<string | Buffer> {
+): Promise<string | Buffer | null> {
   const { localDir } = GlobalConfig.get();
   const localFileName = join(localDir, fileName);
   try {
-    const fileContent = await fs.readFile(localFileName, encoding);
+    const fileContent = encoding
+      ? await fs.readFile(localFileName, encoding)
+      : await fs.readFile(localFileName);
     return fileContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');

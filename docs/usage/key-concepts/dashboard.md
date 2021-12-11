@@ -29,7 +29,7 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 
 Or set `dependencyDashboard` to `true`:
 
-```
+```json
 {
   "dependencyDashboard": true
 }

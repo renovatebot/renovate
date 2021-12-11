@@ -109,6 +109,7 @@ export async function getReleaseList(
   });
   return res.body.map((release) => ({
     url: `${apiUrl}/${release.tag_name}`,
+    notesSourceUrl: apiUrl,
     name: release.name,
     body: release.description,
     tag: release.tag_name,

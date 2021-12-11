@@ -11,9 +11,6 @@ export function getCurrentVersion(
   latestVersion: string,
   allVersions: string[]
 ): string | null {
-  if (lockedVersion && is.undefined(currentValue)) {
-    return allVersions.pop();
-  }
   // istanbul ignore if
   if (!is.string(currentValue)) {
     return null;
