@@ -1,17 +1,17 @@
 import type { PathLike } from 'fs';
 import callsite from 'callsite';
-import { DirectoryJSON, fs, vol } from 'memfs';
+import { DirectoryJSON, IFs, fs, vol } from 'memfs';
 import upath from 'upath';
 
 export class Fixtures {
   static get(name: string, fixturesRoot = '.'): string {
-    const realFs = jest.requireActual('fs');
+    const realFs: IFs = jest.requireActual('fs');
     return realFs.readFileSync(
       upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
       {
         encoding: 'utf-8',
       }
-    );
+    ) as string;
   }
 
   static mock(json: DirectoryJSON, cwd?: string): void {
