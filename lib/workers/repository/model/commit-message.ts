@@ -44,18 +44,25 @@ export class CommitMessage {
     return [prefix, message].join(' ').trim();
   }
 
-  public static formatCasing(commitMessage: any): string {
-    if (commitMessage.includes(':')) {
-      // eslint-disable-next-line no-param-reassign
-      commitMessage = commitMessage.split(':');
-      commitMessage[1] = lowerCaseFirstWord(commitMessage[1]);
-      commitMessage[0] = lowerCaseFirstWord(commitMessage[0]);
-      // eslint-disable-next-line no-param-reassign
-      commitMessage = commitMessage.join(': ');
-    } else {
-      return lowerCaseFirstWord(commitMessage);
+  public static formatCasing(message: string): string {
+    let commitMessage: any = message;
+    const hasSemiColon: boolean = commitMessage.includes(':');
+    commitMessage = commitMessage.split(':');
+    commitMessage = commitMessage.map((msg: string) =>
+      this.lowerCaseFirstWord(msg)
+    );
+    return hasSemiColon ? commitMessage.join(': ') : commitMessage.join('');
+  }
+
+  static lowerCaseFirstWord(message: string): string {
+    let copyMsg: any = message;
+    if (!copyMsg) {
+      return copyMsg;
     }
-    return commitMessage;
+    copyMsg = copyMsg.trim().split(' ');
+    copyMsg[0] = copyMsg[0].toLowerCase();
+    copyMsg = copyMsg.join(' ');
+    return copyMsg;
   }
 
   private formatMessage(): string {
@@ -65,15 +72,4 @@ export class CommitMessage {
 
     return this.message.charAt(0).toUpperCase() + this.message.slice(1);
   }
-}
-function lowerCaseFirstWord(message: any): string {
-  if (!message) {
-    return message;
-  }
-  // eslint-disable-next-line no-param-reassign
-  message = message.trim().split(' ');
-  message[0] = message[0].toLowerCase();
-  // eslint-disable-next-line no-param-reassign
-  message = message.join(' ');
-  return message;
 }
