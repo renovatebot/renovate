@@ -1,11 +1,9 @@
 import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const input = Fixtures.get(`sample.txt`);
-
 describe('manager/cdnurl/extract', () => {
   it('extractPackageFile', () => {
-    expect(extractPackageFile(input)).toMatchSnapshot({
+    expect(extractPackageFile(Fixtures.get(`sample.txt`))).toMatchSnapshot({
       deps: [
         {
           depName: 'prop-types',

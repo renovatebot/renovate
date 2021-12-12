@@ -1,8 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractLocks } from './util';
 
-const validLockfile = Fixtures.get('validLockfile.hcl');
-
 describe('manager/terraform/lockfile/util', () => {
   describe('extractLocks()', () => {
     it('returns null for empty', () => {
@@ -11,7 +9,7 @@ describe('manager/terraform/lockfile/util', () => {
     });
 
     it('extracts', () => {
-      const res = extractLocks(validLockfile);
+      const res = extractLocks(Fixtures.get('validLockfile.hcl'));
       expect(res).toHaveLength(3);
       expect(res).toMatchSnapshot();
     });

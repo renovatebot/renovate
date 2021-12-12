@@ -3,8 +3,6 @@ import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
 import { RubyVersionDatasource } from '.';
 
-const rubyReleasesHtml = Fixtures.get('releases.html');
-
 const datasource = RubyVersionDatasource.id;
 
 describe('datasource/ruby-version/index', () => {
@@ -13,7 +11,7 @@ describe('datasource/ruby-version/index', () => {
       httpMock
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
-        .reply(200, rubyReleasesHtml);
+        .reply(200, Fixtures.get('releases.html'));
       const res = await getPkgReleases({
         datasource,
         depName: 'ruby',

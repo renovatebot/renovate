@@ -1,8 +1,6 @@
 import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const bitbucketPipelinesYAML = Fixtures.get('bitbucket-pipelines.yaml');
-
 describe('manager/bitbucket-pipelines/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
@@ -10,7 +8,7 @@ describe('manager/bitbucket-pipelines/extract', () => {
     });
 
     it('extracts dependencies', () => {
-      const res = extractPackageFile(bitbucketPipelinesYAML);
+      const res = extractPackageFile(Fixtures.get('bitbucket-pipelines.yaml'));
       expect(res.deps).toMatchInlineSnapshot(`
 Array [
   Object {

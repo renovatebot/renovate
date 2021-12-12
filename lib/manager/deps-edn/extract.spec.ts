@@ -1,11 +1,9 @@
 import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const depsEdn = Fixtures.get('deps.edn');
-
 describe('manager/deps-edn/extract', () => {
   it('extractPackageFile', () => {
-    const { deps } = extractPackageFile(depsEdn);
+    const { deps } = extractPackageFile(Fixtures.get('deps.edn'));
     expect(deps).toMatchSnapshot([
       {
         depName: 'persistent-sorted-set:persistent-sorted-set',

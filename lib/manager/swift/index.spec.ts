@@ -1,8 +1,6 @@
 import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const pkgContent = Fixtures.get(`SamplePackage.swift`);
-
 describe('manager/swift/index', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty content', () => {
@@ -129,7 +127,9 @@ describe('manager/swift/index', () => {
       ).toMatchSnapshot({ deps: [{ currentValue: '..<"1.2.3"' }] });
     });
     it('parses multiple packages', () => {
-      expect(extractPackageFile(pkgContent)).toMatchSnapshot();
+      expect(
+        extractPackageFile(Fixtures.get(`SamplePackage.swift`))
+      ).toMatchSnapshot();
     });
   });
 });

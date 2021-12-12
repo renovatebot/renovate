@@ -4,8 +4,6 @@ import * as httpMock from '../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { datasource, defaultRegistryUrl } from './common';
 
-const res1 = Fixtures.get('index.json');
-
 describe('datasource/node/index', () => {
   describe('getReleases', () => {
     it('throws for 500', async () => {
@@ -42,7 +40,10 @@ describe('datasource/node/index', () => {
     });
 
     it('processes real data', async () => {
-      httpMock.scope(defaultRegistryUrl).get('/index.json').reply(200, res1);
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get('/index.json')
+        .reply(200, Fixtures.get('index.json'));
       const res = await getPkgReleases({
         datasource,
         depName: 'node',

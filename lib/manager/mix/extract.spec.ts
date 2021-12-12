@@ -2,8 +2,6 @@ import { Fixtures } from '../../../test/fixtures';
 import { GlobalConfig } from '../../config/global';
 import { extractPackageFile } from '.';
 
-const sample = Fixtures.get('mix.exs');
-
 describe('manager/mix/extract', () => {
   beforeEach(() => {
     GlobalConfig.set({ localDir: '' });
@@ -15,7 +13,7 @@ describe('manager/mix/extract', () => {
       expect(deps).toBeEmpty();
     });
     it('extracts all dependencies', async () => {
-      const res = await extractPackageFile(sample, 'mix.exs');
+      const res = await extractPackageFile(Fixtures.get('mix.exs'), 'mix.exs');
       expect(res).toMatchSnapshot({
         deps: [
           { depName: 'postgrex', currentValue: '~> 0.8.1' },

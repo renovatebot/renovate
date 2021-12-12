@@ -6,16 +6,15 @@ import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-plugin/util';
 import * as sbtPackage from '.';
 
-const mavenIndexHtml = Fixtures.get(`maven-index.html`);
-const sbtPluginIndex = Fixtures.get(`sbt-plugins-index.html`);
-
 describe('datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
-    expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
+    expect(parseIndexDir(Fixtures.get(`maven-index.html`))).toMatchSnapshot();
   });
 
   it('parses sbt index directory', () => {
-    expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
+    expect(
+      parseIndexDir(Fixtures.get(`sbt-plugins-index.html`))
+    ).toMatchSnapshot();
   });
 
   describe('getPkgReleases', () => {

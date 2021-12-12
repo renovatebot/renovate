@@ -1,11 +1,9 @@
 import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const content = Fixtures.get('build.cake');
-
 describe('manager/cake/index', () => {
   it('extracts', () => {
-    expect(extractPackageFile(content)).toMatchSnapshot({
+    expect(extractPackageFile(Fixtures.get('build.cake'))).toMatchSnapshot({
       deps: [
         { depName: 'Foo.Foo', currentValue: '1.1.1' },
         { depName: 'Bim.Bim', currentValue: '6.6.6' },
