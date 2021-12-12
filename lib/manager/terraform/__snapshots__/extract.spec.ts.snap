@@ -212,6 +212,7 @@ Object {
       "depType": "provider",
       "lockedVersion": undefined,
       "lookupName": "hashicorp/helm",
+      "skipReason": "no-version",
     },
     Object {
       "currentValue": "V1.9",

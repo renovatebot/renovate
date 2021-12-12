@@ -5,8 +5,8 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { ExecOptions, exec } from '../../../util/exec';
-import type { ToolConstraint } from '../../../util/exec/types';
+import { exec } from '../../../util/exec';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -28,7 +28,6 @@ export async function generateLockFile(
       toolName: 'npm',
       constraint: config.constraints?.npm,
     };
-    const preCommands = ['hash -d npm'];
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
@@ -56,7 +55,6 @@ export async function generateLockFile(
         tagScheme: 'node',
         tagConstraint,
       },
-      preCommands,
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {

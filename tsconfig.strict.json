@@ -3,7 +3,7 @@
   "compilerOptions": {
     "strictNullChecks": true,
     "noImplicitAny": true,
-    "lib": ["es2019"]
+    "lib": ["es2020"]
   },
   "include": [
     "lib/config/app-strings.ts",
@@ -26,8 +26,7 @@
     "lib/util/cache/*.ts",
     "lib/util/clone.ts",
     "lib/util/date.ts",
-    "lib/util/exec/common.ts",
-    "lib/util/exec/types.ts",
+    "lib/util/exec",
     "lib/util/fs",
     "lib/util/git/config.ts",
     "lib/util/git/types.ts",
@@ -68,6 +67,13 @@
     "lib/logger/err-serializer.spec.ts",
     "lib/manager/gradle/shallow/types.ts",
     "lib/util/cache/*.spec.ts",
+    "lib/util/exec/buildpack.spec.ts",
+    "lib/util/exec/buildpack.ts",
+    "lib/util/exec/docker/index.spec.ts",
+    "lib/util/exec/docker/index.ts",
+    "lib/util/exec/env.spec.ts",
+    "lib/util/exec/index.spec.ts",
+    "lib/util/exec/index.ts",
     "lib/util/fs/index.spec.ts"
   ]
 }
