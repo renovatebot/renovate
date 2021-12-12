@@ -713,7 +713,7 @@ describe('util/exec/index', () => {
       actualCmd.push(execCmd);
       actualOpts.push(execOpts);
       callback(null, { stdout: '', stderr: '' });
-      return undefined;
+      return undefined as never;
     });
     GlobalConfig.set({ cacheDir, localDir: cwd, ...adminConfig });
     await exec(cmd as string, inOpts);
@@ -729,7 +729,7 @@ describe('util/exec/index', () => {
     cpExec.mockImplementation((execCmd, execOpts, callback) => {
       actualCmd.push(execCmd);
       callback(null, { stdout: '', stderr: '' });
-      return undefined;
+      return undefined as never;
     });
 
     GlobalConfig.set({ binarySource: 'global' });
