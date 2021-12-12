@@ -260,7 +260,7 @@ export async function getReleaseNotesMd(
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
-              const notesSourceUrl = `${baseUrl}${repository}/blob/master/${changelogFile}`;
+              const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
               const url =
                 notesSourceUrl +
                 '#' +

@@ -243,7 +243,7 @@ Configuring this to `true` means that Renovate will detect and apply the default
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.
-The `config:base` preset that many extend from limits the amount of concurrent branches to 20, but in most cases we would recommend lower values such as 5 or 10.
+The `config:base` preset that many extend from limits the amount of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
 However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
@@ -2544,6 +2544,31 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
+## userStrings
+
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+If you want, you can change the text in the comment with the `userStrings` config option.
+
+You can edit these user-facing strings:
+
+- `ignoreDigest`: Text of the PR comment for digest upgrades.
+- `ignoreMajor`: Text of the PR comment for major upgrades.
+- `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
+- `ignoreTopic`: Topic of the PR comment.
+
+Example:
+
+```json
+{
+  "userStrings": {
+    "ignoreTopic": "Custom topic for PR comment",
+    "ignoreMajor": "Custom text for major upgrades.",
+    "ignoreDigest": "Custom text for digest upgrades.",
+    "ignoreOther": "Custom text for other upgrades."
+  }
+}
+```
 
 ## versioning
 

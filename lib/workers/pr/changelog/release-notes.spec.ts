@@ -304,7 +304,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/chalk')
         .reply(200)
-        .get('/repos/chalk/git/trees/master')
+        .get('/repos/chalk/git/trees/HEAD')
         .reply(200, {
           tree: [
             { name: 'lib', type: 'tree' },
@@ -327,7 +327,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/some/repository1')
         .reply(200)
-        .get('/repos/some/repository1/git/trees/master')
+        .get('/repos/some/repository1/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/some/repository1/git/blobs/abcd')
         .reply(200, {
@@ -349,7 +349,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/some/repository2')
         .reply(200)
-        .get('/repos/some/repository2/git/trees/master')
+        .get('/repos/some/repository2/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/some/repository2/git/blobs/abcd')
         .reply(200, {
@@ -371,7 +371,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/angular/angular.js')
         .reply(200)
-        .get('/repos/angular/angular.js/git/trees/master')
+        .get('/repos/angular/angular.js/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/angular/angular.js/git/blobs/abcd')
         .reply(200, {
@@ -445,7 +445,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/facebook/jest')
         .reply(200)
-        .get('/repos/facebook/jest/git/trees/master')
+        .get('/repos/facebook/jest/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/facebook/jest/git/blobs/abcd')
         .reply(200, {
@@ -474,7 +474,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/nodeca/js-yaml')
         .reply(200)
-        .get('/repos/nodeca/js-yaml/git/trees/master?recursive=1')
+        .get('/repos/nodeca/js-yaml/git/trees/HEAD?recursive=1')
         .reply(200, subdirTree)
         .get('/repos/nodeca/js-yaml/git/blobs/abcd')
         .reply(200, {
@@ -499,7 +499,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/nodeca/js-yaml')
         .reply(200)
-        .get('/repos/nodeca/js-yaml/git/trees/master')
+        .get('/repos/nodeca/js-yaml/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/nodeca/js-yaml/git/blobs/abcd')
         .reply(200, {
