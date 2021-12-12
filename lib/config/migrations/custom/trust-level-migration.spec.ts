@@ -1,32 +1,35 @@
-import { MigrationsService } from '../migrations-service';
+import { validateCustomMigration } from '../validator';
+import { TrustLevelMigration } from './trust-level-migration';
 
 describe('config/migrations/custom/trust-level-migration', () => {
   it('should handle hight level', () => {
-    const { isMigrated, migratedConfig } = MigrationsService.run({
-      trustLevel: 'high',
-    });
-
-    expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toEqual({
-      allowCustomCrateRegistries: true,
-      allowScripts: true,
-      exposeAllEnv: true,
-    });
+    validateCustomMigration(
+      TrustLevelMigration,
+      {
+        trustLevel: 'high',
+      },
+      {
+        allowCustomCrateRegistries: true,
+        allowScripts: true,
+        exposeAllEnv: true,
+      }
+    );
   });
 
   it('should not rewrite provided properties', () => {
-    const { isMigrated, migratedConfig } = MigrationsService.run({
-      allowCustomCrateRegistries: false,
-      allowScripts: false,
-      exposeAllEnv: false,
-      trustLevel: 'high',
-    });
-
-    expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toEqual({
-      allowCustomCrateRegistries: false,
-      allowScripts: false,
-      exposeAllEnv: false,
-    });
+    validateCustomMigration(
+      TrustLevelMigration,
+      {
+        allowCustomCrateRegistries: false,
+        allowScripts: false,
+        exposeAllEnv: false,
+        trustLevel: 'high',
+      },
+      {
+        allowCustomCrateRegistries: false,
+        allowScripts: false,
+        exposeAllEnv: false,
+      }
+    );
   });
 });

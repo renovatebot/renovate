@@ -1,14 +1,16 @@
-import { MigrationsService } from '../migrations-service';
+import { validateCustomMigration } from '../validator';
+import { BinarySourceMigration } from './binary-source-migration';
 
 describe('config/migrations/custom/binary-source-migration', () => {
   it('should migrate "auto" to "global"', () => {
-    const { isMigrated, migratedConfig } = MigrationsService.run({
-      binarySource: 'auto',
-    });
-
-    expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toEqual({
-      binarySource: 'global',
-    });
+    validateCustomMigration(
+      BinarySourceMigration,
+      {
+        binarySource: 'auto',
+      },
+      {
+        binarySource: 'global',
+      }
+    );
   });
 });

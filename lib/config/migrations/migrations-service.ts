@@ -1,5 +1,5 @@
 import { dequal } from 'dequal';
-import type { MigratedConfig, RenovateConfig } from '../types';
+import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
@@ -43,7 +43,7 @@ export class MigrationsService {
     TrustLevelMigration,
   ];
 
-  static run(originalConfig: RenovateConfig): MigratedConfig {
+  static run(originalConfig: RenovateConfig): RenovateConfig {
     const migratedConfig: RenovateConfig = {};
     const migrations = MigrationsService.getMigrations(
       originalConfig,
@@ -56,13 +56,17 @@ export class MigrationsService {
       migration?.run(value);
     }
 
-    return {
-      isMigrated: !dequal(originalConfig, migratedConfig),
-      migratedConfig,
-    };
+    return migratedConfig;
   }
 
-  private static getMigrations(
+  static isMigrated(
+    originalConfig: RenovateConfig,
+    migratedConfig: RenovateConfig
+  ): boolean {
+    return !dequal(originalConfig, migratedConfig);
+  }
+
+  protected static getMigrations(
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig
   ): ReadonlyArray<Migration> {

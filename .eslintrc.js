@@ -137,6 +137,12 @@ module.exports = {
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/unbound-method': 0,
 
+        'jest/expect-expect': [
+          'error',
+          {
+            assertFunctionNames: ['expect', 'validateCustomMigration'],
+          },
+        ],
         'jest/valid-title': [0, { ignoreTypeOfDescribeName: true }],
         'max-classes-per-file': 0,
         'class-methods-use-this': 0,
