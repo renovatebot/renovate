@@ -206,7 +206,7 @@
     "xmldoc": "1.1.2"
   },
   "optionalDependencies": {
-    "re2": "1.17.0"
+    "re2": "1.17.1"
   },
   "devDependencies": {
     "@actions/core": "1.6.0",

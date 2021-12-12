@@ -9065,10 +9065,10 @@ rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.17.0:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.17.0.tgz#6fe044011513be3e1b89a872d02b18cf45920570"
-  integrity sha512-hb2NBoC3kYWKCtTZCJncv9jIfI1LKUVyVU4yhy0egr9HBMsLrVhLCQB5p2U/btx+ZB26WNcI0/YATPRymm4fYw==
+re2@1.17.1:
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.17.1.tgz#0202025aa20dd574a8cdb439811761d88b70ae59"
+  integrity sha512-TrhxVzakyO/WJsErkc01zjlEiDLCuuRuddbVi2I8YasIbh6MEJfkRoajBRj+ggm00gnGI2EMemE9GrlKrgUZ8Q==
   dependencies:
     install-artifact-from-github "^1.2.0"
     nan "^2.15.0"
