@@ -7,6 +7,7 @@ import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
@@ -45,6 +46,7 @@ export class MigrationsService {
     GoModTidyMigration,
     IgnoreNodeModulesMigration,
     PinVersionsMigration,
+    RebaseConflictedPrs,
     RebaseStalePrsMigration,
     RequiredStatusChecksMigration,
     SemanticCommitsMigration,

@@ -147,11 +147,6 @@ export function migrateConfig(
         );
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
-      } else if (key === 'rebaseConflictedPrs') {
-        delete migratedConfig.rebaseConflictedPrs;
-        if (val === false) {
-          migratedConfig.rebaseWhen = 'never';
-        }
       } else if (key === 'ignoreNpmrcFile') {
         delete migratedConfig.ignoreNpmrcFile;
         if (!is.string(migratedConfig.npmrc)) {
