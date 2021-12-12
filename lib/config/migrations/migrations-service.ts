@@ -6,6 +6,7 @@ import { BinarySourceMigration } from './custom/binary-source-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
+import { PinVersionsMigration } from './custom/pin-versions-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
@@ -42,6 +43,7 @@ export class MigrationsService {
     EnabledManagersMigration,
     GoModTidyMigration,
     IgnoreNodeModulesMigration,
+    PinVersionsMigration,
     RequiredStatusChecksMigration,
     SemanticCommitsMigration,
     TrustLevelMigration,
