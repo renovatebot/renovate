@@ -153,7 +153,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   const stageNames: string[] = [];
 
   const fromMatches = content.matchAll(
-    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\S+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim // TODO #12070 complex for re2 has too many not supported groups
+    /^[ \t]*FROM(?:\\\r?\n| |\t|#.*?\r?\n|[ \t]--[a-z]+=\S+?)*[ \t](?<image>\S+)(?:(?:\\\r?\n| |\t|#.*\r?\n)+as[ \t]+(?<name>\S+))?/gim // TODO #12875 complex for re2 has too many not supported groups
   );
 
   for (const fromMatch of fromMatches) {
@@ -180,7 +180,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   const copyFromMatches = content.matchAll(
-    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|[ \t]--[a-z]+=\w+?)*[ \t]--from=(?<image>\S+)/gim // TODO #12070 complex for re2 has too many not supported groups
+    /^[ \t]*COPY(?:\\\r?\n| |\t|#.*\r?\n|[ \t]--[a-z]+=\w+?)*[ \t]--from=(?<image>\S+)/gim // TODO #12875 complex for re2 has too many not supported groups
   );
 
   for (const copyFromMatch of copyFromMatches) {

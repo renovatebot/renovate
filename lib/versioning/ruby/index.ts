@@ -135,7 +135,7 @@ const getNewValue = ({
       )
       .map(
         (element) =>
-          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12070 adds ' at front when re2 is used
+          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12875 adds ' at front when re2 is used
       )
       .join(',');
   }

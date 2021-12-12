@@ -36,7 +36,7 @@ export function migrateConfig(
         optionTypes[option.name] = option.type;
       });
     }
-    const newConfig = MigrationsService.run(config);
+    const newConfig = MigrationsService.run(config).migratedConfig;
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',
