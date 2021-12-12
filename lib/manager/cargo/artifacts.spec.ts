@@ -1,25 +1,18 @@
-import { exec as _exec } from 'child_process';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/exec-util';
-import { git, mocked } from '../../../test/util';
+import { envMock, exec, mockExecAll } from '../../../test/exec-util';
+import { env, fs, git, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
-import * as _env from '../../util/exec/env';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from './artifacts';
-import * as fs from '../../util/fs';
-import * as fsExtra from 'fs-extra';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../util/http');
 jest.mock('../../util/fs');
-jest.mock('fs-extra');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
 
 const config: UpdateArtifactsConfig = {};
 
