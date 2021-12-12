@@ -5,6 +5,7 @@ import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { readFile } from '../../../../util/fs';
+import is from 'is';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   switch (upath.extname(file)) {
@@ -18,7 +19,12 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       return JSON5.parse(await readFile(file, 'utf8'));
     case '.js': {
       const tmpConfig = await import(file);
-      return tmpConfig.default ? tmpConfig.default : tmpConfig;
+      let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
+      // Allow the config to be a function
+      if (is.fn(config)) {
+        config = config();
+      }
+      return config;
     }
     default:
       throw new Error('Unsupported file type');
