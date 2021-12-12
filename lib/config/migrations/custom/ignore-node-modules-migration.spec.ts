@@ -2,10 +2,11 @@ import { MigrationsService } from '../migrations-service';
 
 describe('config/migrations/custom/ignore-node-modules-migration', () => {
   it('should migrate to ignorePaths', () => {
-    const migratedConfig = MigrationsService.run({
+    const { isMigrated, migratedConfig } = MigrationsService.run({
       ignoreNodeModules: true,
     });
 
-    expect(migratedConfig.ignorePaths).toEqual(['node_modules/']);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toEqual({ ignorePaths: ['node_modules/'] });
   });
 });
