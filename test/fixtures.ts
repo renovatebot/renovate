@@ -56,7 +56,9 @@ export async function outputFile(file: string, data: any): Promise<void> {
   if (await pathExists(dir)) {
     await fs.promises.writeFile(file, data);
   } else {
-    await fs.promises.mkdir(dir);
+    await fs.promises.mkdir(dir, {
+      recursive: true,
+    });
     await fs.promises.writeFile(file, data);
   }
 }

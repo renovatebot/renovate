@@ -166,6 +166,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.depIndex = 0;
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
