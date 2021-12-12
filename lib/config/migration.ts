@@ -66,14 +66,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (key === 'semanticCommits') {
-        if (val === true) {
-          migratedConfig.semanticCommits = 'enabled';
-        } else if (val === false) {
-          migratedConfig.semanticCommits = 'disabled';
-        } else if (val !== 'enabled' && val !== 'disabled') {
-          migratedConfig.semanticCommits = 'auto';
-        }
       } else if (key === 'enabledManagers' && is.array(val)) {
         // Replace yarn with npm, since yarn actually uses npm as package manager
         migratedConfig.enabledManagers = migratedConfig.enabledManagers.map(
