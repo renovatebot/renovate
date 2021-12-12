@@ -145,12 +145,11 @@ export async function extractDependenciesFromUpdatesReport(
       if (depName.endsWith('_%%')) {
         return {
           ...dep,
-          depName: depName.replace(regEx(/_%%/), ''), // TODO #12071
+          depName: depName.replace(regEx(/_%%/), ''),
           datasource: datasourceSbtPackage.id,
         };
       }
       if (regEx(/^%.*%$/).test(currentValue)) {
-        // TODO #12071
         return { ...dep, skipReason: 'version-placeholder' };
       }
       return dep;

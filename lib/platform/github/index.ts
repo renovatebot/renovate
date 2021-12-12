@@ -1245,7 +1245,7 @@ export async function addReviewers(
   const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
     .filter((e) => e.startsWith('team:'))
-    .map((e) => e.replace(regEx(/^team:/), '')); // TODO #12071
+    .map((e) => e.replace(regEx(/^team:/), ''));
   try {
     await githubApi.postJson(
       `repos/${

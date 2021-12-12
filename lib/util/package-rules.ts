@@ -143,7 +143,7 @@ function matchesRule(
           packagePattern === '^*$' || packagePattern === '*'
             ? '.*'
             : packagePattern
-        ); // TODO #12071
+        );
         if (packageRegex.test(depName)) {
           logger.trace(`${depName} matches against ${String(packageRegex)}`);
           isMatch = true;
@@ -173,7 +173,7 @@ function matchesRule(
     for (const pattern of excludePackagePatterns) {
       const packageRegex = regEx(
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
-      ); // TODO #12071
+      );
       if (packageRegex.test(depName)) {
         logger.trace(`${depName} matches against ${String(packageRegex)}`);
         isMatch = true;

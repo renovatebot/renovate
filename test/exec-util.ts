@@ -31,7 +31,7 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
     if (is.string(v)) {
       const val = v
         .replace(regEx(/\\(\w)/g), '/$1')
-        .replace(cwd, '/root/project'); // TODO #12071
+        .replace(cwd, '/root/project');
       this.update(val);
     }
   });
