@@ -140,7 +140,7 @@ module.exports = {
         'jest/expect-expect': [
           'error',
           {
-            assertFunctionNames: ['expect', 'validateCustomMigration'],
+            assertFunctionNames: ['expect', 'validate'],
           },
         ],
         'jest/valid-title': [0, { ignoreTypeOfDescribeName: true }],

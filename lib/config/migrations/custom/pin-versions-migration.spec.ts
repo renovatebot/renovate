@@ -1,10 +1,11 @@
-import { validateCustomMigration } from '../validator';
+import { getCustomMigrationValidator } from '../validator';
 import { PinVersionsMigration } from './pin-versions-migration';
 
 describe('config/migrations/custom/pin-versions-migration', () => {
+  const validate = getCustomMigrationValidator(PinVersionsMigration);
+
   it('should migrate true', () => {
-    validateCustomMigration(
-      PinVersionsMigration,
+    validate(
       {
         pinVersions: true,
       },
@@ -15,8 +16,7 @@ describe('config/migrations/custom/pin-versions-migration', () => {
   });
 
   it('should migrate false', () => {
-    validateCustomMigration(
-      PinVersionsMigration,
+    validate(
       {
         pinVersions: false,
       },

@@ -1,14 +1,15 @@
-import { RenovateConfig } from './../../../test/util';
+import { RenovateConfig } from '../../../test/util';
 import { MigrationsService } from './migrations-service';
 import { Migration, MigrationConstructor } from './types';
 
-export function validateCustomMigration(
-  CustomMigration: MigrationConstructor,
+export function getCustomMigrationValidator(
+  CustomMigration: MigrationConstructor
+): (
   originalConfig: RenovateConfig,
   expectedConfig: RenovateConfig,
-  isMigrated = true
-): void {
-  class MigrationsServiceValidator extends MigrationsService {
+  isMigrated?: boolean
+) => void {
+  class CustomMigrationsService extends MigrationsService {
     protected static override getMigrations(
       original: RenovateConfig,
       migrated: RenovateConfig
@@ -17,10 +18,16 @@ export function validateCustomMigration(
     }
   }
 
-  const migratedConfig = MigrationsServiceValidator.run(originalConfig);
+  return (
+    originalConfig: RenovateConfig,
+    expectedConfig: RenovateConfig,
+    isMigrated = true
+  ): void => {
+    const migratedConfig = CustomMigrationsService.run(originalConfig);
 
-  expect(MigrationsService.isMigrated(originalConfig, migratedConfig)).toBe(
-    isMigrated
-  );
-  expect(migratedConfig).toEqual(expectedConfig);
+    expect(MigrationsService.isMigrated(originalConfig, migratedConfig)).toBe(
+      isMigrated
+    );
+    expect(migratedConfig).toEqual(expectedConfig);
+  };
 }

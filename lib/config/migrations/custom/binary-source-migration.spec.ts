@@ -1,10 +1,11 @@
-import { validateCustomMigration } from '../validator';
+import { getCustomMigrationValidator } from '../validator';
 import { BinarySourceMigration } from './binary-source-migration';
 
 describe('config/migrations/custom/binary-source-migration', () => {
+  const validate = getCustomMigrationValidator(BinarySourceMigration);
+
   it('should migrate "auto" to "global"', () => {
-    validateCustomMigration(
-      BinarySourceMigration,
+    validate(
       {
         binarySource: 'auto',
       },
