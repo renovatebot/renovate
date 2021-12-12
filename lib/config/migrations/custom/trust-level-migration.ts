@@ -2,10 +2,9 @@ import { AbstractMigration } from '../base/abstract-migration';
 
 export class TrustLevelMigration extends AbstractMigration {
   readonly propertyName = 'trustLevel';
+  override readonly deprecated = true;
 
-  override run(value): void {
-    this.delete(this.propertyName);
-
+  run(value): void {
     if (value === 'high') {
       this.setSafely('allowCustomCrateRegistries', true);
       this.setSafely('allowScripts', true);

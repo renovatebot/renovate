@@ -2,10 +2,9 @@ import { AbstractMigration } from '../base/abstract-migration';
 
 export class IgnoreNodeModulesMigration extends AbstractMigration {
   readonly propertyName = 'ignoreNodeModules';
+  override readonly deprecated = true;
 
-  override run(value): void {
-    this.delete(this.propertyName);
-
+  run(value): void {
     this.setSafely('ignorePaths', value ? ['node_modules/'] : []);
   }
 }
