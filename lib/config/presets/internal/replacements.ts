@@ -8,6 +8,7 @@ export const presets: Record<string, Preset> = {
       'replacements:cucumber-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:flake8-pathlib-to-flake8-use-pathlib',
+      'replacements:svg.elements-to-svgelements',
     ],
   },
   'flake8-pathlib-to-flake8-use-pathlib': {
@@ -18,6 +19,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['flake8-pathlib'],
         replacementName: 'flake8-use-pathlib',
         replacementVersion: '0.2.0',
+      },
+    ],
+  },
+  'svg.elements-to-svgelements': {
+    description: 'svg.elements was renamed to svgelements',
+    packageRules: [
+      {
+        matchDatasources: ['pypi'],
+        matchPackageNames: ['svg.elements'],
+        replacementName: 'svgelements',
+        replacementVersion: '1.0.0',
       },
     ],
   },
