@@ -19,17 +19,25 @@ try {
   RegEx = RegExp;
 }
 
-export function regEx(pattern: string | RegExp, flags?: string): RegExp {
-  const key = `${pattern.toString()}:${flags}`;
+export function regEx(
+  pattern: string | RegExp,
+  flags?: string,
+  useCache?: boolean
+): RegExp {
+  let key: string;
+  if (useCache) {
+    key = `${pattern.toString()}:${flags}`;
 
-  const cachedResult = cache.get(key);
-  if (cachedResult) {
-    return cachedResult;
+    const cachedResult = cache.get(key);
+    if (cachedResult) {
+      return cachedResult;
+    }
   }
-
   try {
     const instance = new RegEx(pattern, flags);
-    cache.set(key, instance);
+    if (useCache) {
+      cache.set(key, instance);
+    }
     return instance;
   } catch (err) {
     const error = new Error(CONFIG_VALIDATION);
