@@ -1,8 +1,8 @@
-// istanbul ignore file
 import { RenovateConfig } from '../../../test/util';
 import { MigrationsService } from './migrations-service';
 import { Migration, MigrationConstructor } from './types';
 
+/* istanbul ignore next */
 export function getCustomMigrationValidator(
   CustomMigration: MigrationConstructor
 ): (
