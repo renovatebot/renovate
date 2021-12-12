@@ -109,6 +109,6 @@ export class ArtifactoryDatasource extends Datasource {
   }
 
   private static parseReleaseTimestamp(rawText: string): string {
-    return rawText.trim().replace(regEx(/ ?-$/), '');
+    return rawText.trim().replace(regEx(/ ?-$/), '') + 'Z';
   }
 }
