@@ -21,7 +21,7 @@ try {
 
 export function regEx(
   pattern: string | RegExp,
-  flags?: string,
+  flags?: string | undefined,
   useCache?: boolean
 ): RegExp {
   let key: string;
