@@ -4,7 +4,7 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
-import { fixShortHours } from '../workers/branch/schedule';
+import { fixShortHours } from '../util/url';
 import { GlobalConfig } from './global';
 import { MigrationsService } from './migrations';
 import { getOptions } from './options';

@@ -79,3 +79,7 @@ export function parseUrl(url: string): URL | null {
 export function createURLFromHostOrURL(url: string): URL | null {
   return parseUrl(url) ?? parseUrl(`https://${url}`);
 }
+
+export function fixShortHours(input: string): string {
+  return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
+}
