@@ -1,12 +1,9 @@
-import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
-import * as _env from '../../util/exec/env';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from './artifacts';
 
@@ -63,7 +60,7 @@ describe('manager/cargo/artifacts', () => {
   });
   it('returns null if unchanged', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
-    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
 
