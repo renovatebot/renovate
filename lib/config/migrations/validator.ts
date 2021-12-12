@@ -1,3 +1,4 @@
+import { expect } from '@jest/globals';
 import { RenovateConfig } from '../../../test/util';
 import { MigrationsService } from './migrations-service';
 import { Migration, MigrationConstructor } from './types';
