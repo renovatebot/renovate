@@ -38,8 +38,18 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        branchName: 'some-branch',
+        prTitle: 'some-title',
+        isLockFileMaintenance: true,
+        upgrades: [
+          {
+            branchName: 'some-branch',
+            prTitle: 'some-title',
+            isLockFileMaintenance: true,
+          },
+        ],
+      });
     });
     it('handles lockFileUpdate', () => {
       const branch = [
@@ -55,8 +65,29 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        branchName: 'some-branch',
+        prTitle: 'some-title',
+        isLockfileUpdate: true,
+        currentValue: '^1.0.0',
+        currentVersion: '1.0.0',
+        lockedVersion: '1.0.0',
+        newValue: '^1.0.0',
+        newVersion: '1.0.1',
+        reuseLockFiles: true,
+        upgrades: [
+          {
+            branchName: 'some-branch',
+            prTitle: 'some-title',
+            isLockfileUpdate: true,
+            currentValue: '^1.0.0',
+            currentVersion: '1.0.0',
+            lockedVersion: '1.0.0',
+            newValue: '^1.0.0',
+            newVersion: '1.0.1',
+          },
+        ],
+      });
     });
     it('does not group same upgrades', () => {
       const branch = [
@@ -385,8 +416,7 @@ describe('workers/repository/updates/generate', () => {
         }),
       ];
       const res = generateBranchConfig(branch);
-      // FIXME: explicit assert condition
-      expect(res.prTitle).toMatchSnapshot();
+      expect(res.prTitle).toBe('upgrade some-dep');
     });
     it('handles @types specially', () => {
       const branch: BranchUpgradeConfig[] = [
@@ -427,8 +457,25 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeUndefined();
-      // FIXME: explicit assert condition
-      expect(generateBranchConfig(branch)).toMatchSnapshot();
+      expect(generateBranchConfig(branch)).toMatchSnapshot({
+        upgrades: [
+          {
+            depName: 'some-dep',
+            branchName: 'some-branch',
+            newValue: '0.6.0',
+          },
+          {
+            depName: 'some-dep',
+            branchName: 'some-branch',
+            newValue: '1.0.0',
+          },
+          {
+            depName: '@types/some-dep',
+            branchName: 'some-branch',
+            newValue: '0.5.8',
+          },
+        ],
+      });
     });
     it('handles @types specially (reversed)', () => {
       const branch: BranchUpgradeConfig[] = [
@@ -462,8 +509,28 @@ describe('workers/repository/updates/generate', () => {
           group: {},
         },
       ];
-      // FIXME: explicit assert condition
-      expect(generateBranchConfig(branch)).toMatchSnapshot();
+      expect(generateBranchConfig(branch)).toMatchSnapshot({
+        upgrades: [
+          {
+            depName: 'some-dep',
+            branchName: 'some-branch',
+            newValue: '0.6.0',
+            labels: ['a', 'c'],
+          },
+          {
+            depName: 'some-dep',
+            branchName: 'some-branch',
+            newValue: '1.0.0',
+            labels: ['a', 'b'],
+          },
+          {
+            depName: '@types/some-dep',
+            branchName: 'some-branch',
+            newValue: '0.5.7',
+            labels: ['a'],
+          },
+        ],
+      });
     });
     it('handles upgrades', () => {
       const branch: BranchUpgradeConfig[] = [
@@ -511,8 +578,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      // FIXME: explicit assert condition
-      expect(res.prTitle).toMatchSnapshot();
+      expect(res.prTitle).toMatchSnapshot('some-title (patch)');
     });
     it('sorts upgrades, without position first', () => {
       const branch: BranchUpgradeConfig[] = [
