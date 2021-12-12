@@ -53,8 +53,8 @@ export function extractPackageFile(
   }
   registryUrls = registryUrls.concat(extraUrls);
 
-  const pkgRegex = regEx(`^(${packagePattern})$`, undefined, false);
-  const pkgValRegex = regEx(`^${dependencyPattern}$`, undefined, false);
+  const pkgRegex = regEx(`^(${packagePattern})$`);
+  const pkgValRegex = regEx(`^${dependencyPattern}$`);
   const deps = content
     .split('\n')
     .map((rawline) => {

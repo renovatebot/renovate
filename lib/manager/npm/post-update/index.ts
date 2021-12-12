@@ -510,7 +510,7 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
-  const re = regEx(`${token}`, 'g', false);
+  const tokenRe = regEx(`${token}`, 'g', false);
   const { localDir } = GlobalConfig.get();
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
@@ -568,7 +568,7 @@ export async function getAdditionalFiles(
         logger.debug(`${npmLock} needs updating`);
         updatedArtifacts.push({
           name: npmLock,
-          contents: res.lockFile.replace(re, ''),
+          contents: res.lockFile.replace(tokenRe, ''),
         });
       }
     }

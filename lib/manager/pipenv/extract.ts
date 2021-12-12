@@ -18,7 +18,7 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
   '?:'
 )}\\s*`;
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
-const specifierRegex = regEx(`^${specifierPattern}$`, undefined, false);
+const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
   pipfile: PipFile,
   section: 'packages' | 'dev-packages'
