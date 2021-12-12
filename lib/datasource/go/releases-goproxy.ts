@@ -107,7 +107,9 @@ export function parseNoproxy(
   }
   lexer.reset(input);
   const noproxyPattern = [...lexer].map(({ value }) => value).join('');
-  const result = noproxyPattern ? regEx(`^(?:${noproxyPattern})$`) : null;
+  const result = noproxyPattern
+    ? regEx(`^(?:${noproxyPattern})$`, undefined, false)
+    : null;
   parsedNoproxy[input] = result;
   return result;
 }

@@ -10,8 +10,12 @@ import { AllConfig, RenovateConfig } from './types';
 
 const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
 
-const secretNameRegex = regEx(`^${secretNamePattern}$`);
-const secretTemplateRegex = regEx(`{{ secrets\\.(${secretNamePattern}) }}`);
+const secretNameRegex = regEx(`^${secretNamePattern}$`, undefined, false);
+const secretTemplateRegex = regEx(
+  `{{ secrets\\.(${secretNamePattern}) }}`,
+  undefined,
+  false
+);
 
 function validateSecrets(secrets_: unknown): void {
   if (!secrets_) {
