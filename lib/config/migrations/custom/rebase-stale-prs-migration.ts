@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class RebaseStalePrsMigration extends AbstractMigration {
-  readonly propertyName = 'rebaseStalePrs';
   override readonly deprecated = true;
+  readonly propertyName = 'rebaseStalePrs';
 
   override run(value): void {
     const rebaseConflictedPrs = this.get('rebaseConflictedPrs');

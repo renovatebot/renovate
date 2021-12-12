@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class PinVersionsMigration extends AbstractMigration {
-  readonly propertyName = 'pinVersions';
   override readonly deprecated = true;
+  readonly propertyName = 'pinVersions';
 
   run(value): void {
     if (is.boolean(value)) {
