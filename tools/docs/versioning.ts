@@ -2,6 +2,14 @@ import { getVersioningList } from '../../lib/versioning';
 import { readFile, updateFile } from '../utils';
 import { formatDescription, formatUrls, replaceContent } from './utils';
 
+type Versioning = {
+  id: string;
+  displayName: string;
+  urls?: string[];
+  supportsRanges?: boolean;
+  supportedRangeStrategies?: string[];
+};
+
 export async function generateVersioning(dist: string): Promise<void> {
   const versioningList = getVersioningList();
   let versioningContent =
@@ -9,7 +17,9 @@ export async function generateVersioning(dist: string): Promise<void> {
     versioningList.map((v) => `\`${v}\``).join(', ') +
     '.\n\n';
   for (const versioning of versioningList) {
-    const definition = await import(`../../lib/versioning/${versioning}`);
+    const definition = (await import(
+      `../../lib/versioning/${versioning}`
+    )) as Versioning;
     const { id, displayName, urls, supportsRanges, supportedRangeStrategies } =
       definition;
     versioningContent += `\n### ${displayName} Versioning\n\n`;
