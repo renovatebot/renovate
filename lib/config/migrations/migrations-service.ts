@@ -59,7 +59,14 @@ export class MigrationsService {
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
       const migration = migrations.find((item) => item.propertyName === key);
-      migration?.run(value);
+
+      if (migration) {
+        migration.run(value);
+
+        if (migration.deprecated) {
+          delete migratedConfig[key];
+        }
+      }
     }
 
     return migratedConfig;
