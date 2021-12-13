@@ -5,9 +5,10 @@ import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 
-function removeLeadingWhiteSpaceAddNewLine(input: string): string {
-  return input.replace(regEx(/^ {2}/), '') + '\n';
+function formatContent(input: string): string {
+  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading witespace and add a new line at the end
 }
+
 export async function extractPackageFile(
   content: string,
   fileName?: string
@@ -71,7 +72,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         groupLine = lines[lineNumber];
         if (groupLine !== 'end') {
-          groupContent += removeLeadingWhiteSpaceAddNewLine(groupLine || '');
+          groupContent += formatContent(groupLine || '');
         }
       }
       const groupRes = await extractPackageFile(groupContent);
@@ -106,7 +107,7 @@ export async function extractPackageFile(
             sourceLine = 'end';
           }
           if (sourceLine !== 'end') {
-            sourceContent += removeLeadingWhiteSpaceAddNewLine(sourceLine);
+            sourceContent += formatContent(sourceLine);
           }
         }
         const sourceRes = await extractPackageFile(sourceContent);
@@ -133,7 +134,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         platformsLine = lines[lineNumber];
         if (platformsLine !== 'end') {
-          platformsContent += removeLeadingWhiteSpaceAddNewLine(platformsLine);
+          platformsContent += formatContent(platformsLine);
         }
       }
       const platformsRes = await extractPackageFile(platformsContent);
@@ -158,7 +159,7 @@ export async function extractPackageFile(
         lineNumber += 1;
         ifLine = lines[lineNumber];
         if (ifLine !== 'end') {
-          ifContent += removeLeadingWhiteSpaceAddNewLine(ifLine);
+          ifContent += formatContent(ifLine);
         }
       }
       const ifRes = await extractPackageFile(ifContent);
