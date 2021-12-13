@@ -101,6 +101,7 @@ const repoGroups = {
   ],
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
+  guava: 'https://github.com/google/guava',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
