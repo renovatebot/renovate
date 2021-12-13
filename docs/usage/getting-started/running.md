@@ -108,6 +108,18 @@ If you combine both of the above then any single config option in the environmen
 
 Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
+#### Using `config.js`
+
+If you use a `config.js`, it will be expected to export a configuration via `module.exports`. The value can be either a plain JavaScript object like in this example where `config.js` exports a plain object:
+
+```javascript
+module.exports = {
+  token: 'abcdefg',
+};
+```
+
+`config.js` may also export a `Promise` of such an object, or a function that will return either a plain Javascript object or a `Promise` of such an object. This allows one to include the results of asynchronous operations in the exported value. An example of a `config.js` that exports an async function (which is a function that returns a `Promise`) can be seen in a comment for [#10011: Allow autodiscover filtering for repo topic](https://github.com/renovatebot/renovate/issues/10011#issuecomment-992568583) and more examples can be seen in [`file.spec.ts`](https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts).
+
 ### Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
