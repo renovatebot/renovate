@@ -641,8 +641,8 @@ See [shareable config presets](https://docs.renovatebot.com/config-presets) for 
 
 ## extractVersion
 
-Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file.
-You must defined a "named capture group" called `version` as shown in the below examples.
+Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
+You must define a "named capture group" called `version` like in the examples below.
 
 For example, to extract only the major.minor precision from a GitHub release, the following would work:
 
