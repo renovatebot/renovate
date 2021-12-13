@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { fixShortHours } from '../../util/url';
+import { fixShortHours } from '../../util/date';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 3am on the first day of the month',
