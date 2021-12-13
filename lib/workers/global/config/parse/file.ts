@@ -1,3 +1,4 @@
+import is from 'is';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
@@ -18,7 +19,12 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       return JSON5.parse(await readFile(file, 'utf8'));
     case '.js': {
       const tmpConfig = await import(file);
-      return tmpConfig.default ? tmpConfig.default : tmpConfig;
+      let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
+      // Allow the config to be a function
+      if (is.fn(config)) {
+        config = config();
+      }
+      return config;
     }
     default:
       throw new Error('Unsupported file type');
