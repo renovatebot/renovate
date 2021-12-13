@@ -2365,7 +2365,7 @@ after 10pm and before 5:00am
 after 10pm and before 5am every weekday
 on friday and saturday
 every 3 months on the first day of the month
-* 0 2 * * *
+* 0 2 * *
 ```
 
 Note: For Cron schedules, you _must_ use `*` for minutes, as Renovate doesn't support minute granularity.
