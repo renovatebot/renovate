@@ -22,12 +22,11 @@ try {
 export function regEx(
   pattern: string | RegExp,
   flags?: string | undefined,
-  useCache?: boolean
+  useCache = true
 ): RegExp {
   let key = '';
   if (useCache) {
     key = `${pattern.toString()}:${flags}`;
-
     const cachedResult = cache.get(key);
     if (cachedResult) {
       return cachedResult;
