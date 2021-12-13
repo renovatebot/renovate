@@ -32,6 +32,7 @@ describe('manager/cargo/artifacts', () => {
   afterEach(() => {
     GlobalConfig.reset();
   });
+
   it('returns null if no Cargo.lock found', async () => {
     fs.stat.mockRejectedValue(new Error('not found!'));
     const updatedDeps = [
@@ -48,6 +49,7 @@ describe('manager/cargo/artifacts', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if updatedDeps is empty', async () => {
     expect(
       await cargo.updateArtifacts({
@@ -58,11 +60,14 @@ describe('manager/cargo/artifacts', () => {
       })
     ).toBeNull();
   });
+
   it('returns null if unchanged', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock');
 
     const updatedDeps = [
       {
@@ -79,13 +84,14 @@ describe('manager/cargo/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated Cargo.lock', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
-    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
         depName: 'dep1',
@@ -106,8 +112,8 @@ describe('manager/cargo/artifacts', () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
-    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
         depName: 'renamedDep1',
@@ -132,8 +138,8 @@ describe('manager/cargo/artifacts', () => {
 
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
-    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
         depName: 'dep1',
@@ -154,8 +160,8 @@ describe('manager/cargo/artifacts', () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
-    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -172,8 +178,8 @@ describe('manager/cargo/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
-    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
     const updatedDeps = [
       {
         depName: 'dep1',
@@ -191,8 +197,8 @@ describe('manager/cargo/artifacts', () => {
   });
   it('catches errors', async () => {
     fs.stat.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock' as any);
-    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock' as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
