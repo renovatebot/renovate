@@ -1,3 +1,4 @@
+import is from 'is';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
@@ -5,7 +6,6 @@ import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { readFile } from '../../../../util/fs';
-import is from 'is';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   switch (upath.extname(file)) {

@@ -19,16 +19,16 @@ describe('workers/global/config/parse/file', () => {
   describe('.getConfig()', () => {
     it.each([
       ['custom js config file', 'file.js'],
-      ['custom js config file exporting a Promise', 'filePromise.js'],
-      ['custom js config file exporting a function', 'fileFunction.js'],
+      ['custom js config file exporting a Promise', 'file-promise.js'],
+      ['custom js config file exporting a function', 'file-function.js'],
       // The next two are different syntactic ways of expressing the same thing
       [
         'custom js config file exporting a function returning a Promise',
-        'fileFunctionPromise.js',
+        'file-function-promise.js',
       ],
       [
         'custom js config file exporting an async function',
-        'fileAsyncFunction.js',
+        'file-async-function.js',
       ],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
