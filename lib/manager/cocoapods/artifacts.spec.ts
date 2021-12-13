@@ -1,12 +1,9 @@
-import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
-import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
