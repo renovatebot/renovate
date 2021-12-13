@@ -110,7 +110,8 @@ Note: it's also possible to change the default prefix from `RENOVATE_` using `EN
 
 #### Using `config.js`
 
-If you use a `config.js`, it will be expected to export a configuration via `module.exports`. The value can be either a plain JavaScript object like in this example where `config.js` exports a plain object:
+If you use a `config.js`, it will be expected to export a configuration via `module.exports`.
+The value can be either a plain JavaScript object like in this example where `config.js` exports a plain object:
 
 ```javascript
 module.exports = {
