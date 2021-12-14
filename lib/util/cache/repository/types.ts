@@ -31,9 +31,9 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
-export interface GithubGraphqlCache {
-  timestamp: string;
-  count: number;
+export interface GithubGraphqlPageCache {
+  pageLastResizedAt: string;
+  pageSize: number;
 }
 
 export interface Cache {
@@ -45,5 +45,9 @@ export interface Cache {
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
-  githubGraphql?: Record<string, GithubGraphqlCache>;
+  platform?: {
+    github?: {
+      graphqlPageCache?: Record<string, GithubGraphqlPageCache>;
+    };
+  };
 }

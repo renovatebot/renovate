@@ -484,10 +484,12 @@ describe('util/http/github', () => {
       expect(items).toHaveLength(2);
     });
     it('shrinks items count on 50x', async () => {
-      repoCache.githubGraphql = {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
         testItem: {
-          timestamp: DateTime.local().toISO(),
-          count: 50,
+          pageLastResizedAt: DateTime.local().toISO(),
+          pageSize: 50,
         },
       };
 
@@ -505,7 +507,9 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
-      expect(repoCache?.githubGraphql?.testItem?.count).toBe(25);
+      expect(
+        repoCache?.platform?.github?.graphqlPageCache?.testItem?.pageSize
+      ).toBe(25);
 
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(4);
