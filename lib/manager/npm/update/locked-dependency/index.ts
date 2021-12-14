@@ -1,6 +1,6 @@
 import { logger } from '../../../../logger';
 import * as semver from '../../../../versioning/semver';
-import { UpdateLockedConfig } from '../../../types';
+import type { UpdateLockedConfig } from '../../../types';
 import * as packageLock from './package-lock';
 
 export function updateLockedDependency(
