@@ -230,6 +230,7 @@ function setGraphqlPageSize(
 ): void {
   if (
     ensureTrailingSlash(baseUrl) === ensureTrailingSlash(githubBaseUrl) &&
+    count < MAX_GRAPHQL_PAGE_SIZE &&
     count !== getGraphqlPageSize(baseUrl, fieldName)
   ) {
     const now = DateTime.local();
