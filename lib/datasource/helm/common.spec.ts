@@ -12,9 +12,9 @@ describe('datasource/helm/common', () => {
   describe('findSourceUrl', () => {
     test.each`
       input         | output
-      ${'airflow'}  | ${'https://github.com/bitnami/charts'}
-      ${'coredns'}  | ${'https://github.com/coredns/helm'}
-      ${'pgadmin4'} | ${'https://github.com/rowanruseler/helm-charts'}
+      ${'airflow'}  | ${{ sourceUrl: 'https://github.com/bitnami/charts', sourceDirectory: 'bitnami/airflow' }}
+      ${'coredns'}  | ${{ sourceUrl: 'https://github.com/coredns/helm', sourceDirectory: undefined }}
+      ${'pgadmin4'} | ${{ sourceUrl: 'https://github.com/rowanruseler/helm-charts', sourceDirectory: undefined }}
       ${'dummy'}    | ${undefined}
     `(
       '$input -> $output',

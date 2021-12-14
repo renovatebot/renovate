@@ -1,0 +1,6 @@
+steps:
+  - plugins:
+      - ssh://git@github.company.com/some-org/some-plugin#v3.2.7:
+          username: abc
+      - https://github.company.com/some-third-org/some-third-plugin#v0.0.1:
+          build: app
