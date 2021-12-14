@@ -7,7 +7,7 @@ import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { findSourceUrl } from './common';
-import type { HelmRepository, RepositoryData } from './types';
+import type { HelmRepository, HelmRepositoryData } from './types';
 
 export class HelmDatasource extends Datasource {
   static readonly id = 'helm';
@@ -29,16 +29,21 @@ export class HelmDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${HelmDatasource.id}`,
-    key: (repository: string) => repository,
+    key: (helmRepository: string) => helmRepository,
   })
-  async getRepositoryData(repository: string): Promise<RepositoryData | null> {
+  async getRepositoryData(
+    helmRepository: string
+  ): Promise<HelmRepositoryData | null> {
     let res: any;
     try {
       res = await this.http.get('index.yaml', {
-        baseUrl: ensureTrailingSlash(repository),
+        baseUrl: ensureTrailingSlash(helmRepository),
       });
       if (!res || !res.body) {
-        logger.warn(`Received invalid response from ${repository}`);
+        logger.warn(
+          { helmRepository },
+          `Received invalid response from helm repository`
+        );
         return null;
       }
     } catch (err) {
@@ -49,10 +54,13 @@ export class HelmDatasource extends Datasource {
         json: true,
       }) as HelmRepository;
       if (!is.plainObject<HelmRepository>(doc)) {
-        logger.warn(`Failed to parse index.yaml from ${repository}`);
+        logger.warn(
+          { helmRepository: helmRepository },
+          `Failed to parse index.yaml from helm repository`
+        );
         return null;
       }
-      const result: RepositoryData = {};
+      const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
         const { sourceUrl, sourceDirectory } = findSourceUrl(releases[0]);
         result[name] = {
@@ -68,7 +76,10 @@ export class HelmDatasource extends Datasource {
 
       return result;
     } catch (err) {
-      logger.warn(`Failed to parse index.yaml from ${repository}`);
+      logger.warn(
+        { helmRepository: helmRepository },
+        `Failed to parse index.yaml from helm repository`
+      );
       logger.debug(err);
       return null;
     }
