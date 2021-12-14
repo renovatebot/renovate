@@ -136,6 +136,5 @@ export async function updateArtifacts({
       });
     }
   }
-
   return res;
 }
