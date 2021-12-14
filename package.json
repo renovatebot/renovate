@@ -264,7 +264,7 @@
     "eslint-plugin-promise": "5.2.0",
     "expect-more-jest": "5.4.0",
     "glob": "7.2.0",
-    "graphql": "15.7.2",
+    "graphql": "15.8.0",
     "husky": "7.0.4",
     "jest": "27.4.3",
     "jest-extended": "1.2.0",
