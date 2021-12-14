@@ -1,27 +1,21 @@
-import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/exec-util';
-import { git, mocked } from '../../../test/util';
+import { envMock, exec, mockExecAll } from '../../../test/exec-util';
+import { env, fs, git, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
-import * as _env from '../../util/exec/env';
 import type { StatusResult } from '../../util/git/types';
 import * as _hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from './artifacts';
 
-jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/git');
 jest.mock('../../util/host-rules');
 jest.mock('../../util/http');
+jest.mock('../../util/fs');
 
-const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
 const hostRules = mocked(_hostRules);
 
 const gomod1 = `module github.com/renovate-tests/gomod1
@@ -67,6 +61,7 @@ describe('manager/gomod/artifacts', () => {
   afterEach(() => {
     GlobalConfig.reset();
   });
+
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll(exec);
     expect(
@@ -79,13 +74,15 @@ describe('manager/gomod/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns null if unchanged', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [],
     } as StatusResult);
+
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -96,14 +93,15 @@ describe('manager/gomod/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('returns updated go.sum', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -114,23 +112,24 @@ describe('manager/gomod/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports vendor directory update', async () => {
     const foo = join('vendor/github.com/foo/foo/go.mod');
     const bar = join('vendor/github.com/bar/bar/go.mod');
     const baz = join('vendor/github.com/baz/baz/go.mod');
 
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce('modules.txt content' as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('modules.txt content'); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', foo],
       not_added: [bar],
       deleted: [baz],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
-    fs.readFile.mockResolvedValueOnce('Foo go.sum' as any);
-    fs.readFile.mockResolvedValueOnce('Bar go.sum' as any);
-    fs.readFile.mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('Foo go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('Bar go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [],
@@ -150,15 +149,16 @@ describe('manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode without credentials', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -169,15 +169,16 @@ describe('manager/gomod/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports global mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -188,18 +189,19 @@ describe('manager/gomod/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('supports docker mode with credentials', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({
       token: 'some-token',
     });
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -222,13 +224,13 @@ describe('manager/gomod/artifacts', () => {
         matchHost: 'github.enterprise.com',
       },
     ]);
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -263,13 +265,13 @@ describe('manager/gomod/artifacts', () => {
         matchHost: 'gitlab.enterprise.com',
       },
     ]);
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -306,13 +308,13 @@ describe('manager/gomod/artifacts', () => {
         matchHost: 'https://gitlab.enterprise.com/repo2',
       },
     ]);
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -352,13 +354,13 @@ describe('manager/gomod/artifacts', () => {
         matchHost: 'gitlab.enterprise.com',
       },
     ]);
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -402,13 +404,13 @@ describe('manager/gomod/artifacts', () => {
         matchHost: 'gitlab.enterprise.com',
       },
     ]);
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -453,13 +455,13 @@ describe('manager/gomod/artifacts', () => {
         hostType: 'npm',
       },
     ]);
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -486,16 +488,16 @@ describe('manager/gomod/artifacts', () => {
   it('supports docker mode with goModTidy', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     hostRules.find.mockReturnValueOnce({});
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile.mockResolvedValueOnce('New go.sum 1' as any);
-    fs.readFile.mockResolvedValueOnce('New go.sum 2' as any);
-    fs.readFile.mockResolvedValueOnce('New go.sum 3' as any);
-    fs.readFile.mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -509,11 +511,12 @@ describe('manager/gomod/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
-    fs.outputFile.mockImplementationOnce(() => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('This update totally doesnt work');
     });
     expect(
@@ -533,17 +536,18 @@ describe('manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('updates import paths with gomodUpdateImportPaths', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
-    fs.readFile
-      .mockResolvedValueOnce('New go.sum' as any)
-      .mockResolvedValueOnce('New main.go' as any)
-      .mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -563,16 +567,17 @@ describe('manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
-    fs.readFile
-      .mockResolvedValueOnce('New go.sum' as any)
-      .mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -591,17 +596,18 @@ describe('manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('skips gomodTidy without gomodUpdateImportPaths on major update', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
-    fs.readFile
-      .mockResolvedValueOnce('New go.sum' as any)
-      .mockResolvedValueOnce('New main.go' as any)
-      .mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -617,17 +623,18 @@ describe('manager/gomod/artifacts', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
-    fs.readFile
-      .mockResolvedValueOnce('New go.sum' as any)
-      .mockResolvedValueOnce('New main.go' as any)
-      .mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -642,17 +649,18 @@ describe('manager/gomod/artifacts', () => {
     ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('updates import paths with specific tool version from constraint', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
-    fs.readFile
-      .mockResolvedValueOnce('New go.sum' as any)
-      .mockResolvedValueOnce('New main.go' as any)
-      .mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -675,17 +683,18 @@ describe('manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('updates import paths with latest tool version on invalid version constraint', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', 'main.go'],
     } as StatusResult);
-    fs.readFile
-      .mockResolvedValueOnce('New go.sum' as any)
-      .mockResolvedValueOnce('New main.go' as any)
-      .mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -708,16 +717,17 @@ describe('manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   it('skips updating import paths for gopkg.in dependencies', async () => {
-    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
-    fs.readFile
-      .mockResolvedValueOnce('New go.sum' as any)
-      .mockResolvedValueOnce('New go.mod' as any);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
