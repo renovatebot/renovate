@@ -14,7 +14,6 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../../util/cache/repository';
 import { maskToken } from '../mask';
 import { regEx } from '../regex';
-import { ensureTrailingSlash } from '../url';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -178,15 +177,9 @@ function constructAcceptString(input?: any): string {
 const MAX_GRAPHQL_PAGE_SIZE = 100;
 
 function getGraphqlPageSize(
-  baseUrl: string,
   fieldName: string,
   initialCount = MAX_GRAPHQL_PAGE_SIZE
 ): number {
-  // istanbul ignore if
-  if (ensureTrailingSlash(baseUrl) !== ensureTrailingSlash(githubBaseUrl)) {
-    return initialCount;
-  }
-
   let count = initialCount;
 
   const cache = getCache();
@@ -223,15 +216,10 @@ function getGraphqlPageSize(
   return count;
 }
 
-function setGraphqlPageSize(
-  baseUrl: string,
-  fieldName: string,
-  count: number
-): void {
+function setGraphqlPageSize(fieldName: string, count: number): void {
   if (
-    ensureTrailingSlash(baseUrl) === ensureTrailingSlash(githubBaseUrl) &&
     count < MAX_GRAPHQL_PAGE_SIZE &&
-    count !== getGraphqlPageSize(baseUrl, fieldName)
+    count !== getGraphqlPageSize(fieldName)
   ) {
     const now = DateTime.local();
     const timestamp = now.toISO();
@@ -390,7 +378,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     let optimalCount: null | number = null;
     let count = getGraphqlPageSize(
-      baseUrl,
       fieldName,
       options.count ?? MAX_GRAPHQL_PAGE_SIZE
     );
@@ -438,7 +425,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       }
     }
 
-    setGraphqlPageSize(baseUrl, fieldName, optimalCount);
+    setGraphqlPageSize(fieldName, optimalCount);
 
     return result;
   }
