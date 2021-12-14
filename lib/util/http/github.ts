@@ -187,34 +187,31 @@ function getGraphqlPageSize(
   cache.platform.github ??= {};
   cache.platform.github.graphqlPageCache ??= {};
   const cachedRecord = cache.platform.github.graphqlPageCache[fieldName];
-  delete cache.platform.github.graphqlPageCache[fieldName];
-
-  const now = DateTime.local();
-  let pageLastResizedAt = now.toISO();
 
   if (cachedRecord) {
     logger.debug(
       { fieldName, ...cachedRecord },
-      'Found cached GraphQL page size'
+      'GraphQL page size: found cached value'
     );
 
+    pageSize = cachedRecord.pageSize;
+
+    const now = DateTime.local();
     const then = DateTime.fromISO(cachedRecord.pageLastResizedAt);
     const expiry = then.plus({ hours: 24 });
-    const isExpired = now > expiry;
-
-    pageLastResizedAt = isExpired ? now.toISO() : then.toISO();
-
-    pageSize = cachedRecord.pageSize;
-    pageSize = isExpired
-      ? Math.min(pageSize * 2, MAX_GRAPHQL_PAGE_SIZE)
-      : pageSize;
-  }
-
-  if (pageSize < MAX_GRAPHQL_PAGE_SIZE) {
-    cache.platform.github.graphqlPageCache[fieldName] = {
-      pageLastResizedAt,
-      pageSize,
-    };
+    if (now > expiry) {
+      pageSize = Math.min(pageSize * 2, MAX_GRAPHQL_PAGE_SIZE);
+      if (pageSize < MAX_GRAPHQL_PAGE_SIZE) {
+        logger.debug(
+          { fieldName, ...cachedRecord },
+          'GraphQL page size: expanding'
+        );
+        cache.platform.github.graphqlPageCache[fieldName] = {
+          pageLastResizedAt: now.toISO(),
+          pageSize,
+        };
+      }
+    }
   }
 
   return pageSize;
@@ -228,7 +225,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
       const pageLastResizedAt = now.toISO();
       logger.debug(
         { fieldName, oldPageSize, newPageSize, pageLastResizedAt },
-        'Saving new GraphQL page size'
+        'GraphQL page size: shrinking'
       );
       const cache = getCache();
       cache.platform ??= {};
