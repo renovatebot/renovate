@@ -77,7 +77,7 @@ export class HelmDatasource extends Datasource {
       return result;
     } catch (err) {
       logger.warn(
-        { helmRepository: helmRepository },
+        { helmRepository },
         `Failed to parse index.yaml from helm repository`
       );
       logger.debug(err);
