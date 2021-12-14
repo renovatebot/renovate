@@ -455,6 +455,37 @@ describe('config/presets/index', () => {
         packageTag: '1.2.3',
       });
     });
+
+    it('parses local with subdirectory and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository//path/to/preset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset',
+        presetPath: 'path/to',
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
+    it('parses local with sub preset and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository:preset/subpreset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset/subpreset',
+        presetPath: undefined,
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
     it('parses no prefix as local', () => {
       expect(presets.parsePreset('some/repo')).toEqual({
         packageName: 'some/repo',
@@ -615,7 +646,7 @@ describe('config/presets/index', () => {
           ':ignoreModulesAndTests',
           ':autodetectPinVersions',
           ':prHourlyLimit2',
-          ':prConcurrentLimit20',
+          ':prConcurrentLimit10',
           'group:monorepos',
           'group:recommended',
           'workarounds:all',

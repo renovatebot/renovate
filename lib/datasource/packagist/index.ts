@@ -238,7 +238,7 @@ async function packageLookup(
       return includesPackages[name];
     }
     let pkgUrl;
-    if (providerPackages?.[name]) {
+    if (name in providerPackages) {
       pkgUrl = URL.resolve(
         regUrl,
         providersUrl

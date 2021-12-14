@@ -33,18 +33,31 @@ describe('workers/branch/get-updated', () => {
       git.getFile.mockResolvedValueOnce('existing content');
     });
     it('handles autoreplace base updated', async () => {
-      config.upgrades.push({ manager: 'html', branchName: undefined });
+      config.upgrades.push({
+        packageFile: 'index.html',
+        manager: 'html',
+        branchName: undefined,
+      });
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [{ name: 'index.html', contents: 'updated-file' }],
+      });
     });
     it('handles autoreplace branch no update', async () => {
-      config.upgrades.push({ manager: 'html', branchName: undefined });
+      config.upgrades.push({
+        packageFile: 'index.html',
+        manager: 'html',
+        branchName: undefined,
+      });
       autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        artifactErrors: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: [],
+        updatedPackageFiles: [],
+      });
     });
     it('handles autoreplace failure', async () => {
       config.upgrades.push({ manager: 'html', branchName: undefined });
@@ -53,17 +66,26 @@ describe('workers/branch/get-updated', () => {
     });
     it('handles autoreplace branch needs update', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({ manager: 'html', branchName: undefined });
+      config.upgrades.push({
+        packageFile: 'index.html',
+        manager: 'html',
+        branchName: undefined,
+      });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [{ contents: 'updated-file', name: 'index.html' }],
+      });
     });
     it('handles empty', async () => {
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        artifactErrors: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: [],
+        updatedPackageFiles: [],
+      });
     });
     it('handles null content', async () => {
       config.reuseExistingBranch = true;
@@ -75,16 +97,21 @@ describe('workers/branch/get-updated', () => {
     it('handles content change', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
+        packageFile: 'package.json',
         manager: 'npm',
       } as never);
       npm.updateDependency.mockReturnValue('some new content');
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [
+          { name: 'package.json', contents: 'some new content' },
+        ],
+      });
     });
     it('handles lock files', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
+        packageFile: 'composer.json',
         manager: 'composer',
         branchName: undefined,
       });
@@ -98,8 +125,14 @@ describe('workers/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedArtifacts: [
+          { name: 'composer.json', contents: 'some contents' },
+        ],
+        updatedPackageFiles: [
+          { name: 'composer.json', contents: 'some new content' },
+        ],
+      });
     });
     it('handles lockFileMaintenance', async () => {
       config.upgrades.push({
@@ -115,8 +148,11 @@ describe('workers/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedArtifacts: [
+          { name: 'composer.json', contents: 'some contents' },
+        ],
+      });
     });
     it('handles isRemediation success', async () => {
       config.upgrades.push({
@@ -127,8 +163,11 @@ describe('workers/branch/get-updated', () => {
         'package-lock.json': 'new contents',
       });
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [
+          { name: 'package-lock.json', contents: 'new contents' },
+        ],
+      });
     });
     it('handles isRemediation rebase', async () => {
       config.upgrades.push({
@@ -141,8 +180,11 @@ describe('workers/branch/get-updated', () => {
         'package-lock.json': 'new contents',
       });
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [
+          { name: 'package-lock.json', contents: 'new contents' },
+        ],
+      });
     });
     it('handles lockFileMaintenance error', async () => {
       config.upgrades.push({
@@ -158,8 +200,9 @@ describe('workers/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
+      });
     });
     it('handles lock file errors', async () => {
       config.reuseExistingBranch = true;
@@ -177,21 +220,27 @@ describe('workers/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        artifactErrors: [{ lockFile: 'composer.lock', stderr: 'some error' }],
+      });
     });
     it('handles git submodules', async () => {
       config.upgrades.push({
+        packageFile: '.gitmodules',
         manager: 'git-submodules',
         datasource: GitRefsDatasource.id,
       } as never);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [
+          { name: '.gitmodules', contents: 'existing content' },
+        ],
+      });
     });
     it('update artifacts on update-lockfile strategy', async () => {
       config.upgrades.push({
+        packageFile: 'composer.json',
         manager: 'composer',
         branchName: undefined,
         rangeStrategy: 'update-lockfile',
@@ -206,11 +255,18 @@ describe('workers/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedArtifacts: [
+          { name: 'composer.lock', contents: 'some contents' },
+        ],
+        updatedPackageFiles: [
+          { name: 'composer.json', contents: 'existing content' },
+        ],
+      });
     });
     it('bumps versions in updateDependency managers', async () => {
       config.upgrades.push({
+        packageFile: 'package.json',
         branchName: undefined,
         bumpVersion: 'patch',
         manager: 'npm',
@@ -218,11 +274,18 @@ describe('workers/branch/get-updated', () => {
       npm.updateDependency.mockReturnValue('old version');
       npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [
+          {
+            name: 'package.json',
+            contents: 'new version',
+          },
+        ],
+      });
     });
     it('bumps versions in autoReplace managers', async () => {
       config.upgrades.push({
+        packageFile: 'Chart.yaml',
         branchName: undefined,
         bumpVersion: 'patch',
         manager: 'helmv3',
@@ -232,8 +295,14 @@ describe('workers/branch/get-updated', () => {
         bumpedContent: 'version: 0.0.2',
       });
       const res = await getUpdatedPackageFiles(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        updatedPackageFiles: [
+          {
+            contents: 'version: 0.0.2',
+            name: 'Chart.yaml',
+          },
+        ],
+      });
     });
   });
 });
