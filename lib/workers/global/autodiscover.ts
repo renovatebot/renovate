@@ -33,7 +33,9 @@ export async function autodiscoverRepositories(
     const matched = new Set<string>();
     for (const filter of config.autodiscoverFilter) {
       const res = minimatch.match(discovered, filter);
-      res.forEach((e) => matched.add(e));
+      for (const repository of res) {
+        matched.add(repository);
+      }
     }
     discovered = [...matched];
 
