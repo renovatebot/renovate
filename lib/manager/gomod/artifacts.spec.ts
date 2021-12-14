@@ -77,7 +77,7 @@ describe('manager/gomod/artifacts', () => {
 
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    fs.readLocalFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [],
