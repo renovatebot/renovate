@@ -175,10 +175,12 @@ function constructAcceptString(input?: any): string {
   return acceptStrings.join(', ');
 }
 
+const MAX_GRAPHQL_PAGE_SIZE = 100;
+
 function getGraphqlPageSize(
   baseUrl: string,
   fieldName: string,
-  initialCount = 100
+  initialCount = MAX_GRAPHQL_PAGE_SIZE
 ): number {
   // istanbul ignore if
   if (ensureTrailingSlash(baseUrl) !== ensureTrailingSlash(githubBaseUrl)) {
@@ -206,10 +208,12 @@ function getGraphqlPageSize(
     const expiry = then.plus({ hours: 24 });
     const isExpired = now > expiry;
     timestamp = isExpired ? now.toISO() : then.toISO();
-    count = isExpired ? Math.min(count * 2, 100) : cachedRecord.pageSize;
+    count = isExpired
+      ? Math.min(count * 2, MAX_GRAPHQL_PAGE_SIZE)
+      : cachedRecord.pageSize;
   }
 
-  if (count < 100) {
+  if (count < MAX_GRAPHQL_PAGE_SIZE) {
     cache.platform.github.graphqlPageCache[fieldName] = {
       pageLastResizedAt: timestamp,
       pageSize: count,
@@ -338,7 +342,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const path = 'graphql';
 
-    const { paginate, count = 100, cursor = null } = options;
+    const { paginate, count = MAX_GRAPHQL_PAGE_SIZE, cursor = null } = options;
     let { variables } = options;
     if (paginate) {
       variables = {
@@ -384,7 +388,11 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const { paginate = true } = options;
 
     let optimalCount: null | number = null;
-    let count = getGraphqlPageSize(baseUrl, fieldName, options.count ?? 100);
+    let count = getGraphqlPageSize(
+      baseUrl,
+      fieldName,
+      options.count ?? MAX_GRAPHQL_PAGE_SIZE
+    );
     let limit = options.limit || 1000;
     let cursor: string = null;
 
