@@ -55,7 +55,7 @@ export class HelmDatasource extends Datasource {
       }) as HelmRepository;
       if (!is.plainObject<HelmRepository>(doc)) {
         logger.warn(
-          { helmRepository: helmRepository },
+          { helmRepository },
           `Failed to parse index.yaml from helm repository`
         );
         return null;
