@@ -101,6 +101,7 @@ const repoGroups = {
   ],
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
+  guava: 'https://github.com/google/guava',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
@@ -149,6 +150,7 @@ const repoGroups = {
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',

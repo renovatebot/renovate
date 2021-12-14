@@ -1,14 +1,11 @@
-import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class BinarySourceMigration extends AbstractMigration {
-  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
-    super('binarySource', originalConfig, migratedConfig);
-  }
+  readonly propertyName = 'binarySource';
 
-  override run(): void {
-    if (this.originalConfig.binarySource === 'auto') {
-      this.migratedConfig.binarySource = 'global';
+  override run(value): void {
+    if (value === 'auto') {
+      this.rewrite('global');
     }
   }
 }

@@ -13,7 +13,8 @@ handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
 // istanbul ignore next
 handlebars.registerHelper(
   'replace',
-  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12873
+  (find, replace, context) =>
+    (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
 export const exposedConfigOptions = [

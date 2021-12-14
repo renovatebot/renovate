@@ -50,7 +50,7 @@ export function mockExecAll(
       throw execResult;
     }
     callback(null, execResult);
-    return undefined;
+    return undefined as never;
   });
   return snapshots;
 }
@@ -67,7 +67,7 @@ export function mockExecSequence(
         throw execResult;
       }
       callback(null, execResult);
-      return undefined;
+      return undefined as never;
     });
   });
   return snapshots;

@@ -52,7 +52,7 @@ export async function getReleaseNotesMd(
 ): Promise<ChangeLogFile> | null {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
-  const { default_branch: defaultBranch = 'master' } = (
+  const { default_branch: defaultBranch = 'HEAD' } = (
     await http.getJson<{ default_branch: string }>(apiPrefix)
   ).body;
 

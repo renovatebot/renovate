@@ -1,23 +1,13 @@
 import type { Preset } from '../types';
 
+/* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = {
   all: {
     description: 'All replacements',
     extends: [
-      'replacements:jade-to-pug',
       'replacements:cucumber-to-scoped',
+      'replacements:jade-to-pug',
       'replacements:rollup-node-resolve-to-scoped',
-    ],
-  },
-  'jade-to-pug': {
-    description: 'Jade was renamed to Pug',
-    packageRules: [
-      {
-        matchDatasources: ['npm'],
-        matchPackageNames: ['jade'],
-        replacementName: 'pug',
-        replacementVersion: '2.0.0',
-      },
     ],
   },
   'cucumber-to-scoped': {
@@ -28,6 +18,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'jade-to-pug': {
+    description: 'Jade was renamed to Pug',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['jade'],
+        replacementName: 'pug',
+        replacementVersion: '2.0.0',
       },
     ],
   },
