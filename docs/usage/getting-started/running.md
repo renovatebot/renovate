@@ -92,7 +92,7 @@ WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-live
 
 ### Global config
 
-Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js` or `config.json`), environment variables, or CLI parameters.
+Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js`, `config.json`, `config.json5`, `config.yaml` or `config.yml`), environment variables, or CLI parameters.
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -107,6 +107,21 @@ If you are configuring using environment variables, there are two possibilities:
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
 Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+
+#### Using `config.js`
+
+If you use a `config.js`, it will be expected to export a configuration via `module.exports`.
+The value can be either a plain JavaScript object like in this example where `config.js` exports a plain object:
+
+```javascript
+module.exports = {
+  token: 'abcdefg',
+};
+```
+
+`config.js` may also export a `Promise` of such an object, or a function that will return either a plain Javascript object or a `Promise` of such an object.
+This allows one to include the results of asynchronous operations in the exported value.
+An example of a `config.js` that exports an async function (which is a function that returns a `Promise`) can be seen in a comment for [#10011: Allow autodiscover filtering for repo topic](https://github.com/renovatebot/renovate/issues/10011#issuecomment-992568583) and more examples can be seen in [`file.spec.ts`](https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts).
 
 ### Authentication
 
