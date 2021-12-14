@@ -641,8 +641,8 @@ See [shareable config presets](https://docs.renovatebot.com/config-presets) for 
 
 ## extractVersion
 
-Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file.
-You must defined a "named capture group" called `version` as shown in the below examples.
+Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
+You must define a "named capture group" called `version` like in the examples below.
 
 For example, to extract only the major.minor precision from a GitHub release, the following would work:
 
@@ -2535,7 +2535,7 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseWhen=behind-base-branch and the base branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured `prCreation=not-pending`, or you have `rebaseWhen=behind-base-branch` and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
