@@ -197,13 +197,17 @@ function getGraphqlPageSize(
       { fieldName, ...cachedRecord },
       'Found cached GraphQL page size'
     );
+
     const then = DateTime.fromISO(cachedRecord.pageLastResizedAt);
     const expiry = then.plus({ hours: 24 });
     const isExpired = now > expiry;
+
     pageLastResizedAt = isExpired ? now.toISO() : then.toISO();
+
+    pageSize = cachedRecord.pageSize;
     pageSize = isExpired
       ? Math.min(pageSize * 2, MAX_GRAPHQL_PAGE_SIZE)
-      : cachedRecord.pageSize;
+      : pageSize;
   }
 
   if (pageSize < MAX_GRAPHQL_PAGE_SIZE) {
