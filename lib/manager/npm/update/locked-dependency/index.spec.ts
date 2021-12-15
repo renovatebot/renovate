@@ -4,14 +4,16 @@ import { clone } from '../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 import { updateLockedDependency } from '.';
 
-const packageFileContent = loadFixture('package.json');
-const lockFileContent = loadFixture('package-lock.json');
-const acceptsJson = JSON.parse(loadFixture('accepts.json'));
-const expressJson = JSON.parse(loadFixture('express.json'));
-const mimeJson = JSON.parse(loadFixture('mime.json'));
-const serveStaticJson = JSON.parse(loadFixture('serve-static.json'));
-const sendJson = JSON.parse(loadFixture('send.json'));
-const typeIsJson = JSON.parse(loadFixture('type-is.json'));
+const packageFileContent = loadFixture('package.json', './package-lock');
+const lockFileContent = loadFixture('package-lock.json', './package-lock');
+const acceptsJson = JSON.parse(loadFixture('accepts.json', './package-lock'));
+const expressJson = JSON.parse(loadFixture('express.json', './common'));
+const mimeJson = JSON.parse(loadFixture('mime.json', './package-lock'));
+const serveStaticJson = JSON.parse(
+  loadFixture('serve-static.json', './package-lock')
+);
+const sendJson = JSON.parse(loadFixture('send.json', './package-lock'));
+const typeIsJson = JSON.parse(loadFixture('type-is.json', './package-lock'));
 
 describe('manager/npm/update/locked-dependency/index', () => {
   describe('updateLockedDependency()', () => {
