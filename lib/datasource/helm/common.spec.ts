@@ -15,7 +15,7 @@ describe('datasource/helm/common', () => {
       ${'airflow'}  | ${{ sourceUrl: 'https://github.com/bitnami/charts', sourceDirectory: 'bitnami/airflow' }}
       ${'coredns'}  | ${{ sourceUrl: 'https://github.com/coredns/helm', sourceDirectory: undefined }}
       ${'pgadmin4'} | ${{ sourceUrl: 'https://github.com/rowanruseler/helm-charts', sourceDirectory: undefined }}
-      ${'dummy'}    | ${undefined}
+      ${'dummy'}    | ${{}}
     `(
       '$input -> $output',
       ({ input, output }: { input: string; output: string }) => {
