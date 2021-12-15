@@ -285,14 +285,15 @@ export async function ensurePr(
         if (logJSON.project) {
           upgrade.repoName = logJSON.project.repository;
         }
-        upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
+        upgrade.hasReleaseNotes = false;
         upgrade.releases = [];
         if (
-          upgrade.hasReleaseNotes &&
+          logJSON.hasReleaseNotes &&
           upgrade.repoName &&
           !commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
         ) {
           commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+          upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
             logJSON.versions.forEach((version) => {
               const release = { ...version };
