@@ -2,6 +2,7 @@ import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as fs from '../../../util/fs';
 import type { ExtractConfig } from '../../types';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import * as manager from '.';
@@ -19,12 +20,10 @@ describe('manager/gradle/deep/index-real', () => {
     const SUCCESS_FILE_NAME = 'success.indicator';
     let workingDir: DirectoryResult;
     let testRunConfig: ExtractConfig;
-    let successFile: string;
     let adminConfig: RepoGlobalConfig;
 
     beforeEach(async () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });
-      successFile = '';
       adminConfig = { localDir: workingDir.path };
       GlobalConfig.set(adminConfig);
       testRunConfig = { ...baseConfig };
@@ -43,7 +42,6 @@ allprojects {
         `${workingDir.path}/renovate-plugin.gradle`,
         mockPluginContent
       );
-      successFile = `${workingDir.path}/${SUCCESS_FILE_NAME}`;
     });
 
     afterEach(async () => {
@@ -54,7 +52,7 @@ allprojects {
     it('executes an executable gradle wrapper', async () => {
       const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
       await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-      await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
+      await expect(fs.readLocalFile(SUCCESS_FILE_NAME, 'utf8')).resolves.toBe(
         'success'
       );
     }, 120000);
@@ -64,7 +62,7 @@ allprojects {
       const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
 
       await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-      await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
+      await expect(fs.readLocalFile(SUCCESS_FILE_NAME, 'utf8')).resolves.toBe(
         'success'
       );
     }, 120000);
