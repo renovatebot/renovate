@@ -1,4 +1,5 @@
-import { readFile, readFileSync } from 'fs-extra';
+import { stat, readFileSync } from 'fs-extra';
+import { readLocalFile } from '../../util/fs';
 import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
@@ -23,7 +24,7 @@ const config: UpdateArtifactsConfig = {
 };
 
 function readString(...paths: string[]): Promise<string> {
-  return readFile(resolve(fixtures, ...paths), 'utf8');
+  return readLocalFile(...paths, 'utf8');
 }
 
 function readBinSync(...paths: string[]): Buffer {
@@ -64,7 +65,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
-          `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
+          `../expectedFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
         config: { ...config, newValue: '6.3' },
       });
@@ -122,7 +123,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
-          `./testFiles/gradle/wrapper/gradle-wrapper.properties`
+          `../testFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
         config,
       });
@@ -146,7 +147,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
-          `./testFiles/gradle/wrapper/gradle-wrapper.properties`
+          `../testFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
         config,
       });
@@ -173,7 +174,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
-          `./testFiles/gradle/wrapper/gradle-wrapper.properties`
+          `../testFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
         config,
       });
@@ -217,7 +218,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
         })
       );
 
-      const newContent = await readString(`./gradle-wrapper-sum.properties`);
+      const newContent = await readString(`../gradle-wrapper-sum.properties`);
 
       const result = await gradleWrapper.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -237,10 +238,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
       expect(result[0].artifactError).toBeUndefined();
 
       expect(
-        await readString(
-          adminConfig.localDir,
-          `./gradle/wrapper/gradle-wrapper.properties`
-        )
+        await readString(`gradle/wrapper/gradle-wrapper.properties`)
       ).toEqual(newContent);
 
       expect(httpMock.getTrace()).toEqual([
