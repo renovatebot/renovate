@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/update/locked-dependency/get-locked getLockedDependencies() finds direct dependency 1`] = `
+exports[`manager/npm/update/locked-dependency/package-lock/get-locked getLockedDependencies() finds direct dependency 1`] = `
 Array [
   Object {
     "integrity": "sha1-J03IKTPJ9XTMOKDOXqgXK+nGsJQ=",
@@ -29,7 +29,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/update/locked-dependency/get-locked getLockedDependencies() finds indirect dependency 1`] = `
+exports[`manager/npm/update/locked-dependency/package-lock/get-locked getLockedDependencies() finds indirect dependency 1`] = `
 Array [
   Object {
     "integrity": "sha1-Bnq/Rc/4v/spy9t0OXJbMjiKLFg=",
