@@ -211,9 +211,16 @@ function getGraphqlPageSize(
           pageLastResizedAt: timestamp,
           pageSize: newPageSize,
         };
+      } else {
+        logger.debug(
+          { fieldName, oldPageSize, newPageSize },
+          'GraphQL page size: expanded to default page size'
+        );
 
-        return newPageSize;
+        delete cache.platform.github.graphqlPageCache[fieldName];
       }
+
+      return newPageSize;
     }
 
     return oldPageSize;

@@ -547,6 +547,38 @@ describe('util/http/github', () => {
       expect(trace).toHaveLength(3);
       expect(trace).toMatchSnapshot();
     });
+    it('removes cache record once expanded to the maximum', async () => {
+      repoCache.platform ??= {};
+      repoCache.platform.github ??= {};
+      repoCache.platform.github.graphqlPageCache = {
+        testItem: {
+          pageLastResizedAt: DateTime.local()
+            .minus({ hours: 24, seconds: 1 })
+            .toISO(),
+          pageSize: 50,
+        },
+      };
+
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+
+      expect(
+        repoCache?.platform?.github?.graphqlPageCache?.testItem
+      ).toBeUndefined();
+
+      const trace = httpMock.getTrace();
+      expect(trace).toHaveLength(3);
+      expect(trace).toMatchSnapshot();
+    });
     it('throws on 50x if count < 10', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(500);
       await expect(
