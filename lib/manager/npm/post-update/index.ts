@@ -253,9 +253,12 @@ export async function writeUpdatedPackageFiles(
     return;
   }
   const { localDir } = GlobalConfig.get();
+  const supportedLockFiles = ['package-lock.json'];
   for (const packageFile of config.updatedPackageFiles) {
-    if (packageFile.name.endsWith('package-lock.json')) {
-      logger.debug(`Writing package-lock file: ${packageFile.name}`);
+    if (
+      supportedLockFiles.some((fileName) => packageFile.name.endsWith(fileName))
+    ) {
+      logger.debug(`Writing lock file: ${packageFile.name}`);
       await outputFile(
         upath.join(localDir, packageFile.name),
         packageFile.contents
