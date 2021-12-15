@@ -154,7 +154,7 @@
     "detect-indent": "6.1.0",
     "editorconfig": "0.15.3",
     "email-addresses": "5.0.0",
-    "emoji-regex": "9.2.2",
+    "emoji-regex": "10.0.0",
     "emojibase": "5.2.0",
     "emojibase-regex": "5.1.3",
     "extract-zip": "2.0.1",
