@@ -1,4 +1,3 @@
-import { readLocalFile, stat } from 'fs-extra';
 import { resolve } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import * as httpMock from '../../../test/http-mock';

@@ -1,11 +1,11 @@
-import { stat, readFileSync } from 'fs-extra';
-import { readLocalFile } from '../../util/fs';
+import { readFileSync } from 'fs-extra';
 import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
 import { git, partial } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
+import { readLocalFile } from '../../util/fs';
 import type { StatusResult } from '../../util/git/types';
 import { ifSystemSupportsGradle } from '../gradle/deep/__testutil__/gradle';
 import type { UpdateArtifactsConfig } from '../types';
