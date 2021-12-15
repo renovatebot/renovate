@@ -223,24 +223,22 @@ function getGraphqlPageSize(
 }
 
 function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
-  if (newPageSize < MAX_GRAPHQL_PAGE_SIZE) {
-    const oldPageSize = getGraphqlPageSize(fieldName);
-    if (newPageSize !== oldPageSize) {
-      const now = DateTime.local();
-      const pageLastResizedAt = now.toISO();
-      logger.debug(
-        { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
-        'GraphQL page size: shrinking'
-      );
-      const cache = getCache();
-      cache.platform ??= {};
-      cache.platform.github ??= {};
-      cache.platform.github.graphqlPageCache ??= {};
-      cache.platform.github.graphqlPageCache[fieldName] = {
-        pageLastResizedAt,
-        pageSize: newPageSize,
-      };
-    }
+  const oldPageSize = getGraphqlPageSize(fieldName);
+  if (newPageSize !== oldPageSize) {
+    const now = DateTime.local();
+    const pageLastResizedAt = now.toISO();
+    logger.debug(
+      { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
+      'GraphQL page size: shrinking'
+    );
+    const cache = getCache();
+    cache.platform ??= {};
+    cache.platform.github ??= {};
+    cache.platform.github.graphqlPageCache ??= {};
+    cache.platform.github.graphqlPageCache[fieldName] = {
+      pageLastResizedAt,
+      pageSize: newPageSize,
+    };
   }
 }
 
@@ -431,7 +429,9 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       }
     }
 
-    setGraphqlPageSize(fieldName, optimalCount);
+    if (optimalCount && optimalCount < MAX_GRAPHQL_PAGE_SIZE) {
+      setGraphqlPageSize(fieldName, optimalCount);
+    }
 
     return result;
   }
