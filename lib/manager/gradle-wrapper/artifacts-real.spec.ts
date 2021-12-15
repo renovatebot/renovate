@@ -23,8 +23,8 @@ const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
 };
 
-function readString(...paths: string[]): Promise<string> {
-  return readLocalFile(...paths, 'utf8');
+function readString(path: string): Promise<string> {
+  return readLocalFile(path, 'utf8');
 }
 
 function readBinSync(...paths: string[]): Buffer {
