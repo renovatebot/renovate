@@ -584,27 +584,21 @@ export async function isBranchConflicted(
 
   let result = false;
 
-  let origBranch: string;
+  const origBranch = config.currentBranch;
   try {
-    origBranch = config.currentBranch;
-    await git.reset(ResetMode.HARD);
     if (origBranch !== baseBranch) {
-      await git.checkout(baseBranch);
+      await git.checkout(['-f', baseBranch, '--']);
     }
+    await git.reset(ResetMode.HARD);
     await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
   } catch (err) {
     result = true;
-    // istanbul ignore else: not easy testable
+    // istanbul ignore if: not easily testable
     if (!err?.git?.conflicts?.length) {
       logger.debug(
         { baseBranch, branch, err },
         'Conflict detection: unknown error'
       );
-    }
-  } finally {
-    await git.reset(ResetMode.HARD);
-    if (origBranch !== baseBranch) {
-      await git.checkout(origBranch);
     }
   }
 

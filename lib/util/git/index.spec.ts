@@ -642,6 +642,7 @@ describe('util/git/index', () => {
     });
 
     it('detects non-conflicted branch', async () => {
+      await git.checkoutBranch('renovate/conflicted_branch');
       const res = await git.isBranchConflicted(
         defaultBranch,
         'renovate/non_conflicted_branch'
