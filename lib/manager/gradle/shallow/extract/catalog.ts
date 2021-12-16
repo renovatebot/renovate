@@ -173,7 +173,7 @@ export function parseCatalog(
         ? pluginDescriptor.split(':')
         : [pluginDescriptor.id, pluginDescriptor.version];
     const { currentValue, fileReplacePosition } = extractVersion({
-      version: version,
+      version,
       versions,
       depStartIndex: pluginsStartIndex,
       depSubContent: pluginsSubContent,
