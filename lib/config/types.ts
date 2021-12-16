@@ -72,7 +72,7 @@ export interface RenovateSharedConfig {
 // The below should contain config options where stage=global
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
-  autodiscoverFilter?: string;
+  autodiscoverFilter?: string[];
   baseDir?: string;
   cacheDir?: string;
   detectHostRulesFromEnv?: boolean;

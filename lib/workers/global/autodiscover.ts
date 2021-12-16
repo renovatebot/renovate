@@ -30,7 +30,15 @@ export async function autodiscoverRepositories(
     return config;
   }
   if (config.autodiscoverFilter) {
-    discovered = discovered.filter(minimatch.filter(config.autodiscoverFilter));
+    const matched = new Set<string>();
+    for (const filter of config.autodiscoverFilter) {
+      const res = minimatch.match(discovered, filter);
+      for (const repository of res) {
+        matched.add(repository);
+      }
+    }
+    discovered = [...matched];
+
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
       logger.debug('None of the discovered repositories matched the filter');
