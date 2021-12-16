@@ -16,12 +16,13 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
     return { sourceUrl: releaseMatch[1] };
   }
 
+  let homeMatch;
   if (release.home) {
-    const githubUrlMatch = githubUrl.exec(release.home);
-    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
+    homeMatch = githubUrl.exec(release.home);
+    if (homeMatch?.groups && chartRepo.test(homeMatch?.groups.repo)) {
       return {
-        sourceUrl: githubUrlMatch.groups.url,
-        sourceDirectory: githubUrlMatch.groups.path,
+        sourceUrl: homeMatch.groups.url,
+        sourceDirectory: homeMatch.groups.path,
       };
     }
   }
@@ -41,5 +42,18 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
   }
 
   // fallback
-  return { sourceUrl: release.sources[0] };
+  const firstSourceMatch = githubUrl.exec(release.sources[0]);
+  if (homeMatch?.groups.url && homeMatch?.groups.path) {
+    return {
+      sourceUrl: homeMatch.groups.url,
+      sourceDirectory: homeMatch.groups.path,
+    };
+  } else if (firstSourceMatch?.groups.url && firstSourceMatch?.groups.path) {
+    return {
+      sourceUrl: firstSourceMatch.groups.url,
+      sourceDirectory: firstSourceMatch.groups.path,
+    };
+  } else {
+    return { sourceUrl: release.sources[0] };
+  }
 }
