@@ -390,7 +390,7 @@ describe('manager/gradle/shallow/extract', () => {
             lookupName:
               'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
             managerData: {
-              fileReplacePosition: 21,
+              fileReplacePosition: 822,
               packageFile: 'gradle/libs.versions.toml',
             },
             registryUrls: [
