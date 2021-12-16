@@ -24,7 +24,7 @@ export function regEx(
   flags?: string | undefined,
   useCache = true
 ): RegExp {
-  const key = `${pattern.toString()}:${flags}`;
+  const key = flags ? `${pattern.toString()}:${flags}` : pattern.toString();
   if (useCache) {
     const cachedResult = cache.get(key);
     if (cachedResult) {
