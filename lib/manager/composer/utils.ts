@@ -14,7 +14,7 @@ export function getComposerArguments(config: UpdateArtifactsConfig): string {
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      args += ' --ignore-platform-reqs';
+      args += " --ignore-platform-req='lib-*' --ignore-platform-req='ext-*'";
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
         args += ' --ignore-platform-req ' + quote(req);

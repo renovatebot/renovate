@@ -60,7 +60,7 @@ describe('manager/composer/utils', () => {
           composerIgnorePlatformReqs: [],
         })
       ).toBe(
-        ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+        " --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins"
       );
     });
     it('disables single platform requirement', () => {
