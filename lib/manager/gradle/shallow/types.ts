@@ -68,7 +68,7 @@ export interface GradleCatalog {
     string,
     GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor | string
   >;
-  plugins?: Record<string, GradleCatalogPluginDescriptor>;
+  plugins?: Record<string, GradleCatalogPluginDescriptor | string>;
 }
 
 export interface GradleCatalogModuleDescriptor {
