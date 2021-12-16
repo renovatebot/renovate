@@ -382,6 +382,22 @@ describe('manager/gradle/shallow/extract', () => {
               'https://plugins.gradle.org/m2/',
             ],
           },
+          {
+            depName: 'org.danilopianini.multi-jvm-test-plugin',
+            depType: 'plugin',
+            currentValue: '0.3.0',
+            commitMessageTopic: 'plugin multiJvm',
+            lookupName:
+              'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 822,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
         ],
       },
     ]);

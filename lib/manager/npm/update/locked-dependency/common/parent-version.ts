@@ -1,6 +1,9 @@
-import { GetPkgReleasesConfig, getPkgReleases } from '../../../../datasource';
-import { logger } from '../../../../logger';
-import { api as semver } from '../../../../versioning/npm';
+import {
+  GetPkgReleasesConfig,
+  getPkgReleases,
+} from '../../../../../datasource';
+import { logger } from '../../../../../logger';
+import { api as semver } from '../../../../../versioning/npm';
 
 /**
  * Finds the first stable version of parentName after parentStartingVersion which either:
