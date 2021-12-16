@@ -8,6 +8,8 @@ import * as git from '.';
 import { setNoVerify } from '.';
 
 describe('util/git/index', () => {
+  jest.setTimeout(15000);
+
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
