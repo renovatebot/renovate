@@ -172,7 +172,6 @@ export function parseCatalog(
       typeof pluginDescriptor === 'string'
         ? pluginDescriptor.split(':')
         : [pluginDescriptor.id, pluginDescriptor.version];
-    // const depName = pluginDescriptor.id;
     const { currentValue, fileReplacePosition } = extractVersion({
       version: version,
       versions,
