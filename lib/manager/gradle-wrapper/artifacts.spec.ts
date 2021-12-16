@@ -1,4 +1,4 @@
-import { stat } from 'fs-extra';
+import { readFile, stat } from 'fs-extra';
 import { resolve } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import * as httpMock from '../../../test/http-mock';
@@ -15,7 +15,6 @@ import { resetPrefetchedImages } from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gradleWrapper from '.';
-const { readLocalFile } = jest.requireActual('../../util/fs');
 
 jest.mock('child_process');
 jest.mock('../../util/fs');
@@ -37,8 +36,8 @@ const config: UpdateArtifactsConfig = {
 addReplacingSerializer('gradlew.bat', '<gradlew>');
 addReplacingSerializer('./gradlew', '<gradlew>');
 
-function readString(path: string): Promise<string> {
-  return readLocalFile(path, 'utf8');
+function readString(...paths: string[]): Promise<string> {
+  return readFile(resolve(fixtures, ...paths), 'utf8');
 }
 
 describe('manager/gradle-wrapper/artifacts', () => {
@@ -77,7 +76,7 @@ describe('manager/gradle-wrapper/artifacts', () => {
       packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: await readString(
-        `../expectedFiles/gradle/wrapper/gradle-wrapper.properties`
+        `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
       ),
       config: { ...config, newValue: '6.3' },
     });
