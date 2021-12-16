@@ -66,7 +66,6 @@ export const presets: Record<string, Preset> = {
   preserveSemverRanges: {
     description:
       'Preserve (but continue to upgrade) any existing SemVer ranges',
-    rangeStrategy: 'replace',
     packageRules: [{ matchPackagePatterns: ['*'], rangeStrategy: 'replace' }],
   },
   pinAllExceptPeerDependencies: {
