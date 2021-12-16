@@ -6,7 +6,9 @@ export const presets: Record<string, Preset> = {
     description: 'All replacements',
     extends: [
       'replacements:cucumber-to-scoped',
+      'replacements:hapi-to-scoped',
       'replacements:jade-to-pug',
+      'replacements:joi-to-unscoped',
       'replacements:rollup-node-resolve-to-scoped',
     ],
   },
@@ -21,6 +23,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'hapi-to-scoped': {
+    description: 'hapi became scoped',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['hapi'],
+        replacementName: '@hapi/hapi',
+        replacementVersion: '18.2.0',
+      },
+    ],
+  },
   'jade-to-pug': {
     description: 'Jade was renamed to Pug',
     packageRules: [
@@ -29,6 +42,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['jade'],
         replacementName: 'pug',
         replacementVersion: '2.0.0',
+      },
+    ],
+  },
+  'joi-to-unscoped': {
+    description: 'joi was moved out of the hapi organization',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@hapi/joi'],
+        replacementName: 'joi',
+        replacementVersion: '17.1.1',
       },
     ],
   },
