@@ -597,7 +597,7 @@ export async function isBranchConflicted(
     if (!err?.git?.conflicts?.length) {
       logger.debug(
         { baseBranch, branch, err },
-        'Conflict detection: unknown error'
+        'isBranchConflicted: unknown error'
       );
     }
   }

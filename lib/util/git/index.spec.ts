@@ -593,18 +593,18 @@ describe('util/git/index', () => {
       ]);
 
       await repo.checkout(defaultBranch);
-      await fs.writeFile(base.path + '/past_file', 'past (updated)');
-      await repo.add(['past_file']);
+      await fs.writeFile(base.path + '/one_file', 'past (updated)');
+      await repo.add(['one_file']);
       await repo.commit('past (updated) message');
 
       await repo.checkout('renovate/conflicted_branch');
-      await fs.writeFile(base.path + '/past_file', 'past (updated branch)');
-      await repo.add(['past_file']);
+      await fs.writeFile(base.path + '/one_file', 'past (updated branch)');
+      await repo.add(['one_file']);
       await repo.commit('past (updated branch) message');
 
       await repo.checkout('renovate/non_conflicted_branch');
-      await fs.writeFile(base.path + '/other_file', 'other');
-      await repo.add(['other_file']);
+      await fs.writeFile(base.path + '/another_file', 'other');
+      await repo.add(['another_file']);
       await repo.commit('other (updated branch) message');
 
       await repo.checkout(defaultBranch);
