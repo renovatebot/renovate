@@ -1,16 +1,13 @@
-import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class RequiredStatusChecksMigration extends AbstractMigration {
-  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
-    super('requiredStatusChecks', originalConfig, migratedConfig);
-  }
+  readonly propertyName = 'requiredStatusChecks';
 
-  override run(): void {
+  override run(value): void {
     this.delete(this.propertyName);
 
-    if (this.originalConfig.requiredStatusChecks === null) {
-      this.migratedConfig.ignoreTests = true;
+    if (value === null) {
+      this.setSafely('ignoreTests', true);
     }
   }
 }

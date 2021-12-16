@@ -8,7 +8,7 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "version: 0.0.2",
-      "name": "undefined",
+      "name": "Chart.yaml",
     },
   ],
 }
@@ -22,7 +22,7 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "new version",
-      "name": "undefined",
+      "name": "package.json",
     },
   ],
 }
@@ -36,7 +36,7 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "updated-file",
-      "name": "undefined",
+      "name": "index.html",
     },
   ],
 }
@@ -50,18 +50,9 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "updated-file",
-      "name": "undefined",
+      "name": "index.html",
     },
   ],
-}
-`;
-
-exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch no update 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [],
 }
 `;
 
@@ -73,18 +64,9 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "some new content",
-      "name": "undefined",
+      "name": "package.json",
     },
   ],
-}
-`;
-
-exports[`workers/branch/get-updated getUpdatedPackageFiles() handles empty 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [],
 }
 `;
 
@@ -96,7 +78,7 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "existing content",
-      "name": "undefined",
+      "name": ".gitmodules",
     },
   ],
 }
@@ -162,7 +144,7 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "some new content",
-      "name": "undefined",
+      "name": "composer.json",
     },
   ],
 }
@@ -209,7 +191,7 @@ Object {
   "updatedPackageFiles": Array [
     Object {
       "contents": "existing content",
-      "name": "undefined",
+      "name": "composer.json",
     },
   ],
 }
