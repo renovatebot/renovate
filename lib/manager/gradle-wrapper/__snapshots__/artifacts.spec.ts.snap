@@ -27,7 +27,7 @@ Array [
 exports[`manager/gradle-wrapper/artifacts replaces existing value 1`] = `
 Array [
   Object {
-    "cmd": "<gradlew> wrapper --gradle-version 6.3",
+    "cmd": "<gradlew> wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip",
     "options": Object {
       "cwd": "/root/project/lib/manager/gradle-wrapper/__fixtures__/testFiles",
       "encoding": "utf-8",
