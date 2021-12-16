@@ -1,4 +1,4 @@
-import { stat } from 'fs-extra';
+import { readFile, stat } from 'fs-extra';
 import { resolve } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import * as httpMock from '../../../test/http-mock';
@@ -37,7 +37,7 @@ addReplacingSerializer('gradlew.bat', '<gradlew>');
 addReplacingSerializer('./gradlew', '<gradlew>');
 
 function readString(...paths: string[]): Promise<string> {
-  return fs.readLocalFile(resolve(fixtures, ...paths), 'utf8');
+  return readFile(resolve(fixtures, ...paths), 'utf8');
 }
 
 describe('manager/gradle-wrapper/artifacts', () => {
