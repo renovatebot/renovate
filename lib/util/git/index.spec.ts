@@ -634,20 +634,35 @@ describe('util/git/index', () => {
     });
 
     it('detects conflicted branch', async () => {
+      const branchBefore = 'renovate/non_conflicted_branch';
+      await git.checkoutBranch(branchBefore);
+
       const res = await git.isBranchConflicted(
         defaultBranch,
         'renovate/conflicted_branch'
       );
+
       expect(res).toBeTrue();
+
+      const status = await git.getRepoStatus();
+      expect(status.current).toEqual(branchBefore);
+      expect(status.isClean()).toBeTrue();
     });
 
     it('detects non-conflicted branch', async () => {
-      await git.checkoutBranch('renovate/conflicted_branch');
+      const branchBefore = 'renovate/conflicted_branch';
+      await git.checkoutBranch(branchBefore);
+
       const res = await git.isBranchConflicted(
         defaultBranch,
         'renovate/non_conflicted_branch'
       );
+
       expect(res).toBeFalse();
+
+      const status = await git.getRepoStatus();
+      expect(status.current).toEqual(branchBefore);
+      expect(status.isClean()).toBeTrue();
     });
   });
 });

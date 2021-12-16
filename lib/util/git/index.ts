@@ -586,10 +586,10 @@ export async function isBranchConflicted(
 
   const origBranch = config.currentBranch;
   try {
-    if (origBranch !== baseBranch) {
-      await git.checkout(['-f', baseBranch, '--']);
-    }
     await git.reset(ResetMode.HARD);
+    if (origBranch !== baseBranch) {
+      await git.checkout(baseBranch);
+    }
     await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
   } catch (err) {
     result = true;
@@ -598,6 +598,18 @@ export async function isBranchConflicted(
       logger.debug(
         { baseBranch, branch, err },
         'isBranchConflicted: unknown error'
+      );
+    }
+  } finally {
+    try {
+      await git.merge(['--abort']);
+      if (origBranch !== baseBranch) {
+        await git.checkout(origBranch);
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: cleanup error'
       );
     }
   }
