@@ -239,7 +239,7 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
       expect(
         await readString(
           adminConfig.localDir,
-          `./gradle/wrapper/gradle-wrapper.properties`
+          `gradle/wrapper/gradle-wrapper.properties`
         )
       ).toEqual(newContent);
 
