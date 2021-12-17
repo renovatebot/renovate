@@ -42,9 +42,9 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const coercedVersions = versions.filter((version) => {
+  const coercedVersions = versions.map((version) => {
     const coercedVersion = semver.coerce(version);
-    return coercedVersion ? coercedVersion.version : null;
+    return coercedVersion ? coercedVersion.version : version;
   });
   return semver.maxSatisfying(coercedVersions, range);
 }
@@ -53,9 +53,9 @@ function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const coercedVersions = versions.filter((version) => {
+  const coercedVersions = versions.map((version) => {
     const coercedVersion = semver.coerce(version);
-    return coercedVersion ? coercedVersion.version : null;
+    return coercedVersion ? coercedVersion.version : version;
   });
   return semver.minSatisfying(coercedVersions, range);
 }
