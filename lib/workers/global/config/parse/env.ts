@@ -4,6 +4,7 @@ import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
 import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
+import { coersions } from './coersions';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -71,14 +72,6 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   }
 
   config.hostRules ||= [];
-
-  const coersions = {
-    boolean: (val: string): boolean => val === 'true',
-    array: (val: string): string[] => val.split(',').map((el) => el.trim()),
-    string: (val: string): string => val.replace(/\\n/g, '\n'),
-    object: (val: string): any => JSON.parse(val),
-    integer: parseInt,
-  };
 
   options.forEach((option) => {
     if (option.env !== false) {
