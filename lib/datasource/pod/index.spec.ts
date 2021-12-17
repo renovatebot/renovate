@@ -12,6 +12,8 @@ const config = {
 };
 
 const githubApiHost = 'https://api.github.com';
+const githubEntApiHost = 'https://github.foo.com';
+const githubEntApiHost2 = 'https://ghe.foo.com';
 const cocoapodsHost = 'https://cdn.cocoapods.org';
 
 describe('datasource/pod/index', () => {
@@ -45,16 +47,56 @@ describe('datasource/pod/index', () => {
     it('returns null for 404', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/repos/foo/bar/contents/a/c/b/foo')
+        .reply(404)
         .get('/repos/foo/bar/contents/Specs/foo')
         .reply(404)
-        .get('/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .get('/repos/foo/bar/contents/foo')
         .reply(404);
       const res = await getPkgReleases({
         ...config,
         registryUrls: [...config.registryUrls, 'https://github.com/foo/bar'],
       });
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null for 404 Github enterprise', async () => {
+      httpMock
+        .scope(githubEntApiHost)
+        .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/Specs/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/foo')
+        .reply(404);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: [
+          ...config.registryUrls,
+          'https://github.foo.com/foo/bar',
+        ],
+      });
+      expect(res).toBeNull();
+    });
+    it('returns null for 404 Github enterprise with different url style', async () => {
+      httpMock
+        .scope(githubEntApiHost2)
+        .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/Specs/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/foo')
+        .reply(404);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: [...config.registryUrls, 'https://ghe.foo.com/foo/bar'],
+      });
+      expect(res).toBeNull();
     });
     it('returns null for 401', async () => {
       httpMock
@@ -62,7 +104,6 @@ describe('datasource/pod/index', () => {
         .get('/all_pods_versions_a_c_b.txt')
         .reply(401);
       expect(await getPkgReleases(config)).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 429', async () => {
       httpMock
@@ -70,7 +111,6 @@ describe('datasource/pod/index', () => {
         .get('/all_pods_versions_a_c_b.txt')
         .reply(429);
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
       httpMock
@@ -78,7 +118,6 @@ describe('datasource/pod/index', () => {
         .get('/all_pods_versions_a_c_b.txt')
         .replyWithError('foobar');
       expect(await getPkgReleases(config)).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data from CDN', async () => {
       httpMock
@@ -98,13 +137,10 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('processes real data from Github', async () => {
+    it('processes real data from Github with shard with specs', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/Artsy/Specs/contents/Specs/foo')
-        .reply(404)
         .get('/repos/Artsy/Specs/contents/Specs/a/c/b/foo')
         .reply(200, [{ name: '1.2.3' }]);
       const res = await getPkgReleases({
@@ -119,7 +155,156 @@ describe('datasource/pod/index', () => {
           },
         ],
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('processes real data from Github with shard without specs', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/Artsy/Specs/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/repos/Artsy/Specs/contents/a/c/b/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.com/Artsy/Specs'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.com/Artsy/Specs',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+    it('processes real data from Github with specs without shard', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/Artsy/Specs/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/repos/Artsy/Specs/contents/a/c/b/foo')
+        .reply(404)
+        .get('/repos/Artsy/Specs/contents/Specs/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.com/Artsy/Specs'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.com/Artsy/Specs',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+    it('processes real data from Github without specs without shard', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/Artsy/Specs/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/repos/Artsy/Specs/contents/a/c/b/foo')
+        .reply(404)
+        .get('/repos/Artsy/Specs/contents/Specs/foo')
+        .reply(404)
+        .get('/repos/Artsy/Specs/contents/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.com/Artsy/Specs'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.com/Artsy/Specs',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+    it('processes real data from Github Enterprise with shard with specs', async () => {
+      httpMock
+        .scope(githubEntApiHost)
+        .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.foo.com/foo/bar'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.foo.com/foo/bar',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+    it('processes real data from Github Enterprise with shard without specs', async () => {
+      httpMock
+        .scope(githubEntApiHost)
+        .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/a/c/b/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.foo.com/foo/bar'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.foo.com/foo/bar',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+    it('processes real data from Github Enterprise with specs without shard', async () => {
+      httpMock
+        .scope(githubEntApiHost)
+        .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/Specs/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.foo.com/foo/bar'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.foo.com/foo/bar',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+    it('processes real data from Github Enterprise without specs without shard', async () => {
+      httpMock
+        .scope(githubEntApiHost)
+        .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/a/c/b/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/Specs/foo')
+        .reply(404)
+        .get('/api/v3/repos/foo/bar/contents/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://github.foo.com/foo/bar'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://github.foo.com/foo/bar',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
     });
   });
 });
