@@ -72,11 +72,11 @@ describe('versioning/semver-coerced/index', () => {
 
   describe('.isLessThanRange(version, range)', () => {
     it('should return true for a lower version in strict semver', () => {
-      expect(semverCoerced.isLessThanRange('1.0.2', '~2.0')).toBeTruthy();
+      expect(semverCoerced.isLessThanRange?.('1.0.2', '~2.0')).toBeTruthy();
     });
 
     it('should return false for in-range version in strict semver', () => {
-      expect(semverCoerced.isLessThanRange('3.0.2', '~3.0')).toBeFalsy();
+      expect(semverCoerced.isLessThanRange?.('3.0.2', '~3.0')).toBeFalsy();
     });
   });
 

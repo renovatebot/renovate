@@ -46,6 +46,8 @@
     "lib/util/url.ts",
     "lib/versioning/swift/*.ts",
     "lib/versioning/ubuntu/*.ts",
+    "lib/versioning/semver/*.ts",
+    "lib/versioning/semver-coerced/*.ts",
     "lib/workers/pr/changelog/hbs-template.ts",
     "lib/workers/pr/changelog/types.ts",
     "lib/workers/repository/init/types.ts",
