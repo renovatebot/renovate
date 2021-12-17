@@ -1,4 +1,4 @@
-import type { AllConfig } from '../../config/types';
+import type { RenovateConfig } from '../../config/types';
 import { PlatformId } from '../../constants';
 import * as platform from '../../platform';
 import * as _ghApi from '../../platform/github';
@@ -13,7 +13,7 @@ const hostRules = _hostRules;
 const ghApi: jest.Mocked<typeof _ghApi> = _ghApi as never;
 
 describe('workers/global/autodiscover', () => {
-  let config: AllConfig;
+  let config: RenovateConfig;
   beforeEach(async () => {
     jest.resetAllMocks();
     config = {};
@@ -48,7 +48,7 @@ describe('workers/global/autodiscover', () => {
   });
   it('filters autodiscovered github repos', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = ['project/re*'];
+    config.autodiscoverFilter = 'project/re*';
     config.platform = PlatformId.Github;
     hostRules.find = jest.fn(() => ({
       token: 'abc',
@@ -61,7 +61,7 @@ describe('workers/global/autodiscover', () => {
   });
   it('filters autodiscovered github repos but nothing matches', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = ['project/re*'];
+    config.autodiscoverFilter = 'project/re*';
     config.platform = 'github';
     hostRules.find = jest.fn(() => ({
       token: 'abc',
@@ -71,22 +71,5 @@ describe('workers/global/autodiscover', () => {
     );
     const res = await autodiscoverRepositories(config);
     expect(res).toEqual(config);
-  });
-  it('filters autodiscovered github repos with multiple values', async () => {
-    config.autodiscover = true;
-    config.autodiscoverFilter = ['another-project/re*', 'department/dev/*'];
-    config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
-      token: 'abc',
-    }));
-    const expectedRepositories = [
-      'another-project/repo',
-      'department/dev/aProject',
-    ];
-    ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['another-project/another-repo', ...expectedRepositories])
-    );
-    const res = await autodiscoverRepositories(config);
-    expect(res.repositories).toEqual(expectedRepositories);
   });
 });

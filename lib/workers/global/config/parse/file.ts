@@ -2,7 +2,6 @@ import is from 'is';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
-import { massageConfig } from '../../../../config/massage';
 import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -65,5 +64,5 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     );
     config = migratedConfig;
   }
-  return massageConfig(config);
+  return config;
 }
