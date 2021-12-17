@@ -21,19 +21,21 @@ export interface ChangeLogRelease {
   releaseNotes?: ChangeLogNotes;
   version: string;
   gitRef: string;
+  tagPrefix?: string;
 }
 
 export interface ChangeLogProject {
   depName?: string;
-  type: 'github' | 'gitlab';
+  type: 'github' | 'gitlab' | 'azure';
   apiBaseUrl?: string;
   baseUrl: string;
   repository: string;
   sourceUrl: string;
   sourceDirectory?: string;
+  tagPrefix?: string;
 }
 
-export type ChangeLogError = 'MissingGithubToken' | 'MissingGitlabToken';
+export type ChangeLogError = 'MissingGithubToken' | 'MissingGitlabToken' | 'MissingAzureToken';
 
 export interface ChangeLogResult {
   hasReleaseNotes?: boolean;

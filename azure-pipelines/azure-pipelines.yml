@@ -1,0 +1,29 @@
+trigger:
+  - none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'anymodconrst001dg'
+      repository: 'renovate'
+      command: 'build'
+      Dockerfile: 'Dockerfile'
+      tags: |
+        $(Build.BuildId)
+        latest
+    displayName: Build docker image
+
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'anymodconrst001dg'
+      repository: 'renovate'
+      command: 'push'
+      Dockerfile: 'Dockerfile'
+      tags: |
+        $(Build.BuildId)
+        latest
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), in(variables['Build.SourceBranch'], 'refs/heads/main', 'refs/heads/dg-main'))
+    displayName: Push docker image

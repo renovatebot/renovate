@@ -3,7 +3,7 @@ name: build
 on:
   push:
     branches:
-      - main
+      - dg-main
 
   pull_request:
 

@@ -29,7 +29,7 @@ import type {
 } from '../../../types';
 import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
-import { getPrBody } from './body';
+import { getFullChangelogs as getFullChangelog, getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 
@@ -180,8 +180,8 @@ export async function ensurePr(
   ): string {
     // TODO: types (#7154)
     return `${upgrade.repoName!}${
-      upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
-    }`;
+      upgrade.depName ? `:${upgrade.depName}` : ''
+    }${upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''}`;
   }
 
   if (config.fetchReleaseNotes) {
@@ -269,6 +269,7 @@ export async function ensurePr(
   const prBody = getPrBody(config, {
     debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
   });
+  const fullChangelog = getFullChangelog(config);
 
   try {
     if (existingPr) {
@@ -322,6 +323,7 @@ export async function ensurePr(
           prTitle,
           prBody,
           platformOptions: getPlatformPrOptions(config),
+          changelog: fullChangelog,
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
@@ -353,6 +355,7 @@ export async function ensurePr(
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
+          changelog: fullChangelog,
         });
 
         incLimitedValue('PullRequests');

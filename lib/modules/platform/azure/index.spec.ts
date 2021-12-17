@@ -679,6 +679,14 @@ describe('modules/platform/azure/index', () => {
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
       );
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getThreads: jest.fn().mockReturnValue([]),
+            createThread: jest.fn(() => ({})),
+          } as any)
+      );
+
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -699,6 +707,13 @@ describe('modules/platform/azure/index', () => {
               displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
+          } as any)
+      );
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getThreads: jest.fn().mockReturnValue([]),
+            createThread: jest.fn(() => ({})),
           } as any)
       );
       const pr = await azure.createPr({
@@ -743,6 +758,13 @@ describe('modules/platform/azure/index', () => {
             updatePullRequest: updateFn,
           } as any)
       );
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getThreads: jest.fn().mockReturnValue([]),
+            createThread: jest.fn(() => ({})),
+          } as any)
+      );
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'dev',
@@ -782,6 +804,13 @@ describe('modules/platform/azure/index', () => {
             createPullRequestReviewer: updateFn,
           } as any)
       );
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getThreads: jest.fn().mockReturnValue([]),
+            createThread: jest.fn(() => ({})),
+          } as any)
+      );
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'dev',
@@ -805,6 +834,18 @@ describe('modules/platform/azure/index', () => {
             updatePullRequest,
           } as any)
       );
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getThreads: jest.fn().mockReturnValue([
+              {
+                comments: [{ content: '### Full Release Notes\n\n', id: 1 }],
+                id: 2,
+              },
+            ]),
+            updateComment: jest.fn(() => ({ id: 1 })),
+          } as any)
+      );
       await azure.updatePr({
         number: 1234,
         prTitle: 'The New Title',
@@ -820,6 +861,18 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             updatePullRequest,
+          } as any)
+      );
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getThreads: jest.fn().mockReturnValue([
+              {
+                comments: [{ content: '### Full Release Notes\n\n', id: 1 }],
+                id: 2,
+              },
+            ]),
+            updateComment: jest.fn(() => ({ id: 1 })),
           } as any)
       );
       await azure.updatePr({
@@ -838,6 +891,18 @@ describe('modules/platform/azure/index', () => {
             updatePullRequest,
           } as any)
       );
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getThreads: jest.fn().mockReturnValue([
+              {
+                comments: [{ content: '### Full Release Notes\n\n', id: 1 }],
+                id: 2,
+              },
+            ]),
+            updateComment: jest.fn(() => ({ id: 1 })),
+          } as any)
+      );
       await azure.updatePr({
         number: 1234,
         prTitle: 'The New Title',
@@ -854,6 +919,18 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             updatePullRequest,
+          } as any)
+      );
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getThreads: jest.fn().mockReturnValue([
+              {
+                comments: [{ content: '### Full Release Notes\n\n', id: 1 }],
+                id: 2,
+              },
+            ]),
+            updateComment: jest.fn(() => ({ id: 1 })),
           } as any)
       );
       await azure.updatePr({

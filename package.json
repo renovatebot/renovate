@@ -200,6 +200,7 @@
     "hcl2-parser": "1.0.3",
     "ignore": "5.2.4",
     "ini": "3.0.1",
+    "is-changelog-path": "2.0.0",
     "js-yaml": "4.1.0",
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "3.0.0",
