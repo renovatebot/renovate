@@ -507,10 +507,6 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-
-      const trace = httpMock.getTrace();
-      expect(trace).toHaveLength(4);
-      expect(trace).toMatchSnapshot();
     });
 
     it('throws on 50x if count < 10', async () => {
