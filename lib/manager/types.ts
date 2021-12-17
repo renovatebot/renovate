@@ -231,6 +231,7 @@ export interface UpdateLockedConfig {
 }
 
 export interface UpdateLockedResult {
+  status: 'updated' | 'update-failed';
   files?: Record<string, string>;
 }
 

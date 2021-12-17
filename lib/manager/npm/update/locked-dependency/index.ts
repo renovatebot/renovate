@@ -9,12 +9,12 @@ export async function updateLockedDependency(
   const { currentVersion, newVersion, lockFile } = config;
   if (!(semver.isVersion(currentVersion) && semver.isVersion(newVersion))) {
     logger.warn({ config }, 'Update versions are not valid');
-    return {};
+    return { status: 'update-failed' };
   }
   if (lockFile.endsWith('package-lock.json')) {
     const res = await packageLock.updateLockedDependency(config);
     return res;
   }
   logger.debug({ lockFile }, 'Unsupported lock file');
-  return {};
+  return { status: 'update-failed' };
 }

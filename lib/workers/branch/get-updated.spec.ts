@@ -160,6 +160,7 @@ describe('workers/branch/get-updated', () => {
         isRemediation: true,
       } as never);
       npm.updateLockedDependency.mockResolvedValueOnce({
+        status: 'updated',
         files: { 'package-lock.json': 'new contents' },
       });
       const res = await getUpdatedPackageFiles(config);
@@ -177,6 +178,7 @@ describe('workers/branch/get-updated', () => {
       config.reuseExistingBranch = true;
       git.getFile.mockResolvedValueOnce('existing content');
       npm.updateLockedDependency.mockResolvedValue({
+        status: 'updated',
         files: { 'package-lock.json': 'new contents' },
       });
       const res = await getUpdatedPackageFiles(config);

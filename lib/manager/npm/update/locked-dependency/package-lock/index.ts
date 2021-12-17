@@ -35,11 +35,11 @@ export async function updateLockedDependency(
       packageLockJson = JSON.parse(lockFileContent);
     } catch (err) {
       logger.warn({ err }, 'Failed to parse files');
-      return {};
+      return { status: 'update-failed' };
     }
     if (packageLockJson.lockfileVersion === 2) {
       logger.debug('Only lockfileVersion 1 is supported');
-      return {};
+      return { status: 'update-failed' };
     }
     const lockedDeps = getLockedDependencies(
       packageLockJson,
@@ -53,12 +53,12 @@ export async function updateLockedDependency(
       // Don't return {} if we're a parent update or else the whole update will fail
       // istanbul ignore if: too hard to replicate
       if (isParentUpdate) {
-        const res = { files: {} };
+        const res: UpdateLockedResult = { status: 'update-failed', files: {} };
         res.files[packageFile] = packageFileContent;
         res.files[lockFile] = lockFileContent;
         return res;
       }
-      return {};
+      return { status: 'update-failed' };
     }
     logger.debug(
       `Found matching dependencies with length ${lockedDeps.length}`
@@ -76,7 +76,7 @@ export async function updateLockedDependency(
         { depName, currentVersion, newVersion },
         'Could not find constraints for the locked dependency - cannot remediate'
       );
-      return {};
+      return { status: 'update-failed' };
     }
     const parentUpdates: UpdateLockedConfig[] = [];
     for (const {
@@ -122,7 +122,7 @@ export async function updateLockedDependency(
           logger.debug(
             `Update of ${depName} to ${newVersion} cannot be achieved due to parent ${parentDepName}`
           );
-          return {};
+          return { status: 'update-failed' };
         }
       } else if (depType) {
         // The constaint comes from the package.json file, so we need to update it
@@ -166,7 +166,7 @@ export async function updateLockedDependency(
         logger.debug(
           `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`
         );
-        return {};
+        return { status: 'update-failed' };
       }
       newPackageJsonContent =
         parentUpdateResult.files[packageFile] || newPackageJsonContent;
@@ -180,9 +180,9 @@ export async function updateLockedDependency(
     if (newPackageJsonContent) {
       files[packageFile] = newPackageJsonContent;
     }
-    return { files };
+    return { status: 'updated', files };
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'updateLockedDependency() error');
-    return {};
+    return { status: 'update-failed' };
   }
 }
