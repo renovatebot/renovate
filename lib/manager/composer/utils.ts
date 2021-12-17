@@ -1,6 +1,7 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { ToolConstraint } from '../../util/exec/types';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
@@ -9,12 +10,17 @@ export { composerVersioningId };
 
 const depRequireInstall = new Set(['symfony/flex']);
 
-export function getComposerArguments(config: UpdateArtifactsConfig): string {
+export function getComposerArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint
+): string {
   let args = '';
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      args += " --ignore-platform-req='lib-*' --ignore-platform-req='ext-*'";
+      args += api.matches(toolConstraint.constraint, '^2.2.0')
+        ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
+        : ' --ignore-platform-reqs';
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
         args += ' --ignore-platform-req ' + quote(req);
@@ -74,12 +80,15 @@ export function extractContraints(
   // check last used composer version
   else if (lockParsed?.['plugin-api-version']) {
     const major = api.getMajor(lockParsed?.['plugin-api-version']);
-    res.composer = `${major}.*`;
+    const minor = api.getMinor(lockParsed?.['plugin-api-version']) || '*';
+    res.composer = `${major}.${minor}`;
   }
   // check composer api dependency
   else if (composerJson.require?.['composer-runtime-api']) {
     const major = api.getMajor(composerJson.require?.['composer-runtime-api']);
-    res.composer = `${major}.*`;
+    const minor =
+      api.getMinor(composerJson.require?.['composer-runtime-api']) || '*';
+    res.composer = `${major}.${minor}`;
   }
   return res;
 }

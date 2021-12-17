@@ -49,7 +49,7 @@ Array [
 exports[`manager/composer/artifacts disable plugins when configured locally 1`] = `
 Array [
   Object {
-    "cmd": "composer update foo bar --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -97,7 +97,7 @@ Array [
 exports[`manager/composer/artifacts does not disable plugins when configured globally 1`] = `
 Array [
   Object {
-    "cmd": "composer update foo bar --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader",
+    "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -121,7 +121,7 @@ Array [
 exports[`manager/composer/artifacts installs before running the update when symfony flex is installed 1`] = `
 Array [
   Object {
-    "cmd": "composer install --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -140,7 +140,7 @@ Array [
     },
   },
   Object {
-    "cmd": "composer update --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -164,7 +164,7 @@ Array [
 exports[`manager/composer/artifacts installs before running the update when symfony flex is installed as dev 1`] = `
 Array [
   Object {
-    "cmd": "composer install --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -183,7 +183,7 @@ Array [
     },
   },
   Object {
-    "cmd": "composer update --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -207,7 +207,7 @@ Array [
 exports[`manager/composer/artifacts performs lockFileMaintenance 1`] = `
 Array [
   Object {
-    "cmd": "composer update --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -231,7 +231,7 @@ Array [
 exports[`manager/composer/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "composer update foo bar --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction",
+    "cmd": "composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -255,7 +255,7 @@ Array [
 exports[`manager/composer/artifacts returns updated composer.lock 1`] = `
 Array [
   Object {
-    "cmd": "composer update --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -291,7 +291,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_php --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/php:7.3 bash -l -c \\"install-tool composer 1.10.17 && composer update --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins\\"",
+    "cmd": "docker run --rm --name=renovate_php --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e COMPOSER_CACHE_DIR -w \\"/tmp/github/some/repo\\" renovate/php:7.3 bash -l -c \\"install-tool composer 1.10.17 && composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -315,7 +315,7 @@ Array [
 exports[`manager/composer/artifacts supports global mode 1`] = `
 Array [
   Object {
-    "cmd": "composer update --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -339,7 +339,7 @@ Array [
 exports[`manager/composer/artifacts supports vendor directory update 1`] = `
 Array [
   Object {
-    "cmd": "composer update --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -363,7 +363,7 @@ Array [
 exports[`manager/composer/artifacts uses hostRules to set COMPOSER_AUTH 1`] = `
 Array [
   Object {
-    "cmd": "composer update --with-dependencies --ignore-platform-req='lib-*' --ignore-platform-req='ext-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+    "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
