@@ -9,6 +9,7 @@ import * as packageCache from '../../../../../util/cache/package';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import * as azure from './azure';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -34,7 +35,8 @@ export async function getReleaseList(
         return await gitlab.getReleaseList(project, release);
       case 'github':
         return await github.getReleaseList(project, release);
-
+      case 'azure':
+        return await azure.getReleaseList(project, release);
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -248,6 +250,7 @@ export async function getReleaseNotesMdFileInner(
   const { repository, type } = project;
   const apiBaseUrl = project.apiBaseUrl!;
   const sourceDirectory = project.sourceDirectory!;
+  const tagPrefix = project.tagPrefix!;
   try {
     switch (type) {
       case 'gitlab':
@@ -262,7 +265,13 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory
         );
-
+      case 'azure':
+        return await azure.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+          tagPrefix
+        );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;
@@ -287,9 +296,11 @@ export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
   // TODO: types (#7154)
-  const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
-    project.sourceDirectory ? `-${project.sourceDirectory}` : ''
-  }-${project.apiBaseUrl!}`;
+  const cacheKey = `getReleaseNotesMdFile@v2${project.repository}${
+    project.tagPrefix ? `-${project.tagPrefix}` : ''
+  }${project.sourceDirectory ? `-${project.sourceDirectory}` : ''}-${
+    project.apiBaseUrl
+  }`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -341,7 +352,14 @@ export async function getReleaseNotesMd(
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
-              const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
+              let notesSourceUrl: string;
+              if (baseUrl.match('.*(dev.azure.com|visualstudio.com).*')) {
+                // https:/digitecgalaxus.visualstudio.com/devinite/_git/Chabis.Messaging?path=/CHANGELOG.md
+                const repoInfo = repository.split('/');
+                notesSourceUrl = `${baseUrl}${repoInfo.shift()}/_git/${repoInfo.shift()}?path=/${changelogFile}`;
+              } else {
+                notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
+              }
               const url =
                 notesSourceUrl +
                 '#' +
@@ -418,7 +436,7 @@ export async function addReleaseNotes(
   }
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
-    const cacheKey = getCacheKey(v.version);
+    const cacheKey = getCacheKey([v.tagPrefix, v.version].join(''));
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
     if (!releaseNotes) {

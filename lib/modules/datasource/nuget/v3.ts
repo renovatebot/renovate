@@ -132,11 +132,16 @@ export async function getReleases(
         release.releaseTimestamp = releaseTimestamp;
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
-        latestStable = removeBuildMeta(version);
-        homepage = projectUrl ? massageUrl(projectUrl) : homepage;
+        if (!latestStable || semver.gt(version, latestStable)) {
+          latestStable = removeBuildMeta(version);
+          homepage = projectUrl ?? homepage;
+        }
       }
       if (listed === false) {
         release.isDeprecated = true;
+      }
+      if (projectUrl?.match('.*path=/CHANGELOG.*md.*')) {
+        release.changelogUrl = projectUrl;
       }
       return release;
     }
@@ -177,6 +182,13 @@ export async function getReleases(
       const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
       if (sourceUrl) {
         dep.sourceUrl = massageUrl(sourceUrl);
+      }
+      const branch: string | undefined = nuspec.valueWithPath(
+        'metadata.repository@branch'
+      );
+      if (branch?.includes('/')) {
+        const tagPrefix = branch.split('/').shift();
+        releases.map((r) => (r.tagPrefix = tagPrefix));
       }
     }
   } catch (err) {

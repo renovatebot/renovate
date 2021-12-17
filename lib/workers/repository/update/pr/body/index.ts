@@ -70,20 +70,20 @@ export function getPrBody(
   prBodyConfig: PrBodyConfig
 ): string {
   massageUpdateMetadata(branchConfig);
-  let warnings = '';
-  warnings += getWarnings(branchConfig);
-  if (branchConfig.packageFiles) {
-    warnings += getDepWarningsPR(
-      branchConfig.packageFiles,
-      branchConfig.dependencyDashboard
-    );
+
+  let changelogs = '';
+
+  // due to the small limit of 4000 chars in Azure PRs we write the changelogs as comment
+  if (branchConfig.platform !== 'azure') {
+    changelogs = getChangelogs(branchConfig);
   }
+
   const content = {
     header: getPrHeader(branchConfig),
     table: getPrUpdatesTable(branchConfig),
     warnings,
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
-    changelogs: getChangelogs(branchConfig),
+    changelogs: changelogs,
     configDescription: getPrConfigDescription(branchConfig),
     controls: getControls(),
     footer: getPrFooter(branchConfig),
@@ -107,4 +107,11 @@ export function getPrBody(
     }
   }
   return prBody;
+}
+
+export function getFullChangelogs(config: BranchConfig): string {
+  let changelogs = getChangelogs(config);
+  changelogs = changelogs.trim();
+  changelogs = changelogs.replace(regEx(/\n\n\n+/g), '\n\n');
+  return changelogs;
 }

@@ -2,6 +2,7 @@ import { logger } from '../../../../../logger';
 import * as allVersioning from '../../../../../modules/versioning';
 import { detectPlatform } from '../../../../../util/common';
 import type { BranchUpgradeConfig } from '../../../../types';
+import * as sourceAzure from './source-azure';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
 import type { ChangeLogResult } from './types';
@@ -37,7 +38,9 @@ export async function getChangeLogJSON(
       case 'github':
         res = await sourceGithub.getChangeLogJSON(config);
         break;
-
+      case 'azure':
+        res = await sourceAzure.getChangeLogJSON(config);
+        break;
       default:
         logger.info(
           { sourceUrl, hostType: platform },
