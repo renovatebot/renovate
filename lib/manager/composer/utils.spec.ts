@@ -35,19 +35,13 @@ describe('manager/composer/utils', () => {
 
     it('returns from composer-runtime-api falling back to * for minor', () => {
       expect(
-        extractContraints({ require: { 'composer-runtime-api': '^1-dev' } }, {})
+        extractContraints({ require: { 'composer-runtime-api': '^1.0' } }, {})
       ).toEqual({ composer: '1.*' });
     });
 
     it('returns from plugin-api-version', () => {
       expect(extractContraints({}, { 'plugin-api-version': '1.1.0' })).toEqual({
-        composer: '1.1',
-      });
-    });
-
-    it('returns from plugin-api-version falling back to * for minor', () => {
-      expect(extractContraints({}, { 'plugin-api-version': '1-dev' })).toEqual({
-        composer: '1.*',
+        composer: '1.1.0',
       });
     });
 
