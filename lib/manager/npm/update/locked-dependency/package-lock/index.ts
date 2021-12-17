@@ -47,18 +47,32 @@ export async function updateLockedDependency(
       currentVersion
     );
     if (!lockedDeps.length) {
-      logger.debug(
-        `${depName}@${currentVersion} not found in ${lockFile} - no work to do`
+      const newLockedDeps = getLockedDependencies(
+        packageLockJson,
+        depName,
+        newVersion
       );
+      let status: 'update-failed' | 'already-updated';
+      if (newLockedDeps.length) {
+        logger.debug(
+          `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`
+        );
+        status = 'already-updated';
+      } else {
+        logger.debug(
+          `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
+        );
+        status = 'update-failed';
+      }
       // Don't return {} if we're a parent update or else the whole update will fail
       // istanbul ignore if: too hard to replicate
       if (isParentUpdate) {
-        const res: UpdateLockedResult = { status: 'update-failed', files: {} };
+        const res: UpdateLockedResult = { status, files: {} };
         res.files[packageFile] = packageFileContent;
         res.files[lockFile] = lockFileContent;
         return res;
       }
-      return { status: 'update-failed' };
+      return { status };
     }
     logger.debug(
       `Found matching dependencies with length ${lockedDeps.length}`

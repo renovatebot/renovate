@@ -109,6 +109,13 @@ describe('manager/npm/update/locked-dependency/index', () => {
       const packageLock = JSON.parse(res.files['package-lock.json']);
       expect(packageLock.dependencies.express.version).toBe('4.1.0');
     });
+    it('returns if already remediated', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.10';
+      config.newVersion = '1.2.11';
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('already-updated');
+    });
     it('remediates mime', async () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.11';
