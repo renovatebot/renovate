@@ -365,7 +365,7 @@ The "topic" is usually refers to the dependency being updated, e.g. `"dependency
 
 By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match the required PHP environment of your project as configured in your `composer.json` file.
 
-Composer 2.2 and up will be run with `--ignore-platform-req='ext-*' --ignore-platform-req='lib-*'`, which ignores extension requirements but not the PHP version itself and should suffice in most cases.
+Composer `2.2` and up will be run with `--ignore-platform-req='ext-*' --ignore-platform-req='lib-*'`, which ignores extension requirements but not the PHP version itself and should work in most cases.
 
 Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default. This can result in updated dependencies that are not compatible with your platform.
 
