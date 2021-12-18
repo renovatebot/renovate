@@ -80,13 +80,37 @@ describe('manager/composer/utils', () => {
         ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
     });
-    it('disables only extension and library platform requirements since 2.2', () => {
+    it('disables all platform requirements with 2.1.0', () => {
       expect(
         getComposerArguments(
           {
             composerIgnorePlatformReqs: [],
           },
-          { toolName: 'composer', constraint: '2.2' }
+          { toolName: 'composer', constraint: '2.1.0' }
+        )
+      ).toBe(
+        ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
+    });
+    it('disables only extension and library platform requirements with 2.2.0', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '2.2.0' }
+        )
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins"
+      );
+    });
+    it('disables only extension and library platform requirements with ^2.2', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '^2.2' }
         )
       ).toBe(
         " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins"

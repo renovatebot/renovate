@@ -18,7 +18,9 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      args += api.matches(toolConstraint.constraint, '^2.2.0')
+      const major = api.getMajor(toolConstraint.constraint);
+      const minor = api.getMinor(toolConstraint.constraint);
+      args += api.matches(`${major}.${minor}`, '^2.2')
         ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
         : ' --ignore-platform-reqs';
     } else {
