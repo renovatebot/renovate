@@ -30,12 +30,12 @@ describe('manager/composer/utils', () => {
     it('returns from composer-runtime-api', () => {
       expect(
         extractContraints({ require: { 'composer-runtime-api': '^1.1.0' } }, {})
-      ).toEqual({ composer: '1.*' });
+      ).toEqual({ composer: '^1.1' });
     });
 
     it('returns from plugin-api-version', () => {
       expect(extractContraints({}, { 'plugin-api-version': '1.1.0' })).toEqual({
-        composer: '1.*',
+        composer: '^1.1',
       });
     });
 
