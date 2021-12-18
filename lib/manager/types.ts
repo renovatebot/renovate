@@ -230,6 +230,11 @@ export interface UpdateLockedConfig {
   newVersion?: string;
 }
 
+export interface UpdateLockedResult {
+  status: 'updated' | 'update-failed';
+  files?: Record<string, string>;
+}
+
 export interface GlobalManagerConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
@@ -271,7 +276,7 @@ export interface ManagerApi extends ModuleApi {
 
   updateLockedDependency?(
     config: UpdateLockedConfig
-  ): Result<Record<string, string | null>>;
+  ): Result<UpdateLockedResult>;
 }
 
 // TODO: name and properties used by npm manager

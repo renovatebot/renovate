@@ -2,7 +2,7 @@ import detectIndent from 'detect-indent';
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../logger';
 import { api as semver } from '../../../../../versioning/npm';
-import type { UpdateLockedConfig } from '../../../../types';
+import type { UpdateLockedConfig, UpdateLockedResult } from '../../../../types';
 import { updateDependency } from '../../dependency';
 import { findFirstParentVersion } from '../common/parent-version';
 import { findDepConstraints } from './dep-constraints';
@@ -12,7 +12,7 @@ import type { PackageLockOrEntry } from './types';
 export async function updateLockedDependency(
   config: UpdateLockedConfig,
   isParentUpdate = false
-): Promise<Record<string, string>> {
+): Promise<UpdateLockedResult> {
   const {
     depName,
     currentVersion,
@@ -35,11 +35,11 @@ export async function updateLockedDependency(
       packageLockJson = JSON.parse(lockFileContent);
     } catch (err) {
       logger.warn({ err }, 'Failed to parse files');
-      return null;
+      return { status: 'update-failed' };
     }
     if (packageLockJson.lockfileVersion === 2) {
       logger.debug('Only lockfileVersion 1 is supported');
-      return null;
+      return { status: 'update-failed' };
     }
     const lockedDeps = getLockedDependencies(
       packageLockJson,
@@ -50,15 +50,15 @@ export async function updateLockedDependency(
       logger.debug(
         `${depName}@${currentVersion} not found in ${lockFile} - no work to do`
       );
-      // Don't return null if we're a parent update or else the whole update will fail
+      // Don't return {} if we're a parent update or else the whole update will fail
       // istanbul ignore if: too hard to replicate
       if (isParentUpdate) {
-        const res = {};
-        res[packageFile] = packageFileContent;
-        res[lockFile] = lockFileContent;
+        const res: UpdateLockedResult = { status: 'update-failed', files: {} };
+        res.files[packageFile] = packageFileContent;
+        res.files[lockFile] = lockFileContent;
         return res;
       }
-      return null;
+      return { status: 'update-failed' };
     }
     logger.debug(
       `Found matching dependencies with length ${lockedDeps.length}`
@@ -76,7 +76,7 @@ export async function updateLockedDependency(
         { depName, currentVersion, newVersion },
         'Could not find constraints for the locked dependency - cannot remediate'
       );
-      return null;
+      return { status: 'update-failed' };
     }
     const parentUpdates: UpdateLockedConfig[] = [];
     for (const {
@@ -122,7 +122,7 @@ export async function updateLockedDependency(
           logger.debug(
             `Update of ${depName} to ${newVersion} cannot be achieved due to parent ${parentDepName}`
           );
-          return null;
+          return { status: 'update-failed' };
         }
       } else if (depType) {
         // The constaint comes from the package.json file, so we need to update it
@@ -162,15 +162,16 @@ export async function updateLockedDependency(
         true
       );
       // istanbul ignore if: hard to test due to recursion
-      if (!parentUpdateResult) {
+      if (!parentUpdateResult.files) {
         logger.debug(
           `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`
         );
-        return null;
+        return { status: 'update-failed' };
       }
       newPackageJsonContent =
-        parentUpdateResult[packageFile] || newPackageJsonContent;
-      newLockFileContent = parentUpdateResult[lockFile] || newLockFileContent;
+        parentUpdateResult.files[packageFile] || newPackageJsonContent;
+      newLockFileContent =
+        parentUpdateResult.files[lockFile] || newLockFileContent;
     }
     const files = {};
     if (newLockFileContent) {
@@ -179,9 +180,9 @@ export async function updateLockedDependency(
     if (newPackageJsonContent) {
       files[packageFile] = newPackageJsonContent;
     }
-    return files;
+    return { status: 'updated', files };
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'updateLockedDependency() error');
-    return null;
+    return { status: 'update-failed' };
   }
 }

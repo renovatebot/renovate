@@ -74,7 +74,7 @@ export async function getUpdatedPackageFiles(
         });
       }
       const updateLockedDependency = get(manager, 'updateLockedDependency');
-      const files = await updateLockedDependency({
+      const { files } = await updateLockedDependency({
         ...upgrade,
         packageFileContent,
         lockFileContent,
