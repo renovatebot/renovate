@@ -51,8 +51,8 @@ describe('manager/composer/utils', () => {
       });
     });
 
-    it('fallback to 1.*', () => {
-      expect(extractContraints({}, {})).toEqual({ composer: '1.*' });
+    it('fallback to ^2.0', () => {
+      expect(extractContraints({}, {})).toEqual({ composer: '^2.0' });
     });
   });
 
