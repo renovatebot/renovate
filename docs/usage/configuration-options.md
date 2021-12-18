@@ -363,7 +363,7 @@ The "topic" is usually refers to the dependency being updated, e.g. `"dependency
 
 ## composerIgnorePlatformReqs
 
-By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
+By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match the required PHP environment of your project as configured in your `composer.json` file.
 
 Composer 2.2 and up will be run with `--ignore-platform-req='ext-*' --ignore-platform-req='lib-*'`, which ignores extension requirements but not the PHP version itself and should suffice in most cases.
 
