@@ -26,6 +26,7 @@
     "node_modules",
     "./.cache",
     "./dist",
+    "./esm",
     "**/__mocks__/*",
     "coverage",
     "config.js",
