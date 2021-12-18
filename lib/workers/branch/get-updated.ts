@@ -74,23 +74,22 @@ export async function getUpdatedPackageFiles(
         });
       }
       const updateLockedDependency = get(manager, 'updateLockedDependency');
-      const { files } = await updateLockedDependency({
+      const { status, files } = await updateLockedDependency({
         ...upgrade,
         packageFileContent,
         lockFileContent,
       });
+      if (reuseExistingBranch && status !== 'already-updated') {
+        logger.debug(
+          { lockFile, depName, status },
+          'Need to retry branch as it is not already up-to-date'
+        );
+        return getUpdatedPackageFiles({
+          ...config,
+          reuseExistingBranch: false,
+        });
+      }
       if (files) {
-        if (reuseExistingBranch) {
-          // This ensure it's always 1 commit from the bot
-          logger.debug(
-            { lockFile, depName },
-            'Need to update file(s) so will rebase first'
-          );
-          return getUpdatedPackageFiles({
-            ...config,
-            reuseExistingBranch: false,
-          });
-        }
         updatedFileContents = { ...updatedFileContents, ...files };
       }
     } else {
