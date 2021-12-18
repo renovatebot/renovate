@@ -1,6 +1,9 @@
-export interface SemanticCommitMessageJSON {
-  body?: string;
-  footer?: string;
+import {
+  AbstractCommitMessage,
+  CommitMessageJSON,
+} from './abstract-commit-message';
+
+export interface SemanticCommitMessageJSON extends CommitMessageJSON {
   scope?: string;
   description?: string;
   type?: string;
@@ -11,15 +14,12 @@ export interface SemanticCommitMessageJSON {
  *
  * <type>[optional scope]: <description>
  * [optional body]
- * [optional footer(s)]
+ * [optional footer]
  */
-export class SemanticCommitMessage {
-  static readonly SEPARATOR: string = ':';
+export class SemanticCommitMessage extends AbstractCommitMessage {
   private static readonly REGEXP =
     /(?<type>\w+)\s*[(]*(?<scope>\w+)*[)]*:\s*(?<description>[\w\s]*)/;
 
-  private body?: string;
-  private footer?: string;
   private scope?: string;
   private description?: string;
   private type?: string;
@@ -35,23 +35,19 @@ export class SemanticCommitMessage {
     return message;
   }
 
-  toString(): string {
-    const title = [this.formatPrefix(), this.formatDescription()]
-      .join(' ')
-      .trim();
-    const parts: ReadonlyArray<string> = [title, this.body, this.footer];
+  override toJSON(): SemanticCommitMessageJSON {
+    const json = super.toJSON();
 
-    return parts.filter(Boolean).join('\n\n');
-  }
-
-  toJSON(): SemanticCommitMessageJSON {
     return {
-      body: this.body,
-      footer: this.footer,
+      ...json,
       scope: this.scope,
       description: this.description,
       type: this.type,
     };
+  }
+
+  get title(): string {
+    return [this.formatPrefix(), this.formatDescription()].join(' ').trim();
   }
 
   setDescription(description?: string): void {
@@ -64,14 +60,6 @@ export class SemanticCommitMessage {
 
   setType(type?: string): void {
     this.type = type?.trim();
-  }
-
-  setBody(body?: string): void {
-    this.body = body?.trim();
-  }
-
-  setFooter(footer?: string): void {
-    this.footer = footer?.trim();
   }
 
   private get prefix(): string {
