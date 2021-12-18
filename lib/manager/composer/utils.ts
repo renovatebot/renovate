@@ -1,7 +1,7 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { ToolConstraint } from '../../util/exec/types';
+import type { ToolConstraint } from '../../util/exec/types';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
