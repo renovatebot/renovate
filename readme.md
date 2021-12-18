@@ -25,7 +25,7 @@ Multi-platform and multi-language.
 
 Renovate was released in 2017 and already is widely used in the developer community, including:
 
-![Renovate Matrix](https://renovatebot.com/images/matrix.png)
+![Renovate Matrix](https://app.renovatebot.com/images/matrix.png)
 
 ## The Renovate Approach
 
