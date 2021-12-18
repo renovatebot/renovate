@@ -79,14 +79,13 @@ export function extractContraints(
   }
   // check last used composer version
   else if (lockParsed?.['plugin-api-version']) {
-    res.composer = lockParsed?.['plugin-api-version'];
+    const major = api.getMajor(lockParsed?.['plugin-api-version']);
+    res.composer = `${major}.*`;
   }
   // check composer api dependency
   else if (composerJson.require?.['composer-runtime-api']) {
     const major = api.getMajor(composerJson.require?.['composer-runtime-api']);
-    const minor =
-      api.getMinor(composerJson.require?.['composer-runtime-api']) || '*';
-    res.composer = `${major}.${minor}`;
+    res.composer = `${major}.*`;
   }
   return res;
 }
