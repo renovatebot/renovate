@@ -367,7 +367,8 @@ By default, Renovate will ignore Composer platform requirements as the PHP platf
 
 Composer `2.2` and up will be run with `--ignore-platform-req='ext-*' --ignore-platform-req='lib-*'`, which ignores extension requirements but not the PHP version itself and should work in most cases.
 
-Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default. This can result in updated dependencies that are not compatible with your platform.
+Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default.
+This can result in updated dependencies that are not compatible with your platform.
 
 To customize this behaviour, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
