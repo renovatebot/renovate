@@ -2,6 +2,7 @@
 /config.js
 /coverage
 /dist
+/esm
 /tmp
 .DS_Store
 .cache

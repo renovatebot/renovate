@@ -24,7 +24,11 @@ const config: InitialOptionsTsJest = {
       statements: 100,
     },
   },
-  modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/dist/',
+    '<rootDir>/esm/',
+    '/__fixtures__/',
+  ],
   reporters: ci ? ['default', 'jest-github-actions-reporter'] : ['default'],
   setupFilesAfterEnv: [
     'jest-extended/all',

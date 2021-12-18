@@ -6,7 +6,8 @@
     "outDir": "./dist",
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
     "target": "es2020",
-    "module": "commonjs",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

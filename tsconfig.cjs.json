@@ -9,6 +9,6 @@
     "importHelpers": true,
     "types": ["node"]
   },
-  "files": ["lib/renovate.ts", "lib/config-validator.ts"],
+  "files": ["lib/index.ts", "lib/renovate.ts", "lib/config-validator.ts"],
   "include": ["lib/**/*.d.ts"]
 }

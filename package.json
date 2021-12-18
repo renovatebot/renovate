@@ -3,15 +3,16 @@
   "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
   "bin": {
-    "renovate": "dist/renovate.js",
-    "renovate-config-validator": "dist/config-validator.js"
+    "renovate": "esm/renovate.js",
+    "renovate-config-validator": "esm/config-validator.js"
   },
   "scripts": {
     "build": "run-s clean generate:* compile:*",
     "build:docs": "run-s \"release:prepare {@}\"",
-    "clean": "rimraf dist tmp",
+    "clean": "rimraf dist esm tmp",
     "clean-cache": "node bin/clean-cache.mjs",
-    "compile:ts": "tsc -p tsconfig.app.json",
+    "compile:cjs": "tsc -p tsconfig.cjs.json",
+    "compile:esm": "node tools/build.mjs",
     "config-validator": "node -r ts-node/register/transpile-only -- lib/config-validator.ts",
     "create-json-schema": "node -r ts-node/register/transpile-only -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node --inspect-brk -r ts-node/register/transpile-only  -- lib/renovate.ts",
@@ -30,6 +31,7 @@
     "ls-lint": "ls-lint",
     "markdown-lint": "markdownlint-cli2",
     "markdown-lint-fix": "markdownlint-cli2-fix",
+    "node": "node",
     "null-check": "run-s generate:* \"tsc --noEmit -p tsconfig.strict.json {@}\"",
     "prepare": "run-s prepare:*",
     "prepare:husky": "husky install",
@@ -42,6 +44,7 @@
     "release:prepare": "node -r ts-node/register/transpile-only -- tools/generate-docs.ts",
     "release:publish": "node tools/release.mjs",
     "start": "node -r ts-node/register/transpile-only -- lib/renovate.ts",
+    "start:esm": "run-s compile:esm \"node esm/renovate.js {@}\"",
     "test": "run-s lint test-schema type-check null-check jest",
     "test-dirty": "git diff --exit-code",
     "test-e2e": "npm pack && cd test/e2e && yarn install --no-lockfile --ignore-optional --prod && yarn test",
@@ -256,6 +259,8 @@
     "cross-env": "7.0.3",
     "diff": "5.0.0",
     "emojibase-data": "7.0.0",
+    "esbuild": "0.14.5",
+    "esbuild-plugin-node-externals": "0.2.0",
     "eslint": "8.4.1",
     "eslint-config-prettier": "8.3.0",
     "eslint-formatter-gha": "1.3.0",
@@ -294,6 +299,7 @@
     "**/json-schema": "^0.4.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "esm"
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "declaration": true,
+    "resolveJsonModule": false,
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "inlineSources": true,
+    "module": "ES2020",
+    "importHelpers": true,
+    "allowJs": false,
+    "checkJs": false,
+    "types": ["node"]
+  },
+  "files": ["lib/renovate.ts", "lib/config-validator.ts"],
+  "include": ["lib/**/*.d.ts"]
+}
