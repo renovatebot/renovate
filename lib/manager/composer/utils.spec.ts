@@ -27,6 +27,18 @@ describe('manager/composer/utils', () => {
       ).toEqual({ composer: '1.1.0' });
     });
 
+    it('returns from composer platform require', () => {
+      expect(
+        extractContraints({ require: { php: '^8.1', composer: '2.2.0' } }, {})
+      ).toEqual({ php: '^8.1', composer: '2.2.0' });
+    });
+
+    it('returns from composer platform require-dev', () => {
+      expect(
+        extractContraints({ 'require-dev': { composer: '^2.2' } }, {})
+      ).toEqual({ composer: '^2.2' });
+    });
+
     it('returns from composer-runtime-api', () => {
       expect(
         extractContraints({ require: { 'composer-runtime-api': '^1.1.0' } }, {})
