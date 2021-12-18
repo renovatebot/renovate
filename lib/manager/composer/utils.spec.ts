@@ -68,7 +68,7 @@ describe('manager/composer/utils', () => {
         ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
     });
-    it('disables only extension platform requirements since 2.2', () => {
+    it('disables only extension and library platform requirements since 2.2', () => {
       expect(
         getComposerArguments(
           {
