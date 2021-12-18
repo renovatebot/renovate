@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { pkg } from '../../expose.cjs';
 import { logger, setMeta } from '../../logger';
+import { pkg } from '../../package';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import * as queue from '../../util/http/queue';
