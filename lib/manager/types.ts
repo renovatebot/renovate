@@ -228,7 +228,6 @@ export interface UpdateLockedConfig {
   depName?: string;
   currentVersion?: string;
   newVersion?: string;
-
   allowParentUpdates?: boolean;
 }
 
