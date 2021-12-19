@@ -14,8 +14,8 @@ type CommitMessageConfig = Pick<
 export class CommitMessageFactory {
   private readonly config: CommitMessageConfig;
 
-  constructor(params: CommitMessageConfig) {
-    this.config = params;
+  constructor(config: CommitMessageConfig) {
+    this.config = config;
   }
 
   create(): CommitMessage {

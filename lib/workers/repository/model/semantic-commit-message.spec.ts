@@ -22,7 +22,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     const instance = SemanticCommitMessage.fromString('feat: ticket 123');
     const json = instance.toJSON();
 
-    expect(instance).toBeInstanceOf(SemanticCommitMessage);
+    expect(SemanticCommitMessage.is(instance)).toBeTrue();
     expect(json.type).toBe('feat');
     expect(json.scope).toBeUndefined();
     expect(json.subject).toBe('ticket 123');
@@ -34,7 +34,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     );
     const json = instance.toJSON();
 
-    expect(instance).toBeInstanceOf(SemanticCommitMessage);
+    expect(SemanticCommitMessage.is(instance)).toBeTrue();
     expect(json.type).toBe('fix');
     expect(json.scope).toBe('dashboard');
     expect(json.subject).toBe('ticket 123');
@@ -44,7 +44,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     const instance = SemanticCommitMessage.fromString('fix(deps): ');
     const json = instance.toJSON();
 
-    expect(instance).toBeInstanceOf(SemanticCommitMessage);
+    expect(SemanticCommitMessage.is(instance)).toBeTrue();
     expect(json.type).toBe('fix');
     expect(json.scope).toBe('deps');
     expect(json.subject).toBe('');
@@ -54,7 +54,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     const instance = SemanticCommitMessage.fromString('fix:');
     const json = instance.toJSON();
 
-    expect(instance).toBeInstanceOf(SemanticCommitMessage);
+    expect(SemanticCommitMessage.is(instance)).toBeTrue();
     expect(json.type).toBe('fix');
     expect(json.scope).toBeUndefined();
     expect(json.subject).toBe('');
