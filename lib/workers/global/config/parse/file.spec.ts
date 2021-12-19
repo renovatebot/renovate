@@ -46,10 +46,6 @@ describe('workers/global/config/parse/file', () => {
       expect(res.rangeStrategy).toBe('bump');
     });
 
-    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
-      expect(await file.getConfig({})).toBeDefined();
-    });
-
     it.each([
       [
         'config.js',
@@ -92,16 +88,6 @@ describe('workers/global/config/parse/file', () => {
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
-    it('fatal error and exit if default config.js does not exist', async () => {
-      const mockProcessExit = jest
-        .spyOn(process, 'exit')
-        .mockImplementation(() => undefined as never);
-
-      await file.getConfig({});
-
-      expect(mockProcessExit).toHaveBeenCalledWith(1);
-    });
-
     it('fatal error and exit if config.js contains unresolved env var', async () => {
       const mockProcessExit = jest
         .spyOn(process, 'exit')
@@ -111,11 +97,19 @@ describe('workers/global/config/parse/file', () => {
         __dirname,
         './__fixtures__/config-ref-error.js-invalid'
       );
-      const tmpConfigFile = upath.resolve(tmp.path, 'config-ref-error.js');
+      const tmpDir = tmp.path;
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir);
+      }
+      const tmpConfigFile = upath.resolve(tmpDir, 'config-ref-error.js');
+      console.log(tmpConfigFile);
       fs.copyFileSync(configFile, tmpConfigFile);
 
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 
+      expect(logger.fatal).toHaveBeenCalledWith(
+        `Config file parsing error: CI_API_V4_URL is not defined`
+      );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
