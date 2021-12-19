@@ -10,6 +10,11 @@ describe('workers/repository/model/custom-commit-message', () => {
       ['  test  ', '  ', 'Test'],
       ['test', 'fix', 'fix: test'],
       ['test', 'fix:', 'fix: test'],
+      [
+        'Message    With   Extra  Whitespaces   ',
+        '  refactor   ',
+        'refactor: message With Extra Whitespaces',
+      ],
     ];
 
     it.each(TEST_CASES)(

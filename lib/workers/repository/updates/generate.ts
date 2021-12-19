@@ -157,7 +157,6 @@ export function generateBranchConfig(
       commitMessage.setScope(
         template.compile(upgrade.semanticCommitScope, upgrade)
       );
-      upgrade.commitMessagePrefix = commitMessage.formatPrefix();
     }
     // Compile a few times in case there are nested templates
     commitMessage.setSubject(
@@ -178,7 +177,6 @@ export function generateBranchConfig(
       );
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
-    upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string // TODO #12071
     upgrade.commitMessage = upgrade.commitMessage.replace(
       regEx(/to vv(\d)/), // TODO #12071
       'to v$1'

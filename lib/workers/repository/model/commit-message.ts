@@ -13,6 +13,7 @@ export interface CommitMessageJSON {
  */
 export abstract class CommitMessage {
   static readonly SEPARATOR: string = ':';
+  private static readonly EXTRA_WHITESPACES = /\s+/g;
 
   private body?: string;
   private footer?: string;
@@ -46,6 +47,7 @@ export abstract class CommitMessage {
 
   setSubject(subject?: string): void {
     this.subject = subject?.trim();
+    this.subject = this.subject?.replace(CommitMessage.EXTRA_WHITESPACES, ' ');
   }
 
   formatPrefix(): string {
