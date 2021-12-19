@@ -92,6 +92,8 @@ export async function getUpdatedPackageFiles(
       if (files) {
         updatedFileContents = { ...updatedFileContents, ...files };
       }
+    } else if (upgrade.isLockfileUpdate) {
+      nonUpdatedFileContents[packageFile] = packageFileContent;
     } else {
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
       const updateDependency = get(manager, 'updateDependency');
@@ -112,10 +114,6 @@ export async function getUpdatedPackageFiles(
           }
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
-            if (upgrade.rangeStrategy === 'update-lockfile') {
-              logger.debug({ packageFile, depName }, 'update-lockfile add');
-              nonUpdatedFileContents[packageFile] = res;
-            }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
@@ -178,8 +176,6 @@ export async function getUpdatedPackageFiles(
         // istanbul ignore else
         if (upgrade.manager === 'git-submodules') {
           updatedFileContents[packageFile] = newContent;
-        } else if (upgrade.rangeStrategy === 'update-lockfile') {
-          nonUpdatedFileContents[packageFile] = newContent;
         }
       }
     }

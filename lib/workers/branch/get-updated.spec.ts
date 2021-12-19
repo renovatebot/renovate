@@ -245,9 +245,8 @@ describe('workers/branch/get-updated', () => {
         packageFile: 'composer.json',
         manager: 'composer',
         branchName: undefined,
-        rangeStrategy: 'update-lockfile',
+        isLockfileUpdate: true,
       });
-      autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
