@@ -1,4 +1,5 @@
 import { exec as _exec } from 'child_process';
+import fs from 'fs-extra';
 import {
   ExecSnapshots,
   envMock,
@@ -29,7 +30,7 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 describe('manager/npm/post-update/yarn', () => {
   beforeEach(() => {
     Fixtures.reset();
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
@@ -47,7 +48,7 @@ describe('manager/npm/post-update/yarn', () => {
           '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
           'yarn.lock': 'package-lock-contents',
         },
-        'some-dir'
+        '/some-dir'
       );
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
@@ -60,13 +61,15 @@ describe('manager/npm/post-update/yarn', () => {
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile(
-        'some-dir',
+        '/some-dir',
         {
           YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
           YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
         },
         config
       );
+      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
+      expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }

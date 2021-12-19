@@ -31,15 +31,14 @@ export class Fixtures {
   }
 
   // Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder
-  static fsExtra(): unknown {
+  static fsExtra(): any {
     return {
       ...fs,
-      pathExists,
-      remove: fs.promises.rm,
-      readFile: (fileName: string, encoding?: string) =>
-        fs.promises.readFile(fileName, encoding ?? 'utf8'),
-      writeFile: fs.promises.writeFile,
-      outputFile,
+      pathExists: jest.fn().mockImplementation(pathExists),
+      remove: jest.fn().mockImplementation(fs.promises.rm),
+      readFile: jest.fn().mockImplementation(readFile),
+      writeFile: jest.fn().mockImplementation(fs.promises.writeFile),
+      outputFile: jest.fn().mockImplementation(outputFile),
     };
   }
 
@@ -48,6 +47,10 @@ export class Fixtures {
     const callerDir = upath.dirname(stack[2].getFileName());
     return upath.resolve(callerDir, fixturesRoot, '__fixtures__');
   }
+}
+
+function readFile(fileName: string, encoding?: string): Promise<unknown> {
+  return fs.promises.readFile(fileName, encoding ?? 'utf8');
 }
 
 export async function outputFile(file: string, data: any): Promise<void> {
