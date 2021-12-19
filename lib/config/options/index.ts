@@ -1472,7 +1472,7 @@ const options: RenovateOptions[] = [
     description: 'Message to use for commit messages and pull request titles.',
     type: 'string',
     default:
-      '{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
+      '{{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
     cli: false,
   },
   {

@@ -1,11 +1,7 @@
-import {
-  AbstractCommitMessage,
-  CommitMessageJSON,
-} from './abstract-commit-message';
+import { CommitMessage, CommitMessageJSON } from './commit-message';
 
 export interface SemanticCommitMessageJSON extends CommitMessageJSON {
   scope?: string;
-  description?: string;
   type?: string;
 }
 
@@ -16,13 +12,16 @@ export interface SemanticCommitMessageJSON extends CommitMessageJSON {
  * [optional body]
  * [optional footer]
  */
-export class SemanticCommitMessage extends AbstractCommitMessage {
+export class SemanticCommitMessage extends CommitMessage {
   private static readonly REGEXP =
     /(?<type>\w+)\s*[(]*(?<scope>\w+)*[)]*:\s*(?<description>[\w\s]*)/;
 
   private scope?: string;
-  private description?: string;
   private type?: string;
+
+  static is(value: unknown): value is SemanticCommitMessage {
+    return value instanceof SemanticCommitMessage;
+  }
 
   static fromString(value: string): SemanticCommitMessage {
     const { groups } = value.match(SemanticCommitMessage.REGEXP);
@@ -30,7 +29,7 @@ export class SemanticCommitMessage extends AbstractCommitMessage {
     const message = new SemanticCommitMessage();
     message.setType(groups.type);
     message.setScope(groups.scope);
-    message.setDescription(groups.description);
+    message.setSubject(groups.description);
 
     return message;
   }
@@ -41,17 +40,8 @@ export class SemanticCommitMessage extends AbstractCommitMessage {
     return {
       ...json,
       scope: this.scope,
-      description: this.description,
       type: this.type,
     };
-  }
-
-  get title(): string {
-    return [this.formatPrefix(), this.formatDescription()].join(' ').trim();
-  }
-
-  setDescription(description?: string): void {
-    this.description = description?.trim();
   }
 
   setScope(scope?: string): void {
@@ -62,31 +52,11 @@ export class SemanticCommitMessage extends AbstractCommitMessage {
     this.type = type?.trim();
   }
 
-  private get prefix(): string {
+  protected get prefix(): string {
     if (!this.scope && !this.type) {
       return '';
     }
 
     return this.scope ? `${this.type}(${this.scope})` : this.type;
-  }
-
-  private formatPrefix(): string {
-    if (!this.prefix) {
-      return '';
-    }
-
-    if (this.prefix.endsWith(SemanticCommitMessage.SEPARATOR)) {
-      return this.prefix;
-    }
-
-    return `${this.prefix}${SemanticCommitMessage.SEPARATOR}`;
-  }
-
-  private formatDescription(): string {
-    if (this.prefix) {
-      return this.description;
-    }
-
-    return this.description.charAt(0).toUpperCase() + this.description.slice(1);
   }
 }

@@ -3,7 +3,7 @@ import { SemanticCommitMessage } from './semantic-commit-message';
 describe('workers/repository/model/semantic-commit-message', () => {
   it('should format sematic type', () => {
     const message = new SemanticCommitMessage();
-    message.setDescription('test');
+    message.setSubject('test');
     message.setType(' fix ');
 
     expect(message.toString()).toBe('fix: test');
@@ -11,7 +11,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
 
   it('should format sematic prefix with scope', () => {
     const message = new SemanticCommitMessage();
-    message.setDescription('test');
+    message.setSubject('test');
     message.setType(' fix ');
     message.setScope(' scope ');
 
@@ -25,7 +25,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     expect(instance).toBeInstanceOf(SemanticCommitMessage);
     expect(json.type).toBe('feat');
     expect(json.scope).toBeUndefined();
-    expect(json.description).toBe('ticket 123');
+    expect(json.subject).toBe('ticket 123');
   });
 
   it('should create instance from string with scope', () => {
@@ -37,7 +37,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     expect(instance).toBeInstanceOf(SemanticCommitMessage);
     expect(json.type).toBe('fix');
     expect(json.scope).toBe('dashboard');
-    expect(json.description).toBe('ticket 123');
+    expect(json.subject).toBe('ticket 123');
   });
 
   it('should create instance from string with empty description', () => {
@@ -47,7 +47,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     expect(instance).toBeInstanceOf(SemanticCommitMessage);
     expect(json.type).toBe('fix');
     expect(json.scope).toBe('deps');
-    expect(json.description).toBe('');
+    expect(json.subject).toBe('');
   });
 
   it('should create instance from string with empty scope and description', () => {
@@ -57,6 +57,6 @@ describe('workers/repository/model/semantic-commit-message', () => {
     expect(instance).toBeInstanceOf(SemanticCommitMessage);
     expect(json.type).toBe('fix');
     expect(json.scope).toBeUndefined();
-    expect(json.description).toBe('');
+    expect(json.subject).toBe('');
   });
 });

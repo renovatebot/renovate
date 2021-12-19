@@ -41,16 +41,16 @@ describe('workers/repository/onboarding/branch/create', () => {
     it('applies supplied commit message', async () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
-      config.onboardingCommitMessage = message;
+      config.onboardingAbstractCommitMessage = message;
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
         buildExpectedCommitFilesArgument(`${message}`)
       );
     });
-    describe('applies the commitMessagePrefix value', () => {
+    describe('applies the AbstractCommitMessagePrefix value', () => {
       it('to the default commit message', async () => {
         const prefix = 'RENOV-123';
-        config.commitMessagePrefix = prefix;
+        config.AbstractCommitMessagePrefix = prefix;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
@@ -62,8 +62,8 @@ describe('workers/repository/onboarding/branch/create', () => {
         const prefix = 'RENOV-123';
         const message =
           "Cause your deps need an update and if they dont update, well they're no deps of mine";
-        config.commitMessagePrefix = prefix;
-        config.onboardingCommitMessage = message;
+        config.AbstractCommitMessagePrefix = prefix;
+        config.onboardingAbstractCommitMessage = message;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
@@ -88,7 +88,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message =
           'I say, we can update when we want to, a commit they will never mind';
         config.semanticCommits = 'enabled';
-        config.onboardingCommitMessage = message;
+        config.onboardingAbstractCommitMessage = message;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
