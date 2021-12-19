@@ -47,10 +47,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         buildExpectedCommitFilesArgument(`${message}`)
       );
     });
-    describe('applies the AbstractCommitMessagePrefix value', () => {
+    describe('applies the commitMessagePrefix value', () => {
       it('to the default commit message', async () => {
         const prefix = 'RENOV-123';
-        config.AbstractCommitMessagePrefix = prefix;
+        config.commitMessagePrefix = prefix;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
@@ -62,12 +62,14 @@ describe('workers/repository/onboarding/branch/create', () => {
         const prefix = 'RENOV-123';
         const message =
           "Cause your deps need an update and if they dont update, well they're no deps of mine";
-        config.AbstractCommitMessagePrefix = prefix;
+        config.commitMessagePrefix = prefix;
         config.onboardingCommitMessage = message;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${CommitMessage.SEPARATOR} ${message}`
+            `${prefix}${CommitMessage.SEPARATOR} ${
+              message.charAt(0).toLowerCase() + message.slice(1)
+            }`
           )
         );
       });
@@ -92,7 +94,9 @@ describe('workers/repository/onboarding/branch/create', () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${CommitMessage.SEPARATOR} ${message}`
+            `${prefix}${CommitMessage.SEPARATOR} ${
+              message.charAt(0).toLowerCase() + message.slice(1)
+            }`
           )
         );
       });
