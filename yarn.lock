@@ -2829,17 +2829,6 @@
   dependencies:
     xregexp "4.4.1"
 
-"@renovatebot/parser-utils@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@renovatebot/parser-utils/-/parser-utils-1.0.0.tgz#ff29ca07adc0f9d2f1221675d3ded444d6e5a20d"
-  integrity sha512-OTIsj9XY/OPNl6zhPt6QwUDcpJK1e1oS51xwXgM5Vj+O/nnQu6Ydw7bhnu9b6vEfFxwtuyU2A0B4sBS/ZNyppQ==
-  dependencies:
-    "@thi.ng/zipper" "1.0.3"
-    "@types/moo" "0.5.5"
-    deep-freeze-es6 "1.4.1"
-    klona "2.0.5"
-    moo "0.5.1"
-
 "@renovatebot/ruby-semver@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-1.0.0.tgz#79b5b8edbfa09b9c7c99a1c60b0fc68af7bae9b4"
@@ -5951,6 +5940,17 @@ globby@^11.0.0, globby@^11.0.1, globby@^11.0.4, globby@~11.0.4:
     ignore "^5.1.4"
     merge2 "^1.3.0"
     slash "^3.0.0"
+
+good-enough-parser@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.0.tgz#cd6c63d512227f52b95cb6e6b3be9c2a72bd7086"
+  integrity sha512-0tqIaXxE9LlHgihxfZJQNYFq+Dvbu9hZOh19lek4MSC0WJWLLSONCkpCZHTB+vya223fMcJJVIRNgbLTg14/XQ==
+  dependencies:
+    "@thi.ng/zipper" "1.0.3"
+    "@types/moo" "0.5.5"
+    deep-freeze-es6 "1.4.1"
+    klona "2.0.5"
+    moo "0.5.1"
 
 got@11.8.3, got@^11.7.0:
   version "11.8.3"
