@@ -20,7 +20,11 @@ export abstract class CommitMessage {
   private subject?: string;
 
   toString(): string {
-    const parts: ReadonlyArray<string> = [this.title, this.body, this.footer];
+    const parts: ReadonlyArray<string | undefined> = [
+      this.title,
+      this.body,
+      this.footer,
+    ];
 
     return parts.filter(Boolean).join('\n\n');
   }
@@ -63,6 +67,10 @@ export abstract class CommitMessage {
   }
 
   formatSubject(): string {
+    if (!this.subject) {
+      return '';
+    }
+
     if (this.prefix) {
       return this.subject.charAt(0).toLowerCase() + this.subject.slice(1);
     }

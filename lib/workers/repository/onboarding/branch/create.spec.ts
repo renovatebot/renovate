@@ -41,7 +41,7 @@ describe('workers/repository/onboarding/branch/create', () => {
     it('applies supplied commit message', async () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
-      config.onboardingAbstractCommitMessage = message;
+      config.onboardingCommitMessage = message;
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
         buildExpectedCommitFilesArgument(`${message}`)
@@ -63,7 +63,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message =
           "Cause your deps need an update and if they dont update, well they're no deps of mine";
         config.AbstractCommitMessagePrefix = prefix;
-        config.onboardingAbstractCommitMessage = message;
+        config.onboardingCommitMessage = message;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
@@ -88,7 +88,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message =
           'I say, we can update when we want to, a commit they will never mind';
         config.semanticCommits = 'enabled';
-        config.onboardingAbstractCommitMessage = message;
+        config.onboardingCommitMessage = message;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
