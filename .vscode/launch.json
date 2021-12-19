@@ -71,10 +71,6 @@
         "--testTimeout=100000000",
         "--roots=${workspaceFolder}/${relativeFileDirname}"
       ],
-      "env": {
-        "NODE_ENV": "test",
-        "LOG_LEVEL": "debug"
-      },
       "console": "integratedTerminal",
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
