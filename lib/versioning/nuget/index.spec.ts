@@ -56,13 +56,21 @@ describe('versioning/nuget/index', () => {
   });
 
   test.each`
-    a                | b               | expected
-    ${'2.4.2'}       | ${'2.4.1'}      | ${true}
-    ${'2.4-beta'}    | ${'2.4-alpha'}  | ${true}
-    ${'1.9'}         | ${'2'}          | ${false}
-    ${'1.9'}         | ${'1.9.1'}      | ${false}
-    ${'2.4.0'}       | ${'2.4.0-beta'} | ${true}
-    ${'2.4.0-alpha'} | ${'2.4.0'}      | ${false}
+    a                   | b                  | expected
+    ${'2.4.2'}          | ${'2.4.1'}         | ${true}
+    ${'2.4-beta'}       | ${'2.4-alpha'}     | ${true}
+    ${'1.9'}            | ${'2'}             | ${false}
+    ${'1.9'}            | ${'1.9.1'}         | ${false}
+    ${'2.4.0'}          | ${'2.4.0-beta'}    | ${true}
+    ${'2.4.0-alpha'}    | ${'2.4.0'}         | ${false}
+    ${'1.2.0-beta.333'} | ${'1.2.0-beta.66'} | ${true}
+    ${'1.2.0-beta2'}    | ${'1.2.0-beta10'}  | ${true}
+    ${'1.2.0.1'}        | ${'1.2.0'}         | ${true}
+    ${'1.2.0.1'}        | ${'1.2.0.1-beta'}  | ${true}
+    ${'1.2.0.1-beta'}   | ${'1.2.0.1'}       | ${false}
+    ${undefined}        | ${'1.2.0'}         | ${true}
+    ${'1.2.0+1'}        | ${'1.2.0'}         | ${false}
+    ${'1.2.0'}          | ${'1.2.0+1'}       | ${false}
   `('isGreaterThan($a, $b) === $expected', ({ a, b, expected }) => {
     expect(nuget.isGreaterThan(a, b)).toBe(expected);
   });

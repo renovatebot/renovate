@@ -4,3 +4,4 @@ export * from './versioning';
 export * from './branch-status';
 export * from './vulnerability-alert';
 export * from './pr-state';
+export * from './base';

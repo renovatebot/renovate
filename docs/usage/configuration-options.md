@@ -243,7 +243,7 @@ Configuring this to `true` means that Renovate will detect and apply the default
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.
-The `config:base` preset that many extend from limits the amount of concurrent branches to 20, but in most cases we would recommend lower values such as 5 or 10.
+The `config:base` preset that many extend from limits the amount of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
 However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
@@ -641,8 +641,8 @@ See [shareable config presets](https://docs.renovatebot.com/config-presets) for 
 
 ## extractVersion
 
-Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file.
-You must defined a "named capture group" called `version` as shown in the below examples.
+Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
+You must define a "named capture group" called `version` like in the examples below.
 
 For example, to extract only the major.minor precision from a GitHub release, the following would work:
 
@@ -2539,7 +2539,7 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseWhen=behind-base-branch and the base branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured `prCreation=not-pending`, or you have `rebaseWhen=behind-base-branch` and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
@@ -2548,6 +2548,31 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
+## userStrings
+
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+If you want, you can change the text in the comment with the `userStrings` config option.
+
+You can edit these user-facing strings:
+
+- `ignoreDigest`: Text of the PR comment for digest upgrades.
+- `ignoreMajor`: Text of the PR comment for major upgrades.
+- `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
+- `ignoreTopic`: Topic of the PR comment.
+
+Example:
+
+```json
+{
+  "userStrings": {
+    "ignoreTopic": "Custom topic for PR comment",
+    "ignoreMajor": "Custom text for major upgrades.",
+    "ignoreDigest": "Custom text for digest upgrades.",
+    "ignoreOther": "Custom text for other upgrades."
+  }
+}
+```
 
 ## versioning
 

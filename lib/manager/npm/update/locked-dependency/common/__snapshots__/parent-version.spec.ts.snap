@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/update/locked-dependency/parent-version getLockedDependencies() finds indirect dependency 1`] = `
+exports[`manager/npm/update/locked-dependency/common/parent-version getLockedDependencies() finds indirect dependency 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -25,7 +25,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/update/locked-dependency/parent-version getLockedDependencies() finds removed dependencies 1`] = `
+exports[`manager/npm/update/locked-dependency/common/parent-version getLockedDependencies() finds removed dependencies 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -40,7 +40,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/update/locked-dependency/parent-version getLockedDependencies() finds when a greater version is needed 1`] = `
+exports[`manager/npm/update/locked-dependency/common/parent-version getLockedDependencies() finds when a greater version is needed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -55,7 +55,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/update/locked-dependency/parent-version getLockedDependencies() finds when a range matches greater versions 1`] = `
+exports[`manager/npm/update/locked-dependency/common/parent-version getLockedDependencies() finds when a range matches greater versions 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -70,7 +70,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/update/locked-dependency/parent-version getLockedDependencies() returns null if no matching 1`] = `
+exports[`manager/npm/update/locked-dependency/common/parent-version getLockedDependencies() returns null if no matching 1`] = `
 Array [
   Object {
     "headers": Object {

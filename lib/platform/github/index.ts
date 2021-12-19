@@ -411,23 +411,22 @@ export async function initRepo({
       );
       // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
       // with the base commit from the parent repository
+      const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
+      const sha = repo.defaultBranchRef.target.oid;
       try {
         logger.debug(
-          'Updating forked repository default sha to match upstream'
+          `Updating forked repository default sha ${sha} to match upstream`
         );
-        await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
-          {
-            body: {
-              sha: repo.defaultBranchRef.target.oid,
-              force: true,
-            },
-            token: forkToken || opts.token,
-          }
-        );
+        await githubApi.patchJson(url, {
+          body: {
+            sha,
+            force: true,
+          },
+          token: forkToken || opts.token,
+        });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
-          { err: err.err || err },
+          { url, sha, err: err.err || err },
           'Error updating fork from upstream - cannot continue'
         );
         if (err instanceof ExternalHostError) {
