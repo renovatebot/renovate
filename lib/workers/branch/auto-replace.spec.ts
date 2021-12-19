@@ -27,9 +27,6 @@ describe('workers/branch/auto-replace', () => {
       };
       reuseExistingBranch = false;
     });
-    afterAll(() => {
-      GlobalConfig.reset();
-    });
 
     it('rebases if the deps list has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
