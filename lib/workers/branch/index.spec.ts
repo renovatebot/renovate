@@ -106,16 +106,22 @@ describe('workers/branch/index', () => {
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'not-scheduled',
+      });
     });
     it('skips branch if not scheduled and not updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = false;
       git.branchExists.mockReturnValue(true);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'update-not-scheduled',
+      });
     });
     it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
@@ -139,8 +145,11 @@ describe('workers/branch/index', () => {
 
       git.branchExists.mockReturnValue(false);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'pending',
+      });
     });
     it('skips branch if not stabilityDays not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
@@ -152,8 +161,11 @@ describe('workers/branch/index', () => {
         },
       ];
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'pending',
+      });
     });
 
     it('skips branch if minimumConfidence not met', async () => {
@@ -167,8 +179,11 @@ describe('workers/branch/index', () => {
       mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
       mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'error',
+      });
     });
 
     it('processes branch if minimumConfidence is met', async () => {
@@ -182,8 +197,11 @@ describe('workers/branch/index', () => {
       mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
       mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(true);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'error',
+      });
     });
 
     it('processes branch if not scheduled but updating out of schedule', async () => {
@@ -259,8 +277,11 @@ describe('workers/branch/index', () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'error',
+      });
     });
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -271,8 +292,11 @@ describe('workers/branch/index', () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-edited',
+      });
     });
     it('skips branch if target branch changed', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -284,15 +308,21 @@ describe('workers/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-edited',
+      });
     });
     it('skips branch if branch edited and no PR found', async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-edited',
+      });
     });
     it('continues branch if branch edited and but PR found', async () => {
       git.branchExists.mockReturnValue(true);
@@ -300,8 +330,11 @@ describe('workers/branch/index', () => {
       git.getBranchCommit.mockReturnValueOnce('123test');
       platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'error',
+      });
     });
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       git.branchExists.mockReturnValue(true);
@@ -309,8 +342,11 @@ describe('workers/branch/index', () => {
       git.getBranchCommit.mockReturnValueOnce('123test');
       platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
       const res = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-edited',
+      });
     });
     it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -322,8 +358,11 @@ describe('workers/branch/index', () => {
       });
       limits.isLimitReached.mockReturnValueOnce(true);
       limits.isLimitReached.mockReturnValueOnce(false);
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'branch-limit-reached',
+      });
     });
     it('returns if pr creation limit exceeded and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -338,8 +377,11 @@ describe('workers/branch/index', () => {
         prBlockedBy: 'RateLimited',
       });
       limits.isLimitReached.mockReturnValue(false);
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prBlockedBy: 'RateLimited',
+        result: 'pr-limit-reached',
+      });
     });
     it('returns if commit limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -352,8 +394,11 @@ describe('workers/branch/index', () => {
       git.branchExists.mockReturnValue(false);
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'commit-limit-reached',
+      });
     });
     it('returns if no work', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -365,8 +410,11 @@ describe('workers/branch/index', () => {
       });
       git.branchExists.mockReturnValue(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'no-work',
+      });
     });
 
     it('returns if pending checks', async () => {
@@ -378,8 +426,11 @@ describe('workers/branch/index', () => {
         updatedArtifacts: [],
       });
       config.pendingChecks = true;
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'pending',
+      });
     });
 
     it('returns if branch automerged', async () => {
@@ -447,8 +498,11 @@ describe('workers/branch/index', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prBlockedBy: 'NeedsApproval',
       });
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prBlockedBy: 'NeedsApproval',
+        result: 'needs-pr-approval',
+      });
     });
     it('returns if branch exists but pending', async () => {
       expect.assertions(1);
@@ -465,8 +519,11 @@ describe('workers/branch/index', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prBlockedBy: 'AwaitingTests',
       });
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prBlockedBy: 'AwaitingTests',
+        result: 'pending',
+      });
     });
     it('returns if branch automerge is pending', async () => {
       expect.assertions(1);
@@ -483,8 +540,11 @@ describe('workers/branch/index', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prBlockedBy: 'BranchAutomerge',
       });
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prBlockedBy: 'BranchAutomerge',
+        result: 'done',
+      });
     });
     it('returns if PR creation failed', async () => {
       expect.assertions(1);
@@ -501,8 +561,11 @@ describe('workers/branch/index', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prBlockedBy: 'Error',
       });
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prBlockedBy: 'Error',
+        result: 'error',
+      });
     });
     it('handles unknown PrBlockedBy', async () => {
       expect.assertions(1);
@@ -519,8 +582,11 @@ describe('workers/branch/index', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prBlockedBy: 'whoops' as any,
       });
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prBlockedBy: 'whoops',
+        result: 'error',
+      });
     });
     it('returns if branch exists but updated', async () => {
       expect.assertions(3);
@@ -531,14 +597,17 @@ describe('workers/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
-      // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
           ...config,
           ignoreTests: true,
           prCreation: 'not-pending',
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pending',
+      });
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -694,8 +763,11 @@ describe('workers/branch/index', () => {
         throw new Error('some error');
       });
       const processBranchResult = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(processBranchResult).toMatchSnapshot();
+      expect(processBranchResult).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'error',
+      });
     });
     it('throws and swallows branch errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -706,8 +778,11 @@ describe('workers/branch/index', () => {
         updatedArtifacts: [{}],
       } as WriteExistingFilesResult);
       const processBranchResult = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(processBranchResult).toMatchSnapshot();
+      expect(processBranchResult).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-created',
+      });
     });
     it('swallows pr errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
@@ -723,8 +798,11 @@ describe('workers/branch/index', () => {
         throw new Error('some error');
       });
       const processBranchResult = await branchWorker.processBranch(config);
-      // FIXME: explicit assert condition
-      expect(processBranchResult).toMatchSnapshot();
+      expect(processBranchResult).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
     });
 
     it('closed pr (dry run)', async () => {
@@ -733,8 +811,11 @@ describe('workers/branch/index', () => {
         state: PrState.Closed,
       } as Pr);
       GlobalConfig.set({ ...adminConfig, dryRun: true });
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'already-existed',
+      });
     });
 
     it('branch pr no rebase (dry run)', async () => {
@@ -744,8 +825,11 @@ describe('workers/branch/index', () => {
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       GlobalConfig.set({ ...adminConfig, dryRun: true });
-      // FIXME: explicit assert condition
-      expect(await branchWorker.processBranch(config)).toMatchSnapshot();
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-edited',
+      });
     });
 
     it('branch pr no schedule lockfile (dry run)', async () => {
@@ -767,7 +851,6 @@ describe('workers/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: true });
-      // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -775,7 +858,11 @@ describe('workers/branch/index', () => {
           reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
     });
 
     it('branch pr no schedule (dry run)', async () => {
@@ -800,13 +887,16 @@ describe('workers/branch/index', () => {
       } as EnsurePrResult);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: true });
-      // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
           ...config,
           artifactErrors: [{}],
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
     });
 
     it('branch pr no schedule', async () => {
@@ -827,7 +917,6 @@ describe('workers/branch/index', () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      // FIXME: explicit assert condition
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -835,7 +924,11 @@ describe('workers/branch/index', () => {
           reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
     });
 
     it('executes post-upgrade tasks if trust is high', async () => {
@@ -903,8 +996,11 @@ describe('workers/branch/index', () => {
         ],
       });
 
-      // FIXME: explicit assert condition
-      expect(result).toMatchSnapshot();
+      expect(result).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
       const errorMessage = expect.stringContaining(
         "Post-upgrade command 'disallowed task' does not match allowed pattern '^echo {{{versioning}}}$'"
       );
@@ -1049,8 +1145,11 @@ describe('workers/branch/index', () => {
         ],
       });
 
-      // FIXME: explicit assert condition
-      expect(result).toMatchSnapshot();
+      expect(result).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
       expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
         cwd: '/localDir',
       });
@@ -1157,8 +1256,11 @@ describe('workers/branch/index', () => {
 
       const result = await branchWorker.processBranch(inconfig);
 
-      // FIXME: explicit assert condition
-      expect(result).toMatchSnapshot();
+      expect(result).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
       });
@@ -1291,8 +1393,11 @@ describe('workers/branch/index', () => {
       };
 
       const result = await branchWorker.processBranch(inconfig);
-      // FIXME: explicit assert condition
-      expect(result).toMatchSnapshot();
+      expect(result).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'done',
+      });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
       });

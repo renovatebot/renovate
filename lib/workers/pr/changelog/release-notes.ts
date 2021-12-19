@@ -72,7 +72,11 @@ export function massageBody(
   // semantic-release cleanup
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), ''); // TODO #12071
   body = body.replace(
-    regEx(`^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`),
+    regEx(
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`,
+      undefined,
+      false
+    ),
     ''
   ); // TODO #12071
   // Clean-up unnecessary commits link
@@ -260,7 +264,7 @@ export async function getReleaseNotesMd(
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
-              const notesSourceUrl = `${baseUrl}${repository}/blob/master/${changelogFile}`;
+              const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
               const url =
                 notesSourceUrl +
                 '#' +
