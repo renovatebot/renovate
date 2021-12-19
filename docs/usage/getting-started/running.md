@@ -187,7 +187,7 @@ Don't forget to configure `platform=gitlab` somewhere in config.
 #### Bitbucket Cloud
 
 First, [create an AppPassword](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html) for the bot account.
-Give the bot account the following permission scopes:
+Give the bot App password the following permission scopes:
 
 - [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account) (Account: Read)
 - [`team`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#team) (Workspace membership: Read)
