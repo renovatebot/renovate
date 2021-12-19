@@ -19,12 +19,17 @@ describe('manager/buildkite/extract', () => {
     it('adds skipReason', () => {
       const res = extractPackageFile(Fixtures.get('pipeline3.yml')).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res).toHaveLength(2);
     });
     it('extracts arrays of plugins', () => {
       const res = extractPackageFile(Fixtures.get('pipeline4.yml')).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
+    });
+    it('extracts git-based plugins', () => {
+      const res = extractPackageFile(Fixtures.get('pipeline5.yml')).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
     });
   });
 });
