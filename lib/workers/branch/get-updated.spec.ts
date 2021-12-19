@@ -157,6 +157,7 @@ describe('workers/branch/get-updated', () => {
     it('handles isRemediation success', async () => {
       config.upgrades.push({
         manager: 'npm',
+        lockFile: 'package-lock.json',
         isRemediation: true,
       } as never);
       npm.updateLockedDependency.mockResolvedValueOnce({
