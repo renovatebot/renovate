@@ -13,6 +13,7 @@ Multi-platform and multi-language.
 ## Why Use Renovate?
 
 - Receive automated Pull Requests whenever dependencies need updating
+- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
 - Define schedules to avoid unnecessary noise in projects (e.g. for weekends or outside of working hours, or weekly updates, etc.)
 - Relevant package files are discovered automatically (e.g. supports monorepo architecture such as Lerna or Yarn workspaces without further configuration)
 - Bot behavior is extremely customizable via configuration files (config as code)
