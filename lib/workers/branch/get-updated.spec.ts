@@ -157,6 +157,7 @@ describe('workers/branch/get-updated', () => {
     it('handles isRemediation success', async () => {
       config.upgrades.push({
         manager: 'npm',
+        lockFile: 'package-lock.json',
         isRemediation: true,
       } as never);
       npm.updateLockedDependency.mockResolvedValueOnce({
@@ -245,9 +246,8 @@ describe('workers/branch/get-updated', () => {
         packageFile: 'composer.json',
         manager: 'composer',
         branchName: undefined,
-        rangeStrategy: 'update-lockfile',
+        isLockfileUpdate: true,
       });
-      autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
