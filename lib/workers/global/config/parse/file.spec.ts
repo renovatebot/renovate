@@ -92,6 +92,33 @@ describe('workers/global/config/parse/file', () => {
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });
 
+    it('fatal error and exit if default config.js does not exist', async () => {
+      const mockProcessExit = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+
+      await file.getConfig({});
+
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+    });
+
+    it('fatal error and exit if config.js contains unresolved env var', async () => {
+      const mockProcessExit = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+
+      const configFile = upath.resolve(
+        __dirname,
+        './__fixtures__/config-ref-error.js-invalid'
+      );
+      const tmpConfigFile = upath.resolve(tmp.path, 'config-ref-error.js');
+      fs.copyFileSync(configFile, tmpConfigFile);
+
+      await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
+
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
+    });
+
     it.each([
       ['invalid config file type', './file.txt'],
       ['missing config file type', './file'],

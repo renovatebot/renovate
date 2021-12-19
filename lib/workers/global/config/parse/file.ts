@@ -45,6 +45,12 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     if (err instanceof SyntaxError || err instanceof TypeError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
       process.exit(1);
+    } else if (err instanceof ReferenceError) {
+      logger.fatal(err, `Config file parsing error: ${err.message}`);
+      process.exit(1);
+    } else if (err.code === 'MODULE_NOT_FOUND') {
+      logger.fatal(`Config file ${configFile} must present`);
+      process.exit(1);
     } else if (err.message === 'Unsupported file type') {
       logger.fatal(err.message);
       process.exit(1);
