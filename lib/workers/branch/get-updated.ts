@@ -30,6 +30,7 @@ export async function getUpdatedPackageFiles(
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
     const { manager, packageFile, lockFile, depName } = upgrade;
+    const updateLockedDependency = get(manager, 'updateLockedDependency');
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
@@ -41,8 +42,21 @@ export async function getUpdatedPackageFiles(
         reuseExistingBranch ? config.branchName : config.baseBranch
       );
     }
+    let lockFileContent: string;
+    if (lockFile) {
+      lockFileContent = updatedFileContents[lockFile];
+      if (!lockFileContent) {
+        lockFileContent = await getFile(
+          lockFile,
+          reuseExistingBranch ? config.branchName : config.baseBranch
+        );
+      }
+    }
     // istanbul ignore if
-    if (reuseExistingBranch && !packageFileContent) {
+    if (
+      reuseExistingBranch &&
+      (!packageFileContent || (lockFile && !lockFileContent))
+    ) {
       logger.debug(
         { packageFile, depName },
         'Rebasing branch after file not found'
@@ -55,25 +69,6 @@ export async function getUpdatedPackageFiles(
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else if (upgrade.isRemediation) {
-      let lockFileContent = updatedFileContents[lockFile];
-      if (!lockFileContent) {
-        lockFileContent = await getFile(
-          lockFile,
-          reuseExistingBranch ? config.branchName : config.baseBranch
-        );
-      }
-      // istanbul ignore if: to hard to test
-      if (reuseExistingBranch && !lockFileContent) {
-        logger.debug(
-          { lockFile, depName },
-          'Rebasing branch after lock file not found'
-        );
-        return getUpdatedPackageFiles({
-          ...config,
-          reuseExistingBranch: false,
-        });
-      }
-      const updateLockedDependency = get(manager, 'updateLockedDependency');
       const { status, files } = await updateLockedDependency({
         ...upgrade,
         packageFileContent,
