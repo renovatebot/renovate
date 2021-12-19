@@ -34,14 +34,20 @@ function groovyPluginStringVersionFormatMatch(
 function kotlinPluginStringVersionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
-  return regEx(`(id\\("${dependency.group}"\\)\\s+version\\s+")[^$].*?(")`);
+  return regEx(
+    `(id\\("${dependency.group}"\\)\\s+version\\s+")[^$].*?(")`,
+    undefined,
+    false
+  );
 }
 
 function dependencyStringVersionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
   return regEx(
-    `(dependency\\s+['"]${dependency.group}:${dependency.name}:)[^'"]+(['"])`
+    `(dependency\\s+['"]${dependency.group}:${dependency.name}:)[^'"]+(['"])`,
+    undefined,
+    false
   );
 }
 
@@ -60,7 +66,7 @@ function allMapFormatOrders(
     `${version}${comma}${group}${comma}${name}`,
     `${name}${comma}${version}${comma}${group}`,
     `${version}${comma}${name}${comma}${group}`,
-  ].map((regex) => regEx(`${prefix}${regex}${postfix}`));
+  ].map((regex) => regEx(`${prefix}${regex}${postfix}`, undefined, false));
 }
 
 function moduleMapVersionFormatMatch(dependency: GradleDependency): RegExp[] {
@@ -178,7 +184,11 @@ function variableMapDefinitionFormatMatch(
   variable: string,
   version: string
 ): RegExp {
-  return regEx(`(${variable}\\s*:\\s*?["'])(${version})(["'])`);
+  return regEx(
+    `(${variable}\\s*:\\s*?["'])(${version})(["'])`,
+    undefined,
+    false
+  );
 }
 
 export function collectVersionVariables(
@@ -353,7 +363,7 @@ function updatePropertyFileGlobalVariables(
 ): string | null {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
-    const regex = regEx(`(${variable}\\s*=\\s*)(.*)`);
+    const regex = regEx(`(${variable}\\s*=\\s*)(.*)`, undefined, false);
     const match = regex.exec(buildGradleContent);
     if (match) {
       return buildGradleContent.replace(match[0], `${match[1]}${newValue}`);
