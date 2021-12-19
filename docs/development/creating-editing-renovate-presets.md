@@ -18,7 +18,7 @@ File location: `lib/config/presets/internal/group.ts`
 
 Rules:
 
-1. Only group dependencies together that must be updated together
+1. Only group dependencies that _must_ be updated together
 
 #### Replacement presets
 
