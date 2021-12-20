@@ -16,7 +16,7 @@ Follow the rules below to increase the chance that your pull request gets merged
 
 We have multiple kinds of `group:` presets, with different rules.
 
-##### Rules for `group:monorepo` preset:
+##### Rules for `group:monorepo` preset
 
 1. Only group dependencies that _must_ be updated together
 
