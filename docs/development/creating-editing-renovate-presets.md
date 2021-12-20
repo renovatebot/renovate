@@ -14,15 +14,11 @@ Follow the rules below to increase the chance that your pull request gets merged
 
 #### Group presets
 
-File location: `lib/config/presets/internal/group.ts`
-
 Rules:
 
 1. Only group dependencies that _must_ be updated together
 
 #### Replacement presets
-
-File location: `lib/config/presets/internal/replacements.ts`
 
 Rules:
 
@@ -31,8 +27,6 @@ Rules:
 1. Replacements should update the user to the first recommended version of the new dependency and not include any new changes - whether breaking or not - if they can be avoided.
 
 #### Monorepo presets
-
-File location: `lib/config/presets/internal/monorepo.ts`
 
 Rules:
 
