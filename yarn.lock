@@ -5022,10 +5022,10 @@ emojibase-regex@6.0.0:
   resolved "https://registry.yarnpkg.com/emojibase-regex/-/emojibase-regex-6.0.0.tgz#2d236f6bd38e6aa69089707eb06fe1f6a3270198"
   integrity sha512-vpo76XcjjFapY4Q1vZAp8fu07p9lNCZi0TMtpZ3XyHYRqnqYZTzHgSI7tMvpYmnD8xt9o4XC5oUaSJXT4Ky9Tw==
 
-emojibase@6.0.2:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/emojibase/-/emojibase-6.0.2.tgz#1e76996b2bd9e6927e51f54c3995245b03eacb02"
-  integrity sha512-2h2eblOm86tj+lsJLgLYmEni13H74KNNu1NI1ZgMOX9ByWuvjFZLhETEUH1edpcd8srAlzhfJSD892UbpxfwsA==
+emojibase@6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/emojibase/-/emojibase-6.1.0.tgz#c3bc281e998a0e06398416090c23bac8c5ed3ee8"
+  integrity sha512-1GkKJPXP6tVkYJHOBSJHoGOr/6uaDxZ9xJ6H7m6PfdGXTmQgbALHLWaVRY4Gi/qf5x/gT/NUXLPuSHYLqtLtrQ==
 
 encoding@^0.1.12:
   version "0.1.13"
