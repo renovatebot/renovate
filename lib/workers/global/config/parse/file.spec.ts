@@ -1,4 +1,5 @@
 import fs from 'fs';
+import fsExtra from 'fs-extra';
 import { DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
 import { logger } from '../../../../logger';
@@ -102,11 +103,10 @@ describe('workers/global/config/parse/file', () => {
         './__fixtures__/config-ref-error.js-invalid'
       );
       const tmpDir = tmp.path;
-      if (!fs.existsSync(tmpDir)) {
-        fs.mkdirSync(tmpDir);
-      }
+      await fsExtra.ensureDir(tmpDir);
+
       const tmpConfigFile = upath.resolve(tmpDir, 'config-ref-error.js');
-      fs.copyFileSync(configFile, tmpConfigFile);
+      await fsExtra.copy(configFile, tmpConfigFile);
 
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 

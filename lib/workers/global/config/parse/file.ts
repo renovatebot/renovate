@@ -1,5 +1,5 @@
-import * as fs from 'fs';
 import is from '@sindresorhus/is';
+import * as fs from 'fs-extra';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
@@ -38,8 +38,11 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     configFile = `${process.cwd()}/${configFile}`;
   }
 
-  if (env.RENOVATE_CONFIG_FILE && !fs.existsSync(configFile)) {
-    logger.fatal({ configFile }, `Custom config file specified in RENOVATE_CONFIG_FILE must exist`);
+  if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
+    logger.fatal(
+      { configFile },
+      `Custom config file specified in RENOVATE_CONFIG_FILE must exist`
+    );
     process.exit(1);
   }
 
