@@ -478,6 +478,14 @@ export async function getAdditionalFiles(
     logger.debug('Skipping lock file generation for remediations');
     return { artifactErrors, updatedArtifacts };
   }
+  if (
+    config.reuseExistingBranch &&
+    !config.updatedPackageFiles?.length &&
+    config.upgrades?.every((upgrade) => upgrade.isLockfileUpdate)
+  ) {
+    logger.debug('Existing branch contains all necessary lock file updates');
+    return { artifactErrors, updatedArtifacts };
+  }
   logger.debug('Getting updated lock files');
   if (
     config.updateType === 'lockFileMaintenance' &&
@@ -513,6 +521,7 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
+  const tokenRe = regEx(`${token}`, 'g', false);
   const { localDir } = GlobalConfig.get();
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
@@ -570,7 +579,7 @@ export async function getAdditionalFiles(
         logger.debug(`${npmLock} needs updating`);
         updatedArtifacts.push({
           name: npmLock,
-          contents: res.lockFile.replace(regEx(`${token}`, 'g'), ''),
+          contents: res.lockFile.replace(tokenRe, ''),
         });
       }
     }

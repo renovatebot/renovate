@@ -72,7 +72,11 @@ export function massageBody(
   // semantic-release cleanup
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
-    regEx(`^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`),
+    regEx(
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`,
+      undefined,
+      false
+    ),
     ''
   );
   // Clean-up unnecessary commits link

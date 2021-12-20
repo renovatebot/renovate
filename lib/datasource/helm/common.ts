@@ -22,7 +22,7 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
   }
 
   if (!release.sources?.length) {
-    return undefined;
+    return {};
   }
 
   for (const url of release.sources) {
