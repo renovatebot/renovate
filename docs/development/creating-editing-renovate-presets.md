@@ -27,7 +27,7 @@ We have multiple kinds of `group:` presets, with different rules.
 ##### Rules for `group:*` presets
 
 1. Finally, any other `group:*` presets can be added if they are beneficial to a wide number of users
-2. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one by one and not get them automatically from `config:base`, which includes `group:monorepo` and `group:recommended`
+1. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one by one and not get them automatically from `config:base`, which includes `group:monorepo` and `group:recommended`
 
 #### Replacement presets
 
