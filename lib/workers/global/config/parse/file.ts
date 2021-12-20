@@ -39,7 +39,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   }
 
   if (env.RENOVATE_CONFIG_FILE && !fs.existsSync(configFile)) {
-    logger.fatal(`Custom config file ${configFile} must exist`);
+    logger.fatal({ configFile }, `Custom config file specified in RENOVATE_CONFIG_FILE must exist`);
     process.exit(1);
   }
 
