@@ -46,6 +46,10 @@ describe('workers/global/config/parse/file', () => {
       expect(res.rangeStrategy).toBe('bump');
     });
 
+    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
+      expect(await file.getConfig({})).toBeDefined();
+    });
+
     it.each([
       [
         'config.js',
@@ -102,13 +106,12 @@ describe('workers/global/config/parse/file', () => {
         fs.mkdirSync(tmpDir);
       }
       const tmpConfigFile = upath.resolve(tmpDir, 'config-ref-error.js');
-      console.log(tmpConfigFile);
       fs.copyFileSync(configFile, tmpConfigFile);
 
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 
       expect(logger.fatal).toHaveBeenCalledWith(
-        `Config file parsing error: CI_API_V4_URL is not defined`
+        `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`
       );
       expect(mockProcessExit).toHaveBeenCalledWith(1);
     });

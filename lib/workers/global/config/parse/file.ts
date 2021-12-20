@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
@@ -36,6 +37,12 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
   }
+
+  if (env.RENOVATE_CONFIG_FILE && !fs.existsSync(configFile)) {
+    logger.fatal(`Custom config file ${configFile} must exist`);
+    process.exit(1);
+  }
+
   logger.debug('Checking for config file in ' + configFile);
   let config: AllConfig = {};
   try {
@@ -46,10 +53,9 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
       process.exit(1);
     } else if (err instanceof ReferenceError) {
-      logger.fatal(`Config file parsing error: ${err.message}`);
-      process.exit(1);
-    } else if (err.code === 'MODULE_NOT_FOUND') {
-      logger.fatal(`Config file ${configFile} must present`);
+      logger.fatal(
+        `Error parsing config file due to unresolved variable(s): ${err.message}`
+      );
       process.exit(1);
     } else if (err.message === 'Unsupported file type') {
       logger.fatal(err.message);
