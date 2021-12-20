@@ -68,6 +68,10 @@ describe('versioning/semver-coerced/index', () => {
     it('should return false for lower version in strict semver', () => {
       expect(semverCoerced.isGreaterThan('3.1.2', '4.1.0')).toBeFalsy();
     });
+
+    it('should return false if version cannot be coerced', () => {
+      expect(semverCoerced.isGreaterThan('e.e.e', '4.1.0')).toBeFalsy();
+    });
   });
 
   describe('.isLessThanRange(version, range)', () => {
