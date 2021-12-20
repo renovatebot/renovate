@@ -55,7 +55,10 @@ export async function getLockedVersions(
       const { lockfileVersion } = lockFileCache[npmLock];
       if (lockfileVersion === 1) {
         if (packageFile.constraints.npm) {
-          packageFile.constraints.npm += ' <7';
+          // Add a <7 constraint if it's not already a fixed version
+          if (!valid(packageFile.constraints.npm)) {
+            packageFile.constraints.npm += ' <7';
+          }
         } else {
           packageFile.constraints.npm = '<7';
         }
