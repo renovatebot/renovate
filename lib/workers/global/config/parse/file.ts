@@ -1,8 +1,7 @@
-import is from 'is';
+import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
-import { massageConfig } from '../../../../config/massage';
 import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -22,7 +21,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       const tmpConfig = await import(file);
       let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
       // Allow the config to be a function
-      if (is.fn(config)) {
+      if (is.function_(config)) {
         config = config();
       }
       return config;
@@ -65,5 +64,5 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     );
     config = migratedConfig;
   }
-  return massageConfig(config);
+  return config;
 }
