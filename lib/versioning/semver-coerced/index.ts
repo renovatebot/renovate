@@ -11,8 +11,8 @@ export const supportsRanges = false;
 const { is: isStable } = stable;
 
 function sortVersions(a: string, b: string): number {
-  const aCoerced = semver.coerce(a),
-    bCoerced = semver.coerce(b);
+  const aCoerced = semver.coerce(a);
+  const bCoerced = semver.coerce(b);
 
   return aCoerced && bCoerced ? semver.compare(aCoerced, bCoerced) : 0;
 }
@@ -37,8 +37,8 @@ function matches(version: string, range: string): boolean {
 }
 
 function equals(a: string, b: string): boolean {
-  const aCoerced = semver.coerce(a),
-    bCoerced = semver.coerce(b);
+  const aCoerced = semver.coerce(a);
+  const bCoerced = semver.coerce(b);
   return aCoerced && bCoerced ? semver.eq(aCoerced, bCoerced) : false;
 }
 
@@ -51,11 +51,8 @@ function getSatisfyingVersion(
   range: string
 ): string | null {
   const coercedVersions = versions
-    .map((version) => {
-      const coercedVersion = semver.coerce(version);
-      return coercedVersion ? coercedVersion.version : '';
-    })
-    .filter((version) => version !== '');
+    .map((version) => semver.coerce(version).version)
+    .filter(Boolean);
 
   return semver.maxSatisfying(coercedVersions, range);
 }
@@ -65,11 +62,8 @@ function minSatisfyingVersion(
   range: string
 ): string | null {
   const coercedVersions = versions
-    .map((version) => {
-      const coercedVersion = semver.coerce(version);
-      return coercedVersion ? coercedVersion.version : '';
-    })
-    .filter((version) => version !== '');
+    .map((version) => semver.coerce(version).version)
+    .filter(Boolean);
   return semver.minSatisfying(coercedVersions, range);
 }
 
