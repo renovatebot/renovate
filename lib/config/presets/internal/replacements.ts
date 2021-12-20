@@ -51,7 +51,7 @@ export const presets: Record<string, Preset> = {
     description: 'joi became scoped under the hapi organization',
     packageRules: [
       {
-        matchCurrentVersion: '>=14.0.0',
+        matchCurrentVersion: '>=14.0.0 <14.4.0',
         matchDatasources: ['npm'],
         matchPackageNames: ['joi'],
         replacementName: '@hapi/joi',
