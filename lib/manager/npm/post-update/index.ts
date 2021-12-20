@@ -252,9 +252,12 @@ export async function writeUpdatedPackageFiles(
     return;
   }
   const { localDir } = GlobalConfig.get();
+  const supportedLockFiles = ['package-lock.json'];
   for (const packageFile of config.updatedPackageFiles) {
-    if (packageFile.name.endsWith('package-lock.json')) {
-      logger.debug(`Writing package-lock file: ${packageFile.name}`);
+    if (
+      supportedLockFiles.some((fileName) => packageFile.name.endsWith(fileName))
+    ) {
+      logger.debug(`Writing lock file: ${packageFile.name}`);
       await outputFile(
         upath.join(localDir, packageFile.name),
         packageFile.contents
@@ -510,6 +513,7 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
+  const tokenRe = regEx(`${token}`, 'g', false);
   const { localDir } = GlobalConfig.get();
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
@@ -567,7 +571,7 @@ export async function getAdditionalFiles(
         logger.debug(`${npmLock} needs updating`);
         updatedArtifacts.push({
           name: npmLock,
-          contents: res.lockFile.replace(regEx(`${token}`, 'g'), ''),
+          contents: res.lockFile.replace(tokenRe, ''),
         });
       }
     }

@@ -1,45 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr/changelog/release-notes addReleaseNotes() returns ChangeLogResult 1`] = `
-Object {
-  "a": 1,
-  "hasReleaseNotes": false,
-  "project": Object {
-    "repository": "https://github.com/nodeca/js-yaml",
-    "type": "github",
-  },
-  "versions": Array [
-    Object {
-      "compare": Object {
-        "url": "",
-      },
-      "releaseNotes": null,
-      "version": "3.10.0",
-    },
-  ],
-}
-`;
-
-exports[`workers/pr/changelog/release-notes addReleaseNotes() returns ChangeLogResult without release notes 1`] = `
-Object {
-  "a": 1,
-  "hasReleaseNotes": false,
-  "project": Object {
-    "repository": "https://gitlab.com/gitlab-org/gitter/webapp/",
-    "type": "gitlab",
-  },
-  "versions": Array [
-    Object {
-      "compare": Object {
-        "url": "",
-      },
-      "releaseNotes": null,
-      "version": "20.26.0",
-    },
-  ],
-}
-`;
-
 exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for github repo 1`] = `
 Array [
   Object {

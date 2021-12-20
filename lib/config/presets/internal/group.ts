@@ -39,7 +39,7 @@ const staticGroups = {
         matchDatasources: ['docker'],
         matchPackageNames: ['node'],
         matchPackagePatterns: ['/node$'],
-        excludePackageNames: ['calico/node'],
+        excludePackageNames: ['calico/node', 'kindest/node'],
         commitMessageTopic: 'Node.js',
       },
     ],
