@@ -49,10 +49,22 @@ describe('manager/gradle/shallow/parser-new', () => {
       ${'maven("https://foo.bar/baz/qux")'}           | ${'https://foo.bar/baz/qux'}
       ${'maven { url = uri("https://foo.bar/baz") }'} | ${'https://foo.bar/baz'}
       ${"maven { url 'https://foo.bar/baz' }"}        | ${'https://foo.bar/baz'}
-    `('$input', ({ source, url }) => {
+    `('$source', ({ source, url }) => {
       const expected = [url].filter(Boolean);
       const { urls } = parseGradle('build.gradle', source, {});
       expect(urls).toStrictEqual(expected);
+    });
+  });
+
+  describe('Dependencies', () => {
+    test.each`
+      vars  | dep                      | result
+      ${''} | ${'"foo:bar:1.2.3"'}     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''} | ${'"foo:bar:1.2.3@zip"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+    `(`$dep`, ({ vars, dep, result }) => {
+      const input = [vars, dep].join('\n');
+      const { deps } = parseGradle('build.gradle', input, {});
+      expect(deps).toEqual([result].filter(Boolean));
     });
   });
 

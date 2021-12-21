@@ -1,6 +1,8 @@
 import { lang, lexer as lex, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash, parseUrl, validateUrl } from '../../../util/url';
+import { parseUrl, validateUrl } from '../../../util/url';
+import { PackageDependency } from '../../types';
+import { GradleManagerData } from '../types';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
@@ -16,6 +18,7 @@ import type {
 interface GradleContext {
   packageFile: string;
   varKey?: string;
+  depName?: string;
   result: ParseGradleResult;
 }
 
@@ -45,6 +48,7 @@ function assignHandler(
   };
 
   result.vars[key] = varData;
+  delete ctx.varKey;
   return { ...ctx, result };
 }
 
@@ -110,7 +114,61 @@ const registryUrlQuery = q.alt(
   })
 );
 
-const query = q.alt(assignmentQuery, assignBySetQuery, registryUrlQuery);
+export const groupIdRegexPart =
+  '(?<groupId>[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*)';
+
+export const artifactIdRegexPart = groupIdRegexPart.replace(
+  '<groupId>',
+  '<artifactId>'
+);
+
+export const versionRegexPart = '(?<version>[-.\\[\\](),a-zA-Z0-9+]+)';
+
+export const dataTypeRegexPart =
+  '(?:(?:@(?<dataType>[a-zA-Z][-_a-zA-Z0-9]*))?)';
+
+const depStringRegex = regEx(
+  `^${groupIdRegexPart}:${artifactIdRegexPart}:${versionRegexPart}${dataTypeRegexPart}$`
+);
+
+function depStringHandler(
+  ctx: GradleContext,
+  { value }: lex.StringValueToken
+): GradleContext {
+  const match = value.match(depStringRegex);
+  if (match) {
+    const {
+      groupId,
+      artifactId,
+      version: currentValue,
+      dataType,
+    } = match.groups;
+
+    const depName = `${groupId}:${artifactId}`;
+
+    const dep: PackageDependency<GradleManagerData> = {
+      depName,
+      currentValue,
+    };
+
+    if (dataType) {
+      dep.dataType = dataType;
+    }
+
+    ctx.result.deps.push(dep);
+  }
+
+  return ctx;
+}
+
+const depStringQuery = q.str<GradleContext>(depStringHandler);
+
+const query = q.alt(
+  assignmentQuery,
+  assignBySetQuery,
+  registryUrlQuery,
+  depStringQuery
+);
 
 const groovy = lang.createLang('groovy');
 
