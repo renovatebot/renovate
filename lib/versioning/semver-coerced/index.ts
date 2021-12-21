@@ -43,8 +43,8 @@ function equals(a: string, b: string): boolean {
   return aCoerced && bCoerced ? semver.eq(aCoerced, bCoerced) : false;
 }
 
-function isValid(version: string): boolean {
-  return is.string(semver.valid(semver.coerce(version)));
+function isValid(version: string): string | boolean | null {
+  return semver.valid(semver.coerce(version));
 }
 
 function getSatisfyingVersion(
@@ -84,18 +84,19 @@ function isGreaterThan(version: string, other: string): boolean {
 
 const startsWithNumberRegex = regEx(`^\\d`);
 
-function isSingleVersion(version: string): boolean {
+function isSingleVersion(version: string): string | boolean | null {
   // Since coercion accepts ranges as well as versions, we have to manually
   // check that the version string starts with either 'v' or a digit.
   if (!version.startsWith('v') && !startsWithNumberRegex.exec(version)) {
-    return false;
+    return null;
   }
 
-  return is.string(semver.valid(semver.coerce(version)));
+  return semver.valid(semver.coerce(version));
 }
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): boolean => isValid(input);
+export const isVersion = (input: string): string | boolean | null =>
+  isValid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 

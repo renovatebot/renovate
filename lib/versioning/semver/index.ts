@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import semver from 'semver';
 import stable from 'semver-stable';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -25,7 +24,8 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): boolean => is.string(valid(input));
+export const isVersion = (input: string): string | boolean | null =>
+  valid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 
