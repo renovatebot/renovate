@@ -1998,6 +1998,8 @@ Possible values and meanings:
 
 It is also recommended to avoid `rebaseWhen=never` as it can result in conflicted branches with outdated PR descriptions and/or status checks.
 
+Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` as this results in Renovate not creating any new PRs (unless you request them from the Dependency Dashboard).
+
 ## recreateClosed
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
