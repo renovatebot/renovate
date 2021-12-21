@@ -2,6 +2,7 @@ import { logger } from '../../../../logger';
 import * as semver from '../../../../versioning/semver';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../../../types';
 import * as packageLock from './package-lock';
+import * as yarnLock from './yarn-lock';
 
 export async function updateLockedDependency(
   config: UpdateLockedConfig
@@ -14,6 +15,9 @@ export async function updateLockedDependency(
   if (lockFile.endsWith('package-lock.json')) {
     const res = await packageLock.updateLockedDependency(config);
     return res;
+  }
+  if (lockFile.endsWith('yarn.lock')) {
+    return yarnLock.updateLockedDependency(config);
   }
   logger.debug({ lockFile }, 'Unsupported lock file');
   return { status: 'update-failed' };
