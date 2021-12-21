@@ -51,7 +51,7 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const coercedVersions: string[] = versions
+  const coercedVersions = versions
     .map((version) => semver.coerce(version)?.version)
     .filter(is.string);
 
