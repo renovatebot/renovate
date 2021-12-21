@@ -1,3 +1,4 @@
+import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 
 export function replaceConstraintVersion(
@@ -16,6 +17,14 @@ export function replaceConstraintVersion(
   const matchString = `(${escaped}((",|,)[^\n:]+)?:\n)(.*\n)*?(\\s+dependencies|\n[@a-z])`;
   // yarn will fill in the details later
   const matchResult = regEx(matchString).exec(lockFileContent);
+  // istanbul ignore if
+  if (!matchResult) {
+    logger.debug(
+      { depName, constraint, newVersion },
+      'Could not find constraint in lock file'
+    );
+    return lockFileContent;
+  }
   let constraintLine = matchResult[1];
   if (newConstraint) {
     const newDepNameConstraint = `${depName}@${newConstraint}`;
