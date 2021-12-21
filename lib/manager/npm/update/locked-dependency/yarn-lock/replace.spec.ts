@@ -4,11 +4,26 @@ import { replaceConstraintVersion } from './replace';
 
 const yarnLock1 = loadFixture('express.yarn.lock');
 const yarnLock2 = loadFixture('2.yarn.lock');
+const yarn2Lock = loadFixture('yarn2.lock');
 
 describe('manager/npm/update/locked-dependency/yarn-lock/replace', () => {
   describe('replaceConstraintVersion()', () => {
+    it('returns same if Yarn 2+', () => {
+      const res = replaceConstraintVersion(
+        yarn2Lock,
+        'chalk',
+        '^2.4.1',
+        '2.5.0'
+      );
+      expect(res).toBe(yarn2Lock);
+    });
     it('replaces without dependencies', () => {
-      const res = replaceConstraintVersion(yarnLock1, 'fresh@~0.2.1', '0.2.5');
+      const res = replaceConstraintVersion(
+        yarnLock1,
+        'fresh',
+        '~0.2.1',
+        '0.2.5'
+      );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
       const addedSections = diffRes.filter((item) => item.added);
@@ -27,7 +42,12 @@ describe('manager/npm/update/locked-dependency/yarn-lock/replace', () => {
       `);
     });
     it('replaces with dependencies', () => {
-      const res = replaceConstraintVersion(yarnLock1, 'express@4.0.0', '4.4.0');
+      const res = replaceConstraintVersion(
+        yarnLock1,
+        'express',
+        '4.0.0',
+        '4.4.0'
+      );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
       const addedSections = diffRes.filter((item) => item.added);
@@ -48,9 +68,10 @@ describe('manager/npm/update/locked-dependency/yarn-lock/replace', () => {
     it('replaces constraint too', () => {
       const res = replaceConstraintVersion(
         yarnLock1,
-        'express@4.0.0',
+        'express',
+        '4.0.0',
         '4.4.0',
-        'express@4.4.0'
+        '4.4.0'
       );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
@@ -74,7 +95,8 @@ describe('manager/npm/update/locked-dependency/yarn-lock/replace', () => {
     it('handles escaped constraints', () => {
       const res = replaceConstraintVersion(
         yarnLock2,
-        'string-width@^1.0.1 || ^2.0.0',
+        'string-width',
+        '^1.0.1 || ^2.0.0',
         '2.2.0'
       );
       expect(res).not.toEqual(yarnLock2);

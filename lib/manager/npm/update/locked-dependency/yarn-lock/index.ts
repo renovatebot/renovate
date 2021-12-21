@@ -63,12 +63,12 @@ export function updateLockedDependency(
     }
     let newLockFileContent = lockFileContent;
     for (const dependency of updateLockedDeps) {
-      const { depNameConstraint, newVersion } = dependency;
+      const { depName, constraint, newVersion } = dependency;
       newLockFileContent = replaceConstraintVersion(
         newLockFileContent,
-        depNameConstraint,
-        newVersion,
-        depNameConstraint
+        depName,
+        constraint,
+        newVersion
       );
     }
     // istanbul ignore if: cannot test
