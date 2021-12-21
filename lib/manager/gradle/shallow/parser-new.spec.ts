@@ -1,3 +1,10 @@
+import { regEx } from '../../../util/regex';
+import {
+  GOOGLE_REPO,
+  GRADLE_PLUGIN_PORTAL_REPO,
+  JCENTER_REPO,
+  MAVEN_REPO,
+} from './common';
 import { parseGradle } from './parser-new';
 
 describe('manager/gradle/shallow/parser-new', () => {
@@ -8,23 +15,44 @@ describe('manager/gradle/shallow/parser-new', () => {
     ).toBeEmpty();
   });
 
-  describe('variable assignments', () => {
+  describe('Variable definitions', () => {
     test.each`
-      input                              | name                 | value
+      source                             | name                 | value
       ${'version = "1.2.3"'}             | ${'version'}         | ${'1.2.3'}
       ${'foo.bar = "1.2.3"'}             | ${'foo.bar'}         | ${'1.2.3'}
       ${'foo.bar.baz = "1.2.3"'}         | ${'foo.bar.baz'}     | ${'1.2.3'}
       ${'foo .bar. baz . qux = "1.2.3"'} | ${'foo.bar.baz.qux'} | ${'1.2.3'}
       ${'set("version", "1.2.3")'}       | ${'version'}         | ${'1.2.3'}
-    `('$input', ({ input, name, value }) => {
-      const { vars } = parseGradle('build.gradle', input, {});
+    `('$source', ({ source, name, value }) => {
+      const { vars } = parseGradle('build.gradle', source, {});
       expect(vars).toContainKey(name);
 
       const varData = vars[name];
       expect(varData).toMatchObject({ key: name, value });
       expect(varData.packageFile).toBe('build.gradle');
       expect(varData.fileReplacePosition).toBeNumber();
-      expect(input.slice(varData.fileReplacePosition)).toStartWith(value);
+      expect(source.slice(varData.fileReplacePosition)).toStartWith(value);
+    });
+  });
+
+  describe('Registry URL definitions', () => {
+    test.each`
+      source                                          | url
+      ${'url ""'}                                     | ${null}
+      ${'url "#!@"'}                                  | ${null}
+      ${'url "https://example.com"'}                  | ${'https://example.com'}
+      ${'url("https://example.com")'}                 | ${'https://example.com'}
+      ${'mavenCentral()'}                             | ${MAVEN_REPO}
+      ${'jcenter()'}                                  | ${JCENTER_REPO}
+      ${'google()'}                                   | ${GOOGLE_REPO}
+      ${'gradlePluginPortal()'}                       | ${GRADLE_PLUGIN_PORTAL_REPO}
+      ${'maven("https://foo.bar/baz/qux")'}           | ${'https://foo.bar/baz/qux'}
+      ${'maven { url = uri("https://foo.bar/baz") }'} | ${'https://foo.bar/baz'}
+      ${"maven { url 'https://foo.bar/baz' }"}        | ${'https://foo.bar/baz'}
+    `('$input', ({ source, url }) => {
+      const expected = [url].filter(Boolean);
+      const { urls } = parseGradle('build.gradle', source, {});
+      expect(urls).toStrictEqual(expected);
     });
   });
 
