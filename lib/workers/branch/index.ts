@@ -341,7 +341,8 @@ export async function processBranch(
     // istanbul ignore if
     if (
       dependencyDashboardCheck === 'rebase' ||
-      config.dependencyDashboardRebaseAllOpen
+      config.dependencyDashboardRebaseAllOpen ||
+      config.rebaseRequested
     ) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
