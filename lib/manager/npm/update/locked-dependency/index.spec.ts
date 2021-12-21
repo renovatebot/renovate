@@ -34,6 +34,9 @@ describe('manager/npm/update/locked-dependency/index', () => {
       expect(
         await updateLockedDependency({ ...config, lockFile: 'yarn.lock' })
       ).toMatchObject({});
+      expect(
+        await updateLockedDependency({ ...config, lockFile: 'yarn.lock2' })
+      ).toMatchObject({});
     });
     it('validates versions', async () => {
       expect(
