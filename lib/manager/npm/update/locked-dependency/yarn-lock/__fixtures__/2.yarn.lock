@@ -15,6 +15,15 @@ string-width@^1.0.1:
     is-fullwidth-code-point "^2.0.0"
     strip-ansi "^4.0.0"
 
+"@embroider/addon-shim@^0.48.0":
+  version "0.48.0"
+  resolved "https://registry.yarnpkg.com/@embroider/addon-shim/-/addon-shim-0.48.0.tgz#2a950ecb82c45ae53e801bcddfd26dc420cac9e8"
+  integrity sha512-hu2Yzv5xXHl1vCzkcybjyjCK2/fHwKPDJ5xpwRlvASU/8WMBVLekQQ9Tt8WhPMZJHdMkzIWchAPGkLZaKaeXmA==
+  dependencies:
+    "@embroider/shared-internals" "^0.48.0"
+    ember-auto-import "^2.2.0"
+    semver "^7.3.5"
+
 "string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"

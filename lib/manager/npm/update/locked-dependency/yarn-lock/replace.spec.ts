@@ -117,5 +117,29 @@ describe('manager/npm/update/locked-dependency/yarn-lock/replace', () => {
         "
       `);
     });
+    it('handles quoted', () => {
+      const res = replaceConstraintVersion(
+        yarnLock2,
+        '@embroider/addon-shim',
+        '^0.48.0',
+        '0.48.1'
+      );
+      expect(res).not.toEqual(yarnLock2);
+      const diffRes = Diff.diffLines(yarnLock2, res);
+      const addedSections = diffRes.filter((item) => item.added);
+      const removedSections = diffRes.filter((item) => item.removed);
+      expect(addedSections).toHaveLength(1);
+      expect(removedSections).toHaveLength(1);
+      expect(addedSections[0].value).toMatchInlineSnapshot(`
+        "  version: \\"0.48.1\\"
+        "
+      `);
+      expect(removedSections[0].value).toMatchInlineSnapshot(`
+        "  version \\"0.48.0\\"
+          resolved \\"https://registry.yarnpkg.com/@embroider/addon-shim/-/addon-shim-0.48.0.tgz#2a950ecb82c45ae53e801bcddfd26dc420cac9e8\\"
+          integrity sha512-hu2Yzv5xXHl1vCzkcybjyjCK2/fHwKPDJ5xpwRlvASU/8WMBVLekQQ9Tt8WhPMZJHdMkzIWchAPGkLZaKaeXmA==
+        "
+      `);
+    });
   });
 });
