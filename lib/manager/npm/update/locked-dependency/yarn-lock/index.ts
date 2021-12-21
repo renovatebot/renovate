@@ -4,7 +4,7 @@ import { api as semver } from '../../../../../versioning/npm';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../../../../types';
 import { getLockedDependencies } from './get-locked';
 import { replaceConstraintVersion } from './replace';
-import { YarnLock, YarnLockEntryUpdate } from './types';
+import type { YarnLock, YarnLockEntryUpdate } from './types';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig

@@ -1,5 +1,5 @@
 import { logger } from '../../../../../logger';
-import { YarnLock, YarnLockEntrySummary } from './types';
+import type { YarnLock, YarnLockEntrySummary } from './types';
 
 // Finds matching dependencies withing a package lock file of sub-entry
 export function getLockedDependencies(

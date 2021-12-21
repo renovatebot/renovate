@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../../../../test/util';
-import { UpdateLockedConfig } from '../../../../types';
+import type { UpdateLockedConfig } from '../../../../types';
 import { updateLockedDependency } from '.';
 
 const yarnLock1 = loadFixture('express.yarn.lock');
