@@ -338,12 +338,12 @@ export async function processBranch(
       }
     }
 
-    // istanbul ignore if
-    if (
+    const userRebaseRequested =
       dependencyDashboardCheck === 'rebase' ||
       config.dependencyDashboardRebaseAllOpen ||
-      config.rebaseRequested
-    ) {
+      config.rebaseRequested;
+
+    if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
     } else if (branchExists && config.rebaseWhen === 'never') {
@@ -438,8 +438,7 @@ export async function processBranch(
         });
       }
     }
-    const forcedManually =
-      !!dependencyDashboardCheck || config.rebaseRequested || !branchExists;
+    const forcedManually = userRebaseRequested || !branchExists;
     config.forceCommit = forcedManually || branchPr?.isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
@@ -466,8 +465,7 @@ export async function processBranch(
     // but do not break when there are artifact errors
     if (
       !config.artifactErrors?.length &&
-      !dependencyDashboardCheck &&
-      !config.rebaseRequested &&
+      !userRebaseRequested &&
       commitSha &&
       config.prCreation !== 'immediate'
     ) {
