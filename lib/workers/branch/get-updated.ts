@@ -29,7 +29,8 @@ export async function getUpdatedPackageFiles(
   const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
   const lockFileMaintenanceFiles = [];
   for (const upgrade of config.upgrades) {
-    const { manager, packageFile, lockFile, depName } = upgrade;
+    const { manager, packageFile, depName, newVersion } = upgrade;
+    const updateLockedDependency = get(manager, 'updateLockedDependency');
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
@@ -41,8 +42,22 @@ export async function getUpdatedPackageFiles(
         reuseExistingBranch ? config.branchName : config.baseBranch
       );
     }
+    let lockFileContent: string;
+    const lockFile = upgrade.lockFile || upgrade.lockFiles?.[0] || '';
+    if (lockFile) {
+      lockFileContent = updatedFileContents[lockFile];
+      if (!lockFileContent) {
+        lockFileContent = await getFile(
+          lockFile,
+          reuseExistingBranch ? config.branchName : config.baseBranch
+        );
+      }
+    }
     // istanbul ignore if
-    if (reuseExistingBranch && !packageFileContent) {
+    if (
+      reuseExistingBranch &&
+      (!packageFileContent || (lockFile && !lockFileContent))
+    ) {
       logger.debug(
         { packageFile, depName },
         'Rebasing branch after file not found'
@@ -55,29 +70,11 @@ export async function getUpdatedPackageFiles(
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else if (upgrade.isRemediation) {
-      let lockFileContent = updatedFileContents[lockFile];
-      if (!lockFileContent) {
-        lockFileContent = await getFile(
-          lockFile,
-          reuseExistingBranch ? config.branchName : config.baseBranch
-        );
-      }
-      // istanbul ignore if: to hard to test
-      if (reuseExistingBranch && !lockFileContent) {
-        logger.debug(
-          { lockFile, depName },
-          'Rebasing branch after lock file not found'
-        );
-        return getUpdatedPackageFiles({
-          ...config,
-          reuseExistingBranch: false,
-        });
-      }
-      const updateLockedDependency = get(manager, 'updateLockedDependency');
       const { status, files } = await updateLockedDependency({
         ...upgrade,
         packageFileContent,
         lockFileContent,
+        allowParentUpdates: true,
       });
       if (reuseExistingBranch && status !== 'already-updated') {
         logger.debug(
@@ -91,6 +88,41 @@ export async function getUpdatedPackageFiles(
       }
       if (files) {
         updatedFileContents = { ...updatedFileContents, ...files };
+      }
+    } else if (upgrade.isLockfileUpdate) {
+      if (updateLockedDependency) {
+        const { status, files } = await updateLockedDependency({
+          ...upgrade,
+          lockFile,
+          packageFileContent,
+          lockFileContent,
+          allowParentUpdates: false,
+        });
+        if (status === 'unsupported') {
+          // incompatible lock file
+          nonUpdatedFileContents[packageFile] = packageFileContent;
+        } else if (status === 'already-updated') {
+          logger.debug(
+            `Upgrade of {$depName} to ${newVersion} is already done in existing branch`
+          );
+        } else {
+          // something changed
+          if (reuseExistingBranch) {
+            logger.debug(
+              { lockFile, depName, status },
+              'Need to retry branch as upgrade requirements are not mets'
+            );
+            return getUpdatedPackageFiles({
+              ...config,
+              reuseExistingBranch: false,
+            });
+          }
+          if (files) {
+            updatedFileContents = { ...updatedFileContents, ...files };
+          }
+        }
+      } else {
+        nonUpdatedFileContents[packageFile] = packageFileContent;
       }
     } else {
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
@@ -112,10 +144,6 @@ export async function getUpdatedPackageFiles(
           }
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
-            if (upgrade.rangeStrategy === 'update-lockfile') {
-              logger.debug({ packageFile, depName }, 'update-lockfile add');
-              nonUpdatedFileContents[packageFile] = res;
-            }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
@@ -175,11 +203,8 @@ export async function getUpdatedPackageFiles(
         updatedFileContents[packageFile] = newContent;
       }
       if (newContent === packageFileContent) {
-        // istanbul ignore else
         if (upgrade.manager === 'git-submodules') {
           updatedFileContents[packageFile] = newContent;
-        } else if (upgrade.rangeStrategy === 'update-lockfile') {
-          nonUpdatedFileContents[packageFile] = newContent;
         }
       }
     }

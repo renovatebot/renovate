@@ -157,6 +157,7 @@ describe('workers/branch/get-updated', () => {
     it('handles isRemediation success', async () => {
       config.upgrades.push({
         manager: 'npm',
+        lockFile: 'package-lock.json',
         isRemediation: true,
       } as never);
       npm.updateLockedDependency.mockResolvedValueOnce({
@@ -245,9 +246,8 @@ describe('workers/branch/get-updated', () => {
         packageFile: 'composer.json',
         manager: 'composer',
         branchName: undefined,
-        rangeStrategy: 'update-lockfile',
+        isLockfileUpdate: true,
       });
-      autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -265,6 +265,73 @@ describe('workers/branch/get-updated', () => {
           { name: 'composer.json', contents: 'existing content' },
         ],
       });
+    });
+    it('attempts updateLockedDependency and handles unsupported', async () => {
+      config.upgrades.push({
+        packageFile: 'package.json',
+        lockFiles: ['package-lock.json'],
+        manager: 'npm',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      npm.updateLockedDependency.mockResolvedValue({
+        status: 'unsupported',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "artifactErrors": Array [],
+          "reuseExistingBranch": undefined,
+          "updatedArtifacts": Array [],
+          "updatedPackageFiles": Array [],
+        }
+      `);
+    });
+    it('attempts updateLockedDependency and handles already-updated', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'package.json',
+        lockFile: 'package-lock.json',
+        manager: 'npm',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      npm.updateLockedDependency.mockResolvedValueOnce({
+        status: 'already-updated',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "artifactErrors": Array [],
+          "reuseExistingBranch": false,
+          "updatedArtifacts": Array [],
+          "updatedPackageFiles": Array [],
+        }
+      `);
+    });
+    it('attempts updateLockedDependency and handles updated files with reuse branch', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'package.json',
+        lockFile: 'package-lock.json',
+        manager: 'npm',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      git.getFile.mockResolvedValue('some content');
+      npm.updateLockedDependency.mockResolvedValue({
+        status: 'updated',
+        files: {},
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "artifactErrors": Array [],
+          "reuseExistingBranch": false,
+          "updatedArtifacts": Array [],
+          "updatedPackageFiles": Array [],
+        }
+      `);
     });
     it('bumps versions in updateDependency managers', async () => {
       config.upgrades.push({
