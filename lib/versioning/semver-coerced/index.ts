@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver, { SemVer } from 'semver';
 import stable from 'semver-stable';
 import { regEx } from '../../util/regex';
@@ -42,20 +43,17 @@ function equals(a: string, b: string): boolean {
   return aCoerced && bCoerced ? semver.eq(aCoerced, bCoerced) : false;
 }
 
-function isValid(version: string): string | boolean | null {
-  return semver.valid(semver.coerce(version));
+function isValid(version: string): boolean {
+  return is.string(semver.valid(semver.coerce(version)));
 }
 
 function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const coercedVersions = versions
-    .map((version) => {
-      const coercedVersion = semver.coerce(version);
-      return coercedVersion ? coercedVersion.version : '';
-    })
-    .filter(Boolean);
+  const coercedVersions: string[] = versions
+    .map((version) => semver.coerce(version)?.version)
+    .filter(is.string);
 
   return semver.maxSatisfying(coercedVersions, range);
 }
@@ -64,12 +62,9 @@ function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const coercedVersions = versions
-    .map((version) => {
-      const coercedVersion = semver.coerce(version);
-      return coercedVersion ? coercedVersion.version : '';
-    })
-    .filter(Boolean);
+  const coercedVersions: string[] = versions
+    .map((version) => semver.coerce(version)?.version)
+    .filter(is.string);
 
   return semver.minSatisfying(coercedVersions, range);
 }
@@ -89,19 +84,18 @@ function isGreaterThan(version: string, other: string): boolean {
 
 const startsWithNumberRegex = regEx(`^\\d`);
 
-function isSingleVersion(version: string): string | boolean | null {
+function isSingleVersion(version: string): boolean {
   // Since coercion accepts ranges as well as versions, we have to manually
   // check that the version string starts with either 'v' or a digit.
   if (!version.startsWith('v') && !startsWithNumberRegex.exec(version)) {
-    return null;
+    return false;
   }
 
-  return semver.valid(semver.coerce(version));
+  return is.string(semver.valid(semver.coerce(version)));
 }
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): string | boolean | null =>
-  isValid(input);
+export const isVersion = (input: string): boolean => isValid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 
