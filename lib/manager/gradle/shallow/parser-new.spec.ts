@@ -15,6 +15,7 @@ describe('manager/gradle/shallow/parser-new', () => {
       ${'foo.bar = "1.2.3"'}             | ${'foo.bar'}         | ${'1.2.3'}
       ${'foo.bar.baz = "1.2.3"'}         | ${'foo.bar.baz'}     | ${'1.2.3'}
       ${'foo .bar. baz . qux = "1.2.3"'} | ${'foo.bar.baz.qux'} | ${'1.2.3'}
+      ${'set("version", "1.2.3")'}       | ${'version'}         | ${'1.2.3'}
     `('$input', ({ input, name, value }) => {
       const { vars } = parseGradle('build.gradle', input, {});
       expect(vars).toContainKey(name);

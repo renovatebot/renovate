@@ -13,7 +13,7 @@ interface GradleContext {
 
 function varKeyHandler(
   ctx: GradleContext,
-  { value }: lex.SymbolToken
+  { value }: lex.SymbolToken | lex.StringValueToken
 ): GradleContext {
   const varKey = ctx.varKey ? `${ctx.varKey}.${value}` : value;
   return { ...ctx, varKey };
@@ -46,7 +46,12 @@ const assignmentQuery = q
   .op('=')
   .str(assignHandler);
 
-const query = q.alt(assignmentQuery);
+const assignBySetQuery = q.sym<GradleContext>('set').tree({
+  type: 'wrapped-tree',
+  search: q.str(varKeyHandler).op(',').str(assignHandler),
+});
+
+const query = q.alt(assignmentQuery, assignBySetQuery);
 
 const groovy = lang.createLang('groovy');
 
