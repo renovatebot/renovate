@@ -1,6 +1,6 @@
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import { getHttpUrl } from './url';
 
 /**
