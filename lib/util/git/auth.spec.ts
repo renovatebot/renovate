@@ -135,5 +135,22 @@ describe('util/git/auth', () => {
         GIT_CONFIG_COUNT: '1',
       });
     });
+
+    it('returns original environment variables when no token is set', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables(
+          'https://gitlab.com/',
+          {
+            username: 'testing',
+            password: '1234',
+            hostType: PlatformId.Gitlab,
+            matchHost: 'github.com',
+          },
+          { env: 'value' }
+        )
+      ).toStrictEqual({
+        env: 'value',
+      });
+    });
   });
 });
