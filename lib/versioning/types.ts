@@ -9,11 +9,11 @@ export interface NewValueConfig {
 }
 export interface VersioningApi {
   // validation
-  isCompatible(version: string, range?: string): string | boolean | null;
-  isSingleVersion(version: string): string | boolean | null;
+  isCompatible(version: string, range?: string): boolean;
+  isSingleVersion(version: string): boolean;
   isStable(version: string): boolean;
-  isValid(version: string): string | boolean | null;
-  isVersion(version: string): string | boolean | null;
+  isValid(version: string): boolean;
+  isVersion(version: string): boolean;
 
   // digestion of version
   getMajor(version: string | SemVer): null | number;
