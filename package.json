@@ -254,6 +254,7 @@
     "aws-sdk-client-mock": "0.5.6",
     "conventional-changelog-conventionalcommits": "4.6.1",
     "cross-env": "7.0.3",
+    "diff": "5.0.0",
     "emojibase-data": "7.0.0",
     "eslint": "8.4.1",
     "eslint-config-prettier": "8.3.0",
