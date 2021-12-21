@@ -20,7 +20,7 @@ export function getLockedDependencies(
         entryName = '@' + split[1];
         constraint = split[2];
       } else {
-        logger.warn(
+        logger.debug(
           { depNameConstraint, entry },
           'Unexpected depNameConstraint'
         );
