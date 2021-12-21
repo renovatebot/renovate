@@ -20,9 +20,6 @@ import { mergeChildConfig } from './utils';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-const afterBeforeRe = regEx(
-  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
-);
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
@@ -343,6 +340,9 @@ export function migrateConfig(
         const schedules = is.string(val) ? [val] : [...(val as string[])];
         // split 'and'
         const schedulesLength = schedules.length;
+        const afterBeforeRe = regEx(
+          /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
+        );
         for (let i = 0; i < schedulesLength; i += 1) {
           if (
             schedules[i].includes(' and ') &&
