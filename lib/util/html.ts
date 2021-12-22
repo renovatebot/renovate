@@ -1,6 +1,6 @@
-import { HTMLElement, Options, parse as _parse } from 'node-html-parser';
+import _parse, { HTMLElement, Options } from 'node-html-parser';
 
-export { HTMLElement };
+export type { HTMLElement };
 
 export function parse(html: string, config?: Partial<Options>): HTMLElement {
   if (typeof config !== 'undefined') {
