@@ -39,6 +39,10 @@ export async function readLocalFile(
       : await fs.readFile(localFileName);
     return fileContent;
   } catch (err) {
+    if (err instanceof TypeError) {
+      logger.error({ err }, 'Error reading local file');
+      return null;
+    }
     logger.trace({ err }, 'Error reading local file');
     return null;
   }

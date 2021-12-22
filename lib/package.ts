@@ -7,5 +7,5 @@ export type RenovatPackageJson = PackageJson & {
 };
 
 export const pkg = JSON.parse(
-  fs.readFileSync(`${expose}/../package.json`, 'utf-8')
+  fs.readFileSync(`${expose.dirname}/../package.json`, 'utf-8')
 ) as RenovatPackageJson;

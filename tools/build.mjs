@@ -12,7 +12,7 @@ import shell from 'shelljs';
     target: 'es2020',
     platform: 'node',
     outdir: './esm/',
-    external: ['*/package.json'],
+    external: ['*/package.json', './lib/expose.cjs'],
     tsconfig: './tsconfig.esm.json',
     plugins: [
       esbuildPluginNodeExternals({
@@ -23,6 +23,7 @@ import shell from 'shelljs';
   });
 
   await fs.writeJSON('esm/package.json', { type: 'module' }, { spaces: 2 });
+  await fs.copyFile('lib/expose.cjs', 'esm/expose.cjs');
 })().catch((e) => {
   shell.echo(e);
   shell.exit(1);
