@@ -101,6 +101,13 @@ describe('workers/global/autodiscover', () => {
   it('fail if regex pattern is not valid', async () => {
     config.autodiscover = true;
     config.autodiscoverFilter = '/project/re**./';
+    config.platform = PlatformId.Github;
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'project/another-repo'])
+    );
     expect(await autodiscoverRepositories(config)).toEqual(config);
   });
 });
