@@ -14,7 +14,6 @@ import type {
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
-import { pkg } from '../../package';
 import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
