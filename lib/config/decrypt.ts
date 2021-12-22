@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import is from '@sindresorhus/is';
-import openpgp from 'openpgp';
+import * as openpgp from 'openpgp';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
@@ -40,6 +40,7 @@ export async function tryDecryptPgp(
     logger.debug('Decrypted config using openpgp');
     return data;
   } catch (err) {
+    console.error(err);
     logger.debug({ err }, 'Could not decrypt using openpgp');
     return null;
   }
