@@ -74,10 +74,14 @@ export const isValid = (input: string): boolean =>
 
 export const matches = (version: string, range: string): boolean =>
   satisfies(vtrim(version), vtrim(range));
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  maxSatisfying(versions.map(vtrim), vtrim(range));
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  minSatisfying(versions.map(vtrim), vtrim(range));
+const getSatisfyingVersion = (
+  versions: string[],
+  range: string
+): string | null => maxSatisfying(versions.map(vtrim), vtrim(range));
+const minSatisfyingVersion = (
+  versions: string[],
+  range: string
+): string | null => minSatisfying(versions.map(vtrim), vtrim(range));
 
 const getNewValue = ({
   currentValue,

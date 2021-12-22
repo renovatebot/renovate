@@ -179,7 +179,7 @@ describe('versioning/ruby/index', () => {
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
-      expect(semverRuby.isLessThanRange(version, range)).toBe(expected);
+      expect(semverRuby.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 
