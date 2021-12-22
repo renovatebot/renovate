@@ -5,6 +5,6 @@ export interface ModuleApi {
   url?: string;
 }
 
-export type RenovatPackageJson = PackageJson & {
+export type RenovatePackageJson = PackageJson & {
   'engines-next': Record<string, string>;
 };
