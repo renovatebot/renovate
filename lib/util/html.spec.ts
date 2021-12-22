@@ -1,10 +1,11 @@
-import { HTMLElement, parse } from './html';
+import * as parser from 'node-html-parser';
+import { parse } from './html';
 
 describe('util/html', () => {
   it('parses HTML', () => {
     const body = parse('<div>Hello, world!</div>');
     expect(body.childNodes).toHaveLength(1);
-    const div = body.childNodes[0] as HTMLElement;
+    const div = body.childNodes[0] as parser.HTMLElement;
     expect(div.tagName).toBe('DIV');
     expect(div.textContent).toBe('Hello, world!');
     expect(div instanceof HTMLElement).toBeTrue();
