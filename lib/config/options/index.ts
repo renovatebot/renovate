@@ -2129,7 +2129,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Allow to disable release notes fetching.',
+    description: 'Whether or not to fetch release notes.',
     type: 'boolean',
     default: true,
     cli: false,
