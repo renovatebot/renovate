@@ -216,7 +216,7 @@
     "@jest/test-result": "27.4.2",
     "@ls-lint/ls-lint": "1.10.0",
     "@renovate/eslint-plugin": "https://github.com/renovatebot/eslint-plugin#v0.0.4",
-    "@semantic-release/exec": "6.0.2",
+    "@semantic-release/exec": "6.0.3",
     "@types/auth-header": "1.0.2",
     "@types/bunyan": "1.8.8",
     "@types/cacache": "15.0.1",
