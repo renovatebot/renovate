@@ -98,4 +98,9 @@ describe('workers/global/autodiscover', () => {
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/another-repo']);
   });
+  it('fail if regex pattern is not valid', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = '/project/re**./';
+    expect(await autodiscoverRepositories(config)).toEqual(config);
+  });
 });

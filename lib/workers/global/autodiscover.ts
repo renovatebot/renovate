@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
-import { configRegexPredicate } from '../../util/regex';
+import { configRegexPredicate, isConfigRegex } from '../../util/regex';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -31,8 +31,15 @@ export async function autodiscoverRepositories(
     return config;
   }
   if (config.autodiscoverFilter) {
-    const autodiscoveryPred = configRegexPredicate(config.autodiscoverFilter);
-    if (autodiscoveryPred) {
+    if (isConfigRegex(config.autodiscoverFilter)) {
+      const autodiscoveryPred = configRegexPredicate(config.autodiscoverFilter);
+      if (!autodiscoveryPred) {
+        logger.error(
+          { autodiscoverFilter: config.autodiscoverFilter },
+          'Failed to parse regex pattern'
+        );
+        return config;
+      }
       discovered = discovered.filter(autodiscoveryPred);
     } else {
       discovered = discovered.filter(
