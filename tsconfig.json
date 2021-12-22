@@ -26,7 +26,6 @@
     "./.cache",
     "./dist",
     "**/__mocks__/*",
-    "bin",
     "coverage",
     "config.js",
     "tmp"
