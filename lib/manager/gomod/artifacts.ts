@@ -23,16 +23,16 @@ import type {
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
-  // hard-coded logic to use authentication for github.com based on the credentials for api.github.com
-  const credentials = find({
+  // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
+  const githubToken = find({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
 
-  if (credentials?.token) {
+  if (githubToken?.token) {
     environmentVariables = getGitAuthenticatedEnvironmentVariables(
       'https://github.com/',
-      credentials.token
+      githubToken
     );
   }
 
@@ -65,7 +65,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
         );
         environmentVariables = getGitAuthenticatedEnvironmentVariables(
           httpUrl,
-          hostRule.token,
+          hostRule,
           environmentVariables
         );
       } else {
