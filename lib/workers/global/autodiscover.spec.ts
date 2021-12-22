@@ -72,4 +72,30 @@ describe('workers/global/autodiscover', () => {
     const res = await autodiscoverRepositories(config);
     expect(res).toEqual(config);
   });
+  it('filters autodiscovered github repos with regex', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = '/project/re*./';
+    config.platform = PlatformId.Github;
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'project/another-repo'])
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(['project/repo']);
+  });
+  it('filters autodiscovered github repos with regex negation', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = '!/project/re*./';
+    config.platform = PlatformId.Github;
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'project/another-repo'])
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(['project/another-repo']);
+  });
 });
