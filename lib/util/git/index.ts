@@ -1,6 +1,7 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import Git, { Options, ResetMode, SimpleGit, TaskOptions } from 'simple-git';
+import type { Options, SimpleGit, TaskOptions } from 'simple-git';
+import * as simpleGit from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -32,10 +33,6 @@ import type {
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
-
-declare module 'fs-extra' {
-  export function exists(pathLike: string): Promise<boolean>;
-}
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
@@ -148,7 +145,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
-  const globalGit = Git();
+  const globalGit = simpleGit.default();
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(/\s+/)) {
@@ -211,7 +208,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = Git(localDir, simpleGitConfig());
+  git = simpleGit.default(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -314,7 +311,7 @@ export async function syncGit(): Promise<void> {
   const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
-  if (await fs.exists(gitHead)) {
+  if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
@@ -446,7 +443,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
     }
-    await git.reset(ResetMode.HARD);
+    await git.reset(simpleGit.ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -592,7 +589,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
   let status;
   try {
     await syncGit();
-    await git.reset(ResetMode.HARD);
+    await git.reset(simpleGit.ResetMode.HARD);
     await git.checkout(['-B', branchName, 'origin/' + branchName]);
     await git.checkout([
       '-B',
@@ -688,7 +685,7 @@ export async function commitFiles({
   await configSigningKey(localDir);
   await writeGitAuthor();
   try {
-    await git.reset(ResetMode.HARD);
+    await git.reset(simpleGit.ResetMode.HARD);
     await git.raw(['clean', '-fd']);
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const deletedFiles: string[] = [];

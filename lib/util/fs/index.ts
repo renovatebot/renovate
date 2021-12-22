@@ -1,7 +1,7 @@
 import stream from 'stream';
 import util from 'util';
 import is from '@sindresorhus/is';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';

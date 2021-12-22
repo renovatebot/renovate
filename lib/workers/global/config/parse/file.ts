@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
