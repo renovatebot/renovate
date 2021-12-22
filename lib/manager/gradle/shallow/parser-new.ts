@@ -19,6 +19,7 @@ interface GradleContext {
   packageFile: string;
   varKey?: string;
   depName?: string;
+  depDataType?: string;
   result: ParseGradleResult;
 }
 
@@ -96,20 +97,20 @@ function handleRegistryUrl(
   return ctx;
 }
 
-const registryUrlQuery = q.alt(
+const registryUrlQuery = q.alt<GradleContext>(
   q
     .sym(
       regEx('^(?:mavenCentral|jcenter|google|gradlePluginPortal)$'),
       predefinedRegistryUrl
     )
     .tree(),
-  q.sym('url').alt(
+  q.sym<GradleContext>('url').alt(
     q.str(handleRegistryUrl),
     q.tree({
       search: q.str(handleRegistryUrl),
     })
   ),
-  q.sym('maven').tree({
+  q.sym<GradleContext>('maven').tree({
     search: q.str(handleRegistryUrl),
   })
 );
@@ -163,11 +164,93 @@ function depStringHandler(
 
 const depStringQuery = q.str<GradleContext>(depStringHandler);
 
-const query = q.alt(
+function depTemplateNameHandler(
+  ctx: GradleContext,
+  { value }: lex.StringValueToken
+): GradleContext {
+  const [groupId, artifactId] = value.split(':');
+  ctx.depName = `${groupId}:${artifactId}`;
+  return ctx;
+}
+
+function depTemplateVersionHandler(
+  ctx: GradleContext,
+  { value: varKey }: lex.SymbolToken
+): GradleContext {
+  ctx.varKey = varKey;
+  return ctx;
+}
+
+function depTemplateDataTypeHandler(
+  ctx: GradleContext,
+  { value }: lex.StringValueToken
+): GradleContext {
+  if (value.startsWith('@')) {
+    ctx.varKey = value.slice(1);
+  }
+  return ctx;
+}
+
+function postHandler(ctx: GradleContext): GradleContext {
+  const { varKey, depName, depDataType } = ctx;
+  if (varKey && depName) {
+    const varData = ctx.result.vars[varKey];
+    if (varData) {
+      const dep: PackageDependency<GradleManagerData> = {
+        depName,
+        currentValue: varData.value,
+      };
+
+      if (depDataType) {
+        dep.dataType = depDataType;
+      }
+
+      dep.managerData = {
+        packageFile: varData.packageFile,
+        fileReplacePosition: varData.fileReplacePosition,
+      };
+
+      ctx.result.deps.push(dep);
+    }
+  }
+
+  delete ctx.varKey;
+  delete ctx.depName;
+  delete ctx.depDataType;
+
+  return ctx;
+}
+
+const depTemplateQuery = q.str<GradleContext>({
+  match: [
+    q.str(
+      regEx(`^${groupIdRegexPart}:${artifactIdRegexPart}:$`),
+      depTemplateNameHandler
+    ),
+    q.sym(depTemplateVersionHandler),
+  ],
+  postHandler,
+});
+
+const depTemplateDataTypeQuery = q.str<GradleContext>({
+  match: [
+    q.str(
+      regEx(`^${groupIdRegexPart}:${artifactIdRegexPart}:$`),
+      depTemplateNameHandler
+    ),
+    q.sym(depTemplateVersionHandler),
+    q.str(depTemplateDataTypeHandler),
+  ],
+  postHandler,
+});
+
+const query = q.alt<GradleContext>(
   assignmentQuery,
   assignBySetQuery,
   registryUrlQuery,
-  depStringQuery
+  depStringQuery,
+  depTemplateQuery,
+  depTemplateDataTypeQuery
 );
 
 const groovy = lang.createLang('groovy');
