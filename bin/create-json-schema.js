@@ -10,8 +10,12 @@ const schema = {
 };
 const options = getOptions();
 options.sort((a, b) => {
-  if (a.name < b.name) return -1;
-  if (a.name > b.name) return 1;
+  if (a.name < b.name) {
+    return -1;
+  }
+  if (a.name > b.name) {
+    return 1;
+  }
   return 0;
 });
 const properties = {};
@@ -34,7 +38,7 @@ function createSingleConfig(option) {
         temp.items.enum = option.allowedValues;
       }
     }
-    if (option.subType == 'string' && option.allowString === true) {
+    if (option.subType === 'string' && option.allowString === true) {
       const items = temp.items;
       delete temp.items;
       delete temp.type;
