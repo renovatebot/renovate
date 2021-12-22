@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { expect } from '@jest/globals';
 import upath from 'upath';
 import { getConfig } from '../lib/config/defaults';
-import type { RenovateConfig as _RenovateConfig } from '../lib/config/types';
+import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
 import { platform as _platform } from '../lib/platform';
 import * as _env from '../lib/util/exec/env';
@@ -34,8 +34,7 @@ export const env = mocked(_env);
 export const hostRules = mocked(_hostRules);
 export const logger = mocked(_logger);
 
-// Required because of isolatedModules
-export type RenovateConfig = _RenovateConfig;
+export type { RenovateConfig };
 
 export const defaultConfig = getConfig();
 

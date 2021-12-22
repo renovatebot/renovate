@@ -76,7 +76,6 @@ function applyDefaultHeaders(options: Options): void {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error getting renovate version');
   }
-
   options.headers = {
     ...options.headers,
     'user-agent':

@@ -103,7 +103,7 @@ export async function getUpdatedPackageFiles(
           nonUpdatedFileContents[packageFile] = packageFileContent;
         } else if (status === 'already-updated') {
           logger.debug(
-            `Upgrade of {$depName} to ${newVersion} is already done in existing branch`
+            `Upgrade of ${depName} to ${newVersion} is already done in existing branch`
           );
         } else {
           // something changed
@@ -122,6 +122,10 @@ export async function getUpdatedPackageFiles(
           }
         }
       } else {
+        logger.debug(
+          { manager },
+          'isLockFileUpdate without updateLockedDependency'
+        );
         nonUpdatedFileContents[packageFile] = packageFileContent;
       }
     } else {

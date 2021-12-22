@@ -7,11 +7,14 @@ import {
   GitStatusState,
   GitVersionDescriptor,
   PullRequestStatus,
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { PlatformId } from '../../constants';
-import { REPOSITORY_EMPTY } from '../../constants/error-messages';
+import {
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_EMPTY,
+} from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
@@ -170,6 +173,10 @@ export async function initRepo({
   const repos = await azureApiGit.getRepositories();
   const repo = getRepoByName(repository, repos);
   logger.debug({ repositoryDetails: repo }, 'Repository details');
+  if (repo.isDisabled) {
+    logger.debug('Repository is disabled- throwing error to abort renovation');
+    throw new Error(REPOSITORY_ARCHIVED);
+  }
   // istanbul ignore if
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
