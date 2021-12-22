@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is/dist';
+import is from '@sindresorhus/is';
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
