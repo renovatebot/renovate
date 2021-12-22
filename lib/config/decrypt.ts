@@ -40,7 +40,6 @@ export async function tryDecryptPgp(
     logger.debug('Decrypted config using openpgp');
     return data;
   } catch (err) {
-    console.error(err);
     logger.debug({ err }, 'Could not decrypt using openpgp');
     return null;
   }
