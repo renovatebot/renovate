@@ -1,4 +1,4 @@
-import { valid } from 'semver';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../types';
 import { getNpmLock } from './npm';
@@ -56,7 +56,7 @@ export async function getLockedVersions(
       if (lockfileVersion === 1) {
         if (packageFile.constraints.npm) {
           // Add a <7 constraint if it's not already a fixed version
-          if (!valid(packageFile.constraints.npm)) {
+          if (!semver.valid(packageFile.constraints.npm)) {
             packageFile.constraints.npm += ' <7';
           }
         } else {
@@ -64,7 +64,7 @@ export async function getLockedVersions(
         }
       }
       for (const dep of packageFile.deps) {
-        dep.lockedVersion = valid(
+        dep.lockedVersion = semver.valid(
           lockFileCache[npmLock].lockedVersions[dep.depName]
         );
       }

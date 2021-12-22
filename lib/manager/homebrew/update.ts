@@ -1,5 +1,5 @@
 import { fromStream } from 'hasha';
-import { coerce } from 'semver';
+import semver from 'semver';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import type { UpdateDependencyConfig } from '../types';
@@ -161,7 +161,7 @@ export async function updateDependency({
     const repoName = String(upgrade.managerData.repoName);
     newUrl = `https://github.com/${ownerName}/${repoName}/releases/download/${
       upgrade.newValue
-    }/${repoName}-${String(coerce(upgrade.newValue))}.tar.gz`;
+    }/${repoName}-${String(semver.coerce(upgrade.newValue))}.tar.gz`;
     newSha256 = await fromStream(http.stream(newUrl), {
       algorithm: 'sha256',
     });

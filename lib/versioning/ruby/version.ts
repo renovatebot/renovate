@@ -2,7 +2,7 @@ import { eq, major, minor, patch, prerelease } from '@renovatebot/ruby-semver';
 import {
   SegmentElement,
   create,
-} from '@renovatebot/ruby-semver/dist/ruby/version';
+} from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { regEx } from '../../util/regex';
 
 interface RubyVersion {

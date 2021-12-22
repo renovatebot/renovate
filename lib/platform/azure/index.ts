@@ -7,7 +7,7 @@ import {
   GitStatusState,
   GitVersionDescriptor,
   PullRequestStatus,
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { PlatformId } from '../../constants';
