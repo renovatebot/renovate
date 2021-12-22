@@ -1,6 +1,11 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import type { Options, SimpleGit, TaskOptions } from 'simple-git';
+import type {
+  Options,
+  SimpleGit,
+  TaskOptions,
+  ResetMode as _ResetMode,
+} from 'simple-git';
 import * as simpleGit from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
@@ -33,6 +38,9 @@ import type {
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
+
+// TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
+const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
@@ -443,7 +451,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
     }
-    await git.reset(simpleGit.ResetMode.HARD);
+    await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -589,7 +597,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
   let status;
   try {
     await syncGit();
-    await git.reset(simpleGit.ResetMode.HARD);
+    await git.reset(ResetMode.HARD);
     await git.checkout(['-B', branchName, 'origin/' + branchName]);
     await git.checkout([
       '-B',
@@ -685,7 +693,7 @@ export async function commitFiles({
   await configSigningKey(localDir);
   await writeGitAuthor();
   try {
-    await git.reset(simpleGit.ResetMode.HARD);
+    await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const deletedFiles: string[] = [];
