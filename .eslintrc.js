@@ -169,7 +169,7 @@ module.exports = {
       },
     },
     {
-      files: ['tools/**/*.{c?js}', 'bin/*.{c?js}'],
+      files: ['tools/**/*.{js,cjs}', 'bin/*.{js,cjs}'],
       rules: {
         // need commonjs
         '@typescript-eslint/no-var-requires': 'off',

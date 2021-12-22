@@ -10,7 +10,7 @@
     "build": "run-s clean generate:* compile:*",
     "build:docs": "run-s \"release:prepare {@}\"",
     "clean": "rimraf dist tmp",
-    "clean-cache": "node bin/clean-cache.js",
+    "clean-cache": "node bin/clean-cache.mjs",
     "compile:ts": "tsc -p tsconfig.app.json",
     "config-validator": "node -r ts-node/register/transpile-only -- lib/config-validator.ts",
     "create-json-schema": "node -r ts-node/register/transpile-only -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
