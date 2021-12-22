@@ -5,7 +5,7 @@ import { parse } from 'auth-header';
 import hasha from 'hasha';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
