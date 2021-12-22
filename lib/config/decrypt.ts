@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import is from '@sindresorhus/is';
-import * as openpgp from 'openpgp';
+import openpgp from 'openpgp';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
