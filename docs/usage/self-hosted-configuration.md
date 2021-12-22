@@ -91,6 +91,8 @@ It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or re
 
 **Regex**:
 
+All text inside the start and end `/` will be evaluated as a regular expression.
+
 ```json
 {
   "autodiscoverFilter": "/project/.*/"
