@@ -1,8 +1,18 @@
 import util from 'util';
+import _glob from 'glob';
 
-const glob = util.promisify(require('glob'));
+const glob = util.promisify(_glob);
 
-const ignoredExtensions = ['js', 'ts', 'md', 'pyc', 'DS_Store', 'map', 'snap'];
+const ignoredExtensions = [
+  'js',
+  'ts',
+  'cjs',
+  'md',
+  'pyc',
+  'DS_Store',
+  'map',
+  'snap',
+];
 
 function filterFiles(files: string[]): string[] {
   return files.filter((file) =>
