@@ -4,7 +4,7 @@ import {
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { REPOSITORY_ARCHIVED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
@@ -1264,9 +1264,9 @@ describe('platform/azure/index', () => {
 
     it('returns file content in json5 format', async () => {
       const json5Data = `
-        { 
+        {
           // json5 comment
-          foo: 'bar' 
+          foo: 'bar'
         }
       `;
       azureApi.gitApi.mockImplementationOnce(

@@ -1,4 +1,4 @@
-import { valid } from 'semver';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../types';
 import { getNpmLock } from './npm';
@@ -64,7 +64,7 @@ export async function getLockedVersions(
         }
       }
       for (const dep of packageFile.deps) {
-        dep.lockedVersion = valid(
+        dep.lockedVersion = semver.valid(
           lockFileCache[npmLock].lockedVersions[dep.depName]
         );
       }

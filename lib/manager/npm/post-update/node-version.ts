@@ -1,4 +1,4 @@
-import { validRange } from 'semver';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
@@ -9,7 +9,7 @@ async function getNodeFile(filename: string): Promise<string> | null {
     const constraint = (await readLocalFile(filename, 'utf8'))
       .split('\n')[0]
       .replace(regEx(/^v/), '');
-    if (validRange(constraint)) {
+    if (semver.validRange(constraint)) {
       logger.debug(`Using node constraint "${constraint}" from ${filename}`);
       return constraint;
     }
@@ -21,7 +21,7 @@ async function getNodeFile(filename: string): Promise<string> | null {
 
 function getPackageJsonConstraint(config: PostUpdateConfig): string | null {
   const constraint: string = config.constraints?.node;
-  if (constraint && validRange(constraint)) {
+  if (constraint && semver.validRange(constraint)) {
     logger.debug(`Using node constraint "${constraint}" from package.json`);
     return constraint;
   }

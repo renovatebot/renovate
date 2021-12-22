@@ -1,6 +1,6 @@
 import hasha from 'hasha';
 import Git from 'simple-git';
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
@@ -96,7 +96,7 @@ export class CrateDatasource extends Datasource {
     lookupName: string
   ): Promise<string> {
     if (info.clonePath) {
-      const path = join(
+      const path = upath.join(
         info.clonePath,
         ...CrateDatasource.getIndexSuffix(lookupName)
       );
@@ -208,7 +208,7 @@ export class CrateDatasource extends Datasource {
       if (clonePathPromise) {
         clonePath = await clonePathPromise;
       } else {
-        clonePath = join(
+        clonePath = upath.join(
           privateCacheDir(),
           CrateDatasource.cacheDirFromUrl(url)
         );

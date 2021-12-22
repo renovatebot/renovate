@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { parse } from 'upath';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
@@ -59,7 +59,7 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(outputFileName);
     }
-    const cmd = `pip-compile ${quote(parse(inputFileName).base)}`;
+    const cmd = `pip-compile ${quote(upath.parse(inputFileName).base)}`;
     const tagConstraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
     const execOptions: ExecOptions = {

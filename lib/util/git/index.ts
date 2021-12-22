@@ -1,7 +1,7 @@
 import URL from 'url';
 import fs from 'fs-extra';
 import Git, { Options, ResetMode, SimpleGit, TaskOptions } from 'simple-git';
-import { join } from 'upath';
+import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
@@ -311,7 +311,7 @@ export async function syncGit(): Promise<void> {
   gitInitialized = true;
   const { localDir } = GlobalConfig.get();
   logger.debug('Initializing git repository into ' + localDir);
-  const gitHead = join(localDir, '.git/HEAD');
+  const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
   if (await fs.exists(gitHead)) {
@@ -708,7 +708,7 @@ export async function commitFiles({
           ignoredFiles.push(fileName);
         }
       } else {
-        if (await isDirectory(join(localDir, fileName))) {
+        if (await isDirectory(upath.join(localDir, fileName))) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
         } else {
@@ -721,7 +721,7 @@ export async function commitFiles({
           }
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
-          await fs.outputFile(join(localDir, fileName), contents, {
+          await fs.outputFile(upath.join(localDir, fileName), contents, {
             mode: file.executable ? 0o777 : 0o666,
           });
         }
