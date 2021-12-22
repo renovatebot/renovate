@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as upath from 'upath';
 import { GlobalConfig } from '../../../config/global';

@@ -1,4 +1,4 @@
-import { fromStream } from 'hasha';
+import hasha from 'hasha';
 import semver from 'semver';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
@@ -162,7 +162,7 @@ export async function updateDependency({
     newUrl = `https://github.com/${ownerName}/${repoName}/releases/download/${
       upgrade.newValue
     }/${repoName}-${String(semver.coerce(upgrade.newValue))}.tar.gz`;
-    newSha256 = await fromStream(http.stream(newUrl), {
+    newSha256 = await hasha.fromStream(http.stream(newUrl), {
       algorithm: 'sha256',
     });
   } catch (errOuter) {
@@ -173,7 +173,7 @@ export async function updateDependency({
       const ownerName = String(upgrade.managerData.ownerName);
       const repoName = String(upgrade.managerData.repoName);
       newUrl = `https://github.com/${ownerName}/${repoName}/archive/${upgrade.newValue}.tar.gz`;
-      newSha256 = await fromStream(http.stream(newUrl), {
+      newSha256 = await hasha.fromStream(http.stream(newUrl), {
         algorithm: 'sha256',
       });
     } catch (errInner) {

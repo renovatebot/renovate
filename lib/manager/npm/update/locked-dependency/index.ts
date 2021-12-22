@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import * as semver from '../../../../versioning/semver';
+import semver from '../../../../versioning/semver';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../../../types';
 import * as packageLock from './package-lock';
 import * as yarnLock from './yarn-lock';
