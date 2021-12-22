@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { ltr, maxSatisfying, minSatisfying, satisfies } from 'semver';
+import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { regEx } from '../../util/regex';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
@@ -96,14 +96,17 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   }
 
   override isLessThanRange(version: string, range: string): boolean {
-    return ltr(asSemver(this._parse(version)), asSemver(this._parse(range)));
+    return semver.ltr(
+      asSemver(this._parse(version)),
+      asSemver(this._parse(range))
+    );
   }
 
   override getSatisfyingVersion(
     versions: string[],
     range: string
   ): string | null {
-    return maxSatisfying(
+    return semver.maxSatisfying(
       versions.map((v) => asSemver(this._parse(v))),
       asSemver(this._parse(range))
     );
@@ -113,14 +116,14 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     versions: string[],
     range: string
   ): string | null {
-    return minSatisfying(
+    return semver.minSatisfying(
       versions.map((v) => asSemver(this._parse(v))),
       asSemver(this._parse(range))
     );
   }
 
   override matches(version: string, range: string): boolean {
-    return satisfies(
+    return semver.satisfies(
       asSemver(this._parse(version)),
       asSemver(this._parse(range))
     );

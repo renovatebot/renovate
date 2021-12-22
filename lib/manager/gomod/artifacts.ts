@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
@@ -147,8 +147,8 @@ export async function updateArtifacts({
     return null;
   }
 
-  const vendorDir = join(dirname(goModFileName), 'vendor/');
-  const vendorModulesFileName = join(vendorDir, 'modules.txt');
+  const vendorDir = upath.join(upath.dirname(goModFileName), 'vendor/');
+  const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   try {
