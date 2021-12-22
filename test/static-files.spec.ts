@@ -5,8 +5,9 @@ const glob = util.promisify(_glob);
 
 const ignoredExtensions = [
   'js',
-  'ts',
   'cjs',
+  'ts',
+  'cts',
   'md',
   'pyc',
   'DS_Store',

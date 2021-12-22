@@ -594,7 +594,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  let status;
+  let status: StatusResult;
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
