@@ -495,11 +495,20 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
-    it('parses local Bitbucket user repo', () => {
+    it('parses local Bitbucket user repo with preset name', () => {
       expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
         packageName: '~john_doe/repo',
         params: undefined,
         presetName: 'somefile',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
+    it('parses local Bitbucket user repo', () => {
+      expect(presets.parsePreset('local>~john_doe/renovate-config')).toEqual({
+        packageName: '~john_doe/renovate-config',
+        params: undefined,
+        presetName: 'default',
         presetPath: undefined,
         presetSource: 'local',
       });
