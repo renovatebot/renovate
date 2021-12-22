@@ -40,7 +40,7 @@ const nonScopedPresetWithSubdirRegex = regEx(
   /^(?<packageName>~?[\w\-./]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<packageTag>[\w\-./]+?))?$/
 );
 const gitPresetRegex = regEx(
-  /^(?<packageName>[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<packageTag>[\w\-./]+?))?$/
+  /^(?<packageName>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<packageTag>[\w\-./]+?))?$/
 );
 
 export function replaceArgs(
@@ -50,7 +50,7 @@ export function replaceArgs(
   if (is.string(obj)) {
     let returnStr = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
-      const re = regEx(`{{${arg}}}`, 'g'); // TODO #12071
+      const re = regEx(`{{${arg}}}`, 'g', false);
       returnStr = returnStr.replace(re, argVal);
     }
     return returnStr;
