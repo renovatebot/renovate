@@ -688,7 +688,7 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchReleaseNotes
 
-Configure this to `false` if you want to disable release notes fetching
+Set this to `false` if you want to disable release notes fetching.
 
 ## fileMatch
 
