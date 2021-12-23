@@ -4,7 +4,8 @@ import { GlobalConfig } from '../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
-import { CommitFilesConfig, commitFiles } from '../../util/git';
+import { commitFiles } from '../../util/git';
+import type { CommitFilesConfig } from '../../util/git/types';
 import { sanitize } from '../../util/sanitize';
 import type { BranchConfig } from '../types';
 

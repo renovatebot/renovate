@@ -2545,7 +2545,7 @@ describe('platform/github/index', () => {
         files: [{ name: 'foo.bar', contents: 'foobar' }],
         message: 'foobar',
       });
-      expect(res).toEqual('123123');
+      expect(res).toBe('123123');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw on REST error', async () => {

@@ -22,6 +22,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
+import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { regEx } from '../../util/regex';
@@ -1745,7 +1746,7 @@ export async function pushFiles({
   branchName,
   files,
   message,
-}: git.CommitFilesConfig): Promise<git.CommitSha | null> {
+}: CommitFilesConfig): Promise<CommitSha | null> {
   const additions = files.map(({ name: path, contents }) => ({
     path,
     contents: Buffer.from(contents).toString('base64'),
