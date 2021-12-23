@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { UpdateLockedConfig, UpdateLockedResult } from '../types';
+import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
 import { extractLockFileEntries } from './locked-version';
 
 export function updateLockedDependency(
