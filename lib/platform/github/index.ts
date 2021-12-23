@@ -105,7 +105,6 @@ export async function initPlatform({
   token,
   username,
   gitAuthor,
-  platformCommit,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
@@ -136,20 +135,10 @@ export async function initPlatform({
       discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
     }
   }
-  const gitIgnoredAuthors = [];
-  if (platformCommit) {
-    userDetails = await getUserDetails(platformConfig.endpoint, token);
-    const userId = userDetails.id.toString();
-    const userName = userDetails.username;
-    const userEmail = `${userId}+${userName}@users.noreply.github.com`;
-    const platformAuthor = `${userDetails.username} <${userEmail}>`;
-    gitIgnoredAuthors.push(platformAuthor);
-  }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor || discoveredGitAuthor,
-    gitIgnoredAuthors,
     renovateUsername,
   };
 

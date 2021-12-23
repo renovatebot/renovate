@@ -43,21 +43,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
-
-  const returnConfig: any = {
-    ...config,
-    ...platformInfo,
-  };
-
-  const gitIgnoredAuthors = [
-    ...(config?.gitIgnoredAuthors ?? []),
-    ...(platformInfo?.gitIgnoredAuthors ?? []),
-  ];
-  // istanbul ignore next
-  if (gitIgnoredAuthors.length) {
-    returnConfig.gitIgnoredAuthors = gitIgnoredAuthors;
-  }
-
+  const returnConfig: any = { ...config, ...platformInfo };
   // istanbul ignore else
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
