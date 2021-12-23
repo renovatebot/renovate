@@ -261,7 +261,7 @@
     "eslint-formatter-gha": "1.3.0",
     "eslint-plugin-import": "2.25.3",
     "eslint-plugin-jest": "25.3.0",
-    "eslint-plugin-promise": "5.2.0",
+    "eslint-plugin-promise": "6.0.0",
     "expect-more-jest": "5.4.0",
     "glob": "7.2.0",
     "graphql": "15.8.0",
