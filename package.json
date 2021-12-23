@@ -162,7 +162,7 @@
     "fs-extra": "10.0.0",
     "git-url-parse": "11.6.0",
     "github-url-from-git": "1.5.0",
-    "global-agent": "2.2.0",
+    "global-agent": "3.0.0",
     "good-enough-parser": "1.1.0",
     "got": "11.8.3",
     "handlebars": "4.7.7",
