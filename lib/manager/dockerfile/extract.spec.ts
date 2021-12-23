@@ -191,8 +191,8 @@ describe('manager/dockerfile/extract', () => {
           },
         ]
       `);
-      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
-      expect(res[0].currentValue).toEqual('8');
+      expect(res[0].depName).toBe('registry2.something.info:5005/node');
+      expect(res[0].currentValue).toBe('8');
     });
 
     it('handles custom hosts with port without tag', () => {
@@ -212,7 +212,7 @@ describe('manager/dockerfile/extract', () => {
           },
         ]
       `);
-      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
+      expect(res[0].depName).toBe('registry2.something.info:5005/node');
     });
 
     it('handles quay hosts with port', () => {
@@ -619,7 +619,6 @@ describe('manager/dockerfile/extract', () => {
     });
 
     it('handles default environment variable values', () => {
-      // eslint-disable-next-line no-template-curly-in-string
       const res = getDep('${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}');
       expect(res).toMatchInlineSnapshot(`
 Object {
@@ -632,7 +631,6 @@ Object {
 }
 `);
 
-      // eslint-disable-next-line no-template-curly-in-string
       const res2 = getDep('${REDIS_IMAGE:-redis:5.0.0}');
       expect(res2).toMatchInlineSnapshot(`
 Object {
@@ -644,7 +642,6 @@ Object {
 }
 `);
 
-      // eslint-disable-next-line no-template-curly-in-string
       const res3 = getDep('${REDIS_IMAGE:-redis@sha256:abcd}');
       expect(res3).toMatchInlineSnapshot(`
 Object {
@@ -655,6 +652,18 @@ Object {
   "replaceString": "redis@sha256:abcd",
 }
 `);
+    });
+
+    it('skips tag containing a variable', () => {
+      const res = getDep('mcr.microsoft.com/dotnet/sdk:5.0${IMAGESUFFIX}');
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "replaceString": "mcr.microsoft.com/dotnet/sdk:5.0\${IMAGESUFFIX}",
+          "skipReason": "contains-variable",
+        }
+      `);
     });
   });
 });

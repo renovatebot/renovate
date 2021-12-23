@@ -5048,6 +5048,130 @@ Array [
 ]
 `;
 
+exports[`platform/github/index getJsonFile() returns file content from branch or tag 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "autoMergeAllowed": null,
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "hasIssuesEnabled": null,
+          "id": null,
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "some",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "417",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/contents/file.json?ref=dev",
+  },
+]
+`;
+
+exports[`platform/github/index getJsonFile() returns file content from given repo 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$owner",
+          },
+          "autoMergeAllowed": null,
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "hasIssuesEnabled": null,
+          "id": null,
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+      "variables": Object {
+        "name": "repo",
+        "owner": "different",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "422",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/different/repo/contents/file.json",
+  },
+]
+`;
+
 exports[`platform/github/index getJsonFile() returns file content in json5 format 1`] = `
 Array [
   Object {
@@ -7058,6 +7182,17 @@ Array [
       "host": "ghe.renovatebot.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "method": "HEAD",
+    "url": "https://ghe.renovatebot.com/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "host": "ghe.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
     "method": "GET",
     "url": "https://ghe.renovatebot.com/user",
   },
@@ -7073,6 +7208,15 @@ Array [
     "url": "https://ghe.renovatebot.com/user/emails",
   },
 ]
+`;
+
+exports[`platform/github/index initPlatform() should support custom endpoint without version 1`] = `
+Object {
+  "endpoint": "https://ghe.renovatebot.com/",
+  "gitAuthor": "undefined <user@domain.com>",
+  "gitIgnoredAuthors": Array [],
+  "renovateUsername": "renovate-bot",
+}
 `;
 
 exports[`platform/github/index initPlatform() should support default endpoint no email access 1`] = `
@@ -7938,6 +8082,17 @@ Array [
       "host": "github.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "method": "HEAD",
+    "url": "https://github.company.com/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "host": "github.company.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
     "method": "GET",
     "url": "https://github.company.com/user",
   },
@@ -7964,14 +8119,12 @@ Array [
             "name": "$name",
             "owner": "$owner",
           },
-          "autoMergeAllowed": null,
           "defaultBranchRef": Object {
             "name": null,
             "target": Object {
               "oid": null,
             },
           },
-          "hasIssuesEnabled": null,
           "id": null,
           "isArchived": null,
           "isFork": null,
@@ -7990,7 +8143,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "417",
+      "content-length": "373",
       "content-type": "application/json",
       "host": "github.company.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

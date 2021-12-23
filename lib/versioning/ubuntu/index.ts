@@ -6,6 +6,9 @@ export const displayName = 'Ubuntu';
 export const urls = ['https://changelogs.ubuntu.com/meta-release'];
 export const supportsRanges = false;
 
+// #12509
+const temporarilyUnstable = ['22.04'];
+
 // validation
 
 function isValid(input: string): string | boolean | null {
@@ -32,6 +35,9 @@ function isSingleVersion(version: string): string | boolean | null {
 
 function isStable(version: string): boolean {
   if (!isValid(version)) {
+    return false;
+  }
+  if (temporarilyUnstable.includes(version)) {
     return false;
   }
   return regEx(/^\d?[02468]\.04/).test(version);
@@ -66,12 +72,12 @@ function getPatch(version: string): null | number {
 // comparison
 
 function equals(version: string, other: string): boolean {
-  return isVersion(version) && isVersion(other) && version === other;
+  return !!isVersion(version) && !!isVersion(other) && version === other;
 }
 
 function isGreaterThan(version: string, other: string): boolean {
-  const xMajor = getMajor(version);
-  const yMajor = getMajor(other);
+  const xMajor = getMajor(version) ?? 0;
+  const yMajor = getMajor(other) ?? 0;
   if (xMajor > yMajor) {
     return true;
   }
@@ -79,8 +85,8 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  const xMinor = getMinor(version);
-  const yMinor = getMinor(other);
+  const xMinor = getMinor(version) ?? 0;
+  const yMinor = getMinor(other) ?? 0;
   if (xMinor > yMinor) {
     return true;
   }
@@ -88,8 +94,8 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  const xPatch = getPatch(version) || 0;
-  const yPatch = getPatch(other) || 0;
+  const xPatch = getPatch(version) ?? 0;
+  const yPatch = getPatch(other) ?? 0;
   return xPatch > yPatch;
 }
 

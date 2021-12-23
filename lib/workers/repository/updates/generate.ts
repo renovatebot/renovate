@@ -92,7 +92,6 @@ export function generateBranchConfig(
     toVersions.length > 1 ||
     (!toVersions[0] && newValue.length > 1);
   if (newValue.length > 1 && !groupEligible) {
-    // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
   }
   const typesGroup =
@@ -173,6 +172,10 @@ export function generateBranchConfig(
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
     // istanbul ignore if
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
+      logger.debug(
+        { branchName: config.branchName },
+        'Secrets exposed in commit message'
+      );
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
@@ -203,6 +206,10 @@ export function generateBranchConfig(
         .replace(regEx(/\s+/g), ' '); // TODO #12071
       // istanbul ignore if
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
+        logger.debug(
+          { branchName: config.branchName },
+          'Secrets were exposed in PR title'
+        );
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
       if (upgrade.toLowerCase) {
@@ -235,10 +242,10 @@ export function generateBranchConfig(
         const existingStamp = DateTime.fromISO(releaseTimestamp);
         const upgradeStamp = DateTime.fromISO(upgrade.releaseTimestamp);
         if (upgradeStamp > existingStamp) {
-          releaseTimestamp = upgrade.releaseTimestamp; // eslint-disable-line
+          releaseTimestamp = upgrade.releaseTimestamp;
         }
       } else {
-        releaseTimestamp = upgrade.releaseTimestamp; // eslint-disable-line
+        releaseTimestamp = upgrade.releaseTimestamp;
       }
     }
   }

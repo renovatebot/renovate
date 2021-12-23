@@ -122,7 +122,7 @@ export async function validateConfig(
         topic: 'Config security error',
         message: '__proto__',
       });
-      continue; // eslint-disable-line
+      continue;
     }
     if (parentPath && topLevelObjects.includes(key)) {
       errors.push({
@@ -228,7 +228,7 @@ export async function validateConfig(
             message: `${currentPath}: ${errorMessage}`,
           });
         }
-      } else if (val != null) {
+      } else if (val !== null) {
         const type = optionTypes[key];
         if (type === 'boolean') {
           if (val !== true && val !== false) {
@@ -243,8 +243,8 @@ export async function validateConfig(
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
-                const subValidation = await module.exports.validateConfig(
-                  subval,
+                const subValidation = await validateConfig(
+                  subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`
                 );
@@ -408,44 +408,51 @@ export async function validateConfig(
                     )}`,
                   });
                 } else if (is.nonEmptyArray(regexManager.fileMatch)) {
-                  let validRegex = false;
-                  for (const matchString of regexManager.matchStrings) {
-                    try {
-                      regEx(matchString);
-                      validRegex = true;
-                    } catch (e) {
-                      errors.push({
-                        topic: 'Configuration Error',
-                        message: `Invalid regExp for ${currentPath}: \`${String(
-                          matchString
-                        )}\``,
-                      });
-                    }
-                  }
-                  if (validRegex) {
-                    const mandatoryFields = [
-                      'depName',
-                      'currentValue',
-                      'datasource',
-                    ];
-                    for (const field of mandatoryFields) {
-                      if (
-                        !regexManager[`${field}Template`] &&
-                        !regexManager.matchStrings.some((matchString) =>
-                          matchString.includes(`(?<${field}>`)
-                        )
-                      ) {
+                  if (is.nonEmptyArray(regexManager.matchStrings)) {
+                    let validRegex = false;
+                    for (const matchString of regexManager.matchStrings) {
+                      try {
+                        regEx(matchString);
+                        validRegex = true;
+                      } catch (e) {
                         errors.push({
                           topic: 'Configuration Error',
-                          message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          message: `Invalid regExp for ${currentPath}: \`${String(
+                            matchString
+                          )}\``,
                         });
                       }
                     }
+                    if (validRegex) {
+                      const mandatoryFields = [
+                        'depName',
+                        'currentValue',
+                        'datasource',
+                      ];
+                      for (const field of mandatoryFields) {
+                        if (
+                          !regexManager[`${field}Template`] &&
+                          !regexManager.matchStrings.some((matchString) =>
+                            matchString.includes(`(?<${field}>`)
+                          )
+                        ) {
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                          });
+                        }
+                      }
+                    }
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                    });
                   }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a fileMatch array`,
+                    message: `Each Regex Manager must contain a non-empty fileMatch array`,
                   });
                 }
               }
@@ -532,7 +539,7 @@ export async function validateConfig(
                 .filter((option) => option.freeChoice)
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
-                const subValidation = await module.exports.validateConfig(
+                const subValidation = await validateConfig(
                   val,
                   isPreset,
                   currentPath

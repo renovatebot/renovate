@@ -1,5 +1,5 @@
 import { defaultConfig, git, platform } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { BranchStatus } from '../../types';
 import { tryBranchAutomerge } from './automerge';
@@ -13,7 +13,7 @@ describe('workers/branch/automerge', () => {
       config = {
         ...defaultConfig,
       };
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('returns false if not configured for automerge', async () => {
       config.automerge = false;
@@ -63,7 +63,7 @@ describe('workers/branch/automerge', () => {
     it('returns true if automerge succeeds (dry-run)', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      setGlobalConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });

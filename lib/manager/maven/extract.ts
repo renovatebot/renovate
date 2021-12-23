@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { basename, dirname, join, normalize } from 'upath';
+import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
@@ -41,9 +41,9 @@ function depFromNode(node: XmlElement): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
   }
-  let groupId = node.valueWithPath('groupId');
-  const artifactId = node.valueWithPath('artifactId');
-  const currentValue = node.valueWithPath('version');
+  let groupId = node.valueWithPath('groupId')?.trim();
+  const artifactId = node.valueWithPath('artifactId')?.trim();
+  const currentValue = node.valueWithPath('version')?.trim();
 
   if (!groupId && node.name === 'plugin') {
     groupId = 'org.apache.maven.plugins';
@@ -63,7 +63,7 @@ function depFromNode(node: XmlElement): PackageDependency | null {
       registryUrls,
     };
 
-    const depType = node.valueWithPath('scope');
+    const depType = node.valueWithPath('scope')?.trim();
     if (depType) {
       result.depType = depType;
     }
@@ -154,13 +154,13 @@ function applyProps(
 function resolveParentFile(packageFile: string, parentPath: string): string {
   let parentFile = 'pom.xml';
   let parentDir = parentPath;
-  const parentBasename = basename(parentPath);
+  const parentBasename = upath.basename(parentPath);
   if (parentBasename === 'pom.xml' || parentBasename.endsWith('.pom.xml')) {
     parentFile = parentBasename;
-    parentDir = dirname(parentPath);
+    parentDir = upath.dirname(parentPath);
   }
-  const dir = dirname(packageFile);
-  return normalize(join(dir, parentDir, parentFile));
+  const dir = upath.dirname(packageFile);
+  return upath.normalize(upath.join(dir, parentDir, parentFile));
 }
 
 export function extractPackage(
@@ -202,7 +202,7 @@ export function extractPackage(
   if (repositories?.children) {
     const repoUrls = [];
     for (const repo of repositories.childrenNamed('repository')) {
-      const repoUrl = repo.valueWithPath('url');
+      const repoUrl = repo.valueWithPath('url')?.trim();
       if (repoUrl) {
         repoUrls.push(repoUrl);
       }
@@ -216,7 +216,7 @@ export function extractPackage(
 
   if (packageFile && project.childNamed('parent')) {
     const parentPath =
-      project.valueWithPath('parent.relativePath') || '../pom.xml';
+      project.valueWithPath('parent.relativePath')?.trim() || '../pom.xml';
     result.parent = resolveParentFile(packageFile, parentPath);
   }
 
@@ -273,7 +273,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const urlsSet = new Set([...rawDep.registryUrls, ...registryUrls[name]]);
-      rawDep.registryUrls = [...urlsSet]; // eslint-disable-line no-param-reassign
+      rawDep.registryUrls = [...urlsSet];
     });
   });
 
@@ -297,9 +297,9 @@ function cleanResult(
   packageFiles: PackageFile<Record<string, any>>[]
 ): PackageFile<Record<string, any>>[] {
   packageFiles.forEach((packageFile) => {
-    delete packageFile.mavenProps; // eslint-disable-line no-param-reassign
+    delete packageFile.mavenProps;
     packageFile.deps.forEach((dep) => {
-      delete dep.propSource; // eslint-disable-line no-param-reassign
+      delete dep.propSource;
     });
   });
   return packageFiles;

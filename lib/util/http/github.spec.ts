@@ -192,6 +192,14 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
+      it('should throw secondary rate limit exceeded', async () => {
+        await expect(
+          fail(403, {
+            message:
+              'You have exceeded a secondary rate limit and have been temporarily blocked from content creation. Please retry your request again later.',
+          })
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+      });
       it('should throw Bad credentials', async () => {
         await expect(
           fail(401, { message: 'Bad credentials. (401)' })
@@ -272,6 +280,7 @@ describe('util/http/github', () => {
           })
         ).rejects.toThrow('Validation error');
       });
+
       it('should throw original error of unknown type', async () => {
         await expect(
           fail(418, {
@@ -356,7 +365,7 @@ describe('util/http/github', () => {
       await githubApi.requestGraphql(graphqlQuery);
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
+      expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
     });
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
@@ -483,6 +492,23 @@ describe('util/http/github', () => {
       expect(trace).toHaveLength(4);
       expect(trace).toMatchSnapshot();
     });
+
+    it('continues to iterate with a lower page size on error 502', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(502)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2)
+        .post('/graphql')
+        .reply(200, page3);
+
+      const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
+      expect(items).toHaveLength(3);
+    });
+
     it('throws on 50x if count < 10', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(500);
       await expect(

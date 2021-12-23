@@ -1,8 +1,9 @@
 import { quote } from 'shlex';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -13,7 +14,7 @@ import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/; // TODO #12070
+const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?<plugin>[^'"]+)(['"])`);
 
 function getPluginCommands(content: string): string[] {
   const result = new Set<string>();
@@ -113,8 +114,8 @@ export async function updateArtifacts({
     },
   ];
 
-  const podsDir = join(dirname(packageFileName), 'Pods');
-  const podsManifestFileName = join(podsDir, 'Manifest.lock');
+  const podsDir = upath.join(upath.dirname(packageFileName), 'Pods');
+  const podsManifestFileName = upath.join(podsDir, 'Manifest.lock');
   if (await readLocalFile(podsManifestFileName, 'utf8')) {
     for (const f of status.modified.concat(status.not_added)) {
       if (f.startsWith(podsDir)) {
@@ -135,6 +136,5 @@ export async function updateArtifacts({
       });
     }
   }
-
   return res;
 }

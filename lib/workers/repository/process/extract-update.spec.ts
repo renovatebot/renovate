@@ -32,8 +32,16 @@ describe('workers/repository/process/extract-update', () => {
       git.checkoutBranch.mockResolvedValueOnce('123test');
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        branchList: ['branchName'],
+        branches: [
+          {
+            branchName: 'some-branch',
+            upgrades: [],
+          },
+        ],
+        packageFiles: undefined,
+      });
       await expect(update(config, res.branches)).resolves.not.toThrow();
     });
     it('runs with baseBranches', async () => {
@@ -45,8 +53,7 @@ describe('workers/repository/process/extract-update', () => {
       git.checkoutBranch.mockResolvedValueOnce('123test');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toBeUndefined();
     });
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};

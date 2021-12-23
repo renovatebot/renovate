@@ -1,8 +1,8 @@
 import { exec as _exec } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
-import { toUnix } from 'upath';
-import { ExecOptions } from '../lib/util/exec';
+import upath from 'upath';
+import type { ExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 
 type CallOptions = ExecOptions | null | undefined;
@@ -25,9 +25,8 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
     options,
   };
 
-  const cwd = toUnix(process.cwd());
+  const cwd = upath.toUnix(process.cwd());
 
-  // eslint-disable-next-line array-callback-return
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {
       const val = v
@@ -51,7 +50,7 @@ export function mockExecAll(
       throw execResult;
     }
     callback(null, execResult);
-    return undefined;
+    return undefined as never;
   });
   return snapshots;
 }
@@ -68,7 +67,7 @@ export function mockExecSequence(
         throw execResult;
       }
       callback(null, execResult);
-      return undefined;
+      return undefined as never;
     });
   });
   return snapshots;

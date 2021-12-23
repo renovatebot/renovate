@@ -13,7 +13,6 @@ export * from './types';
 export const getPlatformList = (): string[] => Array.from(platforms.keys());
 export const getPlatforms = (): Map<string, Platform> => platforms;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 let _platform: Platform;
 
 const handler: ProxyHandler<Platform> = {

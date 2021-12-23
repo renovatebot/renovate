@@ -1,12 +1,13 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -26,12 +27,13 @@ function parseDepName(depType: string, key: string): string {
     return key;
   }
 
-  const [, depName] = /((?:@[^/]+\/)?[^/@]+)$/.exec(key) ?? []; // TODO #12070
+  const [, depName] = regEx(/((?:@[^/]+\/)?[^/@]+)$/).exec(key) ?? [];
   return depName;
 }
 
-const RE_REPOSITORY_GITHUB_SSH_FORMAT =
-  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/; // TODO #12070
+const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
+  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/
+);
 
 export async function extractPackageFile(
   content: string,
@@ -48,7 +50,7 @@ export async function extractPackageFile(
     logger.debug({ fileName }, 'Invalid JSON');
     return null;
   }
-  // eslint-disable-next-line no-underscore-dangle
+
   if (packageJson._id && packageJson._args && packageJson._from) {
     logger.debug('Ignoring vendorised package.json');
     return null;
@@ -106,13 +108,16 @@ export async function extractPackageFile(
     } else {
       npmrc = config.npmrc || '';
       if (npmrc.length) {
-        npmrc = npmrc.replace(/\n?$/, '\n'); // TODO #12070
+        npmrc = npmrc.replace(/\n?$/, '\n'); // TODO #12875 add \n to front when used with re2
       }
       if (repoNpmrc?.includes('package-lock')) {
         logger.debug('Stripping package-lock setting from .npmrc');
-        repoNpmrc = repoNpmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n'); // TODO #12070
+        repoNpmrc = repoNpmrc.replace(
+          regEx(/(^|\n)package-lock.*?(\n|$)/g),
+          '\n'
+        );
       }
-      if (repoNpmrc.includes('=${') && !getGlobalConfig().exposeAllEnv) {
+      if (repoNpmrc.includes('=${') && !GlobalConfig.get('exposeAllEnv')) {
         logger.debug(
           { npmrcFileName },
           'Stripping .npmrc file of lines with variables'
@@ -160,6 +165,7 @@ export async function extractPackageFile(
     engines: 'engine',
     volta: 'volta',
     resolutions: 'resolutions',
+    packageManager: 'packageManager',
   };
 
   const constraints: Record<string, any> = {};
@@ -179,7 +185,7 @@ export async function extractPackageFile(
       return dep;
     }
     dep.currentValue = input.trim();
-    if (depType === 'engines') {
+    if (depType === 'engines' || depType === 'packageManager') {
       if (depName === 'node') {
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
@@ -189,6 +195,12 @@ export async function extractPackageFile(
         dep.datasource = npmId;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
+        if (
+          dep.currentValue.startsWith('2') ||
+          dep.currentValue.startsWith('3')
+        ) {
+          dep.lookupName = '@yarnpkg/cli';
+        }
       } else if (depName === 'npm') {
         dep.datasource = npmId;
         dep.commitMessageTopic = 'npm';
@@ -272,10 +284,10 @@ export async function extractPackageFile(
     const matchUrlSshFormat = RE_REPOSITORY_GITHUB_SSH_FORMAT.exec(depNamePart);
     if (matchUrlSshFormat === null) {
       githubOwnerRepo = depNamePart
-        .replace(/^github:/, '') // TODO #12070
-        .replace(/^git\+/, '') // TODO #12070
-        .replace(/^https:\/\/github\.com\//, '') // TODO #12070
-        .replace(/\.git$/, ''); // TODO #12070
+        .replace(regEx(/^github:/), '')
+        .replace(regEx(/^git\+/), '')
+        .replace(regEx(/^https:\/\/github\.com\//), '')
+        .replace(regEx(/\.git$/), '');
       const githubRepoSplit = githubOwnerRepo.split('/');
       if (githubRepoSplit.length !== 2) {
         dep.skipReason = SkipReason.UnknownVersion;
@@ -287,7 +299,7 @@ export async function extractPackageFile(
       githubRepo = matchUrlSshFormat[2];
       githubOwnerRepo = `${githubOwner}/${githubRepo}`;
     }
-    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/; // TODO #12070
+    const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/; // TODO #12872 lookahead
     if (
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
@@ -302,8 +314,8 @@ export async function extractPackageFile(
       dep.lookupName = githubOwnerRepo;
       dep.pinDigests = false;
     } else if (
-      /^[0-9a-f]{7}$/.test(depRefPart) || // TODO #12070
-      /^[0-9a-f]{40}$/.test(depRefPart) // TODO #12070
+      regEx(/^[0-9a-f]{7}$/).test(depRefPart) ||
+      regEx(/^[0-9a-f]{40}$/).test(depRefPart)
     ) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = null;
@@ -321,10 +333,19 @@ export async function extractPackageFile(
   }
 
   for (const depType of Object.keys(depTypes)) {
-    if (packageJson[depType]) {
+    let dependencies = packageJson[depType];
+    if (dependencies) {
       try {
+        if (depType === 'packageManager') {
+          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(dependencies);
+          // istanbul ignore next
+          if (!match) {
+            break;
+          }
+          dependencies = { [match.groups.name]: match.groups.range };
+        }
         for (const [key, val] of Object.entries(
-          packageJson[depType] as NpmPackageDependency
+          dependencies as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
           let dep: PackageDependency = {

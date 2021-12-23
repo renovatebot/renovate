@@ -54,6 +54,13 @@ export interface GhGraphQlPr extends GhPr {
   labels: string[] & { nodes?: { name: string }[] };
 }
 
+export interface PlatformConfig {
+  hostType: string;
+  endpoint: string;
+  isGhe?: boolean;
+  gheVersion?: string | null;
+}
+
 export interface LocalRepoConfig {
   repositoryName: string;
   repositoryId: string;
@@ -72,7 +79,6 @@ export interface LocalRepoConfig {
   defaultBranchOid: string;
   repositoryOwner: string;
   repository: string | null;
-  isGhe: boolean;
   renovateUsername: string;
   productLinks: any;
   ignorePrAuthor: boolean;

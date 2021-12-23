@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { partial } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import * as hostRules from '../../util/host-rules';
 import type { PackageFile } from '../types';
 import extractPackageFile from './extract';
@@ -44,20 +44,20 @@ describe('manager/git-submodules/extract', () => {
   });
   describe('extractPackageFile()', () => {
     it('extracts submodules', async () => {
-      setGlobalConfig({ localDir: `${__dirname}/__fixtures__` });
+      GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
       hostRules.add({ matchHost: 'github.com', token: '123test' });
       let res: PackageFile;
       expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res.deps).toHaveLength(1);
-      expect(res.deps[0].currentValue).toEqual('main');
+      expect(res.deps[0].currentValue).toBe('main');
       res = await extractPackageFile('', '.gitmodules.3', {});
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.4', {});
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.5', {});
       expect(res.deps).toHaveLength(3);
-      expect(res.deps[2].lookupName).toEqual(
+      expect(res.deps[2].lookupName).toBe(
         'https://github.com/renovatebot/renovate-config.git'
       );
     });

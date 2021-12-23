@@ -1,5 +1,5 @@
 import { getConfig, platform } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { BranchStatus } from '../../types';
 import { BranchConfig } from '../types';
 import { setArtifactErrorStatus } from './artifacts';
@@ -7,7 +7,7 @@ import { setArtifactErrorStatus } from './artifacts';
 describe('workers/branch/artifacts', () => {
   let config: BranchConfig;
   beforeEach(() => {
-    setGlobalConfig({});
+    GlobalConfig.set({});
     jest.resetAllMocks();
     config = {
       ...getConfig(),
@@ -31,7 +31,7 @@ describe('workers/branch/artifacts', () => {
     });
 
     it('skips status (dry-run)', async () => {
-      setGlobalConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       platform.getBranchStatusCheck.mockResolvedValueOnce(null);
       await setArtifactErrorStatus(config);
       expect(platform.setBranchStatus).not.toHaveBeenCalled();

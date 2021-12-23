@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 import { loadFixture } from '../../../test/util';
 import { extractPackage } from './extract';
 

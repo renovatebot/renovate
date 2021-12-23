@@ -2,12 +2,14 @@ import crypto from 'crypto';
 import merge from 'deepmerge';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
+import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
 import type {
@@ -68,14 +70,7 @@ function cloneResponse<T extends Buffer | string | any>(
 }
 
 function applyDefaultHeaders(options: Options): void {
-  let renovateVersion = 'unknown';
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error getting renovate version');
-  }
-  // eslint-disable-next-line no-param-reassign
+  const renovateVersion = pkg.version;
   options.headers = {
     ...options.headers,
     'user-agent':
@@ -98,7 +93,7 @@ async function gotRoutine<T>(
 
   // Cheat the TS compiler using `as` to pick a specific overload.
   // Otherwise it doesn't typecheck.
-  const resp = await got<T>(url, options as GotJSONOptions);
+  const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
   const duration =
     resp.timings.phases.total || /* istanbul ignore next: can't be tested */ 0;
 
@@ -292,13 +287,13 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       ...options,
     };
 
+    let resolvedUrl = url;
     // istanbul ignore else: needs test
     if (options?.baseUrl) {
-      // eslint-disable-next-line no-param-reassign
-      url = resolveBaseUrl(options.baseUrl, url);
+      resolvedUrl = resolveBaseUrl(options.baseUrl, url);
     }
 
     applyDefaultHeaders(combinedOptions);
-    return got.stream(url, combinedOptions);
+    return got.stream(resolvedUrl, combinedOptions);
   }
 }

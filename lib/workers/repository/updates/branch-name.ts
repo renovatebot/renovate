@@ -1,4 +1,4 @@
-import { clean as cleanGitRef } from 'clean-git-ref';
+import cleanGitRef from 'clean-git-ref';
 import hasha from 'hasha';
 import slugify from 'slugify';
 import type { RenovateConfig } from '../../../config/types';
@@ -19,15 +19,17 @@ const RE_MULTIPLE_DASH = regEx(/--+/g);
  * - chained dashes(breaks markdown comments) are replaced by single dash
  */
 function cleanBranchName(branchName: string): string {
-  return cleanGitRef(branchName)
+  return cleanGitRef
+    .clean(branchName)
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
     .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: : ? [ \ ^ ~
+    .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
+    .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
-/* eslint-disable no-param-reassign */
 export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {

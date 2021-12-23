@@ -1,8 +1,8 @@
-import * as semver from 'semver';
+import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';
-import { configRegexPredicate, isConfigRegex } from '../../../../util/regex';
+import { configRegexPredicate } from '../../../../util/regex';
 import type { VersioningApi } from '../../../../versioning';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440 from '../../../../versioning/pep440';
@@ -29,6 +29,7 @@ export function filterVersions(
     }
     return true;
   }
+  // istanbul ignore if: shouldn't happen
   if (!currentVersion) {
     return [];
   }
@@ -60,10 +61,10 @@ export function filterVersions(
   }
 
   if (allowedVersions) {
-    if (isConfigRegex(allowedVersions)) {
-      const isAllowed = configRegexPredicate(allowedVersions);
+    const isAllowedPred = configRegexPredicate(allowedVersions);
+    if (isAllowedPred) {
       filteredVersions = filteredVersions.filter(({ version }) =>
-        isAllowed(version)
+        isAllowedPred(version)
       );
     } else if (versioning.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>

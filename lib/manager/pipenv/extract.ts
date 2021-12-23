@@ -1,5 +1,5 @@
 import toml from '@iarna/toml';
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
+import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier.js';
 import is from '@sindresorhus/is';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
@@ -18,6 +18,7 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
   '?:'
 )}\\s*`;
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
+const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
   pipfile: PipFile,
   section: 'packages' | 'dev-packages'
@@ -25,7 +26,7 @@ function extractFromSection(
   if (!(section in pipfile)) {
     return [];
   }
-  const specifierRegex = regEx(`^${specifierPattern}$`);
+
   const pipfileSection = pipfile[section];
 
   const deps = Object.entries(pipfileSection)

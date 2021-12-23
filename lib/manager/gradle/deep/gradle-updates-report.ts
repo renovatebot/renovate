@@ -1,4 +1,4 @@
-import { join } from 'upath';
+import upath from 'upath';
 import * as datasourceSbtPackage from '../../../datasource/sbt-package';
 import { logger } from '../../../logger';
 import {
@@ -52,7 +52,7 @@ gradle.buildFinished {
    def json = JsonOutput.toJson(output)
    outputFile.write json
 }`;
-  const gradleInitFile = join(gradleRoot, 'renovate-plugin.gradle');
+  const gradleInitFile = upath.join(gradleRoot, 'renovate-plugin.gradle');
   logger.debug(
     'Creating renovate-plugin.gradle file with renovate gradle plugin'
   );
@@ -60,7 +60,7 @@ gradle.buildFinished {
 }
 
 async function readGradleReport(localDir: string): Promise<GradleProject[]> {
-  const renovateReportFilename = join(
+  const renovateReportFilename = upath.join(
     localDir,
     GRADLE_DEPENDENCY_REPORT_FILENAME
   );
@@ -72,7 +72,7 @@ async function readGradleReport(localDir: string): Promise<GradleProject[]> {
   try {
     return JSON.parse(contents);
   } catch (err) {
-    logger.error({ err }, 'Invalid JSON');
+    logger.error({ err }, 'Invalid Gradle extract JSON');
     return [];
   }
 }

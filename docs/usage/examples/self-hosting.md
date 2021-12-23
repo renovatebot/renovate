@@ -15,7 +15,7 @@ If you want to use these package managers to update your lockfiles, you must ens
 npm install -g yarn pnpm
 ```
 
-The same goes for any other third party binary tool like `gradle` or `poetry` - you need to make sure they are installed and the appropriate version before running Renovate.
+The same goes for any other third-party binary tool like `gradle` or `poetry` - you need to make sure it is installed and the appropriate version before running Renovate.
 
 ### Docker
 
@@ -210,15 +210,15 @@ By default, Renovate stores all files in the `renovate/` subdirectory of the ope
 
 Repository data is copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
 
-Renovate's own cache, as well as the caches(s) for npm, Yarn, Composer etc, is stored in `/tmp/renovate/cache`.
+Renovate's own cache, as well as the caches(s) for npm, Yarn, Composer etc, are stored in `/tmp/renovate/cache`.
 
-To use another directory as the base directory, instead of `tmp/renovate`:
+To use another directory as the base directory, instead of the default `tmp/renovate` you can:
 
-- Configure a value for `baseDir` in `config.js`
+- Set a value for `baseDir` in `config.js`
 - Use an environment variable `RENOVATE_BASE_DIR`
 - Use the CLI to pass a base directory: `--base-dir=`
 
-If you want to override the cache location then configure a value for `cacheDir` instead.
+If you want to override the cache location then set a value for `cacheDir` instead.
 
 ## Usage
 

@@ -1,3 +1,4 @@
+import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
@@ -12,6 +13,9 @@ import type { ExtractionResult } from './types';
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
 );
+export const bitbucketRefMatchRegex = regEx(
+  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?ref=(?<tag>.*)$/
+);
 export const gitTagsRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/
 );
@@ -24,7 +28,6 @@ export function extractTerraformModule(
 ): ExtractionResult {
   const result = extractTerraformProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line no-param-reassign
     dep.managerData.terraformDependencyType = TerraformDependencyTypes.module;
   });
   return result;
@@ -32,14 +35,24 @@ export function extractTerraformModule(
 
 export function analyseTerraformModule(dep: PackageDependency): void {
   const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
+  const bitbucketRefMatch = bitbucketRefMatchRegex.exec(dep.managerData.source);
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
-  /* eslint-disable no-param-reassign */
+
   if (githubRefMatch) {
     dep.lookupName = githubRefMatch.groups.project.replace(regEx(/\.git$/), '');
     dep.depType = 'module';
     dep.depName = 'github.com/' + dep.lookupName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = datasourceGithubTags.id;
+  } else if (bitbucketRefMatch) {
+    dep.depType = 'module';
+    dep.depName =
+      bitbucketRefMatch.groups.workspace +
+      '/' +
+      bitbucketRefMatch.groups.project;
+    dep.lookupName = dep.depName;
+    dep.currentValue = bitbucketRefMatch.groups.tag;
+    dep.datasource = BitBucketTagsDatasource.id;
   } else if (gitTagsRefMatch) {
     dep.depType = 'module';
     if (gitTagsRefMatch.groups.path.includes('//')) {
@@ -70,5 +83,4 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     logger.debug({ dep }, 'terraform dep has no source');
     dep.skipReason = SkipReason.NoSource;
   }
-  /* eslint-enable no-param-reassign */
 }

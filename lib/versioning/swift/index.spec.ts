@@ -23,16 +23,19 @@ describe('versioning/swift/index', () => {
     version                    | expected
     ${'from: "1.2.3"'}         | ${true}
     ${'from : "1.2.3"'}        | ${true}
+    ${'from : "1.2.3.4.5"'}    | ${false}
     ${'from:"1.2.3"'}          | ${true}
     ${' from:"1.2.3" '}        | ${true}
     ${' from : "1.2.3" '}      | ${true}
     ${'"1.2.3"..."1.2.4"'}     | ${true}
     ${' "1.2.3" ... "1.2.4" '} | ${true}
     ${'"1.2.3"...'}            | ${true}
+    ${'"1.2.3.4.5"...'}        | ${false}
     ${' "1.2.3" ... '}         | ${true}
     ${'..."1.2.4"'}            | ${true}
     ${' ... "1.2.4" '}         | ${true}
     ${'"1.2.3"..<"1.2.4"'}     | ${true}
+    ${'"1.2.3.4.5"..<"1.2.4"'} | ${false}
     ${' "1.2.3" ..< "1.2.4" '} | ${true}
     ${'..<"1.2.4"'}            | ${true}
     ${' ..< "1.2.4" '}         | ${true}
@@ -86,7 +89,7 @@ describe('versioning/swift/index', () => {
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
-      expect(isLessThanRange(version, range)).toBe(expected);
+      expect(isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 

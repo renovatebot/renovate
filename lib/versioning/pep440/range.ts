@@ -1,6 +1,6 @@
 import { gte, lt, lte, satisfies } from '@renovate/pep440';
-import { parse as parseRange } from '@renovate/pep440/lib/specifier';
-import { parse as parseVersion } from '@renovate/pep440/lib/version';
+import { parse as parseRange } from '@renovate/pep440/lib/specifier.js';
+import { parse as parseVersion } from '@renovate/pep440/lib/version.js';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { NewValueConfig } from '../types';
@@ -80,7 +80,10 @@ export function getNewValue({
   }
   if (ranges.some((range) => range.operator === '===')) {
     // the operator "===" is used for legacy non PEP440 versions
-    logger.warn('Arbitrary equality not supported: ' + currentValue);
+    logger.warn(
+      { currentValue },
+      'PEP440 arbitrary equality (===) not supported'
+    );
     return null;
   }
   let result = ranges

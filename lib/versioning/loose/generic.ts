@@ -104,15 +104,20 @@ export const comparer = (
   };
 };
 
-// helper functions to ease create other versioning schemas with little code
-// especially if those schemas do not support ranges
+/**
+ * helper functions to ease create other versioning schemas with little code
+ * especially if those schemas do not support ranges
+ * @deprecated Use `GenericVersioningApi` instead
+ * @param param0 object with parse and optional compare function
+ * @returns
+ */
 export const create = ({
   parse,
   compare,
 }: {
   parse: VersionParser;
   compare: VersionComparator;
-}): any => {
+}): VersioningApi => {
   let schema: VersioningApi = {} as any;
   if (parse) {
     schema = { ...schema, ...parser(parse) };
@@ -175,7 +180,7 @@ export abstract class GenericVersioningApi<
   /*
    * virtual
    */
-  // eslint-disable-next-line class-methods-use-this
+
   protected _compareOther(_left: T, _right: T): number {
     return 0;
   }
@@ -235,7 +240,6 @@ export abstract class GenericVersioningApi<
     return versions.find((v) => this.equals(v, range)) || null;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getNewValue(newValueConfig: NewValueConfig): string {
     const { newVersion } = newValueConfig || {};
     return newVersion;

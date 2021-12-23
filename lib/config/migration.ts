@@ -4,8 +4,8 @@ import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
-import { getGlobalConfig } from './global';
-import { applyMigrations } from './migrations';
+import { GlobalConfig } from './global';
+import { MigrationsService } from './migrations';
 import { getOptions } from './options';
 import { removedPresets } from './presets/common';
 import type {
@@ -20,23 +20,6 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 
-const removedOptions = [
-  'maintainYarnLock',
-  'yarnCacheFolder',
-  'yarnMaintenanceBranchName',
-  'yarnMaintenanceCommitMessage',
-  'yarnMaintenancePrTitle',
-  'yarnMaintenancePrBody',
-  'groupBranchName',
-  'groupBranchName',
-  'groupCommitMessage',
-  'groupPrTitle',
-  'groupPrBody',
-  'statusCheckVerify',
-  'lazyGrouping',
-  'supportPolicy',
-];
-
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfig,
@@ -50,7 +33,8 @@ export function migrateConfig(
         optionTypes[option.name] = option.type;
       });
     }
-    const migratedConfig = clone(config) as MigratedRenovateConfig;
+    const newConfig = MigrationsService.run(config).migratedConfig;
+    const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',
       'devDependencies',
@@ -58,12 +42,9 @@ export function migrateConfig(
       'optionalDependencies',
       'peerDependencies',
     ];
-    const { migratePresets } = getGlobalConfig();
-    applyMigrations(config, migratedConfig);
+    const { migratePresets } = GlobalConfig.get();
     for (const [key, val] of Object.entries(config)) {
-      if (removedOptions.includes(key)) {
-        delete migratedConfig[key];
-      } else if (key === 'pathRules') {
+      if (key === 'pathRules') {
         if (is.array(val)) {
           migratedConfig.packageRules = is.array(migratedConfig.packageRules)
             ? migratedConfig.packageRules
@@ -85,13 +66,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (key === 'gomodTidy') {
-        if (val) {
-          migratedConfig.postUpdateOptions =
-            migratedConfig.postUpdateOptions || [];
-          migratedConfig.postUpdateOptions.push('gomodTidy');
-        }
-        delete migratedConfig.gomodTidy;
       } else if (key === 'semanticCommits') {
         if (val === true) {
           migratedConfig.semanticCommits = 'enabled';
@@ -211,16 +185,6 @@ export function migrateConfig(
         if (val === false) {
           migratedConfig.rebaseWhen = 'never';
         }
-      } else if (key === 'exposeEnv') {
-        migratedConfig.exposeAllEnv = val;
-        delete migratedConfig.exposeEnv;
-      } else if (key === 'trustLevel') {
-        delete migratedConfig.trustLevel;
-        if (val === 'high') {
-          migratedConfig.allowCustomCrateRegistries ??= true;
-          migratedConfig.allowScripts ??= true;
-          migratedConfig.exposeAllEnv ??= true;
-        }
       } else if (key === 'ignoreNpmrcFile') {
         delete migratedConfig.ignoreNpmrcFile;
         if (!is.string(migratedConfig.npmrc)) {
@@ -305,9 +269,6 @@ export function migrateConfig(
           }
         }
         delete migratedConfig.unpublishSafe;
-      } else if (key === 'versionScheme') {
-        migratedConfig.versioning = val;
-        delete migratedConfig.versionScheme;
       } else if (
         key === 'automergeType' &&
         is.string(val) &&
@@ -316,31 +277,22 @@ export function migrateConfig(
         migratedConfig.automergeType = 'branch';
       } else if (key === 'automergeMinor') {
         migratedConfig.minor = migratedConfig.minor || {};
-        migratedConfig.minor.automerge = val == true; // eslint-disable-line eqeqeq
+        migratedConfig.minor.automerge = !!val;
         delete migratedConfig[key];
       } else if (key === 'automergeMajor') {
         migratedConfig.major = migratedConfig.major || {};
-        migratedConfig.major.automerge = val == true; // eslint-disable-line eqeqeq
+        migratedConfig.major.automerge = !!val;
         delete migratedConfig[key];
-      } else if (key === 'multipleMajorPrs') {
-        delete migratedConfig.multipleMajorPrs;
-        migratedConfig.separateMultipleMajor = val;
       } else if (key === 'renovateFork' && is.boolean(val)) {
         delete migratedConfig.renovateFork;
         migratedConfig.includeForks = val;
       } else if (key === 'separateMajorReleases') {
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
-      } else if (key === 'separatePatchReleases') {
-        delete migratedConfig.separatePatchReleases;
-        migratedConfig.separateMinorPatch = val;
       } else if (key === 'automergePatch') {
         migratedConfig.patch = migratedConfig.patch || {};
-        migratedConfig.patch.automerge = val == true; // eslint-disable-line eqeqeq
+        migratedConfig.patch.automerge = !!val;
         delete migratedConfig[key];
-      } else if (key === 'ignoreNodeModules') {
-        delete migratedConfig.ignoreNodeModules;
-        migratedConfig.ignorePaths = val ? ['node_modules/'] : [];
       } else if (
         key === 'automerge' &&
         is.string(val) &&
@@ -374,9 +326,6 @@ export function migrateConfig(
           migratedConfig.packages
         );
         delete migratedConfig.packages;
-      } else if (key === 'excludedPackageNames') {
-        migratedConfig.excludePackageNames = val;
-        delete migratedConfig.excludedPackageNames;
       } else if (key === 'packageName') {
         migratedConfig.packageNames = [val];
         delete migratedConfig.packageName;
@@ -541,8 +490,6 @@ export function migrateConfig(
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
         }
-      } else if (key === 'binarySource' && val === 'auto') {
-        migratedConfig.binarySource = 'global';
       } else if (key === 'composerIgnorePlatformReqs') {
         if (val === true) {
           migratedConfig.composerIgnorePlatformReqs = [];

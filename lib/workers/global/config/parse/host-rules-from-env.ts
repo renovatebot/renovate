@@ -13,7 +13,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
   for (const envName of Object.keys(env).sort()) {
     if (npmEnvPrefixes.some((prefix) => envName.startsWith(prefix))) {
       logger.trace('Ignoring npm env: ' + envName);
-      continue; // eslint-disable-line no-continue
+      continue;
     }
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
@@ -28,7 +28,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
           // host-less rule
         } else if (splitEnv.length === 1) {
           logger.warn(`Cannot parse ${envName} env`);
-          continue; // eslint-disable-line no-continue
+          continue;
         } else {
           matchHost = splitEnv.join('.');
         }

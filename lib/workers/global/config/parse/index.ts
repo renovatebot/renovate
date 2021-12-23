@@ -8,6 +8,7 @@ import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
 import * as envParser from './env';
 import * as fileParser from './file';
+import { hostRulesFromEnv } from './host-rules-from-env';
 
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
@@ -17,7 +18,7 @@ export async function parseConfigs(
 
   // Get configs
   const defaultConfig = defaultsParser.getConfig();
-  const fileConfig = fileParser.getConfig(env);
+  const fileConfig = await fileParser.getConfig(env);
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = envParser.getConfig(env);
 
@@ -81,6 +82,10 @@ export async function parseConfigs(
     config = mergeChildConfig(config, globalManagerConfig);
   }
 
+  if (config.detectHostRulesFromEnv) {
+    const hostRules = hostRulesFromEnv(env);
+    config.hostRules = [...config.hostRules, ...hostRules];
+  }
   // Get global config
   logger.trace({ config }, 'Full config');
 
