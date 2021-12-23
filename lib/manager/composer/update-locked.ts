@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { api as composer } from '../../versioning/composer';
-import { UpdateLockedConfig, UpdateLockedResult } from '../types';
-import { ComposerLock } from './types';
+import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
+import type { ComposerLock } from './types';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig
