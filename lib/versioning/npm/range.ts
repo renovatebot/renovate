@@ -64,10 +64,7 @@ export function getNewValue({
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return newVersion;
   }
-  if (
-    rangeStrategy === 'update-lockfile' ||
-    rangeStrategy === 'in-range-only'
-  ) {
+  if (rangeStrategy === 'update-lockfile') {
     if (satisfies(newVersion, currentValue)) {
       return currentValue;
     }

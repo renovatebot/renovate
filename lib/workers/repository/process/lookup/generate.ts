@@ -64,10 +64,7 @@ export function generateUpdate(
   if (!versioning.isVersion(update.newValue)) {
     update.isRange = true;
   }
-  if (
-    ['update-lockfile', 'in-range-only'].includes(rangeStrategy) &&
-    currentValue === update.newValue
-  ) {
+  if (rangeStrategy === 'update-lockfile' && currentValue === update.newValue) {
     update.isLockfileUpdate = true;
   }
   if (

@@ -102,11 +102,10 @@ export async function shouldReuseExistingBranch(
 
     if (
       groupedByPackageFile[upgrade.packageFile].size > 1 &&
-      (groupedByPackageFile[upgrade.packageFile].has('update-lockfile') ||
-        groupedByPackageFile[upgrade.packageFile].has('in-range-only'))
+      groupedByPackageFile[upgrade.packageFile].has('update-lockfile')
     ) {
       logger.debug(
-        `Detected multiple rangeStrategies along with update-lockfile or in-range-only`
+        `Detected multiple rangeStrategies along with update-lockfile`
       );
       return {
         reuseExistingBranch: false,

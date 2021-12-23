@@ -150,12 +150,6 @@ describe('versioning/composer/index', () => {
     ${'^5.1'}                 | ${'update-lockfile'} | ${'5.1.0'}        | ${'6.0.0'}       | ${'^6.0'}
     ${'^5'}                   | ${'update-lockfile'} | ${'5.1.0'}        | ${'5.2.0'}       | ${'^5'}
     ${'^5'}                   | ${'update-lockfile'} | ${'5.1.0'}        | ${'6.0.0'}       | ${'^6'}
-    ${'^0.1'}                 | ${'in-range-only'}   | ${'0.1.0'}        | ${'0.1.1'}       | ${'^0.1'}
-    ${'^0.1'}                 | ${'in-range-only'}   | ${'0.1.0'}        | ${'0.2.0'}       | ${'^0.2'}
-    ${'^5.1'}                 | ${'in-range-only'}   | ${'5.1.0'}        | ${'5.2.0'}       | ${'^5.1'}
-    ${'^5.1'}                 | ${'in-range-only'}   | ${'5.1.0'}        | ${'6.0.0'}       | ${'^6.0'}
-    ${'^5'}                   | ${'in-range-only'}   | ${'5.1.0'}        | ${'5.2.0'}       | ${'^5'}
-    ${'^5'}                   | ${'in-range-only'}   | ${'5.1.0'}        | ${'6.0.0'}       | ${'^6'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

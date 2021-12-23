@@ -132,10 +132,7 @@ function getNewValue({
   if (rangeStrategy === 'pin') {
     return newVersion;
   }
-  if (
-    rangeStrategy === 'update-lockfile' ||
-    rangeStrategy === 'in-range-only'
-  ) {
+  if (rangeStrategy === 'update-lockfile') {
     if (matches(newVersion, currentValue)) {
       return currentValue;
     }

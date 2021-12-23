@@ -36,7 +36,7 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
-  if (['replace', 'update-lockfile', 'in-range-only'].includes(rangeStrategy)) {
+  if (['replace', 'update-lockfile'].includes(rangeStrategy)) {
     if (
       regEx(/~>\s*0\.\d+/).test(currentValue) &&
       npm.getMajor(newVersion) === 0
