@@ -11,15 +11,20 @@ export function updateLockedDependency(
   logger.debug(
     `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
-  const locked = JSON.parse(lockFileContent) as ComposerLock;
-  if (
-    locked.packages?.find(
-      (entry) =>
-        entry.name === depName &&
-        composer.equals(entry.version || '', newVersion)
-    )
-  ) {
-    return { status: 'already-updated' };
+  try {
+    const locked = JSON.parse(lockFileContent) as ComposerLock;
+    if (
+      locked.packages?.find(
+        (entry) =>
+          entry.name === depName &&
+          composer.equals(entry.version || '', newVersion)
+      )
+    ) {
+      return { status: 'already-updated' };
+    }
+    return { status: 'unsupported' };
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'composer.updateLockedDependency() error');
+    return { status: 'update-failed' };
   }
-  return { status: 'unsupported' };
 }

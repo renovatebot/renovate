@@ -10,9 +10,14 @@ export function updateLockedDependency(
   logger.debug(
     `bundler.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
-  const locked = extractLockFileEntries(lockFileContent);
-  if (locked.get(depName) === newVersion) {
-    return { status: 'already-updated' };
+  try {
+    const locked = extractLockFileEntries(lockFileContent);
+    if (locked.get(depName) === newVersion) {
+      return { status: 'already-updated' };
+    }
+    return { status: 'unsupported' };
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'composer.updateLockedDependency() error');
+    return { status: 'update-failed' };
   }
-  return { status: 'unsupported' };
 }
