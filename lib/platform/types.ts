@@ -1,6 +1,6 @@
 import type { MergeStrategy } from '../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../types';
-import type { CommitFilesConfig, CommitSha } from '../util/git';
+import type { CommitFilesConfig, CommitSha } from '../util/git/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
