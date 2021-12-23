@@ -692,7 +692,7 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchReleaseNotes
 
-Configure this to `false` if you want to disable release notes fetching
+Set this to `false` if you want to disable release notes fetching.
 
 ## fileMatch
 
@@ -2001,6 +2001,8 @@ Possible values and meanings:
 - If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 It is also recommended to avoid `rebaseWhen=never` as it can result in conflicted branches with outdated PR descriptions and/or status checks.
+
+Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` as this can prevent creation of PRs.
 
 ## recreateClosed
 

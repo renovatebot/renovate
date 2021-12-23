@@ -5,8 +5,8 @@ import {
   fromHexcodeToCodepoint,
   fromUnicodeToHexcode,
 } from 'emojibase';
-import emojibaseEmojiRegex from 'emojibase-regex/emoji';
-import SHORTCODE_REGEX from 'emojibase-regex/shortcode';
+import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
+import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
 import type { RenovateConfig } from '../config/types';
 import dataFiles from '../data-files.generated';
 import { regEx } from './regex';
