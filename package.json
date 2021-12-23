@@ -185,7 +185,7 @@
     "openpgp": "5.0.1",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
-    "p-queue": "6.6.2",
+    "p-queue": "7.1.0",
     "parse-diff": "0.8.1",
     "parse-link-header": "1.0.1",
     "redis": "3.1.2",
