@@ -28,10 +28,11 @@ module.exports = {
      * checks done by typescript.
      *
      * https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/FAQ.md#eslint-plugin-import
+     * required for esm check
      */
-    'import/default': 0,
-    'import/named': 0,
-    'import/namespace': 0,
+    'import/default': 2,
+    'import/named': 2,
+    'import/namespace': 2,
     'import/no-named-as-default-member': 0,
     'import/prefer-default-export': 0, // no benefit
 
@@ -121,6 +122,10 @@ module.exports = {
   },
   overrides: [
     {
+      // files to check, so no `--ext` is required
+      files: ['**/*.{js,mjs,cjs,ts}'],
+    },
+    {
       files: ['**/*.spec.ts', 'test/**'],
       env: {
         jest: true,
@@ -143,7 +148,7 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.{js,mjs}'],
+      files: ['**/*.{js,mjs,cjs}'],
 
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0,
@@ -152,7 +157,7 @@ module.exports = {
       },
     },
     {
-      files: ['tools/**/*.{ts,js,mjs}'],
+      files: ['tools/**/*.{ts,js,mjs,cjs}'],
       env: {
         node: true,
       },
@@ -164,7 +169,7 @@ module.exports = {
       },
     },
     {
-      files: ['tools/**/*.js'],
+      files: ['tools/**/*.{js,cjs}', 'bin/*.{js,cjs}'],
       rules: {
         // need commonjs
         '@typescript-eslint/no-var-requires': 'off',

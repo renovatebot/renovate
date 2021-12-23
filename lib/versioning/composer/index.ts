@@ -1,4 +1,4 @@
-import { coerce } from 'semver';
+import semver from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
@@ -88,13 +88,13 @@ const equals = (a: string, b: string): boolean =>
   npm.equals(composer2npm(a), composer2npm(b));
 
 const getMajor = (version: string): number =>
-  npm.getMajor(coerce(composer2npm(version)));
+  npm.getMajor(semver.coerce(composer2npm(version)));
 
 const getMinor = (version: string): number =>
-  npm.getMinor(coerce(composer2npm(version)));
+  npm.getMinor(semver.coerce(composer2npm(version)));
 
 const getPatch = (version: string): number =>
-  npm.getPatch(coerce(composer2npm(version)));
+  npm.getPatch(semver.coerce(composer2npm(version)));
 
 const isGreaterThan = (a: string, b: string): boolean =>
   npm.isGreaterThan(composer2npm(a), composer2npm(b));

@@ -1596,7 +1596,7 @@ const options: RenovateOptions[] = [
   {
     name: 'groupSlug',
     description:
-      'Slug to use for group (e.g. in branch name). Will be calculated from groupName if null.',
+      'Slug to use for group (e.g. in branch name). Will be calculated from `groupName` if `null`.',
     type: 'string',
     default: null,
     cli: false,
@@ -2130,7 +2130,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Allow to disable release notes fetching.',
+    description: 'Whether or not to fetch release notes.',
     type: 'boolean',
     default: true,
     cli: false,

@@ -1,4 +1,4 @@
-import * as url from 'url';
+import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';

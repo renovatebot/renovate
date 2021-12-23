@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { gte, minVersion, validRange } from 'semver';
+import semver from 'semver';
 import { quote } from 'shlex';
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -68,7 +68,7 @@ export async function generateLockFile(
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = join(cwd, 'yarn.lock');
+  const lockFileName = upath.join(cwd, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
@@ -77,11 +77,13 @@ export async function generateLockFile(
       ? yarnUpdate.newValue
       : config.constraints?.yarn;
     const minYarnVersion =
-      validRange(yarnCompatibility) && minVersion(yarnCompatibility);
+      semver.validRange(yarnCompatibility) &&
+      semver.minVersion(yarnCompatibility);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
-      minYarnVersion && gte(minYarnVersion, '2.2.0');
-    const isYarnModeAvailable = minYarnVersion && gte(minYarnVersion, '3.0.0');
+      minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
+    const isYarnModeAvailable =
+      minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
     let installYarn = 'npm i -g yarn';
     if (isYarn1 && minYarnVersion) {

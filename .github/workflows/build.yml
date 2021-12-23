@@ -92,17 +92,16 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+      # build before tests to for static file check
+      - name: Build
+        run: yarn build
+
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
         uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
         if: always() && env.coverage == 'true'
-
-      # build after tests to exclude build files from tests
-      # TODO: check if build before test speeds up tests
-      - name: Build
-        run: yarn build
 
       - name: E2E Test
         run: yarn test-e2e
