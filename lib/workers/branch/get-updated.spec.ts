@@ -248,6 +248,9 @@ describe('workers/branch/get-updated', () => {
         branchName: undefined,
         isLockfileUpdate: true,
       });
+      composer.updateLockedDependency.mockReturnValueOnce({
+        status: 'unsupported',
+      });
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
