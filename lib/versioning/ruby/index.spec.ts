@@ -316,6 +316,8 @@ describe('versioning/ruby/index', () => {
     ${'< 1.0.3'}             | ${'replace'}         | ${'1.0.3'}     | ${'1.2.4'}   | ${'< 1.2.5'}
     ${'~> 6.0.0'}            | ${'update-lockfile'} | ${'6.0.2'}     | ${'6.0.3'}   | ${'~> 6.0.0'}
     ${'~> 6.0.0'}            | ${'update-lockfile'} | ${'6.0.2'}     | ${'7.0.0'}   | ${'~> 7.0.0'}
+    ${'~> 6.0.0'}            | ${'in-range-only'}   | ${'6.0.2'}     | ${'6.0.3'}   | ${'~> 6.0.0'}
+    ${'~> 6.0.0'}            | ${'in-range-only'}   | ${'6.0.2'}     | ${'7.0.0'}   | ${'~> 7.0.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

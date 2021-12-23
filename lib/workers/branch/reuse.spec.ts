@@ -56,6 +56,11 @@ describe('workers/branch/reuse', () => {
           rangeStrategy: 'update-lockfile',
           branchName: 'current',
         },
+        {
+          packageFile: 'package.json',
+          rangeStrategy: 'in-range-only',
+          branchName: 'current',
+        },
       ];
       git.branchExists.mockReturnValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({

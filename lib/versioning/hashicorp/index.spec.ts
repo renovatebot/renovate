@@ -66,6 +66,10 @@ describe('versioning/hashicorp/index', () => {
     ${'~> 0.14'}            | ${'update-lockfile'} | ${'0.14.2'}    | ${'0.15.0'} | ${'~> 0.15'}
     ${'~> 2.62.0'}          | ${'update-lockfile'} | ${'2.62.0'}    | ${'2.62.1'} | ${'~> 2.62.0'}
     ${'~> 2.62.0'}          | ${'update-lockfile'} | ${'2.62.0'}    | ${'2.67.0'} | ${'~> 2.67.0'}
+    ${'~> 0.14'}            | ${'in-range-only'}   | ${'0.14.2'}    | ${'0.14.6'} | ${'~> 0.14'}
+    ${'~> 0.14'}            | ${'in-range-only'}   | ${'0.14.2'}    | ${'0.15.0'} | ${'~> 0.15'}
+    ${'~> 2.62.0'}          | ${'in-range-only'}   | ${'2.62.0'}    | ${'2.62.1'} | ${'~> 2.62.0'}
+    ${'~> 2.62.0'}          | ${'in-range-only'}   | ${'2.62.0'}    | ${'2.67.0'} | ${'~> 2.67.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

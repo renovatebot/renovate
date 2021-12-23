@@ -241,6 +241,7 @@ describe('workers/branch/get-updated', () => {
         ],
       });
     });
+
     it('update artifacts on update-lockfile strategy', async () => {
       config.upgrades.push({
         packageFile: 'composer.json',
@@ -266,6 +267,33 @@ describe('workers/branch/get-updated', () => {
         ],
       });
     });
+
+    it('update artifacts on in-range-only strategy', async () => {
+      config.upgrades.push({
+        packageFile: 'composer.json',
+        manager: 'composer',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      composer.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            name: 'composer.lock',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot({
+        updatedArtifacts: [
+          { name: 'composer.lock', contents: 'some contents' },
+        ],
+        updatedPackageFiles: [
+          { name: 'composer.json', contents: 'existing content' },
+        ],
+      });
+    });
+
     it('attempts updateLockedDependency and handles unsupported', async () => {
       config.upgrades.push({
         packageFile: 'package.json',

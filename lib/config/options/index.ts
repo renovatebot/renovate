@@ -1150,6 +1150,7 @@ const options: RenovateOptions[] = [
       'replace',
       'widen',
       'update-lockfile',
+      'in-range-only',
     ],
     cli: false,
     env: false,

@@ -5,4 +5,5 @@ export type RangeStrategy =
   | 'pin'
   | 'replace'
   | 'update-lockfile'
+  | 'in-range-only'
   | 'widen';

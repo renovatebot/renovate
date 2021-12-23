@@ -104,6 +104,7 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioning.isVersion(release.version)
       );
+
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -161,7 +162,7 @@ export async function lookupUpdates(
       // istanbul ignore next
       if (
         isVulnerabilityAlert &&
-        rangeStrategy === 'update-lockfile' &&
+        ['update-lockfile', 'in-range-only'].includes(rangeStrategy) &&
         !lockedVersion
       ) {
         rangeStrategy = 'bump';
@@ -170,7 +171,7 @@ export async function lookupUpdates(
         .filter((release) => !release.isDeprecated)
         .map((release) => release.version);
       let currentVersion: string;
-      if (rangeStrategy === 'update-lockfile') {
+      if (['update-lockfile', 'in-range-only'].includes(rangeStrategy)) {
         currentVersion = lockedVersion;
       }
       currentVersion ??=
@@ -365,6 +366,13 @@ export async function lookupUpdates(
           update.isLockfileUpdate ||
           (update.newDigest && !update.newDigest.startsWith(currentDigest))
       );
+    // If range strategy is 'in-range-only', also strip out updates where currentValue !== newValue
+    const rangeStrategy = getRangeStrategy(config);
+    if (rangeStrategy === 'in-range-only') {
+      res.updates = res.updates.filter(
+        (update) => update.newValue === currentValue
+      );
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError || err.message === CONFIG_VALIDATION) {
       throw err;

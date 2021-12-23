@@ -93,6 +93,7 @@ const getNewValue = ({
   } else {
     switch (rangeStrategy) {
       case 'update-lockfile':
+      case 'in-range-only':
         if (satisfies(newVersion, currentValue)) {
           newValue = currentValue;
         } else {

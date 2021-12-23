@@ -1960,6 +1960,7 @@ Behavior:
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
 - `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
+- `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates.
 
 Renovate's `"auto"` strategy works like this for npm:
 
@@ -1976,6 +1977,9 @@ For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0`
 If instead you'd prefer to be updated to `^1.2.0` in cases like this, then configure `rangeStrategy` to `bump` in your Renovate config.
 
 This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
+
+We discourage using of the `in-range-only` strategy unless you strictly need it.
+Using the `in-range-only` strategy may result in being multiple releases behind without knowing it.
 
 ## rebaseLabel
 
