@@ -8661,10 +8661,10 @@ parse-conflict-json@*, parse-conflict-json@^2.0.1:
     just-diff "^5.0.1"
     just-diff-apply "^4.0.1"
 
-parse-diff@0.8.1:
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/parse-diff/-/parse-diff-0.8.1.tgz#d8d3d11a97da7a0dc6c657bbb72024c0738359cd"
-  integrity sha512-0QG0HqwXCC/zMohOlaxkQmV1igZq1LQ6xsv/ziex6TDbY0GFxr3TDJN+/aHjWH3s2WTysSW3Bhs9Yfh6DOelFA==
+parse-diff@0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/parse-diff/-/parse-diff-0.9.0.tgz#2e71b5dc5d8f4b9c19c471fd6325646dc9f21724"
+  integrity sha512-Jn+VZORAezkfOXR6B40EZcXxdJBamtgBpfeoFH6hxD+p0e74nVaCL9SWlQj1ggc8b6AexgPKlDiiE0CMMZDSbQ==
 
 parse-entities@^2.0.0:
   version "2.0.0"
