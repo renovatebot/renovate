@@ -80,7 +80,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (m.getRangeStrategy) {
     // Use manager's own function if it exists
     const managerRangeStrategy = m.getRangeStrategy(config);
-    if (rangeStrategy === 'in-range-only') {
+    if (managerRangeStrategy === 'in-range-only') {
       return 'update-lockfile';
     }
     return managerRangeStrategy;

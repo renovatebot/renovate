@@ -367,11 +367,11 @@ export async function lookupUpdates(
           (update.newDigest && !update.newDigest.startsWith(currentDigest))
       );
     // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
-    /*if (config.rangeStrategy === 'in-range-only') {
+    if (config.rangeStrategy === 'in-range-only') {
       res.updates = res.updates.filter(
         (update) => update.newValue === currentValue
       );
-    }*/
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError || err.message === CONFIG_VALIDATION) {
       throw err;
