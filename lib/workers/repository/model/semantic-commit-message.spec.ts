@@ -56,14 +56,4 @@ describe('workers/repository/model/semantic-commit-message', () => {
     expect(json.scope).toBe('deps');
     expect(json.subject).toBe('');
   });
-
-  it('should create instance from string with empty scope and description', () => {
-    const instance = SemanticCommitMessage.fromString('fix:');
-    const json = instance.toJSON();
-
-    expect(SemanticCommitMessage.is(instance)).toBeTrue();
-    expect(json.type).toBe('fix');
-    expect(json.scope).toBeUndefined();
-    expect(json.subject).toBe('');
-  });
 });
