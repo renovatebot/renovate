@@ -840,6 +840,36 @@ describe('platform/bitbucket/index', () => {
       await bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('throws exception when unable to check reviewers workspace membership', async () => {
+      const reviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { reviewers: [reviewer] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
+              ],
+            },
+            message:
+              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
+          },
+        })
+        .head('/2.0/workspaces/some/members/123')
+        .reply(401);
+      await expect(() =>
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+      ).rejects.toThrowErrorMatchingSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('rethrows exception when PR update error not due to inactive reviewers', async () => {
       const reviewer = {
         display_name: 'Jane Smith',

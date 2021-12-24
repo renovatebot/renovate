@@ -2008,3 +2008,66 @@ Array [
   },
 ]
 `;
+
+exports[`platform/bitbucket/index updatePr() throws exception when unable to check reviewers workspace membership 1`] = `"Response code 401 (Unauthorized)"`;
+
+exports[`platform/bitbucket/index updatePr() throws exception when unable to check reviewers workspace membership 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "body": Object {
+      "description": "body",
+      "reviewers": Array [
+        Object {
+          "account_id": "123",
+          "display_name": "Bob Smith",
+          "uuid": "{d2238482-2e9f-48b3-8630-de22ccb9e42f}",
+        },
+      ],
+      "title": "title",
+    },
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": "148",
+      "content-type": "application/json",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://api.bitbucket.org/2.0/workspaces/some/members/123",
+  },
+]
+`;
