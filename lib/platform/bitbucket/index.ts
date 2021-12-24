@@ -52,6 +52,10 @@ const pathSeparator = '/';
 
 let renovateUserUuid: string;
 
+const inactiveReviewersMessage = 'reviewers: Malformed reviewers list';
+const notMemberReviewersMessage =
+  'is not a member of this workspace and cannot be added to this pull request';
+
 export async function initPlatform({
   endpoint,
   username,
@@ -749,10 +753,6 @@ export async function updatePr({
       }
     );
   } catch (err) {
-    const inactiveReviewersMessage = 'reviewers: Malformed reviewers list';
-    const notMemberReviewersMessage =
-      'is not a member of this workspace and cannot be added to this pull request';
-
     if (
       err.statusCode === 400 &&
       [inactiveReviewersMessage, notMemberReviewersMessage].some((m) =>
