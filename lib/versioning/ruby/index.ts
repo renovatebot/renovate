@@ -89,7 +89,7 @@ const getNewValue = ({
   currentVersion,
   newVersion,
 }: NewValueConfig): string => {
-  let newValue = null;
+  let newValue = '';
   if (isVersion(currentValue)) {
     newValue = currentValue.startsWith('v') ? 'v' + newVersion : newVersion;
   } else if (currentValue.replace(regEx(/^=\s*/), '') === currentVersion) {

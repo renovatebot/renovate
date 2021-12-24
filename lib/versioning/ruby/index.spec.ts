@@ -174,8 +174,8 @@ describe('versioning/ruby/index', () => {
     ${'2.0.0'}       | ${'>= 1.1.5, < 2.0'}   | ${false}
     ${'1.2.0-beta'}  | ${'1.2.0-alpha'}       | ${false}
     ${'2.0.0'}       | ${'> 1.2.2, ~> 2.0.0'} | ${false}
-    ${'asdf'}        | ${'> 1.2.2, ~> 2.0.0'} | ${null}
-    ${null}          | ${'> 1.2.2, ~> 2.0.0'} | ${null}
+    ${'asdf'}        | ${'> 1.2.2, ~> 2.0.0'} | ${false}
+    ${null}          | ${'> 1.2.2, ~> 2.0.0'} | ${false}
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {

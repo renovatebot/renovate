@@ -18,14 +18,14 @@ const parse = (range: string): Range => {
   const value = (range || '').trim();
 
   const match = regExp.exec(value);
-  if (match) {
-    const { version = null, operator = null, delimiter = ' ' } = match.groups;
+  if (match?.groups) {
+    const { version = '', operator = '', delimiter = ' ' } = match.groups;
     return { version, operator, delimiter };
   }
 
   return {
-    version: null,
-    operator: null,
+    version: '',
+    operator: '',
     delimiter: ' ',
   };
 };
