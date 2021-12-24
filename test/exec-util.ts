@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
-import { toUnix } from 'upath';
+import upath from 'upath';
 import type { ExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 
@@ -25,7 +25,7 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
     options,
   };
 
-  const cwd = toUnix(process.cwd());
+  const cwd = upath.toUnix(process.cwd());
 
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {

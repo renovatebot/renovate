@@ -478,6 +478,14 @@ export async function getAdditionalFiles(
     logger.debug('Skipping lock file generation for remediations');
     return { artifactErrors, updatedArtifacts };
   }
+  if (
+    config.reuseExistingBranch &&
+    !config.updatedPackageFiles?.length &&
+    config.upgrades?.every((upgrade) => upgrade.isLockfileUpdate)
+  ) {
+    logger.debug('Existing branch contains all necessary lock file updates');
+    return { artifactErrors, updatedArtifacts };
+  }
   logger.debug('Getting updated lock files');
   if (
     config.updateType === 'lockFileMaintenance' &&

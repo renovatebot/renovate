@@ -363,10 +363,14 @@ The "topic" is usually refers to the dependency being updated, e.g. `"dependency
 
 ## composerIgnorePlatformReqs
 
-By default, Renovate will run Composer with `--ignore-platform-reqs` as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
-However, this also means that all platform constraints (including PHP version) will be ignored by default, which can result in updated dependencies that are not compatible with your platform.
+By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match the required PHP environment of your project as configured in your `composer.json` file.
 
-To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
+Composer `2.2` and up will be run with `--ignore-platform-req='ext-*' --ignore-platform-req='lib-*'`, which ignores extension and library platform requirements but not the PHP version itself and should work in most cases.
+
+Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default.
+This can result in updated dependencies that are not compatible with your platform.
+
+To customize this behaviour, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
 Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
 The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
@@ -688,7 +692,7 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchReleaseNotes
 
-Configure this to `false` if you want to disable release notes fetching
+Set this to `false` if you want to disable release notes fetching.
 
 ## fileMatch
 
@@ -1997,6 +2001,8 @@ Possible values and meanings:
 - If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 It is also recommended to avoid `rebaseWhen=never` as it can result in conflicted branches with outdated PR descriptions and/or status checks.
+
+Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` as this can prevent creation of PRs.
 
 ## recreateClosed
 

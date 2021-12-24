@@ -21,6 +21,7 @@ export async function updateLockedDependency(
     packageFileContent,
     lockFile,
     lockFileContent,
+    allowParentUpdates = true,
   } = config;
   logger.debug(
     `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
@@ -107,6 +108,12 @@ export async function updateLockedDependency(
           }`
         );
       } else if (parentDepName && parentVersion) {
+        if (!allowParentUpdates) {
+          logger.debug(
+            `Cannot update ${depName} to ${newVersion} without an update to ${parentDepName}`
+          );
+          return { status: 'update-failed' };
+        }
         // Parent dependency needs updating too
         const parentNewVersion = await findFirstParentVersion(
           parentDepName,

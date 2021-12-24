@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import * as handlebars from 'handlebars';
+import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { clone } from '../clone';
