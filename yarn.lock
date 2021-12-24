@@ -3308,10 +3308,10 @@
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.9.tgz#152c6c20a7688c30b967ec1841d31ace569863fc"
   integrity sha512-L/TMpyURfBkf+o/526Zb6kd/tchUP3iBDEPjqjb+U2MAJhVRxxrmr2fwpe08E7QsV7YLcpq0tUaQ9O9x97ZIxQ==
 
-"@types/shelljs@0.8.9":
-  version "0.8.9"
-  resolved "https://registry.yarnpkg.com/@types/shelljs/-/shelljs-0.8.9.tgz#45dd8501aa9882976ca3610517dac3831c2fbbf4"
-  integrity sha512-flVe1dvlrCyQJN/SGrnBxqHG+RzXrVKsmjD8WS/qYHpq5UPjfq7UWFBENP0ZuOl0g6OpAlL6iBoLSvKYUUmyQw==
+"@types/shelljs@0.8.10":
+  version "0.8.10"
+  resolved "https://registry.yarnpkg.com/@types/shelljs/-/shelljs-0.8.10.tgz#c33079c9b41a9d6f788f98f1d8a68f880a14f454"
+  integrity sha512-nhBdUA/n0nRo1B6E4BuRnUvllYAqal4T9zd91ZDnBh+qQMQTwvxmJHx6xEn/0vdjP2kqEA5eVeLazs4nMxeuFg==
   dependencies:
     "@types/glob" "*"
     "@types/node" "*"
