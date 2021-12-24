@@ -79,6 +79,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
+  globalPresets?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;

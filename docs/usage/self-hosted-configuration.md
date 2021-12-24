@@ -330,6 +330,12 @@ Possible values:
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
+## globalPresets
+
+The list of presets to use/extend in the self-hosted global config file.
+Unlike the usual presets, `globalPresets` are resolved immediately, and merged with any other global config.
+You can use this option, for example, if you want to publish the list of repositories to renovate in a preset and re-use it somewhere else.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
