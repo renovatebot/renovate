@@ -1,6 +1,13 @@
 import { SemanticCommitMessage } from './semantic-commit-message';
 
 describe('workers/repository/model/semantic-commit-message', () => {
+  it('should format message without prefix', () => {
+    const message = new SemanticCommitMessage();
+    message.setSubject('test');
+
+    expect(message.toString()).toBe('Test');
+  });
+
   it('should format sematic type', () => {
     const message = new SemanticCommitMessage();
     message.setSubject('test');
