@@ -68,11 +68,11 @@ export default ({ to, range }: { range: string; to: string }): string => {
     const majorPart = to.split('.')[0];
     newRange = '~>' + (range.includes(' ') ? ' ' : '') + majorPart;
   } else {
-    const lastPart =
-      range
-        .split(',')
-        .map((part) => part.trim())
-        .pop() ?? '';
+    const lastPart: string = range
+      .split(',')
+      .map((part) => part.trim())
+      .slice(-1)
+      .join();
     const lastPartPrecision = lastPart.split('.').length;
     const toPrecision = to.split('.').length;
     let massagedTo: string = to;
