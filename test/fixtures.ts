@@ -1,17 +1,18 @@
+import type fs from 'fs';
 import type { PathLike } from 'fs';
 import callsite from 'callsite';
-import { DirectoryJSON, IFs, fs, vol } from 'memfs';
+import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import upath from 'upath';
 
 export class Fixtures {
   static get(name: string, fixturesRoot = '.'): string {
-    const realFs: IFs = jest.requireActual('fs');
+    const realFs = jest.requireActual<typeof fs>('fs');
     return realFs.readFileSync(
       upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
       {
         encoding: 'utf-8',
       }
-    ) as string;
+    );
   }
 
   static mock(json: DirectoryJSON, cwd?: string): void {
@@ -33,11 +34,11 @@ export class Fixtures {
   // Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder
   static fsExtra(): any {
     return {
-      ...fs,
+      ...memfs,
       pathExists: jest.fn().mockImplementation(pathExists),
-      remove: jest.fn().mockImplementation(fs.promises.rm),
+      remove: jest.fn().mockImplementation(memfs.promises.rm),
       readFile: jest.fn().mockImplementation(readFile),
-      writeFile: jest.fn().mockImplementation(fs.promises.writeFile),
+      writeFile: jest.fn().mockImplementation(memfs.promises.writeFile),
       outputFile: jest.fn().mockImplementation(outputFile),
     };
   }
@@ -50,25 +51,25 @@ export class Fixtures {
 }
 
 function readFile(fileName: string, encoding?: string): Promise<unknown> {
-  return fs.promises.readFile(fileName, encoding ?? 'utf8');
+  return memfs.promises.readFile(fileName, encoding ?? 'utf8');
 }
 
 export async function outputFile(file: string, data: any): Promise<void> {
   const dir = upath.dirname(file);
 
   if (await pathExists(dir)) {
-    await fs.promises.writeFile(file, data);
+    await memfs.promises.writeFile(file, data);
   } else {
-    await fs.promises.mkdir(dir, {
+    await memfs.promises.mkdir(dir, {
       recursive: true,
     });
-    await fs.promises.writeFile(file, data);
+    await memfs.promises.writeFile(file, data);
   }
 }
 
 async function pathExists(path: string): Promise<boolean> {
   try {
-    await fs.promises.access(path);
+    await memfs.promises.access(path);
     return true;
   } catch {
     return false;
