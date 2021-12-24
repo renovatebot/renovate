@@ -1,6 +1,12 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import Git, { Options, ResetMode, SimpleGit, TaskOptions } from 'simple-git';
+import type {
+  Options,
+  SimpleGit,
+  TaskOptions,
+  ResetMode as _ResetMode,
+} from 'simple-git';
+import * as simpleGit from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -33,9 +39,8 @@ import type {
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
-declare module 'fs-extra' {
-  export function exists(pathLike: string): Promise<boolean>;
-}
+// TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
+const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
@@ -148,7 +153,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
-  const globalGit = Git();
+  const globalGit = simpleGit.default();
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(/\s+/)) {
@@ -211,7 +216,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = Git(localDir, simpleGitConfig());
+  git = simpleGit.default(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -314,7 +319,7 @@ export async function syncGit(): Promise<void> {
   const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
-  if (await fs.exists(gitHead)) {
+  if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
@@ -589,7 +594,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  let status;
+  let status: StatusResult;
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);

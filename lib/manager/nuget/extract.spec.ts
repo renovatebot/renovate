@@ -1,4 +1,4 @@
-import * as upath from 'upath';
+import upath from 'upath';
 import { loadFixture } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';

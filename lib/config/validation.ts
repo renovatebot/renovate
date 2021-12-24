@@ -243,8 +243,8 @@ export async function validateConfig(
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
-                const subValidation = await module.exports.validateConfig(
-                  subval,
+                const subValidation = await validateConfig(
+                  subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`
                 );
@@ -539,7 +539,7 @@ export async function validateConfig(
                 .filter((option) => option.freeChoice)
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
-                const subValidation = await module.exports.validateConfig(
+                const subValidation = await validateConfig(
                   val,
                   isPreset,
                   currentPath
