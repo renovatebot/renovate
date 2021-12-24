@@ -1,5 +1,5 @@
-import { RenovateSharedConfig } from '../../../config/types';
-import { CommitMessage } from './commit-message';
+import type { RenovateSharedConfig } from '../../../config/types';
+import type { CommitMessage } from './commit-message';
 import { CustomCommitMessage } from './custom-commit-message';
 import { SemanticCommitMessage } from './semantic-commit-message';
 
