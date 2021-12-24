@@ -338,13 +338,21 @@ export async function processBranch(
       }
     }
 
-    // istanbul ignore if
-    if (
+    const userRebaseRequested =
       dependencyDashboardCheck === 'rebase' ||
-      config.dependencyDashboardRebaseAllOpen
-    ) {
+      config.dependencyDashboardRebaseAllOpen ||
+      config.rebaseRequested;
+
+    if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
+    } else if (branchExists && config.rebaseWhen === 'never') {
+      logger.debug('rebaseWhen=never so skipping branch update check');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: BranchResult.NoWork,
+      };
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
@@ -430,16 +438,7 @@ export async function processBranch(
         });
       }
     }
-    const forcedManually =
-      !!dependencyDashboardCheck || config.rebaseRequested || !branchExists;
-    if (!forcedManually && config.rebaseWhen === 'never') {
-      logger.debug(`Skipping commit (rebaseWhen=never)`);
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: BranchResult.NoWork,
-      };
-    }
+    const forcedManually = userRebaseRequested || !branchExists;
     config.forceCommit = forcedManually || branchPr?.isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
@@ -466,8 +465,7 @@ export async function processBranch(
     // but do not break when there are artifact errors
     if (
       !config.artifactErrors?.length &&
-      !dependencyDashboardCheck &&
-      !config.rebaseRequested &&
+      !userRebaseRequested &&
       commitSha &&
       config.prCreation !== 'immediate'
     ) {

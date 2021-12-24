@@ -34,6 +34,9 @@ describe('manager/npm/update/locked-dependency/index', () => {
       expect(
         await updateLockedDependency({ ...config, lockFile: 'yarn.lock' })
       ).toMatchObject({});
+      expect(
+        await updateLockedDependency({ ...config, lockFile: 'yarn.lock2' })
+      ).toMatchObject({});
     });
     it('validates versions', async () => {
       expect(
@@ -141,6 +144,14 @@ describe('manager/npm/update/locked-dependency/index', () => {
       expect(packageLock.dependencies.mime.version).toBe('1.4.1');
       expect(packageLock.dependencies.express.version).toBe('4.16.0');
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('fails remediation if cannot update parent', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.11';
+      config.newVersion = '1.4.1';
+      config.allowParentUpdates = false;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('update-failed');
     });
   });
 });

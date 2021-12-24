@@ -123,7 +123,7 @@ describe('util/git/index', () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       // FIXME: explicit assert condition
       expect(await git.getFileList()).toMatchSnapshot();
       await repo.reset(['--hard', 'HEAD^']);
@@ -554,7 +554,7 @@ describe('util/git/index', () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
     });
 
