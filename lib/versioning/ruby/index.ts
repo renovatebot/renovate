@@ -45,7 +45,7 @@ export const isVersion = (version: string): boolean => !!valid(vtrim(version));
 const isGreaterThan = (left: string, right: string): boolean =>
   gt(vtrim(left), vtrim(right));
 const isLessThanRange = (version: string, range: string): boolean =>
-  ltr(vtrim(version), vtrim(range));
+  !!ltr(vtrim(version), vtrim(range));
 
 const isSingleVersion = (range: string): boolean => {
   const { version, operator } = parseRange(vtrim(range));
