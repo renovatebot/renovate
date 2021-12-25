@@ -271,14 +271,6 @@ export async function ensureDependencyDashboard(
     issueBody += '## Other Branches\n\n';
     issueBody += `These updates are pending. To force PRs open, click the checkbox below.\n\n`;
     for (const branch of otherBranches) {
-      logger.info(
-        {
-          prBlockedBy: branch.prBlockedBy,
-          prNo: branch.prNo,
-          result: branch.result,
-        },
-        'Blocked PR'
-      );
       issueBody += getListItem(branch, 'other');
     }
     issueBody += '\n';
