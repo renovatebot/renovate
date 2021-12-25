@@ -68,7 +68,7 @@ export default ({ to, range }: { range: string; to: string }): string => {
     const majorPart = to.split('.')[0];
     newRange = '~>' + (range.includes(' ') ? ' ' : '') + majorPart;
   } else {
-    const lastPart: string = range
+    const lastPart = range
       .split(',')
       .map((part) => part.trim())
       .slice(-1)
