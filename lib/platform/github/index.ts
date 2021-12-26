@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
-import { valid as semverValid } from 'semver';
+import semver from 'semver';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -94,7 +94,7 @@ export async function detectGhe(token: string): Promise<void> {
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
       ) ?? [];
-    platformConfig.gheVersion = semverValid(gheVersion) ?? null;
+    platformConfig.gheVersion = semver.valid(gheVersion) ?? null;
   }
 }
 

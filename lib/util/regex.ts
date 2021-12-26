@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
+import { re2 } from '../expose.cjs';
 
 import { logger } from '../logger';
 
@@ -8,8 +9,7 @@ let RegEx: RegExpConstructor;
 const cache = new Map<string, RegExp>();
 
 try {
-  // eslint-disable-next-line
-  const RE2 = require('re2');
+  const RE2 = re2();
   // Test if native is working
   new RE2('.*').exec('test');
   logger.debug('Using RE2 as regex engine');

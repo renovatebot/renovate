@@ -1,6 +1,6 @@
 import cryptoRandomString from 'crypto-random-string';
 import findUp from 'find-up';
-import * as upath from 'upath';
+import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';

@@ -1,5 +1,5 @@
-import { parse as _parse } from '@renovatebot/ruby-semver/dist/ruby/requirement';
-import { Version, create } from '@renovatebot/ruby-semver/dist/ruby/version';
+import { parse as _parse } from '@renovatebot/ruby-semver/dist/ruby/requirement.js';
+import { Version, create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator';
