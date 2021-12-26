@@ -5086,27 +5086,27 @@ eslint-config-prettier@8.3.0:
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.3.0.tgz#f7471b20b6fe8a9a9254cc684454202886a2dd7a"
   integrity sha512-BgZuLUSeKzvlL/VUjx/Yb787VQ26RU3gGjA3iiFvdsp/2bMfVIWUVP7tjxtjS0e+HP409cPlPvNkQloz8C91ew==
 
-eslint-formatter-gha@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/eslint-formatter-gha/-/eslint-formatter-gha-1.3.0.tgz#3e050b8c0ee7e24cc539a364620d6b10326f80aa"
-  integrity sha512-KOFJh1yoPwA2XdDp8Y11gUmsTL3oGmEaz0YKdwn4JKUYcOSvG2g0eFDTCDiUzLlHdCw77+snv/xfvLVDt06fHQ==
+eslint-formatter-gha@1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/eslint-formatter-gha/-/eslint-formatter-gha-1.4.1.tgz#e787a68171c5486fb7e8b514224a722a5f59a8ec"
+  integrity sha512-c2L/p4Xtnzlb3ascN4vERcXTMNPePedxZNRZcKG19DDpViBIG1WLMyMIeC2FSW7yGLBANZNb9N66sV2PDCdIqQ==
   dependencies:
     "@actions/core" "^1.2.6"
-    eslint-formatter-json "^0.1.0"
-    eslint-formatter-stylish "^7.32.0"
+    eslint-formatter-json "^8.0.0"
+    eslint-formatter-stylish "^8.0.0"
 
-eslint-formatter-json@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/eslint-formatter-json/-/eslint-formatter-json-0.1.0.tgz#47ad6d13973e7b1dec3461ef264cc3aa74d523a4"
-  integrity sha512-rVgsIGzO3q0v7ss9JgZ7mMDz41PBp46+BY8zn/bMY7HjNWtnaAznBtX8A2XATyZvkq+EEtfHfD/2GKi60bzTiA==
+eslint-formatter-json@^8.0.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/eslint-formatter-json/-/eslint-formatter-json-8.3.0.tgz#5674d87c80e23a92bbaecc906b1c153e67e547f9"
+  integrity sha512-zMYHg0iA4AH534aUJyh7PR+f7xzAsd0kLEFzo4U3TN60l3zt5/7Ukbv2VmQcSl/bOFdOkhRhB9+U52plxp8o8Q==
 
-eslint-formatter-stylish@^7.32.0:
-  version "7.32.0"
-  resolved "https://registry.yarnpkg.com/eslint-formatter-stylish/-/eslint-formatter-stylish-7.32.0.tgz#ce9666f78d74da1b35d31f12372f7a52200628f4"
-  integrity sha512-ymqGV3QbwZezQzPTED7xfzGVxT0iGAcM99Spv2jVtdclB4h0i7Feiugs3jWdl+U5SCTlEIj1OlLiWRizK4nFJg==
+eslint-formatter-stylish@^8.0.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/eslint-formatter-stylish/-/eslint-formatter-stylish-8.3.0.tgz#554d8d0ef666605ab22880f356d1b74d900f4d41"
+  integrity sha512-4QKzT/NPD6VjFDhdUHnp/6bRODXg2G44SCEC4tc8MMErBffHojbVzcje0H7ql7aJQ277OBGCpe8mjjiNmdCxBg==
   dependencies:
     chalk "^4.0.0"
-    strip-ansi "^6.0.0"
+    strip-ansi "^6.0.1"
     text-table "^0.2.0"
 
 eslint-import-resolver-node@^0.3.6:
@@ -5190,10 +5190,10 @@ eslint-visitor-keys@^3.0.0, eslint-visitor-keys@^3.1.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-3.1.0.tgz#eee4acea891814cda67a7d8812d9647dd0179af2"
   integrity sha512-yWJFpu4DtjsWKkt5GeNBBuZMlNcYVs6vRCLoCVEJrTjaSB6LC98gFipNK/erM2Heg/E8mIK+hXG/pJMLK+eRZA==
 
-eslint@8.4.1:
-  version "8.4.1"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.4.1.tgz#d6531bbf3e598dffd7c0c7d35ec52a0b30fdfa2d"
-  integrity sha512-TxU/p7LB1KxQ6+7aztTnO7K0i+h0tDi81YRY9VzB6Id71kNz+fFYnf5HD5UOQmxkzcoa0TlVZf9dpMtUv0GpWg==
+eslint@8.5.0:
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.5.0.tgz#ddd2c1afd8f412036f87ae2a063d2aa296d3175f"
+  integrity sha512-tVGSkgNbOfiHyVte8bCM8OmX+xG9PzVG/B4UCF60zx7j61WIVY/AqJECDgpLD4DbbESD0e174gOg3ZlrX15GDg==
   dependencies:
     "@eslint/eslintrc" "^1.0.5"
     "@humanwhocodes/config-array" "^0.9.2"
@@ -6075,20 +6075,15 @@ ignore-walk@^4.0.1:
   dependencies:
     minimatch "^3.0.4"
 
-ignore@5.1.9:
-  version "5.1.9"
-  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.1.9.tgz#9ec1a5cbe8e1446ec60d4420060d43aa6e7382fb"
-  integrity sha512-2zeMQpbKz5dhZ9IwL0gbxSW5w0NK/MSAMtNuhgIHEPmaU3vPdKPL0UdvUCXs5SS4JAwsBxysK5sFMW8ocFiVjQ==
+ignore@5.2.0, ignore@^5.1.4, ignore@^5.1.8:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.0.tgz#6d3bac8fa7fe0d45d9f9be7bac2fc279577e345a"
+  integrity sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==
 
 ignore@^4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-4.0.6.tgz#750e3db5862087b4737ebac8207ffd1ef27b25fc"
   integrity sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
-
-ignore@^5.1.4, ignore@^5.1.8:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.0.tgz#6d3bac8fa7fe0d45d9f9be7bac2fc279577e345a"
-  integrity sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==
 
 import-fresh@^3.0.0, import-fresh@^3.2.1:
   version "3.3.0"
