@@ -92,8 +92,8 @@ const getNewValue = ({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string => {
-  let newValue = '';
+}: NewValueConfig): string | null => {
+  let newValue = null;
   if (isVersion(currentValue)) {
     newValue = currentValue.startsWith('v') ? 'v' + newVersion : newVersion;
   } else if (currentValue.replace(regEx(/^=\s*/), '') === currentVersion) {
@@ -131,7 +131,7 @@ const getNewValue = ({
         logger.warn(`Unsupported strategy ${rangeStrategy}`);
     }
   }
-  if (regEx(/^('|")/).exec(currentValue)) {
+  if (regEx(/^('|")/).exec(currentValue) && newValue) {
     const delimiter = currentValue[0];
     return newValue
       .split(',')
