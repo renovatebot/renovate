@@ -172,7 +172,7 @@ describe('manager/npm/extract/locked-versions', () => {
     it('uses yarn.lock with yarn v3.0.0', async () => {
       const yarnVersion = '3.0.0';
       const lockfileVersion = 8;
-      const isYarn1 = true;
+      const isYarn1 = false;
       yarn.getYarnLock.mockReturnValue({
         isYarn1,
         lockfileVersion,
