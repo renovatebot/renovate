@@ -135,7 +135,7 @@
     "@renovate/pep440": "1.0.0",
     "@renovatebot/ruby-semver": "1.0.0",
     "@sindresorhus/is": "4.2.0",
-    "@yarnpkg/core": "2.4.0",
+    "@yarnpkg/core": "3.1.0",
     "@yarnpkg/parsers": "2.4.1",
     "auth-header": "1.0.0",
     "azure-devops-node-api": "11.1.0",
