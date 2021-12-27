@@ -65,6 +65,7 @@ describe('manager/gradle/shallow/parser-new', () => {
       ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz = "1.2.3"'}     | ${'"foo:bar:${ baz }"'}     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz.qux = "1.2.3"'} | ${'"foo:bar:${ baz.qux }"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz@zip"'}     | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
       ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}@zip"'}   | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
     `(`$dep`, ({ vars, dep, result }) => {
       const input = [vars, dep].join('\n');

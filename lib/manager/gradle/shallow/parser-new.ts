@@ -177,7 +177,7 @@ function depTemplateVersionHandler(
   ctx: GradleContext,
   { value: varKey }: lex.SymbolToken
 ): GradleContext {
-  ctx.varKey = varKey;
+  ctx.varKey = ctx.varKey ? `${ctx.varKey}.${varKey}` : varKey;
   return ctx;
 }
 
@@ -227,7 +227,9 @@ const depTemplateQuery = q.str<GradleContext>({
       regEx(`^${groupIdRegexPart}:${artifactIdRegexPart}:$`),
       depTemplateNameHandler
     ),
-    q.sym(depTemplateVersionHandler),
+    q
+      .sym<GradleContext>(depTemplateVersionHandler)
+      .many(q.op<GradleContext>('.').sym(depTemplateVersionHandler), 0, 5),
   ],
   postHandler,
 });
