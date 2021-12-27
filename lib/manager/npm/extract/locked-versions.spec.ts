@@ -182,7 +182,7 @@ describe('manager/npm/extract/locked-versions', () => {
       await getLockedVersions(packageFiles);
       expect(packageFiles).toEqual([
         {
-          constraints: {},
+          constraints: { yarn: '^3.0.0' },
           deps: [
             { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
@@ -191,12 +191,14 @@ describe('manager/npm/extract/locked-versions', () => {
               depName: 'yarn',
               depType: 'engines',
               lockedVersion: undefined,
+              lookupName: '@yarnpkg/cli',
             },
             {
               currentValue: '3.0.0',
               depName: 'yarn',
               depType: 'packageManager',
               lockedVersion: undefined,
+              lookupName: '@yarnpkg/cli',
             },
           ],
           lockFiles: ['yarn.lock'],
