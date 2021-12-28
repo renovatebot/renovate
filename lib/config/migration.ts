@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
 import { clone } from '../util/clone';
-import { fixShortHours } from '../util/date';
 import { regEx } from '../util/regex';
 import { GlobalConfig } from './global';
 import { MigrationsService } from './migrations';
@@ -18,6 +17,9 @@ import type {
 import { mergeChildConfig } from './utils';
 
 const options = getOptions();
+export function fixShortHours(input: string): string {
+  return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
+}
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 // Returns a migrated config
