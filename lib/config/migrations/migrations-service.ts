@@ -45,10 +45,7 @@ export class MigrationsService {
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
     const migratedConfig: RenovateConfig = {};
-    const migrations = MigrationsService.getMigrations(
-      originalConfig,
-      migratedConfig
-    );
+    const migrations = this.getMigrations(originalConfig, migratedConfig);
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
