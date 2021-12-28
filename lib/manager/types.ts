@@ -228,10 +228,11 @@ export interface UpdateLockedConfig {
   depName?: string;
   currentVersion?: string;
   newVersion?: string;
+  allowParentUpdates?: boolean;
 }
 
 export interface UpdateLockedResult {
-  status: 'updated' | 'already-updated' | 'update-failed';
+  status: 'unsupported' | 'updated' | 'already-updated' | 'update-failed';
   files?: Record<string, string>;
 }
 

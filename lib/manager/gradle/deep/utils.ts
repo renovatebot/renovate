@@ -1,4 +1,4 @@
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { localPathExists, readLocalFile } from '../../../util/fs';
 import {
@@ -17,7 +17,7 @@ export async function getDockerConstraint(
   }
 
   const fileContent = await readLocalFile(
-    join(gradleRoot, GradleWrapperProperties),
+    upath.join(gradleRoot, GradleWrapperProperties),
     'utf8'
   );
 
@@ -34,7 +34,7 @@ export async function getDockerPreCommands(
     return null;
   }
 
-  if (await localPathExists(join(gradleRoot, GradleWrapperProperties))) {
+  if (await localPathExists(upath.join(gradleRoot, GradleWrapperProperties))) {
     return null;
   }
 
