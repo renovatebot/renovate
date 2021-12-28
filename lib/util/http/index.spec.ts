@@ -19,8 +19,12 @@ describe('util/http/index', () => {
   });
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
-    // FIXME: explicit assert condition
-    expect(await http.get('http://renovate.com/test')).toMatchSnapshot();
+    expect(await http.get('http://renovate.com/test')).toEqual({
+      authorization: false,
+      body: '',
+      headers: {},
+      statusCode: 200,
+    });
     expect(httpMock.allUsed()).toBeTrue();
   });
   it('returns 429 error', async () => {
@@ -54,47 +58,81 @@ describe('util/http/index', () => {
   });
   it('getJson', async () => {
     httpMock.scope(baseUrl).get('/').reply(200, '{ "test": true }');
-    // FIXME: explicit assert condition
-    expect(await http.getJson('http://renovate.com')).toMatchSnapshot();
+    expect(await http.getJson('http://renovate.com')).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {},
+      statusCode: 200,
+    });
   });
   it('postJson', async () => {
     httpMock.scope(baseUrl).post('/').reply(200, {});
-    // FIXME: explicit assert condition
     expect(
       await http.postJson('http://renovate.com', { body: {}, baseUrl })
-    ).toMatchSnapshot();
+    ).toEqual({
+      authorization: false,
+      body: {},
+      headers: {
+        'content-type': 'application/json',
+      },
+      statusCode: 200,
+    });
     expect(httpMock.allUsed()).toBeTrue();
   });
   it('putJson', async () => {
     httpMock.scope(baseUrl).put('/').reply(200, {});
-    // FIXME: explicit assert condition
     expect(
       await http.putJson('http://renovate.com', { body: {}, baseUrl })
-    ).toMatchSnapshot();
+    ).toEqual({
+      authorization: false,
+      body: {},
+      headers: {
+        'content-type': 'application/json',
+      },
+      statusCode: 200,
+    });
     expect(httpMock.allUsed()).toBeTrue();
   });
   it('patchJson', async () => {
     httpMock.scope(baseUrl).patch('/').reply(200, {});
-    // FIXME: explicit assert condition
     expect(
       await http.patchJson('http://renovate.com', { body: {}, baseUrl })
-    ).toMatchSnapshot();
+    ).toEqual({
+      authorization: false,
+      body: {},
+      headers: {
+        'content-type': 'application/json',
+      },
+      statusCode: 200,
+    });
     expect(httpMock.allUsed()).toBeTrue();
   });
   it('deleteJson', async () => {
     httpMock.scope(baseUrl).delete('/').reply(200, {});
-    // FIXME: explicit assert condition
     expect(
       await http.deleteJson('http://renovate.com', { body: {}, baseUrl })
-    ).toMatchSnapshot();
+    ).toEqual({
+      authorization: false,
+      body: {},
+      headers: {
+        'content-type': 'application/json',
+      },
+      statusCode: 200,
+    });
     expect(httpMock.allUsed()).toBeTrue();
   });
   it('headJson', async () => {
     httpMock.scope(baseUrl).head('/').reply(200, {});
-    // FIXME: explicit assert condition
-    expect(
-      await http.headJson('http://renovate.com', { baseUrl })
-    ).toMatchSnapshot();
+    expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({
+      authorization: false,
+      body: {},
+      headers: {
+        'content-type': 'application/json',
+      },
+      statusCode: 200,
+    });
     expect(httpMock.allUsed()).toBeTrue();
   });
 
@@ -133,8 +171,14 @@ describe('util/http/index', () => {
         .reply(500)
         .head('/')
         .reply(200, undefined, { 'x-some-header': 'abc' });
-      // FIXME: explicit assert condition
-      expect(await http.head('http://renovate.com')).toMatchSnapshot();
+      expect(await http.head('http://renovate.com')).toEqual({
+        authorization: false,
+        body: '',
+        headers: {
+          'x-some-header': 'abc',
+        },
+        statusCode: 200,
+      });
       expect(httpMock.allUsed()).toBeTrue();
     } finally {
       process.env.NODE_ENV = NODE_ENV;
