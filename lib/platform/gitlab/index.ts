@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import pAll from 'p-all';
-import { lt } from 'semver';
+import semver from 'semver';
 import { PlatformId } from '../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -126,7 +126,7 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  draftPrefix = lt(defaults.version, '13.2.0')
+  draftPrefix = semver.lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
 
@@ -685,7 +685,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/PR/g), 'MR')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
 
-  if (lt(defaults.version, '13.4.0')) {
+  if (semver.lt(defaults.version, '13.4.0')) {
     logger.debug(
       { version: defaults.version },
       'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters'
@@ -973,7 +973,7 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${iid}`);
 
-  if (lt(defaults.version, '13.9.0')) {
+  if (semver.lt(defaults.version, '13.9.0')) {
     logger.warn(
       { version: defaults.version },
       'Adding reviewers is only available in GitLab 13.9 and onwards'

@@ -1,5 +1,5 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
+import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier.js';
 import { GlobalConfig } from '../../config/global';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';

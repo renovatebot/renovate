@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -54,7 +54,9 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
 
 function getCwd({ cwd, cwdFile }: ExecOptions): string {
   const defaultCwd = GlobalConfig.get('localDir');
-  const paramCwd = cwdFile ? join(defaultCwd, dirname(cwdFile)) : cwd;
+  const paramCwd = cwdFile
+    ? upath.join(defaultCwd, upath.dirname(cwdFile))
+    : cwd;
   return paramCwd ?? defaultCwd;
 }
 

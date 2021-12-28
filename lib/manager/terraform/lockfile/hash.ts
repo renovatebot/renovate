@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import extract from 'extract-zip';
 import pMap from 'p-map';
-import { join } from 'upath';
+import upath from 'upath';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/types';
 import { logger } from '../../../logger';
@@ -67,8 +67,8 @@ export class TerraformProviderHash {
     build: TerraformBuild,
     cacheDir: string
   ): Promise<string> {
-    const downloadFileName = join(cacheDir, build.filename);
-    const extractPath = join(cacheDir, 'extract', build.filename);
+    const downloadFileName = upath.join(cacheDir, build.filename);
+    const extractPath = upath.join(cacheDir, 'extract', build.filename);
     logger.trace(
       `Downloading archive and generating hash for ${build.name}-${build.version}...`
     );

@@ -1,4 +1,4 @@
-import * as URL from 'url';
+import URL from 'url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
