@@ -62,8 +62,13 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
               delete newRule[newKey];
             }
           });
-          newRule.matchUpdateTypes = rule.matchUpdateTypes || [];
-          newRule.matchUpdateTypes.push(key);
+          // @ts-expect-error - Wildcard is not defined in our types
+          if (rule.matchUpdateTypes?.includes('*')) {
+            newRule.matchUpdateTypes = clone(updateTypes);
+          } else {
+            newRule.matchUpdateTypes = rule.matchUpdateTypes || [];
+            newRule.matchUpdateTypes.push(key);
+          }
           newRule = { ...newRule, ...val };
           newRules.push(newRule);
         }
