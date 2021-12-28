@@ -37,9 +37,20 @@ export function extractPackageFile(content: string): PackageFile | null {
           logger.trace('depLineMatch');
           let skipReason: SkipReason;
           let repo: string;
-          if (depName.startsWith('https://') || depName.startsWith('git@')) {
-            logger.debug({ dependency: depName }, 'Skipping git plugin');
-            skipReason = SkipReason.GitPlugin;
+          const gitPluginMatch = regEx(
+            /(ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/
+          ).exec(depName);
+          if (gitPluginMatch) {
+            logger.debug('Examining git plugin');
+            const { registry, gitPluginName } = gitPluginMatch.groups;
+            const dep: PackageDependency = {
+              depName: gitPluginName,
+              currentValue: currentValue,
+              registryUrls: ['https://' + registry],
+              datasource: datasourceGithubTags.id,
+            };
+            deps.push(dep);
+            continue;
           } else if (isVersion(currentValue)) {
             const splitName = depName.split('/');
             if (splitName.length === 1) {
@@ -76,8 +87,10 @@ export function extractPackageFile(content: string): PackageFile | null {
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting buildkite plugins');
   }
+
   if (!deps.length) {
     return null;
   }
+
   return { deps };
 }

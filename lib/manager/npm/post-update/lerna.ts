@@ -1,4 +1,4 @@
-import semver, { validRange } from 'semver';
+import semver from 'semver';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -44,7 +44,7 @@ export async function generateLockFiles(
     if (lernaClient === 'yarn') {
       let installYarn = 'npm i -g yarn';
       const yarnCompatibility = config.constraints?.yarn;
-      if (validRange(yarnCompatibility)) {
+      if (semver.validRange(yarnCompatibility)) {
         installYarn += `@${quote(yarnCompatibility)}`;
       }
       preCommands.push(installYarn);
@@ -55,7 +55,7 @@ export async function generateLockFiles(
     } else if (lernaClient === 'npm') {
       let installNpm = 'npm i -g npm';
       const npmCompatibility = config.constraints?.npm;
-      if (validRange(npmCompatibility)) {
+      if (semver.validRange(npmCompatibility)) {
         installNpm += `@${quote(npmCompatibility)} || true`;
       }
       preCommands.push(installNpm, 'hash -d npm 2>/dev/null || true');

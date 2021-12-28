@@ -455,6 +455,37 @@ describe('config/presets/index', () => {
         packageTag: '1.2.3',
       });
     });
+
+    it('parses local with subdirectory and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository//path/to/preset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset',
+        presetPath: 'path/to',
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
+    it('parses local with sub preset and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository:preset/subpreset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset/subpreset',
+        presetPath: undefined,
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
     it('parses no prefix as local', () => {
       expect(presets.parsePreset('some/repo')).toEqual({
         packageName: 'some/repo',
@@ -464,11 +495,20 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
-    it('parses local Bitbucket user repo', () => {
+    it('parses local Bitbucket user repo with preset name', () => {
       expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
         packageName: '~john_doe/repo',
         params: undefined,
         presetName: 'somefile',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
+    it('parses local Bitbucket user repo', () => {
+      expect(presets.parsePreset('local>~john_doe/renovate-config')).toEqual({
+        packageName: '~john_doe/renovate-config',
+        params: undefined,
+        presetName: 'default',
         presetPath: undefined,
         presetSource: 'local',
       });
