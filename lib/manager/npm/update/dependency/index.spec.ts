@@ -39,8 +39,10 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input,
         upgrade,
       });
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeJsonString();
+      expect(JSON.parse(res)).toEqual({
+        dependencies: { gulp: 'gulpjs/gulp#v4.0.0' },
+      });
     });
     it('replaces a npm package alias', () => {
       const upgrade = {
@@ -60,8 +62,10 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input,
         upgrade,
       });
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeJsonString();
+      expect(JSON.parse(res)).toEqual({
+        dependencies: { hapi: 'npm:@hapi/hapi@18.3.1' },
+      });
     });
     it('replaces a github short hash', () => {
       const upgrade = {
@@ -80,8 +84,10 @@ describe('manager/npm/update/dependency/index', () => {
         fileContent: input,
         upgrade,
       });
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBeJsonString();
+      expect(JSON.parse(res)).toEqual({
+        dependencies: { gulp: 'gulpjs/gulp#0000000' },
+      });
     });
     it('replaces a github fully specified version', () => {
       const upgrade = {
