@@ -42,6 +42,18 @@ describe('config/massage', () => {
       expect(res).toMatchSnapshot();
       expect(res.packageRules).toHaveLength(3);
     });
+    it('massages packageRules matchUpdateTypes with wildcard', () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          {
+            // @ts-expect-error - Wildcard is not defined in our types
+            matchUpdateTypes: ['*'],
+          },
+        ],
+      };
+      const res = massage.massageConfig(config);
+      expect(res.packageRules[0].matchUpdateTypes).toHaveLength(6);
+    });
     it('does not massage lockFileMaintenance', () => {
       const config: RenovateConfig = {
         packageRules: [
