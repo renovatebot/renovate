@@ -78,7 +78,7 @@ export class GolangVersionDatasource extends Datasource {
         } else {
           const releaseDateMatch = releaseDateRegex.exec(line);
           if (releaseDateMatch) {
-            release.releaseTimestamp = `${releaseDateMatch.groups.year}-${releaseDateMatch.groups.month}-${releaseDateMatch.groups.day}`;
+            release.releaseTimestamp = `${releaseDateMatch.groups.year}-${releaseDateMatch.groups.month}-${releaseDateMatch.groups.day}T00:00:00.000Z`;
           }
           const releaseVersionMatch = releaseVersionRegex.exec(line);
           if (releaseVersionMatch) {
