@@ -46,7 +46,7 @@ export function regEx(
 }
 
 export function escapeRegExp(input: string): string {
-  return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string // TODO #12071
+  return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string
 }
 
 const configValStart = regEx(/^!?\//);
