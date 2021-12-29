@@ -123,10 +123,10 @@ export async function getUrls(
         const sourceUrl = pomXml.valueWithPath('scm.url');
         if (sourceUrl) {
           result.sourceUrl = sourceUrl
-            .replace(regEx(/^scm:/), '') // TODO #12071
-            .replace(regEx(/^git:/), '') // TODO #12071
-            .replace(regEx(/^git@github.com:/), 'https://github.com/') // TODO #12071
-            .replace(regEx(/\.git$/), ''); // TODO #12071
+            .replace(regEx(/^scm:/), '')
+            .replace(regEx(/^git:/), '')
+            .replace(regEx(/^git@github.com:/), 'https://github.com/')
+            .replace(regEx(/\.git$/), '');
         }
 
         return result;
