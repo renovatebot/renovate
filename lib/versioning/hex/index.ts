@@ -10,11 +10,11 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function hex2npm(input: string): string {
   return input
-    .replace(regEx(/~>\s*(\d+\.\d+)$/), '^$1') // TODO #12071
-    .replace(regEx(/~>\s*(\d+\.\d+\.\d+)/), '~$1') // TODO #12071
-    .replace(regEx(/==|and/), '') // TODO #12071
+    .replace(regEx(/~>\s*(\d+\.\d+)$/), '^$1')
+    .replace(regEx(/~>\s*(\d+\.\d+\.\d+)/), '~$1')
+    .replace(regEx(/==|and/), '')
     .replace('or', '||')
-    .replace(regEx(/!=\s*(\d+\.\d+(\.\d+.*)?)/), '>$1 <$1') // TODO #12071
+    .replace(regEx(/!=\s*(\d+\.\d+(\.\d+.*)?)/), '>$1 <$1')
     .trim();
 }
 

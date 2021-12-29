@@ -65,7 +65,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
         }
       }
-      const services = regEx(/^\s*services:\s*$/).test(line); // TODO #12071
+      const services = regEx(/^\s*services:\s*$/).test(line);
       if (services) {
         logger.trace(`Matched services on line ${lineNumber}`);
         let foundImage: boolean;
