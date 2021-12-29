@@ -142,7 +142,7 @@ function parseDepExpr(
   const tokens = expr
     .trim()
     .split(regEx(/("[^"]*")/g))
-    .map((x) => (regEx(/"[^"]*"/).test(x) ? x : x.replace(regEx(/[()]+/g), ''))) // TODO #12071
+    .map((x) => (regEx(/"[^"]*"/).test(x) ? x : x.replace(regEx(/[()]+/g), '')))
     .join('')
     .split(regEx(/\s*(%%?)\s*|\s*classifier\s*/));
 
