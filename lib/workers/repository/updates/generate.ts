@@ -178,7 +178,7 @@ export function generateBranchConfig(
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
     upgrade.commitMessage = upgrade.commitMessage.replace(
-      regEx(/to vv(\d)/), // TODO #12071
+      regEx(/to vv(\d)/),
       'to v$1'
     );
     if (upgrade.commitBody) {
@@ -192,7 +192,7 @@ export function generateBranchConfig(
       upgrade.prTitle = template
         .compile(upgrade.prTitle, upgrade)
         .trim()
-        .replace(regEx(/\s+/g), ' '); // TODO #12071
+        .replace(regEx(/\s+/g), ' ');
       // istanbul ignore if
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
         logger.debug(
