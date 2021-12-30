@@ -76,7 +76,7 @@ async function getModules(
       .filter((s) => !!s);
 
     for (const line of modules) {
-      const [, name, path] = line.split(regEx(/submodule\.(.+?)\.path\s(.+)/)); // TODO #12071
+      const [, name, path] = line.split(regEx(/submodule\.(.+?)\.path\s(.+)/));
       res.push({ name, path });
     }
   } catch (err) /* istanbul ignore next */ {
@@ -105,8 +105,8 @@ export default async function extractPackageFile(
     try {
       const [currentDigest] = (await git.subModule(['status', path]))
         .trim()
-        .replace(regEx(/^[-+]/), '') // TODO #12071
-        .split(regEx(/\s/)); // TODO #12071
+        .replace(regEx(/^[-+]/), '')
+        .split(regEx(/\s/));
       const subModuleUrl = await getUrl(git, gitModulesPath, name);
       // hostRules only understands HTTP URLs
       // Find HTTP URL, then apply token

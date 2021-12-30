@@ -105,7 +105,7 @@ export function rez2pep440(input: string): string {
 export function pep4402rezInclusiveBound(input: string): string {
   return input
     .split(',')
-    .map((v) => v.trim().replace(regEx(/[<>=]/g), '')) // TODO #12071
+    .map((v) => v.trim().replace(regEx(/[<>=]/g), ''))
     .join('..');
 }
 
