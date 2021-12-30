@@ -42,6 +42,90 @@ export { setPrivateKey } from './private-key';
 // TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
 const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
+// A generic wrapper for simpleGit.* calls to make them more fault-tolerant
+async function gitRetry(
+  retryCount: number,
+  delaySeconds: number,
+  delayFactor: number,
+  gitFuncName: string,
+  gitFunc: (...args) => Promise<any>,
+  args: any[] | undefined
+): Promise<any> {
+  logger.debug(
+    { retryCount, delaySeconds, delayFactor, gitFuncName, args },
+    'gitRetry'
+  );
+  let round: number = 0;
+  while (round <= retryCount) {
+    logger.debug({ round }, 'gitRetry round');
+    try {
+      if (args === undefined) {
+        return await gitFunc.call(this as SimpleGit);
+      }
+      return await gitFunc.call(this as SimpleGit, args);
+    } catch (err) {
+      logger.debug({ err }, `${gitFuncName} thrown`);
+      try {
+        checkForPlatformFailure(err);
+        throw err;
+      } catch (errChecked) {
+        if (errChecked instanceof ExternalHostError) {
+          logger.debug(
+            { err },
+            `gitRetry failure in round ${round} of ${retryCount}`
+          );
+          const nextDelay = delayFactor ^ ((round - 1) * delaySeconds);
+          await new Promise((resolve) => setTimeout(resolve, nextDelay));
+        } else {
+          throw err;
+        }
+      }
+    }
+    const nextDelay = delayFactor ^ ((round - 1) * delaySeconds);
+    logger.debug({ nextDelay }, 'Waiting nextDelay seconds');
+    await new Promise((resolve) => setTimeout(resolve, nextDelay));
+    round++;
+  }
+
+  throw new Error(`gitRetry count has exceeded the limit of ${retryCount}`);
+}
+
+// Retry parameters
+const retryCount = 5;
+const delaySeconds = 3;
+const retryFactor = 2;
+
+function wrapSimpleGitWithRetry(simpleGit) {
+  const prototype = Object.getPrototypeOf(simpleGit);
+
+  const funcsToWrap = {
+    raw: prototype.raw,
+    clone: prototype.clone,
+    branch: prototype.branch,
+    fetch: prototype.fetch,
+    push: prototype.push,
+    pull: prototype.pull,
+    checkout: prototype.checkout,
+    commit: prototype.commit,
+  };
+
+  for (const func in funcsToWrap) {
+    prototype[func] = (...args) => {
+      return gitRetry.call(
+        this,
+        retryCount,
+        delaySeconds,
+        retryFactor,
+        func,
+        funcsToWrap[func],
+        args
+      );
+    };
+  }
+
+  return simpleGit;
+}
+
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
   if (process.env.NODE_ENV === 'test') {
@@ -216,7 +300,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = simpleGit.default(localDir, simpleGitConfig());
+  git = wrapSimpleGitWithRetry(simpleGit.default(localDir, simpleGitConfig()));
   gitInitialized = false;
   await fetchBranchCommits();
 }
