@@ -155,8 +155,11 @@ describe('manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles, false);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toMatchSnapshot([
+        {},
+        { npmrc: '@org:registry=//registry.some.org\n' },
+        {},
+      ]);
     });
 
     it('uses yarnZeroInstall and skipInstalls from yarn workspaces package settings', async () => {
@@ -182,8 +185,11 @@ describe('manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles, false);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toMatchSnapshot([
+        {},
+        { managerData: { yarnZeroInstall: true }, skipInstalls: false },
+        { managerData: { yarnZeroInstall: true }, skipInstalls: false },
+      ]);
     });
   });
 });

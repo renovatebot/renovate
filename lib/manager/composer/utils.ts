@@ -1,6 +1,7 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import type { ToolConstraint } from '../../util/exec/types';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
@@ -9,12 +10,19 @@ export { composerVersioningId };
 
 const depRequireInstall = new Set(['symfony/flex']);
 
-export function getComposerArguments(config: UpdateArtifactsConfig): string {
+export function getComposerArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint
+): string {
   let args = '';
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      args += ' --ignore-platform-reqs';
+      const major = api.getMajor(toolConstraint.constraint);
+      const minor = api.getMinor(toolConstraint.constraint);
+      args += api.matches(`${major}.${minor}`, '^2.2')
+        ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
+        : ' --ignore-platform-reqs';
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
         args += ' --ignore-platform-req ' + quote(req);
