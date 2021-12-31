@@ -151,7 +151,7 @@ describe('versioning/rez/index', () => {
   `(
     'isLessThanRange($version, "$range") === $expected',
     ({ version, range, expected }) => {
-      expect(versioning.isLessThanRange(version, range)).toBe(expected);
+      expect(versioning.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 

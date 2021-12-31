@@ -60,7 +60,7 @@ export function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return newVersion;
   }
@@ -110,9 +110,8 @@ export function getNewValue({
   const toVersionMajor = major(newVersion);
   const toVersionMinor = minor(newVersion);
   const toVersionPatch = patch(newVersion);
-  const suffix = prerelease(newVersion)
-    ? '-' + String(prerelease(newVersion)[0])
-    : '';
+  const toNewVersion = prerelease(newVersion);
+  const suffix = toNewVersion ? '-' + String(toNewVersion[0]) : '';
   // Simple range
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
@@ -169,21 +168,25 @@ export function getNewValue({
       const newRange = semverUtils.parseRange(currentValue);
       const versions = newRange.map((x) => {
         const subRange = x.semver;
-        const bumpedSubRange = getNewValue({
-          currentValue: subRange,
-          rangeStrategy: 'bump',
-          currentVersion,
-          newVersion,
-        });
-        if (satisfies(newVersion, bumpedSubRange)) {
-          return bumpedSubRange;
+        if (subRange) {
+          const bumpedSubRange = getNewValue({
+            currentValue: subRange,
+            rangeStrategy: 'bump',
+            currentVersion,
+            newVersion,
+          });
+          if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
+            return bumpedSubRange;
+          }
+
+          return getNewValue({
+            currentValue: subRange,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          });
         }
-        return getNewValue({
-          currentValue: subRange,
-          rangeStrategy: 'replace',
-          currentVersion,
-          newVersion,
-        });
+        return null;
       });
       return versions.filter((x) => x !== null && x !== '').join(' ');
     }
