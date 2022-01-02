@@ -21,7 +21,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { RepositoryError } from '../../util/errors';
+import { ErrorFactory } from '../../util/errors/error-factory';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
@@ -233,6 +233,8 @@ export async function initRepo({
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
+  const errorFactory = new ErrorFactory();
+  errorFactory.setContext({ repositoryName: repository });
   try {
     let infoQuery = repoInfoQuery;
 
@@ -252,24 +254,24 @@ export async function initRepo({
     repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
-      throw new RepositoryError(REPOSITORY_NOT_FOUND, repository);
+      errorFactory.throwRepositoryError(REPOSITORY_NOT_FOUND);
     }
     // istanbul ignore if
     if (!repo.defaultBranchRef?.name) {
-      throw new RepositoryError(REPOSITORY_EMPTY, repository);
+      errorFactory.throwRepositoryError(REPOSITORY_EMPTY);
     }
     if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(
         { repository, this_repository: repo.nameWithOwner },
         'Repository has been renamed'
       );
-      throw new RepositoryError(REPOSITORY_RENAMED, repository);
+      errorFactory.throwRepositoryError(REPOSITORY_RENAMED);
     }
     if (repo.isArchived) {
       logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
-      throw new RepositoryError(REPOSITORY_ARCHIVED, repository);
+      errorFactory.throwRepositoryError(REPOSITORY_ARCHIVED);
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
@@ -298,13 +300,13 @@ export async function initRepo({
       throw err;
     }
     if (err.statusCode === 403) {
-      throw new RepositoryError(REPOSITORY_ACCESS_FORBIDDEN, repository);
+      errorFactory.throwRepositoryError(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (err.statusCode === 404) {
-      throw new RepositoryError(REPOSITORY_NOT_FOUND, repository);
+      errorFactory.throwRepositoryError(REPOSITORY_NOT_FOUND);
     }
     if (err.message.startsWith('Repository access blocked')) {
-      throw new RepositoryError(REPOSITORY_BLOCKED, repository);
+      errorFactory.throwRepositoryError(REPOSITORY_BLOCKED);
     }
     if (err.message === REPOSITORY_FORKED) {
       throw err;
@@ -313,7 +315,7 @@ export async function initRepo({
       throw err;
     }
     if (err.message === 'Response code 451 (Unavailable for Legal Reasons)') {
-      throw new RepositoryError(REPOSITORY_ACCESS_FORBIDDEN, repository);
+      errorFactory.throwRepositoryError(REPOSITORY_ACCESS_FORBIDDEN);
     }
     logger.debug({ err }, 'Unknown GitHub initRepo error');
     throw err;
