@@ -34,7 +34,19 @@ describe('workers/repository/model/custom-commit-message', () => {
       commitMessage.setBody('body');
       commitMessage.setFooter('footer');
 
+      expect(commitMessage.toJSON()).toEqual({
+        body: 'body',
+        footer: 'footer',
+        prefix: undefined,
+        subject: 'subject',
+      });
       expect(commitMessage.toString()).toBe('Subject\n\nbody\n\nfooter');
+    });
+
+    it('should remove empty subject by default', () => {
+      const commitMessage = new CustomCommitMessage();
+
+      expect(commitMessage.formatSubject()).toBe('');
     });
   });
 });
