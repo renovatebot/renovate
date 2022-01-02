@@ -100,11 +100,21 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchBaseBranches.length) {
-    const isMatch = matchBaseBranches.includes(baseBranch);
-    if (!isMatch) {
+    const hasBaseBranchMatch = matchBaseBranches.some(
+      (matchBaseBranch): boolean => {
+        const isAllowedPred = configRegexPredicate(matchBaseBranch);
+        if (isAllowedPred) {
+          return isAllowedPred(baseBranch);
+        }
+        return matchBaseBranch === baseBranch;
+      }
+    );
+
+    if (hasBaseBranchMatch) {
+      positiveMatch = true;
+    } else {
       return false;
     }
-    positiveMatch = true;
   }
   if (matchManagers.length) {
     const isMatch = matchManagers.includes(manager);

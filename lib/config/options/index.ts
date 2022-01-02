@@ -852,7 +852,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchBaseBranches',
     description:
-      'List of branches to match (e.g. ["master"]). Valid only within `packageRules` object.',
+      'List of branches to match (e.g. ["master"]) or list of regex patterns (e.g. ["/^release\\/.*/"]). Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
