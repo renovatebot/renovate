@@ -67,7 +67,9 @@ describe('workers/repository/onboarding/branch/create', () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${CommitMessage.SEPARATOR} ${message}`
+            `${prefix}${CommitMessage.SEPARATOR} ${
+              message.charAt(0).toLowerCase() + message.slice(1)
+            }`
           )
         );
       });
@@ -92,7 +94,9 @@ describe('workers/repository/onboarding/branch/create', () => {
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
-            `${prefix}${CommitMessage.SEPARATOR} ${message}`
+            `${prefix}${CommitMessage.SEPARATOR} ${
+              message.charAt(0).toLowerCase() + message.slice(1)
+            }`
           )
         );
       });

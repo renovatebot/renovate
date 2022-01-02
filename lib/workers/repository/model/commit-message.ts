@@ -1,13 +1,23 @@
-export class CommitMessage {
-  public static readonly SEPARATOR: string = ':';
+export interface CommitMessageJSON {
+  body?: string;
+  footer?: string;
+  subject?: string;
+}
 
-  private message = '';
+/**
+ * @see https://git-scm.com/docs/git-commit#_discussion
+ *
+ * [optional prefix]: <suject>
+ * [optional body]
+ * [optional footer]
+ */
+export abstract class CommitMessage {
+  static readonly SEPARATOR: string = ':';
+  private static readonly EXTRA_WHITESPACES = /\s+/g;
 
-  private prefix = '';
-
-  constructor(message = '') {
-    this.setMessage(message);
-  }
+  private body?: string;
+  private footer?: string;
+  private subject?: string;
 
   public static formatPrefix(prefix: string): string {
     if (!prefix) {
@@ -21,34 +31,54 @@ export class CommitMessage {
     return `${prefix}${CommitMessage.SEPARATOR}`;
   }
 
-  public setMessage(message: string): void {
-    this.message = (message || '').trim();
+  toString(): string {
+    const parts: ReadonlyArray<string | undefined> = [
+      this.title,
+      this.body,
+      this.footer,
+    ];
+
+    return parts.filter(Boolean).join('\n\n');
   }
 
-  public setCustomPrefix(prefix?: string): void {
-    this.prefix = (prefix ?? '').trim();
+  get title(): string {
+    return [CommitMessage.formatPrefix(this.prefix), this.formatSubject()]
+      .join(' ')
+      .trim();
   }
 
-  public setSemanticPrefix(type?: string, scope?: string): void {
-    this.prefix = (type ?? '').trim();
+  toJSON(): CommitMessageJSON {
+    return {
+      body: this.body,
+      footer: this.footer,
+      subject: this.subject,
+    };
+  }
 
-    if (scope?.trim()) {
-      this.prefix += `(${scope.trim()})`;
+  setBody(body?: string): void {
+    this.body = body?.trim();
+  }
+
+  setFooter(footer?: string): void {
+    this.footer = footer?.trim();
+  }
+
+  setSubject(subject?: string): void {
+    this.subject = subject?.trim();
+    this.subject = this.subject?.replace(CommitMessage.EXTRA_WHITESPACES, ' ');
+  }
+
+  formatSubject(): string {
+    if (!this.subject) {
+      return '';
     }
-  }
 
-  public toString(): string {
-    const prefix = CommitMessage.formatPrefix(this.prefix);
-    const message = this.formatMessage();
-
-    return [prefix, message].join(' ').trim();
-  }
-
-  private formatMessage(): string {
     if (this.prefix) {
-      return this.message;
+      return this.subject.charAt(0).toLowerCase() + this.subject.slice(1);
     }
 
-    return this.message.charAt(0).toUpperCase() + this.message.slice(1);
+    return this.subject.charAt(0).toUpperCase() + this.subject.slice(1);
   }
+
+  protected abstract get prefix(): string;
 }
