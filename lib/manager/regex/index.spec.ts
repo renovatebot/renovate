@@ -106,8 +106,16 @@ describe('manager/regex/index', () => {
       'Dockerfile',
       config
     );
-    // FIXME: explicit assert condition
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchSnapshot({
+      deps: [
+        {
+          currentValue: '8.12.13',
+          datasource: 'helm',
+          depName: 'prometheus-operator',
+          registryUrls: ['https://charts.helm.sh/stable'],
+        },
+      ],
+    });
   });
   it('extracts and applies a registryUrlTemplate', async () => {
     const config = {
@@ -140,8 +148,16 @@ describe('manager/regex/index', () => {
       'Dockerfile',
       config
     );
-    // FIXME: explicit assert condition
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchSnapshot({
+      deps: [
+        {
+          currentValue: '6.2',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'maven',
+        },
+      ],
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-gradle' },
       'Invalid regex manager registryUrl'
