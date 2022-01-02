@@ -12,8 +12,24 @@ const supportedSchemes = getOptions().find(
 
 describe('versioning/index', () => {
   it('has api', () => {
-    // FIXME: explicit assert condition
-    expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
+    expect(Object.keys(allVersioning.get('semver')).sort()).toEqual([
+      'equals',
+      'getMajor',
+      'getMinor',
+      'getNewValue',
+      'getPatch',
+      'getSatisfyingVersion',
+      'isCompatible',
+      'isGreaterThan',
+      'isLessThanRange',
+      'isSingleVersion',
+      'isStable',
+      'isValid',
+      'isVersion',
+      'matches',
+      'minSatisfyingVersion',
+      'sortVersions',
+    ]);
   });
   it('validates', () => {
     function validate(
