@@ -100,21 +100,18 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchBaseBranches.length) {
-    const hasBaseBranchMatch = matchBaseBranches.some(
-      (matchBaseBranch): boolean => {
-        const isAllowedPred = configRegexPredicate(matchBaseBranch);
-        if (isAllowedPred) {
-          return isAllowedPred(baseBranch);
-        }
-        return matchBaseBranch === baseBranch;
+    const isMatch = matchBaseBranches.some((matchBaseBranch): boolean => {
+      const isAllowedPred = configRegexPredicate(matchBaseBranch);
+      if (isAllowedPred) {
+        return isAllowedPred(baseBranch);
       }
-    );
+      return matchBaseBranch === baseBranch;
+    });
 
-    if (hasBaseBranchMatch) {
-      positiveMatch = true;
-    } else {
+    if (!isMatch) {
       return false;
     }
+    positiveMatch = true;
   }
   if (matchManagers.length) {
     const isMatch = matchManagers.includes(manager);
