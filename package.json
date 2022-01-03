@@ -181,7 +181,7 @@
     "minimatch": "3.0.4",
     "moo": "0.5.1",
     "nanoid": "3.1.30",
-    "node-html-parser": "5.1.0",
+    "node-html-parser": "5.2.0",
     "openpgp": "5.0.1",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
@@ -206,7 +206,7 @@
     "xmldoc": "1.1.2"
   },
   "optionalDependencies": {
-    "re2": "1.17.1"
+    "re2": "1.17.2"
   },
   "devDependencies": {
     "@actions/core": "1.6.0",
@@ -252,7 +252,7 @@
     "@typescript-eslint/eslint-plugin": "5.8.0",
     "@typescript-eslint/parser": "5.8.0",
     "aws-sdk-client-mock": "0.5.6",
-    "conventional-changelog-conventionalcommits": "4.6.1",
+    "conventional-changelog-conventionalcommits": "4.6.2",
     "cross-env": "7.0.3",
     "diff": "5.0.0",
     "emojibase-data": "7.0.1",
