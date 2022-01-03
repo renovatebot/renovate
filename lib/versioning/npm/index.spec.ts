@@ -83,6 +83,7 @@ describe('versioning/npm/index', () => {
     ${'^1.2.3'}             | ${'replace'}  | ${'1.2.3'}     | ${'1.2.3'}              | ${'^1.2.3'}
     ${'^1.2.3'}             | ${'replace'}  | ${'1.2.3'}     | ${'1.2.2'}              | ${'^1.2.2'}
     ${'^0.9.21'}            | ${'replace'}  | ${'0.9.21'}    | ${'0.9.22'}             | ${'^0.9.21'}
+    ${'ee'}                 | ${'bump'}     | ${'1.0.0'}     | ${'1.0.1'}              | ${null}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
