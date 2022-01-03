@@ -25,7 +25,10 @@ export interface QualifierToken extends BaseToken {
 
 export type Token = NumberToken | QualifierToken;
 
-function iterateChars(str: string, cb: (p: string, n: string) => void): void {
+function iterateChars(
+  str: string,
+  cb: (p: string | null, n: string | null) => void
+): void {
   let prev = null;
   let next = null;
   for (let i = 0; i < str.length; i += 1) {
@@ -173,7 +176,7 @@ export enum QualifierTypes {
   SP,
 }
 
-export function qualifierType(token: Token): number {
+export function qualifierType(token: Token): number | null {
   const val = token.val;
   if (val === 'alpha' || (token.isTransition && val === 'a')) {
     return QualifierTypes.Alpha;
@@ -274,8 +277,8 @@ function compare(left: string, right: string): number {
   return 0;
 }
 
-function isVersion(version: string): boolean {
-  if (!version) {
+function isVersion(version: unknown): version is string {
+  if (!version || typeof version !== 'string') {
     return false;
   }
   if (!regEx(/^[a-z0-9.-]+$/i).test(version)) {
@@ -297,7 +300,7 @@ function isVersion(version: string): boolean {
 const INCLUDING_POINT = 'INCLUDING_POINT';
 const EXCLUDING_POINT = 'EXCLUDING_POINT';
 
-function parseRange(rangeStr: string): Range[] {
+function parseRange(rangeStr: string): Range[] | null {
   function emptyInterval(): Range {
     return {
       leftType: null,
@@ -310,17 +313,17 @@ function parseRange(rangeStr: string): Range[] {
   }
 
   const commaSplit = rangeStr.split(',');
-  let result: Range[] = [];
+  let ranges: Range[] | null = [];
   let interval = emptyInterval();
 
   commaSplit.forEach((subStr) => {
-    if (!result) {
+    if (!ranges) {
       return;
     }
     if (interval.leftType === null) {
       if (regEx(/^\[.*]$/).test(subStr)) {
         const ver = subStr.slice(1, -1);
-        result.push({
+        ranges.push({
           leftType: INCLUDING_POINT,
           leftValue: ver,
           leftBracket: '[',
@@ -340,43 +343,46 @@ function parseRange(rangeStr: string): Range[] {
         interval.leftValue = ver;
         interval.leftBracket = subStr[0];
       } else {
-        result = null;
+        ranges = null;
       }
     } else if (subStr.endsWith(']')) {
       const ver = subStr.slice(0, -1);
       interval.rightType = INCLUDING_POINT;
       interval.rightValue = ver;
       interval.rightBracket = ']';
-      result.push(interval);
+      ranges.push(interval);
       interval = emptyInterval();
     } else if (subStr.endsWith(')') || subStr.endsWith('[')) {
       const ver = subStr.slice(0, -1);
       interval.rightType = EXCLUDING_POINT;
       interval.rightValue = ver;
       interval.rightBracket = subStr.endsWith(')') ? ')' : '[';
-      result.push(interval);
+      ranges.push(interval);
       interval = emptyInterval();
     } else {
-      result = null;
+      ranges = null;
     }
   });
 
   if (interval.leftType) {
     return null;
   } // something like '[1,2],[3'
-  if (!result || !result.length) {
+  if (!ranges || !ranges.length) {
     return null;
   }
 
-  const lastIdx = result.length - 1;
-  let prevValue: string = null;
-  return result.reduce((acc, range, idx) => {
+  const lastIdx = ranges.length - 1;
+  let prevValue: string | null = null;
+  const result: Range[] = [];
+  for (let idx = 0; idx < ranges.length; idx += 1) {
+    const range = ranges[idx];
     const { leftType, leftValue, rightType, rightValue } = range;
 
     if (idx === 0 && leftValue === '') {
       if (leftType === EXCLUDING_POINT && isVersion(rightValue)) {
         prevValue = rightValue;
-        return [...acc, { ...range, leftValue: null }];
+        result.push({ ...range, leftValue: null });
+        continue;
       }
       return null;
     }
@@ -385,7 +391,8 @@ function parseRange(rangeStr: string): Range[] {
         if (prevValue && compare(prevValue, leftValue) === 1) {
           return null;
         }
-        return [...acc, { ...range, rightValue: null }];
+        result.push({ ...range, rightValue: null });
+        continue;
       }
       return null;
     }
@@ -397,10 +404,12 @@ function parseRange(rangeStr: string): Range[] {
         return null;
       }
       prevValue = rightValue;
-      return [...acc, range];
+      result.push(range);
+      continue;
     }
     return null;
-  }, [] as Range[]);
+  }
+  return result;
 }
 
 function isValid(str: string): boolean {
@@ -411,20 +420,20 @@ function isValid(str: string): boolean {
 }
 
 export interface Range {
-  leftType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
-  leftValue: string;
-  leftBracket: string;
-  rightType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
-  rightValue: string;
-  rightBracket: string;
+  leftType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT | null;
+  leftValue: string | null;
+  leftBracket: string | null;
+  rightType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT | null;
+  rightValue: string | null;
+  rightBracket: string | null;
 }
 
-function rangeToStr(fullRange: Range[]): string | null {
+function rangeToStr(fullRange: Range[] | null): string | null {
   if (fullRange === null) {
     return null;
   }
 
-  const valToStr = (val: string): string => (val === null ? '' : val);
+  const valToStr = (val: string | null): string => (val === null ? '' : val);
 
   if (fullRange.length === 1) {
     const { leftBracket, rightBracket, leftValue, rightValue } = fullRange[0];
