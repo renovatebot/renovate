@@ -131,7 +131,7 @@ const getNewValue = ({
         logger.warn(`Unsupported strategy ${rangeStrategy}`);
     }
   }
-  if (regEx(/^('|")/).exec(currentValue) && newValue) {
+  if (newValue && regEx(/^('|")/).exec(currentValue)) {
     const delimiter = currentValue[0];
     return newValue
       .split(',')

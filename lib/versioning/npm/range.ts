@@ -77,6 +77,8 @@ export function getNewValue({
   }
   const parsedRange = semverUtils.parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
+  // eslint-disable-next-line no-console
+  console.log(parsedRange, element);
   if (rangeStrategy === 'widen') {
     if (satisfies(newVersion, currentValue)) {
       return currentValue;
@@ -185,8 +187,9 @@ export function getNewValue({
             currentVersion,
             newVersion,
           });
+        } else {
+          return null;
         }
-        return null;
       });
       return versions.filter((x) => x !== null && x !== '').join(' ');
     }
