@@ -246,7 +246,6 @@ export function addMetaData(
   }
 
   // Clean up any empty urls
-  // if (is.string(dep.homepage) && validateUrl())
   const urlKeys: (keyof ReleaseResult)[] = [
     'homepage',
     'sourceUrl',
