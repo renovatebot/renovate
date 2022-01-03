@@ -37,8 +37,7 @@ Object.defineProperty(HttpError.prototype, 'host', {
   get: function url(this: HttpError) {
     const urlStr = this.response?.url;
     const url = urlStr ? parseUrl(urlStr) : null;
-    const host = url ? url.host : undefined;
-    return host;
+    return url?.host;
   },
 });
 
