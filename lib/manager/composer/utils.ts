@@ -66,7 +66,7 @@ export function extractContraints(
   composerJson: ComposerConfig,
   lockParsed: ComposerLock
 ): Record<string, string> {
-  const res: Record<string, string> = { composer: '^2.0' };
+  const res: Record<string, string> = { composer: '~2.2.0' };
 
   // extract php
   if (composerJson.require?.php) {

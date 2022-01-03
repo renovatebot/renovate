@@ -51,8 +51,8 @@ describe('manager/composer/utils', () => {
       });
     });
 
-    it('fallback to ^2.0', () => {
-      expect(extractContraints({}, {})).toEqual({ composer: '^2.0' });
+    it('fallback to Composer 2.2 LTS', () => {
+      expect(extractContraints({}, {})).toEqual({ composer: '~2.2.0' });
     });
   });
 
