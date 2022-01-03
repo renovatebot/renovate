@@ -10,8 +10,8 @@ function getFutureVersion(
   newVersion: string,
   step: number
 ): string {
-  const toRelease: number[] = parseVersion(newVersion).release;
-  const baseRelease: number[] = parseVersion(baseVersion).release;
+  const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
+  const baseRelease: number[] = parseVersion(baseVersion)?.release ?? [];
   let found = false;
   const futureRelease = baseRelease.map((basePart, index) => {
     if (found) {
