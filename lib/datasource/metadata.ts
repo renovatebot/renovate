@@ -246,12 +246,7 @@ export function addMetaData(
   }
 
   // Clean up any empty urls
-  const urlKeys: (keyof ReleaseResult)[] = [
-    'homepage',
-    'sourceUrl',
-    'changelogUrl',
-    'dependencyUrl',
-  ];
+  const urlKeys = ['homepage', 'sourceUrl', 'changelogUrl', 'dependencyUrl'];
   for (const urlKey of urlKeys) {
     const urlVal = dep[urlKey];
     if (is.string(urlVal) && validateUrl(urlVal.trim())) {
