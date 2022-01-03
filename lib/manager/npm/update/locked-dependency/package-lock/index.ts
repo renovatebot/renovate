@@ -147,12 +147,13 @@ export async function updateLockedDependency(
         }
       } else if (depType) {
         // The constaint comes from the package.json file, so we need to update it
-        const newValue = semver.getNewValue({
-          currentValue: constraint,
-          rangeStrategy: 'replace',
-          currentVersion,
-          newVersion,
-        });
+        const newValue =
+          semver.getNewValue({
+            currentValue: constraint,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          }) ?? constraint;
         newPackageJsonContent = updateDependency({
           fileContent: packageFileContent,
           upgrade: { depName, depType, newValue },

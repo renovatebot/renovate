@@ -44,11 +44,12 @@ export function getRollbackUpdate(
     logger.debug('No newVersion to roll back to');
     return null;
   }
-  const newValue = version.getNewValue({
-    currentValue,
-    rangeStrategy: 'replace',
-    newVersion,
-  });
+  const newValue =
+    version.getNewValue({
+      currentValue,
+      rangeStrategy: 'replace',
+      newVersion,
+    }) ?? currentValue;
   return {
     bucket: 'rollback',
     newMajor: version.getMajor(newVersion),

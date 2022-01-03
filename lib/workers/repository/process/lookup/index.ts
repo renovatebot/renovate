@@ -151,11 +151,12 @@ export async function lookupUpdates(
         res.updates.push({
           updateType: 'replacement',
           newName: dependency.replacementName,
-          newValue: versioning.getNewValue({
-            currentValue,
-            newVersion: dependency.replacementVersion,
-            rangeStrategy,
-          }),
+          newValue:
+            versioning.getNewValue({
+              currentValue,
+              newVersion: dependency.replacementVersion,
+              rangeStrategy,
+            }) ?? currentValue,
         });
       }
       // istanbul ignore next
@@ -204,12 +205,13 @@ export async function lookupUpdates(
         res.updates.push({
           updateType: 'pin',
           isPin: true,
-          newValue: versioning.getNewValue({
-            currentValue,
-            rangeStrategy,
-            currentVersion,
-            newVersion: currentVersion,
-          }),
+          newValue:
+            versioning.getNewValue({
+              currentValue,
+              rangeStrategy,
+              currentVersion,
+              newVersion: currentVersion,
+            }) ?? currentValue,
           newMajor: versioning.getMajor(currentVersion),
         });
       }

@@ -34,12 +34,13 @@ export function generateUpdate(
   const { currentValue } = config;
   if (currentValue) {
     try {
-      update.newValue = versioning.getNewValue({
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-      });
+      update.newValue =
+        versioning.getNewValue({
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        }) ?? currentValue;
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
