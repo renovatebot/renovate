@@ -22,7 +22,7 @@ declare module '*.json' {
   export = value;
 }
 
-// these  declartions will be removed once the types.ts file for @renovate/pep440 is ready
+// these  declartions will be removed once the types.ts file for Pep440 is ready
 interface parsed {
   public: string;
   base_version: string;
