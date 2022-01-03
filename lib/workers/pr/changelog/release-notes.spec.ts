@@ -280,62 +280,261 @@ describe('workers/pr/changelog/release-notes', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it.each([[''], ['v'], ['other-'], ['other_v'], ['other@']])(
-      'gets release notes with body "%s"',
-      async (prefix) => {
-        httpMock
-          .scope('https://api.github.com/')
-          .get('/repos/some/other-repository/releases?per_page=100')
-          .reply(200, [
-            { tag_name: `${prefix}1.0.0` },
-            {
-              tag_name: `${prefix}1.0.1`,
-              body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-            },
-          ]);
-        const res = await getReleaseNotes(
+    it('gets release notes with body ""', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
           {
-            ...githubProject,
-            repository: 'some/other-repository',
-            depName: 'other',
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
           },
-          '1.0.1'
-        );
-        // FIXME: explicit assert condition
-        expect(res).toMatchSnapshot();
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      }
-    );
-
-    it.each([[''], ['v'], ['other-']])(
-      'gets release notes with body from gitlab repo "%s"',
-      async (prefix) => {
-        httpMock
-          .scope('https://api.gitlab.com/')
-          .get('/projects/some%2fother-repository/releases?per_page=100')
-          .reply(200, [
-            { tag_name: `${prefix}1.0.0` },
-            {
-              tag_name: `${prefix}1.0.1`,
-              description:
-                'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
-            },
-          ]);
-
-        const res = await getReleaseNotes(
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: '1.0.1',
+        url: 'https://github.com/some/other-repository/releases/1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body "v"', async () => {
+      const prefix = 'v';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
           {
-            ...gitlabProject,
-            repository: 'some/other-repository',
-            depName: 'other',
-            apiBaseUrl: 'https://api.gitlab.com/',
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
           },
-          '1.0.1'
-        );
-        // FIXME: explicit assert condition
-        expect(res).toMatchSnapshot();
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      }
-    );
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'v1.0.1',
+        url: 'https://github.com/some/other-repository/releases/v1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body "other-"', async () => {
+      const prefix = 'other-';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'other-1.0.1',
+        url: 'https://github.com/some/other-repository/releases/other-1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body "other_v"', async () => {
+      const prefix = 'other_v';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'other_v1.0.1',
+        url: 'https://github.com/some/other-repository/releases/other_v1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body "other@"', async () => {
+      const prefix = 'other@';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'other@1.0.1',
+        url: 'https://github.com/some/other-repository/releases/other@1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('gets release notes with body from gitlab repo ""', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.gitlab.com/')
+        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            description:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...gitlabProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+          apiBaseUrl: 'https://api.gitlab.com/',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        name: undefined,
+        notesSourceUrl:
+          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+        tag: '1.0.1',
+        url: 'https://gitlab.com/some/other-repository/tags/1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body from gitlab repo "v"', async () => {
+      const prefix = 'v';
+      httpMock
+        .scope('https://api.gitlab.com/')
+        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            description:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...gitlabProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+          apiBaseUrl: 'https://api.gitlab.com/',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        name: undefined,
+        notesSourceUrl:
+          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+        tag: 'v1.0.1',
+        url: 'https://gitlab.com/some/other-repository/tags/v1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body from gitlab repo "other-"', async () => {
+      const prefix = 'other-';
+      httpMock
+        .scope('https://api.gitlab.com/')
+        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            description:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...gitlabProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+          apiBaseUrl: 'https://api.gitlab.com/',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        name: undefined,
+        notesSourceUrl:
+          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+        tag: 'other-1.0.1',
+        url: 'https://gitlab.com/some/other-repository/tags/other-1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
 
     it('gets null from repository without gitlab/github in domain', async () => {
       const res = await getReleaseNotes(

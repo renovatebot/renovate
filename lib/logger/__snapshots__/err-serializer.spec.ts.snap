@@ -1,22 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`logger/err-serializer expands errors 1`] = `
-Object {
-  "a": 1,
-  "b": 2,
-  "message": "some message",
-  "options": Object {
-    "headers": Object {
-      "authorization": "Bearer testtoken",
-    },
-  },
-  "response": Object {
-    "body": "some response body",
-    "url": "some/path",
-  },
-}
-`;
-
 exports[`logger/err-serializer got handles http error 1`] = `
 Array [
   Object {
@@ -80,13 +63,5 @@ Object {
     "statusCode": 412,
     "statusMessage": "Precondition Failed",
   },
-}
-`;
-
-exports[`logger/err-serializer handles missing fields 1`] = `
-Object {
-  "a": 1,
-  "body": "some body",
-  "stack": "foo",
 }
 `;

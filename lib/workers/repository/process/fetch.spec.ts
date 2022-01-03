@@ -20,8 +20,9 @@ describe('workers/repository/process/fetch', () => {
         npm: [{ packageFile: 'package.json', deps: [] }],
       };
       await fetchUpdates(config, packageFiles);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toEqual({
+        npm: [{ deps: [], packageFile: 'package.json' }],
+      });
     });
     it('handles ignored, skipped and disabled', async () => {
       config.ignoreDeps = ['abcd'];

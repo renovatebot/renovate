@@ -76,12 +76,28 @@ describe('workers/pr/changelog/gitlab', () => {
       ).toBeNull();
     });
     it('works without GitLab', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: false,
+        project: {
+          apiBaseUrl: 'https://gitlab.com/api/v4/',
+          baseUrl: 'https://gitlab.com/',
+          depName: 'renovate',
+          repository: 'meno/dropzone',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://gitlab.com/meno/dropzone/',
+          type: 'gitlab',
+        },
+        versions: [
+          { version: '5.6.1' },
+          { version: '5.6.0' },
+          { version: '5.5.0' },
+          { version: '5.4.0' },
+        ],
+      });
     });
     it('uses GitLab tags', async () => {
       httpMock
@@ -101,12 +117,28 @@ describe('workers/pr/changelog/gitlab', () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://gitlab.com/api/v4/',
+          baseUrl: 'https://gitlab.com/',
+          depName: 'renovate',
+          repository: 'meno/dropzone',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://gitlab.com/meno/dropzone/',
+          type: 'gitlab',
+        },
+        versions: [
+          { version: '5.6.1' },
+          { version: '5.6.0' },
+          { version: '5.5.0' },
+          { version: '5.4.0' },
+        ],
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles empty GitLab tags response', async () => {
@@ -120,12 +152,28 @@ describe('workers/pr/changelog/gitlab', () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: false,
+        project: {
+          apiBaseUrl: 'https://gitlab.com/api/v4/',
+          baseUrl: 'https://gitlab.com/',
+          depName: 'renovate',
+          repository: 'meno/dropzone',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://gitlab.com/meno/dropzone/',
+          type: 'gitlab',
+        },
+        versions: [
+          { version: '5.6.1' },
+          { version: '5.6.0' },
+          { version: '5.5.0' },
+          { version: '5.4.0' },
+        ],
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('uses GitLab tags with error', async () => {
@@ -139,12 +187,28 @@ describe('workers/pr/changelog/gitlab', () => {
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
         .reply(200, []);
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: false,
+        project: {
+          apiBaseUrl: 'https://gitlab.com/api/v4/',
+          baseUrl: 'https://gitlab.com/',
+          depName: 'renovate',
+          repository: 'meno/dropzone',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://gitlab.com/meno/dropzone/',
+          type: 'gitlab',
+        },
+        versions: [
+          { version: '5.6.1' },
+          { version: '5.6.0' },
+          { version: '5.5.0' },
+          { version: '5.4.0' },
+        ],
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles no sourceUrl', async () => {
@@ -186,14 +250,30 @@ describe('workers/pr/changelog/gitlab', () => {
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
           endpoint: 'https://gitlab-enterprise.example.com/',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: false,
+        project: {
+          apiBaseUrl: 'https://gitlab-enterprise.example.com/api/v4/',
+          baseUrl: 'https://gitlab-enterprise.example.com/',
+          depName: 'renovate',
+          repository: 'meno/dropzone',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
+          type: 'gitlab',
+        },
+        versions: [
+          { version: '5.6.1' },
+          { version: '5.6.0' },
+          { version: '5.5.0' },
+          { version: '5.4.0' },
+        ],
+      });
     });
     it('supports self-hosted gitlab changelog', async () => {
       httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
@@ -203,7 +283,6 @@ describe('workers/pr/changelog/gitlab', () => {
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -211,7 +290,24 @@ describe('workers/pr/changelog/gitlab', () => {
           sourceUrl: 'https://git.test.com/meno/dropzone/',
           endpoint: 'https://git.test.com/api/v4/',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: false,
+        project: {
+          apiBaseUrl: 'https://git.test.com/api/v4/',
+          baseUrl: 'https://git.test.com/',
+          depName: 'renovate',
+          repository: 'meno/dropzone',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://git.test.com/meno/dropzone/',
+          type: 'gitlab',
+        },
+        versions: [
+          { version: '5.6.1' },
+          { version: '5.6.0' },
+          { version: '5.5.0' },
+          { version: '5.4.0' },
+        ],
+      });
     });
   });
 });
