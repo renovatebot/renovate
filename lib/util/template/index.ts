@@ -23,10 +23,10 @@ handlebars.registerHelper('containsString', (str, subStr, options) =>
 
 handlebars.registerHelper({
   and(...args) {
-    return Array.prototype.slice.call(args, 0, args.length - 1).every(Boolean);
+    return args.every(Boolean);
   },
   or(...args) {
-    return Array.prototype.slice.call(args, 0, args.length - 1).some(Boolean);
+    return args.some(Boolean);
   },
 });
 
