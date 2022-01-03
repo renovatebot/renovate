@@ -243,7 +243,7 @@ Configuring this to `true` means that Renovate will detect and apply the default
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.
-The `config:base` preset that many extend from limits the amount of concurrent branches to 20, but in most cases we would recommend lower values such as 5 or 10.
+The `config:base` preset that many extend from limits the amount of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
 However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
@@ -363,10 +363,14 @@ The "topic" is usually refers to the dependency being updated, e.g. `"dependency
 
 ## composerIgnorePlatformReqs
 
-By default, Renovate will run Composer with `--ignore-platform-reqs` as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
-However, this also means that all platform constraints (including PHP version) will be ignored by default, which can result in updated dependencies that are not compatible with your platform.
+By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match the required PHP environment of your project as configured in your `composer.json` file.
 
-To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
+Composer `2.2` and up will be run with `--ignore-platform-req='ext-*' --ignore-platform-req='lib-*'`, which ignores extension and library platform requirements but not the PHP version itself and should work in most cases.
+
+Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default.
+This can result in updated dependencies that are not compatible with your platform.
+
+To customize this behaviour, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
 Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
 The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
@@ -377,6 +381,13 @@ Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-p
 This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
 The Composer output should inform you about the reasons the update failed.
 
+## confidential
+
+If enabled, all issues created by Renovate are set as confidential, even in a public repository.
+**Note:** the Dependency Dashboard issue will also be confidential.
+By default issues created by Renovate are visible to all users.
+This option is applicable to GitLab only.
+
 ## configWarningReuseIssue
 
 Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
@@ -385,7 +396,7 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 ## constraints
 
-Constraints are used in package managers which use third party tools to update "artifacts" like lock files or checksum files.
+Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
 Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
 
@@ -634,8 +645,8 @@ See [shareable config presets](https://docs.renovatebot.com/config-presets) for 
 
 ## extractVersion
 
-Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file.
-You must defined a "named capture group" called `version` as shown in the below examples.
+Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
+You must define a "named capture group" called `version` like in the examples below.
 
 For example, to extract only the major.minor precision from a GitHub release, the following would work:
 
@@ -681,7 +692,7 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchReleaseNotes
 
-Configure this to `false` if you want to disable release notes fetching
+Set this to `false` if you want to disable release notes fetching.
 
 ## fileMatch
 
@@ -1090,6 +1101,11 @@ For instance if you have a project with an `"examples/"` directory you wish to i
 
 Useful to know: Renovate's default ignore is `node_modules` and `bower_components` only, however if you are extending the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
+## ignorePlugins
+
+Set this to `true` if running plugins causes problems.
+Applicable for Composer only for now.
+
 ## ignorePrAuthor
 
 This is usually needed if someone needs to migrate bot accounts, including from hosted app to self-hosted.
@@ -1193,7 +1209,16 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 This feature can be used to refresh lock files and keep them up-to-date.
 "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
-Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock`, `poetry.lock` and `Cargo.lock`.
+Supported lock files are:
+
+- `package-lock.json`
+- `yarn.lock`
+- `composer.lock`
+- `Gemfile.lock`
+- `poetry.lock`
+- `Cargo.lock`
+- `jsonnetfile.lock.json`
+
 Others may be added via feature request.
 
 This feature is disabled by default.
@@ -1234,7 +1259,7 @@ See [Private npm module support](https://docs.renovatebot.com/getting-started/pr
 ## npmrcMerge
 
 This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
-In some situations you need the ability to force override `.npmrc` contents in a repo (`npmMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmMerge=true`).
+In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
 A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and therefore its values ignored.
@@ -1497,7 +1522,18 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 ### matchCurrentVersion
 
-`matchCurrentVersion` can be an exact SemVer version or a SemVer range.
+`matchCurrentVersion` can be an exact SemVer version or a SemVer range:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCurrentVersion": ">=1.0.0",
+      "matchPackageNames": ["angular"]
+    }
+  ]
+}
+```
 
 This field also supports Regular Expressions which must begin and end with `/`.
 For example, the following enforces that only `1.*` versions will be used:
@@ -1652,6 +1688,31 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### replacementName
+
+Use this field to define the name of a replacement package.
+Must be used with `replacementVersion` (see example below).
+You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+
+### replacementVersion
+
+Use this field to define the version of a replacement package.
+Must be used with `replacementName`.
+For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["jade"],
+      "replacementName": "pug",
+      "replacementVersion": "2.0.0"
+    }
+  ]
+}
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
@@ -1694,6 +1755,8 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 ## postUpgradeTasks
 
+Note: post-upgrade tasks can only be used on self-hosted Renovate instances.
+
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
 The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
 
@@ -1716,16 +1779,17 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 ### commands
 
-A list of commands that are executed after Renovate has updated a dependency but before the commit it made
+A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
 ### fileFilters
 
-A list of glob-style matchers that determine which files will be included in the final commit made by Renovate
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
 
 ### executionMode
 
-Defaults to `update`, but can also be set to `branch`. This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask
-will be executed for every dependency on the branch. If set to `branch` the postUpgradeTask is executed for the whole branch.
+Defaults to `update`, but can also be set to `branch`.
+This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
+If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 ## prBodyColumns
 
@@ -1937,6 +2001,8 @@ Possible values and meanings:
 - If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 It is also recommended to avoid `rebaseWhen=never` as it can result in conflicted branches with outdated PR descriptions and/or status checks.
+
+Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` as this can prevent creation of PRs.
 
 ## recreateClosed
 
@@ -2218,7 +2284,7 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 ## registryUrls
 
 Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use.
-In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageUrls` like so:
+In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageRules` like so:
 
 ```json
 {
@@ -2233,6 +2299,10 @@ In case there is a need to configure them manually, it can be done using this `r
 
 The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
 
+## replacement
+
+Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
+
 ## respectLatest
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
@@ -2241,7 +2311,15 @@ By default, `renovate` will update to a version greater than `latest` only if th
 ## reviewers
 
 Must be valid usernames.
-If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
+
+If on GitHub and assigning a team to review, you must use the prefix `team:` and add the _last part_ of the team name.
+Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
+
+```json
+{
+  "reviewers": "team:foo"
+}
+```
 
 ## reviewersFromCodeOwners
 
@@ -2349,13 +2427,17 @@ For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were b
 If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released.
 If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
-It is recommended that you leave this setting to `true`, because of the polite way that Renovate handles this.
+It is recommended that you leave this option to `true`, because of the polite way that Renovate handles this.
 For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives.
 In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released.
 You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it.
 Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to the base branch once it's tested.
 After that, Renovate will resume providing you updates to 3.x again!
 i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
+
+This option also has priority over package groups configured by `packageRule`.
+So Renovate will propose separate PRs for major and minor updates of packages even if they are grouped.
+If you want to enforce grouped package updates, you need to set this option to `false` within the `packageRule`.
 
 ## separateMinorPatch
 
@@ -2459,7 +2541,7 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseWhen=behind-base-branch and the base branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured `prCreation=not-pending`, or you have `rebaseWhen=behind-base-branch` and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
@@ -2468,6 +2550,31 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
+## userStrings
+
+When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
+If you want, you can change the text in the comment with the `userStrings` config option.
+
+You can edit these user-facing strings:
+
+- `ignoreDigest`: Text of the PR comment for digest upgrades.
+- `ignoreMajor`: Text of the PR comment for major upgrades.
+- `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
+- `ignoreTopic`: Topic of the PR comment.
+
+Example:
+
+```json
+{
+  "userStrings": {
+    "ignoreTopic": "Custom topic for PR comment",
+    "ignoreMajor": "Custom text for major upgrades.",
+    "ignoreDigest": "Custom text for digest upgrades.",
+    "ignoreOther": "Custom text for other upgrades."
+  }
+}
+```
 
 ## versioning
 

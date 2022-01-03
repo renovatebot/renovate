@@ -15,25 +15,32 @@ import { generateBranchName } from './branch-name';
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substr(1);
 
+function sanitizeDepName(depName: string): string {
+  return depName
+    .replace('@types/', '')
+    .replace('@', '')
+    .replace(regEx(/\//g), '-')
+    .replace(regEx(/\s+/g), '-')
+    .replace(regEx(/-+/), '-')
+    .toLowerCase();
+}
+
 export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   const updateConfig = { ...input };
   delete updateConfig.packageRules;
   // TODO: Remove next line once #8075 is complete
   updateConfig.depNameSanitized = updateConfig.depName
-    ? updateConfig.depName
-        .replace('@types/', '')
-        .replace('@', '')
-        .replace(regEx(/\//g), '-') // TODO #12071
-        .replace(regEx(/\s+/g), '-') // TODO #12071
-        .replace(regEx(/-+/), '-')
-        .toLowerCase()
+    ? sanitizeDepName(updateConfig.depName)
+    : undefined;
+  updateConfig.newNameSanitized = updateConfig.newName
+    ? sanitizeDepName(updateConfig.newName)
     : undefined;
   if (updateConfig.sourceUrl) {
     const parsedSourceUrl = parseUrl(updateConfig.sourceUrl);
     if (parsedSourceUrl?.pathname) {
       updateConfig.sourceRepoSlug = parsedSourceUrl.pathname
-        .replace(regEx(/^\//), '') // remove leading slash  // TODO #12071
-        .replace(regEx(/\//g), '-') // change slashes to hyphens   // TODO #12071
+        .replace(regEx(/^\//), '') // remove leading slash
+        .replace(regEx(/\//g), '-') // change slashes to hyphens
         .replace(regEx(/-+/g), '-'); // remove multiple hyphens
     }
   }
@@ -53,6 +60,7 @@ export async function flattenUpdates(
     'pin',
     'digest',
     'lockFileMaintenance',
+    'replacement',
   ];
   for (const [manager, files] of Object.entries(packageFiles)) {
     const managerConfig = getManagerConfig(config, manager);

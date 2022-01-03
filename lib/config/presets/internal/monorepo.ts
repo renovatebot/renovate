@@ -34,6 +34,7 @@ const repoGroups = {
   deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'dnd-kit': 'https://github.com/clauderic/dnd-kit',
+  'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -85,6 +86,7 @@ const repoGroups = {
     'https://github.com/dotnet/runtime',
   ],
   dropwizard: 'https://github.com/dropwizard/dropwizard',
+  emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
   feathers: 'https://github.com/feathersjs/feathers',
@@ -100,6 +102,7 @@ const repoGroups = {
   ],
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
+  guava: 'https://github.com/google/guava',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
@@ -148,6 +151,7 @@ const repoGroups = {
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
   pnpjs: 'https://github.com/pnp/pnpjs',
   playwright: 'https://github.com/Microsoft/playwright',
@@ -182,6 +186,7 @@ const repoGroups = {
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
+  xterm: 'https://github.com/xtermjs/xterm.js',
 };
 
 const patternGroups = {

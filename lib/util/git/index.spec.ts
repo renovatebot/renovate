@@ -2,10 +2,10 @@ import fs from 'fs-extra';
 import Git from 'simple-git';
 import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
-import { GitNoVerifyOption, setNoVerify } from '.';
+import { setNoVerify } from '.';
 
 describe('util/git/index', () => {
   jest.setTimeout(15000);
@@ -71,7 +71,7 @@ describe('util/git/index', () => {
     await repo.clone(base.path, '.', ['--bare']);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    setGlobalConfig({ localDir: tmpDir.path });
+    GlobalConfig.set({ localDir: tmpDir.path });
     await git.initRepo({
       url: origin.path,
     });
@@ -94,6 +94,13 @@ describe('util/git/index', () => {
     await base.cleanup();
   });
 
+  describe('validateGitVersion()', () => {
+    it('has a git version greater or equal to the minimum required', async () => {
+      const res = await git.validateGitVersion();
+      expect(res).toBeTrue();
+    });
+  });
+
   describe('checkoutBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
       await expect(git.checkoutBranch(defaultBranch)).resolves.not.toThrow();
@@ -104,8 +111,11 @@ describe('util/git/index', () => {
   });
   describe('getFileList()', () => {
     it('should return the correct files', async () => {
-      // FIXME: explicit assert condition
-      expect(await git.getFileList()).toMatchSnapshot();
+      expect(await git.getFileList()).toEqual([
+        'file_to_delete',
+        'master_file',
+        'past_file',
+      ]);
     });
     it('should exclude submodules', async () => {
       const repo = Git(base.path);
@@ -116,9 +126,13 @@ describe('util/git/index', () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
-      // FIXME: explicit assert condition
-      expect(await git.getFileList()).toMatchSnapshot();
+      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await git.getFileList()).toEqual([
+        '.gitmodules',
+        'file_to_delete',
+        'master_file',
+        'past_file',
+      ]);
       await repo.reset(['--hard', 'HEAD^']);
     });
   });
@@ -203,8 +217,7 @@ describe('util/git/index', () => {
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes'
       );
-      // FIXME: explicit assert condition
-      expect(branchFiles).toMatchSnapshot();
+      expect(branchFiles).toEqual(['some-new-file']);
     });
   });
 
@@ -363,7 +376,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Commit]);
+      setNoVerify(['commit']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -393,7 +406,7 @@ describe('util/git/index', () => {
           contents: 'some new-contents',
         },
       ];
-      setNoVerify([GitNoVerifyOption.Push]);
+      setNoVerify(['push']);
 
       await git.commitFiles({
         branchName: 'renovate/something',
@@ -434,8 +447,10 @@ describe('util/git/index', () => {
 
   describe('getCommitMessages()', () => {
     it('returns commit messages', async () => {
-      // FIXME: explicit assert condition
-      expect(await git.getCommitMessages()).toMatchSnapshot();
+      expect(await git.getCommitMessages()).toEqual([
+        'master message',
+        'past message',
+      ]);
     });
   });
 
@@ -449,14 +464,14 @@ describe('util/git/index', () => {
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('https://user:pass@host/some/repo.git');
+      ).toBe('https://user:pass@host/some/repo.git');
       expect(
         getUrl({
           auth: 'user:pass',
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('https://user:pass@host/some/repo.git');
+      ).toBe('https://user:pass@host/some/repo.git');
     });
 
     it('returns ssh url', () => {
@@ -467,7 +482,7 @@ describe('util/git/index', () => {
           hostname: 'host',
           repository: 'some/repo',
         })
-      ).toEqual('git@host:some/repo.git');
+      ).toBe('git@host:some/repo.git');
     });
   });
 
@@ -482,8 +497,10 @@ describe('util/git/index', () => {
 
       expect(git.branchExists('test')).toBeFalsy();
 
-      // FIXME: explicit assert condition
-      expect(await git.getCommitMessages()).toMatchSnapshot();
+      expect(await git.getCommitMessages()).toEqual([
+        'master message',
+        'past message',
+      ]);
 
       await git.checkoutBranch('develop');
 
@@ -496,7 +513,7 @@ describe('util/git/index', () => {
       await git.checkoutBranch('test');
 
       const msg = await git.getCommitMessages();
-      expect(msg).toMatchSnapshot();
+      expect(msg).toEqual(['past message2', 'master message', 'past message']);
       expect(msg).toContain('past message2');
     });
 
@@ -547,7 +564,7 @@ describe('util/git/index', () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
     });
 

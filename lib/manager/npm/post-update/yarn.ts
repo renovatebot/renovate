@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { gte, minVersion, validRange } from 'semver';
+import semver from 'semver';
 import { quote } from 'shlex';
-import { join } from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -10,7 +10,8 @@ import {
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { ExecOptions, exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import { exists, readFile, remove, writeFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
@@ -67,7 +68,7 @@ export async function generateLockFile(
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = join(cwd, 'yarn.lock');
+  const lockFileName = upath.join(cwd, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
@@ -76,11 +77,13 @@ export async function generateLockFile(
       ? yarnUpdate.newValue
       : config.constraints?.yarn;
     const minYarnVersion =
-      validRange(yarnCompatibility) && minVersion(yarnCompatibility);
+      semver.validRange(yarnCompatibility) &&
+      semver.minVersion(yarnCompatibility);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
-      minYarnVersion && gte(minYarnVersion, '2.2.0');
-    const isYarnModeAvailable = minYarnVersion && gte(minYarnVersion, '3.0.0');
+      minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
+    const isYarnModeAvailable =
+      minYarnVersion && semver.gte(minYarnVersion, '3.0.0');
 
     let installYarn = 'npm i -g yarn';
     if (isYarn1 && minYarnVersion) {
@@ -128,7 +131,7 @@ export async function generateLockFile(
         extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
       }
     }
-    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
+    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
       } else if (isYarnModeAvailable) {
@@ -148,11 +151,11 @@ export async function generateLockFile(
         image: 'node',
         tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
+      preCommands,
     };
     // istanbul ignore if
-    if (getGlobalConfig().exposeAllEnv) {
+    if (GlobalConfig.get('exposeAllEnv')) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }

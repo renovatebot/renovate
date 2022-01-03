@@ -9,10 +9,10 @@ import { fileTestRegex } from './util';
 function createDependency(
   definition: ApplicationDefinition
 ): PackageDependency {
-  const source = definition.spec?.source;
+  const source = definition?.spec?.source;
 
   if (
-    source == null ||
+    !source ||
     !is.nonEmptyString(source.repoURL) ||
     !is.nonEmptyString(source.targetRevision)
   ) {

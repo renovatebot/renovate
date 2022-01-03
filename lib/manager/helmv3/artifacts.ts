@@ -1,7 +1,8 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   getSiblingFileName,
   getSubDirectory,
@@ -81,7 +82,7 @@ export async function updateArtifacts({
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    logger.warn({ err }, 'Failed to update Helm lock file');
+    logger.debug({ err }, 'Failed to update Helm lock file');
     return [
       {
         artifactError: {

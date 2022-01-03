@@ -1,4 +1,4 @@
-import { validRange } from 'semver';
+import semver from 'semver';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -43,17 +43,20 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      if (line.startsWith('go ') && validRange(line.replace('go ', ''))) {
+      if (
+        line.startsWith('go ') &&
+        semver.validRange(line.replace('go ', ''))
+      ) {
         constraints.go = line.replace('go ', '^');
       }
       const replaceMatch = regEx(
         /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
-      ).exec(line); // TODO #12071
+      ).exec(line);
       if (replaceMatch) {
         const dep = getDep(lineNumber, replaceMatch, 'replace');
         deps.push(dep);
       }
-      const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line); // TODO #12071
+      const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line);
       if (requireMatch && !line.endsWith('// indirect')) {
         logger.trace({ lineNumber }, `require line: "${line}"`);
         const dep = getDep(lineNumber, requireMatch, 'require');
@@ -64,7 +67,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         do {
           lineNumber += 1;
           line = lines[lineNumber];
-          const multiMatch = regEx(/^\s+([^\s]+)\s+([^\s]+)/).exec(line); // TODO #12071
+          const multiMatch = regEx(/^\s+([^\s]+)\s+([^\s]+)/).exec(line);
           logger.trace(`reqLine: "${line}"`);
           if (multiMatch && !line.endsWith('// indirect')) {
             logger.trace({ lineNumber }, `require line: "${line}"`);

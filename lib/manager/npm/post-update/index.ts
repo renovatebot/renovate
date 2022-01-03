@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
+import detectIndent from 'detect-indent';
 import { dump, load } from 'js-yaml';
 import upath from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
@@ -24,6 +25,7 @@ import {
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { ensureTrailingSlash } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import * as lerna from './lerna';
@@ -64,7 +66,7 @@ export function determineLockFileDirs(
         npmLockDirs.push(upgrade.npmLock);
         pnpmShrinkwrapDirs.push(upgrade.pnpmShrinkwrap);
       }
-      continue; // eslint-disable-line no-continue
+      continue;
     }
     if (upgrade.isLockfileUpdate) {
       yarnLockDirs.push(upgrade.yarnLock);
@@ -140,7 +142,7 @@ export async function writeExistingFiles(
     { packageFiles: npmFiles.map((n) => n.packageFile) },
     'Writing package.json files'
   );
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   for (const packageFile of npmFiles) {
     const basedir = upath.join(
       localDir,
@@ -166,36 +168,67 @@ export async function writeExistingFiles(
         await remove(npmLockPath);
       } else {
         logger.debug(`Writing ${npmLock}`);
-        let existingNpmLock = await getFile(npmLock);
-        const widens = [];
-        for (const upgrade of config.upgrades) {
-          if (
-            upgrade.rangeStrategy === 'widen' &&
-            upgrade.npmLock === npmLock
-          ) {
-            widens.push(upgrade.depName);
-          }
+        let existingNpmLock: string;
+        let detectedIndent: string;
+        let npmLockParsed: any;
+        try {
+          existingNpmLock = await getFile(npmLock);
+          detectedIndent = detectIndent(existingNpmLock).indent || '  ';
+          npmLockParsed = JSON.parse(existingNpmLock);
+        } catch (err) {
+          logger.warn({ err }, 'Error parsing npm lock file');
         }
-        if (widens.length) {
-          logger.debug(
-            `Removing ${String(widens)} from ${npmLock} to force an update`
-          );
-          try {
-            const npmLockParsed = JSON.parse(existingNpmLock);
-            if (npmLockParsed.dependencies) {
-              widens.forEach((depName) => {
-                delete npmLockParsed.dependencies[depName];
-              });
+        if (npmLockParsed) {
+          const packageNames = Object.keys(npmLockParsed?.packages || {}); // lockfileVersion=2
+          const widens = [];
+          let lockFileChanged = false;
+          for (const upgrade of config.upgrades) {
+            if (
+              upgrade.rangeStrategy === 'widen' &&
+              upgrade.npmLock === npmLock
+            ) {
+              widens.push(upgrade.depName);
             }
-            existingNpmLock = JSON.stringify(npmLockParsed, null, 2);
-          } catch (err) {
-            logger.warn(
-              { npmLock },
-              'Error massaging package-lock.json for widen'
+            const { depName } = upgrade;
+            for (const packageName of packageNames) {
+              if (
+                packageName === `node_modules/${depName}` ||
+                packageName.startsWith(`node_modules/${depName}/`)
+              ) {
+                logger.trace({ packageName }, 'Massaging out package name');
+                lockFileChanged = true;
+                delete npmLockParsed.packages[packageName];
+              }
+            }
+          }
+          if (widens.length) {
+            logger.debug(
+              `Removing ${String(widens)} from ${npmLock} to force an update`
+            );
+            lockFileChanged = true;
+            try {
+              if (npmLockParsed.dependencies) {
+                widens.forEach((depName) => {
+                  delete npmLockParsed.dependencies[depName];
+                });
+              }
+            } catch (err) {
+              logger.warn(
+                { npmLock },
+                'Error massaging package-lock.json for widen'
+              );
+            }
+          }
+          if (lockFileChanged) {
+            logger.debug('Massaging npm lock file before writing to disk');
+            existingNpmLock = JSON.stringify(
+              npmLockParsed,
+              null,
+              detectedIndent
             );
           }
+          await outputFile(npmLockPath, existingNpmLock);
         }
-        await outputFile(npmLockPath, existingNpmLock);
       }
     }
     const { yarnLock } = packageFile;
@@ -219,20 +252,25 @@ export async function writeUpdatedPackageFiles(
     logger.debug('No files found');
     return;
   }
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
+  const supportedLockFiles = ['package-lock.json'];
   for (const packageFile of config.updatedPackageFiles) {
-    if (packageFile.name.endsWith('package-lock.json')) {
-      logger.debug(`Writing package-lock file: ${packageFile.name}`);
+    if (
+      supportedLockFiles.some((fileName) => packageFile.name.endsWith(fileName))
+    ) {
+      logger.debug(`Writing lock file: ${packageFile.name}`);
       await outputFile(
         upath.join(localDir, packageFile.name),
         packageFile.contents
       );
-      continue; // eslint-disable-line
+      continue;
     }
     if (!packageFile.name.endsWith('package.json')) {
-      continue; // eslint-disable-line
+      continue;
     }
     logger.debug(`Writing ${String(packageFile.name)}`);
+    const detectedIndent =
+      detectIndent(packageFile.contents.toString()).indent || '  ';
     const massagedFile = JSON.parse(packageFile.contents.toString());
     try {
       const { token } = hostRules.find({
@@ -254,7 +292,7 @@ export async function writeUpdatedPackageFiles(
     }
     await outputFile(
       upath.join(localDir, packageFile.name),
-      JSON.stringify(massagedFile)
+      JSON.stringify(massagedFile, null, detectedIndent)
     );
   }
 }
@@ -339,10 +377,9 @@ async function updateYarnOffline(
         .split('\n')
         .find((line) => line.startsWith('yarn-offline-mirror '));
       if (mirrorLine) {
-        const mirrorPath = mirrorLine
-          .split(' ')[1]
-          .replace(regEx(/"/g), '')
-          .replace(regEx(/\/?$/), '/');
+        const mirrorPath = ensureTrailingSlash(
+          mirrorLine.split(' ')[1].replace(regEx(/"/g), '')
+        );
         resolvedPaths.push(upath.join(lockFileDir, mirrorPath));
       }
     }
@@ -441,6 +478,14 @@ export async function getAdditionalFiles(
     logger.debug('Skipping lock file generation for remediations');
     return { artifactErrors, updatedArtifacts };
   }
+  if (
+    config.reuseExistingBranch &&
+    !config.updatedPackageFiles?.length &&
+    config.upgrades?.every((upgrade) => upgrade.isLockfileUpdate)
+  ) {
+    logger.debug('Existing branch contains all necessary lock file updates');
+    return { artifactErrors, updatedArtifacts };
+  }
   logger.debug('Getting updated lock files');
   if (
     config.updateType === 'lockFileMaintenance' &&
@@ -476,7 +521,8 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
-  const { localDir } = getGlobalConfig();
+  const tokenRe = regEx(`${token}`, 'g', false);
+  const { localDir } = GlobalConfig.get();
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
     const fullLockFileDir = upath.join(localDir, lockFileDir);
@@ -533,7 +579,7 @@ export async function getAdditionalFiles(
         logger.debug(`${npmLock} needs updating`);
         updatedArtifacts.push({
           name: npmLock,
-          contents: res.lockFile.replace(regEx(`${token}`, 'g'), ''),
+          contents: res.lockFile.replace(tokenRe, ''),
         });
       }
     }

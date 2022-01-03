@@ -14,8 +14,7 @@ describe('manager/sbt/update', () => {
         'patch'
       );
 
-      // FIXME: explicit assert condition
-      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).toEqual(content.replace('0.0.2', '0.0.3'));
       expect(bumpedContent).not.toEqual(content);
     });
     it('no ops', () => {
@@ -33,8 +32,7 @@ describe('manager/sbt/update', () => {
         '0.0.1',
         'minor'
       );
-      // FIXME: explicit assert condition
-      expect(bumpedContent).toMatchSnapshot();
+      expect(bumpedContent).toEqual(content.replace('0.0.2', '0.1.0'));
       expect(bumpedContent).not.toEqual(content);
     });
     it('returns content if bumping errors', () => {

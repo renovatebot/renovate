@@ -3,7 +3,8 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import {
   deleteLocalFile,
   getSiblingFileName,
@@ -117,10 +118,11 @@ export async function updateArtifacts({
       await deleteLocalFile(lockFileName);
       cmd.push('poetry update --lock --no-interaction');
     } else {
-      for (let i = 0; i < updatedDeps.length; i += 1) {
-        const dep = updatedDeps[i];
-        cmd.push(`poetry update --lock --no-interaction ${quote(dep.depName)}`);
-      }
+      cmd.push(
+        `poetry update --lock --no-interaction ${updatedDeps
+          .map((dep) => quote(dep.depName))
+          .join(' ')}`
+      );
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.constraints?.poetry || 'poetry';
@@ -138,8 +140,8 @@ export async function updateArtifacts({
         image: 'python',
         tagConstraint,
         tagScheme: 'poetry',
-        preCommands: [poetryInstall],
       },
+      preCommands: [poetryInstall],
     };
     await exec(cmd, execOptions);
     const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');

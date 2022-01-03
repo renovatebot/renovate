@@ -42,6 +42,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
   const jars =
     opts.jars === undefined
       ? {
+          '0.0.1': 200,
           '1.0.0': 200,
           '1.0.1': 404,
           '1.0.2': 500,
@@ -94,9 +95,12 @@ function mockGenericPackage(opts: MockOpts = {}) {
         .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       const timestamp = `2020-01-01T${major}:${minor}:${patch}.000Z`;
+      const headers = version.startsWith('0.')
+        ? {}
+        : { 'Last-Modified': timestamp };
       scope
         .head(`/${packagePath}/${version}/${artifact}-${version}.pom`)
-        .reply(status, '', { 'Last-Modified': timestamp });
+        .reply(status, '', headers);
     });
   }
 
@@ -188,6 +192,7 @@ describe('datasource/clojure/index', () => {
     );
 
     expect(releases).toMatchObject([
+      { version: '0.0.1' },
       { version: '1.0.0' },
       { version: '1.0.3-SNAPSHOT' },
       { version: '2.0.0' },
@@ -294,7 +299,7 @@ describe('datasource/clojure/index', () => {
   it('returns null for invalid registryUrls', async () => {
     const res = await get(
       'org.example:package',
-      // eslint-disable-next-line no-template-curly-in-string
+
       '${project.baseUri}../../repository/'
     );
     expect(res).toBeNull();
@@ -311,6 +316,6 @@ describe('datasource/clojure/index', () => {
 
     const { sourceUrl } = await get();
 
-    expect(sourceUrl).toEqual('https://github.com/example/test');
+    expect(sourceUrl).toBe('https://github.com/example/test');
   });
 });

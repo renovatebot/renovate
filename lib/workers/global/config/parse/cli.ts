@@ -1,7 +1,7 @@
 import { Command } from 'commander';
-import { version } from '../../../../../package.json';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
+import { pkg } from '../../../../expose.cjs';
 import { regEx } from '../../../../util/regex';
 
 export function getCliName(option: Partial<RenovateOptions>): string {
@@ -85,9 +85,9 @@ export function getConfig(input: string[]): AllConfig {
     }
   });
 
+  /* eslint-disable no-console */
   /* istanbul ignore next */
   function helpConsole(): void {
-    /* eslint-disable no-console */
     console.log('  Examples:');
     console.log('');
     console.log('    $ renovate --token 123test singapore/lint-condo');
@@ -102,7 +102,7 @@ export function getConfig(input: string[]): AllConfig {
   }
 
   program = program
-    .version(version, '-v, --version')
+    .version(pkg.version, '-v, --version')
     .on('--help', helpConsole)
     .action((repositories: string[], opts: Record<string, unknown>) => {
       if (repositories?.length) {

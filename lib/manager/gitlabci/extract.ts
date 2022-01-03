@@ -2,17 +2,21 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { GitlabPipeline } from './types';
 import { replaceReferenceTags } from './utils';
 
-const commentsRe = /^\s*#/; // TODO #12070
-const whitespaceRe = /^(?<whitespace>\s*)/; // TODO #12070
-const imageRe =
-  /^(?<whitespace>\s*)image:(?:\s+['"]?(?<image>[^\s'"]+)['"]?)?\s*$/; // TODO #12070
-const nameRe = /^\s*name:\s+['"]?(?<depName>[^\s'"]+)['"]?\s*$/; // TODO #12070
-const serviceRe = /^\s*-\s*(?:name:\s+)?['"]?(?<depName>[^\s'"]+)['"]?\s*$/; // TODO #12070
+const commentsRe = regEx(/^\s*#/);
+const whitespaceRe = regEx(`^(?<whitespace>\\s*)`);
+const imageRe = regEx(
+  `^(?<whitespace>\\s*)image:(?:\\s+['"]?(?<image>[^\\s'"]+)['"]?)?\\s*$`
+);
+const nameRe = regEx(`^\\s*name:\\s+['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`);
+const serviceRe = regEx(
+  `^\\s*-\\s*(?:name:\\s+)?['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`
+);
 function skipCommentLines(
   lines: string[],
   lineNumber: number
@@ -61,7 +65,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
         }
       }
-      const services = /^\s*services:\s*$/.test(line); // TODO #12071  #12070
+      const services = regEx(/^\s*services:\s*$/).test(line);
       if (services) {
         logger.trace(`Matched services on line ${lineNumber}`);
         let foundImage: boolean;
@@ -105,7 +109,7 @@ export async function extractAllPackageFiles(
     const content = await readLocalFile(file, 'utf8');
     if (!content) {
       logger.debug({ file }, 'Empty or non existent gitlabci file');
-      // eslint-disable-next-line no-continue
+
       continue;
     }
     let doc: GitlabPipeline;
@@ -120,7 +124,7 @@ export async function extractAllPackageFiles(
     if (is.array(doc?.include)) {
       for (const includeObj of doc.include) {
         if (is.string(includeObj.local)) {
-          const fileObj = includeObj.local.replace(/^\//, ''); // TODO #12071 #12070
+          const fileObj = includeObj.local.replace(regEx(/^\//), '');
           if (!seen.has(fileObj)) {
             seen.add(fileObj);
             filesToExamine.push(fileObj);
@@ -128,7 +132,7 @@ export async function extractAllPackageFiles(
         }
       }
     } else if (is.string(doc?.include)) {
-      const fileObj = doc.include.replace(/^\//, ''); // TODO #12071  #12070
+      const fileObj = doc.include.replace(regEx(/^\//), '');
       if (!seen.has(fileObj)) {
         seen.add(fileObj);
         filesToExamine.push(fileObj);

@@ -11,9 +11,11 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowCustomCrateRegistries
 
+## allowPlugins
+
 ## allowPostUpgradeCommandTemplating
 
-Set to true to allow templating of dependency level post-upgrade commands.
+Set to `true` to allow templating of dependency level post-upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
@@ -102,12 +104,23 @@ e.g.
 
 ## binarySource
 
-Renovate often needs to use third party binaries in its PRs, e.g. `npm` to update `package-lock.json` or `go` to update `go.sum`.
+Renovate often needs to use third-party binaries in its PRs, e.g. `npm` to update `package-lock.json` or `go` to update `go.sum`.
 By default, Renovate will use a child process to run such tools, so they need to be pre-installed before running Renovate and available in the path.
 
-As an alternative, Renovate can use "sidecar" containers for third party tools.
+Renovate can instead use "sidecar" containers for third-party tools when `binarySource=docker`.
 If configured, Renovate will use `docker run` to create containers such as Node.js or Python to run tools within as-needed.
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
+
+Additionally, when Renovate is run inside a container built using [`containerbase/buildpack`](https://github.com/containerbase/buildpack), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
+This mode means that Renovate will dynamically install the version of tools available, if supported.
+
+Supported tools for dynamic install are:
+
+- `composer`
+- `jb`
+- `npm`
+
+Unsupported tools will fall back to `binarySource=global`.
 
 ## cacheDir
 
@@ -247,6 +260,11 @@ e.g.
 ## dryRun
 
 ## endpoint
+
+## executionTimeout
+
+Default execution timeout in minutes for child processes Renovate creates.
+If this option is not set, Renovate will fallback to 15 minutes.
 
 ## exposeAllEnv
 

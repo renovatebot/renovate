@@ -32,9 +32,11 @@ If you have a specific file or file pattern you want the Renovate bot to find, u
 e.g.:
 
 ```json
+{
   "pip_requirements": {
-    "fileMatch": ["my/specifically-named.file", "\.requirements$"]
+    "fileMatch": ["my/specifically-named.file", "\\.requirements$"]
   }
+}
 ```
 
 ## Alternate registries
@@ -63,9 +65,11 @@ You can use the `registryUrls` array to configure alternate index URL(s).
 e.g.:
 
 ```json
+{
   "python": {
     "registryUrls": ["http://example.com/private-pypi/"]
   }
+}
 ```
 
 Note: the index-url found in the `requirements.txt` file takes precedence over a `registryUrl` configured like the above.
@@ -76,14 +80,18 @@ To override the URL found in `requirements.txt`, you need to configure it in `pa
 The most direct way to disable all Python support in Renovate is like this:
 
 ```json
+{
   "python": {
     "enabled": false
   }
+}
 ```
 
 Alternatively, maybe you only want one package manager, such as `npm`.
 In that case this would enable _only_ `npm`:
 
 ```json
+{
   "enabledManagers": ["npm"]
+}
 ```

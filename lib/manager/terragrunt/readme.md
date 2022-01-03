@@ -4,8 +4,10 @@ You can create a custom [versioning config](/configuration-options/#versioning) 
 For example, if you want to reference a tag like `module-v1.2.5`, a block like this would work:
 
 ```json
-"terraform": {
- "versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+{
+  "terraform": {
+    "versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+  }
 }
 ```
 

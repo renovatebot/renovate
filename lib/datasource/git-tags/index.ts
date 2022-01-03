@@ -1,6 +1,5 @@
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
-import * as semver from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import { GitDatasource } from '../git-refs/base';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -18,7 +17,6 @@ export class GitTagsDatasource extends Datasource {
     namespace: `datasource-${GitTagsDatasource.id}`,
     key: ({ lookupName }: GetReleasesConfig) => lookupName,
   })
-  // eslint-disable-next-line class-methods-use-this
   async getReleases({
     lookupName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -29,7 +27,6 @@ export class GitTagsDatasource extends Datasource {
     }
     const releases = rawRefs
       .filter((ref) => ref.type === 'tags')
-      .filter((ref) => semver.isVersion(ref.value))
       .map((ref) => ({
         version: ref.value,
         gitRef: ref.value,
@@ -48,7 +45,6 @@ export class GitTagsDatasource extends Datasource {
     return result;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   override async getDigest(
     { lookupName }: DigestConfig,
     newValue?: string

@@ -4,7 +4,7 @@ import {
   GitStatusContext,
   PullRequestAsyncStatus,
   PullRequestStatus,
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../logger';
 import { HostRule, PrState } from '../../types';
 import { GitOptions } from '../../types/git';
@@ -123,7 +123,7 @@ export async function streamToString(
   stream: NodeJS.ReadableStream
 ): Promise<string> {
   const chunks: Uint8Array[] = [];
-  /* eslint-disable promise/avoid-new */
+
   const p = await new Promise<string>((resolve, reject) => {
     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));

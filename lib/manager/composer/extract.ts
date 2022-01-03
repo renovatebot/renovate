@@ -22,7 +22,7 @@ import type {
  * See https://github.com/composer/composer/blob/750a92b4b7aecda0e5b2f9b963f1cb1421900675/src/Composer/Repository/ComposerRepository.php#L815
  */
 function transformRegUrl(url: string): string {
-  return url.replace(regEx(/(\/packages\.json)$/), ''); // TODO #12071
+  return url.replace(regEx(/(\/packages\.json)$/), '');
 }
 
 /**
@@ -41,11 +41,10 @@ function parseRepositories(
     Object.entries(repoJson).forEach(([key, repo]) => {
       if (is.object(repo)) {
         const name = is.array(repoJson) ? repo.name : key;
-        // eslint-disable-next-line default-case
+
         switch (repo.type) {
           case 'vcs':
           case 'git':
-            // eslint-disable-next-line no-param-reassign
             repositories[name] = repo;
             break;
           case 'composer':
@@ -131,7 +130,6 @@ export async function extractPackageFile(
 
           // Check custom repositories by type
           if (repositories[depName]) {
-            // eslint-disable-next-line default-case
             switch (repositories[depName].type) {
               case 'vcs':
               case 'git':
@@ -152,9 +150,6 @@ export async function extractPackageFile(
           if (!depName.includes('/')) {
             dep.skipReason = SkipReason.Unsupported;
           }
-          if (currentValue === '*') {
-            dep.skipReason = SkipReason.AnyVersion;
-          }
           if (lockParsed) {
             const lockField =
               depType === 'require'
@@ -164,7 +159,7 @@ export async function extractPackageFile(
               (item) => item.name === dep.depName
             );
             if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
-              dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), ''); // TODO #12071
+              dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), '');
             }
           }
           deps.push(dep);

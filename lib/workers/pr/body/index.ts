@@ -1,6 +1,7 @@
 import { platform } from '../../../platform';
 import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
+import { ensureTrailingSlash } from '../../../util/url';
 import type { BranchConfig } from '../../types';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
@@ -12,7 +13,6 @@ import { getPrUpdatesTable } from './updates-table';
 
 function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach((upgrade) => {
-    /* eslint-disable no-param-reassign */
     const {
       homepage,
       sourceUrl,
@@ -44,7 +44,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
       let fullUrl = sourceUrl;
       if (sourceDirectory) {
         fullUrl =
-          sourceUrl.replace(regEx(/\/?$/), '/') +
+          ensureTrailingSlash(sourceUrl) +
           'tree/HEAD/' +
           sourceDirectory.replace('^/?/', '');
       }
@@ -54,7 +54,6 @@ function massageUpdateMetadata(config: BranchConfig): void {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
-    /* eslint-enable no-param-reassign */
   });
 }
 

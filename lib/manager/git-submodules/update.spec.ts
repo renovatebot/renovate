@@ -1,7 +1,7 @@
 import _simpleGit from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { Upgrade } from '../types';
 import updateDependency from './update';
@@ -19,11 +19,11 @@ describe('manager/git-submodules/update', () => {
 
       tmpDir = await dir({ unsafeCleanup: true });
       adminConfig = { localDir: join(tmpDir.path) };
-      setGlobalConfig(adminConfig);
+      GlobalConfig.set(adminConfig);
     });
     afterAll(async () => {
       await tmpDir.cleanup();
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     it('returns null on error', async () => {
       simpleGit.mockReturnValue({
@@ -50,7 +50,7 @@ describe('manager/git-submodules/update', () => {
         fileContent: '',
         upgrade,
       });
-      expect(update).toEqual('');
+      expect(update).toBe('');
     });
   });
 });

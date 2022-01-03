@@ -15,7 +15,6 @@ function mockFs(files: Record<string, string>): void {
 }
 
 describe('manager/gradle/shallow/extract', () => {
-  beforeAll(() => {});
   afterAll(() => {
     jest.resetAllMocks();
   });
@@ -34,78 +33,23 @@ describe('manager/gradle/shallow/extract', () => {
     expect(res).toBeNull();
   });
 
-  it('works', async () => {
+  it('extracts from cross-referenced files', async () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
       'build.gradle': 'url "https://example.com"; "foo:bar:$baz"',
-      'settings.gradle': null,
     });
 
     const res = await extractAllPackageFiles({} as ExtractConfig, [
       'build.gradle',
       'gradle.properties',
-      'settings.gradle',
     ]);
 
-    expect(res).toMatchObject([
+    expect(res).toMatchSnapshot([
       {
         packageFile: 'gradle.properties',
-        deps: [
-          {
-            depName: 'foo:bar',
-            currentValue: '1.2.3',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://example.com',
-            ],
-          },
-        ],
+        deps: [{ depName: 'foo:bar', currentValue: '1.2.3' }],
       },
       { packageFile: 'build.gradle', deps: [] },
-      {
-        datasource: 'maven',
-        deps: [],
-        packageFile: 'settings.gradle',
-      },
-    ]);
-  });
-
-  it('works with file-ext', async () => {
-    mockFs({
-      'gradle.properties': '',
-      'build.gradle': 'url "https://example.com"; "foo:bar:1.2.3@zip"',
-      'settings.gradle': null,
-    });
-
-    const res = await extractAllPackageFiles({} as ExtractConfig, [
-      'build.gradle',
-      'gradle.properties',
-      'settings.gradle',
-    ]);
-
-    expect(res).toMatchObject([
-      {
-        packageFile: 'gradle.properties',
-        deps: [],
-      },
-      {
-        packageFile: 'build.gradle',
-        deps: [
-          {
-            depName: 'foo:bar',
-            currentValue: '1.2.3',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://example.com',
-            ],
-          },
-        ],
-      },
-      {
-        datasource: 'maven',
-        deps: [],
-        packageFile: 'settings.gradle',
-      },
     ]);
   });
 
@@ -164,12 +108,12 @@ describe('manager/gradle/shallow/extract', () => {
           },
         ],
       },
-      { packageFile: 'build.gradle', deps: [] },
       {
         datasource: 'maven',
         deps: [],
         packageFile: 'settings.gradle',
       },
+      { packageFile: 'build.gradle', deps: [] },
     ]);
   });
 
@@ -431,6 +375,22 @@ describe('manager/gradle/shallow/extract', () => {
               'org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin',
             managerData: {
               fileReplacePosition: 21,
+              packageFile: 'gradle/libs.versions.toml',
+            },
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://plugins.gradle.org/m2/',
+            ],
+          },
+          {
+            depName: 'org.danilopianini.multi-jvm-test-plugin',
+            depType: 'plugin',
+            currentValue: '0.3.0',
+            commitMessageTopic: 'plugin multiJvm',
+            lookupName:
+              'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
+            managerData: {
+              fileReplacePosition: 822,
               packageFile: 'gradle/libs.versions.toml',
             },
             registryUrls: [

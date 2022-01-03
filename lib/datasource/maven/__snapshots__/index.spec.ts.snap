@@ -18,7 +18,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -27,7 +27,16 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -71,8 +80,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -91,6 +100,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -151,6 +169,9 @@ Object {
   "name": "package",
   "registryUrl": "https://repo.maven.apache.org/maven2",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -221,7 +242,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -230,7 +251,16 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -274,8 +304,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -294,6 +324,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -333,6 +372,15 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
   },
@@ -358,6 +406,15 @@ Array [
     },
     "method": "GET",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -397,6 +454,15 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
   },
@@ -422,6 +488,15 @@ Array [
     },
     "method": "GET",
     "url": "https://repo.maven.apache.org/maven2/org/example/child/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/child/index.html",
   },
   Object {
     "headers": Object {
@@ -506,6 +581,15 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
   },
@@ -538,6 +622,15 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
   },
@@ -563,6 +656,15 @@ Array [
     },
     "method": "GET",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -611,6 +713,15 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
   },
@@ -645,6 +756,15 @@ Array [
     },
     "method": "GET",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -694,7 +814,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -703,7 +823,16 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -747,8 +876,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -767,6 +896,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -802,7 +940,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -811,7 +949,16 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -855,8 +1002,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -883,6 +1030,15 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.5-SNAPSHOT/package-1.0.5-SNAPSHOT.pom",
   },
   Object {
@@ -899,6 +1055,9 @@ Array [
 
 exports[`datasource/maven/index ignores unsupported protocols 1`] = `
 Array [
+  Object {
+    "version": "0.0.1",
+  },
   Object {
     "releaseTimestamp": "2020-01-01T01:00:00.000Z",
     "version": "1.0.0",
@@ -940,8 +1099,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "http://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -985,8 +1144,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "http://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -1005,6 +1164,15 @@ Array [
     },
     "method": "HEAD",
     "url": "http://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "http://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -1035,6 +1203,9 @@ Object {
   "name": "package",
   "registryUrl": "https://frontend_for_private_s3_repository/maven2",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "version": "1.0.0",
     },
@@ -1103,6 +1274,101 @@ Array [
 ]
 `;
 
+exports[`datasource/maven/index returns html-based releases 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.5-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/package-1.0.3-20200101.010003-3.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.5-SNAPSHOT/package-1.0.5-SNAPSHOT.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+]
+`;
+
 exports[`datasource/maven/index returns null when metadata is not found 1`] = `
 Array [
   Object {
@@ -1113,6 +1379,15 @@ Array [
     },
     "method": "GET",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
 ]
 `;
@@ -1125,6 +1400,9 @@ Object {
   "name": "package",
   "registryUrl": "https://repo.maven.apache.org/maven2",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -1159,7 +1437,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -1168,7 +1446,16 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -1212,8 +1499,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -1232,6 +1519,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -1262,6 +1558,9 @@ Object {
   "name": "package",
   "registryUrl": "https://custom.registry.renovatebot.com",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -1307,8 +1606,8 @@ Array [
       "host": "custom.registry.renovatebot.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "GET",
-    "url": "https://custom.registry.renovatebot.com/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "method": "HEAD",
+    "url": "https://custom.registry.renovatebot.com/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -1357,8 +1656,8 @@ Array [
       "host": "custom.registry.renovatebot.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://custom.registry.renovatebot.com/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://custom.registry.renovatebot.com/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -1379,6 +1678,16 @@ Array [
     },
     "method": "HEAD",
     "url": "https://custom.registry.renovatebot.com/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Bearer 123test",
+      "host": "custom.registry.renovatebot.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://custom.registry.renovatebot.com/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -1411,6 +1720,9 @@ Object {
   "name": "package",
   "registryUrl": "https://repo.maven.apache.org/maven2",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -1454,7 +1766,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -1463,7 +1775,16 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -1507,8 +1828,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -1527,6 +1848,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {
@@ -1557,6 +1887,9 @@ Object {
   "name": "package",
   "registryUrl": "https://repo.maven.apache.org/maven2",
   "releases": Array [
+    Object {
+      "version": "0.0.1",
+    },
     Object {
       "releaseTimestamp": "2020-01-01T01:00:00.000Z",
       "version": "1.0.0",
@@ -1600,7 +1933,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/index.html",
   },
   Object {
     "headers": Object {
@@ -1609,7 +1942,16 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/0.0.1/package-0.0.1.pom",
   },
   Object {
     "headers": Object {
@@ -1653,8 +1995,8 @@ Array [
       "host": "repo.maven.apache.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
-    "method": "HEAD",
-    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
+    "method": "GET",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml",
   },
   Object {
     "headers": Object {
@@ -1673,6 +2015,15 @@ Array [
     },
     "method": "HEAD",
     "url": "https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repo.maven.apache.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "HEAD",
+    "url": "https://repo.maven.apache.org/maven2/org/example/package/1.0.4-SNAPSHOT/package-1.0.4-SNAPSHOT.pom",
   },
   Object {
     "headers": Object {

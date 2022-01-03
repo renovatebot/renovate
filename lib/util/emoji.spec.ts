@@ -8,7 +8,7 @@ describe('util/emoji', () => {
 
   describe('emojify', () => {
     it('encodes known shortcodes', () => {
-      expect(emojify('Let it :bee:')).toEqual('Let it 🐝');
+      expect(emojify('Let it :bee:')).toBe('Let it 🐝');
     });
 
     it('encodes aliases', () => {
@@ -18,12 +18,12 @@ describe('util/emoji', () => {
     });
 
     it('omits unknown shortcodes', () => {
-      expect(emojify(':foo: :bar: :bee:')).toEqual(':foo: :bar: 🐝');
+      expect(emojify(':foo: :bar: :bee:')).toBe(':foo: :bar: 🐝');
     });
 
     it('does not encode when config option is disabled', () => {
       setEmojiConfig({ unicodeEmoji: false });
-      expect(emojify('Let it :bee:')).toEqual('Let it :bee:');
+      expect(emojify('Let it :bee:')).toBe('Let it :bee:');
     });
   });
 
@@ -47,11 +47,11 @@ describe('util/emoji', () => {
     });
 
     describe('unsupported characters', () => {
-      const unsupported = '🪆';
+      const unsupported = '🫠';
 
       it('uses replacement character', () => {
         setEmojiConfig({ unicodeEmoji: false });
-        expect(unemojify(unsupported)).toEqual('�');
+        expect(unemojify(unsupported)).toBe('�');
       });
     });
   });

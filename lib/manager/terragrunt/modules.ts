@@ -24,7 +24,6 @@ export function extractTerragruntModule(
   const moduleName = 'terragrunt';
   const result = extractTerragruntProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line no-param-reassign
     dep.managerData.terragruntDependencyType =
       TerragruntDependencyTypes.terragrunt;
   });
@@ -34,7 +33,7 @@ export function extractTerragruntModule(
 export function analyseTerragruntModule(dep: PackageDependency): void {
   const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
-  /* eslint-disable no-param-reassign */
+
   if (githubRefMatch) {
     dep.depType = 'github';
     dep.lookupName = githubRefMatch.groups.project.replace(regEx(/\.git$/), '');
@@ -71,5 +70,4 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
     logger.debug({ dep }, 'terragrunt dep has no source');
     dep.skipReason = SkipReason.NoSource;
   }
-  /* eslint-enable no-param-reassign */
 }

@@ -73,19 +73,58 @@ describe('manager/poetry/extract', () => {
     });
     it('dedupes registries', async () => {
       const res = await extractPackageFile(pyproject8toml, filename);
-      // FIXME: explicit assert condition
-      expect(res.registryUrls).toMatchSnapshot();
+      expect(res).toMatchObject({
+        registryUrls: ['https://pypi.org/pypi/', 'https://bar.baz/+simple/'],
+      });
     });
     it('extracts mixed versioning types', async () => {
       const res = await extractPackageFile(pyproject9toml, filename);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        deps: [
+          { depName: 'dep1', currentValue: '0.2' },
+          { depName: 'dep2', currentValue: '1.1.0' },
+          { depName: 'dep3', currentValue: '1.0a1' },
+          { depName: 'dep4', currentValue: '1.0b2' },
+          { depName: 'dep5', currentValue: '1.0rc1' },
+          { depName: 'dep6', currentValue: '1.0.dev4' },
+          { depName: 'dep7', currentValue: '1.0c1' },
+          { depName: 'dep8', currentValue: '2012.2' },
+          { depName: 'dep9', currentValue: '1.0.dev456' },
+          { depName: 'dep10', currentValue: '1.0a1' },
+          { depName: 'dep11', currentValue: '1.0a2.dev456' },
+          { depName: 'dep12', currentValue: '1.0a12.dev456' },
+          { depName: 'dep13', currentValue: '1.0a12' },
+          { depName: 'dep14', currentValue: '1.0b1.dev456' },
+          { depName: 'dep15', currentValue: '1.0b2' },
+          { depName: 'dep16', currentValue: '1.0b2.post345.dev456' },
+          { depName: 'dep17', currentValue: '1.0b2.post345' },
+          { depName: 'dep18', currentValue: '1.0rc1.dev456' },
+          { depName: 'dep19', currentValue: '1.0rc1' },
+          { depName: 'dep20', currentValue: '1.0' },
+          { depName: 'dep21', currentValue: '1.0+abc.5' },
+          { depName: 'dep22', currentValue: '1.0+abc.7' },
+          { depName: 'dep23', currentValue: '1.0+5' },
+          { depName: 'dep24', currentValue: '1.0.post456.dev34' },
+          { depName: 'dep25', currentValue: '1.0.post456' },
+          { depName: 'dep26', currentValue: '1.1.dev1' },
+          { depName: 'dep27', currentValue: '~=3.1' },
+          { depName: 'dep28', currentValue: '~=3.1.2' },
+          { depName: 'dep29', currentValue: '~=3.1a1' },
+          { depName: 'dep30', currentValue: '==3.1' },
+          { depName: 'dep31', currentValue: '==3.1.*' },
+          { depName: 'dep32', currentValue: '~=3.1.0, !=3.1.3' },
+          { depName: 'dep33', currentValue: '<=2.0' },
+          { depName: 'dep34', currentValue: '<2.0' },
+        ],
+      });
     });
     it('resolves lockedVersions from the lockfile', async () => {
       fs.readLocalFile.mockResolvedValue(pyproject11tomlLock);
       const res = await extractPackageFile(pyproject11toml, filename);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        constraints: { python: '^3.9' },
+        deps: [{ lockedVersion: '1.17.5' }],
+      });
     });
     it('skips git dependencies', async () => {
       const content =

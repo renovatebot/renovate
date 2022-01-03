@@ -65,8 +65,10 @@ describe('util/package-rules', () => {
         },
       ],
     };
-    // FIXME: explicit assert condition
-    expect(applyPackageRules(config)).toMatchSnapshot();
+    expect(applyPackageRules(config)).toEqual({
+      ...config,
+      matchUpdateTypes: ['bump'],
+    });
   });
   it('applies both rules for a', () => {
     const dep = {
@@ -709,10 +711,10 @@ describe('util/package-rules', () => {
     expect(res3.x).toBeDefined();
   });
   it('empty rules', () => {
-    // FIXME: explicit assert condition
-    expect(
-      applyPackageRules({ ...config1, packageRules: null })
-    ).toMatchSnapshot();
+    expect(applyPackageRules({ ...config1, packageRules: null })).toEqual({
+      foo: 'bar',
+      packageRules: null,
+    });
   });
 
   it('creates groupSlug if necessary', () => {
@@ -731,6 +733,27 @@ describe('util/package-rules', () => {
       ],
     };
     const res = applyPackageRules(config);
-    expect(res.groupSlug).toEqual('b');
+    expect(res.groupSlug).toBe('b');
+  });
+  it('matches matchSourceUrlPrefixes(case-insensitive)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchSourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/Renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch' as UpdateType,
+      sourceUrl: 'https://github.com/renovatebot/Presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
   });
 });

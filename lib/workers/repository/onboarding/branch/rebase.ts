@@ -1,5 +1,5 @@
 import { configFileNames } from '../../../../config/app-strings';
-import { getGlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import {
@@ -26,7 +26,7 @@ export async function rebaseOnboardingBranch(
   }
   const configFile = defaultConfigFile(config);
   const existingContents = await getFile(configFile, config.onboardingBranch);
-  const contents = await getOnboardingConfigContents(config);
+  const contents = await getOnboardingConfigContents(config, configFile);
   if (
     contents === existingContents &&
     !(await isBranchStale(config.onboardingBranch))
@@ -43,7 +43,7 @@ export async function rebaseOnboardingBranch(
   const commitMessage = commitMessageFactory.create();
 
   // istanbul ignore if
-  if (getGlobalConfig().dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }

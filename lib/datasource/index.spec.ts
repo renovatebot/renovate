@@ -137,7 +137,7 @@ describe('datasource/index', () => {
       versioning: 'loose',
     });
     expect(res.releases).toHaveLength(1);
-    expect(res.releases[0].version).toEqual('v1.0');
+    expect(res.releases[0].version).toBe('v1.0');
   });
   it('adds sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -285,7 +285,7 @@ describe('datasource/index', () => {
       datasource: datasourceNpm.id,
       depName: 'abc',
     });
-    expect(res.sourceUrl).toEqual('https://abc.com');
+    expect(res.sourceUrl).toBe('https://abc.com');
   });
   it('massages sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
@@ -296,6 +296,20 @@ describe('datasource/index', () => {
       datasource: datasourceNpm.id,
       depName: 'cas',
     });
-    expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');
+    expect(res.sourceUrl).toBe('https://github.com/Jasig/cas');
+  });
+
+  it('applies replacements', async () => {
+    npmDatasource.getReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceNpm.id,
+      depName: 'abc',
+      replacementName: 'def',
+      replacementVersion: '2.0.0',
+    });
+    expect(res.replacementName).toBe('def');
+    expect(res.replacementVersion).toBe('2.0.0');
   });
 });

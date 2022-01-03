@@ -1,19 +1,19 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,
 } from 'child_process';
 import { envMock } from '../../../test/exec-util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
-import { RawExecOptions, VolumeOption } from './common';
 import * as dockerModule from './docker';
-import { ExecOptions, exec } from '.';
+import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
+import { exec } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('child_process');
+jest.mock('../../../lib/datasource');
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -39,7 +39,7 @@ describe('util/exec/index', () => {
     jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   afterEach(() => {
@@ -465,14 +465,13 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: ['preCommand1', 'preCommand2', null],
-            postCommands: ['postCommand1', undefined, 'postCommand2'],
           },
+          preCommands: ['preCommand1', 'preCommand2', null],
         },
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd} && postCommand1 && postCommand2"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -497,8 +496,6 @@ describe('util/exec/index', () => {
         inOpts: {
           docker: {
             image,
-            preCommands: null,
-            postCommands: undefined,
           },
         },
         outCmd: [
@@ -540,6 +537,26 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: { binarySource: 'docker' },
+      },
+    ],
+
+    [
+      'Default timeout from executionTimeout config option',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 30 * 60 * 1000,
+            maxBuffer: 10485760,
+          },
+        ],
+        adminConfig: { executionTimeout: 30 },
       },
     ],
 
@@ -696,9 +713,9 @@ describe('util/exec/index', () => {
       actualCmd.push(execCmd);
       actualOpts.push(execOpts);
       callback(null, { stdout: '', stderr: '' });
-      return undefined;
+      return undefined as never;
     });
-    setGlobalConfig({ cacheDir, localDir: cwd, ...adminConfig });
+    GlobalConfig.set({ cacheDir, localDir: cwd, ...adminConfig });
     await exec(cmd as string, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
@@ -712,27 +729,50 @@ describe('util/exec/index', () => {
     cpExec.mockImplementation((execCmd, execOpts, callback) => {
       actualCmd.push(execCmd);
       callback(null, { stdout: '', stderr: '' });
-      return undefined;
+      return undefined as never;
     });
 
-    setGlobalConfig({ binarySource: 'global' });
+    GlobalConfig.set({ binarySource: 'global' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setGlobalConfig({ binarySource: 'docker' });
+    GlobalConfig.set({ binarySource: 'docker' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setGlobalConfig({ binarySource: 'global' });
+    GlobalConfig.set({ binarySource: 'global' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setGlobalConfig({ binarySource: 'docker' });
+    GlobalConfig.set({ binarySource: 'docker' });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    // FIXME: explicit assert condition
-    expect(actualCmd).toMatchSnapshot();
+    expect(actualCmd).toEqual([
+      `echo hello`,
+      `echo hello`,
+      `docker pull renovate/image`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `echo hello`,
+      `echo hello`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+      `docker ps --filter name=renovate_image -aq`,
+      `docker run --rm --name=renovate_image --label=renovate_child renovate/image bash -l -c "echo hello"`,
+    ]);
+  });
+  it('Supports binarySource=install', async () => {
+    process.env = processEnv;
+    cpExec.mockImplementation(() => {
+      throw new Error('some error occurred');
+    });
+    GlobalConfig.set({ binarySource: 'install' });
+    process.env.BUILDPACK = 'true';
+    const promise = exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
+    await expect(promise).rejects.toThrow('No tool releases found.');
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {
@@ -751,7 +791,7 @@ describe('util/exec/index', () => {
   });
 
   it('wraps error if removeDockerContainer throws an error', async () => {
-    setGlobalConfig({ binarySource: 'docker' });
+    GlobalConfig.set({ binarySource: 'docker' });
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });

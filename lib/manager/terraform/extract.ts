@@ -145,7 +145,7 @@ export async function extractPackageFile(
       /* istanbul ignore next */
       default:
     }
-    // eslint-disable-next-line no-param-reassign
+
     delete dep.managerData;
   });
   if (deps.some((dep) => dep.skipReason !== 'local')) {

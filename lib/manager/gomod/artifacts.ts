@@ -1,10 +1,11 @@
 import is from '@sindresorhus/is';
-import { dirname, join } from 'upath';
-import { getGlobalConfig } from '../../config/global';
+import upath from 'upath';
+import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
@@ -22,16 +23,16 @@ import type {
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
-  // hard-coded logic to use authentication for github.com based on the credentials for api.github.com
-  const credentials = find({
+  // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
+  const githubToken = find({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
 
-  if (credentials?.token) {
+  if (githubToken?.token) {
     environmentVariables = getGitAuthenticatedEnvironmentVariables(
       'https://github.com/',
-      credentials.token
+      githubToken
     );
   }
 
@@ -64,7 +65,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
         );
         environmentVariables = getGitAuthenticatedEnvironmentVariables(
           httpUrl,
-          hostRule.token,
+          hostRule,
           environmentVariables
         );
       } else {
@@ -146,8 +147,8 @@ export async function updateArtifacts({
     return null;
   }
 
-  const vendorDir = join(dirname(goModFileName), 'vendor/');
-  const vendorModulesFileName = join(vendorDir, 'modules.txt');
+  const vendorDir = upath.join(upath.dirname(goModFileName), 'vendor/');
+  const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   try {
@@ -171,7 +172,7 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
-        CGO_ENABLED: getGlobalConfig().binarySource === 'docker' ? '0' : null,
+        CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
       },
       docker: {

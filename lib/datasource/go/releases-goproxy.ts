@@ -5,7 +5,8 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { regEx } from '../../util/regex';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GoproxyFallback, http } from './common';
+import { GoproxyFallback, getSourceUrl, http } from './common';
+import { getDatasource } from './get-datasource';
 import * as direct from './releases-direct';
 import type { GoproxyItem, VersionInfo } from './types';
 
@@ -36,9 +37,9 @@ export function parseGoproxy(
   }
 
   const result: GoproxyItem[] = input
-    .split(/([^,|]*(?:,|\|))/) // TODO: #12070
+    .split(regEx(/([^,|]*(?:,|\|))/))
     .filter(Boolean)
-    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12070
+    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12872 lookahead
     .map(([url, separator]) => ({
       url,
       fallback:
@@ -55,7 +56,7 @@ export function parseGoproxy(
 const lexer = moo.states({
   main: {
     separator: {
-      match: /\s*?,\s*?/, // TODO #12070
+      match: /\s*?,\s*?/, // TODO #12870
       value: (_: string) => '|',
     },
     asterisk: {
@@ -71,19 +72,23 @@ const lexer = moo.states({
       push: 'characterRange',
       value: (_: string) => '[',
     },
+    trailingSlash: {
+      match: /\/$/,
+      value: (_: string) => '',
+    },
     char: {
       match: /[^*?\\[\n]/,
       value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
     },
     escapedChar: {
-      match: /\\./, // TODO #12070
+      match: /\\./, // TODO #12870
       value: (s: string) => s.slice(1),
     },
   },
   characterRange: {
-    char: /[^\\\]\n]/, // TODO #12070
+    char: /[^\\\]\n]/, // TODO #12870
     escapedChar: {
-      match: /\\./, // TODO #12070
+      match: /\\./, // TODO #12870
       value: (s: string) => s.slice(1),
     },
     characterRangeEnd: {
@@ -106,7 +111,9 @@ export function parseNoproxy(
   }
   lexer.reset(input);
   const noproxyPattern = [...lexer].map(({ value }) => value).join('');
-  const result = noproxyPattern ? regEx(`^(?:${noproxyPattern})$`) : null;
+  const result = noproxyPattern
+    ? regEx(`^(?:${noproxyPattern})(?:/.*)?$`)
+    : null;
   parsedNoproxy[input] = result;
   return result;
 }
@@ -202,7 +209,9 @@ export async function getReleases(
       });
       const releases = await pAll(queue, { concurrency: 5 });
       if (releases.length) {
-        result = { releases };
+        const datasource = await getDatasource(lookupName);
+        const sourceUrl = getSourceUrl(datasource);
+        result = { releases, sourceUrl };
         break;
       }
     } catch (err) {
