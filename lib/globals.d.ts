@@ -8,19 +8,6 @@ declare interface Error {
   validationError?: string;
   validationMessage?: string;
 }
-interface parsed {
-  public: string;
-  base_version: string;
-  is_prerelease: boolean;
-  is_devrelease: boolean;
-  is_postrelease: boolean;
-  epoch: number;
-  release: number[];
-  pre: (string | number)[];
-  post: (string | number)[];
-  dev: (string | number)[];
-  local: string | null;
-}
 
 // can't use `resolveJsonModule` because it will copy json files and change dist path
 
@@ -33,6 +20,21 @@ declare module '*/package.json' {
 declare module '*.json' {
   const value: Record<string, any>;
   export = value;
+}
+
+// these  declartions will be removed once the types.ts file for @renovate/pep440 is ready
+interface parsed {
+  public: string;
+  base_version: string;
+  is_prerelease: boolean;
+  is_devrelease: boolean;
+  is_postrelease: boolean;
+  epoch: number;
+  release: number[];
+  pre: (string | number)[];
+  post: (string | number)[];
+  dev: (string | number)[];
+  local: string | null;
 }
 
 declare module '@renovate/pep440' {
