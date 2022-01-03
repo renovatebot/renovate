@@ -4,18 +4,33 @@ describe('manager/ruby-version/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns a result', () => {
       const res = extractPackageFile('8.4.0\n');
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: '8.4.0',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+        },
+      ]);
     });
     it('supports ranges', () => {
       const res = extractPackageFile('8.4\n');
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: '8.4',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+        },
+      ]);
     });
     it('skips non ranges', () => {
       const res = extractPackageFile('latestn');
-      // FIXME: explicit assert condition
-      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toEqual([
+        {
+          currentValue: 'latestn',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+        },
+      ]);
     });
   });
 });

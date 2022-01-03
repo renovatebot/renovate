@@ -1,11 +1,13 @@
 import { quote } from 'shlex';
-import { resolve } from 'upath';
-import { getGlobalConfig } from '../../config/global';
+import upath from 'upath';
+import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import { readLocalFile, stat, writeLocalFile } from '../../util/fs';
-import { StatusResult, getRepoStatus } from '../../util/git';
+import { getRepoStatus } from '../../util/git';
+import type { StatusResult } from '../../util/git/types';
 import { Http } from '../../util/http';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
@@ -57,10 +59,10 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const { localDir: projectDir } = getGlobalConfig();
+    const projectDir = GlobalConfig.get('localDir');
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
     const gradlew = gradleWrapperFileName();
-    const gradlewPath = resolve(projectDir, `./${gradlew}`);
+    const gradlewPath = upath.resolve(projectDir, `./${gradlew}`);
     let cmd = await prepareGradleCommand(
       gradlew,
       projectDir,

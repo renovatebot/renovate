@@ -342,8 +342,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somepreset',
-        presetPath: 'somefile',
+        presetName: 'somefile/somepreset',
+        presetPath: undefined,
         presetSource: 'github',
       });
     });
@@ -355,8 +355,8 @@ describe('config/presets/index', () => {
       ).toEqual({
         packageName: 'some/repo',
         params: undefined,
-        presetName: 'somesubpreset',
-        presetPath: 'somefile/somepreset',
+        presetName: 'somefile/somepreset/somesubpreset',
+        presetPath: undefined,
         presetSource: 'github',
       });
     });
@@ -407,6 +407,15 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+    it('parses local with spaces', () => {
+      expect(presets.parsePreset('local>A2B CD/A2B_Renovate')).toEqual({
+        packageName: 'A2B CD/A2B_Renovate',
+        params: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
     it('parses local with subdirectory', () => {
       expect(
         presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
@@ -418,6 +427,65 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
+    it('parses local with sub preset and tag', () => {
+      expect(
+        presets.parsePreset(
+          'local>some-group/some-repo:some-file/subpreset#1.2.3'
+        )
+      ).toEqual({
+        packageName: 'some-group/some-repo',
+        params: undefined,
+        presetName: 'some-file/subpreset',
+        presetPath: undefined,
+        presetSource: 'local',
+        packageTag: '1.2.3',
+      });
+    });
+    it('parses local with subdirectory and tag', () => {
+      expect(
+        presets.parsePreset(
+          'local>some-group/some-repo//some-dir/some-file#1.2.3'
+        )
+      ).toEqual({
+        packageName: 'some-group/some-repo',
+        params: undefined,
+        presetName: 'some-file',
+        presetPath: 'some-dir',
+        presetSource: 'local',
+        packageTag: '1.2.3',
+      });
+    });
+
+    it('parses local with subdirectory and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository//path/to/preset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset',
+        presetPath: 'path/to',
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
+    it('parses local with sub preset and branch/tag with a slash', () => {
+      expect(
+        presets.parsePreset(
+          'local>PROJECT/repository:preset/subpreset#feature/branch'
+        )
+      ).toEqual({
+        packageName: 'PROJECT/repository',
+        params: undefined,
+        presetName: 'preset/subpreset',
+        presetPath: undefined,
+        presetSource: 'local',
+        packageTag: 'feature/branch',
+      });
+    });
+
     it('parses no prefix as local', () => {
       expect(presets.parsePreset('some/repo')).toEqual({
         packageName: 'some/repo',
@@ -427,11 +495,20 @@ describe('config/presets/index', () => {
         presetSource: 'local',
       });
     });
-    it('parses local Bitbucket user repo', () => {
+    it('parses local Bitbucket user repo with preset name', () => {
       expect(presets.parsePreset('local>~john_doe/repo//somefile')).toEqual({
         packageName: '~john_doe/repo',
         params: undefined,
         presetName: 'somefile',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
+    it('parses local Bitbucket user repo', () => {
+      expect(presets.parsePreset('local>~john_doe/renovate-config')).toEqual({
+        packageName: '~john_doe/renovate-config',
+        params: undefined,
+        presetName: 'default',
         presetPath: undefined,
         presetSource: 'local',
       });
@@ -578,7 +655,7 @@ describe('config/presets/index', () => {
           ':ignoreModulesAndTests',
           ':autodetectPinVersions',
           ':prHourlyLimit2',
-          ':prConcurrentLimit20',
+          ':prConcurrentLimit10',
           'group:monorepos',
           'group:recommended',
           'workarounds:all',

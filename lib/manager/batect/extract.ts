@@ -1,5 +1,5 @@
 import { load } from 'js-yaml';
-import * as upath from 'upath';
+import upath from 'upath';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';

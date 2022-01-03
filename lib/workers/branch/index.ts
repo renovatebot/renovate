@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -338,13 +338,21 @@ export async function processBranch(
       }
     }
 
-    // istanbul ignore if
-    if (
+    const userRebaseRequested =
       dependencyDashboardCheck === 'rebase' ||
-      config.dependencyDashboardRebaseAllOpen
-    ) {
+      config.dependencyDashboardRebaseAllOpen ||
+      config.rebaseRequested;
+
+    if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
+    } else if (branchExists && config.rebaseWhen === 'never') {
+      logger.debug('rebaseWhen=never so skipping branch update check');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: BranchResult.NoWork,
+      };
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
@@ -418,7 +426,7 @@ export async function processBranch(
     } else if (config.updatedArtifacts?.length && branchPr) {
       // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
       // istanbul ignore if
-      if (getGlobalConfig().dryRun) {
+      if (GlobalConfig.get('dryRun')) {
         logger.info(
           `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`
         );
@@ -430,16 +438,7 @@ export async function processBranch(
         });
       }
     }
-    const forcedManually =
-      !!dependencyDashboardCheck || config.rebaseRequested || !branchExists;
-    if (!forcedManually && config.rebaseWhen === 'never') {
-      logger.debug(`Skipping commit (rebaseWhen=never)`);
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: BranchResult.NoWork,
-      };
-    }
+    const forcedManually = userRebaseRequested || !branchExists;
     config.forceCommit = forcedManually || branchPr?.isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
@@ -466,8 +465,7 @@ export async function processBranch(
     // but do not break when there are artifact errors
     if (
       !config.artifactErrors?.length &&
-      !dependencyDashboardCheck &&
-      !config.rebaseRequested &&
+      !userRebaseRequested &&
       commitSha &&
       config.prCreation !== 'immediate'
     ) {
@@ -484,7 +482,7 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
-        if (getGlobalConfig().dryRun) {
+        if (GlobalConfig.get('dryRun')) {
           logger.info('DRY-RUN: Would delete branch' + config.branchName);
         } else {
           await deleteBranchSilently(config.branchName);
@@ -647,7 +645,7 @@ export async function processBranch(
           ' - any of the package files in this branch needs updating, or \n';
         content += ' - the branch becomes conflicted, or\n';
         content +=
-          ' - you check the rebase/retry checkbox if found above, or\n';
+          ' - you click the rebase/retry checkbox if found above, or\n';
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
@@ -662,7 +660,7 @@ export async function processBranch(
             config.suppressNotifications.includes('lockFileErrors')
           )
         ) {
-          if (getGlobalConfig().dryRun) {
+          if (GlobalConfig.get('dryRun')) {
             logger.info(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );

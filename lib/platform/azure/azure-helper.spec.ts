@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 
 describe('platform/azure/azure-helper', () => {
   let azureHelper: typeof import('./azure-helper');
@@ -232,8 +232,47 @@ describe('platform/azure/azure-helper', () => {
         GitPullRequestMergeStrategy.Squash
       );
     });
+    it('should return default branch policy', async () => {
+      azureApi.policyApi.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyConfigurations: jest.fn(() => [
+              {
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      repositoryId: 'doo-dee-doo-repository-id',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+              {
+                settings: {
+                  allowRebase: true,
+                  scope: [
+                    {
+                      matchKind: 'DefaultBranch',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+            ]),
+          } as any)
+      );
+      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+        GitPullRequestMergeStrategy.Rebase
+      );
+    });
     it('should return most specific exact branch policy', async () => {
       const refMock = 'refs/heads/ding';
+      const defaultBranchMock = 'dong';
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
@@ -266,6 +305,19 @@ describe('platform/azure/azure-helper', () => {
               },
               {
                 settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      matchKind: 'DefaultBranch',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+              {
+                settings: {
                   allowRebase: true,
                   scope: [
                     {
@@ -282,12 +334,13 @@ describe('platform/azure/azure-helper', () => {
             ]),
           } as any)
       );
-      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
-        GitPullRequestMergeStrategy.Rebase
-      );
+      expect(
+        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock)
+      ).toEqual(GitPullRequestMergeStrategy.Rebase);
     });
     it('should return most specific prefix branch policy', async () => {
       const refMock = 'refs/heads/ding-wow';
+      const defaultBranchMock = 'dong-wow';
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
@@ -298,6 +351,19 @@ describe('platform/azure/azure-helper', () => {
                   scope: [
                     {
                       repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+              {
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      matchKind: 'DefaultBranch',
                     },
                   ],
                 },
@@ -323,9 +389,9 @@ describe('platform/azure/azure-helper', () => {
             ]),
           } as any)
       );
-      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
-        GitPullRequestMergeStrategy.Rebase
-      );
+      expect(
+        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock)
+      ).toEqual(GitPullRequestMergeStrategy.Rebase);
     });
   });
 });

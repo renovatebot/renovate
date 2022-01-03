@@ -5,8 +5,8 @@ import {
   fromHexcodeToCodepoint,
   fromUnicodeToHexcode,
 } from 'emojibase';
-import emojibaseEmojiRegex from 'emojibase-regex/emoji';
-import SHORTCODE_REGEX from 'emojibase-regex/shortcode';
+import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
+import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
 import type { RenovateConfig } from '../config/types';
 import dataFiles from '../data-files.generated';
 import { regEx } from './regex';
@@ -55,7 +55,7 @@ export function emojify(text: string): string {
 const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
   ({ source }) => source
 );
-const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g'); // TODO #12070
+const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g'); // TODO #12875 cannot figure it out
 const excludedModifiers = new Set([
   '20E3',
   '200D',

@@ -14,3 +14,4 @@ google-firebase-messaging = "com.google.firebase:firebase-messaging"
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version = "1.5.21" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+multiJvm = "org.danilopianini.multi-jvm-test-plugin:0.3.0"

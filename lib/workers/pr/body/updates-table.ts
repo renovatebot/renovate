@@ -46,7 +46,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
         if (value) {
           res[header] = template
             .compile(value, upgrade)
-            .replace(regEx(/^``$/), ''); // TODO #12071
+            .replace(regEx(/^``$/), '');
         } else {
           res[header] = '';
         }
@@ -67,7 +67,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
       const content = row[column]
         ? row[column]
             .replace(regEx(/^@/), '@&#8203;')
-            .replace(regEx(/\|/g), '\\|') // TODO #12071
+            .replace(regEx(/\|/g), '\\|')
         : '';
       val += ` ${content} |`;
     }

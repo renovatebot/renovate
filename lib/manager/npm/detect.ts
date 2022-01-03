@@ -1,6 +1,6 @@
 import os from 'os';
 import is from '@sindresorhus/is';
-import { join } from 'upath';
+import upath from 'upath';
 import { logger } from '../../logger';
 import { readFile } from '../../util/fs';
 import { GlobalManagerConfig } from '../types';
@@ -8,7 +8,7 @@ import { GlobalManagerConfig } from '../types';
 export async function detectGlobalConfig(): Promise<GlobalManagerConfig> {
   const res: GlobalManagerConfig = {};
   const homedir = os.homedir();
-  const npmrcFileName = join(homedir, '.npmrc');
+  const npmrcFileName = upath.join(homedir, '.npmrc');
   try {
     const npmrc = await readFile(npmrcFileName, 'utf8');
     if (is.nonEmptyString(npmrc)) {

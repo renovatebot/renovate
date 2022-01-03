@@ -217,6 +217,4 @@ Object {
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title (patch)"`;
-
-exports[`workers/repository/updates/generate generateBranchConfig() supports manual prTitle 1`] = `"upgrade some-dep"`;
+exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades: some-title (patch) 1`] = `"some-title (patch)"`;

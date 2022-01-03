@@ -37,20 +37,90 @@ describe('manager/sbt/extract', () => {
       ).toBeNull();
     });
     it('extracts deps for generic use-cases', () => {
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(sbt)).toMatchSnapshot();
+      expect(extractPackageFile(sbt)).toMatchSnapshot({
+        deps: [
+          {
+            lookupName: 'org.scala-lang:scala-library',
+            currentValue: '2.9.10',
+          },
+          { lookupName: 'org.example:foo', currentValue: '0.0.1' },
+          { lookupName: 'org.example:bar_2.9.10', currentValue: '0.0.2' },
+          { lookupName: 'org.example:baz_2.9.10', currentValue: '0.0.3' },
+          { lookupName: 'org.example:qux', currentValue: '0.0.4' },
+          {
+            lookupName: 'org.scala-lang:scala-library',
+            currentValue: '2.13.3',
+          },
+          { lookupName: 'org.example:quux', currentValue: '0.0.5' },
+          { lookupName: 'org.example:quuz_2.9.10', currentValue: '0.0.6' },
+          { lookupName: 'org.example:corge', currentValue: '0.0.7' },
+          { lookupName: 'org.example:grault', currentValue: '0.0.8' },
+          { lookupName: 'org.example:waldo', currentValue: '0.0.9' },
+          { lookupName: 'org.example:fred', currentValue: '(,8.4.0]' },
+        ],
+        packageFileVersion: '1.0',
+      });
     });
     it('extracts deps when scala version is defined in a variable', () => {
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot();
+      expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot({
+        deps: [
+          { lookupName: 'org.example:foo', currentValue: '0.0.1' },
+          { lookupName: 'org.example:bar_2.12', currentValue: '0.0.2' },
+          { lookupName: 'org.example:baz_2.12', currentValue: '0.0.3' },
+          { lookupName: 'org.example:qux', currentValue: '0.0.4' },
+          { lookupName: 'org.example:quux', currentValue: '0.0.5' },
+          { lookupName: 'org.example:quuz_2.12', currentValue: '0.0.6' },
+          { lookupName: 'org.example:corge', currentValue: '0.0.7' },
+          { lookupName: 'org.example:grault', currentValue: '0.0.8' },
+          { lookupName: 'org.example:waldo', currentValue: '0.0.9' },
+        ],
+
+        packageFileVersion: '3.2.1',
+      });
     });
     it('skips deps when scala version is missing', () => {
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(sbtMissingScalaVersion)).toMatchSnapshot();
+      expect(extractPackageFile(sbtMissingScalaVersion)).toEqual({
+        deps: [
+          {
+            currentValue: '3.0.0',
+            datasource: 'sbt-package',
+            depName: 'org.scalatest:scalatest',
+            lookupName: 'org.scalatest:scalatest',
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+          {
+            currentValue: '1.0.11',
+            datasource: 'sbt-plugin',
+            depName: 'com.github.gseitz:sbt-release',
+            depType: 'plugin',
+            groupName: 'sbtReleaseVersion for com.github.gseitz',
+            lookupName: 'com.github.gseitz:sbt-release',
+            registryUrls: [
+              'https://repo.maven.apache.org/maven2',
+              'https://dl.bintray.com/sbt/sbt-plugin-releases',
+            ],
+          },
+        ],
+        packageFileVersion: '1.0.1',
+      });
     });
     it('extract deps from native scala file with variables', () => {
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(sbtDependencyFile)).toMatchSnapshot();
+      expect(extractPackageFile(sbtDependencyFile)).toMatchSnapshot({
+        deps: [
+          {
+            lookupName: 'org.scala-lang:scala-library',
+            currentValue: '2.13.0-RC5',
+          },
+          {
+            lookupName: 'com.example:foo_2.13.0-RC5',
+            currentValue: '0.7.1',
+          },
+          { lookupName: 'com.abc:abc', currentValue: '1.2.3' },
+          { lookupName: 'com.abc:abc-a', currentValue: '1.2.3' },
+          { lookupName: 'com.abc:abc-b', currentValue: '1.2.3' },
+          { lookupName: 'com.abc:abc-c', currentValue: '1.2.3' },
+        ],
+      });
     });
     it('extracts deps when scala version is defined with a trailing comma', () => {
       const content = `
@@ -59,8 +129,18 @@ describe('manager/sbt/extract', () => {
         )
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(content)).toMatchSnapshot();
+      expect(extractPackageFile(content)).toMatchSnapshot({
+        deps: [
+          {
+            lookupName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+          },
+          {
+            lookupName: 'org.example:bar_2.12',
+            currentValue: '0.0.2',
+          },
+        ],
+      });
     });
     it('extracts deps when scala version is defined in a variable with a trailing comma', () => {
       const content = `
@@ -70,14 +150,30 @@ describe('manager/sbt/extract', () => {
         )
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      // FIXME: explicit assert condition
-      expect(extractPackageFile(content)).toMatchSnapshot();
+      expect(extractPackageFile(content)).toMatchSnapshot({
+        deps: [{ lookupName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
+      });
     });
     it('extract deps from native scala file with private variables', () => {
-      // FIXME: explicit assert condition
       expect(
         extractPackageFile(sbtPrivateVariableDependencyFile)
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        deps: [
+          {
+            lookupName: 'org.scala-lang:scala-library',
+            currentValue: '2.13.0-RC5',
+          },
+          {
+            lookupName: 'com.example:foo_2.13.0-RC5',
+            currentValue: '0.7.1',
+          },
+          {
+            lookupName: 'com.abc:abc',
+            currentValue: '1.2.3',
+          },
+        ],
+        packageFileVersion: undefined,
+      });
     });
   });
 });

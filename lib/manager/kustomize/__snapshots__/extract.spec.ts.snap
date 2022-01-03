@@ -160,6 +160,22 @@ Array [
 ]
 `;
 
+exports[`manager/kustomize/extract extractPackageFile() parses helmChart field 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "3.1.3",
+      "datasource": "helm",
+      "depName": "minecraft",
+      "depType": "HelmChart",
+      "registryUrls": Array [
+        "https://itzg.github.io/minecraft-server-charts",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`manager/kustomize/extract extractPackageFile() should extract bases resources and components from their respective blocks 1`] = `
 Array [
   Object {

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
-import * as semver from 'semver';
+import semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';

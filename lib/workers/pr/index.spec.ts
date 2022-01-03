@@ -237,8 +237,12 @@ describe('workers/pr/index', () => {
       config.schedule = ['before 5am'];
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      // FIXME: explicit assert condition
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot([
+        {
+          prTitle: 'Update dependency dummy to v1.1.0',
+          sourceBranch: 'renovate/gitlabdummy-1.x',
+        },
+      ]);
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
       config.branchName = 'renovate/dummy-1.x';
       config.depName = 'dummy';
@@ -253,8 +257,12 @@ describe('workers/pr/index', () => {
       config.schedule = ['before 5am'];
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      // FIXME: explicit assert condition
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot([
+        {
+          prTitle: 'Update dependency dummy to v1.1.0',
+          sourceBranch: 'renovate/dummy-1.x',
+        },
+      ]);
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
     it('should not create PR if limit is reached', async () => {
@@ -282,6 +290,7 @@ describe('workers/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalled();
     });
     it('should create group PR', async () => {
+      const depsWithSameNotesSourceUrl = ['e', 'f'];
       config.upgrades = config.upgrades.concat([
         {
           depName: 'a',
@@ -305,17 +314,53 @@ describe('workers/pr/index', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
         },
+        {
+          depName: depsWithSameNotesSourceUrl[0],
+          updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
+        },
+        {
+          depName: depsWithSameNotesSourceUrl[1],
+          updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
+        },
       ] as never);
       config.updateType = 'lockFileMaintenance';
       config.recreateClosed = true;
       config.rebaseWhen = 'never';
       for (const upgrade of config.upgrades) {
         upgrade.logJSON = await changelogHelper.getChangeLogJSON(upgrade);
+
+        if (depsWithSameNotesSourceUrl.includes(upgrade.depName)) {
+          upgrade.sourceDirectory = `packages/${upgrade.depName}`;
+
+          upgrade.logJSON = {
+            ...upgrade.logJSON,
+            project: {
+              ...upgrade.logJSON.project,
+              repository: 'renovateapp/dummymonorepo',
+            },
+            versions: upgrade.logJSON.versions.map((V) => {
+              return {
+                ...V,
+                releaseNotes: {
+                  ...V.releaseNotes,
+                  notesSourceUrl:
+                    'https://github.com/renovateapp/dummymonorepo/blob/changelogfile.md',
+                },
+              };
+            }),
+          };
+        }
       }
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      // FIXME: explicit assert condition
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot([
+        {
+          prTitle: 'Update dependency dummy to v1.1.0',
+          sourceBranch: 'renovate/dummy-1.x',
+        },
+      ]);
     });
     it('should add note about Pin', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
@@ -328,8 +373,12 @@ describe('workers/pr/index', () => {
       config.logJSON = await changelogHelper.getChangeLogJSON(config);
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      // FIXME: explicit assert condition
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot([
+        {
+          prTitle: 'Update dependency dummy to v1.1.0',
+          sourceBranch: 'renovate/dummy-1.x',
+        },
+      ]);
       expect(platform.createPr.mock.calls[0][0].prBody).toContain(
         'this Pin PR'
       );
@@ -544,8 +593,10 @@ describe('workers/pr/index', () => {
       config.logJSON = await changelogHelper.getChangeLogJSON(config);
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       const { pr } = await prWorker.ensurePr(config);
-      // FIXME: explicit assert condition
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchSnapshot({
+        displayNumber: 'Existing PR',
+        title: 'Update dependency dummy to v1.1.0',
+      });
     });
     it('should return modified existing PR title', async () => {
       config.newValue = '1.2.0';
@@ -554,8 +605,10 @@ describe('workers/pr/index', () => {
         title: 'wrong',
       });
       const { pr } = await prWorker.ensurePr(config);
-      // FIXME: explicit assert condition
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchSnapshot({
+        displayNumber: 'Existing PR',
+        title: 'wrong',
+      });
     });
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
