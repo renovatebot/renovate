@@ -7,6 +7,8 @@ import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import * as git from '.';
 import { setNoVerify } from '.';
 
+jest.mock('delay');
+
 describe('util/git/index', () => {
   jest.setTimeout(15000);
 
@@ -65,7 +67,11 @@ describe('util/git/index', () => {
 
   let tmpDir: tmp.DirectoryResult;
 
+  const OLD_ENV = process.env;
+
   beforeEach(async () => {
+    jest.resetModules();
+    process.env = { ...OLD_ENV };
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
@@ -91,7 +97,54 @@ describe('util/git/index', () => {
   });
 
   afterAll(async () => {
+    process.env = OLD_ENV;
     await base.cleanup();
+  });
+
+  describe('gitRetry', () => {
+    it('returns result if git returns successfully', async () => {
+      const gitFunc = jest.fn().mockImplementation((args) => {
+        if (args === undefined) {
+          return 'some result';
+        } else {
+          return 'different result';
+        }
+      });
+      expect(await git.gitRetry(gitFunc)).toBe('some result');
+      expect(await git.gitRetry(gitFunc, 'arg')).toBe('different result');
+      expect(gitFunc).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries the func call if ExternalHostError thrown', async () => {
+      process.env.NODE_ENV = '';
+      const gitFunc = jest
+        .fn()
+        .mockImplementationOnce(() => {
+          throw new Error('The remote end hung up unexpectedly');
+        })
+        .mockImplementationOnce(() => 'some result');
+      expect(await git.gitRetry(gitFunc)).toBe('some result');
+      expect(gitFunc).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries the func call up to retry count if ExternalHostError thrown', async () => {
+      process.env.NODE_ENV = '';
+      const gitFunc = jest.fn().mockImplementation(() => {
+        throw new Error('The remote end hung up unexpectedly');
+      });
+      await expect(git.gitRetry(gitFunc)).rejects.toThrow(
+        'gitRetry has exceeded the limit of 5 retries'
+      );
+      expect(gitFunc).toHaveBeenCalledTimes(6);
+    });
+
+    it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {
+      const gitFunc = jest.fn().mockImplementationOnce(() => {
+        throw new Error('some error');
+      });
+      await expect(git.gitRetry(gitFunc)).rejects.toThrow('some error');
+      expect(gitFunc).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('validateGitVersion()', () => {

@@ -1,4 +1,5 @@
 import URL from 'url';
+import delay from 'delay';
 import fs from 'fs-extra';
 import type {
   Options,
@@ -42,88 +43,50 @@ export { setPrivateKey } from './private-key';
 // TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
 const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
+// Retry parameters
+const retryCount = 5;
+const delaySeconds = 3;
+const delayFactor = 2;
+
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
-async function gitRetry(
-  retryCount: number,
-  delaySeconds: number,
-  delayFactor: number,
-  gitFuncName: string,
+export async function gitRetry(
   gitFunc: (...args) => Promise<any>,
-  args: any[] | undefined
+  ...args: any[] | undefined
 ): Promise<any> {
-  logger.debug(
-    { retryCount, delaySeconds, delayFactor, gitFuncName, args },
-    'gitRetry'
-  );
-  let round: number = 0;
+  logger.debug({ retryCount, delaySeconds, delayFactor, args }, 'gitRetry');
+  let round = 0;
   while (round <= retryCount) {
     logger.debug({ round }, 'gitRetry round');
     try {
-      if (args === undefined) {
-        return await gitFunc.call(this as SimpleGit);
-      }
-      return await gitFunc.call(this as SimpleGit, args);
+      return await gitFunc(...args);
     } catch (err) {
-      logger.debug({ err }, `${gitFuncName} thrown`);
+      logger.debug({ err }, `Git function thrown`);
       try {
+        // Try to transform the Error to ExternalHostError
         checkForPlatformFailure(err);
         throw err;
       } catch (errChecked) {
         if (errChecked instanceof ExternalHostError) {
           logger.debug(
-            { err },
-            `gitRetry failure in round ${round} of ${retryCount}`
+            { errChecked },
+            `ExternalHostError thrown in round ${
+              round + 1
+            } of ${retryCount} - retrying in the next round`
           );
-          const nextDelay = delayFactor ^ ((round - 1) * delaySeconds);
-          await new Promise((resolve) => setTimeout(resolve, nextDelay));
         } else {
           throw err;
         }
       }
     }
+
     const nextDelay = delayFactor ^ ((round - 1) * delaySeconds);
-    logger.debug({ nextDelay }, 'Waiting nextDelay seconds');
-    await new Promise((resolve) => setTimeout(resolve, nextDelay));
+    logger.debug({ nextDelay }, `Waiting ${nextDelay} seconds`);
+    await delay(1000 * nextDelay);
+
     round++;
   }
 
-  throw new Error(`gitRetry count has exceeded the limit of ${retryCount}`);
-}
-
-// Retry parameters
-const retryCount = 5;
-const delaySeconds = 3;
-const retryFactor = 2;
-
-function wrapSimpleGitWithRetry(simpleGit) {
-  const prototype = Object.getPrototypeOf(simpleGit);
-
-  const funcsToWrap = {
-    raw: prototype.raw,
-    clone: prototype.clone,
-    branch: prototype.branch,
-    fetch: prototype.fetch,
-    push: prototype.push,
-    pull: prototype.pull,
-    checkout: prototype.checkout,
-    commit: prototype.commit,
-  };
-
-  for (const func in funcsToWrap) {
-    prototype[func] = (...args) => {
-      return gitRetry.call(
-        this,
-        retryCount,
-        delaySeconds,
-        retryFactor,
-        func,
-        funcsToWrap[func],
-        args
-      );
-    };
-  }
-
-  return simpleGit;
+  throw new Error(`gitRetry has exceeded the limit of ${retryCount} retries`);
 }
 
 // istanbul ignore next
@@ -206,7 +169,12 @@ async function isDirectory(dir: string): Promise<boolean> {
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
   // see https://stackoverflow.com/a/62352647/3005034
   try {
-    const res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
+    const gitRaw = git.raw.bind(git);
+    const res = await gitRetry(gitRaw, [
+      'rev-parse',
+      '--abbrev-ref',
+      'origin/HEAD',
+    ]);
     return res.replace('origin/', '').trim();
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -239,7 +207,8 @@ export async function validateGitVersion(): Promise<boolean> {
   let version: string;
   const globalGit = simpleGit.default();
   try {
-    const raw = await globalGit.raw(['--version']);
+    const globalGitRaw = globalGit.raw.bind(globalGit);
+    const raw = await gitRetry(globalGitRaw, ['--version']);
     for (const section of raw.split(/\s+/)) {
       if (semverCoerced.isVersion(section)) {
         version = section;
@@ -277,7 +246,8 @@ async function fetchBranchCommits(): Promise<void> {
     );
   }
   try {
-    (await git.raw(opts))
+    const gitRaw = git.raw.bind(git);
+    (await gitRetry(gitRaw, opts))
       .split('\n')
       .filter(Boolean)
       .map((line) => line.trim().split(regEx(/\s+/)))
@@ -300,25 +270,29 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = wrapSimpleGitWithRetry(simpleGit.default(localDir, simpleGitConfig()));
+  git = simpleGit.default(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
   logger.debug(`resetToBranch(${branchName})`);
-  await git.raw(['reset', '--hard']);
-  await git.checkout(branchName);
-  await git.raw(['reset', '--hard', 'origin/' + branchName]);
-  await git.raw(['clean', '-fd']);
+  const gitRaw = git.raw.bind(git);
+  const gitCheckout = git.checkout.bind(git);
+  await gitRetry(gitRaw, ['reset', '--hard']);
+  await gitRetry(gitCheckout, branchName);
+  await gitRetry(gitRaw, ['reset', '--hard', 'origin/' + branchName]);
+  await gitRetry(gitRaw, ['clean', '-fd']);
 }
 
 async function deleteLocalBranch(branchName: string): Promise<void> {
-  await git.branch(['-D', branchName]);
+  const gitBranch = git.branch.bind(git);
+  await gitRetry(gitBranch, ['-D', branchName]);
 }
 
 async function cleanLocalBranches(): Promise<void> {
-  const existingBranches = (await git.raw(['branch']))
+  const gitRaw = git.raw.bind(git);
+  const existingBranches = (await gitRetry(gitRaw, ['branch']))
     .split('\n')
     .map((branch) => branch.trim())
     .filter((branch) => branch.length)
@@ -347,13 +321,14 @@ export function setGitAuthor(gitAuthor: string): void {
 export async function writeGitAuthor(): Promise<void> {
   const { gitAuthorName, gitAuthorEmail } = config;
   try {
+    const gitAddConfig = git.addConfig.bind(git);
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
-      await git.addConfig('user.name', gitAuthorName);
+      await gitRetry(gitAddConfig, 'user.name', gitAuthorName);
     }
     if (gitAuthorEmail) {
       logger.debug({ gitAuthorEmail }, 'Setting git author email');
-      await git.addConfig('user.email', gitAuthorEmail);
+      await gitRetry(gitAddConfig, 'user.email', gitAuthorEmail);
     }
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -375,8 +350,9 @@ export function setUserRepoConfig({
 
 export async function getSubmodules(): Promise<string[]> {
   try {
+    const gitRaw = git.raw.bind(git);
     return (
-      (await git.raw([
+      (await gitRetry(gitRaw, [
         'config',
         '--file',
         '.gitmodules',
@@ -403,18 +379,24 @@ export async function syncGit(): Promise<void> {
   const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
+  const gitRaw = git.raw.bind(git);
+  const gitPull = git.pull.bind(git);
+  const gitFetch = git.fetch.bind(git);
+  const gitSubmoduleUpdate = git.submoduleUpdate.bind(git);
+  const gitLog = git.log.bind(git);
+
   if (await fs.pathExists(gitHead)) {
     try {
-      await git.raw(['remote', 'set-url', 'origin', config.url]);
+      await gitRetry(gitRaw, ['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
-      await git.pull();
-      await git.fetch();
+      await gitRetry(gitPull);
+      await gitRetry(gitFetch);
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
       await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
-      await git.raw(['remote', 'prune', 'origin']);
+      await gitRetry(gitRaw, ['remote', 'prune', 'origin']);
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.info({ durationMs }, 'git fetch completed');
       clone = false;
@@ -455,13 +437,15 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  config.currentBranchSha = (
+    await gitRetry(gitRaw, ['rev-parse', 'HEAD'])
+  ).trim();
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
       try {
         logger.debug(`Cloning git submodule at ${submodule}`);
-        await git.submoduleUpdate(['--init', submodule]);
+        await gitRetry(gitSubmoduleUpdate, ['--init', submodule]);
       } catch (err) {
         logger.warn(
           { err },
@@ -471,7 +455,7 @@ export async function syncGit(): Promise<void> {
     }
   }
   try {
-    const latestCommit = (await git.log({ n: 1 })).latest;
+    const latestCommit = (await gitRetry(gitLog, { n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -486,7 +470,8 @@ export async function syncGit(): Promise<void> {
 // istanbul ignore next
 export async function getRepoStatus(): Promise<StatusResult> {
   await syncGit();
-  return git.status();
+  const gitStatus = git.status.bind(git);
+  return gitRetry(gitStatus);
 }
 
 export function branchExists(branchName: string): boolean {
@@ -504,7 +489,8 @@ export async function getBranchParentSha(
 ): Promise<CommitSha | null> {
   try {
     const branchSha = getBranchCommit(branchName);
-    const parentSha = await git.revparse([`${branchSha}^`]);
+    const gitRevparse = git.revparse.bind(git);
+    const parentSha = await gitRetry(gitRevparse, [`${branchSha}^`]);
     return parentSha;
   } catch (err) {
     logger.debug({ err }, 'Error getting branch parent sha');
@@ -515,7 +501,8 @@ export async function getBranchParentSha(
 export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
-  const res = await git.log({
+  const gitLog = git.log.bind(git);
+  const res = await gitRetry(gitLog, {
     n: 10,
     format: { message: '%s' },
   });
@@ -526,16 +513,19 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   logger.debug(`Setting current branch to ${branchName}`);
   await syncGit();
   try {
+    const gitRaw = git.raw.bind(git);
+    const gitCheckout = git.checkout.bind(git);
+    const gitReset = git.reset.bind(git);
     config.currentBranch = branchName;
     config.currentBranchSha = (
-      await git.raw(['rev-parse', 'origin/' + branchName])
+      await gitRetry(gitRaw, ['rev-parse', 'origin/' + branchName])
     ).trim();
-    await git.checkout(['-f', branchName, '--']);
+    await gitRetry(gitCheckout, ['-f', branchName, '--']);
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
     }
-    await git.reset(ResetMode.HARD);
+    await gitRetry(gitReset, ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -553,7 +543,8 @@ export async function getFileList(): Promise<string[]> {
   const submodules = await getSubmodules();
   let files: string;
   try {
-    files = await git.raw(['ls-tree', '-r', branch]);
+    const gitRaw = git.raw.bind(git);
+    files = await gitRetry(gitRaw, ['ls-tree', '-r', branch]);
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: Not a valid object name')) {
       logger.debug(
@@ -585,8 +576,9 @@ export function getBranchList(): string[] {
 export async function isBranchStale(branchName: string): Promise<boolean> {
   await syncGit();
   try {
+    const gitBranch = git.branch.bind(git);
     const { currentBranchSha, currentBranch } = config;
-    const branches = await git.branch([
+    const branches = await gitRetry(gitBranch, [
       '--remotes',
       '--verbose',
       '--contains',
@@ -620,8 +612,9 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   // Retrieve the author of the most recent commit
   let lastAuthor: string;
   try {
+    const gitRaw = git.raw.bind(git);
     lastAuthor = (
-      await git.raw([
+      await gitRetry(gitRaw, [
         'log',
         '-1',
         '--pretty=format:%ae',
@@ -660,7 +653,8 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
 export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
   try {
-    await git.raw(['push', '--delete', 'origin', branchName]);
+    const gitRaw = git.raw.bind(git);
+    await gitRetry(gitRaw, ['push', '--delete', 'origin', branchName]);
     logger.debug({ branchName }, 'Deleted remote branch');
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -680,17 +674,22 @@ export async function deleteBranch(branchName: string): Promise<void> {
 export async function mergeBranch(branchName: string): Promise<void> {
   let status: StatusResult;
   try {
+    const gitReset = git.reset.bind(git);
+    const gitCheckout = git.checkout.bind(git);
+    const gitStatus = git.status.bind(git);
+    const gitMerge = git.merge.bind(git);
+    const gitPush = git.push.bind(git);
     await syncGit();
-    await git.reset(ResetMode.HARD);
-    await git.checkout(['-B', branchName, 'origin/' + branchName]);
-    await git.checkout([
+    await gitRetry(gitReset, ResetMode.HARD);
+    await gitRetry(gitCheckout, ['-B', branchName, 'origin/' + branchName]);
+    await gitRetry(gitCheckout, [
       '-B',
       config.currentBranch,
       'origin/' + config.currentBranch,
     ]);
-    status = await git.status();
-    await git.merge(['--ff-only', branchName]);
-    await git.push('origin', config.currentBranch);
+    status = await gitRetry(gitStatus);
+    await gitRetry(gitMerge, ['--ff-only', branchName]);
+    await gitRetry(gitPush, 'origin', config.currentBranch);
     incLimitedValue(Limit.Commits);
   } catch (err) {
     logger.debug(
@@ -713,7 +712,12 @@ export async function getBranchLastCommitTime(
 ): Promise<Date> {
   await syncGit();
   try {
-    const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
+    const gitShow = git.show.bind(git);
+    const time = await gitRetry(gitShow, [
+      '-s',
+      '--format=%ai',
+      'origin/' + branchName,
+    ]);
     return new Date(Date.parse(time));
   } catch (err) {
     checkForPlatformFailure(err);
@@ -742,7 +746,8 @@ export async function getFile(
 ): Promise<string | null> {
   await syncGit();
   try {
-    const content = await git.show([
+    const gitShow = git.show.bind(git);
+    const content = await gitRetry(gitShow, [
       'origin/' + (branchName || config.currentBranch) + ':' + filePath,
     ]);
     return content;
@@ -777,9 +782,16 @@ export async function commitFiles({
   await configSigningKey(localDir);
   await writeGitAuthor();
   try {
-    await git.reset(ResetMode.HARD);
-    await git.raw(['clean', '-fd']);
-    await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
+    const gitReset = git.reset.bind(git);
+    const gitRaw = git.raw.bind(git);
+    const gitCheckout = git.checkout.bind(git);
+    await gitRetry(gitReset, ResetMode.HARD);
+    await gitRetry(gitRaw, ['clean', '-fd']);
+    await gitRetry(gitCheckout, [
+      '-B',
+      branchName,
+      'origin/' + config.currentBranch,
+    ]);
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];
     const ignoredFiles: string[] = [];
