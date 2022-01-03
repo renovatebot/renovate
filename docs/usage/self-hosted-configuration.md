@@ -91,7 +91,7 @@ It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or re
 
 **Regex**:
 
-All text inside the start and end `/` will be evaluated as a regular expression.
+All text inside the start and end `/` will be treated as a regular expression.
 
 ```json
 {
@@ -99,7 +99,7 @@ All text inside the start and end `/` will be evaluated as a regular expression.
 }
 ```
 
-It is also possible to negate the regex using a leading `!`:
+You can negate the regex by putting a `!` in front:
 
 ```json
 {
