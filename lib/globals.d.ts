@@ -8,6 +8,19 @@ declare interface Error {
   validationError?: string;
   validationMessage?: string;
 }
+interface parsed {
+  public: string;
+  base_version: string;
+  is_prerelease: boolean;
+  is_devrelease: boolean;
+  is_postrelease: boolean;
+  epoch: number;
+  release: number[];
+  pre: (string | number)[];
+  post: (string | number)[];
+  dev: (string | number)[];
+  local: string | null;
+}
 
 // can't use `resolveJsonModule` because it will copy json files and change dist path
 
@@ -20,4 +33,34 @@ declare module '*/package.json' {
 declare module '*.json' {
   const value: Record<string, any>;
   export = value;
+}
+
+declare module '@renovate/pep440' {
+  import { SemVer } from 'semver';
+
+  export function compare(version: string, other: string): number;
+  export function satisfies(version: string, specifier: string): boolean;
+  export function valid(version: string): string | null;
+  export function validRange(specifier: string): boolean;
+  export function explain(version: string): parsed;
+  export function gt(version: string, other: string): boolean;
+  export function major(input: string | SemVer): number;
+  export function minor(input: string | SemVer): number;
+  export function patch(input: string | SemVer): number;
+  export function eq(version: string, other: string): boolean;
+  export function gte(version: string, other: string): boolean;
+  export function lte(version: string, other: string): boolean;
+  export function lt(version: string, other: string): boolean;
+}
+declare module '@renovate/pep440/lib/specifier.js' {
+  interface Range {
+    operator: string;
+    prefix: string;
+    version: string;
+  }
+  export function parse(ranges: string): Range[];
+  export function filter(versions: string[], range: string): string[];
+}
+declare module '@renovate/pep440/lib/version.js' {
+  export function parse(version: string, regex?: RegExp): parsed | null;
 }
