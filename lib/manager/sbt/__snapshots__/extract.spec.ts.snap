@@ -471,32 +471,3 @@ Object {
   "packageFileVersion": undefined,
 }
 `;
-
-exports[`manager/sbt/extract extractPackageFile() skips deps when scala version is missing 1`] = `
-Object {
-  "deps": Array [
-    Object {
-      "currentValue": "3.0.0",
-      "datasource": "sbt-package",
-      "depName": "org.scalatest:scalatest",
-      "lookupName": "org.scalatest:scalatest",
-      "registryUrls": Array [
-        "https://repo.maven.apache.org/maven2",
-      ],
-    },
-    Object {
-      "currentValue": "1.0.11",
-      "datasource": "sbt-plugin",
-      "depName": "com.github.gseitz:sbt-release",
-      "depType": "plugin",
-      "groupName": "sbtReleaseVersion for com.github.gseitz",
-      "lookupName": "com.github.gseitz:sbt-release",
-      "registryUrls": Array [
-        "https://repo.maven.apache.org/maven2",
-        "https://dl.bintray.com/sbt/sbt-plugin-releases",
-      ],
-    },
-  ],
-  "packageFileVersion": "1.0.1",
-}
-`;

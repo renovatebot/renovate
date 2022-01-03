@@ -1,5 +1,5 @@
-import * as semver from 'semver';
-import { is as isStable } from 'semver-stable';
+import semver from 'semver';
+import stable from 'semver-stable';
 import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
@@ -47,7 +47,7 @@ export const api: VersioningApi = {
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,
-  isStable,
+  isStable: stable.is,
   isValid,
   isVersion,
   matches,
