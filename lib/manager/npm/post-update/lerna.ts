@@ -1,9 +1,10 @@
-import semver, { validRange } from 'semver';
+import semver from 'semver';
 import { quote } from 'shlex';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { ExecOptions, exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -43,7 +44,7 @@ export async function generateLockFiles(
     if (lernaClient === 'yarn') {
       let installYarn = 'npm i -g yarn';
       const yarnCompatibility = config.constraints?.yarn;
-      if (validRange(yarnCompatibility)) {
+      if (semver.validRange(yarnCompatibility)) {
         installYarn += `@${quote(yarnCompatibility)}`;
       }
       preCommands.push(installYarn);
@@ -54,10 +55,10 @@ export async function generateLockFiles(
     } else if (lernaClient === 'npm') {
       let installNpm = 'npm i -g npm';
       const npmCompatibility = config.constraints?.npm;
-      if (validRange(npmCompatibility)) {
+      if (semver.validRange(npmCompatibility)) {
         installNpm += `@${quote(npmCompatibility)} || true`;
       }
-      preCommands.push(installNpm, 'hash -d npm');
+      preCommands.push(installNpm, 'hash -d npm 2>/dev/null || true');
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
@@ -67,7 +68,7 @@ export async function generateLockFiles(
       return { error: false };
     }
     let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
-    if (getGlobalConfig().allowScripts && config.ignoreScripts !== false) {
+    if (GlobalConfig.get('allowScripts') && config.ignoreScripts !== false) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
@@ -83,11 +84,11 @@ export async function generateLockFiles(
         image: 'node',
         tagScheme: 'node',
         tagConstraint,
-        preCommands,
       },
+      preCommands,
     };
     // istanbul ignore if
-    if (getGlobalConfig().exposeAllEnv) {
+    if (GlobalConfig.get('exposeAllEnv')) {
       execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
       execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }

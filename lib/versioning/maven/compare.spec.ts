@@ -123,6 +123,7 @@ describe('versioning/maven/compare', () => {
     ${'[1.3,1.2]'}
     ${'[1,[2,3],4]'}
     ${'[,1.0]'}
+    ${'[,1.0],[,1.0]'}
   `('filters out incorrect range: $input', ({ input }) => {
     const range = parseRange(input);
     expect(range).toBeNull();

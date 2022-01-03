@@ -127,13 +127,15 @@ const getNewValue = ({
     const delimiter = currentValue[0];
     return newValue
       .split(',')
-      .map(
-        (element) =>
-          element.replace(/^(?<whitespace>\s*)/, `$<whitespace>${delimiter}`) // TODO #12071 #12070
+      .map((element) =>
+        element.replace(
+          regEx(`^(?<whitespace>\\s*)`),
+          `$<whitespace>${delimiter}`
+        )
       )
       .map(
         (element) =>
-          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12071 #12070
+          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12875 adds ' at front when re2 is used
       )
       .join(',');
   }

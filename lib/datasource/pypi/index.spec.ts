@@ -12,6 +12,9 @@ const dataRequiresPythonResponse = loadFixture(
   'versions-html-data-requires-python.html'
 );
 const mixedHyphensResponse = loadFixture('versions-html-mixed-hyphens.html');
+const mixedCaseResponse = loadFixture('versions-html-mixed-case.html');
+const withPeriodsResponse = loadFixture('versions-html-with-periods.html');
+const hyphensResponse = loadFixture('versions-html-hyphens.html');
 
 const baseUrl = 'https://pypi.org/pypi';
 const datasource = PypiDatasource.id;
@@ -304,6 +307,25 @@ describe('datasource/pypi/index', () => {
       });
       expect(res.isPrivate).toBeTrue();
     });
+    it('process data from simple endpoint with hyphens', async () => {
+      httpMock
+        .scope('https://pypi.org/simple/')
+        .get('/package-with-hyphens/')
+        .reply(200, hyphensResponse);
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'package--with-hyphens',
+      });
+      expect(res.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
+    });
     it('process data from simple endpoint with hyphens replaced with underscores', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
@@ -321,6 +343,63 @@ describe('datasource/pypi/index', () => {
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('process data from simple endpoint with mixed-case characters', async () => {
+      httpMock
+        .scope('https://pypi.org/simple/')
+        .get('/packagewithmixedcase/')
+        .reply(200, mixedCaseResponse);
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'PackageWithMixedCase',
+      });
+      expect(res.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
+    });
+    it('process data from simple endpoint with mixed-case characters when using lower case dependency name', async () => {
+      httpMock
+        .scope('https://pypi.org/simple/')
+        .get('/packagewithmixedcase/')
+        .reply(200, mixedCaseResponse);
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'packagewithmixedcase',
+      });
+      expect(res.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
+    });
+    it('process data from simple endpoint with periods', async () => {
+      httpMock
+        .scope('https://pypi.org/simple/')
+        .get('/package-with-periods/')
+        .reply(200, withPeriodsResponse);
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'package.with.periods',
+      });
+      expect(res.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
     });
     it('returns null for empty response', async () => {
       httpMock

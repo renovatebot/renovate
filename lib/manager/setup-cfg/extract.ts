@@ -4,12 +4,12 @@ import pep440 from '../../versioning/pep440';
 import type { PackageDependency, PackageFile, Result } from '../types';
 
 function getSectionName(str: string): string {
-  const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) || []; // TODO #12071
+  const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) || [];
   return sectionName;
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) || []; // TODO #12071
+  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) || [];
   return sectionRecord;
 }
 
@@ -65,7 +65,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   content
     .split('\n')
-    .map((line) => line.replace(regEx(/[;#].*$/), '').trimRight()) // TODO #12071
+    .map((line) => line.replace(regEx(/[;#].*$/), '').trimRight())
     .forEach((rawLine) => {
       let line = rawLine;
       const newSectionName = getSectionName(line);
@@ -75,7 +75,7 @@ export function extractPackageFile(
       } else {
         if (newSectionRecord) {
           sectionRecord = newSectionRecord;
-          line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t'); // TODO #12071
+          line = rawLine.replace(regEx(/^[^=]*=\s*/), '\t');
         }
         const dep = parseDep(line, sectionName, sectionRecord);
         if (dep) {

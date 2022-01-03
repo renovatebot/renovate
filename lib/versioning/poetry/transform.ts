@@ -1,4 +1,4 @@
-import { parse } from 'semver';
+import semver from 'semver';
 import { RANGE_COMPARATOR_PATTERN, VERSION_PATTERN } from './patterns';
 
 function parseLetterTag(
@@ -77,7 +77,7 @@ export function semver2poetry(version?: string): string | null {
   if (!version) {
     return null;
   }
-  const s = parse(version);
+  const s = semver.parse(version);
   if (!s) {
     return null;
   }

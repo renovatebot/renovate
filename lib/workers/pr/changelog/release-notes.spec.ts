@@ -102,8 +102,23 @@ describe('workers/pr/changelog/release-notes', () => {
         },
         versions: [{ version: '3.10.0', compare: { url: '' } }],
       };
-      // FIXME: explicit assert condition
-      expect(await addReleaseNotes(input as never)).toMatchSnapshot();
+      expect(await addReleaseNotes(input as never)).toEqual({
+        a: 1,
+        hasReleaseNotes: false,
+        project: {
+          repository: 'https://github.com/nodeca/js-yaml',
+          type: 'github',
+        },
+        versions: [
+          {
+            compare: {
+              url: '',
+            },
+            releaseNotes: null,
+            version: '3.10.0',
+          },
+        ],
+      });
     });
 
     it('returns ChangeLogResult without release notes', async () => {
@@ -117,8 +132,23 @@ describe('workers/pr/changelog/release-notes', () => {
           { version: '20.26.0', compare: { url: '' } } as ChangeLogRelease,
         ],
       } as ChangeLogResult;
-      // FIXME: explicit assert condition
-      expect(await addReleaseNotes(input)).toMatchSnapshot();
+      expect(await addReleaseNotes(input)).toEqual({
+        a: 1,
+        hasReleaseNotes: false,
+        project: {
+          repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
+          type: 'gitlab',
+        },
+        versions: [
+          {
+            compare: {
+              url: '',
+            },
+            releaseNotes: null,
+            version: '20.26.0',
+          },
+        ],
+      });
     });
   });
 
@@ -144,8 +174,19 @@ describe('workers/pr/changelog/release-notes', () => {
         ...githubProject,
         repository: 'some/yet-other-repository',
       });
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot([
+        {
+          notesSourceUrl:
+            'https://api.github.com/repos/some/yet-other-repository/releases',
+          tag: 'v1.0.0',
+        },
+        {
+          body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          notesSourceUrl:
+            'https://api.github.com/repos/some/yet-other-repository/releases',
+          tag: 'v1.0.1',
+        },
+      ]);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -166,8 +207,20 @@ describe('workers/pr/changelog/release-notes', () => {
         ...gitlabProject,
         repository: 'some/yet-other-repository',
       });
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot([
+        {
+          notesSourceUrl:
+            'https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases',
+          tag: 'v1.0.0',
+          url: 'https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0',
+        },
+        {
+          notesSourceUrl:
+            'https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases',
+          tag: 'v1.0.1',
+          url: 'https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1',
+        },
+      ]);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -191,8 +244,20 @@ describe('workers/pr/changelog/release-notes', () => {
         apiBaseUrl: 'https://my.custom.domain/api/v4/',
         baseUrl: 'https://my.custom.domain/',
       });
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot([
+        {
+          notesSourceUrl:
+            'https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases',
+          tag: 'v1.0.0',
+          url: 'https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0',
+        },
+        {
+          notesSourceUrl:
+            'https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases',
+          tag: 'v1.0.1',
+          url: 'https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1',
+        },
+      ]);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -215,62 +280,261 @@ describe('workers/pr/changelog/release-notes', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it.each([[''], ['v'], ['other-'], ['other_v'], ['other@']])(
-      'gets release notes with body "%s"',
-      async (prefix) => {
-        httpMock
-          .scope('https://api.github.com/')
-          .get('/repos/some/other-repository/releases?per_page=100')
-          .reply(200, [
-            { tag_name: `${prefix}1.0.0` },
-            {
-              tag_name: `${prefix}1.0.1`,
-              body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
-            },
-          ]);
-        const res = await getReleaseNotes(
+    it('gets release notes with body ""', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
           {
-            ...githubProject,
-            repository: 'some/other-repository',
-            depName: 'other',
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
           },
-          '1.0.1'
-        );
-        // FIXME: explicit assert condition
-        expect(res).toMatchSnapshot();
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      }
-    );
-
-    it.each([[''], ['v'], ['other-']])(
-      'gets release notes with body from gitlab repo "%s"',
-      async (prefix) => {
-        httpMock
-          .scope('https://api.gitlab.com/')
-          .get('/projects/some%2fother-repository/releases?per_page=100')
-          .reply(200, [
-            { tag_name: `${prefix}1.0.0` },
-            {
-              tag_name: `${prefix}1.0.1`,
-              description:
-                'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
-            },
-          ]);
-
-        const res = await getReleaseNotes(
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: '1.0.1',
+        url: 'https://github.com/some/other-repository/releases/1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body "v"', async () => {
+      const prefix = 'v';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
           {
-            ...gitlabProject,
-            repository: 'some/other-repository',
-            depName: 'other',
-            apiBaseUrl: 'https://api.gitlab.com/',
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
           },
-          '1.0.1'
-        );
-        // FIXME: explicit assert condition
-        expect(res).toMatchSnapshot();
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      }
-    );
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'v1.0.1',
+        url: 'https://github.com/some/other-repository/releases/v1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body "other-"', async () => {
+      const prefix = 'other-';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'other-1.0.1',
+        url: 'https://github.com/some/other-repository/releases/other-1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body "other_v"', async () => {
+      const prefix = 'other_v';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'other_v1.0.1',
+        url: 'https://github.com/some/other-repository/releases/other_v1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body "other@"', async () => {
+      const prefix = 'other@';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            body: 'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: 'other@1.0.1',
+        url: 'https://github.com/some/other-repository/releases/other@1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('gets release notes with body from gitlab repo ""', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.gitlab.com/')
+        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            description:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...gitlabProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+          apiBaseUrl: 'https://api.gitlab.com/',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        name: undefined,
+        notesSourceUrl:
+          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+        tag: '1.0.1',
+        url: 'https://gitlab.com/some/other-repository/tags/1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body from gitlab repo "v"', async () => {
+      const prefix = 'v';
+      httpMock
+        .scope('https://api.gitlab.com/')
+        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            description:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...gitlabProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+          apiBaseUrl: 'https://api.gitlab.com/',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        name: undefined,
+        notesSourceUrl:
+          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+        tag: 'v1.0.1',
+        url: 'https://gitlab.com/some/other-repository/tags/v1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('gets release notes with body from gitlab repo "other-"', async () => {
+      const prefix = 'other-';
+      httpMock
+        .scope('https://api.gitlab.com/')
+        .get('/projects/some%2fother-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            description:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+          },
+        ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...gitlabProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+          apiBaseUrl: 'https://api.gitlab.com/',
+        },
+        '1.0.1'
+      );
+      expect(res).toEqual({
+        body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        name: undefined,
+        notesSourceUrl:
+          'https://api.gitlab.com/projects/some%2fother-repository/releases',
+        tag: 'other-1.0.1',
+        url: 'https://gitlab.com/some/other-repository/tags/other-1.0.1',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
 
     it('gets null from repository without gitlab/github in domain', async () => {
       const res = await getReleaseNotes(
@@ -304,7 +568,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/chalk')
         .reply(200)
-        .get('/repos/chalk/git/trees/master')
+        .get('/repos/chalk/git/trees/HEAD')
         .reply(200, {
           tree: [
             { name: 'lib', type: 'tree' },
@@ -327,7 +591,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/some/repository1')
         .reply(200)
-        .get('/repos/some/repository1/git/trees/master')
+        .get('/repos/some/repository1/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/some/repository1/git/blobs/abcd')
         .reply(200, {
@@ -349,7 +613,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/some/repository2')
         .reply(200)
-        .get('/repos/some/repository2/git/trees/master')
+        .get('/repos/some/repository2/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/some/repository2/git/blobs/abcd')
         .reply(200, {
@@ -371,7 +635,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/angular/angular.js')
         .reply(200)
-        .get('/repos/angular/angular.js/git/trees/master')
+        .get('/repos/angular/angular.js/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/angular/angular.js/git/blobs/abcd')
         .reply(200, {
@@ -384,9 +648,11 @@ describe('workers/pr/changelog/release-notes', () => {
         },
         '1.6.9'
       );
-      // FIXME: explicit assert condition
-      expect(res).not.toBeNull();
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        notesSourceUrl:
+          'https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md',
+        url: 'https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md#169-fiery-basilisk-2018-02-02',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -409,9 +675,11 @@ describe('workers/pr/changelog/release-notes', () => {
         '20.26.0'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(res).not.toBeNull();
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        notesSourceUrl:
+          'https://gitlab.com/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md',
+        url: 'https://gitlab.com/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md#20260---2020-05-18',
+      });
     });
 
     it('parses self hosted gitlab', async () => {
@@ -435,9 +703,11 @@ describe('workers/pr/changelog/release-notes', () => {
         '20.26.0'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(res).not.toBeNull();
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        notesSourceUrl:
+          'https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md',
+        url: 'https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md#20260---2020-05-18',
+      });
     });
 
     it('parses jest', async () => {
@@ -445,7 +715,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/facebook/jest')
         .reply(200)
-        .get('/repos/facebook/jest/git/trees/master')
+        .get('/repos/facebook/jest/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/facebook/jest/git/blobs/abcd')
         .reply(200, {
@@ -459,9 +729,11 @@ describe('workers/pr/changelog/release-notes', () => {
         '22.0.0'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(res).not.toBeNull();
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        notesSourceUrl:
+          'https://github.com/facebook/jest/blob/HEAD/CHANGELOG.md',
+        url: 'https://github.com/facebook/jest/blob/HEAD/CHANGELOG.md#jest-2200',
+      });
     });
 
     it('handles github sourceDirectory', async () => {
@@ -474,7 +746,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/nodeca/js-yaml')
         .reply(200)
-        .get('/repos/nodeca/js-yaml/git/trees/master?recursive=1')
+        .get('/repos/nodeca/js-yaml/git/trees/HEAD?recursive=1')
         .reply(200, subdirTree)
         .get('/repos/nodeca/js-yaml/git/blobs/abcd')
         .reply(200, {
@@ -489,9 +761,11 @@ describe('workers/pr/changelog/release-notes', () => {
         '3.10.0'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(res).not.toBeNull();
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        notesSourceUrl:
+          'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md',
+        url: 'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md#3100--2017-09-10',
+      });
     });
 
     it('parses js-yaml', async () => {
@@ -499,7 +773,7 @@ describe('workers/pr/changelog/release-notes', () => {
         .scope('https://api.github.com')
         .get('/repos/nodeca/js-yaml')
         .reply(200)
-        .get('/repos/nodeca/js-yaml/git/trees/master')
+        .get('/repos/nodeca/js-yaml/git/trees/HEAD')
         .reply(200, githubTreeResponse)
         .get('/repos/nodeca/js-yaml/git/blobs/abcd')
         .reply(200, {
@@ -513,9 +787,11 @@ describe('workers/pr/changelog/release-notes', () => {
         '3.10.0'
       );
       expect(httpMock.getTrace()).toMatchSnapshot();
-      // FIXME: explicit assert condition
-      expect(res).not.toBeNull();
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        notesSourceUrl:
+          'https://github.com/nodeca/js-yaml/blob/HEAD/CHANGELOG.md',
+        url: 'https://github.com/nodeca/js-yaml/blob/HEAD/CHANGELOG.md#3100--2017-09-10',
+      });
     });
 
     it('ignores invalid', async () => {
@@ -551,9 +827,11 @@ describe('workers/pr/changelog/release-notes', () => {
         );
         versionOneNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
-        // FIXME: explicit assert condition
-        expect(res).not.toBeNull();
-        expect(res).toMatchSnapshot();
+        expect(res).toMatchSnapshot({
+          notesSourceUrl:
+            'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
+          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-httpswwwgithubcomyargsyargscomparev1520v1530-2020-03-08',
+        });
       });
 
       it('parses yargs 15.2.0', async () => {
@@ -576,9 +854,11 @@ describe('workers/pr/changelog/release-notes', () => {
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
-        // FIXME: explicit assert condition
-        expect(res).not.toBeNull();
-        expect(res).toMatchSnapshot();
+        expect(res).toMatchSnapshot({
+          notesSourceUrl:
+            'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
+          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-httpswwwgithubcomyargsyargscomparev1510v1520-2020-03-01',
+        });
       });
 
       it('parses adapter-utils 4.33.0', async () => {
@@ -601,9 +881,11 @@ describe('workers/pr/changelog/release-notes', () => {
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
-        // FIXME: explicit assert condition
-        expect(res).not.toBeNull();
-        expect(res).toMatchSnapshot();
+        expect(res).toMatchSnapshot({
+          notesSourceUrl:
+            'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md',
+          url: 'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md#4330-05-15-2020',
+        });
       });
 
       it('handles gitlab sourceDirectory', async () => {
@@ -632,9 +914,11 @@ describe('workers/pr/changelog/release-notes', () => {
         );
         versionTwoNotes = res;
         expect(httpMock.getTrace()).toMatchSnapshot();
-        // FIXME: explicit assert condition
-        expect(res).not.toBeNull();
-        expect(res).toMatchSnapshot();
+        expect(res).toMatchSnapshot({
+          notesSourceUrl:
+            'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/packages/foo/CHANGELOG.md',
+          url: 'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/packages/foo/CHANGELOG.md#4330-05-15-2020',
+        });
       });
 
       it('isUrl', () => {

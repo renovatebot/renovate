@@ -2,13 +2,14 @@ import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
 import registryAuthToken from 'registry-auth-token';
-import getRegistryUrl from 'registry-auth-token/registry-url';
-import { getGlobalConfig } from '../../config/global';
+import getRegistryUrl from 'registry-auth-token/registry-url.js';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
 import { regEx } from '../../util/regex';
 import { add } from '../../util/sanitize';
+import { ensureTrailingSlash } from '../../util/url';
 import type { Npmrc, PackageResolution } from './types';
 
 let npmrc: Record<string, any> = {};
@@ -61,7 +62,7 @@ export function setNpmrc(input?: string): void {
     npmrcRaw = input;
     logger.debug('Setting npmrc');
     npmrc = ini.parse(input.replace(regEx(/\\n/g), '\n'));
-    const { exposeAllEnv } = getGlobalConfig();
+    const { exposeAllEnv } = GlobalConfig.get();
     for (const [key, val] of Object.entries(npmrc)) {
       if (!exposeAllEnv) {
         sanitize(key, val);
@@ -112,8 +113,8 @@ export function resolvePackage(packageName: string): PackageResolution {
     !authInfo &&
     npmrc &&
     npmrc._authToken &&
-    registryUrl.replace(regEx(/\/?$/), '/') ===
-      npmrc.registry?.replace(/\/?$/, '/') // TODO #12070
+    ensureTrailingSlash(registryUrl) ===
+      ensureTrailingSlash(npmrc?.registry || '')
   ) {
     authInfo = { type: 'Bearer', token: npmrc._authToken };
   }

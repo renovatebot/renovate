@@ -92,7 +92,7 @@ export function updateDependency({
           // Replace version
           const [oldV] = upgrade.currentValue.split('.');
           newLine = newLine.replace(
-            regEx(`/${oldV}(\\s+)`),
+            regEx(`/${oldV}(\\s+)`, undefined, false),
             `/v${upgrade.newMajor}$1`
           );
         }

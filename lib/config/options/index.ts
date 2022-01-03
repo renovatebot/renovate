@@ -262,10 +262,10 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Controls whether third party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
+      'Controls whether third-party tools like npm or Gradle are called directly, via Docker sidecar containers, or dynamic install.',
     globalOnly: true,
     type: 'string',
-    allowedValues: ['global', 'docker'],
+    allowedValues: ['global', 'docker', 'install'],
     default: 'global',
   },
   {
@@ -746,6 +746,14 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+  },
+  {
+    name: 'executionTimeout',
+    description:
+      'Default execution timeout in minutes for child processes Renovate creates.',
+    type: 'integer',
+    default: 15,
+    globalOnly: true,
   },
   {
     name: 'aliases',
@@ -1587,7 +1595,7 @@ const options: RenovateOptions[] = [
   {
     name: 'groupSlug',
     description:
-      'Slug to use for group (e.g. in branch name). Will be calculated from groupName if null.',
+      'Slug to use for group (e.g. in branch name). Will be calculated from `groupName` if `null`.',
     type: 'string',
     default: null,
     cli: false,
@@ -1663,6 +1671,14 @@ const options: RenovateOptions[] = [
   {
     name: 'filterUnavailableUsers',
     description: 'Filter reviewers and assignees based on their availability.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
+    name: 'confidential',
+    description:
+      'If enabled, issues created by Renovate are set as confidential.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],
@@ -2113,7 +2129,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Allow to disable release notes fetching.',
+    description: 'Whether or not to fetch release notes.',
     type: 'boolean',
     default: true,
     cli: false,
@@ -2174,6 +2190,21 @@ const options: RenovateOptions[] = [
     description: `Enable or disable usage of platform-native auto-merge capabilities when available.`,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'userStrings',
+    description:
+      'User-facing strings pertaining to the PR comment that gets posted when a PR is closed.',
+    type: 'object',
+    default: {
+      ignoreTopic: 'Renovate Ignore Notification',
+      ignoreMajor:
+        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{newMajor}}}.x releases. However, if you upgrade to {{{newMajor}}}.x manually then Renovate will reenable minor and patch updates automatically.',
+      ignoreDigest:
+        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{depName}}}:{{{currentValue}}} digest updates. Digest updates will resume if you update the specified tag at any time.',
+      ignoreOther:
+        'As this PR has been closed unmerged, Renovate will now ignore this update ({{{newValue}}}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the `ignoreDeps` array of your renovate config.',
+    },
   },
 ];
 

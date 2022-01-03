@@ -2,7 +2,7 @@ import { createReadStream } from 'fs';
 import { DirectoryResult, dir } from 'tmp-promise';
 import * as httpMock from '../../../../test/http-mock';
 import { getFixturePath, loadFixture, logger } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { Logger } from '../../../logger/types';
 import { TerraformProviderHash } from './hash';
@@ -17,7 +17,7 @@ describe('manager/terraform/lockfile/hash', () => {
 
   beforeEach(async () => {
     cacheDir = await dir({ unsafeCleanup: true });
-    setGlobalConfig({ cacheDir: cacheDir.path });
+    GlobalConfig.set({ cacheDir: cacheDir.path });
   });
 
   afterEach(() => cacheDir.cleanup());

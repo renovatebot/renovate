@@ -24,20 +24,6 @@ Array [
 ]
 `;
 
-exports[`manager/npm/post-update/yarn checkYarnrc() returns no offline mirror and unquoted yarn path 1`] = `
-Object {
-  "offlineMirror": false,
-  "yarnPath": "./.yarn/cli.js",
-}
-`;
-
-exports[`manager/npm/post-update/yarn checkYarnrc() returns offline mirror and yarn path 1`] = `
-Object {
-  "offlineMirror": true,
-  "yarnPath": "./.yarn/cli.js",
-}
-`;
-
 exports[`manager/npm/post-update/yarn does not use global cache if zero install is detected 1`] = `
 Array [
   Object {

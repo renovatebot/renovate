@@ -52,7 +52,7 @@ export async function getReleaseNotesMd(
 ): Promise<ChangeLogFile> | null {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
-  const { default_branch: defaultBranch = 'master' } = (
+  const { default_branch: defaultBranch = 'HEAD' } = (
     await http.getJson<{ default_branch: string }>(apiPrefix)
   ).body;
 
@@ -109,12 +109,13 @@ export async function getReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  const url = `${ensureTrailingSlash(
-    apiBaseUrl
-  )}repos/${repository}/releases?per_page=100`;
-  const res = await http.getJson<GithubRelease[]>(url, { paginate: true });
+  const url = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}/releases`;
+  const res = await http.getJson<GithubRelease[]>(`${url}?per_page=100`, {
+    paginate: true,
+  });
   return res.body.map((release) => ({
     url: release.html_url,
+    notesSourceUrl: url,
     id: release.id,
     tag: release.tag_name,
     name: release.name,

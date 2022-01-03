@@ -75,11 +75,16 @@ const getScalaVersionVariable = (str: string): string =>
 
 const isResolver = (str: string): boolean =>
   regEx(
-    /^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/
+    /^\s*(resolvers\s*\+\+?=\s*((Seq|List|Stream)\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/
   ).test(str);
 const getResolverUrl = (str: string): string =>
   str
-    .replace(regEx(/^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"/), '')
+    .replace(
+      regEx(
+        /^\s*(resolvers\s*\+\+?=\s*((Seq|List|Stream)\()?)?"[^"]*"\s*at\s*"/
+      ),
+      ''
+    )
     .replace(regEx(/"[\s,)]*$/), '');
 
 const isVarDependency = (str: string): boolean =>
@@ -94,12 +99,12 @@ const isVarDef = (str: string): boolean =>
 
 const isVarSeqSingleLine = (str: string): boolean =>
   regEx(
-    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*Seq\(.*\).*\s*$/
+    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(Seq|List|Stream)\(.*\).*\s*$/
   ).test(str);
 
 const isVarSeqMultipleLine = (str: string): boolean =>
   regEx(
-    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*Seq\(.*[^)]*.*$/
+    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(Seq|List|Stream)\(.*[^)]*.*$/
   ).test(str);
 
 const getVarName = (str: string): string =>
@@ -137,7 +142,7 @@ function parseDepExpr(
   const tokens = expr
     .trim()
     .split(regEx(/("[^"]*")/g))
-    .map((x) => (regEx(/"[^"]*"/).test(x) ? x : x.replace(regEx(/[()]+/g), ''))) // TODO #12071
+    .map((x) => (regEx(/"[^"]*"/).test(x) ? x : x.replace(regEx(/[()]+/g), '')))
     .join('')
     .split(regEx(/\s*(%%?)\s*|\s*classifier\s*/));
 
@@ -250,14 +255,14 @@ function parseSbtLine(
     } else if (isVarSeqSingleLine(line)) {
       isMultiDeps = false;
       const depExpr = line
-        .replace(regEx(/^.*Seq\(\s*/), '')
+        .replace(regEx(/^.*(Seq|List|Stream)\(\s*/), '')
         .replace(regEx(/\).*$/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });
     } else if (isVarSeqMultipleLine(line)) {
       isMultiDeps = true;
-      const depExpr = line.replace(regEx(/^.*Seq\(\s*/), '');
+      const depExpr = line.replace(regEx(/^.*(Seq|List|Stream)\(\s*/), '');
       dep = parseDepExpr(depExpr, {
         ...ctx,
       });

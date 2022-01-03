@@ -938,6 +938,7 @@ describe('platform/bitbucket/index', () => {
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         { 
@@ -953,6 +954,47 @@ describe('platform/bitbucket/index', () => {
       expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('returns file content from given repo', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/different/repo/src/HEAD/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile('file.json', 'different/repo');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns file content from branch or tag', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/dev/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile('file.json', 'some/repo', 'dev');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns file content from branch with a slash in its name', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/refs/branches/feat/123-test')
+        .reply(200, JSON.stringify({ target: { hash: '1234567890' } }));
+      scope
+        .get('/2.0/repositories/some/repo/src/1234567890/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile(
+        'file.json',
+        'some/repo',
+        'feat/123-test'
+      );
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('throws on malformed JSON', async () => {
       const scope = await initRepoMock();
       scope

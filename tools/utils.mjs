@@ -22,7 +22,7 @@ export { program };
  */
 export function exec(cmd) {
   try {
-    if (!program.dryRun) {
+    if (!options.dryRun) {
       const res = shell.exec(cmd);
       return res.code === 0;
     }

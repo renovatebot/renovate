@@ -18,6 +18,7 @@ Multi-platform and multi-language.
 - Bot behavior is extremely customizable via configuration files (config as code)
 - Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
 - Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
+- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
 - Supports GitHub (.com and Enterprise), GitLab (.com and CE/EE), Bitbucket Cloud, Bitbucket Server, Azure DevOps and Gitea.
 - Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
 
@@ -25,7 +26,7 @@ Multi-platform and multi-language.
 
 Renovate was released in 2017 and already is widely used in the developer community, including:
 
-![Renovate Matrix](https://renovatebot.com/images/matrix.png)
+![Renovate Matrix](https://app.renovatebot.com/images/matrix.png)
 
 ## The Renovate Approach
 
@@ -63,7 +64,7 @@ If you are not on github.com or gitlab.com, or you prefer to run your own instan
 
 - Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using cron)
 - Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
-- Run the `renovate/renovate:slim` Docker Hub image if you only use package managers that don't need third party binaries (e.g. JavaScript, Docker, NuGet, pip)
+- Run the `renovate/renovate:slim` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
 
 [More details on the self-hosting development](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md).
 

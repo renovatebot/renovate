@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
@@ -44,6 +45,7 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
+  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
   const res: UpdateResult = {
     updates: [],
     warnings: [],
@@ -62,8 +64,8 @@ export async function lookupUpdates(
       res.skipReason = SkipReason.InvalidConfig;
       return res;
     }
-    const isValid = currentValue && versioning.isValid(currentValue);
-    if (isValid) {
+    const isValid = is.string(currentValue) && versioning.isValid(currentValue);
+    if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
         versioning.isSingleVersion(currentValue)
@@ -129,8 +131,8 @@ export async function lookupUpdates(
         );
       }
       // Check that existing constraint can be satisfied
-      const allSatisfyingVersions = allVersions.filter((v) =>
-        versioning.matches(v.version, currentValue)
+      const allSatisfyingVersions = allVersions.filter(
+        (v) => unconstrainedValue || versioning.matches(v.version, currentValue)
       );
       if (rollbackPrs && !allSatisfyingVersions.length) {
         const rollback = getRollbackUpdate(config, allVersions, versioning);
@@ -167,16 +169,22 @@ export async function lookupUpdates(
       const nonDeprecatedVersions = dependency.releases
         .filter((release) => !release.isDeprecated)
         .map((release) => release.version);
-      const currentVersion =
+      let currentVersion: string;
+      if (rangeStrategy === 'update-lockfile') {
+        currentVersion = lockedVersion;
+      }
+      currentVersion ??=
         getCurrentVersion(
-          config,
+          currentValue,
+          lockedVersion,
           versioning,
           rangeStrategy,
           latestVersion,
           nonDeprecatedVersions
         ) ||
         getCurrentVersion(
-          config,
+          currentValue,
+          lockedVersion,
           versioning,
           rangeStrategy,
           latestVersion,
@@ -188,6 +196,7 @@ export async function lookupUpdates(
       }
       res.currentVersion = currentVersion;
       if (
+        currentValue &&
         currentVersion &&
         rangeStrategy === 'pin' &&
         !versioning.isSingleVersion(currentValue)
@@ -204,21 +213,22 @@ export async function lookupUpdates(
           newMajor: versioning.getMajor(currentVersion),
         });
       }
-      let filterStart = currentVersion;
-      if (lockedVersion && rangeStrategy === 'update-lockfile') {
-        // Look for versions greater than the current locked version that still satisfy the package.json range
-        filterStart = lockedVersion;
+      // istanbul ignore if
+      if (!versioning.isVersion(currentVersion)) {
+        res.skipReason = SkipReason.InvalidVersion;
+        return res;
       }
       // Filter latest, unstable, etc
       let filteredReleases = filterVersions(
         config,
-        filterStart,
+        currentVersion,
         latestVersion,
         allVersions,
         versioning
-      ).filter((v) =>
-        // Leave only compatible versions
-        versioning.isCompatible(v.version, currentValue)
+      ).filter(
+        (v) =>
+          // Leave only compatible versions
+          unconstrainedValue || versioning.isCompatible(v.version, currentValue)
       );
       if (isVulnerabilityAlert) {
         filteredReleases = filteredReleases.slice(0, 1);
@@ -231,10 +241,12 @@ export async function lookupUpdates(
           release.version,
           versioning
         );
-        if (buckets[bucket]) {
-          buckets[bucket].push(release);
-        } else {
-          buckets[bucket] = [release];
+        if (is.string(bucket)) {
+          if (buckets[bucket]) {
+            buckets[bucket].push(release);
+          } else {
+            buckets[bucket] = [release];
+          }
         }
       }
       const depResultConfig = mergeChildConfig(config, res);
@@ -371,6 +383,7 @@ export async function lookupUpdates(
         rollbackPrs,
         isVulnerabilityAlert,
         updatePinnedDependencies,
+        unconstrainedValue,
         err,
       },
       'lookupUpdates error'
