@@ -77,8 +77,6 @@ export function getNewValue({
   }
   const parsedRange = semverUtils.parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
-  // eslint-disable-next-line no-console
-  console.log(parsedRange, element);
   if (rangeStrategy === 'widen') {
     if (satisfies(newVersion, currentValue)) {
       return currentValue;
@@ -170,26 +168,22 @@ export function getNewValue({
       const newRange = semverUtils.parseRange(currentValue);
       const versions = newRange.map((x) => {
         const subRange = x.semver;
-        if (subRange) {
-          const bumpedSubRange = getNewValue({
-            currentValue: subRange,
-            rangeStrategy: 'bump',
-            currentVersion,
-            newVersion,
-          });
-          if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
-            return bumpedSubRange;
-          }
-
-          return getNewValue({
-            currentValue: subRange,
-            rangeStrategy: 'replace',
-            currentVersion,
-            newVersion,
-          });
-        } else {
-          return null;
+        const bumpedSubRange = getNewValue({
+          currentValue: subRange ?? 'ee', // ee is invalid value used inplace of undefined
+          rangeStrategy: 'bump',
+          currentVersion,
+          newVersion,
+        });
+        if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
+          return bumpedSubRange;
         }
+
+        return getNewValue({
+          currentValue: subRange ?? 'ee',
+          rangeStrategy: 'replace',
+          currentVersion,
+          newVersion,
+        });
       });
       return versions.filter((x) => x !== null && x !== '').join(' ');
     }
