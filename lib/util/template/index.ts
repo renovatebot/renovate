@@ -17,6 +17,19 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
+handlebars.registerHelper('containsString', (str, subStr, options) =>
+  str.includes(subStr)
+);
+
+handlebars.registerHelper({
+  and(...args) {
+    return Array.prototype.slice.call(args, 0, args.length - 1).every(Boolean);
+  },
+  or(...args) {
+    return Array.prototype.slice.call(args, 0, args.length - 1).some(Boolean);
+  },
+});
+
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',
