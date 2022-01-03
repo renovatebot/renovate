@@ -60,6 +60,7 @@ declare module '@renovate/pep440/lib/specifier.js' {
     prefix: string;
     version: string;
   }
+  const RANGE_PATTERN: string;
   export function parse(ranges: string): Range[];
   export function filter(versions: string[], range: string): string[];
 }
