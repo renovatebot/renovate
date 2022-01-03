@@ -36,3 +36,24 @@ If you want to print pretty JSON with Handlebars you can use the built-in functi
 `{{{stringToPrettyJSON myvar}}}`
 
 In the example above `myvar` is a variable/field, that contains valid JSON.
+
+### containsString
+
+Returns `true` if a given string is a substring.
+
+`{{#if (containsString 'banana' 'ban')}}Is a substring{{else}}Is NOT a substring{{/if}}` => `Is a substring`
+`{{#if (containsString 'potato' 'ban')}}Is a substring{{else}}Is NOT a substring{{/if}}` => `Is NOT a substring`
+
+### and
+
+Returns `true` only if all expressions are `true`.
+
+`{{#if (and true true true)}}True{{else}}False{{/if}}` => `True`
+`{{#if (and false false)}}True{{else}}False{{/if}}` => `False`
+
+### or
+
+Returns `true` if at least one expression is `true`.
+
+`{{#if (or true true false)}}True{{else}}False{{/if}}` => `True`
+`{{#if (or false false)}}True{{else}}False{{/if}}` => `False`
