@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { valid } from 'semver';
 import npm, { isValid, isVersion } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { nodeSchedule } from './schedule';
@@ -22,7 +23,7 @@ function getNewValue({
   });
   if (isVersion(res)) {
     // normalize out any 'v' prefix
-    return isVersion(res);
+    return valid(res);
   }
   return res;
 }
