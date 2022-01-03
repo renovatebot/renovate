@@ -1489,7 +1489,19 @@ Use this field to restrict rules to a particular branch. e.g.
 }
 ```
 
-This field also supports Regular Expressions if they begin and end with `/`.
+This field also supports Regular Expressions if they begin and end with `/`. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchBaseBranches": ["/^release\\/.*/"],
+      "excludePackagePatterns": ["^eslint"],
+      "enabled": false
+    }
+  ]
+}
+```
 
 ### matchManagers
 
