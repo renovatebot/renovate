@@ -5,12 +5,25 @@ export const presets: Record<string, Preset> = {
   all: {
     description: 'All replacements',
     extends: [
+      'replacements:babel-eslint-to-eslint-parser',
       'replacements:cucumber-to-scoped',
       'replacements:hapi-to-scoped',
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
       'replacements:rollup-node-resolve-to-scoped',
+    ],
+  },
+  'babel-eslint-to-eslint-parser': {
+    description: 'babel-eslint was renamed under the @babel scope',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=7.11.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['babel-eslint'],
+        replacementName: '@babel/eslint-parser',
+        replacementVersion: '7.11.0',
+      },
     ],
   },
   'cucumber-to-scoped': {
