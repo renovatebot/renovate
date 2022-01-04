@@ -1,4 +1,4 @@
-import { getPkgReleases } from '..';
+import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { id as datasource } from '.';
 
@@ -74,6 +74,47 @@ describe('datasource/gitlab-tags/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
+    });
+  });
+
+  describe('getDigest', () => {
+    it('returns commits from gitlab installation', async () => {
+      const digest = 'abcd00001234';
+      const body = [
+        {
+          id: digest,
+        },
+      ];
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
+        .reply(200, body);
+      const res = await getDigest({
+        datasource,
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        depName: 'some/dep2',
+      });
+      expect(res).toBe(digest);
+    });
+
+    it('returns commits from gitlab installation for a specific branch', async () => {
+      const digest = 'abcd00001234';
+      const body = {
+        id: digest,
+      };
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits/branch')
+        .reply(200, body);
+      const res = await getDigest(
+        {
+          datasource,
+          registryUrls: ['https://gitlab.company.com/api/v4/'],
+          depName: 'some/dep2',
+        },
+        'branch'
+      );
+      expect(res).toBe(digest);
     });
   });
 });
