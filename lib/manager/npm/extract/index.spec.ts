@@ -183,7 +183,7 @@ describe('manager/npm/extract/index', () => {
         'package.json',
         { npmrc: 'config-npmrc', npmrcMerge: true }
       );
-      expect(res.npmrc).toEqual(`config-npmrc\nrepo-npmrc\n`);
+      expect(res.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
     });
     it('finds and filters .npmrc with variables', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
