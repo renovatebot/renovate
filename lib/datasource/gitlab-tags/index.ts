@@ -90,7 +90,7 @@ export async function getDigest(
   }
 
   const urlEncodedRepo = encodeURIComponent(repo);
-  let digest;
+  let digest: string;
 
   if (newValue) {
     const url = joinUrlParts(
@@ -100,9 +100,7 @@ export async function getDigest(
       `repository/commits/`,
       newValue
     );
-    const gitlabCommits = await gitlabApi.getJson<GitlabCommit>(url, {
-      paginate: true,
-    });
+    const gitlabCommits = await gitlabApi.getJson<GitlabCommit>(url);
     digest = gitlabCommits.body.id;
   } else {
     const url = joinUrlParts(
@@ -111,9 +109,7 @@ export async function getDigest(
       urlEncodedRepo,
       `repository/commits?per_page=1`
     );
-    const gitlabCommits = await gitlabApi.getJson<GitlabCommit[]>(url, {
-      paginate: true,
-    });
+    const gitlabCommits = await gitlabApi.getJson<GitlabCommit[]>(url);
     digest = gitlabCommits.body[0].id;
   }
 
