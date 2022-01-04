@@ -188,6 +188,7 @@ const repoGroups = {
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
   xterm: 'https://github.com/xtermjs/xterm.js',
+  'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
 const patternGroups = {
