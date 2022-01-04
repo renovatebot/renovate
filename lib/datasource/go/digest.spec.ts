@@ -62,11 +62,7 @@ describe('datasource/go/digest', () => {
         { lookupName: 'gitlab.com/group/subgroup' },
         null
       );
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns digest', async () => {
       httpMock
