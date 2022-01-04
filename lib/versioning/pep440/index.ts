@@ -31,28 +31,33 @@ const isStable = (input: string): boolean => {
 };
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string): boolean =>
-  validRange(input) || !!isVersion(input);
+export function isValid(input: string): boolean {
+  return validRange(input) || !!isVersion(input);
+}
 
-const getSatisfyingVersion = (
+function getSatisfyingVersion(
   versions: string[],
   range: string
-): string | null => {
+): string | null {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
-};
+}
 
-const minSatisfyingVersion = (
+function minSatisfyingVersion(
   versions: string[],
   range: string
-): string | null => {
+): string | null {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[0];
-};
+}
 
-export const isSingleVersion = (constraint: string): boolean =>
-  !!isVersion(constraint) ||
-  (constraint?.startsWith('==') && !!isVersion(constraint.substring(2).trim()));
+export function isSingleVersion(constraint: string): boolean {
+  return (
+    !!isVersion(constraint) ||
+    (constraint?.startsWith('==') &&
+      !!isVersion(constraint.substring(2).trim()))
+  );
+}
 
 export { isVersion, matches };
 

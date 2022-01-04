@@ -112,7 +112,7 @@ export function getNewValue({
   const toVersionMinor = minor(newVersion);
   const toVersionPatch = patch(newVersion);
   const toNewVersion = prerelease(newVersion);
-  const suffix = toNewVersion ? '-' + String(toNewVersion[0]) : '';
+  const suffix = toNewVersion ? `-${toNewVersion[0]}` : '';
   // Simple range
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
@@ -166,8 +166,8 @@ export function getNewValue({
         return currentValue;
       }
     } else {
-      const newRange = semverUtils.parseRange(currentValue);
-      const versions = newRange
+      return semverUtils
+        .parseRange(currentValue)
         .map((x) => x.semver)
         .filter(is.string)
         .map((subRange) => {
@@ -187,8 +187,9 @@ export function getNewValue({
             currentVersion,
             newVersion,
           });
-        });
-      return versions.filter((x) => x !== null && x !== '').join(' ');
+        })
+        .filter((x) => x !== null && x !== '')
+        .join(' ');
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue
