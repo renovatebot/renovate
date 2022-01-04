@@ -186,7 +186,7 @@ function depTemplateDataTypeHandler(
   { value }: lex.StringValueToken
 ): GradleContext {
   if (value.startsWith('@')) {
-    ctx.varKey = value.slice(1);
+    ctx.depDataType = value.slice(1);
   }
   return ctx;
 }

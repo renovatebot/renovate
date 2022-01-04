@@ -1,4 +1,3 @@
-import { regEx } from '../../../util/regex';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
