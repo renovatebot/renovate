@@ -1945,6 +1945,10 @@ Here's an example of how you would define PR priority so that devDependencies ar
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
+## projectName
+
+The name of this project. Defaults to "Renovate".
+
 ## pruneStaleBranches
 
 Configure to `false` to disable deleting orphan branches and autoclosing PRs.

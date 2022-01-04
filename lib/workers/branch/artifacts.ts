@@ -12,7 +12,7 @@ export async function setArtifactErrorStatus(
     return;
   }
 
-  const context = `renovate/artifacts`;
+  const context = config.projectName.toLowerCase() + `/artifacts`;
   const description = 'Artifact file update failure';
   const state = BranchStatus.red;
   const existingState = await platform.getBranchStatusCheck(

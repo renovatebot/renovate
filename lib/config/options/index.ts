@@ -2206,6 +2206,12 @@ const options: RenovateOptions[] = [
         'As this PR has been closed unmerged, Renovate will now ignore this update ({{{newValue}}}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the `ignoreDeps` array of your renovate config.',
     },
   },
+  {
+    name: 'projectName',
+    description: 'The name of this project',
+    type: 'string',
+    default: 'Renovate',
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

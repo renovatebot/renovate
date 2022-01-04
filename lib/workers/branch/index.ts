@@ -178,7 +178,9 @@ export async function processBranch(
           } else {
             const newBody = branchPr.body?.replace(
               rebasingRegex,
-              '**Rebasing**: Renovate will not automatically rebase this PR, because other commits have been found.'
+              '**Rebasing**: ' +
+                config.projectName +
+                ' will not automatically rebase this PR, because other commits have been found.'
             );
             if (newBody !== branchPr.body) {
               logger.debug(
@@ -633,13 +635,15 @@ export async function processBranch(
           { artifactErrors: config.artifactErrors },
           'artifactErrors'
         );
-        let content = `Renovate failed to update `;
+        let content = config.projectName + ` failed to update `;
         content +=
           config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
         content +=
           ' related to this branch. You probably do not want to merge this PR as-is.';
         content += emojify(
-          `\n\n:recycle: Renovate will retry this branch, including artifacts, only when one of the following happens:\n\n`
+          `\n\n:recycle: ` +
+            config.projectName +
+            ` will retry this branch, including artifacts, only when one of the following happens:\n\n`
         );
         content +=
           ' - any of the package files in this branch needs updating, or \n';
