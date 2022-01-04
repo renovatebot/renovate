@@ -15,7 +15,7 @@ const versionLikeRegex = regEx('^(?<version>[-.\\[\\](),a-zA-Z0-9+]+)');
 // from the beginning of input
 export function versionLikeSubstring(input: string): string | null {
   const match = input ? versionLikeRegex.exec(input) : null;
-  return match ? match.groups.version : null;
+  return match?.groups?.version ?? null;
 }
 
 export function isDependencyString(input: string): boolean {
@@ -40,7 +40,7 @@ export function isDependencyString(input: string): boolean {
     tempArtifactId,
     tempVersionPart,
   ];
-  return (
+  return !!(
     groupId &&
     artifactId &&
     versionPart &&

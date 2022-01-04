@@ -120,6 +120,8 @@ You can run `yarn test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
 `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
+Refactor PRs should ideally not change or remove tests (adding tests is OK).
+
 ### Jest
 
 You can run just the Jest unit tests by running `yarn jest`.
