@@ -41,8 +41,7 @@ In the example above `myvar` is a variable/field, that contains valid JSON.
 
 Returns `true` if a given string is a substring.
 
-`{{#if (containsString 'banana' 'ban')}}Is a substring{{else}}Is NOT a substring{{/if}}` => `Is a substring`
-`{{#if (containsString 'potato' 'ban')}}Is a substring{{else}}Is NOT a substring{{/if}}` => `Is NOT a substring`
+`{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
 
 ### and
 
