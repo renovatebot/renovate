@@ -423,11 +423,15 @@ describe('datasource/repology/index', () => {
         versioning,
         depName: 'some_repo/some-package',
       });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
-      expect(res.releases[0].version).toBe('1.0.0');
-      expect(res.releases[1].version).toBe('4.0.0');
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          { version: '1.0.0' },
+          {
+            version: '4.0.0',
+          },
+        ],
+      });
     });
 
     it('returns correct package versions for multi-package project', async () => {
@@ -446,11 +450,15 @@ describe('datasource/repology/index', () => {
         versioning,
         depName: 'ubuntu_20_04/python3.8',
       });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
-      expect(res.releases[0].version).toBe('3.8.2-1ubuntu1');
-      expect(res.releases[1].version).toBe('3.8.10-0ubuntu1~20.04.2');
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          { version: '3.8.2-1ubuntu1' },
+          {
+            version: '3.8.10-0ubuntu1~20.04.2',
+          },
+        ],
+      });
     });
   });
 });

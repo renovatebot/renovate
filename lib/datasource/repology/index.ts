@@ -92,7 +92,7 @@ function findPackageInResponse(
   // In some cases Repology bundles multiple packages into a single project, which might result in ambiguous results.
   // We need to do additional filtering by matching allowed package types passed as params with package description.
   // Remaining packages are the one we are looking for
-  const packagesWithType = repoPackages.filter(function (pkg) {
+  const packagesWithType = repoPackages.filter((pkg) => {
     for (const pkgType of types) {
       if (pkg[pkgType] && pkg[pkgType] === pkgName) {
         return true;
