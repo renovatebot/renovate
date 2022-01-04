@@ -116,5 +116,35 @@ describe('datasource/gitlab-tags/index', () => {
       );
       expect(res).toBe(digest);
     });
+
+    it('returns null from gitlab installation with no commits', async () => {
+      const body = [];
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
+        .reply(200, body);
+      const res = await getDigest({
+        datasource,
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        depName: 'some/dep2',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null from gitlab installation with unknown branch', async () => {
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits/unknown-branch')
+        .reply(404, null);
+      const res = await getDigest(
+        {
+          datasource,
+          registryUrls: ['https://gitlab.company.com/api/v4/'],
+          depName: 'some/dep2',
+        },
+        'unknown-branch'
+      );
+      expect(res).toBeNull();
+    });
   });
 });

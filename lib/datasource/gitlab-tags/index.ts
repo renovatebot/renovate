@@ -1,3 +1,4 @@
+import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
 import { joinUrlParts } from '../../util/url';
@@ -92,30 +93,38 @@ export async function getDigest(
   const urlEncodedRepo = encodeURIComponent(repo);
   let digest: string;
 
-  if (newValue) {
-    const url = joinUrlParts(
-      depHost,
-      `api/v4/projects`,
-      urlEncodedRepo,
-      `repository/commits/`,
-      newValue
+  try {
+    if (newValue) {
+      const url = joinUrlParts(
+        depHost,
+        `api/v4/projects`,
+        urlEncodedRepo,
+        `repository/commits/`,
+        newValue
+      );
+      const gitlabCommits = await gitlabApi.getJson<GitlabCommit>(url);
+      digest = gitlabCommits.body.id;
+    } else {
+      const url = joinUrlParts(
+        depHost,
+        `api/v4/projects`,
+        urlEncodedRepo,
+        `repository/commits?per_page=1`
+      );
+      const gitlabCommits = await gitlabApi.getJson<GitlabCommit[]>(url);
+      digest = gitlabCommits.body[0].id;
+    }
+  } catch (err) {
+    logger.debug(
+      { gitlabRepo: repo, err, registryUrl },
+      'Error getting latest commit from Gitlab repo'
     );
-    const gitlabCommits = await gitlabApi.getJson<GitlabCommit>(url);
-    digest = gitlabCommits.body.id;
-  } else {
-    const url = joinUrlParts(
-      depHost,
-      `api/v4/projects`,
-      urlEncodedRepo,
-      `repository/commits?per_page=1`
-    );
-    const gitlabCommits = await gitlabApi.getJson<GitlabCommit[]>(url);
-    digest = gitlabCommits.body[0].id;
   }
 
   if (!digest) {
     return null;
   }
+
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
