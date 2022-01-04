@@ -23,9 +23,15 @@ handlebars.registerHelper('containsString', (str, subStr, options) =>
 
 handlebars.registerHelper({
   and(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
     return args.every(Boolean);
   },
   or(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
     return args.some(Boolean);
   },
 });
