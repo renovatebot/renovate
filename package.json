@@ -188,7 +188,7 @@
     "p-queue": "6.6.2",
     "parse-diff": "0.9.0",
     "parse-link-header": "1.0.1",
-    "redis": "3.1.2",
+    "redis": "4.0.1",
     "registry-auth-token": "4.2.1",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
