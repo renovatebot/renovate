@@ -4210,7 +4210,7 @@ chevrotain@^9.1.0:
     "@chevrotain/utils" "^9.1.0"
     regexp-to-ast "0.5.0"
 
-chownr@*, chownr@^2.0.0:
+chownr@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
@@ -5801,10 +5801,10 @@ globby@^11.0.0, globby@^11.0.1, globby@^11.0.4, globby@~11.0.4:
     merge2 "^1.3.0"
     slash "^3.0.0"
 
-good-enough-parser@1.1.5:
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.5.tgz#ac69879d36c63f9c650d336b85d88db8f43ced35"
-  integrity sha512-d7G51+xWAbqOjRJb52mHcOo1zV48zqKUUw1vQRdq8J4VKCbwpoH1WMDJIpIEtnTgeqzzErNKR8rU4cR4EGas4g==
+good-enough-parser@1.1.7:
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.7.tgz#a1f6a2fbc10e351dcbb61e322a5f17bbc43bd1eb"
+  integrity sha512-2E03CBmbGc61rDA6TbDsTGm1UywMviza5N1APzp6YtFcB9g6bjWwDIG54EeNQdavOhLGivsMh1U8tB+v5mzE7Q==
   dependencies:
     "@thi.ng/zipper" "1.0.3"
     "@types/moo" "0.5.5"
@@ -6049,13 +6049,6 @@ ignore-walk@^3.0.3:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/ignore-walk/-/ignore-walk-3.0.4.tgz#c9a09f69b7c7b479a5d74ac1a3c0d4236d2a6335"
   integrity sha512-PY6Ii8o1jMRA1z4F2hRkH/xN59ox43DavKvD3oDpfurRlOJyAHpifIwpbdv1n4jt4ov0jSpw3kQ4GhJnpBL6WQ==
-  dependencies:
-    minimatch "^3.0.4"
-
-ignore-walk@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/ignore-walk/-/ignore-walk-4.0.1.tgz#fc840e8346cf88a3a9380c5b17933cd8f4d39fa3"
-  integrity sha512-rzDQLaW4jQbh2YrOFlJdCtX8qgJTehFRYiUB2r1osqTeDzV/3+Jh8fz1oAPzUThf3iku8Ds4IDqawI5d8mUiQw==
   dependencies:
     minimatch "^3.0.4"
 
@@ -8042,6 +8035,22 @@ node-gyp@^7.1.0, node-gyp@^7.1.2:
     tar "^6.0.2"
     which "^2.0.2"
 
+node-gyp@^8.4.1:
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-8.4.1.tgz#3d49308fc31f768180957d6b5746845fbd429937"
+  integrity sha512-olTJRgUtAb/hOXG0E93wZDs5YiJlgbXxTwQAFHyNlRsXQnYzUaF2aGgujZbw+hR8aF4ZG/rST57bWMWD16jr9w==
+  dependencies:
+    env-paths "^2.2.0"
+    glob "^7.1.4"
+    graceful-fs "^4.2.6"
+    make-fetch-happen "^9.1.0"
+    nopt "^5.0.0"
+    npmlog "^6.0.0"
+    rimraf "^3.0.2"
+    semver "^7.3.5"
+    tar "^6.1.2"
+    which "^2.0.2"
+
 node-html-parser@5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-5.2.0.tgz#6f29fd00d79f65334e7e20200964644207925607"
@@ -9884,7 +9893,7 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-tar@*, tar@^6.0.2, tar@^6.0.5, tar@^6.1.0, tar@^6.1.2:
+tar@^6.0.2, tar@^6.0.5, tar@^6.1.0, tar@^6.1.11, tar@^6.1.2:
   version "6.1.11"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.11.tgz#6760a38f003afa1b2ffd0ffe9e9abbd0eab3d621"
   integrity sha512-an/KZQzQUkZCkuoAA64hM92X0Urb6VpRhAFllDzz44U2mcD5scmT3zBc4VgVpkugF580+DQn8eAFSyoQt0tznA==
