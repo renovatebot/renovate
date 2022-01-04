@@ -1,5 +1,83 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/repology/index getReleases returns correct package types for api_call 1`] = `
+Object {
+  "registryUrl": "https://repology.org",
+  "releases": Array [
+    Object {
+      "version": "1.0.0",
+    },
+    Object {
+      "version": "4.0.0",
+    },
+  ],
+}
+`;
+
+exports[`datasource/repology/index getReleases returns correct package types for api_call 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repology.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repology.org/tools/project-by?repo=some_repo&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=some-package",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repology.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repology.org/api/v1/project/some-package",
+  },
+]
+`;
+
+exports[`datasource/repology/index getReleases returns correct package versions for multi-package project 1`] = `
+Object {
+  "registryUrl": "https://repology.org",
+  "releases": Array [
+    Object {
+      "version": "3.8.2-1ubuntu1",
+    },
+    Object {
+      "version": "3.8.10-0ubuntu1~20.04.2",
+    },
+  ],
+}
+`;
+
+exports[`datasource/repology/index getReleases returns correct package versions for multi-package project 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repology.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repology.org/tools/project-by?repo=ubuntu_20_04&name_type=binname&target_page=api_v1_project&noautoresolve=on&name=python3.8",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "host": "repology.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://repology.org/tools/project-by?repo=ubuntu_20_04&name_type=srcname&target_page=api_v1_project&noautoresolve=on&name=python3.8",
+  },
+]
+`;
+
 exports[`datasource/repology/index getReleases returns correct version for api package 1`] = `
 Object {
   "registryUrl": "https://repology.org",
