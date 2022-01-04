@@ -64,6 +64,22 @@ describe('datasource/go/digest', () => {
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
+    it('supports gitlab digest with a specific branch', async () => {
+      const branch = 'some-branch';
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/group/subgroup?go-get=1')
+        .reply(200, loadFixture('go-get-gitlab.html'));
+      httpMock
+        .scope('https://gitlab.com/')
+        .get(`/api/v4/projects/group%2Fsubgroup/repository/commits/${branch}`)
+        .reply(200, { id: 'abcdefabcdefabcdefabcdef' });
+      const res = await getDigest(
+        { lookupName: 'gitlab.com/group/subgroup' },
+        branch
+      );
+      expect(res).toBe('abcdefabcdefabcdefabcdef');
+    });
     it('returns digest', async () => {
       httpMock
         .scope('https://golang.org/')
