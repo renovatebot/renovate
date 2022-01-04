@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../logger';
@@ -166,25 +167,27 @@ export function getNewValue({
       }
     } else {
       const newRange = semverUtils.parseRange(currentValue);
-      const versions = newRange.map((x) => {
-        const subRange = x.semver;
-        const bumpedSubRange = getNewValue({
-          currentValue: subRange ?? 'ee', // ee is invalid value used inplace of undefined
-          rangeStrategy: 'bump',
-          currentVersion,
-          newVersion,
-        });
-        if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
-          return bumpedSubRange;
-        }
+      const versions = newRange
+        .map((x) => x.semver)
+        .filter(is.string)
+        .map((subRange) => {
+          const bumpedSubRange = getNewValue({
+            currentValue: subRange,
+            rangeStrategy: 'bump',
+            currentVersion,
+            newVersion,
+          });
+          if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
+            return bumpedSubRange;
+          }
 
-        return getNewValue({
-          currentValue: subRange ?? 'ee',
-          rangeStrategy: 'replace',
-          currentVersion,
-          newVersion,
+          return getNewValue({
+            currentValue: subRange,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          });
         });
-      });
       return versions.filter((x) => x !== null && x !== '').join(' ');
     }
     logger.debug(
