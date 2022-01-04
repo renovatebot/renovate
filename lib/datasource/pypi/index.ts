@@ -176,7 +176,7 @@ export class PypiDatasource extends Datasource {
     const srcPrefix = `${packageName}-`;
     const srcSuffix = '.tar.gz';
     if (srcText.startsWith(srcPrefix) && srcText.endsWith(srcSuffix)) {
-      return srcText.replace(srcPrefix, '').replace(regEx(/\.tar\.gz$/), ''); // TODO #12071
+      return srcText.replace(srcPrefix, '').replace(regEx(/\.tar\.gz$/), '');
     }
 
     // pep-0427 wheel packages
