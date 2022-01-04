@@ -408,7 +408,6 @@ export async function syncGit(): Promise<void> {
     }
   }
   if (clone) {
-    await fs.emptyDir(localDir);
     const cloneStart = Date.now();
     try {
       const opts = [];
@@ -423,7 +422,14 @@ export async function syncGit(): Promise<void> {
           opts.push(e[0], `${e[1]}`)
         );
       }
-      await git.clone(config.url, '.', opts);
+      const gitClone = git.clone.bind(git);
+      const emptyDirAndClone = async (
+        ...args: [string, string, any[]]
+      ): Promise<void> => {
+        await fs.emptyDir(localDir);
+        await gitClone(...args);
+      };
+      await gitRetry(emptyDirAndClone, config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
@@ -516,12 +522,13 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     const gitRaw = git.raw.bind(git);
     const gitCheckout = git.checkout.bind(git);
     const gitReset = git.reset.bind(git);
+    const gitLog = git.log.bind(git);
     config.currentBranch = branchName;
     config.currentBranchSha = (
       await gitRetry(gitRaw, ['rev-parse', 'origin/' + branchName])
     ).trim();
     await gitRetry(gitCheckout, ['-f', branchName, '--']);
-    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    const latestCommitDate = (await gitRetry(gitLog, { n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
     }
@@ -728,7 +735,8 @@ export async function getBranchLastCommitTime(
 export async function getBranchFiles(branchName: string): Promise<string[]> {
   await syncGit();
   try {
-    const diff = await git.diffSummary([
+    const gitDiffSummary = git.diffSummary.bind(git);
+    const diff = await gitRetry(gitDiffSummary, [
       `origin/${branchName}`,
       `origin/${branchName}^`,
     ]);
@@ -760,7 +768,8 @@ export async function getFile(
 export async function hasDiff(branchName: string): Promise<boolean> {
   await syncGit();
   try {
-    return (await git.diff(['HEAD', branchName])) !== '';
+    const gitDiff = git.diff.bind(git);
+    return (await gitRetry(gitDiff, ['HEAD', branchName])) !== '';
   } catch (err) {
     return true;
   }
@@ -785,6 +794,11 @@ export async function commitFiles({
     const gitReset = git.reset.bind(git);
     const gitRaw = git.raw.bind(git);
     const gitCheckout = git.checkout.bind(git);
+    const gitRm = git.rm.bind(git);
+    const gitAdd = git.add.bind(git);
+    const gitCommit = git.commit.bind(git);
+    const gitPush = git.push.bind(git);
+    const gitFetch = git.fetch.bind(git);
     await gitRetry(gitReset, ResetMode.HARD);
     await gitRetry(gitRaw, ['clean', '-fd']);
     await gitRetry(gitCheckout, [
@@ -801,7 +815,7 @@ export async function commitFiles({
       if (fileName === '|delete|') {
         fileName = file.contents as string;
         try {
-          await git.rm([fileName]);
+          await gitRetry(gitRm, [fileName]);
           deletedFiles.push(fileName);
         } catch (err) /* istanbul ignore next */ {
           checkForPlatformFailure(err);
@@ -830,9 +844,9 @@ export async function commitFiles({
           // istanbul ignore next
           const addParams =
             fileName === configFileNames[0] ? ['-f', fileName] : fileName;
-          await git.add(addParams);
+          await gitRetry(gitAdd, addParams);
           if (file.executable) {
-            await git.raw(['update-index', '--chmod=+x', fileName]);
+            await gitRetry(gitRaw, ['update-index', '--chmod=+x', fileName]);
           }
           addedModifiedFiles.push(fileName);
         } catch (err) /* istanbul ignore next */ {
@@ -854,7 +868,7 @@ export async function commitFiles({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitRes = await git.commit(message, [], commitOptions);
+    const commitRes = await gitRetry(gitCommit, message, [], commitOptions);
     if (
       commitRes.summary &&
       commitRes.summary.changes === 0 &&
@@ -885,7 +899,8 @@ export async function commitFiles({
       pushOptions['--no-verify'] = null;
     }
 
-    const pushRes = await git.push(
+    const pushRes = await gitRetry(
+      gitPush,
       'origin',
       `${branchName}:${branchName}`,
       pushOptions
@@ -894,9 +909,10 @@ export async function commitFiles({
     logger.debug({ result: pushRes }, 'git push');
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await git.fetch(['origin', ref, '--force']);
+    await gitRetry(gitFetch, ['origin', ref, '--force']);
+    const gitRevparse = git.revparse.bind(git);
     config.branchCommits[branchName] = (
-      await git.revparse([branchName])
+      await gitRetry(gitRevparse, [branchName])
     ).trim();
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
