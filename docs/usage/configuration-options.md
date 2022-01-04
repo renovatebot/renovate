@@ -1982,7 +1982,9 @@ If instead you'd prefer to be updated to `^1.2.0` in cases like this, then confi
 
 This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
 
-We discourage using of the `in-range-only` strategy unless you strictly need it.
+The `in-range-only` strategy may be useful for people preferring to leave the package file unchanged and only do `update-lockfile` within the existing range.
+The `in-range-only` strategy behaves like `update-lockfile`, but discards any updates where the new version of the dependency is not equal to the current version.
+Please note that we discourage using of the `in-range-only` strategy unless you strictly need it.
 Using the `in-range-only` strategy may result in being multiple releases behind without knowing it.
 
 ## rebaseLabel
