@@ -131,7 +131,7 @@ It is also recommended that you configure `config.gitAuthor` with the same ident
 
 #### GitHub (Enterprise Server)
 
-First, [create a Personal Access Token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" scope).
+First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account (select "repo" scope).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
@@ -186,7 +186,7 @@ Don't forget to configure `platform=gitlab` somewhere in config.
 
 #### Bitbucket Cloud
 
-First, [create an AppPassword](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html) for the bot account.
+First, [create an AppPassword](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
 Give the bot App password the following permission scopes:
 
 - [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account) (Account: Read)
@@ -209,7 +209,7 @@ If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot co
 
 ### Azure DevOps
 
-First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats) for the bot account.
+First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=azure` somewhere in config.
 
