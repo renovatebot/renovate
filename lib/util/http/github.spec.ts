@@ -592,7 +592,6 @@ describe('util/http/github', () => {
 
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(3);
-      expect(trace).toMatchSnapshot();
     });
     it('throws on 50x if count < 10', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(500);
