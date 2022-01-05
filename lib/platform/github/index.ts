@@ -146,9 +146,16 @@ export async function initPlatform({
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
+  const opts = hostRules.find({
+    hostType: PlatformId.Github,
+    url: platformConfig.endpoint,
+  });
   try {
+    const endpoint = opts.token?.startsWith('x-access-token:')
+      ? 'installation/repositories'
+      : 'user/repos';
     const res = await githubApi.getJson<{ full_name: string }[]>(
-      'user/repos?per_page=100',
+      `${endpoint}?per_page=100`,
       { paginate: 'all' }
     );
     return res.body.map((repo) => repo.full_name);
