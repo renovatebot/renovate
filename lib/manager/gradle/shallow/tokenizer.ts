@@ -8,6 +8,7 @@ const escapedChars = {
   [TokenType.EscapedChar]: {
     match: escapedCharRegex,
     value: (x: string): string =>
+      /* istanbul ignore next */
       ({
         "\\'": "'",
         '\\"': '"',
