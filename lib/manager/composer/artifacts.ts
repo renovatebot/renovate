@@ -125,7 +125,8 @@ export async function updateArtifacts({
     // Determine whether install is required before update
     if (requireComposerDependencyInstallation(existingLockFile)) {
       const preCmd = 'composer';
-      const preArgs = 'install' + getComposerArguments(config);
+      const preArgs =
+        'install' + getComposerArguments(config, composerToolConstraint);
       logger.debug({ preCmd, preArgs }, 'composer pre-update command');
       commands.push(`${preCmd} ${preArgs}`);
     }
@@ -140,7 +141,7 @@ export async function updateArtifacts({
           'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
         ).trim() + ' --with-dependencies';
     }
-    args += getComposerArguments(config);
+    args += getComposerArguments(config, composerToolConstraint);
     logger.debug({ cmd, args }, 'composer command');
     commands.push(`${cmd} ${args}`);
 

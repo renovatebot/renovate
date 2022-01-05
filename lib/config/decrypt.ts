@@ -174,7 +174,7 @@ export async function decryptConfig(
           }
           logger.debug(`Decrypted ${eKey}`);
           if (eKey === 'npmToken') {
-            const token = decryptedStr.replace(regEx(/\n$/), ''); // TODO #12071
+            const token = decryptedStr.replace(regEx(/\n$/), '');
             add(token);
             logger.debug(
               { decryptedToken: maskToken(token) },
@@ -191,7 +191,7 @@ export async function decryptConfig(
               } else {
                 logger.debug('Appending _authToken= to end of existing npmrc');
                 decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\n?$/), // TODO #12071
+                  regEx(/\n?$/),
                   `\n_authToken=${token}\n`
                 );
               }

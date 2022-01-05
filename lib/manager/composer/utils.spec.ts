@@ -62,33 +62,80 @@ describe('manager/composer/utils', () => {
     });
 
     it('disables scripts and plugins by default', () => {
-      expect(getComposerArguments({})).toBe(
+      expect(
+        getComposerArguments({}, { toolName: 'composer', constraint: '1.*' })
+      ).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
     });
     it('disables platform requirements', () => {
       expect(
-        getComposerArguments({
-          composerIgnorePlatformReqs: [],
-        })
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '1.*' }
+        )
       ).toBe(
         ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
     });
+    it('disables all platform requirements with 2.1.0', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '2.1.0' }
+        )
+      ).toBe(
+        ' --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
+      );
+    });
+    it('disables only extension and library platform requirements with 2.2.0', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '2.2.0' }
+        )
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins"
+      );
+    });
+    it('disables only extension and library platform requirements with ^2.2', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '^2.2' }
+        )
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins"
+      );
+    });
     it('disables single platform requirement', () => {
       expect(
-        getComposerArguments({
-          composerIgnorePlatformReqs: ['ext-intl'],
-        })
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: ['ext-intl'],
+          },
+          { toolName: 'composer', constraint: '1.*' }
+        )
       ).toBe(
         ' --ignore-platform-req ext-intl --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
     });
     it('disables multiple platform requirement', () => {
       expect(
-        getComposerArguments({
-          composerIgnorePlatformReqs: ['ext-intl', 'ext-icu'],
-        })
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: ['ext-intl', 'ext-icu'],
+          },
+          { toolName: 'composer', constraint: '1.*' }
+        )
       ).toBe(
         ' --ignore-platform-req ext-intl --ignore-platform-req ext-icu --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
@@ -97,18 +144,21 @@ describe('manager/composer/utils', () => {
       GlobalConfig.set({
         allowScripts: true,
       });
-      expect(getComposerArguments({})).toBe(
-        ' --no-ansi --no-interaction --no-plugins'
-      );
+      expect(
+        getComposerArguments({}, { toolName: 'composer', constraint: '1.*' })
+      ).toBe(' --no-ansi --no-interaction --no-plugins');
     });
     it('disables scripts when configured locally', () => {
       GlobalConfig.set({
         allowScripts: true,
       });
       expect(
-        getComposerArguments({
-          ignoreScripts: true,
-        })
+        getComposerArguments(
+          {
+            ignoreScripts: true,
+          },
+          { toolName: 'composer', constraint: '1.*' }
+        )
       ).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );
@@ -117,18 +167,21 @@ describe('manager/composer/utils', () => {
       GlobalConfig.set({
         allowPlugins: true,
       });
-      expect(getComposerArguments({})).toBe(
-        ' --no-ansi --no-interaction --no-scripts --no-autoloader'
-      );
+      expect(
+        getComposerArguments({}, { toolName: 'composer', constraint: '1.*' })
+      ).toBe(' --no-ansi --no-interaction --no-scripts --no-autoloader');
     });
     it('disables plugins when configured locally', () => {
       GlobalConfig.set({
         allowPlugins: true,
       });
       expect(
-        getComposerArguments({
-          ignorePlugins: true,
-        })
+        getComposerArguments(
+          {
+            ignorePlugins: true,
+          },
+          { toolName: 'composer', constraint: '1.*' }
+        )
       ).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins'
       );

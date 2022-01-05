@@ -5,10 +5,6 @@ import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
 
 describe('datasource/metadata', () => {
-  it('Should do nothing if dep is not specified', () => {
-    expect(addMetaData()).toBeUndefined();
-  });
-
   it('Should handle manualChangelogUrls', () => {
     const dep: ReleaseResult = {
       releases: [
