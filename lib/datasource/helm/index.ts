@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
+import { gt } from 'semver';
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { ensureTrailingSlash } from '../../util/url';
@@ -62,10 +63,12 @@ export class HelmDatasource extends Datasource {
       }
       const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
-        const refRelease = releases[releases.length - 1];
-        const { sourceUrl, sourceDirectory } = findSourceUrl(refRelease);
+        const latestRelease = releases.sort((r0, r1) =>
+          gt(r0.version, r1.version) ? -1 : 1
+        )[0];
+        const { sourceUrl, sourceDirectory } = findSourceUrl(latestRelease);
         result[name] = {
-          homepage: refRelease.home,
+          homepage: latestRelease.home,
           sourceUrl,
           sourceDirectory,
           releases: releases.map((release) => ({
