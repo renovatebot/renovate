@@ -12,7 +12,7 @@ function getKey(namespace: string, key: string): string {
 export async function end(): Promise<void> {
   try {
     // https://github.com/redis/node-redis#disconnecting
-    await client?.quit();
+    await client?.disconnect();
   } catch (err) {
     logger.warn({ err }, 'Redis cache end failed');
   }
