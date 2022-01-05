@@ -14,6 +14,29 @@ Array [
 ]
 `;
 
+exports[`datasource/helm/index getReleases returns home and source metadata of the most recent version 1`] = `
+Object {
+  "homepage": "https://www.autoscaler.io/9.11.0",
+  "registryUrl": "https://example-repository.com",
+  "releases": Array [
+    Object {
+      "releaseTimestamp": "2021-11-01T22:54:28.760Z",
+      "version": "9.10.8",
+    },
+    Object {
+      "releaseTimestamp": "2021-12-14T18:07:21.619Z",
+      "version": "9.10.9",
+    },
+    Object {
+      "releaseTimestamp": "2021-12-22T11:20:10.489Z",
+      "version": "9.11.0",
+    },
+  ],
+  "sourceDirectory": "cluster-autoscaler#9.11.0",
+  "sourceUrl": "https://github.com/kubernetes/autoscaler",
+}
+`;
+
 exports[`datasource/helm/index getReleases returns list of versions for normal response 1`] = `
 Object {
   "homepage": "https://www.getambassador.io/",

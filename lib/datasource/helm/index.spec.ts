@@ -185,5 +185,18 @@ describe('datasource/helm/index', () => {
       );
       expect(trace).toMatchSnapshot();
     });
+    it('returns home and source metadata of the most recent version', async () => {
+      httpMock
+        .scope('https://example-repository.com')
+        .get('/index.yaml')
+        .reply(200, indexYaml);
+      const releases = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        depName: 'cluster-autoscaler',
+        registryUrls: ['https://example-repository.com'],
+      });
+      expect(releases).not.toBeNull();
+      expect(releases).toMatchSnapshot();
+    });
   });
 });
