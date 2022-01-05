@@ -51,7 +51,7 @@ jobs:
           }]' || '[]') }}
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 14 || matrix.node-version == 16) }}
       NODE_VERSION: ${{ matrix.node-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
       # skip Java tests on pull requests without 'ci:fulltest' label
