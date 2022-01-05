@@ -32,7 +32,7 @@ export function extractTerragruntProvider(
   const lineNumber = startingLine;
   let line: string;
   const deps: PackageDependency[] = [];
-  const managerData: Record<string, any> = {
+  const managerData: Record<string, unknown> = {
     moduleName,
     terragruntDependencyType: TerragruntDependencyTypes.terragrunt,
   };
