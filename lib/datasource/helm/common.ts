@@ -41,7 +41,7 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
     }
   }
 
-  // fallback
+  // fallback: if neither home nor sources are a chart repo URL, use githubUrl (if present)
   const firstSourceMatch = githubUrl.exec(release.sources[0]);
   if (homeMatch?.groups.url && homeMatch?.groups.path) {
     return {

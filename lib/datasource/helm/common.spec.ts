@@ -11,11 +11,13 @@ const repo = load(loadFixture('sample.yaml'), {
 describe('datasource/helm/common', () => {
   describe('findSourceUrl', () => {
     test.each`
-      input         | output
-      ${'airflow'}  | ${{ sourceUrl: 'https://github.com/bitnami/charts', sourceDirectory: 'bitnami/airflow' }}
-      ${'coredns'}  | ${{ sourceUrl: 'https://github.com/coredns/helm', sourceDirectory: undefined }}
-      ${'pgadmin4'} | ${{ sourceUrl: 'https://github.com/rowanruseler/helm-charts', sourceDirectory: undefined }}
-      ${'dummy'}    | ${{}}
+      input                    | output
+      ${'airflow'}             | ${{ sourceUrl: 'https://github.com/bitnami/charts', sourceDirectory: 'bitnami/airflow' }}
+      ${'coredns'}             | ${{ sourceUrl: 'https://github.com/coredns/helm', sourceDirectory: undefined }}
+      ${'pgadmin4'}            | ${{ sourceUrl: 'https://github.com/rowanruseler/helm-charts', sourceDirectory: undefined }}
+      ${'dummy-no-home'}       | ${{ sourceUrl: 'https://github.com/dummyorg/dummymonorepo', sourceDirectory: 'charts/dummy-no-home' }}
+      ${'dummy-no-chart-repo'} | ${{ sourceUrl: 'https://github.com/dummyorg/dummymonorepo', sourceDirectory: 'charts/dummy-no-chart-repo' }}
+      ${'dummy'}               | ${{}}
     `(
       '$input -> $output',
       ({ input, output }: { input: string; output: string }) => {
