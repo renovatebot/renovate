@@ -271,9 +271,9 @@ You should save and test out this script manually first, and add it to cron once
 
 ## Kubernetes for GitLab, using Git over SSH
 
-This section describes how to use Git binary with SSH for Gitlab, to avoid API shortcomings.
+This section describes how to use Git binary with SSH for GitLab, to avoid API shortcomings.
 
-You need to first create a SSH key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
+You need to first create a SSH key, then add the public part to GitLab (see this [guide](https://docs.gitlab.com/ee/ssh/))
 
 Then, you need to create the secret to add the SSH key, and the following config to your container
 
