@@ -4,6 +4,8 @@ import { loadFixture } from '../../../test/util';
 import { GolangVersionDatasource } from '.';
 
 const golangReleasesContent = loadFixture('releases.go');
+const golangReleasesInvalidContent = loadFixture('releases-invalid.go');
+const golangReleasesInvalidContent2 = loadFixture('releases-invalid2.go');
 
 const datasource = GolangVersionDatasource.id;
 
@@ -21,24 +23,48 @@ describe('datasource/golang-version/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('throws for empty result', async () => {
+    it('returns null for invalid release with no versions', async () => {
+      httpMock
+        .scope('https://raw.githubusercontent.com')
+        .get('/golang/website/master/internal/history/release.go')
+        .reply(200, golangReleasesInvalidContent);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'golang',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null for invalid release with wrong termination', async () => {
+      httpMock
+        .scope('https://raw.githubusercontent.com')
+        .get('/golang/website/master/internal/history/release.go')
+        .reply(200, golangReleasesInvalidContent2);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'golang',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null for empty result', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/master/internal/history/release.go')
         .reply(200, {});
-      await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
-      ).rejects.toThrow();
+      expect(
+        await getPkgReleases({ datasource, depName: 'golang' })
+      ).toBeNull();
     });
 
-    it('throws for 404', async () => {
+    it('returns null for error 404', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/master/internal/history/release.go')
         .reply(404);
-      await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
-      ).rejects.toThrow();
+      expect(
+        await getPkgReleases({ datasource, depName: 'golang' })
+      ).toBeNull();
     });
   });
 });

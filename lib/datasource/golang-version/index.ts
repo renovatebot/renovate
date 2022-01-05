@@ -1,6 +1,4 @@
-import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
-import { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { isVersion, id as semverVersioningId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
@@ -43,69 +41,60 @@ export class GolangVersionDatasource extends Datasource {
     };
     const golangVersionsUrl = `${registryUrl}master/internal/history/release.go`;
 
-    try {
-      const response = await this.http.get(golangVersionsUrl);
+    const response = await this.http.get(golangVersionsUrl);
 
-      const lines = response.body.split(lineTerminationRegex);
+    const lines = response.body.split(lineTerminationRegex);
 
-      const startOfReleases = lines.indexOf('var Releases = []*Release{');
-      if (startOfReleases === -1) {
-        throw new Error('Invalid file - could not find the Releases section');
-      }
+    const startOfReleases = lines.indexOf('var Releases = []*Release{');
+    if (startOfReleases === -1) {
+      throw new Error('Invalid file - could not find the Releases section');
+    }
 
-      // Remove part before releases
-      lines.splice(0, startOfReleases + 1);
+    // Remove part before releases
+    lines.splice(0, startOfReleases + 1);
 
-      // Parse the release list
-      let release: Release = { version: undefined };
-      while (lines.length !== 0) {
-        const line = lines.shift().trim();
+    // Parse the release list
+    let release: Release = { version: undefined };
+    while (lines.length !== 0) {
+      const line = lines.shift().trim();
 
-        if (line === releaseBeginningChar) {
+      if (line === releaseBeginningChar) {
+        if (release.version !== undefined) {
+          throw new Error(
+            'Invalid file - unexpected error while parsing a release'
+          );
+        }
+      } else if (line === releaseTerminationChar) {
+        if (release.version === undefined) {
+          throw new Error('Invalid file - release has empty version');
+        }
+        res.releases.push(release);
+        release = { version: undefined };
+      } else {
+        const releaseDateMatch = releaseDateRegex.exec(line);
+        if (releaseDateMatch) {
+          // Make a valid UTC timestamp
+          const year = releaseDateMatch.groups.year.padStart(4, '0');
+          const month = releaseDateMatch.groups.month.padStart(2, '0');
+          const day = releaseDateMatch.groups.day.padStart(2, '0');
+          release.releaseTimestamp = `${year}-${month}-${day}T00:00:00.000Z`;
+        }
+        const releaseVersionMatch = releaseVersionRegex.exec(line);
+        if (releaseVersionMatch) {
+          release.version = `${releaseVersionMatch.groups.versionMajor}.${releaseVersionMatch.groups.versionMinor}.${releaseVersionMatch.groups.patch}`;
           // istanbul ignore if
-          if (release.version !== undefined) {
-            throw new Error(
-              'Invalid file - unexpected error while parsing a release'
-            );
-          }
-        } else if (line === releaseTerminationChar) {
-          // istanbul ignore if
-          if (release.version === undefined) {
-            throw new Error('Invalid file - release has empty version');
-          }
-          res.releases.push(release);
-          release = { version: undefined };
-        } else {
-          const releaseDateMatch = releaseDateRegex.exec(line);
-          if (releaseDateMatch) {
-            // Make a valid UTC timestamp
-            const year = releaseDateMatch.groups.year.padStart(4, '0');
-            const month = releaseDateMatch.groups.month.padStart(2, '0');
-            const day = releaseDateMatch.groups.day.padStart(2, '0');
-            release.releaseTimestamp = `${year}-${month}-${day}T00:00:00.000Z`;
-          }
-          const releaseVersionMatch = releaseVersionRegex.exec(line);
-          if (releaseVersionMatch) {
-            release.version = `${releaseVersionMatch.groups.versionMajor}.${releaseVersionMatch.groups.versionMinor}.${releaseVersionMatch.groups.patch}`;
-            // istanbul ignore if
-            if (!isVersion(release.version)) {
-              throw new Error(
-                `Version ${release.version} is not a valid semver`
-              );
-            }
+          if (!isVersion(release.version)) {
+            throw new Error(`Version ${release.version} is not a valid semver`);
           }
         }
       }
+    }
 
-      // istanbul ignore if
-      if (res.releases.length === 0) {
-        throw new Error(`Invalid file - zero releases extracted`);
-      }
-    } catch (err) {
-      this.handleGenericErrors(err);
+    // istanbul ignore if
+    if (res.releases.length === 0) {
+      throw new Error(`Invalid file - zero releases extracted`);
     }
 
     return res;
   }
-
 }
