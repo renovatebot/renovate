@@ -19,7 +19,6 @@ describe('datasource/golang-version/index', () => {
         depName: 'golang',
       });
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws for empty result', async () => {
@@ -30,7 +29,6 @@ describe('datasource/golang-version/index', () => {
       await expect(
         getPkgReleases({ datasource, depName: 'golang' })
       ).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws for 404', async () => {
@@ -41,7 +39,6 @@ describe('datasource/golang-version/index', () => {
       await expect(
         getPkgReleases({ datasource, depName: 'golang' })
       ).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

@@ -108,7 +108,4 @@ export class GolangVersionDatasource extends Datasource {
     return res;
   }
 
-  override handleSpecificErrors(err: HttpError): never | void {
-    throw new ExternalHostError(err);
-  }
 }
