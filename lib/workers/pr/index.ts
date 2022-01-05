@@ -326,17 +326,14 @@ export async function ensurePr(
 
   config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
 
-  function getReleaseNotesSourceWithSourceDirectory(
-    upgrade: BranchUpgradeConfig
-  ): string {
-    return `${
-      upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl || upgrade.sourceUrl
-    }${upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''}`;
-  }
-
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
-    const notesSourceUrl = getReleaseNotesSourceWithSourceDirectory(upgrade);
+    let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
+    if (!notesSourceUrl) {
+      notesSourceUrl = `${upgrade.sourceUrl}${
+        upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
+      }`;
+    }
 
     if (upgrade.hasReleaseNotes && notesSourceUrl) {
       if (releaseNotesSources.includes(notesSourceUrl)) {
