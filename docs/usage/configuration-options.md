@@ -749,9 +749,9 @@ Otherwise, if another bot or human shares the same email and pushes to one of Re
 
 Specify commit authors ignored by Renovate.
 
-By default, Renovate will treat any PR as modified if another git author has added to the branch.
+By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
-If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other git author(s) to `gitIgnoredAuthors`.
+If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other Git author(s) to `gitIgnoredAuthors`.
 
 Example:
 
