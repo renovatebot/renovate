@@ -66,7 +66,7 @@ describe('logger/pretty-stdout', () => {
           d: ['e', 'f'],
         },
       };
-      expect(prettyStdout.getDetails(rec as any)).toEqual(
+      expect(prettyStdout.getDetails(rec as any)).toBe(
         `       "config": {"a": "b", "d": ["e", "f"]}\n`
       );
     });

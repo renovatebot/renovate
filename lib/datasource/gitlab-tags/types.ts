@@ -4,3 +4,7 @@ export type GitlabTag = {
     created_at?: string;
   };
 };
+
+export type GitlabCommit = {
+  id: string;
+};

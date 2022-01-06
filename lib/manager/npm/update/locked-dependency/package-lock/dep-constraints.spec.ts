@@ -9,7 +9,6 @@ const packageLockJson = loadJsonFixture('package-lock.json');
 describe('manager/npm/update/locked-dependency/package-lock/dep-constraints', () => {
   describe('findDepConstraints()', () => {
     it('finds indirect dependency', () => {
-      // FIXME: explicit assert condition
       expect(
         findDepConstraints(
           packageJson,
@@ -18,10 +17,15 @@ describe('manager/npm/update/locked-dependency/package-lock/dep-constraints', ()
           '0.2.0',
           '0.2.1'
         )
-      ).toMatchSnapshot();
+      ).toEqual([
+        {
+          constraint: '0.2.0',
+          parentDepName: 'express',
+          parentVersion: '4.0.0',
+        },
+      ]);
     });
     it('finds direct dependency', () => {
-      // FIXME: explicit assert condition
       expect(
         findDepConstraints(
           packageJson,
@@ -30,13 +34,12 @@ describe('manager/npm/update/locked-dependency/package-lock/dep-constraints', ()
           '4.0.0',
           '4.5.0'
         )
-      ).toMatchSnapshot();
+      ).toEqual([{ constraint: '4.0.0', depType: 'dependencies' }]);
     });
     it('finds direct devDependency', () => {
       const packageJsonDev = { ...packageJson };
       packageJsonDev.devDependencies = packageJsonDev.dependencies;
       delete packageJsonDev.dependencies;
-      // FIXME: explicit assert condition
       expect(
         findDepConstraints(
           packageJsonDev,
@@ -45,7 +48,7 @@ describe('manager/npm/update/locked-dependency/package-lock/dep-constraints', ()
           '4.0.0',
           '4.5.0'
         )
-      ).toMatchSnapshot();
+      ).toEqual([{ constraint: '4.0.0', depType: 'devDependencies' }]);
     });
   });
 });

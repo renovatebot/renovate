@@ -48,8 +48,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newDigest = 'some-digest';
       upgrade.depIndex = 0;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual(src.replace('7.1.0', '7.1.1'));
     });
     it('handles a double attempt', async () => {
       const script =
@@ -62,8 +61,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newValue = '7.1.1';
       upgrade.depIndex = 1;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBe(`     ${script}  ${script.replace('7.1.0', '7.1.1')} `);
     });
     it('handles already updated', async () => {
       const script =
@@ -83,8 +81,7 @@ describe('workers/branch/auto-replace', () => {
         srcAlreadyUpdated,
         reuseExistingBranch
       );
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual(srcAlreadyUpdated);
     });
     it('returns existing content if replaceString mismatch', async () => {
       const script =
@@ -102,14 +99,12 @@ describe('workers/branch/auto-replace', () => {
         'wrong source',
         reuseExistingBranch
       );
-      // FIXME: explicit assert condition
       expect(res).toBe('wrong source');
     });
     it('updates version and integrity', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous">';
-      const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src).deps;
+      upgrade.baseDeps = extractPackageFile(script).deps;
       upgrade.depName = 'KaTeX';
       upgrade.lookupName = 'KaTeX/0.10.0/katex.min.js';
       upgrade.currentValue = '0.10.0';
@@ -119,9 +114,10 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newDigest = 'sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
-      const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      const res = await doAutoReplace(upgrade, script, reuseExistingBranch);
+      expect(res).toBe(
+        `<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js" integrity="sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" crossorigin="anonymous">`
+      );
     });
     it('updates with autoReplaceNewString', async () => {
       const dockerfile =
@@ -140,8 +136,9 @@ describe('workers/branch/auto-replace', () => {
       upgrade.autoReplaceStringTemplate =
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toBe(
+        `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
+      );
     });
     it('fails with oldversion in depname', async () => {
       const yml =
