@@ -11,5 +11,6 @@ interface NodeJsSchedule {
 export type NodeJsData = Record<string, NodeJsSchedule>;
 
 export const nodeSchedule: NodeJsData = JSON.parse(
-  dataFiles.get('data/node-js-schedule.json') ?? ''
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  dataFiles.get('data/node-js-schedule.json')!
 );
