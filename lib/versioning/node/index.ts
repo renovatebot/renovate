@@ -14,14 +14,14 @@ function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   const res = npm.getNewValue({
     currentValue,
     rangeStrategy,
     currentVersion,
     newVersion,
   });
-  if (isVersion(res)) {
+  if (res && isVersion(res)) {
     // normalize out any 'v' prefix
     return valid(res);
   }

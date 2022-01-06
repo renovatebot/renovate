@@ -188,7 +188,7 @@ describe('versioning/pep440/index', () => {
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
-      expect(pep440.isLessThanRange(version, range)).toBe(expected);
+      expect(pep440.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 });
