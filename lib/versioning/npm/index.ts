@@ -33,9 +33,12 @@ const {
 export const isValid = (input: string): boolean => !!validRange(input);
 export const isVersion = (input: string): boolean => !!valid(input);
 
-const isSingleVersion = (constraint: string): boolean =>
-  isVersion(constraint) ||
-  (constraint?.startsWith('=') && isVersion(constraint.substring(1).trim()));
+function isSingleVersion(constraint: string): boolean {
+  return (
+    isVersion(constraint) ||
+    (constraint?.startsWith('=') && isVersion(constraint.substring(1).trim()))
+  );
+}
 
 export const api: VersioningApi = {
   equals,
