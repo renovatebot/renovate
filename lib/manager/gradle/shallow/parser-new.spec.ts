@@ -57,15 +57,20 @@ describe('manager/gradle/shallow/parser-new', () => {
 
   describe('Dependencies', () => {
     test.each`
-      vars                   | dep                         | result
-      ${''}                  | ${'"foo:bar:1.2.3"'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${''}                  | ${'"foo:bar:1.2.3@zip"'}    | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz"'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:${ baz }"'}     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz.qux = "1.2.3"'} | ${'"foo:bar:${ baz.qux }"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz@zip"'}     | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}@zip"'}   | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+      vars                   | dep                                                                       | result
+      ${''}                  | ${'"foo:bar:1.2.3"'}                                                      | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                  | ${'"foo:bar:1.2.3@zip"'}                                                  | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz"'}                                                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}"'}                                                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:${ baz }"'}                                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz.qux = "1.2.3"'} | ${'"foo:bar:${ baz.qux }"'}                                               | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz@zip"'}                                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}@zip"'}                                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+      ${''}                  | ${'group: "foo", name: "bar", version: "1.2.3"'}                          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'group: "foo", name: "bar", version: baz'}                              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                  | ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                  | ${'(group : "foo", name : "bar", version : "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                  | ${'(group = "foo", name = "bar", version = "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
     `(`$dep`, ({ vars, dep, result }) => {
       const input = [vars, dep].join('\n');
       const { deps } = parseGradle('build.gradle', input, {});
@@ -77,11 +82,11 @@ describe('manager/gradle/shallow/parser-new', () => {
   //   describe('simple cases', () => {
   //     test.each`
   //       input                                                                     | output
-  //       ${'group: "foo", name: "bar", version: "1.2.3"'}                          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-  //       ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-  //       ${'group: "foo", name: "bar", version: depVersion'}                       | ${null}
+
+  //
+  //
   //       ${'("foo", "bar", "1.2.3")'}                                              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-  //       ${'(group = "foo", name = "bar", version = "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+  //
   //       ${'createXmlValueRemover("defaults", "integer", "integer")'}              | ${{ depName: 'defaults:integer', currentValue: 'integer', skipReason: SkipReason.Ignored }}
   //       ${'"foo:bar:1.2.3@zip"'}                                                  | ${{ currentValue: '1.2.3', dataType: 'zip', depName: 'foo:bar' }}
   //     `('$input', ({ input, output }) => {

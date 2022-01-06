@@ -16,29 +16,45 @@ import type {
 } from './types';
 
 interface GradleContext {
-  packageFile: string;
   result: ParseGradleResult;
-  varName?: string;
+  packageFile: string;
+  variableName?: string;
+  otherPackageFile?: string;
+  fileReplacePosition?: number;
   groupId?: string;
   artifactId?: string;
+  version?: string;
   dataType?: string;
+  paramName?: string;
 }
 
-function varNameHandler(
+function cleanupContext(ctx: GradleContext): GradleContext {
+  delete ctx.variableName;
+  delete ctx.otherPackageFile;
+  delete ctx.fileReplacePosition;
+  delete ctx.groupId;
+  delete ctx.artifactId;
+  delete ctx.version;
+  delete ctx.dataType;
+  delete ctx.paramName;
+  return ctx;
+}
+
+function handleVariableName(
   ctx: GradleContext,
   { value }: lex.SymbolToken | lex.StringValueToken
 ): GradleContext {
   return {
     ...ctx,
-    varName: ctx.varName ? `${ctx.varName}.${value}` : value,
+    variableName: ctx.variableName ? `${ctx.variableName}.${value}` : value,
   };
 }
 
-function assignHandler(
+function handleVariableValue(
   ctx: GradleContext,
   { value, offset: fileReplacePosition }: lex.StringValueToken
 ): GradleContext {
-  const { varName: key, packageFile, result } = ctx;
+  const { variableName: key, packageFile, result } = ctx;
 
   if (!key) {
     return ctx;
@@ -52,19 +68,20 @@ function assignHandler(
   };
 
   result.vars[key] = varData;
-  delete ctx.varName;
-  return { ...ctx, result };
+
+  return cleanupContext({ ...ctx, result });
 }
 
 const assignmentQuery = q
-  .sym(varNameHandler)
-  .many(q.op<GradleContext>('.').sym(varNameHandler), 0, 5)
+  .sym(handleVariableName)
+  .many(q.op<GradleContext>('.').sym(handleVariableName), 0, 5)
   .op('=')
-  .str(assignHandler);
+  .str(handleVariableValue);
 
-const assignBySetQuery = q.sym<GradleContext>('set').tree({
+const assignmentSetQuery = q.sym<GradleContext>('set').tree({
+  maxDepth: 1,
   type: 'wrapped-tree',
-  search: q.str(varNameHandler).op(',').str(assignHandler),
+  search: q.str(handleVariableName).op(',').str(handleVariableValue),
 });
 
 const predefinedUrls = {
@@ -74,7 +91,7 @@ const predefinedUrls = {
   gradlePluginPortal: GRADLE_PLUGIN_PORTAL_REPO,
 };
 
-function predefinedRegistryUrl(
+function handlePredefinedRegistry(
   ctx: GradleContext,
   { value }: lex.SymbolToken
 ): GradleContext {
@@ -85,7 +102,7 @@ function predefinedRegistryUrl(
   return ctx;
 }
 
-function handleRegistryUrl(
+function handleCustomRegistry(
   ctx: GradleContext,
   { value }: lex.StringValueToken
 ): GradleContext {
@@ -104,18 +121,16 @@ const registryUrlQuery = q.alt<GradleContext>(
   q
     .sym(
       regEx('^(?:mavenCentral|jcenter|google|gradlePluginPortal)$'),
-      predefinedRegistryUrl
+      handlePredefinedRegistry
     )
     .tree(),
-  q.sym<GradleContext>('url').alt(
-    q.str(handleRegistryUrl),
-    q.tree({
-      search: q.str(handleRegistryUrl),
-    })
-  ),
-  q.sym<GradleContext>('maven').tree({
-    search: q.str(handleRegistryUrl),
-  })
+  q
+    .sym<GradleContext>('url')
+    .alt(
+      q.str(handleCustomRegistry),
+      q.tree({ search: q.str(handleCustomRegistry) })
+    ),
+  q.sym<GradleContext>('maven').tree({ search: q.str(handleCustomRegistry) })
 );
 
 export const groupIdRegexPart =
@@ -135,7 +150,7 @@ const depStringRegex = regEx(
   `^${groupIdRegexPart}:${artifactIdRegexPart}:${versionRegexPart}${dataTypeRegexPart}$`
 );
 
-function depStringHandler(
+function handleDepString(
   ctx: GradleContext,
   { value }: lex.StringValueToken
 ): GradleContext {
@@ -165,9 +180,9 @@ function depStringHandler(
   return ctx;
 }
 
-const depStringQuery = q.str<GradleContext>(depStringHandler);
+const depStringQuery = q.str<GradleContext>(handleDepString);
 
-function depTemplateNameHandler(
+function handleTemplateDepName(
   ctx: GradleContext,
   { value }: lex.StringValueToken
 ): GradleContext {
@@ -177,15 +192,17 @@ function depTemplateNameHandler(
   return ctx;
 }
 
-function depTemplateVersionHandler(
+function handleTemplateVersion(
   ctx: GradleContext,
   { value: varName }: lex.SymbolToken
 ): GradleContext {
-  ctx.varName = ctx.varName ? `${ctx.varName}.${varName}` : varName;
+  ctx.variableName = ctx.variableName
+    ? `${ctx.variableName}.${varName}`
+    : varName;
   return ctx;
 }
 
-function depTemplateDataTypeHandler(
+function handleTemplateDataType(
   ctx: GradleContext,
   { value }: lex.StringValueToken
 ): GradleContext {
@@ -195,8 +212,13 @@ function depTemplateDataTypeHandler(
   return ctx;
 }
 
-function postHandler(ctx: GradleContext): GradleContext {
-  const { varName: varName, groupId, artifactId, dataType: depDataType } = ctx;
+function handleTemplate(ctx: GradleContext): GradleContext {
+  const {
+    variableName: varName,
+    groupId,
+    artifactId,
+    dataType: depDataType,
+  } = ctx;
   if (varName && groupId && artifactId) {
     const varData = ctx.result.vars[varName];
     if (varData) {
@@ -218,52 +240,116 @@ function postHandler(ctx: GradleContext): GradleContext {
     }
   }
 
-  delete ctx.varName;
-  delete ctx.groupId;
-  delete ctx.artifactId;
-  delete ctx.dataType;
+  return cleanupContext(ctx);
+}
+
+const templateStringQuery = q.str<GradleContext>({
+  match: [
+    q.str(
+      regEx(`^${groupIdRegexPart}:${artifactIdRegexPart}:$`),
+      handleTemplateDepName
+    ),
+    q
+      .sym<GradleContext>(handleTemplateVersion)
+      .many(q.op<GradleContext>('.').sym(handleTemplateVersion), 0, 5),
+  ],
+  postHandler: handleTemplate,
+});
+
+const templateStringWithDataTypeQuery = q.str<GradleContext>({
+  match: [
+    q.str(
+      regEx(`^${groupIdRegexPart}:${artifactIdRegexPart}:$`),
+      handleTemplateDepName
+    ),
+    q.sym(handleTemplateVersion),
+    q.str(handleTemplateDataType),
+  ],
+  postHandler: handleTemplate,
+});
+
+function handleKeywordParam(
+  ctx: GradleContext,
+  token: lex.StringValueToken | lex.SymbolToken
+): GradleContext {
+  const value =
+    token.type === 'string-value'
+      ? token.value
+      : ctx.result.vars[token.value]?.value;
+
+  if (value) {
+    const { paramName } = ctx;
+
+    if (paramName === 'group') {
+      ctx.groupId = value;
+    } else if (paramName === 'name') {
+      ctx.artifactId = value;
+    } else if (paramName === 'version') {
+      ctx.version = value;
+      if (token.type === 'symbol') {
+        const varData = ctx.result.vars[token.value];
+        if (varData) {
+          ctx.otherPackageFile = varData.packageFile;
+          ctx.fileReplacePosition = varData.fileReplacePosition;
+        }
+      } else {
+        ctx.fileReplacePosition = token.offset;
+      }
+    }
+  }
+
+  return handleKeywordParamsDep(ctx);
+}
+
+function handleKeywordParamsDep(ctx: GradleContext): GradleContext {
+  const {
+    groupId,
+    artifactId,
+    version: currentValue,
+    fileReplacePosition,
+  } = ctx;
+
+  const packageFile = ctx.otherPackageFile ?? ctx.packageFile;
+
+  if (groupId && artifactId && currentValue && fileReplacePosition) {
+    const depName = `${groupId}:${artifactId}`;
+
+    const dep: PackageDependency<GradleManagerData> = {
+      depName,
+      currentValue,
+      managerData: {
+        packageFile,
+        fileReplacePosition,
+      },
+    };
+
+    ctx.result.deps.push(dep);
+    return cleanupContext(ctx);
+  }
 
   return ctx;
 }
 
-const depTemplateQuery = q.str<GradleContext>({
-  match: [
-    q.str(
-      regEx(`^${groupIdRegexPart}:${artifactIdRegexPart}:$`),
-      depTemplateNameHandler
-    ),
-    q
-      .sym<GradleContext>(depTemplateVersionHandler)
-      .many(q.op<GradleContext>('.').sym(depTemplateVersionHandler), 0, 5),
-  ],
-  postHandler,
-});
-
-const depTemplateDataTypeQuery = q.str<GradleContext>({
-  match: [
-    q.str(
-      regEx(`^${groupIdRegexPart}:${artifactIdRegexPart}:$`),
-      depTemplateNameHandler
-    ),
-    q.sym(depTemplateVersionHandler),
-    q.str(depTemplateDataTypeHandler),
-  ],
-  postHandler,
-});
-
-// const depKeywordQuery = q
-//   .begin()
-//   .many(q.sym().alt(q.op(':'), q.op('=')).alt(q.str(), q.sym()), 3, 5)
-//   .end();
+const keywordParamsDepQuery = q.many(
+  q
+    .sym<GradleContext>((ctx: GradleContext, { value }) => ({
+      ...ctx,
+      paramName: value,
+    }))
+    .alt(q.op(':'), q.op('='))
+    .alt(q.str(handleKeywordParam), q.sym(handleKeywordParam)),
+  3,
+  3
+);
 
 const query = q.alt<GradleContext>(
   assignmentQuery,
-  assignBySetQuery,
+  assignmentSetQuery,
   registryUrlQuery,
   depStringQuery,
-  depTemplateQuery,
-  depTemplateDataTypeQuery
-  // depKeywordQuery
+  templateStringQuery,
+  templateStringWithDataTypeQuery,
+  keywordParamsDepQuery
 );
 
 const groovy = lang.createLang('groovy');
