@@ -59,6 +59,7 @@
     "lib/util/sanitize.ts",
     "lib/util/split.ts",
     "lib/util/url.ts",
+    "lib/versioning/gradle/**/*.ts",
     "lib/versioning/maven/**/*.ts",
     "lib/versioning/ruby/**/*.ts",
     "lib/versioning/semver-coerced/**/*.ts",
