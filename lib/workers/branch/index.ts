@@ -440,18 +440,10 @@ export async function processBranch(
       }
     }
     const forcedManually = userRebaseRequested || !branchExists;
-    if (!forcedManually && config.rebaseWhen === 'never') {
-      logger.debug(`Skipping commit (rebaseWhen=never)`);
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: BranchResult.NoWork,
-      };
-    }
     config.isConflicted ??=
       branchExists &&
       (await isBranchConflicted(config.baseBranch, config.branchName));
-    config.forceCommit = forcedManually || branchPr?.isConflicted;
+    config.forceCommit = forcedManually || config.isConflicted;
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
