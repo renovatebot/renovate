@@ -17,25 +17,28 @@ import type {
 
 interface GradleContext {
   packageFile: string;
-  varKey?: string;
-  depName?: string;
-  depDataType?: string;
   result: ParseGradleResult;
+  varName?: string;
+  groupId?: string;
+  artifactId?: string;
+  dataType?: string;
 }
 
-function varKeyHandler(
+function varNameHandler(
   ctx: GradleContext,
   { value }: lex.SymbolToken | lex.StringValueToken
 ): GradleContext {
-  const varKey = ctx.varKey ? `${ctx.varKey}.${value}` : value;
-  return { ...ctx, varKey };
+  return {
+    ...ctx,
+    varName: ctx.varName ? `${ctx.varName}.${value}` : value,
+  };
 }
 
 function assignHandler(
   ctx: GradleContext,
   { value, offset: fileReplacePosition }: lex.StringValueToken
 ): GradleContext {
-  const { varKey: key, packageFile, result } = ctx;
+  const { varName: key, packageFile, result } = ctx;
 
   if (!key) {
     return ctx;
@@ -49,19 +52,19 @@ function assignHandler(
   };
 
   result.vars[key] = varData;
-  delete ctx.varKey;
+  delete ctx.varName;
   return { ...ctx, result };
 }
 
 const assignmentQuery = q
-  .sym(varKeyHandler)
-  .many(q.op<GradleContext>('.').sym(varKeyHandler), 0, 5)
+  .sym(varNameHandler)
+  .many(q.op<GradleContext>('.').sym(varNameHandler), 0, 5)
   .op('=')
   .str(assignHandler);
 
 const assignBySetQuery = q.sym<GradleContext>('set').tree({
   type: 'wrapped-tree',
-  search: q.str(varKeyHandler).op(',').str(assignHandler),
+  search: q.str(varNameHandler).op(',').str(assignHandler),
 });
 
 const predefinedUrls = {
@@ -169,15 +172,16 @@ function depTemplateNameHandler(
   { value }: lex.StringValueToken
 ): GradleContext {
   const [groupId, artifactId] = value.split(':');
-  ctx.depName = `${groupId}:${artifactId}`;
+  ctx.groupId = groupId;
+  ctx.artifactId = artifactId;
   return ctx;
 }
 
 function depTemplateVersionHandler(
   ctx: GradleContext,
-  { value: varKey }: lex.SymbolToken
+  { value: varName }: lex.SymbolToken
 ): GradleContext {
-  ctx.varKey = ctx.varKey ? `${ctx.varKey}.${varKey}` : varKey;
+  ctx.varName = ctx.varName ? `${ctx.varName}.${varName}` : varName;
   return ctx;
 }
 
@@ -186,18 +190,18 @@ function depTemplateDataTypeHandler(
   { value }: lex.StringValueToken
 ): GradleContext {
   if (value.startsWith('@')) {
-    ctx.depDataType = value.slice(1);
+    ctx.dataType = value.slice(1);
   }
   return ctx;
 }
 
 function postHandler(ctx: GradleContext): GradleContext {
-  const { varKey, depName, depDataType } = ctx;
-  if (varKey && depName) {
-    const varData = ctx.result.vars[varKey];
+  const { varName: varName, groupId, artifactId, dataType: depDataType } = ctx;
+  if (varName && groupId && artifactId) {
+    const varData = ctx.result.vars[varName];
     if (varData) {
       const dep: PackageDependency<GradleManagerData> = {
-        depName,
+        depName: `${groupId}:${artifactId}`,
         currentValue: varData.value,
       };
 
@@ -214,9 +218,10 @@ function postHandler(ctx: GradleContext): GradleContext {
     }
   }
 
-  delete ctx.varKey;
-  delete ctx.depName;
-  delete ctx.depDataType;
+  delete ctx.varName;
+  delete ctx.groupId;
+  delete ctx.artifactId;
+  delete ctx.dataType;
 
   return ctx;
 }
@@ -246,6 +251,11 @@ const depTemplateDataTypeQuery = q.str<GradleContext>({
   postHandler,
 });
 
+// const depKeywordQuery = q
+//   .begin()
+//   .many(q.sym().alt(q.op(':'), q.op('=')).alt(q.str(), q.sym()), 3, 5)
+//   .end();
+
 const query = q.alt<GradleContext>(
   assignmentQuery,
   assignBySetQuery,
@@ -253,6 +263,7 @@ const query = q.alt<GradleContext>(
   depStringQuery,
   depTemplateQuery,
   depTemplateDataTypeQuery
+  // depKeywordQuery
 );
 
 const groovy = lang.createLang('groovy');
