@@ -205,6 +205,10 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
       // istanbul ignore else: Can result be null ???
       if (result !== null) {
+        // Adjust the response if request has been made with Github App
+        if (result.body.repositories) {
+          result.body = result.body.repositories;
+        }
         if (opts.paginate) {
           // Check if result is paginated
           const pageLimit = opts.pageLimit || 10;
