@@ -9,9 +9,8 @@ interface NodeJsSchedule {
 }
 
 export type NodeJsData = Record<string, NodeJsSchedule>;
-const dataInStringForm: string | undefined = dataFiles.get(
-  'data/node-js-schedule.json'
+
+export const nodeSchedule: NodeJsData = JSON.parse(
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  dataFiles.get('data/node-js-schedule.json')!
 );
-export const nodeSchedule: NodeJsData = dataInStringForm
-  ? JSON.parse(dataInStringForm)
-  : {};
