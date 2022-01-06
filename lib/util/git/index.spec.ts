@@ -110,8 +110,8 @@ describe('util/git/index', () => {
           return 'different result';
         }
       });
-      expect(await git.gitRetry(gitFunc)).toBe('some result');
-      expect(await git.gitRetry(gitFunc, 'arg')).toBe('different result');
+      expect(await git.gitRetry(() => gitFunc())).toBe('some result');
+      expect(await git.gitRetry(() => gitFunc('arg'))).toBe('different result');
       expect(gitFunc).toHaveBeenCalledTimes(2);
     });
 
@@ -123,7 +123,7 @@ describe('util/git/index', () => {
           throw new Error('The remote end hung up unexpectedly');
         })
         .mockImplementationOnce(() => 'some result');
-      expect(await git.gitRetry(gitFunc)).toBe('some result');
+      expect(await git.gitRetry(() => gitFunc())).toBe('some result');
       expect(gitFunc).toHaveBeenCalledTimes(2);
     });
 
@@ -132,7 +132,7 @@ describe('util/git/index', () => {
       const gitFunc = jest.fn().mockImplementation(() => {
         throw new Error('The remote end hung up unexpectedly');
       });
-      await expect(git.gitRetry(gitFunc)).rejects.toThrow(
+      await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
         'gitRetry has exceeded the limit of 5 retries'
       );
       expect(gitFunc).toHaveBeenCalledTimes(6);
@@ -142,7 +142,7 @@ describe('util/git/index', () => {
       const gitFunc = jest.fn().mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      await expect(git.gitRetry(gitFunc)).rejects.toThrow('some error');
+      await expect(git.gitRetry(() => gitFunc())).rejects.toThrow('some error');
       expect(gitFunc).toHaveBeenCalledTimes(1);
     });
   });
