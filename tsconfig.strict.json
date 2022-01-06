@@ -60,6 +60,8 @@
     "lib/util/split.ts",
     "lib/util/url.ts",
     "lib/versioning/maven/**/*.ts",
+    "lib/versioning/node/**/*.ts",
+    "lib/versioning/npm/**/*.ts",
     "lib/versioning/ruby/**/*.ts",
     "lib/versioning/semver-coerced/**/*.ts",
     "lib/versioning/semver/**/*.ts",
