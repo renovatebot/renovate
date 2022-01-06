@@ -47,12 +47,12 @@ Returns `true` if a given string is a substring.
 
 Returns `true` only if all expressions are `true`.
 
-`{{#if (and true true true)}}True{{else}}False{{/if}}` => `True`
-`{{#if (and false false)}}True{{else}}False{{/if}}` => `False`
+`{{#if (and isMajor hasReleaseNotes)}}Backwards Incompatible release! Check out the Release notes.{{/if}}`
+
+In the example above, it will only show a text if `isMajor=true` and `hasReleaseNotes=true`.
 
 ### or
 
 Returns `true` if at least one expression is `true`.
 
-`{{#if (or true true false)}}True{{else}}False{{/if}}` => `True`
-`{{#if (or false false)}}True{{else}}False{{/if}}` => `False`
+`{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
