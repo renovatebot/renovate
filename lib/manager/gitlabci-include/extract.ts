@@ -48,7 +48,7 @@ export function extractPackageFile(
         if (config.endpoint) {
           dep.registryUrls = [
             config.endpoint.replace(regEx(/\/api\/v4\/?/), ''),
-          ]; // TODO #12071
+          ];
         }
         deps.push(dep);
       }

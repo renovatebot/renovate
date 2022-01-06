@@ -25,9 +25,9 @@ For example, all the following are valid tags:
 
 ```sh
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:25.69.4
-docker run --rm renovate/renovate:25.69
-docker run --rm renovate/renovate:25
+docker run --rm renovate/renovate:31.14.0
+docker run --rm renovate/renovate:31.14
+docker run --rm renovate/renovate:31
 ```
 
 Do not use the example tags listed above, as they will be out-of-date.
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:25.69.4
+              image: renovate/renovate:31.14.0
               args:
                 - user/repo
               # Environment Variables
@@ -121,7 +121,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:25.69.4
+            - image: renovate/renovate:31.14.0
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -271,9 +271,9 @@ You should save and test out this script manually first, and add it to cron once
 
 ## Kubernetes for GitLab, using Git over SSH
 
-This section describes how to use Git binary with SSH for Gitlab, to avoid API shortcomings.
+This section describes how to use Git binary with SSH for GitLab, to avoid API shortcomings.
 
-You need to first create a SSH key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
+You need to first create a SSH key, then add the public part to GitLab (see this [guide](https://docs.gitlab.com/ee/ssh/))
 
 Then, you need to create the secret to add the SSH key, and the following config to your container
 
@@ -359,7 +359,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:25.69.4
+              image: renovate/renovate:31.14.0
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

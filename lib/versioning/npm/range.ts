@@ -1,16 +1,18 @@
-import {
-  inc as increment,
-  valid as isVersion,
+import semver from 'semver';
+import semverUtils from 'semver-utils';
+import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
+import type { NewValueConfig } from '../types';
+
+const {
+  inc: increment,
+  valid: isVersion,
   major,
   minor,
   patch,
   prerelease,
   satisfies,
-} from 'semver';
-import { parseRange } from 'semver-utils';
-import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
-import type { NewValueConfig } from '../types';
+} = semver;
 
 function replaceCaretValue(oldValue: string, newValue: string): string {
   const toVersionMajor = major(newValue);
@@ -73,7 +75,7 @@ export function getNewValue({
       newVersion,
     });
   }
-  const parsedRange = parseRange(currentValue);
+  const parsedRange = semverUtils.parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
   if (rangeStrategy === 'widen') {
     if (satisfies(newVersion, currentValue)) {
@@ -164,7 +166,7 @@ export function getNewValue({
         return currentValue;
       }
     } else {
-      const newRange = parseRange(currentValue);
+      const newRange = semverUtils.parseRange(currentValue);
       const versions = newRange.map((x) => {
         const subRange = x.semver;
         const bumpedSubRange = getNewValue({

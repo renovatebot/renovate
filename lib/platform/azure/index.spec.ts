@@ -4,7 +4,8 @@ import {
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { REPOSITORY_ARCHIVED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -144,6 +145,13 @@ describe('platform/azure/index', () => {
                 name: 'prj2',
               },
             },
+            {
+              name: 'repo3',
+              project: {
+                name: 'some',
+              },
+              isDisabled: true,
+            },
           ]),
         } as any)
     );
@@ -167,6 +175,14 @@ describe('platform/azure/index', () => {
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
+    });
+
+    it(`throws if repo is disabled`, async () => {
+      await expect(
+        initRepo({
+          repository: 'some/repo3',
+        })
+      ).rejects.toThrow(REPOSITORY_ARCHIVED);
     });
   });
 
@@ -1248,9 +1264,9 @@ describe('platform/azure/index', () => {
 
     it('returns file content in json5 format', async () => {
       const json5Data = `
-        { 
+        {
           // json5 comment
-          foo: 'bar' 
+          foo: 'bar'
         }
       `;
       azureApi.gitApi.mockImplementationOnce(

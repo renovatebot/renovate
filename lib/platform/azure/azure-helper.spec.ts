@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 
 describe('platform/azure/azure-helper', () => {
   let azureHelper: typeof import('./azure-helper');

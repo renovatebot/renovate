@@ -25,6 +25,7 @@ import {
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { ensureTrailingSlash } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import * as lerna from './lerna';
@@ -376,10 +377,9 @@ async function updateYarnOffline(
         .split('\n')
         .find((line) => line.startsWith('yarn-offline-mirror '));
       if (mirrorLine) {
-        const mirrorPath = mirrorLine
-          .split(' ')[1]
-          .replace(regEx(/"/g), '')
-          .replace(regEx(/\/?$/), '/');
+        const mirrorPath = ensureTrailingSlash(
+          mirrorLine.split(' ')[1].replace(regEx(/"/g), '')
+        );
         resolvedPaths.push(upath.join(lockFileDir, mirrorPath));
       }
     }
@@ -478,6 +478,14 @@ export async function getAdditionalFiles(
     logger.debug('Skipping lock file generation for remediations');
     return { artifactErrors, updatedArtifacts };
   }
+  if (
+    config.reuseExistingBranch &&
+    !config.updatedPackageFiles?.length &&
+    config.upgrades?.every((upgrade) => upgrade.isLockfileUpdate)
+  ) {
+    logger.debug('Existing branch contains all necessary lock file updates');
+    return { artifactErrors, updatedArtifacts };
+  }
   logger.debug('Getting updated lock files');
   if (
     config.updateType === 'lockFileMaintenance' &&
@@ -513,6 +521,7 @@ export async function getAdditionalFiles(
   } catch (err) {
     logger.warn({ err }, 'Error getting token for packageFile');
   }
+  const tokenRe = regEx(`${token}`, 'g', false);
   const { localDir } = GlobalConfig.get();
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
@@ -570,7 +579,7 @@ export async function getAdditionalFiles(
         logger.debug(`${npmLock} needs updating`);
         updatedArtifacts.push({
           name: npmLock,
-          contents: res.lockFile.replace(regEx(`${token}`, 'g'), ''),
+          contents: res.lockFile.replace(tokenRe, ''),
         });
       }
     }

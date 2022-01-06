@@ -3,7 +3,7 @@ import {
   GitRepository,
   GitStatusContext,
   PullRequestStatus,
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../logger';
 import { HostRule, PrState } from '../../types';
 import { GitOptions } from '../../types/git';

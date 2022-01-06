@@ -1,10 +1,10 @@
 import fs from 'fs';
-import { join, normalizeTrim } from 'upath';
+import upath from 'upath';
 import { regEx } from './regex';
 
 function relatePath(here: string, there: string): string {
-  const thereParts = normalizeTrim(there).split(regEx(/[\\/]/));
-  const hereParts = normalizeTrim(here).split(regEx(/[\\/]/));
+  const thereParts = upath.normalizeTrim(there).split(regEx(/[\\/]/));
+  const hereParts = upath.normalizeTrim(here).split(regEx(/[\\/]/));
 
   let idx = 0;
   while (
@@ -41,7 +41,7 @@ export function loadModules<T>(
     .sort();
 
   for (const moduleName of moduleNames) {
-    const modulePath = join(relatePath(__dirname, dirname), moduleName);
+    const modulePath = upath.join(relatePath(__dirname, dirname), moduleName);
     const module = require(modulePath); // eslint-disable-line
     // istanbul ignore if
     if (!module || (validate && !validate(module, moduleName))) {
