@@ -1,6 +1,7 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier.js';
 import { GlobalConfig } from '../../config/global';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -11,6 +12,9 @@ import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
 const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
+const packageGitRegex = regEx(
+  /^(?<source>(?:git\+)(git|ssh|https):\/\/(?<gitUrl>(?<user>.*)@(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w./-]+))(?:.git)(?:@(?<version>.*))))$/gm
+);
 
 const rangePattern: string = RANGE_PATTERN;
 const specifierPartPattern = `\\s*${rangePattern.replace(
@@ -65,12 +69,33 @@ export function extractPackageFile(
       }
       const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
       const lineNoHashes = lineNoEnvMarkers.split(' \\')[0];
-      const matches =
+      const packageMatches =
         pkgValRegex.exec(lineNoHashes) || pkgRegex.exec(lineNoHashes);
-      if (!matches) {
+      const gitPackageMatches = packageGitRegex.exec(lineNoHashes);
+      if (!packageMatches && !gitPackageMatches) {
         return null;
       }
-      const [, depName, , currVal] = matches;
+      if (gitPackageMatches) {
+        const currentVersion = gitPackageMatches.groups.version;
+        const depName = gitPackageMatches.groups.depName;
+
+        // we need to replace the / with a :
+        const scmPath = gitPackageMatches.groups.scmPath;
+        const delimiter = gitPackageMatches.groups.delimiter;
+        const lookupName = gitPackageMatches.groups.gitUrl
+          .replace(`${delimiter}${scmPath}`, `:${scmPath}`)
+          .replace(`@${currentVersion}`, '');
+        dep = {
+          ...dep,
+          depName,
+          currentValue: currentVersion,
+          currentVersion: currentVersion,
+          lookupName: lookupName,
+          datasource: GitTagsDatasource.id,
+        };
+        return dep;
+      }
+      const [, depName, , currVal] = packageMatches;
       const currentValue = currVal?.trim();
       dep = {
         ...dep,
