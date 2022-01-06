@@ -10,7 +10,10 @@ type Token = {
   val: string | number;
 };
 
-function iterateChars(str: string, cb: (p: string, n: string) => void): void {
+function iterateChars(
+  str: string,
+  cb: (p: string | null, n: string | null) => void
+): void {
   let prev = null;
   let next = null;
   for (let i = 0; i < str.length; i += 1) {
