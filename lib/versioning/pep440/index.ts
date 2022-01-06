@@ -31,27 +31,38 @@ const isStable = (input: string): boolean => {
 };
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string): string =>
-  validRange(input) || isVersion(input);
+export function isValid(input: string): boolean {
+  return validRange(input) || !!isVersion(input);
+}
 
-const getSatisfyingVersion = (versions: string[], range: string): string => {
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
-};
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string => {
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[0];
-};
+}
 
-export const isSingleVersion = (constraint: string): string =>
-  isVersion(constraint) ||
-  (constraint?.startsWith('==') && isVersion(constraint.substring(2).trim()));
+export function isSingleVersion(constraint: string): boolean {
+  return (
+    !!isVersion(constraint) ||
+    (constraint?.startsWith('==') &&
+      !!isVersion(constraint.substring(2).trim()))
+  );
+}
 
 export { isVersion, matches };
 
 const equals = (version1: string, version2: string): boolean =>
-  isVersion(version1) && isVersion(version2) && eq(version1, version2);
+  !!isVersion(version1) && !!isVersion(version2) && eq(version1, version2);
 
 export const api: VersioningApi = {
   equals,

@@ -10,8 +10,8 @@ function getFutureVersion(
   newVersion: string,
   step: number
 ): string {
-  const toRelease: number[] = parseVersion(newVersion).release;
-  const baseRelease: number[] = parseVersion(baseVersion).release;
+  const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
+  const baseRelease: number[] = parseVersion(baseVersion)?.release ?? [];
   let found = false;
   const futureRelease = baseRelease.map((basePart, index) => {
     if (found) {
@@ -41,7 +41,7 @@ export function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   // easy pin
   if (rangeStrategy === 'pin') {
     return '==' + newVersion;
