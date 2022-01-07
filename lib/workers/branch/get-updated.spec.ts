@@ -4,6 +4,7 @@ import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
 import * as _helmv3 from '../../manager/helmv3';
 import * as _npm from '../../manager/npm';
+import * as _poetry from '../../manager/poetry';
 import type { BranchConfig } from '../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -12,12 +13,14 @@ const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
 const helmv3 = mocked(_helmv3);
 const npm = mocked(_npm);
+const poetry = mocked(_poetry);
 const autoReplace = mocked(_autoReplace);
 
 jest.mock('../../manager/composer');
 jest.mock('../../manager/helmv3');
 jest.mock('../../manager/npm');
 jest.mock('../../manager/git-submodules');
+jest.mock('../../manager/poetry');
 jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
@@ -248,6 +251,9 @@ describe('workers/branch/get-updated', () => {
         branchName: undefined,
         isLockfileUpdate: true,
       });
+      composer.updateLockedDependency.mockReturnValueOnce({
+        status: 'unsupported',
+      });
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -263,6 +269,29 @@ describe('workers/branch/get-updated', () => {
         ],
         updatedPackageFiles: [
           { name: 'composer.json', contents: 'existing content' },
+        ],
+      });
+    });
+    it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
+      config.upgrades.push({
+        packageFile: 'pyproject.toml',
+        manager: 'poetry',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      poetry.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            name: 'poetry.lock',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot({
+        updatedArtifacts: [{ name: 'poetry.lock', contents: 'some contents' }],
+        updatedPackageFiles: [
+          { name: 'pyproject.toml', contents: 'existing content' },
         ],
       });
     });

@@ -2,7 +2,7 @@ import url from 'url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
 import registryAuthToken from 'registry-auth-token';
-import getRegistryUrl from 'registry-auth-token/registry-url';
+import getRegistryUrl from 'registry-auth-token/registry-url.js';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import type { OutgoingHttpHeaders } from '../../util/http/types';

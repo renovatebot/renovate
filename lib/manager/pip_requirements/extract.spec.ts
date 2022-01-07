@@ -10,6 +10,7 @@ const requirements5 = loadFixture('requirements5.txt');
 const requirements6 = loadFixture('requirements6.txt');
 const requirements7 = loadFixture('requirements7.txt');
 const requirements8 = loadFixture('requirements8.txt');
+const requirementsWithEnvMarkers = loadFixture('requirements-env-markers.txt');
 
 describe('manager/pip_requirements/extract', () => {
   beforeEach(() => {
@@ -134,10 +135,29 @@ describe('manager/pip_requirements/extract', () => {
         'http://its-a-secret:example.com/private-pypi/',
       ]);
     });
+
     it('should handle hashes', () => {
       const res = extractPackageFile(requirements8, 'unused_file_name', {});
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
+    });
+
+    it('should handle dependency and ignore env markers', () => {
+      const res = extractPackageFile(
+        requirementsWithEnvMarkers,
+        'unused_file_name',
+        {}
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '==20.3.0',
+            currentVersion: '20.3.0',
+            datasource: 'pypi',
+            depName: 'attrs',
+          },
+        ],
+      });
     });
   });
 });

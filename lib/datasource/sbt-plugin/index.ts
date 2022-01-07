@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
+import { ensureTrailingSlash } from '../../util/url';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { downloadHttpProtocol } from '../maven/util';
@@ -17,8 +18,6 @@ export const customRegistrySupport = true;
 export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
 export const defaultVersioning = ivyVersioning.id;
 export const registryStrategy = 'hunt';
-
-const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/'); // TODO #12071
 
 async function resolvePluginReleases(
   rootUrl: string,

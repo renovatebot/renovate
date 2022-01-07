@@ -20,17 +20,6 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/fetch fetchUpdates() handles empty deps 1`] = `
-Object {
-  "npm": Array [
-    Object {
-      "deps": Array [],
-      "packageFile": "package.json",
-    },
-  ],
-}
-`;
-
 exports[`workers/repository/process/fetch fetchUpdates() handles ignored, skipped and disabled 1`] = `
 Object {
   "npm": Array [

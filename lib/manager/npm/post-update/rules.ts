@@ -19,7 +19,10 @@ export function processHostRules(): HostRulesResult {
   for (const hostRule of npmHostRules) {
     if (hostRule.resolvedHost) {
       let uri = hostRule.matchHost;
-      uri = validateUrl(uri) ? uri.replace(regEx(/^https?:/), '') : `//${uri}/`; // TODO #12071
+      uri =
+        is.string(uri) && validateUrl(uri)
+          ? uri.replace(regEx(/^https?:/), '')
+          : `//${uri}/`;
       if (hostRule.token) {
         const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
         additionalNpmrcContent.push(`${uri}:${key}=${hostRule.token}`);

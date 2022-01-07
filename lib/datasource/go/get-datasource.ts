@@ -45,6 +45,16 @@ async function goGetDatasource(goModule: string): Promise<DataSource | null> {
 
     if (gitlabUrl && gitlabUrlName) {
       if (gitlabModuleName?.startsWith(gitlabUrlName)) {
+        if (gitlabModuleName.includes('.git')) {
+          return {
+            datasource: gitlab.id,
+            registryUrl: gitlabUrl,
+            lookupName: gitlabModuleName.substring(
+              0,
+              gitlabModuleName.indexOf('.git')
+            ),
+          };
+        }
         return {
           datasource: gitlab.id,
           registryUrl: gitlabUrl,

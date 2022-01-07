@@ -1,5 +1,5 @@
-import * as fs from 'fs-extra';
-import { MoveOptions, WriteFileOptions } from 'fs-extra';
+import fs from 'fs-extra';
+import type { MoveOptions, WriteFileOptions } from 'fs-extra';
 
 // istanbul ignore next
 export function stat(path: string | Buffer): Promise<fs.Stats> {

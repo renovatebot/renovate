@@ -1,7 +1,13 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import Git, { Options, ResetMode, SimpleGit, TaskOptions } from 'simple-git';
-import { join } from 'upath';
+import type {
+  Options,
+  SimpleGit,
+  TaskOptions,
+  ResetMode as _ResetMode,
+} from 'simple-git';
+import * as simpleGit from 'simple-git';
+import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
@@ -33,9 +39,8 @@ import type {
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
-declare module 'fs-extra' {
-  export function exists(pathLike: string): Promise<boolean>;
-}
+// TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
+const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
@@ -103,7 +108,7 @@ function checkForPlatformFailure(err: Error): void {
 }
 
 function localName(branchName: string): string {
-  return branchName.replace(regEx(/^origin\//), ''); // TODO #12071
+  return branchName.replace(regEx(/^origin\//), '');
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -148,7 +153,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
-  const globalGit = Git();
+  const globalGit = simpleGit.default();
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(/\s+/)) {
@@ -191,7 +196,7 @@ async function fetchBranchCommits(): Promise<void> {
     (await git.raw(opts))
       .split('\n')
       .filter(Boolean)
-      .map((line) => line.trim().split(regEx(/\s+/))) // TODO #12071
+      .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
@@ -211,7 +216,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = Git(localDir, simpleGitConfig());
+  git = simpleGit.default(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -311,10 +316,10 @@ export async function syncGit(): Promise<void> {
   gitInitialized = true;
   const { localDir } = GlobalConfig.get();
   logger.debug('Initializing git repository into ' + localDir);
-  const gitHead = join(localDir, '.git/HEAD');
+  const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
-  if (await fs.exists(gitHead)) {
+  if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
@@ -483,7 +488,7 @@ export async function getFileList(): Promise<string[]> {
     .split('\n')
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(regEx(/\t/)).pop()) // TODO #12071
+    .map((line) => line.split(regEx(/\t/)).pop())
     .filter((file: string) =>
       submodules.every((submodule: string) => !file.startsWith(submodule))
     );
@@ -589,7 +594,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  let status;
+  let status: StatusResult;
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
@@ -708,7 +713,7 @@ export async function commitFiles({
           ignoredFiles.push(fileName);
         }
       } else {
-        if (await isDirectory(join(localDir, fileName))) {
+        if (await isDirectory(upath.join(localDir, fileName))) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
         } else {
@@ -721,7 +726,7 @@ export async function commitFiles({
           }
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
-          await fs.outputFile(join(localDir, fileName), contents, {
+          await fs.outputFile(upath.join(localDir, fileName), contents, {
             mode: file.executable ? 0o777 : 0o666,
           });
         }
