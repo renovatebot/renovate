@@ -1947,7 +1947,8 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 ## projectName
 
-The name of this project. Defaults to "Renovate".
+The name of this project.
+Defaults to "Renovate".
 
 ## pruneStaleBranches
 
