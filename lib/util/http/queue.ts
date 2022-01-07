@@ -1,4 +1,3 @@
-import URL from 'url';
 import PQueue from 'p-queue';
 import { getRequestLimit } from './host-rules';
 
@@ -6,7 +5,7 @@ const hostQueues = new Map<string | null, PQueue | null>();
 
 function getUrlHost(url: string): string | null {
   try {
-    return URL.parse(url).host;
+    return new URL(url).host;
   } catch (e) {
     return null;
   }
