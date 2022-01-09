@@ -51,10 +51,11 @@ export class AwsMachineImageDataSource extends Datasource {
     });
     const matchingImages = await this.ec2.send(cmd);
     matchingImages.Images = matchingImages.Images ?? [];
-    return matchingImages.Images.sort(
-      (image1, image2) =>
-        Date.parse(image1.CreationDate) - Date.parse(image2.CreationDate)
-    );
+    return matchingImages.Images.sort((image1, image2) => {
+      const ts1 = image1.CreationDate ? Date.parse(image1.CreationDate) : 0;
+      const ts2 = image2.CreationDate ? Date.parse(image2.CreationDate) : 0;
+      return ts1 - ts2;
+    });
   }
 
   @cache({
@@ -76,13 +77,15 @@ export class AwsMachineImageDataSource extends Datasource {
         (image) => image.ImageId === newValue
       );
       if (newValueMatchingImages.length === 1) {
-        return newValueMatchingImages[0].Name;
+        return newValueMatchingImages[0].Name ?? null;
       }
       return null;
     }
 
-    return (await this.getReleases({ lookupName: serializedAmiFilter }))
-      .releases[0].newDigest;
+    return (
+      (await this.getReleases({ lookupName: serializedAmiFilter }))
+        ?.releases?.[0]?.newDigest ?? null
+    );
   }
 
   @cache({
@@ -98,17 +101,19 @@ export class AwsMachineImageDataSource extends Datasource {
       return null;
     }
     const latestImage = images[images.length - 1];
-    return {
-      releases: [
-        {
-          version: latestImage.ImageId,
-          releaseTimestamp: latestImage.CreationDate,
-          isDeprecated:
-            Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
-            this.now,
-          newDigest: latestImage.Name,
-        },
-      ],
-    };
+    return latestImage.ImageId
+      ? {
+          releases: [
+            {
+              version: latestImage.ImageId,
+              releaseTimestamp: latestImage.CreationDate,
+              isDeprecated:
+                Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
+                this.now,
+              newDigest: latestImage.Name,
+            },
+          ],
+        }
+      : null;
   }
 }
