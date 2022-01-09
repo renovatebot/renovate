@@ -128,8 +128,8 @@
     "node": "^14.15.0 || >=16.13.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ec2": "3.35.0",
-    "@aws-sdk/client-ecr": "3.38.0",
+    "@aws-sdk/client-ec2": "3.46.0",
+    "@aws-sdk/client-ecr": "3.46.0",
     "@breejs/later": "4.1.0",
     "@iarna/toml": "2.2.5",
     "@renovate/pep440": "1.0.0",
@@ -210,7 +210,6 @@
   },
   "devDependencies": {
     "@actions/core": "1.6.0",
-    "@aws-sdk/client-s3": "3.41.0",
     "@jest/globals": "27.4.4",
     "@jest/reporters": "27.4.5",
     "@jest/test-result": "27.4.2",
