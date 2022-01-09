@@ -23,7 +23,7 @@ export function matchesHelmValuesDockerHeuristic(
   parentKey: string,
   data: unknown
 ): data is HelmDockerImageDependency {
-  return (
+  return !!(
     parentKeyRe.test(parentKey) &&
     data &&
     typeof data === 'object' &&
@@ -36,5 +36,5 @@ export function matchesHelmValuesInlineImage(
   parentKey: string,
   data: unknown
 ): data is string {
-  return parentKeyRe.test(parentKey) && data && typeof data === 'string';
+  return !!(parentKeyRe.test(parentKey) && data && typeof data === 'string');
 }
