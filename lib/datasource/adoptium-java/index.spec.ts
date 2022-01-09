@@ -10,13 +10,6 @@ const jre = loadFixture('jre.json');
 function getPath(page: number, imageType = 'jdk'): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
 }
-function* range(start: number, end: number): Generator<number, number, number> {
-  yield start;
-  if (start === end) {
-    return;
-  }
-  yield* range(start + 1, end);
-}
 
 const depName = 'java';
 
@@ -69,32 +62,10 @@ describe('datasource/adoptium-java/index', () => {
     });
 
     it('processes real data', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, res1);
-      const res = await getPkgReleases({
-        datasource,
-        depName,
-      });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
-    });
-
-    it('processes real data (jre)', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath(0, 'jre')).reply(200, jre);
-      const res = await getPkgReleases({
-        datasource,
-        depName: 'java-jre',
-      });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
-    });
-
-    it('pages', async () => {
       httpMock
         .scope(defaultRegistryUrl)
         .get(getPath(0))
-        .reply(200, {
-          versions: [...range(1, 50)].map((v) => ({ semver: `1.${v}.0` })),
-        })
+        .reply(200, res1)
         .get(getPath(1))
         .reply(404);
       const res = await getPkgReleases({
@@ -102,7 +73,40 @@ describe('datasource/adoptium-java/index', () => {
         depName,
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(50);
+      expect(res?.releases).toHaveLength(3);
+    });
+
+    it('processes real data (jre)', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0, 'jre'))
+        .reply(200, jre)
+        .get(getPath(1, 'jre'))
+        .reply(404);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'java-jre',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(2);
+    });
+
+    it('pages', async () => {
+      const versions = [...Array(51).keys()]
+        .slice(1)
+        .map((v) => ({ semver: `1.${v}.0` }));
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0))
+        .reply(200, { versions })
+        .get(getPath(1))
+        .reply(404);
+      const res = await getPkgReleases({
+        datasource,
+        depName,
+      });
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(50);
     });
   });
 });
