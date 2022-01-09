@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
+import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
 import { pkg } from '../../expose.cjs';
 import { logger, setMeta } from '../../logger';
@@ -23,7 +24,9 @@ export async function renovateRepository(
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = GlobalConfig.set(repoConfig);
+  let config = GlobalConfig.set(
+    applySecretsToConfig(repoConfig, undefined, false)
+  );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion: pkg.version }, 'Repository started');

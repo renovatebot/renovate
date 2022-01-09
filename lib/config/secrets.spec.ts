@@ -97,5 +97,25 @@ describe('config/secrets', () => {
       expect(res).toMatchSnapshot();
       expect(Object.keys(res)).not.toContain('secrets');
     });
+    it('replaces secrets in a array of objects without deleting them', () => {
+      const config = {
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
+        hostRules: [
+          { hostType: 'npm', token: '{{ secrets.ARTIFACTORY_TOKEN }}' },
+        ],
+      };
+      const res = applySecretsToConfig(config, undefined, false);
+      expect(res).toMatchSnapshot();
+      expect(Object.keys(res)).toContain('secrets');
+    });
+    it('replaces secrets in a array of strings without deleting them', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+      };
+      const res = applySecretsToConfig(config, undefined, false);
+      expect(res).toMatchSnapshot();
+      expect(Object.keys(res)).toContain('secrets');
+    });
   });
 });
