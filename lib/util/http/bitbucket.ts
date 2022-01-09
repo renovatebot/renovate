@@ -15,11 +15,8 @@ export class BitbucketHttp extends Http {
   protected override request<T>(
     url: string | URL,
     options?: InternalHttpOptions
-  ): Promise<HttpResponse<T> | null> {
-    const opts = {
-      baseUrl,
-      ...options,
-    };
+  ): Promise<HttpResponse<T>> {
+    const opts = { baseUrl, ...options };
     return super.request<T>(url, opts);
   }
 }
