@@ -304,6 +304,7 @@ const platform: Platform = {
     await git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
+      fullClone: true,
     });
 
     // Reset cached resources
