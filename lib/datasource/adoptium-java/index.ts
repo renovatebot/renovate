@@ -25,7 +25,7 @@ export class AdoptiumJavaDatasource extends Datasource {
 
   override readonly caching = true;
 
-  async getPageReleases(
+  private async getPageReleases(
     url: string,
     page: number
   ): Promise<Release[] | undefined> {
@@ -71,8 +71,11 @@ export class AdoptiumJavaDatasource extends Datasource {
     try {
       let page = 0;
       let releases = await this.getPageReleases(url, page);
-      while (releases?.length) {
+      while (releases) {
         result.releases.push(...releases);
+        if (releases.length !== pageSize) {
+          break;
+        }
         page += 1;
         releases = await this.getPageReleases(url, page);
       }

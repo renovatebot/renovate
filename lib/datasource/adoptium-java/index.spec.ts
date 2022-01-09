@@ -62,12 +62,7 @@ describe('datasource/adoptium-java/index', () => {
     });
 
     it('processes real data', async () => {
-      httpMock
-        .scope(defaultRegistryUrl)
-        .get(getPath(0))
-        .reply(200, res1)
-        .get(getPath(1))
-        .reply(404);
+      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, res1);
       const res = await getPkgReleases({
         datasource,
         depName,
@@ -77,12 +72,7 @@ describe('datasource/adoptium-java/index', () => {
     });
 
     it('processes real data (jre)', async () => {
-      httpMock
-        .scope(defaultRegistryUrl)
-        .get(getPath(0, 'jre'))
-        .reply(200, jre)
-        .get(getPath(1, 'jre'))
-        .reply(404);
+      httpMock.scope(defaultRegistryUrl).get(getPath(0, 'jre')).reply(200, jre);
       const res = await getPkgReleases({
         datasource,
         depName: 'java-jre',
