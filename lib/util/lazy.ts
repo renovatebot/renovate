@@ -1,11 +1,11 @@
 export class Lazy<T> {
-  private _didRun: boolean = false;
+  private _didRun = false;
   private _value?: T;
   private _error: Error | undefined;
 
   constructor(private readonly executor: () => T) {}
 
-  hasValue() {
+  hasValue(): boolean {
     return this._didRun;
   }
 
@@ -22,6 +22,6 @@ export class Lazy<T> {
     if (this._error) {
       throw this._error;
     }
-    return this._value!;
+    return this._value;
   }
 }

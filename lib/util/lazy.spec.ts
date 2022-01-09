@@ -2,16 +2,12 @@ import { Lazy } from './lazy';
 
 describe('util/lazy', () => {
   describe('.getValue()', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('gets a value', () => {
       const spy = jest.fn().mockReturnValue(0);
       const lazy = new Lazy(() => spy());
       const value = lazy.getValue();
-      expect(value).toEqual(0);
-      expect(spy).toBeCalledTimes(1);
+      expect(value).toBe(0);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('caches the value', () => {
@@ -19,7 +15,7 @@ describe('util/lazy', () => {
       const lazy = new Lazy(() => spy());
       lazy.getValue();
       lazy.getValue();
-      expect(spy).toBeCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('throws an error', () => {
@@ -28,7 +24,7 @@ describe('util/lazy', () => {
       });
       const lazy = new Lazy(() => spy());
       expect(() => lazy.getValue()).toThrow();
-      expect(spy).toBeCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('caches the error', () => {
@@ -38,7 +34,7 @@ describe('util/lazy', () => {
       const lazy = new Lazy(() => spy());
       expect(() => lazy.getValue()).toThrow();
       expect(() => lazy.getValue()).toThrow();
-      expect(spy).toBeCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -49,7 +45,7 @@ describe('util/lazy', () => {
       lazy.getValue();
       const hasValue = lazy.hasValue();
       expect(hasValue).toBeTrue();
-      expect(spy).toBeCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('does not have a value', () => {
@@ -57,7 +53,7 @@ describe('util/lazy', () => {
       const lazy = new Lazy(() => spy());
       const hasValue = lazy.hasValue();
       expect(hasValue).toBeFalse();
-      expect(spy).toBeCalledTimes(0);
+      expect(spy).toHaveBeenCalledTimes(0);
     });
   });
 });
