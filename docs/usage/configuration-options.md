@@ -10,15 +10,16 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 
 You can store your Renovate configuration file in one of the following locations:
 
-- `.github/renovate.json`
-- `.github/renovate.json5`
-- `.gitlab/renovate.json`
-- `.gitlab/renovate.json5`
-- `.renovaterc.json`
-- `renovate.json`
-- `renovate.json5`
-- `.renovaterc`
-- `package.json` _(within a `"renovate"` section)_
+renovate.json
+renovate.json5
+.github/renovate.json
+.github/renovate.json5
+.gitlab/renovate.json
+.gitlab/renovate.json5
+.renovaterc
+.renovaterc.json
+
+When renovating a repository, Renovate will try to autodetect/touch those files in exactly the same order they are listead above.
 
 Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
