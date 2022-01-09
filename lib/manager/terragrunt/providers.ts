@@ -8,7 +8,7 @@ export const sourceExtractionRegex = regEx(
   /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
 );
 
-function extractBracesContent(content): number {
+function extractBracesContent(content: string): number {
   const stack = [];
   let i = 0;
   for (i; i < content.length; i += 1) {
@@ -32,12 +32,11 @@ export function extractTerragruntProvider(
   const lineNumber = startingLine;
   let line: string;
   const deps: PackageDependency[] = [];
-  const dep: PackageDependency = {
-    managerData: {
-      moduleName,
-      terragruntDependencyType: TerragruntDependencyTypes.terragrunt,
-    },
+  const managerData: Record<string, unknown> = {
+    moduleName,
+    terragruntDependencyType: TerragruntDependencyTypes.terragrunt,
   };
+  const dep: PackageDependency = { managerData };
   const teraformContent = lines
     .slice(lineNumber)
     .join('\n')
@@ -46,10 +45,10 @@ export function extractTerragruntProvider(
 
   for (let lineNo = 0; lineNo < teraformContent.length; lineNo += 1) {
     line = teraformContent[lineNo];
-    const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
-      dep.managerData.source = kvMatch.groups.value;
-      dep.managerData.sourceLine = lineNumber + lineNo;
+    const kvGroups = keyValueExtractionRegex.exec(line)?.groups;
+    if (kvGroups) {
+      managerData.source = kvGroups.value;
+      managerData.sourceLine = lineNumber + lineNo;
     }
   }
   deps.push(dep);
