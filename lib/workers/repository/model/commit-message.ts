@@ -1,8 +1,4 @@
-export interface CommitMessageJSON {
-  body?: string;
-  footer?: string;
-  subject?: string;
-}
+import type { CommitMessageJSON } from '../../../types';
 
 /**
  * @see https://git-scm.com/docs/git-commit#_discussion

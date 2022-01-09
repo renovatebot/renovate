@@ -1,4 +1,5 @@
-import { CommitMessage, CommitMessageJSON } from './commit-message';
+import type { CommitMessageJSON } from '../../../types';
+import { CommitMessage } from './commit-message';
 
 export interface SemanticCommitMessageJSON extends CommitMessageJSON {
   scope?: string;
