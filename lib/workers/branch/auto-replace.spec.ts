@@ -70,9 +70,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newValue = '7.1.1';
       upgrade.depIndex = 1;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
-      expect(res).toEqual(
-        `     ${script}  ${script.replace('7.1.0', '7.1.1')} `
-      );
+      expect(res).toBe(`     ${script}  ${script.replace('7.1.0', '7.1.1')} `);
     });
     it('handles already updated', async () => {
       const script =
@@ -126,7 +124,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
       const res = await doAutoReplace(upgrade, script, reuseExistingBranch);
-      expect(res).toEqual(
+      expect(res).toBe(
         `<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js" integrity="sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" crossorigin="anonymous">`
       );
     });
@@ -147,7 +145,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.autoReplaceStringTemplate =
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
-      expect(res).toEqual(
+      expect(res).toBe(
         `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
       );
     });
