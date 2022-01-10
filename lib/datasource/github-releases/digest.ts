@@ -14,7 +14,7 @@ async function findDigestFile(
   for (const asset of smallAssets) {
     const res = await http.get(asset.browser_download_url);
     for (const line of res.body.split('\n')) {
-      const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2); // TODO #12071
+      const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
       if (lineDigest === digest) {
         return {
           assetName: asset.name,

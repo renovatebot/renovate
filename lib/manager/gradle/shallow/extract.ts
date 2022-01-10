@@ -1,4 +1,4 @@
-import * as upath from 'upath';
+import upath from 'upath';
 import {
   id as datasource,
   defaultRegistryUrls,

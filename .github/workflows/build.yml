@@ -63,14 +63,14 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
         if: env.SKIP_JAVA_TESTS == 'false'
-        uses: actions/setup-java@5f00602cd1b2819185d88dc7a1b1985f598c6705 # renovate: tag=v2.4.0
+        uses: actions/setup-java@f0bb91606209742fe3ea40199be2f3ef195ecabf # renovate: tag=v2.5.0
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
@@ -92,17 +92,16 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+      # build before tests to for static file check
+      - name: Build
+        run: yarn build
+
       - name: Unit tests
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
         uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # renovate: tag=v2.1.0
         if: always() && env.coverage == 'true'
-
-      # build after tests to exclude build files from tests
-      # TODO: check if build before test speeds up tests
-      - name: Build
-        run: yarn build
 
       - name: E2E Test
         run: yarn test-e2e
@@ -119,7 +118,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -169,7 +168,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn

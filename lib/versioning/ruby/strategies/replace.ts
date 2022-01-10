@@ -71,7 +71,8 @@ export default ({ to, range }: { range: string; to: string }): string => {
     const lastPart = range
       .split(',')
       .map((part) => part.trim())
-      .pop();
+      .slice(-1)
+      .join();
     const lastPartPrecision = lastPart.split('.').length;
     const toPrecision = to.split('.').length;
     let massagedTo: string = to;

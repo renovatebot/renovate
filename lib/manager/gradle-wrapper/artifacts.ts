@@ -1,5 +1,5 @@
 import { quote } from 'shlex';
-import { resolve } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -62,7 +62,7 @@ export async function updateArtifacts({
     const projectDir = GlobalConfig.get('localDir');
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
     const gradlew = gradleWrapperFileName();
-    const gradlewPath = resolve(projectDir, `./${gradlew}`);
+    const gradlewPath = upath.resolve(projectDir, `./${gradlew}`);
     let cmd = await prepareGradleCommand(
       gradlew,
       projectDir,

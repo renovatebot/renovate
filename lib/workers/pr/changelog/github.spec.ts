@@ -83,41 +83,105 @@ describe('workers/pr/changelog/github', () => {
     });
 
     it('works without Github', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('uses GitHub tags', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('filters unnecessary warns', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           depName: '@renovate/no',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: '@renovate/no',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('supports node engines', async () => {
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           depType: 'engines',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('handles no sourceUrl', async () => {
@@ -171,13 +235,29 @@ describe('workers/pr/changelog/github', () => {
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           endpoint: 'https://github-enterprise.example.com/',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
 
     it('supports github enterprise and github enterprise changelog', async () => {
@@ -187,14 +267,30 @@ describe('workers/pr/changelog/github', () => {
         token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
-      // FIXME: explicit assert condition
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
           endpoint: 'https://github-enterprise.example.com/',
         })
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
+          baseUrl: 'https://github-enterprise.example.com/',
+          depName: 'renovate',
+          repository: 'chalk/chalk',
+          sourceDirectory: undefined,
+          sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
+          type: 'github',
+        },
+        versions: [
+          { version: '2.5.2' },
+          { version: '2.4.2' },
+          { version: '2.3.0' },
+          { version: '2.2.2' },
+        ],
+      });
     });
   });
 });

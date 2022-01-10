@@ -1,6 +1,6 @@
-import { validRange } from 'semver';
+import semver from 'semver';
 import { quote } from 'shlex';
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -17,7 +17,7 @@ export async function generateLockFile(
   config: PostUpdateConfig,
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = join(cwd, 'pnpm-lock.yaml');
+  const lockFileName = upath.join(cwd, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile = null;
   let stdout: string;
@@ -32,7 +32,7 @@ export async function generateLockFile(
     const pnpmCompatibility = pnpmUpdate
       ? pnpmUpdate.newValue
       : config.constraints?.pnpm;
-    if (validRange(pnpmCompatibility)) {
+    if (semver.validRange(pnpmCompatibility)) {
       installPnpm += `@${quote(pnpmCompatibility)}`;
     }
     const preCommands = [installPnpm];

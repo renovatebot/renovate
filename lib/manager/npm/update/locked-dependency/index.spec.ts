@@ -33,7 +33,10 @@ describe('manager/npm/update/locked-dependency/index', () => {
     it('validates filename', async () => {
       expect(
         await updateLockedDependency({ ...config, lockFile: 'yarn.lock' })
-      ).toBeNull();
+      ).toMatchObject({});
+      expect(
+        await updateLockedDependency({ ...config, lockFile: 'yarn.lock2' })
+      ).toMatchObject({});
     });
     it('validates versions', async () => {
       expect(
@@ -41,12 +44,12 @@ describe('manager/npm/update/locked-dependency/index', () => {
           ...config,
           newVersion: '^2.0.0',
         })
-      ).toBeNull();
+      ).toMatchObject({});
     });
     it('returns null for unparseable files', async () => {
       expect(
         await updateLockedDependency({ ...config, lockFileContent: 'not json' })
-      ).toBeNull();
+      ).toMatchObject({});
     });
     it('rejects lockFileVersion 2', async () => {
       expect(
@@ -54,10 +57,10 @@ describe('manager/npm/update/locked-dependency/index', () => {
           ...config,
           lockFileContent: lockFileContent.replace(': 1,', ': 2,'),
         })
-      ).toBeNull();
+      ).toMatchObject({});
     });
     it('returns null if no locked deps', async () => {
-      expect(await updateLockedDependency(config)).toBeNull();
+      expect(await updateLockedDependency(config)).toMatchObject({});
     });
     it('rejects null if no constraint found', async () => {
       expect(
@@ -68,7 +71,7 @@ describe('manager/npm/update/locked-dependency/index', () => {
           currentVersion: '10.0.0',
           newVersion: '11.0.0',
         })
-      ).toBeNull();
+      ).toMatchObject({});
     });
     it('remediates in-range', async () => {
       const res = await updateLockedDependency({
@@ -78,7 +81,7 @@ describe('manager/npm/update/locked-dependency/index', () => {
         newVersion: '1.2.12',
       });
       expect(
-        JSON.parse(res['package-lock.json']).dependencies.mime.version
+        JSON.parse(res.files['package-lock.json']).dependencies.mime.version
       ).toBe('1.2.12');
     });
     it('fails to remediate if parent dep cannot support', async () => {
@@ -98,16 +101,23 @@ describe('manager/npm/update/locked-dependency/index', () => {
         currentVersion: '1.0.0',
         newVersion: '2.0.0',
       });
-      expect(res).toBeNull();
+      expect(res).toMatchObject({});
     });
     it('remediates express', async () => {
       config.depName = 'express';
       config.currentVersion = '4.0.0';
       config.newVersion = '4.1.0';
       const res = await updateLockedDependency(config);
-      expect(res['package.json']).toContain('"express": "4.1.0"');
-      const packageLock = JSON.parse(res['package-lock.json']);
+      expect(res.files['package.json']).toContain('"express": "4.1.0"');
+      const packageLock = JSON.parse(res.files['package-lock.json']);
       expect(packageLock.dependencies.express.version).toBe('4.1.0');
+    });
+    it('returns if already remediated', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.10';
+      config.newVersion = '1.2.11';
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('already-updated');
     });
     it('remediates mime', async () => {
       config.depName = 'mime';
@@ -130,10 +140,18 @@ describe('manager/npm/update/locked-dependency/index', () => {
         .get('/type-is')
         .reply(200, typeIsJson);
       const res = await updateLockedDependency(config);
-      const packageLock = JSON.parse(res['package-lock.json']);
+      const packageLock = JSON.parse(res.files['package-lock.json']);
       expect(packageLock.dependencies.mime.version).toBe('1.4.1');
       expect(packageLock.dependencies.express.version).toBe('4.16.0');
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('fails remediation if cannot update parent', async () => {
+      config.depName = 'mime';
+      config.currentVersion = '1.2.11';
+      config.newVersion = '1.4.1';
+      config.allowParentUpdates = false;
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('update-failed');
     });
   });
 });
