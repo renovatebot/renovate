@@ -100,7 +100,14 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchBaseBranches.length) {
-    const isMatch = matchBaseBranches.includes(baseBranch);
+    const isMatch = matchBaseBranches.some((matchBaseBranch): boolean => {
+      const isAllowedPred = configRegexPredicate(matchBaseBranch);
+      if (isAllowedPred) {
+        return isAllowedPred(baseBranch);
+      }
+      return matchBaseBranch === baseBranch;
+    });
+
     if (!isMatch) {
       return false;
     }
@@ -143,7 +150,7 @@ function matchesRule(
           packagePattern === '^*$' || packagePattern === '*'
             ? '.*'
             : packagePattern
-        ); // TODO #12071
+        );
         if (packageRegex.test(depName)) {
           logger.trace(`${depName} matches against ${String(packageRegex)}`);
           isMatch = true;
@@ -173,7 +180,7 @@ function matchesRule(
     for (const pattern of excludePackagePatterns) {
       const packageRegex = regEx(
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
-      ); // TODO #12071
+      );
       if (packageRegex.test(depName)) {
         logger.trace(`${depName} matches against ${String(packageRegex)}`);
         isMatch = true;

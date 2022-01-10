@@ -4,6 +4,7 @@ import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
 import * as _helmv3 from '../../manager/helmv3';
 import * as _npm from '../../manager/npm';
+import * as _poetry from '../../manager/poetry';
 import type { BranchConfig } from '../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -12,12 +13,14 @@ const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
 const helmv3 = mocked(_helmv3);
 const npm = mocked(_npm);
+const poetry = mocked(_poetry);
 const autoReplace = mocked(_autoReplace);
 
 jest.mock('../../manager/composer');
 jest.mock('../../manager/helmv3');
 jest.mock('../../manager/npm');
 jest.mock('../../manager/git-submodules');
+jest.mock('../../manager/poetry');
 jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
@@ -157,10 +160,12 @@ describe('workers/branch/get-updated', () => {
     it('handles isRemediation success', async () => {
       config.upgrades.push({
         manager: 'npm',
+        lockFile: 'package-lock.json',
         isRemediation: true,
       } as never);
       npm.updateLockedDependency.mockResolvedValueOnce({
-        'package-lock.json': 'new contents',
+        status: 'updated',
+        files: { 'package-lock.json': 'new contents' },
       });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
@@ -177,7 +182,8 @@ describe('workers/branch/get-updated', () => {
       config.reuseExistingBranch = true;
       git.getFile.mockResolvedValueOnce('existing content');
       npm.updateLockedDependency.mockResolvedValue({
-        'package-lock.json': 'new contents',
+        status: 'updated',
+        files: { 'package-lock.json': 'new contents' },
       });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
@@ -243,9 +249,11 @@ describe('workers/branch/get-updated', () => {
         packageFile: 'composer.json',
         manager: 'composer',
         branchName: undefined,
-        rangeStrategy: 'update-lockfile',
+        isLockfileUpdate: true,
       });
-      autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
+      composer.updateLockedDependency.mockReturnValueOnce({
+        status: 'unsupported',
+      });
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -263,6 +271,96 @@ describe('workers/branch/get-updated', () => {
           { name: 'composer.json', contents: 'existing content' },
         ],
       });
+    });
+    it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
+      config.upgrades.push({
+        packageFile: 'pyproject.toml',
+        manager: 'poetry',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      poetry.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            name: 'poetry.lock',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot({
+        updatedArtifacts: [{ name: 'poetry.lock', contents: 'some contents' }],
+        updatedPackageFiles: [
+          { name: 'pyproject.toml', contents: 'existing content' },
+        ],
+      });
+    });
+    it('attempts updateLockedDependency and handles unsupported', async () => {
+      config.upgrades.push({
+        packageFile: 'package.json',
+        lockFiles: ['package-lock.json'],
+        manager: 'npm',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      npm.updateLockedDependency.mockResolvedValue({
+        status: 'unsupported',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "artifactErrors": Array [],
+          "reuseExistingBranch": undefined,
+          "updatedArtifacts": Array [],
+          "updatedPackageFiles": Array [],
+        }
+      `);
+    });
+    it('attempts updateLockedDependency and handles already-updated', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'package.json',
+        lockFile: 'package-lock.json',
+        manager: 'npm',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      npm.updateLockedDependency.mockResolvedValueOnce({
+        status: 'already-updated',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "artifactErrors": Array [],
+          "reuseExistingBranch": false,
+          "updatedArtifacts": Array [],
+          "updatedPackageFiles": Array [],
+        }
+      `);
+    });
+    it('attempts updateLockedDependency and handles updated files with reuse branch', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'package.json',
+        lockFile: 'package-lock.json',
+        manager: 'npm',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      git.getFile.mockResolvedValue('some content');
+      npm.updateLockedDependency.mockResolvedValue({
+        status: 'updated',
+        files: {},
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "artifactErrors": Array [],
+          "reuseExistingBranch": false,
+          "updatedArtifacts": Array [],
+          "updatedPackageFiles": Array [],
+        }
+      `);
     });
     it('bumps versions in updateDependency managers', async () => {
       config.upgrades.push({

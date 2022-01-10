@@ -1,4 +1,4 @@
-import { join } from 'upath';
+import upath from 'upath';
 import * as datasourceSbtPackage from '../../../datasource/sbt-package';
 import { logger } from '../../../logger';
 import {
@@ -52,7 +52,7 @@ gradle.buildFinished {
    def json = JsonOutput.toJson(output)
    outputFile.write json
 }`;
-  const gradleInitFile = join(gradleRoot, 'renovate-plugin.gradle');
+  const gradleInitFile = upath.join(gradleRoot, 'renovate-plugin.gradle');
   logger.debug(
     'Creating renovate-plugin.gradle file with renovate gradle plugin'
   );
@@ -60,7 +60,7 @@ gradle.buildFinished {
 }
 
 async function readGradleReport(localDir: string): Promise<GradleProject[]> {
-  const renovateReportFilename = join(
+  const renovateReportFilename = upath.join(
     localDir,
     GRADLE_DEPENDENCY_REPORT_FILENAME
   );
@@ -145,12 +145,11 @@ export async function extractDependenciesFromUpdatesReport(
       if (depName.endsWith('_%%')) {
         return {
           ...dep,
-          depName: depName.replace(regEx(/_%%/), ''), // TODO #12071
+          depName: depName.replace(regEx(/_%%/), ''),
           datasource: datasourceSbtPackage.id,
         };
       }
       if (regEx(/^%.*%$/).test(currentValue)) {
-        // TODO #12071
         return { ...dep, skipReason: 'version-placeholder' };
       }
       return dep;

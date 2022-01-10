@@ -26,7 +26,7 @@ export interface VersioningApi {
   isLessThanRange?(version: string, range: string): boolean;
   getSatisfyingVersion(versions: string[], range: string): string | null;
   minSatisfyingVersion(versions: string[], range: string): string | null;
-  getNewValue(newValueConfig: NewValueConfig): string;
+  getNewValue(newValueConfig: NewValueConfig): string | null;
   sortVersions(version: string, other: string): number;
 
   matches(version: string, range: string | Range): boolean;
