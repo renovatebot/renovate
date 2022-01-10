@@ -407,7 +407,7 @@ export async function syncGit(): Promise<void> {
       };
       await gitRetry(() => emptyDirAndClone());
     } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'git clonerror');
+      logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
