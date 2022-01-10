@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { isStable, isValid, api as nodever } from '.';
+import { isStable, isValid, api as nodever, valueToVersion } from '.';
 
 describe('versioning/node/index', () => {
   let dtLocal: any;
@@ -10,22 +10,32 @@ describe('versioning/node/index', () => {
     DateTime.local = dtLocal;
   });
 
-  test.each`
-    currentValue | rangeStrategy | currentVersion | newVersion  | expected
-    ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'v1.1.0'} | ${'1.1.0'}
-    ${'~8.0.0'}  | ${'replace'}  | ${'8.0.2'}     | ${'v8.2.0'} | ${'~8.2.0'}
-  `(
-    'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
-    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      const res = nodever.getNewValue({
+  describe('getNewValue', () => {
+    test.each`
+      currentValue | rangeStrategy | currentVersion | newVersion   | expected
+      ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'v1.1.0'}  | ${'1.1.0'}
+      ${'~8.0.0'}  | ${'replace'}  | ${'8.0.2'}     | ${'v8.2.0'}  | ${'~8.2.0'}
+      ${'erbium'}  | ${'replace'}  | ${'12.0.0'}    | ${'v14.1.4'} | ${'fermium'}
+      ${'Fermium'} | ${'replace'}  | ${'14.0.0'}    | ${'v16.1.6'} | ${'gallium'}
+    `(
+      'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
+      ({
         currentValue,
         rangeStrategy,
         currentVersion,
         newVersion,
-      });
-      expect(res).toBe(expected);
-    }
-  );
+        expected,
+      }) => {
+        const res = nodever.getNewValue({
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        });
+        expect(res).toBe(expected);
+      }
+    );
+  });
 
   describe('isStable', () => {
     const t1 = DateTime.fromISO('2020-09-01');
@@ -55,5 +65,18 @@ describe('versioning/node/index', () => {
 
   it('isValid', () => {
     expect(isValid === nodever.isValid).toBeTrue();
+  });
+
+  describe('valueToVersion', () => {
+    test.each`
+      value        | expected
+      ${'Erbium'}  | ${'v12'}
+      ${'fermium'} | ${'v14'}
+      ${'GALLIUM'} | ${'v16'}
+      ${'v13'}     | ${'v13'}
+      ${'bogus'}   | ${'bogus'}
+    `('valueToVersion("$value") === $expected', ({ value, expected }) => {
+      expect(valueToVersion(value as string)).toBe(expected);
+    });
   });
 });

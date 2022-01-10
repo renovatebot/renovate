@@ -1,7 +1,11 @@
 import { DateTime } from 'luxon';
 import npm, { isValid, isVersion } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
-import { nodeSchedule } from './schedule';
+import {
+  findScheduleForCodename,
+  findScheduleForVersion,
+  nodeSchedule,
+} from './schedule';
 
 export const id = 'node';
 export const displayName = 'Node.js';
@@ -14,6 +18,13 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
+  // Try to use codename if the current value is a codename
+  if (findScheduleForCodename(currentValue)) {
+    const newSchedule = findScheduleForVersion(newVersion);
+    if (newSchedule?.codename) {
+      return newSchedule.codename.toLowerCase();
+    }
+  }
   const res = npm.getNewValue({
     currentValue,
     rangeStrategy,
@@ -25,6 +36,11 @@ function getNewValue({
     return isVersion(res);
   }
   return res;
+}
+
+export function valueToVersion(value: string): string {
+  const schedule = findScheduleForCodename(value);
+  return schedule?.version || value;
 }
 
 export { isValid };
@@ -45,5 +61,7 @@ export const api: VersioningApi = {
   ...npm,
   isStable,
   getNewValue,
+  valueToVersion,
 };
+
 export default api;
