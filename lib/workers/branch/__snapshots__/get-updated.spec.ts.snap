@@ -178,15 +178,6 @@ Object {
 }
 `;
 
-exports[`workers/branch/get-updated getUpdatedPackageFiles() reuse branch when update artifacts on update-lockfile strategy with no updateLockedDependency 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [],
-}
-`;
-
 exports[`workers/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy 1`] = `
 Object {
   "artifactErrors": Array [],

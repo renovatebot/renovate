@@ -313,7 +313,9 @@ describe('workers/branch/get-updated', () => {
       ]);
       git.getFile.mockResolvedValueOnce('some contents');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        reuseExistingBranch: undefined,
         updatedArtifacts: [],
         updatedPackageFiles: [],
       });
