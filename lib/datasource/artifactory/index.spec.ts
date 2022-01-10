@@ -37,7 +37,7 @@ describe('datasource/artifactory/index', () => {
         datasource,
         lookupName: testLookupName,
       });
-      expect(res.releases).toHaveLength(4);
+      expect(res?.releases).toHaveLength(4);
       expect(res).toMatchSnapshot({
         registryUrl: 'https://jfrog.company.com/artifactory',
       });
@@ -53,7 +53,7 @@ describe('datasource/artifactory/index', () => {
         datasource,
         lookupName: testLookupName,
       });
-      expect(res.releases).toHaveLength(4);
+      expect(res?.releases).toHaveLength(4);
       expect(res).toMatchSnapshot({
         registryUrl: 'https://jfrog.company.com/artifactory',
       });
@@ -78,7 +78,7 @@ describe('datasource/artifactory/index', () => {
         datasource,
         lookupName: testLookupName,
       });
-      expect(res.releases).toHaveLength(5);
+      expect(res?.releases).toHaveLength(5);
       expect(res).toMatchSnapshot();
     });
 
