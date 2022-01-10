@@ -43,7 +43,7 @@ If you want to convert a string to a valid URI, use the built-in function `encod
 
 `{{{encodeURIComponent baseDir}}}`
 
-In the example above `myvar` is the string you want to transform into a valid URI.
+In the example above `baseDir` is the string you want to transform into a valid URI.
 
 Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to learn more.
 
