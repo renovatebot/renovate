@@ -51,6 +51,8 @@
     "lib/util/host-rules.ts",
     "lib/util/html.ts",
     "lib/util/http/**/.ts",
+    "lib/util/lazy.ts",
+    "lib/util/lazy.spec.ts",
     "lib/util/index.ts",
     "lib/util/json-writer/code-format.ts",
     "lib/util/json-writer/editor-config.ts",

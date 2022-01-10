@@ -22,6 +22,6 @@ export class Lazy<T> {
     if (this._error) {
       throw this._error;
     }
-    return this._value;
+    return this._value as never;
   }
 }
