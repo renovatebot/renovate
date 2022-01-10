@@ -295,6 +295,30 @@ describe('workers/branch/get-updated', () => {
         ],
       });
     });
+
+    it('reuse branch when update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
+      config.upgrades.push({
+        packageFile: 'pyproject.toml',
+        manager: 'poetry',
+        branchName: undefined,
+        isLockfileUpdate: true,
+      });
+      poetry.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            name: 'poetry.lock',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      git.getFile.mockResolvedValueOnce('some contents');
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot({
+        updatedArtifacts: [],
+        updatedPackageFiles: [],
+      });
+    });
+
     it('attempts updateLockedDependency and handles unsupported', async () => {
       config.upgrades.push({
         packageFile: 'package.json',

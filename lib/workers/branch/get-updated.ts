@@ -260,15 +260,25 @@ export async function getUpdatedPackageFiles(
         config,
       });
       if (is.nonEmptyArray(results)) {
-        updatedPackageFiles.push(packageFile);
+        let updated = false;
         for (const res of results) {
           const { file, artifactError } = res;
           // istanbul ignore else
-          if (file) {
+          if (
+            file &&
+            (await getFile(
+              file.name,
+              reuseExistingBranch ? config.branchName : config.baseBranch
+            )) !== file.contents
+          ) {
             updatedArtifacts.push(file);
+            updated = true;
           } else if (artifactError) {
             artifactErrors.push(artifactError);
           }
+        }
+        if (updated) {
+          updatedPackageFiles.push(packageFile);
         }
       }
     }
