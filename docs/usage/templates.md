@@ -49,6 +49,7 @@ Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-U
 
 ### replace
 
+The `replace` helper replaces _all_ found strings with the replacement string.
 If you want to replace some characters in a string, use the built-in function `replace` like this:
 
 `{{{replace 'github.com', 'ghc', depName}}}`
