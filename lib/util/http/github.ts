@@ -202,12 +202,15 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     try {
       result = await super.request<T>(url, opts);
-
       // istanbul ignore else: Can result be null ???
       if (result !== null) {
-        // Adjust the response if request has been made with Github App
-        if (result.body.repositories) {
-          result.body = result.body.repositories;
+        //When the response body is not an array, it means the response comes from the Github App endpoint and it needs to be converted.
+        if (!Array.isArray(result.body)) {
+          Object.values(result.body).forEach((element) => {
+            if (Array.isArray(element)) {
+              result.body = element;
+            }
+          });
         }
         if (opts.paginate) {
           // Check if result is paginated
@@ -238,6 +241,16 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
               }
             );
             const pages = await pAll(queue, { concurrency: 5 });
+            //When the response body is not an array, it means the response comes from the Github App endpoint and it needs to be converted.
+            pages.forEach((page) => {
+              if (!Array.isArray(page.body)) {
+                Object.values(page.body).forEach((element) => {
+                  if (Array.isArray(element)) {
+                    page.body = element;
+                  }
+                });
+              }
+            });
             if (opts.paginationField) {
               result.body[opts.paginationField] = result.body[
                 opts.paginationField
