@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noImplicitAny": true /* required for js files */,
-    "strictNullChecks": true /* required for js files */,
+    "noImplicitAny": false /* required for js files */,
+    "strictNullChecks": false /* required for js files */,
     "outDir": "./dist",
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
     "target": "es2020",
