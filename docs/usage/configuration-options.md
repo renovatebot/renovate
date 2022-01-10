@@ -22,7 +22,7 @@ You can store your Renovate configuration file in one of the following locations
 
 _Note_: Storing Renovate config in `package.json` is now deprecated and its support may be removed in the future.
 
-When renovating a repository, Renovate will try to autodetect/touch those files in exactly the same order they are listead above.
+When renovating a repository, Renovate will try to detect the configuration files in the order listed above, and stop after the first one is found.
 
 Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
