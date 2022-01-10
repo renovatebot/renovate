@@ -54,7 +54,7 @@ If you want to replace some characters in a string, use the built-in function `r
 
 `{{{replace 'github.com', 'ghc', depName}}}`
 
-In the example above `github.com` will be replaced by `ghc` in `depName`.
+In the example above all matches of `github.com` will be replaced by `ghc` in `depName`.
 
 Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
 
