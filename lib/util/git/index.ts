@@ -50,7 +50,6 @@ const delayFactor = 2;
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
 export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<any> {
-  logger.debug({ retryCount, delaySeconds, delayFactor }, 'gitRetry');
   let round = 0;
   while (round <= retryCount) {
     if (round > 0) {
