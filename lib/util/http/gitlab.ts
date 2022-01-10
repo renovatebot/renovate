@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
-import parseLinkHeader from 'parse-link-header';
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { parseUrl } from '../url';
+import { parseLinkHeader, parseUrl } from '../url';
 import { Http, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
@@ -40,7 +39,9 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
       if (opts.paginate && is.array(result.body)) {
         // Check if result is paginated
         try {
-          const linkHeader = parseLinkHeader(result.headers.link as string);
+          const linkHeader = await parseLinkHeader(
+            result.headers.link as string
+          );
           const nextUrl = linkHeader?.next?.url
             ? parseUrl(linkHeader.next.url)
             : null;

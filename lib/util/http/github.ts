@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
-import parseLinkHeader from 'parse-link-header';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -12,6 +11,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
 import { regEx } from '../regex';
+import { parseLinkHeader } from '../url';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -211,8 +211,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
         const linkHeader =
-          result?.headers?.link &&
-          parseLinkHeader(result.headers.link as string);
+          is.string(result?.headers?.link) &&
+          (await parseLinkHeader(result.headers.link as string));
         if (linkHeader?.next && linkHeader?.last) {
           let lastPage = +linkHeader.last.page;
           // istanbul ignore else: needs a test

@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-restricted-imports
+import type _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
 import { regEx } from './regex';
 
@@ -78,4 +80,19 @@ export function parseUrl(url: string): URL | null {
  */
 export function createURLFromHostOrURL(url: string): URL | null {
   return parseUrl(url) ?? parseUrl(`https://${url}`);
+}
+
+let parseLinkHeaderPromise: Promise<typeof _parseLinkHeader> | null = null;
+
+export type LinkHeaderLinks = _parseLinkHeader.Links;
+
+export async function parseLinkHeader(
+  linkHeader: string
+): Promise<LinkHeaderLinks | null> {
+  if (null === parseLinkHeaderPromise) {
+    // https://github.com/thlorenz/parse-link-header#environmental-variables
+    process.env.PARSE_LINK_HEADER_THROW_ON_MAXLEN_EXCEEDED = 'true';
+    parseLinkHeaderPromise = import('parse-link-header').then((m) => m.default);
+  }
+  return (await parseLinkHeaderPromise)(linkHeader);
 }

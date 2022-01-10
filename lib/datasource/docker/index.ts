@@ -1,11 +1,10 @@
 import URL from 'url';
-import parseLinkHeader from 'parse-link-header';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { hasKey } from '../../util/object';
 import { regEx } from '../../util/regex';
-import { ensurePathPrefix } from '../../util/url';
+import { ensurePathPrefix, parseLinkHeader } from '../../util/url';
 import {
   api as dockerVersioning,
   id as dockerVersioningId,
@@ -81,7 +80,7 @@ async function getDockerApiTags(
       noAuth: true,
     });
     tags = tags.concat(res.body.tags);
-    const linkHeader = parseLinkHeader(res.headers.link as string);
+    const linkHeader = await parseLinkHeader(res.headers.link as string);
     url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
     page += 1;
   } while (url && page < 20);
