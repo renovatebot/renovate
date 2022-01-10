@@ -1,5 +1,6 @@
 import { DescribeImagesCommand, EC2Client, Image } from '@aws-sdk/client-ec2';
 import { cache } from '../../util/cache/package/decorator';
+import { Lazy } from '../../util/lazy';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -28,13 +29,13 @@ export class AwsMachineImageDataSource extends Datasource {
     },
   };
 
-  private readonly ec2: EC2Client;
+  private readonly ec2: Lazy<EC2Client>;
 
   private readonly now: number;
 
   constructor() {
     super(AwsMachineImageDataSource.id);
-    this.ec2 = new EC2Client({});
+    this.ec2 = new Lazy(() => new EC2Client({}));
     this.now = Date.now();
   }
 
@@ -49,7 +50,7 @@ export class AwsMachineImageDataSource extends Datasource {
     const cmd = new DescribeImagesCommand({
       Filters: JSON.parse(serializedAmiFilter),
     });
-    const matchingImages = await this.ec2.send(cmd);
+    const matchingImages = await this.ec2.getValue().send(cmd);
     matchingImages.Images = matchingImages.Images ?? [];
     return matchingImages.Images.sort((image1, image2) => {
       const ts1 = image1.CreationDate ? Date.parse(image1.CreationDate) : 0;
