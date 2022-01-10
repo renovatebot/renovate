@@ -53,7 +53,9 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<any> {
   logger.debug({ retryCount, delaySeconds, delayFactor }, 'gitRetry');
   let round = 0;
   while (round <= retryCount) {
-    logger.debug({ round }, 'gitRetry round');
+    if (round > 0) {
+      logger.debug({ round }, 'gitRetry round');
+    }
     try {
       return await gitFunc();
     } catch (err) {
