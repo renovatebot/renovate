@@ -33,3 +33,7 @@ For example, if you want to use at least npm `8.1.0` and also allow newer versio
   }
 }
 ```
+
+## LTS codenames
+
+Renovate understands [codenames for Node.js LTS releases](https://github.com/nodejs/Release/blob/main/CODENAMES.md) and will offer upgrades for them (e.g. from `fermium` to `gallium`).
