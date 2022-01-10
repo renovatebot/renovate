@@ -1,27 +1,45 @@
+interface ValueResult<T> {
+  type: 'success';
+  value: T;
+}
+
+interface ErrorResult {
+  type: 'error';
+  err: Error;
+}
+
 export class Lazy<T> {
-  private _didRun = false;
-  private _value?: T;
-  private _error: Error | undefined;
+  private _result?: ValueResult<T> | ErrorResult;
 
   constructor(private readonly executor: () => T) {}
 
   hasValue(): boolean {
-    return this._didRun;
+    return !!this._result;
   }
 
   getValue(): T {
-    if (!this._didRun) {
-      try {
-        this._value = this.executor();
-      } catch (err) {
-        this._error = err;
-      } finally {
-        this._didRun = true;
+    const result = this._result;
+    if (result) {
+      if (result.type === 'success') {
+        return result.value;
+      }
+
+      if (result.type === 'error') {
+        throw result.err;
       }
     }
-    if (this._error) {
-      throw this._error;
+
+    return this.realizeValue();
+  }
+
+  private realizeValue(): T {
+    try {
+      const value = this.executor();
+      this._result = { type: 'success', value };
+      return value;
+    } catch (err) {
+      this._result = { type: 'error', err };
+      throw err;
     }
-    return this._value as never;
   }
 }
