@@ -13,7 +13,7 @@ export class RemovePropertyMigration extends AbstractMigration {
     this.propertyName = propertyName;
   }
 
-  run(): void {
+  override run(): void {
     this.delete(this.propertyName);
   }
 }
