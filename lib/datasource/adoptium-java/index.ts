@@ -28,20 +28,22 @@ export class AdoptiumJavaDatasource extends Datasource {
   private async getPageReleases(
     url: string,
     page: number
-  ): Promise<Release[] | undefined> {
+  ): Promise<Release[] | null> {
     const pgUrl = `${url}&page=${page}`;
     try {
       const pgRes = await this.http.getJson<AdoptiumJavaResponse>(pgUrl);
-      return pgRes?.body?.versions?.map(({ semver }) => ({
-        version: semver,
-      }));
+      return (
+        pgRes?.body?.versions?.map(({ semver }) => ({
+          version: semver,
+        })) ?? null
+      );
     } catch (err) {
       if (
         page !== 0 &&
         err instanceof HttpError &&
         err.response?.statusCode === 404
       ) {
-        return undefined;
+        return null;
       }
 
       throw err;

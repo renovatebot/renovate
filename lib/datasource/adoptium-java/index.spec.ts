@@ -11,6 +11,17 @@ function getPath(page: number, imageType = 'jdk'): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
 }
 
+function* range(
+  start: number,
+  end: number
+): Generator<number, number, number> | undefined {
+  yield start;
+  if (start === end) {
+    return;
+  }
+  yield* range(start + 1, end);
+}
+
 const depName = 'java';
 
 describe('datasource/adoptium-java/index', () => {
@@ -82,9 +93,9 @@ describe('datasource/adoptium-java/index', () => {
     });
 
     it('pages', async () => {
-      const versions = [...Array(51).keys()]
-        .slice(1)
-        .map((v) => ({ semver: `1.${v}.0` }));
+      const versions = [...range(1, 50)].map((v: number) => ({
+        semver: `1.${v}.0`,
+      }));
       httpMock
         .scope(defaultRegistryUrl)
         .get(getPath(0))
