@@ -89,7 +89,7 @@ describe('versioning/loose/utils', () => {
       ${'matches'}         | ${true}
       ${'sortVersions'}    | ${0}
     `('$fn', ({ fn, expected }: ApiTestData) => {
-      const apiFn: () => ApiTestExpected = api[fn] as never;
+      const apiFn: () => ApiTestExpected = api[fn].bind(api) as never;
       expect(apiFn()).toBe(expected);
     });
 
