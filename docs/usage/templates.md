@@ -56,3 +56,23 @@ If you want to replace some characters in a string, use the built-in function `r
 In the example above `github.com` will be replaced by `ghc` in `depName`.
 
 Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
+
+### containsString
+
+Returns `true` if a given string is a substring.
+
+`{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
+
+### and
+
+Returns `true` only if all expressions are `true`.
+
+`{{#if (and isMajor hasReleaseNotes)}}Backwards Incompatible release! Check out the Release notes.{{/if}}`
+
+In the example above, it will only show a text if `isMajor=true` and `hasReleaseNotes=true`.
+
+### or
+
+Returns `true` if at least one expression is `true`.
+
+`{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
