@@ -74,7 +74,7 @@ function applyDefaultHeaders(options: Options): void {
   options.headers = {
     ...options.headers,
     'user-agent':
-      process.env.RENOVATE_USER_AGENT ||
+      process.env.RENOVATE_USER_AGENT ??
       `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
@@ -95,7 +95,7 @@ async function gotRoutine<T>(
   // Otherwise it doesn't typecheck.
   const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
   const duration =
-    resp.timings.phases.total || /* istanbul ignore next: can't be tested */ 0;
+    resp.timings.phases.total ?? /* istanbul ignore next: can't be tested */ 0;
 
   const httpRequests = memCache.get('http-requests') || [];
   httpRequests.push({ ...requestStats, duration });
@@ -107,14 +107,14 @@ async function gotRoutine<T>(
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   private options?: GotOptions;
 
-  constructor(private hostType: string, options?: HttpOptions) {
+  constructor(private hostType: string, options: HttpOptions = {}) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
   protected async request<T>(
     requestUrl: string | URL,
-    httpOptions?: InternalHttpOptions
-  ): Promise<HttpResponse<T> | null> {
+    httpOptions: InternalHttpOptions = {}
+  ): Promise<HttpResponse<T>> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
@@ -160,7 +160,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     // Cache GET requests unless useCache=false
     if (
-      ['get', 'head'].includes(options.method) &&
+      (options.method === 'get' || options.method === 'head') &&
       options.useCache !== false
     ) {
       resPromise = memCache.get(cacheKey);
