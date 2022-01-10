@@ -87,7 +87,7 @@ let parseLinkHeaderPromise: Promise<typeof _parseLinkHeader> | null = null;
 export type LinkHeaderLinks = _parseLinkHeader.Links;
 
 export async function parseLinkHeader(
-  linkHeader: string
+  linkHeader: string | null | undefined
 ): Promise<LinkHeaderLinks | null> {
   if (null === parseLinkHeaderPromise) {
     // https://github.com/thlorenz/parse-link-header#environmental-variables
