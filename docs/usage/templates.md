@@ -41,7 +41,7 @@ In the example above `myvar` is a variable/field, that contains valid JSON.
 
 If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
 
-`{{{encodeURIComponent myvar}}}`
+`{{{encodeURIComponent baseDir}}}`
 
 In the example above `myvar` is the string you want to transform into a valid URI.
 
@@ -51,7 +51,7 @@ Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-U
 
 If you want to replace some characters in a string, use the built-in function `replace` like this:
 
-`{{{replace find, replace, context}}}`
+`{{{replace 'github.com', 'ghc', depName}}}`
 
 In the example above ...
 
