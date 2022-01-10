@@ -1,5 +1,5 @@
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
-import { lang, lexer, query as q } from '@renovatebot/parser-utils';
+import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier.js';
+import { lang, lexer, query as q } from 'good-enough-parser';
 import { PypiDatasource } from '../../datasource/pypi';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';

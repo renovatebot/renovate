@@ -86,6 +86,7 @@ const repoGroups = {
     'https://github.com/dotnet/runtime',
   ],
   dropwizard: 'https://github.com/dropwizard/dropwizard',
+  emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
   feathers: 'https://github.com/feathersjs/feathers',
@@ -101,6 +102,7 @@ const repoGroups = {
   ],
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
+  guava: 'https://github.com/google/guava',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   hapijs: 'https://github.com/hapijs',
@@ -165,6 +167,7 @@ const repoGroups = {
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
+  'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   springfox: 'https://github.com/springfox/springfox',
@@ -185,6 +188,7 @@ const repoGroups = {
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
   xterm: 'https://github.com/xtermjs/xterm.js',
+  'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
 const patternGroups = {

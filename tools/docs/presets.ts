@@ -34,7 +34,7 @@ export async function generatePresets(dist: string): Promise<void> {
     let content = `\n`;
     for (const [preset, value] of Object.entries(presetConfig)) {
       let header = `\n### ${name === 'default' ? '' : name}:${preset}`;
-      let presetDescription = value.description;
+      let presetDescription = value.description as string;
       delete value.description;
       if (!presetDescription) {
         if (value.packageRules?.[0].description) {
@@ -48,10 +48,10 @@ export async function generatePresets(dist: string): Promise<void> {
       } else {
         logger.warn(`Preset ${name}:${preset} has no description`);
       }
-      body += '\n```\n';
+      body += '\n```json\n';
       body += JSON.stringify(value, null, 2);
       body += '\n```\n';
-      body += '----\n';
+      body += '\n----\n';
       if (body.includes('{{arg0}}')) {
         header += '(`<arg0>`';
         if (body.includes('{{arg1}}')) {

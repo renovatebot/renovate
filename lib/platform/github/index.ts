@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
-import { valid as semverValid } from 'semver';
+import semver from 'semver';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -94,7 +94,7 @@ export async function detectGhe(token: string): Promise<void> {
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
       ) ?? [];
-    platformConfig.gheVersion = semverValid(gheVersion) ?? null;
+    platformConfig.gheVersion = semver.valid(gheVersion) ?? null;
   }
 }
 
@@ -411,23 +411,22 @@ export async function initRepo({
       );
       // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
       // with the base commit from the parent repository
+      const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
+      const sha = repo.defaultBranchRef.target.oid;
       try {
         logger.debug(
-          'Updating forked repository default sha to match upstream'
+          `Updating forked repository default sha ${sha} to match upstream`
         );
-        await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
-          {
-            body: {
-              sha: repo.defaultBranchRef.target.oid,
-              force: true,
-            },
-            token: forkToken || opts.token,
-          }
-        );
+        await githubApi.patchJson(url, {
+          body: {
+            sha,
+            force: true,
+          },
+          token: forkToken || opts.token,
+        });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
-          { err: err.err || err },
+          { url, sha, err: err.err || err },
           'Error updating fork from upstream - cannot continue'
         );
         if (err instanceof ExternalHostError) {
@@ -1245,7 +1244,7 @@ export async function addReviewers(
   const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
     .filter((e) => e.startsWith('team:'))
-    .map((e) => e.replace(regEx(/^team:/), '')); // TODO #12071
+    .map((e) => e.replace(regEx(/^team:/), ''));
   try {
     await githubApi.postJson(
       `repos/${

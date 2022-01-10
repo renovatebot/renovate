@@ -168,9 +168,12 @@ export function parseCatalog(
   const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {
     const pluginDescriptor = plugins[pluginName];
-    const depName = pluginDescriptor.id;
+    const [depName, version] =
+      typeof pluginDescriptor === 'string'
+        ? pluginDescriptor.split(':')
+        : [pluginDescriptor.id, pluginDescriptor.version];
     const { currentValue, fileReplacePosition } = extractVersion({
-      version: pluginDescriptor.version,
+      version,
       versions,
       depStartIndex: pluginsStartIndex,
       depSubContent: pluginsSubContent,

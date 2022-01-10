@@ -1,4 +1,6 @@
+import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
+import type { HostRule } from '../../types';
 import { getHttpUrl } from './url';
 
 /**
@@ -7,9 +9,16 @@ import { getHttpUrl } from './url';
  */
 export function getGitAuthenticatedEnvironmentVariables(
   gitUrl: string,
-  token: string,
+  { token, hostType, matchHost }: HostRule,
   environmentVariables?: NodeJS.ProcessEnv
 ): NodeJS.ProcessEnv {
+  if (!token) {
+    logger.warn(
+      `Could not create environment variable for ${matchHost} as token was empty`
+    );
+    return { ...environmentVariables };
+  }
+
   // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
   const gitConfigCountEnvVariable =
     environmentVariables?.GIT_CONFIG_COUNT || process.env.GIT_CONFIG_COUNT;
@@ -25,17 +34,28 @@ export function getGitAuthenticatedEnvironmentVariables(
     }
   }
 
-  const gitUrlWithToken = getHttpUrl(gitUrl, token);
+  const gitUrlWithToken = getUrlWithToken(gitUrl, hostType, token);
 
   // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
   // add the two new config key and value to the returnEnvironmentVariables object
   // increase the CONFIG_COUNT by one and add it to the object
-  const returnEnvironmentVariables = {
+  return {
     ...environmentVariables,
     [`GIT_CONFIG_KEY_${gitConfigCount}`]: `url.${gitUrlWithToken}.insteadOf`,
     [`GIT_CONFIG_VALUE_${gitConfigCount}`]: gitUrl,
     GIT_CONFIG_COUNT: (gitConfigCount + 1).toString(),
   };
+}
 
-  return returnEnvironmentVariables;
+function getUrlWithToken(
+  gitUrl: string,
+  hostType: string,
+  authToken: string
+): string {
+  let token = authToken;
+  if (hostType === PlatformId.Gitlab) {
+    token = `gitlab-ci-token:${token}`;
+  }
+
+  return getHttpUrl(gitUrl, token);
 }

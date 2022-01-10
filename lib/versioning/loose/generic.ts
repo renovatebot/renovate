@@ -104,15 +104,20 @@ export const comparer = (
   };
 };
 
-// helper functions to ease create other versioning schemas with little code
-// especially if those schemas do not support ranges
+/**
+ * helper functions to ease create other versioning schemas with little code
+ * especially if those schemas do not support ranges
+ * @deprecated Use `GenericVersioningApi` instead
+ * @param param0 object with parse and optional compare function
+ * @returns
+ */
 export const create = ({
   parse,
   compare,
 }: {
   parse: VersionParser;
   compare: VersionComparator;
-}): any => {
+}): VersioningApi => {
   let schema: VersioningApi = {} as any;
   if (parse) {
     schema = { ...schema, ...parser(parse) };

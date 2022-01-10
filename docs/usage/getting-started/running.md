@@ -27,7 +27,7 @@ Therefore if you need Renovate to support any non-npm lock files like Bundler th
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
-Renovate requires Node.js >=14.15.0 as well as Git >=2.33.0.
+Renovate requires Node.js `>=14.15.0` and Git `>=2.33.0`.
 
 #### Docker image
 
@@ -92,7 +92,7 @@ WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-live
 
 ### Global config
 
-Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js` or `config.json`), environment variables, or CLI parameters.
+Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js`, `config.json`, `config.json5`, `config.yaml` or `config.yml`), environment variables, or CLI parameters.
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -108,6 +108,21 @@ If you combine both of the above then any single config option in the environmen
 
 Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
+#### Using `config.js`
+
+If you use a `config.js`, it will be expected to export a configuration via `module.exports`.
+The value can be either a plain JavaScript object like in this example where `config.js` exports a plain object:
+
+```javascript
+module.exports = {
+  token: 'abcdefg',
+};
+```
+
+`config.js` may also export a `Promise` of such an object, or a function that will return either a plain JavaScript object or a `Promise` of such an object.
+This allows one to include the results of asynchronous operations in the exported value.
+An example of a `config.js` that exports an async function (which is a function that returns a `Promise`) can be seen in a comment for [#10011: Allow autodiscover filtering for repo topic](https://github.com/renovatebot/renovate/issues/10011#issuecomment-992568583) and more examples can be seen in [`file.spec.ts`](https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts).
+
 ### Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
@@ -116,7 +131,7 @@ It is also recommended that you configure `config.gitAuthor` with the same ident
 
 #### GitHub (Enterprise Server)
 
-First, [create a Personal Access Token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" scope).
+First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account (select "repo" scope).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
@@ -171,7 +186,14 @@ Don't forget to configure `platform=gitlab` somewhere in config.
 
 #### Bitbucket Cloud
 
-First, [create an AppPassword](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html) for the bot account.
+First, [create an AppPassword](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
+Give the bot App password the following permission scopes:
+
+- [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account) (Account: Read)
+- [`team`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#team) (Workspace membership: Read)
+- [`issue:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#issue-write) (Issues: Write)
+- [`pullrequest:write`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pullrequest-write) (Pull requests: Write)
+
 Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
 Also be sure to configure the `username` for your bot account too.
 Don't forget to configure `platform=bitbucket` somewhere in config.
@@ -187,7 +209,7 @@ If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot co
 
 ### Azure DevOps
 
-First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats) for the bot account.
+First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=azure` somewhere in config.
 

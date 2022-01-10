@@ -114,7 +114,7 @@ Must be valid usernames on the platform in use.
 
 If enabled Renovate will try to determine PR assignees by matching rules defined in a CODEOWNERS file against the changes in the PR.
 
-See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
 
 ## assigneesSampleSize
 
@@ -363,10 +363,14 @@ The "topic" is usually refers to the dependency being updated, e.g. `"dependency
 
 ## composerIgnorePlatformReqs
 
-By default, Renovate will run Composer with `--ignore-platform-reqs` as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
-However, this also means that all platform constraints (including PHP version) will be ignored by default, which can result in updated dependencies that are not compatible with your platform.
+By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match the required PHP environment of your project as configured in your `composer.json` file.
 
-To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
+Composer `2.2` and up will be run with `--ignore-platform-req='ext-*' --ignore-platform-req='lib-*'`, which ignores extension and library platform requirements but not the PHP version itself and should work in most cases.
+
+Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default.
+This can result in updated dependencies that are not compatible with your platform.
+
+To customize this behaviour, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
 Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
 The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
@@ -641,8 +645,8 @@ See [shareable config presets](https://docs.renovatebot.com/config-presets) for 
 
 ## extractVersion
 
-Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file.
-You must defined a "named capture group" called `version` as shown in the below examples.
+Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
+You must define a "named capture group" called `version` like in the examples below.
 
 For example, to extract only the major.minor precision from a GitHub release, the following would work:
 
@@ -688,7 +692,7 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchReleaseNotes
 
-Configure this to `false` if you want to disable release notes fetching
+Set this to `false` if you want to disable release notes fetching.
 
 ## fileMatch
 
@@ -745,9 +749,9 @@ Otherwise, if another bot or human shares the same email and pushes to one of Re
 
 Specify commit authors ignored by Renovate.
 
-By default, Renovate will treat any PR as modified if another git author has added to the branch.
+By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
-If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other git author(s) to `gitIgnoredAuthors`.
+If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other Git author(s) to `gitIgnoredAuthors`.
 
 Example:
 
@@ -768,7 +772,7 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
-For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://golang.org/ref/mod#module-proxy)).
+For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
 
 Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
 Also we support the `off` keyword which will stop any fetching immediately.
@@ -1485,6 +1489,20 @@ Use this field to restrict rules to a particular branch. e.g.
 }
 ```
 
+This field also supports Regular Expressions if they begin and end with `/`. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchBaseBranches": ["/^release\\/.*/"],
+      "excludePackagePatterns": ["^eslint"],
+      "enabled": false
+    }
+  ]
+}
+```
+
 ### matchManagers
 
 Use this field to restrict rules to a particular package manager. e.g.
@@ -1997,6 +2015,8 @@ Possible values and meanings:
 - If you have enforced that PRs must be up-to-date before merging (e.g. using branch protection on GitHub), then automerge won't be possible as soon as a PR gets out-of-date but remains non-conflicted
 
 It is also recommended to avoid `rebaseWhen=never` as it can result in conflicted branches with outdated PR descriptions and/or status checks.
+
+Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` as this can prevent creation of PRs.
 
 ## recreateClosed
 
@@ -2535,7 +2555,7 @@ To opt in to letting Renovate update internal package versions normally, set thi
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
-However there are cases where updates might be desirable - e.g. if you have configured prCreation=not-pending, or you have rebaseWhen=behind-base-branch and the base branch is updated so you want Renovate PRs to be rebased.
+However there are cases where updates might be desirable - e.g. if you have configured `prCreation=not-pending`, or you have `rebaseWhen=behind-base-branch` and the base branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
 If you wish to disable all updates outside of scheduled hours then configure this field to `false`.
@@ -2592,7 +2612,7 @@ Other managers can use the `"loose"` versioning fallback: the first 3 parts are 
 ## vulnerabilityAlerts
 
 Renovate can read from GitHub's Vulnerability Alerts and customize Pull Requests accordingly.
-For this to work, you must first ensure you have enabled "[Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/about-the-dependency-graph#enabling-the-dependency-graph)" and "[Dependabot alerts](https://docs.github.com/en/github/administering-a-repository/managing-security-and-analysis-settings-for-your-repository)" under the "Security & analysis" section of the repository's "Settings" tab.
+For this to work, you must first ensure you have enabled "[Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph#enabling-the-dependency-graph)" and "[Dependabot alerts](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository)" under the "Security & analysis" section of the repository's "Settings" tab.
 
 Additionally, if you are running Renovate in app mode then you must make sure that the app has been granted the permissions to read "Vulnerability alerts".
 If you are the account admin, browse to the app (e.g. [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and verify that read access to "vulnerability alerts" is mentioned.

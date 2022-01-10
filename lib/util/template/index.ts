@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import * as handlebars from 'handlebars';
+import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { clone } from '../clone';
@@ -13,8 +13,28 @@ handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
 // istanbul ignore next
 handlebars.registerHelper(
   'replace',
-  (find, replace, context) => context.replace(new RegExp(find, 'g'), replace) // TODO #12873
+  (find, replace, context) =>
+    (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
+
+handlebars.registerHelper('containsString', (str, subStr, options) =>
+  str.includes(subStr)
+);
+
+handlebars.registerHelper({
+  and(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.every(Boolean);
+  },
+  or(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.some(Boolean);
+  },
+});
 
 export const exposedConfigOptions = [
   'additionalBranchPrefix',

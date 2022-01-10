@@ -262,10 +262,10 @@ const options: RenovateOptions[] = [
   {
     name: 'binarySource',
     description:
-      'Controls whether third-party tools like npm or Gradle are called directly, or via Docker sidecar containers.',
+      'Controls whether third-party tools like npm or Gradle are called directly, via Docker sidecar containers, or dynamic install.',
     globalOnly: true,
     type: 'string',
-    allowedValues: ['global', 'docker'],
+    allowedValues: ['global', 'docker', 'install'],
     default: 'global',
   },
   {
@@ -860,7 +860,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchBaseBranches',
     description:
-      'List of branches to match (e.g. ["master"]). Valid only within `packageRules` object.',
+      'List of strings containing exact matches (e.g. `["main"]`) and/or regex expressions (e.g. `["/^release\\/.*/"]`). Valid only within `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1603,7 +1603,7 @@ const options: RenovateOptions[] = [
   {
     name: 'groupSlug',
     description:
-      'Slug to use for group (e.g. in branch name). Will be calculated from groupName if null.',
+      'Slug to use for group (e.g. in branch name). Will be calculated from `groupName` if `null`.',
     type: 'string',
     default: null,
     cli: false,
@@ -2137,7 +2137,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Allow to disable release notes fetching.',
+    description: 'Whether or not to fetch release notes.',
     type: 'boolean',
     default: true,
     cli: false,
