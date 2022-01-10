@@ -8,7 +8,7 @@ import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
+import { getAuthenticatedEnvironmentVariables } from '../../util/git/auth';
 import { find, getAll } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { createURLFromHostOrURL, validateUrl } from '../../util/url';
@@ -30,7 +30,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   });
 
   if (githubToken?.token) {
-    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+    environmentVariables = getAuthenticatedEnvironmentVariables(
       'https://github.com/',
       githubToken
     );
@@ -63,7 +63,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
         logger.debug(
           `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
         );
-        environmentVariables = getGitAuthenticatedEnvironmentVariables(
+        environmentVariables = getAuthenticatedEnvironmentVariables(
           httpUrl,
           hostRule,
           environmentVariables

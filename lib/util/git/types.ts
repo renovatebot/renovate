@@ -56,3 +56,12 @@ export type CommitFilesConfig = {
   message: string;
   force?: boolean;
 };
+
+/**
+ * Represents a git authentication rule in the form of e.g.:
+ * git config --global url."https://api@github.com/".insteadOf "https://github.com/"
+ */
+export type AuthenticationRule = {
+  url: string;
+  insteadOf: string;
+};

@@ -1,14 +1,15 @@
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
-import { getHttpUrl } from './url';
+import { AuthenticationRule } from './types';
+import { getAuthenticationRules } from './url';
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
  * @returns a new NodeJS.ProcessEnv object without modifying any input parameters
  */
-export function getGitAuthenticatedEnvironmentVariables(
-  gitUrl: string,
+export function getAuthenticatedEnvironmentVariables(
+  originalGitUrl: string,
   { token, hostType, matchHost }: HostRule,
   environmentVariables?: NodeJS.ProcessEnv
 ): NodeJS.ProcessEnv {
@@ -34,28 +35,38 @@ export function getGitAuthenticatedEnvironmentVariables(
     }
   }
 
-  const gitUrlWithToken = getUrlWithToken(gitUrl, hostType, token);
+  const authenticationRules = getAuthenticationRulesWithToken(
+    originalGitUrl,
+    hostType,
+    token
+  );
 
   // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
   // add the two new config key and value to the returnEnvironmentVariables object
-  // increase the CONFIG_COUNT by one and add it to the object
-  return {
+  // increase the CONFIG_COUNT by one for each rule and add it to the object
+  const newEnvironmentVariables = {
     ...environmentVariables,
-    [`GIT_CONFIG_KEY_${gitConfigCount}`]: `url.${gitUrlWithToken}.insteadOf`,
-    [`GIT_CONFIG_VALUE_${gitConfigCount}`]: gitUrl,
-    GIT_CONFIG_COUNT: (gitConfigCount + 1).toString(),
   };
+  authenticationRules.forEach(({ url, insteadOf }) => {
+    newEnvironmentVariables[
+      `GIT_CONFIG_KEY_${gitConfigCount}`
+    ] = `url.${url}.insteadOf`;
+    newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] = insteadOf;
+    gitConfigCount++;
+  });
+  newEnvironmentVariables['GIT_CONFIG_COUNT'] = gitConfigCount.toString();
+
+  return newEnvironmentVariables;
 }
 
-function getUrlWithToken(
-  gitUrl: string,
+function getAuthenticationRulesWithToken(
+  url: string,
   hostType: string,
   authToken: string
-): string {
+): AuthenticationRule[] {
   let token = authToken;
   if (hostType === PlatformId.Gitlab) {
-    token = `gitlab-ci-token:${token}`;
+    token = `gitlab-ci-token:${authToken}`;
   }
-
-  return getHttpUrl(gitUrl, token);
+  return getAuthenticationRules(url, token);
 }
