@@ -52,7 +52,7 @@ This way:
 
 ## Manual rebasing
 
-You can request that Renovate rebase a PR by ticking the rebase/retry checkbox on GitHub or Gitlab.
+You can request that Renovate rebase a PR by ticking the rebase/retry checkbox on GitHub or GitLab.
 Or you can add a "rebase" label to the PR.
 The label name is configurable via the `rebaseLabel` option.
 
