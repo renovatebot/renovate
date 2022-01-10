@@ -20,7 +20,7 @@ You can store your Renovate configuration file in one of the following locations
 - `.renovaterc.json`
 - `package.json` _(within a `"renovate"` section)_
 
-_Note_: Storing Renovate config in `package.json` is now deprecated and its support may be removed in the future.
+_Note_: Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
 
 When renovating a repository, Renovate will try to detect the configuration files in the order listed above, and stop after the first one is found.
 
