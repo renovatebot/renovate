@@ -10,14 +10,14 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 
 You can store your Renovate configuration file in one of the following locations:
 
-- renovate.json
-- renovate.json5
-- .github/renovate.json
-- .github/renovate.json5
-- .gitlab/renovate.json
-- .gitlab/renovate.json5
-- .renovaterc
-- .renovaterc.json
+- `renovate.json`
+- `renovate.json5`
+- `.github/renovate.json`
+- `.github/renovate.json5`
+- `.gitlab/renovate.json`
+- `.gitlab/renovate.json5`
+- `.renovaterc`
+- `.renovaterc.json`
 - `package.json` _(within a `"renovate"` section)_
 
 _Note_: Storing Renovate config in `package.json` is now deprecated and its support may be removed in the future.
