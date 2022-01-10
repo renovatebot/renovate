@@ -151,13 +151,15 @@ export async function getRepos(): Promise<string[]> {
     url: platformConfig.endpoint,
   });
   try {
-    const endpoint = opts.token?.startsWith('x-access-token:')
-      ? 'installation/repositories'
-      : 'user/repos';
+    const isGHApp = opts.token?.startsWith('x-access-token:');
+    const endpoint = isGHApp ? 'installation/repositories' : 'user/repos';
     const res = await githubApi.getJson<{ full_name: string }[]>(
       `${endpoint}?per_page=100`,
-      { paginate: 'all' }
+      { paginationField: 'repositories', paginate: 'all' }
     );
+    if (isGHApp) {
+      res.body = res.body.repositories;
+    }
     return res.body.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
