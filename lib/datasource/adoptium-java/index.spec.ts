@@ -49,6 +49,16 @@ describe('datasource/adoptium-java/index', () => {
       ).toBeNull();
     });
 
+    it('returns null for empty result', async () => {
+      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, {});
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName,
+        })
+      ).toBeNull();
+    });
+
     it('returns null for empty 200 OK', async () => {
       httpMock
         .scope(defaultRegistryUrl)
