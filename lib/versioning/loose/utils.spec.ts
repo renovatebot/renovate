@@ -14,7 +14,7 @@ describe('versioning/loose/utils', () => {
     'valueOf',
   ];
   function getAllPropertyNames(obj: any): string[] {
-    const props = [];
+    const props: string[] = [];
     let o = obj;
 
     do {
@@ -34,7 +34,7 @@ describe('versioning/loose/utils', () => {
         return _version ? _version.localeCompare(_other) : 0;
       }
 
-      protected _parse(_version: string): GenericVersion {
+      protected _parse(_version: string): GenericVersion | null {
         return _version === 'test' ? null : { release: [1, 0, 0] };
       }
     }
@@ -68,6 +68,11 @@ describe('versioning/loose/utils', () => {
       ]);
     });
 
+    type ApiTestExpected = number | boolean | undefined;
+    type ApiTestData = {
+      fn: keyof DummyScheme;
+      expected: ApiTestExpected;
+    };
     test.each`
       fn                   | expected
       ${'equals'}          | ${true}
@@ -83,8 +88,9 @@ describe('versioning/loose/utils', () => {
       ${'isVersion'}       | ${true}
       ${'matches'}         | ${true}
       ${'sortVersions'}    | ${0}
-    `('$fn', ({ fn, expected }) => {
-      expect(api[fn]()).toBe(expected);
+    `('$fn', ({ fn, expected }: ApiTestData) => {
+      const apiFn: () => ApiTestExpected = api[fn] as never;
+      expect(apiFn()).toBe(expected);
     });
 
     it('getMajor is null', () => {

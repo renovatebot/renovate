@@ -19,26 +19,26 @@ export interface VersionComparator {
 // parse should return null if version not valid
 // parse should return an object with property release, an array of version sections major.minor.patch
 export const parser = (parse: VersionParser): Partial<VersioningApi> => {
-  function isValid(version: string): string {
+  function isValid(version: string): string | null {
     if (!version) {
       return null;
     }
     const parsed = parse(version);
     return parsed ? version : null;
   }
-  function getSection(version: string, index: number): number {
+  function getSection(version: string, index: number): number | null {
     const parsed = parse(version);
     return parsed && parsed.release.length > index
       ? parsed.release[index]
       : null;
   }
-  function getMajor(version: string): number {
+  function getMajor(version: string): number | null {
     return getSection(version, 0);
   }
-  function getMinor(version: string): number {
+  function getMinor(version: string): number | null {
     return getSection(version, 1);
   }
-  function getPatch(version: string): number {
+  function getPatch(version: string): number | null {
     return getSection(version, 2);
   }
 
@@ -78,11 +78,17 @@ export const comparer = (
   }
 
   // we don't not have ranges, so versions has to be equal
-  function getSatisfyingVersion(versions: string[], range: string): string {
-    return versions.find((v) => equals(v, range)) || null;
+  function getSatisfyingVersion(
+    versions: string[],
+    range: string
+  ): string | null {
+    return versions.find((v) => equals(v, range)) ?? null;
   }
-  function minSatisfyingVersion(versions: string[], range: string): string {
-    return versions.find((v) => equals(v, range)) || null;
+  function minSatisfyingVersion(
+    versions: string[],
+    range: string
+  ): string | null {
+    return versions.find((v) => equals(v, range)) ?? null;
   }
   function getNewValue(newValueConfig: NewValueConfig): string {
     const { newVersion } = newValueConfig || {};
@@ -132,7 +138,7 @@ export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion
 > implements VersioningApi
 {
-  private _getSection(version: string, index: number): number {
+  private _getSection(version: string, index: number): number | null {
     const parsed = this._parse(version);
     return parsed && parsed.release.length > index
       ? parsed.release[index]
@@ -197,7 +203,7 @@ export abstract class GenericVersioningApi<
 
   isStable(version: string): boolean {
     const parsed = this._parse(version);
-    return parsed && !parsed.prerelease;
+    return !!(parsed && !parsed.prerelease);
   }
 
   isSingleVersion(version: string): string | boolean {
@@ -233,11 +239,11 @@ export abstract class GenericVersioningApi<
   }
 
   getSatisfyingVersion(versions: string[], range: string): string | null {
-    return versions.find((v) => this.equals(v, range)) || null;
+    return versions.find((v) => this.equals(v, range)) ?? null;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
-    return versions.find((v) => this.equals(v, range)) || null;
+    return versions.find((v) => this.equals(v, range)) ?? null;
   }
 
   getNewValue(newValueConfig: NewValueConfig): string {
