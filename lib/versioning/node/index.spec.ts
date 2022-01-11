@@ -76,4 +76,48 @@ describe('versioning/node/index', () => {
       expect(nodever.isValid(version as string)).toBe(expected);
     });
   });
+
+  describe('matches', () => {
+    test.each`
+      version     | range        | expected
+      ${'16.0.0'} | ${'gallium'} | ${true}
+      ${'16.0.0'} | ${'fermium'} | ${false}
+    `('("$version","$range") === $expected', ({ version, range, expected }) => {
+      expect(nodever.matches(version as string, range as string)).toBe(
+        expected
+      );
+    });
+  });
+
+  describe('getSatisfyingVersion', () => {
+    test.each`
+      versions                          | range        | expected
+      ${['16.0.0']}                     | ${'gallium'} | ${'16.0.0'}
+      ${['16.0.0', '14.0.0', '16.9.9']} | ${'gallium'} | ${'16.9.9'}
+      ${['15.0.0', '14.0.0']}           | ${'gallium'} | ${null}
+    `(
+      '("$versions","$range") === $expected',
+      ({ versions, range, expected }) => {
+        expect(
+          nodever.getSatisfyingVersion(versions as string[], range as string)
+        ).toBe(expected);
+      }
+    );
+  });
+
+  describe('minSatisfyingVersion', () => {
+    test.each`
+      versions                          | range        | expected
+      ${['16.0.0']}                     | ${'gallium'} | ${'16.0.0'}
+      ${['16.0.0', '14.0.0', '16.9.9']} | ${'gallium'} | ${'16.0.0'}
+      ${['15.0.0', '14.0.0']}           | ${'gallium'} | ${null}
+    `(
+      '("$versions","$range") === $expected',
+      ({ versions, range, expected }) => {
+        expect(
+          nodever.minSatisfyingVersion(versions as string[], range as string)
+        ).toBe(expected);
+      }
+    );
+  });
 });

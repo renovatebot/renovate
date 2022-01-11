@@ -48,7 +48,7 @@ function getNewValue({
   return res;
 }
 
-export function isValid(version: string): boolean | string {
+export function isValid(version: string): boolean | string | null {
   return npm.isValid(normalizeValue(version));
 }
 
