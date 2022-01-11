@@ -14,7 +14,7 @@ const awsMachineImageRegex = regEx('^ami-(?<suffix>[a-z0-9]{17})$');
 class AwsMachineImageVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
     if (version) {
-      const matchGroups = version.match(awsMachineImageRegex)?.groups;
+      const matchGroups = awsMachineImageRegex.exec(version)?.groups;
       if (matchGroups) {
         const { suffix } = matchGroups;
         return { release: [1, 0, 0], suffix };
