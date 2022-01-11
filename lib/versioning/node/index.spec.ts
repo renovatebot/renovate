@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { isStable, isValid, api as nodever, valueToVersion } from '.';
+import { api as nodever } from '.';
 
 describe('versioning/node/index', () => {
   let dtLocal: any;
@@ -18,7 +18,7 @@ describe('versioning/node/index', () => {
       ${'erbium'}  | ${'replace'}  | ${'12.0.0'}    | ${'v14.1.4'} | ${'fermium'}
       ${'Fermium'} | ${'replace'}  | ${'14.0.0'}    | ${'v16.1.6'} | ${'gallium'}
     `(
-      'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
+      '($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
       ({
         currentValue,
         rangeStrategy,
@@ -56,27 +56,14 @@ describe('versioning/node/index', () => {
       ${'10.1.0'}   | ${t1} | ${true}
       ${'10.0.0a'}  | ${t1} | ${false}
       ${'9.0.0'}    | ${t1} | ${false}
-    `('isStable("$version") === $expected', ({ version, time, expected }) => {
+    `('("$version") === $expected', ({ version, time, expected }) => {
       DateTime.local = (...args: (string | any)[]) =>
         args.length ? dtLocal.apply(DateTime, args) : time;
-      expect(isStable(version as string)).toBe(expected);
+      expect(nodever.isStable(version as string)).toBe(expected);
     });
   });
 
   it('isValid', () => {
-    expect(isValid === nodever.isValid).toBeTrue();
-  });
-
-  describe('valueToVersion', () => {
-    test.each`
-      value        | expected
-      ${'Erbium'}  | ${'v12'}
-      ${'fermium'} | ${'v14'}
-      ${'GALLIUM'} | ${'v16'}
-      ${'v13'}     | ${'v13'}
-      ${'bogus'}   | ${'bogus'}
-    `('valueToVersion("$value") === $expected', ({ value, expected }) => {
-      expect(valueToVersion(value as string)).toBe(expected);
-    });
+    expect(nodever.isValid === nodever.isValid).toBeTrue();
   });
 });

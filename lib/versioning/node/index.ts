@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { valid } from 'semver';
-import npm, { isValid, isVersion } from '../npm';
+import npm, { isVersion } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   findScheduleForCodename,
@@ -12,6 +12,15 @@ export const id = 'node';
 export const displayName = 'Node.js';
 export const urls = [];
 export const supportsRanges = false;
+
+function normalizeValue(value: string): string {
+  const schedule = findScheduleForCodename(value);
+  if (schedule) {
+    const major = schedule.version.replace('v', '');
+    return `^${major}.x`;
+  }
+  return value;
+}
 
 function getNewValue({
   currentValue,
@@ -27,7 +36,7 @@ function getNewValue({
     }
   }
   const res = npm.getNewValue({
-    currentValue,
+    currentValue: normalizeValue(currentValue),
     rangeStrategy,
     currentVersion,
     newVersion,
@@ -39,12 +48,9 @@ function getNewValue({
   return res;
 }
 
-export function valueToVersion(value: string): string {
-  const schedule = findScheduleForCodename(value);
-  return schedule?.version || value;
+export function isValid(value: string): boolean | string {
+  return npm.isValid(normalizeValue(value));
 }
-
-export { isValid };
 
 export function isStable(version: string): boolean {
   if (npm.isStable(version)) {
@@ -58,11 +64,32 @@ export function isStable(version: string): boolean {
   return false;
 }
 
+export function matches(version: string, range: string): boolean {
+  return npm.matches(version, normalizeValue(range));
+}
+
+export function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.getSatisfyingVersion(versions, normalizeValue(range));
+}
+
+export function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.minSatisfyingVersion(versions, normalizeValue(range));
+}
+
 export const api: VersioningApi = {
   ...npm,
   isStable,
   getNewValue,
-  valueToVersion,
+  isValid,
+  matches,
+  getSatisfyingVersion,
+  minSatisfyingVersion,
 };
 
 export default api;

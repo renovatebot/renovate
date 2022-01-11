@@ -21,8 +21,11 @@ export function findScheduleForCodename(
 ): ({ version: string } & NodeJsSchedule) | null {
   for (const version of Object.keys(nodeSchedule)) {
     const schedule = nodeSchedule[version];
-    if (schedule.codename?.toLowerCase() === codename.toLowerCase()) {
-      return { version, ...schedule };
+    if (
+      schedule.codename &&
+      schedule.codename.toLowerCase() === codename?.toLowerCase()
+    ) {
+      return { version: version, ...schedule };
     }
   }
   return null;
