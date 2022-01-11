@@ -344,8 +344,8 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles the in-range-only strategy', async () => {
-      config.currentValue = '^1.2.1';
-      config.lockedVersion = '1.2.1';
+      config.currentValue = '~1.2.0';
+      config.lockedVersion = '1.2.0';
       config.rangeStrategy = 'in-range-only';
       config.depName = 'q';
       config.datasource = datasourceNpmId;
