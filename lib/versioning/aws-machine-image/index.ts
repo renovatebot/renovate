@@ -24,7 +24,7 @@ class AwsMachineImageVersioningApi extends GenericVersioningApi {
   }
 
   protected override _compare(_version: string, _other: string): number {
-    return 1;
+    return 0;
   }
 }
 

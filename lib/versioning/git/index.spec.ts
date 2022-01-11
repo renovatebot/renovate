@@ -32,14 +32,4 @@ describe('versioning/git/index', () => {
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(git.isGreaterThan(a, b)).toBe(expected);
   });
-
-  test.each`
-    value    | expected
-    ${''}    | ${''}
-    ${'123'} | ${'123'}
-    ${'321'} | ${'321'}
-  `('valueToVersion("$value") === $expected', ({ value, expected }) => {
-    const res = git.valueToVersion(value);
-    expect(res).toBe(expected);
-  });
 });

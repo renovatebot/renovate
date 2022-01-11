@@ -20,10 +20,6 @@ class GitVersioningApi extends GenericVersioningApi {
   protected override _compare(_version: string, _other: string): number {
     return -1;
   }
-
-  valueToVersion(value: string): string {
-    return value;
-  }
 }
 
 export const api: VersioningApi = new GitVersioningApi();
