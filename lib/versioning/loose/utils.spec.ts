@@ -68,35 +68,52 @@ describe('versioning/loose/utils', () => {
       ]);
     });
 
-    type ApiTestExpected = number | boolean | undefined;
-    type ApiTestData = {
-      fn: keyof DummyScheme;
-      expected: ApiTestExpected;
-    };
-    test.each`
-      fn                   | expected
-      ${'equals'}          | ${true}
-      ${'getMajor'}        | ${1}
-      ${'getMinor'}        | ${0}
-      ${'getNewValue'}     | ${undefined}
-      ${'getPatch'}        | ${0}
-      ${'isCompatible'}    | ${true}
-      ${'isGreaterThan'}   | ${false}
-      ${'isSingleVersion'} | ${true}
-      ${'isStable'}        | ${true}
-      ${'isValid'}         | ${true}
-      ${'isVersion'}       | ${true}
-      ${'matches'}         | ${true}
-      ${'sortVersions'}    | ${0}
-    `('$fn', ({ fn, expected }: ApiTestData) => {
-      const apiFn: () => ApiTestExpected = api[fn].bind(api) as never;
-      expect(apiFn()).toBe(expected);
+    it('equals', () => {
+      expect(api.equals('', '')).toBe(true);
     });
-
-    it('getMajor is null', () => {
-      expect(api.getMajor('test')).toBeNull();
+    it('getMajor', () => {
+      expect(api.getMajor('')).toBe(1);
     });
-
+    it('getMinor', () => {
+      expect(api.getMinor('')).toBe(0);
+    });
+    it('getNewValue', () => {
+      expect(
+        api.getNewValue({
+          currentValue: '',
+          rangeStrategy: 'auto',
+          currentVersion: '',
+          newVersion: '',
+        })
+      ).toBe('');
+    });
+    it('getPatch', () => {
+      expect(api.getPatch('')).toBe(0);
+    });
+    it('isCompatible', () => {
+      expect(api.isCompatible('', '')).toBe(true);
+    });
+    it('isGreaterThan', () => {
+      expect(api.isGreaterThan('', '')).toBe(false);
+    });
+    it('isSingleVersion', () => {
+      expect(api.isSingleVersion('')).toBe(true);
+    });
+    it('isStable', () => {
+      expect(api.isStable('')).toBe(true);
+    });
+    it('isValid', () => {
+      expect(api.isValid('')).toBe(true);
+    });
+    it('isVersion', () => {
+      expect(api.isVersion('')).toBe(true);
+    });
+    it('matches', () => {
+      expect(api.matches('', '')).toBe(true);
+    });
+    it('sortVersions', () => {
+      expect(api.sortVersions('', '')).toBe(0);
+    });
     it('isLessThanRange', () => {
       expect(api.isLessThanRange('', '')).toBeFalsy();
     });
