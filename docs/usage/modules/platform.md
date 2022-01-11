@@ -8,7 +8,7 @@ Renovate aims to be platform-neutral, while also taking advantage of good platfo
 
 ## Supported platforms
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 
 The currently supported platforms are:
 
