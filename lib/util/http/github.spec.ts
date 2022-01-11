@@ -146,7 +146,7 @@ describe('util/http/github', () => {
       async function fail(
         code: number,
         body: any = undefined,
-        headers: httpMock.ReplyHeaders = undefined
+        headers: httpMock.ReplyHeaders = {}
       ) {
         const url = '/some-url';
         httpMock
@@ -441,9 +441,9 @@ describe('util/http/github', () => {
         .post('/graphql')
         .reply(200, { data: { repository } });
 
-      const { data } = await githubApi.requestGraphql(graphqlQuery);
+      const res = await githubApi.requestGraphql(graphqlQuery);
       expect(httpMock.getTrace()).toHaveLength(1);
-      expect(data).toStrictEqual({ repository });
+      expect(res?.data).toStrictEqual({ repository });
     });
     it('queryRepoField', async () => {
       httpMock
