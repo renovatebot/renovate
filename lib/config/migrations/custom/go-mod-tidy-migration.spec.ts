@@ -1,11 +1,8 @@
-import { getCustomMigrationValidator } from '../validator';
 import { GoModTidyMigration } from './go-mod-tidy-migration';
 
 describe('config/migrations/custom/go-mod-tidy-migration', () => {
-  const validate = getCustomMigrationValidator(GoModTidyMigration);
-
   it('should add postUpdateOptions option when true', () => {
-    validate(
+    expect(GoModTidyMigration).toMigrate(
       {
         gomodTidy: true,
         postUpdateOptions: ['test'],
@@ -17,7 +14,7 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
   });
 
   it('should handle case when postUpdateOptions is not defined ', () => {
-    validate(
+    expect(GoModTidyMigration).toMigrate(
       {
         gomodTidy: true,
       },
@@ -28,7 +25,7 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
   });
 
   it('should only remove when false', () => {
-    validate(
+    expect(GoModTidyMigration).toMigrate(
       {
         gomodTidy: false,
       },

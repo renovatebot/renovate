@@ -18,7 +18,7 @@ describe('manager/pipenv/extract', () => {
       expect(await extractPackageFile('nothing here', 'Pipfile')).toBeNull();
     });
     it('extracts dependencies', async () => {
-      fsutil.localPathExists.mockResolvedValue(true);
+      fsutil.localPathExists.mockResolvedValueOnce(true);
       const res = await extractPackageFile(pipfile1, 'Pipfile');
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
@@ -30,6 +30,7 @@ describe('manager/pipenv/extract', () => {
       expect(res.deps.filter((r) => r.skipReason)).toHaveLength(6);
     });
     it('extracts multiple dependencies', async () => {
+      fsutil.localPathExists.mockResolvedValueOnce(true);
       const res = await extractPackageFile(pipfile2, 'Pipfile');
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(5);
@@ -66,11 +67,37 @@ describe('manager/pipenv/extract', () => {
       expect(res.registryUrls).toEqual(['source-url', 'other-source-url']);
     });
     it('extracts example pipfile', async () => {
+      fsutil.localPathExists.mockResolvedValueOnce(true);
       const res = await extractPackageFile(pipfile4, 'Pipfile');
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchSnapshot({
+        constraints: { python: '== 2.7.*' },
+        deps: [
+          { depName: 'requests', skipReason: 'any-version' },
+          {
+            currentValue: '>0.5.0',
+            datasource: 'pypi',
+            depName: 'records',
+            depType: 'packages',
+          },
+          { depName: 'django', skipReason: 'git-dependency' },
+          { depName: 'e682b37', skipReason: 'file-dependency' },
+          { depName: 'e1839a8', skipReason: 'local-dependency' },
+          { depName: 'pywinusb', skipReason: 'any-version' },
+          { currentValue: '*', skipReason: 'any-version' },
+          {
+            currentValue: '>=1.0,<3.0',
+            datasource: 'pypi',
+            depName: 'unittest2',
+            depType: 'dev-packages',
+            managerData: { nestedVersion: true },
+          },
+        ],
+        lockFiles: ['Pipfile.lock'],
+        registryUrls: ['https://pypi.python.org/simple'],
+      });
     });
     it('supports custom index', async () => {
+      fsutil.localPathExists.mockResolvedValueOnce(true);
       const res = await extractPackageFile(pipfile5, 'Pipfile');
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toBeDefined();

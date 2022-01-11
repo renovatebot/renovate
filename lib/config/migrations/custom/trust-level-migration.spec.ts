@@ -1,11 +1,8 @@
-import { getCustomMigrationValidator } from '../validator';
 import { TrustLevelMigration } from './trust-level-migration';
 
 describe('config/migrations/custom/trust-level-migration', () => {
-  const validate = getCustomMigrationValidator(TrustLevelMigration);
-
   it('should handle hight level', () => {
-    validate(
+    expect(TrustLevelMigration).toMigrate(
       {
         trustLevel: 'high',
       },
@@ -18,7 +15,7 @@ describe('config/migrations/custom/trust-level-migration', () => {
   });
 
   it('should not rewrite provided properties', () => {
-    validate(
+    expect(TrustLevelMigration).toMigrate(
       {
         allowCustomCrateRegistries: false,
         allowScripts: false,

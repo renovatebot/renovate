@@ -4,7 +4,7 @@ export class RequiredStatusChecksMigration extends AbstractMigration {
   override readonly deprecated = true;
   readonly propertyName = 'requiredStatusChecks';
 
-  run(value): void {
+  override run(value): void {
     if (value === null) {
       this.setSafely('ignoreTests', true);
     }
