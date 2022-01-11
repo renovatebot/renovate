@@ -43,6 +43,7 @@ export class AdoptiumJavaDatasource extends Datasource {
         err instanceof HttpError &&
         err.response?.statusCode === 404
       ) {
+        // No more pages
         return null;
       }
 
@@ -75,7 +76,7 @@ export class AdoptiumJavaDatasource extends Datasource {
       let releases = await this.getPageReleases(url, page);
       while (releases) {
         result.releases.push(...releases);
-        if (releases.length !== pageSize) {
+        if (releases.length !== pageSize || page >= 50) {
           break;
         }
         page += 1;
