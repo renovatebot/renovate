@@ -24,9 +24,7 @@ export class Lazy<T> {
         return result.value;
       }
 
-      if (result.type === 'error') {
-        throw result.err;
-      }
+      throw result.err;
     }
 
     return this.realizeValue();
