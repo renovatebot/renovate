@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from './../util/fs';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { GlobalConfig } from '../../config/global';
