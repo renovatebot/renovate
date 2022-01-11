@@ -3,7 +3,7 @@ import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { regEx } from '../regex';
-import { AuthenticationRule } from './types';
+import type { AuthenticationRule } from './types';
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
