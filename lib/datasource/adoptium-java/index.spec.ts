@@ -14,7 +14,7 @@ function getPath(page: number, imageType = 'jdk'): string {
 function* range(
   start: number,
   end: number
-): Generator<number, number, number> | undefined {
+): Generator<number, number, number> | void {
   yield start;
   if (start === end) {
     return;
