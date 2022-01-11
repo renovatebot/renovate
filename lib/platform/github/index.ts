@@ -152,15 +152,20 @@ export async function getRepos(): Promise<string[]> {
   });
   try {
     const isGHApp = opts.token?.startsWith('x-access-token:');
-    const endpoint = isGHApp ? 'installation/repositories' : 'user/repos';
-    const res = await githubApi.getJson<{ full_name: string }[]>(
-      `${endpoint}?per_page=100`,
-      { paginationField: 'repositories', paginate: 'all' }
-    );
     if (isGHApp) {
+      const res = await githubApi.getJson<{ full_name: string }[]>(
+        `installation/repositories?per_page=100`,
+        { paginationField: 'repositories', paginate: 'all' }
+      );
       res.body = res.body.repositories;
+      return res.body.map((repo) => repo.full_name);
+    } else {
+      const res = await githubApi.getJson<{ full_name: string }[]>(
+        `user/repos?per_page=100`,
+        { paginate: 'all' }
+      );
+      return res.body.map((repo) => repo.full_name);
     }
-    return res.body.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
