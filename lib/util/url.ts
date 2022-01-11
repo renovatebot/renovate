@@ -1,6 +1,8 @@
+import is from '@sindresorhus/is';
 // eslint-disable-next-line no-restricted-imports
-import type _parseLinkHeader from 'parse-link-header';
+import _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
+import { logger } from '../logger';
 import { regEx } from './regex';
 
 export function joinUrlParts(...parts: string[]): string {
@@ -82,17 +84,17 @@ export function createURLFromHostOrURL(url: string): URL | null {
   return parseUrl(url) ?? parseUrl(`https://${url}`);
 }
 
-let parseLinkHeaderPromise: Promise<typeof _parseLinkHeader> | null = null;
-
 export type LinkHeaderLinks = _parseLinkHeader.Links;
 
-export async function parseLinkHeader(
+export function parseLinkHeader(
   linkHeader: string | null | undefined
-): Promise<LinkHeaderLinks | null> {
-  if (null === parseLinkHeaderPromise) {
-    // https://github.com/thlorenz/parse-link-header#environmental-variables
-    process.env.PARSE_LINK_HEADER_THROW_ON_MAXLEN_EXCEEDED = 'true';
-    parseLinkHeaderPromise = import('parse-link-header').then((m) => m.default);
+): LinkHeaderLinks {
+  if (!is.nonEmptyString(linkHeader)) {
+    return null;
   }
-  return (await parseLinkHeaderPromise)(linkHeader);
+  if (linkHeader.length > 2000) {
+    logger.warn({ linkHeader }, 'Link header too long.');
+    return null;
+  }
+  return _parseLinkHeader(linkHeader);
 }

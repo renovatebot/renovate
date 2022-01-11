@@ -80,7 +80,7 @@ async function getDockerApiTags(
       noAuth: true,
     });
     tags = tags.concat(res.body.tags);
-    const linkHeader = await parseLinkHeader(res.headers.link as string);
+    const linkHeader = parseLinkHeader(res.headers.link as string);
     url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
     page += 1;
   } while (url && page < 20);

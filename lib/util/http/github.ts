@@ -210,9 +210,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       if (opts.paginate) {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
-        const linkHeader =
-          is.string(result?.headers?.link) &&
-          (await parseLinkHeader(result.headers.link as string));
+        const linkHeader = parseLinkHeader(result?.headers?.link as string);
         if (linkHeader?.next && linkHeader?.last) {
           let lastPage = +linkHeader.last.page;
           // istanbul ignore else: needs a test
