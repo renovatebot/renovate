@@ -1,3 +1,4 @@
+import fs from 'fs';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { GlobalConfig } from '../../config/global';
@@ -37,11 +38,16 @@ export async function postUpgradeCommandsExecutor(
     );
     const commands = upgrade.postUpgradeTasks?.commands || [];
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters || [];
-
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles.concat(updatedArtifacts)) {
-        if (file.name !== '|delete|') {
+        let stat;
+        try {
+          stat = await fs.promises.lstat(file.name);
+        } catch (err) {
+          stat = null;
+        }
+        if (file.name !== '|delete|' && stat?.isFile()) {
           let contents;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);
