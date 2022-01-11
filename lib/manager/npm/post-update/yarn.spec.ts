@@ -299,9 +299,7 @@ describe('manager/npm/post-update/yarn', () => {
       );
       expect(offlineMirror).toBeFalse();
       expect(yarnPath).toBeNull();
-      expect(Fixtures.toJSON('/tmp/renovate/.yarnrc')).not.toContain(
-        'yarn-path'
-      );
+      expect(Fixtures.toJSON()['/tmp/renovate/.yarnrc']).toBe('\n');
     });
   });
 });
