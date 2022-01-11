@@ -207,6 +207,8 @@ describe('manager/npm/post-update/yarn', () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         { isLockFileMaintenance: true },
       ]);
+      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
+      expect(fs.remove).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toBeUndefined();
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
@@ -252,6 +254,7 @@ describe('manager/npm/post-update/yarn', () => {
       stderr: 'some-error',
     });
     const res = await yarnHelper.generateLockFile('some-dir', {});
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
