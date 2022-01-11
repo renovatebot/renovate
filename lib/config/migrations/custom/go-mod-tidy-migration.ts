@@ -4,7 +4,7 @@ export class GoModTidyMigration extends AbstractMigration {
   override readonly deprecated = true;
   readonly propertyName = 'gomodTidy';
 
-  run(value): void {
+  override run(value): void {
     const postUpdateOptions = this.get('postUpdateOptions');
 
     if (value) {

@@ -1,11 +1,8 @@
-import { getCustomMigrationValidator } from '../validator';
 import { EnabledManagersMigration } from './enabled-managers-migration';
 
 describe('config/migrations/custom/enabled-managers-migration', () => {
-  const validate = getCustomMigrationValidator(EnabledManagersMigration);
-
   it('should replace yarn by nmp', () => {
-    validate(
+    expect(EnabledManagersMigration).toMigrate(
       {
         enabledManagers: ['test1', 'yarn', 'test2'],
       },

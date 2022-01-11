@@ -1,11 +1,8 @@
-import { getCustomMigrationValidator } from '../validator';
 import { SemanticCommitsMigration } from './semantic-commits-migration';
 
 describe('config/migrations/custom/semantic-commits-migration', () => {
-  const validate = getCustomMigrationValidator(SemanticCommitsMigration);
-
   it('should migrate true to "enabled"', () => {
-    validate(
+    expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: true,
       } as any,
@@ -14,7 +11,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
   });
 
   it('should migrate false to "disabled"', () => {
-    validate(
+    expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: false,
       } as any,
@@ -23,7 +20,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
   });
 
   it('should migrate null to "auto"', () => {
-    validate(
+    expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: null,
       } as any,
@@ -32,7 +29,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
   });
 
   it('should migrate random string to "auto"', () => {
-    validate(
+    expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'test',
       } as any,
@@ -41,7 +38,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
   });
 
   it('should not migrate valid enabled config', () => {
-    validate(
+    expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'enabled',
       } as any,
@@ -51,7 +48,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
   });
 
   it('should not migrate valid disabled config', () => {
-    validate(
+    expect(SemanticCommitsMigration).toMigrate(
       {
         semanticCommits: 'disabled',
       } as any,

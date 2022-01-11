@@ -1,11 +1,8 @@
-import { getCustomMigrationValidator } from '../validator';
 import { RebaseStalePrsMigration } from './rebase-stale-prs-migration';
 
 describe('config/migrations/custom/rebase-stale-prs-migration', () => {
-  const validate = getCustomMigrationValidator(RebaseStalePrsMigration);
-
   it('should migrate true', () => {
-    validate(
+    expect(RebaseStalePrsMigration).toMigrate(
       {
         rebaseStalePrs: true,
       },
@@ -16,7 +13,7 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
   });
 
   it('should migrate false', () => {
-    validate(
+    expect(RebaseStalePrsMigration).toMigrate(
       {
         rebaseStalePrs: false,
       },
@@ -27,7 +24,7 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
   });
 
   it('should migrate null', () => {
-    validate(
+    expect(RebaseStalePrsMigration).toMigrate(
       {
         rebaseStalePrs: null,
       },

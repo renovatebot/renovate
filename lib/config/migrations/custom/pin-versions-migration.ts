@@ -5,7 +5,7 @@ export class PinVersionsMigration extends AbstractMigration {
   override readonly deprecated = true;
   readonly propertyName = 'pinVersions';
 
-  run(value): void {
+  override run(value): void {
     if (is.boolean(value)) {
       this.setSafely('rangeStrategy', value ? 'pin' : 'replace');
     }
