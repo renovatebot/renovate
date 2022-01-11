@@ -9,7 +9,7 @@ import { AuthenticationRule } from './types';
  * Add authorization to a Git Url and returns a new environment variables object
  * @returns a new NodeJS.ProcessEnv object without modifying any input parameters
  */
-export function getAuthenticatedEnvironmentVariables(
+export function getGitAuthenticatedEnvironmentVariables(
   originalGitUrl: string,
   { token, hostType, matchHost }: HostRule,
   environmentVariables?: NodeJS.ProcessEnv

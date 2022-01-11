@@ -1,5 +1,5 @@
 import { PlatformId } from '../../constants';
-import { getAuthenticatedEnvironmentVariables } from './auth';
+import { getGitAuthenticatedEnvironmentVariables } from './auth';
 
 describe('util/git/auth', () => {
   afterEach(() => {
@@ -8,7 +8,7 @@ describe('util/git/auth', () => {
   describe('getGitAuthenticatedEnvironmentVariables()', () => {
     it('returns url with token', () => {
       expect(
-        getAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'token1234',
           hostType: PlatformId.Github,
           matchHost: 'github.com',
@@ -26,7 +26,7 @@ describe('util/git/auth', () => {
 
     it('returns correct url if token already contains GitHub App username', () => {
       expect(
-        getAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'x-access-token:token1234',
           hostType: PlatformId.Github,
           matchHost: 'github.com',
@@ -47,7 +47,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token and already existing GIT_CONFIG_COUNT from parameter', () => {
       expect(
-        getAuthenticatedEnvironmentVariables(
+        getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
           {
             token: 'token1234',
@@ -70,7 +70,7 @@ describe('util/git/auth', () => {
     it('returns url with token and already existing GIT_CONFIG_COUNT from parameter over environment', () => {
       process.env.GIT_CONFIG_COUNT = '54';
       expect(
-        getAuthenticatedEnvironmentVariables(
+        getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
           {
             token: 'token1234',
@@ -93,7 +93,7 @@ describe('util/git/auth', () => {
     it('returns url with token and already existing GIT_CONFIG_COUNT from environment', () => {
       process.env.GIT_CONFIG_COUNT = '1';
       expect(
-        getAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'token1234',
           hostType: PlatformId.Github,
           matchHost: 'github.com',
@@ -111,7 +111,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token and passthrough existing variables', () => {
       expect(
-        getAuthenticatedEnvironmentVariables(
+        getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
           {
             token: 'token1234',
@@ -135,7 +135,7 @@ describe('util/git/auth', () => {
     it('return url with token with invalid GIT_CONFIG_COUNT from environment', () => {
       process.env.GIT_CONFIG_COUNT = 'notvalid';
       expect(
-        getAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'token1234',
           hostType: PlatformId.Github,
           matchHost: 'github.com',
@@ -153,7 +153,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token containing username for GitLab token', () => {
       expect(
-        getAuthenticatedEnvironmentVariables('https://gitlab.com/', {
+        getGitAuthenticatedEnvironmentVariables('https://gitlab.com/', {
           token: 'token1234',
           hostType: PlatformId.Gitlab,
           matchHost: 'github.com',
@@ -174,7 +174,7 @@ describe('util/git/auth', () => {
 
     it('returns original environment variables when no token is set', () => {
       expect(
-        getAuthenticatedEnvironmentVariables(
+        getGitAuthenticatedEnvironmentVariables(
           'https://gitlab.com/',
           {
             username: 'testing',
@@ -191,7 +191,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token for http hosts', () => {
       expect(
-        getAuthenticatedEnvironmentVariables('http://github.com/', {
+        getGitAuthenticatedEnvironmentVariables('http://github.com/', {
           token: 'token1234',
           hostType: PlatformId.Github,
           matchHost: 'github.com',
@@ -209,7 +209,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token for orgs', () => {
       expect(
-        getAuthenticatedEnvironmentVariables('https://github.com/org', {
+        getGitAuthenticatedEnvironmentVariables('https://github.com/org', {
           token: 'token1234',
           hostType: PlatformId.Github,
           matchHost: 'github.com',
@@ -230,7 +230,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token for orgs and projects', () => {
       expect(
-        getAuthenticatedEnvironmentVariables('https://github.com/org/repo', {
+        getGitAuthenticatedEnvironmentVariables('https://github.com/org/repo', {
           token: 'token1234',
           hostType: PlatformId.Github,
           matchHost: 'github.com',
@@ -251,7 +251,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token for orgs and projects and ports', () => {
       expect(
-        getAuthenticatedEnvironmentVariables(
+        getGitAuthenticatedEnvironmentVariables(
           'https://github.com:89/org/repo.git',
           {
             token: 'token1234',
