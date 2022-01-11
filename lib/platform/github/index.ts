@@ -153,12 +153,13 @@ export async function getRepos(): Promise<string[]> {
   try {
     const isGHApp = opts.token?.startsWith('x-access-token:');
     if (isGHApp) {
-      const res = await githubApi.getJson<{ full_name: string }[]>(
-        `installation/repositories?per_page=100`,
-        { paginationField: 'repositories', paginate: 'all' }
-      );
-      res.body = res.body.repositories;
-      return res.body.map((repo) => repo.full_name);
+      const res = await githubApi.getJson<{
+        repositories: { full_name: string }[];
+      }>(`installation/repositories?per_page=100`, {
+        paginationField: 'repositories',
+        paginate: 'all',
+      });
+      return res.body.repositories.map((repo) => repo.full_name);
     } else {
       const res = await githubApi.getJson<{ full_name: string }[]>(
         `user/repos?per_page=100`,
