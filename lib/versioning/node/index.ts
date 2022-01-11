@@ -29,7 +29,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string | null {
   // Try to use codename if the current value is a codename
-  if (findScheduleForCodename(currentValue)) {
+  if (rangeStrategy !== 'pin' && findScheduleForCodename(currentValue)) {
     const newSchedule = findScheduleForVersion(newVersion);
     if (newSchedule?.codename) {
       return newSchedule.codename.toLowerCase();
