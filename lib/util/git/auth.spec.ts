@@ -24,6 +24,24 @@ describe('util/git/auth', () => {
       });
     });
 
+    it('returns url with token for different protocols', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables('foobar://github.com/', {
+          token: 'token1234',
+          hostType: PlatformId.Github,
+          matchHost: 'github.com',
+        })
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url."https://api:token1234@github.com/".insteadOf',
+        GIT_CONFIG_KEY_1: 'url."https://ssh:token1234@github.com/".insteadOf',
+        GIT_CONFIG_KEY_2: 'url."https://git:token1234@github.com/".insteadOf',
+        GIT_CONFIG_VALUE_0: 'https://github.com/',
+        GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_2: 'git@github.com:',
+      });
+    });
+
     it('returns correct url if token already contains GitHub App username', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables('https://github.com/', {
