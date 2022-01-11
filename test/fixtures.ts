@@ -4,7 +4,16 @@ import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import upath from 'upath';
 
+/**
+ * Class to work with in-memory file-system
+ */
 export class Fixtures {
+  /**
+   * Returns content from fixture file from __fixtures__ folder
+   * @param name name of the fixture file
+   * @param fixturesRoot is an optional, by default is current folder
+   * @returns
+   */
   static get(name: string, fixturesRoot = '.'): string {
     const realFs = jest.requireActual<typeof fs>('fs');
     return realFs.readFileSync(
@@ -15,10 +24,22 @@ export class Fixtures {
     );
   }
 
+  /**
+   * Adds files from a flat json object to the file-system
+   * @param json flat object
+   * @param cwd is an optional string used to compute absolute file paths, if a file path is given in a relative form
+   */
   static mock(json: DirectoryJSON, cwd?: string): void {
     vol.fromJSON(json, cwd);
   }
 
+  /**
+   * Exports the whole contents of the volume recursively to a flat JSON object
+   * @param paths is an optional argument that specifies one or more paths to be exported. If this argument is omitted, the whole volume is exported. paths can be an array of paths. A path can be a string, Buffer or an URL object.
+   * @param json is an optional object parameter which will be populated with the exported files
+   * @param isRelative is boolean that specifies if returned paths should be relative
+   * @returns
+   */
   static toJSON(
     paths?: PathLike | PathLike[],
     json?: Record<string, unknown>,
@@ -27,6 +48,9 @@ export class Fixtures {
     return vol.toJSON(paths, json, isRelative);
   }
 
+  /**
+   * Removes all files from the volume.
+   */
   static reset(): void {
     vol.reset();
   }
