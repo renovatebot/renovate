@@ -14,6 +14,7 @@
     "lib/data-files.generated.ts",
     "lib/datasource/**/common.ts",
     "lib/datasource/**/types.ts",
+    "lib/datasource/artifactory",
     "lib/datasource/gitlab-tags/util.ts",
     "lib/datasource/helm/common.ts",
     "lib/datasource/metadata.ts",
@@ -90,6 +91,7 @@
   ],
   "exclude": [
     "lib/constants/platform.spec.ts",
+    "lib/datasource/artifactory/**/*.spec.ts",
     "lib/datasource/docker/common.ts",
     "lib/datasource/github-releases/common.ts",
     "lib/datasource/go/common.ts",
