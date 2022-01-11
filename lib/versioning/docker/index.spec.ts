@@ -131,7 +131,7 @@ describe('versioning/docker/index', () => {
         '3.8.0',
       ];
 
-      expect(versions.sort(docker.sortVersions)).toEqual([
+      expect(versions.sort(docker.sortVersions.bind(docker))).toEqual([
         '3.7.0b1',
         '3.7.0b5',
         '3.7.0',

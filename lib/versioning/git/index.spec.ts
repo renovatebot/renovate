@@ -1,24 +1,45 @@
 import git from '.';
 
 describe('versioning/git/index', () => {
-  describe('isValid(version)', () => {
-    it('should return true', () => {
-      expect(git.isValid('a1')).toBeTruthy();
-    });
+  test.each`
+    input       | expected
+    ${''}       | ${true}
+    ${'1'}      | ${true}
+    ${'a'}      | ${true}
+    ${'a1'}     | ${true}
+    ${'foobar'} | ${false}
+  `('isValid("$input") === $expected', ({ input, expected }) => {
+    expect(git.isValid(input)).toBe(expected);
   });
-  describe('isCompatible(version)', () => {
-    it('should return true', () => {
-      expect(git.isCompatible('')).toBeTruthy();
-    });
+
+  test.each`
+    version               | range | expected
+    ${''}                 | ${''} | ${true}
+    ${'1234567890aBcDeF'} | ${''} | ${true}
+  `(
+    'isCompatible("$version") === $expected',
+    ({ version, range, expected }) => {
+      const res = git.isCompatible(version, range);
+      expect(!!res).toBe(expected);
+    }
+  );
+
+  test.each`
+    a        | b        | expected
+    ${''}    | ${''}    | ${false}
+    ${'abc'} | ${'bca'} | ${false}
+    ${'123'} | ${'321'} | ${false}
+  `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
+    expect(git.isGreaterThan(a, b)).toBe(expected);
   });
-  describe('isGreaterThan(version1, version2)', () => {
-    it('should return false', () => {
-      expect(git.isGreaterThan('', '')).toBeFalsy();
-    });
-  });
-  describe('valueToVersion(version)', () => {
-    it('should return same as input', () => {
-      expect(git.valueToVersion('')).toBe('');
-    });
+
+  test.each`
+    value    | expected
+    ${''}    | ${''}
+    ${'123'} | ${'123'}
+    ${'321'} | ${'321'}
+  `('valueToVersion("$value") === $expected', ({ value, expected }) => {
+    const res = git.valueToVersion(value);
+    expect(res).toBe(expected);
   });
 });
