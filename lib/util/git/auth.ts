@@ -1,8 +1,9 @@
+import gitUrlParse from 'git-url-parse';
 import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
+import { regEx } from '../regex';
 import { AuthenticationRule } from './types';
-import { getAuthenticationRules } from './url';
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
@@ -50,7 +51,7 @@ export function getAuthenticatedEnvironmentVariables(
   authenticationRules.forEach(({ url, insteadOf }) => {
     newEnvironmentVariables[
       `GIT_CONFIG_KEY_${gitConfigCount}`
-    ] = `url.${url}.insteadOf`;
+    ] = `url."${url}".insteadOf`;
     newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] = insteadOf;
     gitConfigCount++;
   });
@@ -69,4 +70,48 @@ function getAuthenticationRulesWithToken(
     token = `gitlab-ci-token:${authToken}`;
   }
   return getAuthenticationRules(url, token);
+}
+
+/**
+ * Generates the authentication rules for later git usage for the given host
+ * @link https://coolaj86.com/articles/vanilla-devops-git-credentials-cheatsheet/
+ */
+export function getAuthenticationRules(
+  gitUrl: string,
+  token: string
+): AuthenticationRule[] {
+  const authenticationRules = [];
+  const hasUser = token.split(':').length > 1;
+  const insteadUrl = gitUrlParse(gitUrl);
+  const url = gitUrlParse(gitUrl);
+  const protocol = regEx(/^https?$/).exec(url.protocol)
+    ? url.protocol
+    : 'https';
+
+  // https protocol
+  url.token = hasUser ? token : `api:${token}`;
+  authenticationRules.push({
+    url: url.toString(protocol),
+    insteadOf: insteadUrl.toString(protocol),
+  });
+
+  // ssh protocol
+  url.token = hasUser ? token : `ssh:${token}`;
+  authenticationRules.push({
+    url: url.toString(protocol),
+    // only edge case, need to stringify ourself because the exact syntax is not supported by the library
+    // https://github.com/IonicaBizau/git-url-parse/blob/246c9119fb42c2ea1c280028fe77c53eb34c190c/lib/index.js#L246
+    insteadOf: `ssh://git@${insteadUrl.resource}${
+      insteadUrl.port ? `:${insteadUrl.port}` : ''
+    }/${insteadUrl.full_name}${insteadUrl.git_suffix ? '.git' : ''}`,
+  });
+
+  // alternative ssh protocol
+  url.token = hasUser ? token : `git:${token}`;
+  authenticationRules.push({
+    url: url.toString(protocol),
+    insteadOf: insteadUrl.toString('ssh'),
+  });
+
+  return authenticationRules;
 }
