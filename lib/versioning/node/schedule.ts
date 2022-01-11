@@ -1,5 +1,5 @@
 import dataFiles from '../../data-files.generated';
-import npm from '../npm';
+import semver from '../semver';
 
 interface NodeJsSchedule {
   lts?: string;
@@ -16,14 +16,16 @@ export const nodeSchedule: NodeJsData = JSON.parse(
   dataFiles.get('data/node-js-schedule.json')!
 );
 
+export type NodeJsScheduleWithVersion = { version: string } & NodeJsSchedule;
+
 export function findScheduleForCodename(
   codename: string
-): ({ version: string } & NodeJsSchedule) | null {
+): NodeJsScheduleWithVersion | null {
   for (const version of Object.keys(nodeSchedule)) {
     const schedule = nodeSchedule[version];
     if (
       schedule.codename &&
-      schedule.codename.toLowerCase() === codename?.toLowerCase()
+      schedule.codename.toUpperCase() === codename?.toUpperCase()
     ) {
       return { version: version, ...schedule };
     }
@@ -32,7 +34,7 @@ export function findScheduleForCodename(
 }
 
 export function findScheduleForVersion(version: string): NodeJsSchedule | null {
-  const major = npm.getMajor(version);
+  const major = semver.getMajor(version);
   const schedule = nodeSchedule[`v${major}`];
   return schedule;
 }
