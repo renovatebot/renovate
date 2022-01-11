@@ -63,7 +63,17 @@ describe('versioning/node/index', () => {
     });
   });
 
-  it('isValid', () => {
-    expect(nodever.isValid === nodever.isValid).toBeTrue();
+  describe('isValid', () => {
+    test.each`
+      version       | expected
+      ${'16.0.0'}   | ${true}
+      ${'erbium'}   | ${true}
+      ${'bogus'}    | ${false}
+      ${'^10.0.0'}  | ${true}
+      ${'10.x'}     | ${true}
+      ${'10.9.8.7'} | ${false}
+    `('("$version") === $expected', ({ version, expected }) => {
+      expect(nodever.isValid(version as string)).toBe(expected);
+    });
   });
 });
