@@ -79,14 +79,14 @@ export const comparer = (
     range: string
   ): string | null {
     const result = versions.find((v) => equals(v, range));
-    return result?.length ? result : null;
+    return result ?? null;
   }
   function minSatisfyingVersion(
     versions: string[],
     range: string
   ): string | null {
     const result = versions.find((v) => equals(v, range));
-    return result?.length ? result : null;
+    return result ?? null;
   }
   function getNewValue(newValueConfig: NewValueConfig): string {
     const { newVersion } = newValueConfig || {};
@@ -238,12 +238,12 @@ export abstract class GenericVersioningApi<
 
   getSatisfyingVersion(versions: string[], range: string): string | null {
     const result = versions.find((v) => this.equals(v, range));
-    return result?.length ? result : null;
+    return result ?? null;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
     const result = versions.find((v) => this.equals(v, range));
-    return result?.length ? result : null;
+    return result ?? null;
   }
 
   getNewValue(newValueConfig: NewValueConfig): string {
