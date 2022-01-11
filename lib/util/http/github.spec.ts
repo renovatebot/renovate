@@ -142,18 +142,6 @@ describe('util/http/github', () => {
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(1);
     });
-    it('should handle Github App installation endpoint response format', async () => {
-      const url = '/some-url';
-      httpMock
-        .scope(githubApiHost)
-        .get(url)
-        .reply(200, {
-          repositories: ['a'],
-        });
-      const res = await githubApi.getJson('some-url');
-      expect(res).toBeDefined();
-      expect(res.body).toEqual(['a']);
-    });
     describe('handleGotError', () => {
       async function fail(
         code: number,
