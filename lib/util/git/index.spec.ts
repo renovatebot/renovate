@@ -133,7 +133,7 @@ describe('util/git/index', () => {
         throw new Error('The remote end hung up unexpectedly');
       });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
-        'gitRetry has exceeded the limit of 5 retries'
+        'The remote end hung up unexpectedly'
       );
       expect(gitFunc).toHaveBeenCalledTimes(6);
     });

@@ -51,6 +51,8 @@ const delayFactor = 2;
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
 export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   let round = 0;
+  let lastError: Error | undefined;
+
   while (round <= retryCount) {
     if (round > 0) {
       logger.debug(`gitRetry round ${round}`);
@@ -58,22 +60,19 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
     try {
       return await gitFunc();
     } catch (err) {
+      lastError = err;
       logger.debug({ err }, `Git function thrown`);
-      try {
-        // Try to transform the Error to ExternalHostError
-        checkForPlatformFailure(err);
+      // Try to transform the Error to ExternalHostError
+      const errChecked = checkForPlatformFailure(err);
+      if (errChecked instanceof ExternalHostError) {
+        logger.debug(
+          { err: errChecked },
+          `ExternalHostError thrown in round ${
+            round + 1
+          } of ${retryCount} - retrying in the next round`
+        );
+      } else {
         throw err;
-      } catch (errChecked) {
-        if (errChecked instanceof ExternalHostError) {
-          logger.debug(
-            { err: errChecked },
-            `ExternalHostError thrown in round ${
-              round + 1
-            } of ${retryCount} - retrying in the next round`
-          );
-        } else {
-          throw err;
-        }
       }
     }
 
@@ -84,13 +83,13 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
     round++;
   }
 
-  throw new Error(`gitRetry has exceeded the limit of ${retryCount} retries`);
+  throw lastError;
 }
 
 // istanbul ignore next
-function checkForPlatformFailure(err: Error): void {
+function checkForPlatformFailure(err: Error): Error | null {
   if (process.env.NODE_ENV === 'test') {
-    return;
+    return null;
   }
   const externalHostFailureStrings = [
     'remote: Invalid username or password',
@@ -110,7 +109,7 @@ function checkForPlatformFailure(err: Error): void {
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {
       logger.debug({ err }, 'Converting git error to ExternalHostError');
-      throw new ExternalHostError(err, 'git');
+      return new ExternalHostError(err, 'git');
     }
   }
 
@@ -147,9 +146,11 @@ function checkForPlatformFailure(err: Error): void {
       const res = new Error(CONFIG_VALIDATION);
       res.validationError = message;
       res.validationMessage = err.message;
-      throw res;
+      return res;
     }
   }
+
+  return null;
 }
 
 function localName(branchName: string): string {
@@ -170,7 +171,10 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     const res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
     return res.replace('origin/', '').trim();
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     if (
       err.message.startsWith(
         'fatal: ref refs/remotes/origin/HEAD is not a symbolic ref'
@@ -246,7 +250,10 @@ async function fetchBranchCommits(): Promise<void> {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     logger.debug({ err }, 'git error');
     if (err.message?.includes('Please ask the owner to check their account')) {
       throw new Error(REPOSITORY_DISABLED);
@@ -317,7 +324,10 @@ export async function writeGitAuthor(): Promise<void> {
       await git.addConfig('user.email', gitAuthorEmail);
     }
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     logger.debug(
       { err, gitAuthorName, gitAuthorEmail },
       'Error setting git author config'
@@ -438,7 +448,10 @@ export async function syncGit(): Promise<void> {
     const latestCommit = (await git.log({ n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     if (err.message.includes('does not have any commits yet')) {
       throw new Error(REPOSITORY_EMPTY);
     }
@@ -502,7 +515,10 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     if (err.message?.includes('fatal: ambiguous argument')) {
       logger.warn({ err }, 'Failed to checkout branch');
       throw new Error(TEMPORARY_ERROR);
@@ -563,7 +579,10 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     );
     return isStale;
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     throw err;
   }
 }
@@ -627,7 +646,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
     await gitRetry(() => git.raw(['push', '--delete', 'origin', branchName]));
     logger.debug({ branchName }, 'Deleted remote branch');
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     logger.debug({ branchName }, 'No remote branch to delete');
   }
   try {
@@ -635,7 +657,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
     // istanbul ignore next
     logger.debug({ branchName }, 'Deleted local branch');
   } catch (err) {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     logger.debug({ branchName }, 'No local branch to delete');
   }
   delete config.branchCommits[branchName];
@@ -684,7 +709,10 @@ export async function getBranchLastCommitTime(
     const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
     return new Date(Date.parse(time));
   } catch (err) {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     return new Date();
   }
 }
@@ -698,7 +726,10 @@ export async function getBranchFiles(branchName: string): Promise<string[]> {
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'getBranchFiles error');
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     return null;
   }
 }
@@ -714,7 +745,10 @@ export async function getFile(
     ]);
     return content;
   } catch (err) {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     return null;
   }
 }
@@ -761,7 +795,10 @@ export async function commitFiles({
           await git.rm([fileName]);
           deletedFiles.push(fileName);
         } catch (err) /* istanbul ignore next */ {
-          checkForPlatformFailure(err);
+          const errChecked = checkForPlatformFailure(err);
+          if (errChecked) {
+            throw errChecked;
+          }
           logger.trace({ err, fileName }, 'Cannot delete file');
           ignoredFiles.push(fileName);
         }
@@ -857,7 +894,10 @@ export async function commitFiles({
     incLimitedValue(Limit.Commits);
     return commit;
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
     if (err.message.includes(`'refs/heads/renovate' exists`)) {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'None';
