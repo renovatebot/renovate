@@ -106,8 +106,6 @@ async function gotRoutine<T>(
   httpRequests.push({ ...requestStats, duration });
   memCache.set('http-requests', httpRequests);
 
-  resp.headers;
-
   return resp;
 }
 
