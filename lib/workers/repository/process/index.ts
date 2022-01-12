@@ -1,6 +1,6 @@
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
 import { platform } from '../../../platform';

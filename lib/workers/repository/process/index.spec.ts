@@ -1,4 +1,3 @@
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import {
   RenovateConfig,
   getConfig,
@@ -6,6 +5,8 @@ import {
   mocked,
   platform,
 } from '../../../../test/util';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { extractDependencies, updateRepo } from '.';
 
@@ -47,6 +48,7 @@ describe('workers/repository/process/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({});
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'none';
+      getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
         branchList: [undefined, undefined],
@@ -65,6 +67,7 @@ describe('workers/repository/process/index', () => {
       platform.getJsonFile = jest.fn().mockResolvedValue({});
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'replace';
+      getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
         branchList: [undefined, undefined],
@@ -88,6 +91,7 @@ describe('workers/repository/process/index', () => {
           }
           return {};
         });
+      getCache().configFileName = 'renovate.json';
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'replace';
       await expect(extractDependencies(config)).rejects.toThrow(
