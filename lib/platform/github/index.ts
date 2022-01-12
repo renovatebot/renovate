@@ -108,6 +108,8 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitHub personal access token');
   }
 
+  platformConfig.isGHApp = token.startsWith('x-access-token:');
+
   if (endpoint) {
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(platformConfig.endpoint);
@@ -146,13 +148,8 @@ export async function initPlatform({
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
-  const opts = hostRules.find({
-    hostType: PlatformId.Github,
-    url: platformConfig.endpoint,
-  });
   try {
-    const isGHApp = opts.token?.startsWith('x-access-token:');
-    if (isGHApp) {
+    if (platformConfig.isGHApp) {
       const res = await githubApi.getJson<{
         repositories: { full_name: string }[];
       }>(`installation/repositories?per_page=100`, {
