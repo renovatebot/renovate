@@ -658,6 +658,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
     logger.debug({ branchName }, 'Deleted local branch');
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
+    // istanbul ignore if
     if (errChecked) {
       throw errChecked;
     }
@@ -710,6 +711,7 @@ export async function getBranchLastCommitTime(
     return new Date(Date.parse(time));
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
+    // istanbul ignore if
     if (errChecked) {
       throw errChecked;
     }
@@ -746,6 +748,7 @@ export async function getFile(
     return content;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
+    // istanbul ignore if
     if (errChecked) {
       throw errChecked;
     }
