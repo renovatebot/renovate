@@ -200,7 +200,8 @@ export async function getDigest(
     );
     if (manifestResponse) {
       if (hasKey('docker-content-digest', manifestResponse.headers)) {
-        digest = manifestResponse.headers['docker-content-digest'] || null;
+        digest =
+          (manifestResponse.headers['docker-content-digest'] as string) || null;
       } else {
         logger.debug(
           { registryHost },

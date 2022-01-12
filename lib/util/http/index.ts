@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import type { IncomingHttpHeaders } from 'http';
 import merge from 'deepmerge';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -51,7 +52,7 @@ export interface InternalHttpOptions extends HttpOptions {
 export interface HttpResponse<T = string> {
   statusCode: number;
   body: T;
-  headers: any;
+  headers: IncomingHttpHeaders;
   authorization?: boolean;
 }
 
@@ -100,6 +101,8 @@ async function gotRoutine<T>(
   const httpRequests = memCache.get('http-requests') || [];
   httpRequests.push({ ...requestStats, duration });
   memCache.set('http-requests', httpRequests);
+
+  resp.headers;
 
   return resp;
 }
