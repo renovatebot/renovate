@@ -49,10 +49,14 @@ export interface InternalHttpOptions extends HttpOptions {
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
+export interface HttpHeaders extends IncomingHttpHeaders {
+  link?: string | undefined;
+}
+
 export interface HttpResponse<T = string> {
   statusCode: number;
   body: T;
-  headers: IncomingHttpHeaders;
+  headers: HttpHeaders;
   authorization?: boolean;
 }
 
