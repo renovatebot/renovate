@@ -214,7 +214,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           ? parseLinkHeader(result.headers.link)
           : null;
         if (linkHeader?.next && linkHeader?.last) {
-          let lastPage = +linkHeader.last.page;
+          let lastPage = Number(linkHeader.last.page);
           // istanbul ignore else: needs a test
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
