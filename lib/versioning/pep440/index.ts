@@ -1,5 +1,5 @@
-import * as pep440 from '@renovate/pep440';
-import { filter } from '@renovate/pep440/lib/specifier.js';
+import * as pep440 from '@renovatebot/pep440';
+import { filter } from '@renovatebot/pep440';
 import type { VersioningApi } from '../types';
 import { getNewValue, isLessThanRange } from './range';
 
