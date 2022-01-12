@@ -89,12 +89,13 @@ export async function detectGhe(token: string): Promise<void> {
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
+    const gheHeaders: Record<string, string | string[]> =
+      gheQueryRes?.headers || {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
       ) ?? [];
-    platformConfig.gheVersion = semver.valid(gheVersion) ?? null;
+    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
   }
 }
 
