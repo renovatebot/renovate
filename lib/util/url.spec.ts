@@ -55,7 +55,7 @@ describe('util/url', () => {
 
   it('validates URLs', () => {
     expect(validateUrl()).toBeFalse();
-    expect(validateUrl(null)).toBeFalse();
+    expect(validateUrl(null as never)).toBeFalse();
     expect(validateUrl('foo')).toBeFalse();
     expect(validateUrl('ssh://github.com')).toBeFalse();
     expect(validateUrl('http://github.com')).toBeTrue();
@@ -63,13 +63,13 @@ describe('util/url', () => {
   });
 
   it('parses URL', () => {
-    expect(parseUrl(null)).toBeNull();
-    expect(parseUrl(undefined)).toBeNull();
+    expect(parseUrl(null as never)).toBeNull();
+    expect(parseUrl(undefined as never)).toBeNull();
 
     const url = parseUrl('https://github.com/renovatebot/renovate');
-    expect(url.protocol).toBe('https:');
-    expect(url.host).toBe('github.com');
-    expect(url.pathname).toBe('/renovatebot/renovate');
+    expect(url?.protocol).toBe('https:');
+    expect(url?.host).toBe('github.com');
+    expect(url?.pathname).toBe('/renovatebot/renovate');
   });
 
   it('trimTrailingSlash', () => {
