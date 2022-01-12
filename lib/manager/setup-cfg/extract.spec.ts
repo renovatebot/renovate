@@ -8,7 +8,6 @@ describe('manager/setup-cfg/extract', () => {
     });
     it('extracts dependencies', () => {
       const res = extractPackageFile(Fixtures.get('setup-cfg-1.txt'));
-      // FIXME: explicit assert condition
       expect(res).toMatchSnapshot({
         deps: [
           { depName: 'qux', currentValue: '>=4.4.4' },

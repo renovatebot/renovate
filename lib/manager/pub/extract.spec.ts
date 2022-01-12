@@ -19,7 +19,6 @@ describe('manager/pub/extract', () => {
         Fixtures.get('extract.yaml'),
         'pubspec.yaml'
       );
-      // FIXME: explicit assert condition
       expect(res).toEqual({
         datasource: 'dart',
         deps: [
