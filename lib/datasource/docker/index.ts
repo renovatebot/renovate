@@ -80,7 +80,7 @@ async function getDockerApiTags(
       noAuth: true,
     });
     tags = tags.concat(res.body.tags);
-    const linkHeader = parseLinkHeader(res.headers.link as string);
+    const linkHeader = parseLinkHeader(res.headers.link);
     url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
     page += 1;
   } while (url && page < 20);
@@ -199,7 +199,8 @@ export async function getDigest(
     );
     if (manifestResponse) {
       if (hasKey('docker-content-digest', manifestResponse.headers)) {
-        digest = manifestResponse.headers['docker-content-digest'] || null;
+        digest =
+          (manifestResponse.headers['docker-content-digest'] as string) || null;
       } else {
         logger.debug(
           { registryHost },
