@@ -76,16 +76,38 @@ async function getDockerApiTags(
   }
   let page = 1;
   do {
-    const res = await http.getJson<{ tags: string[] }>(url, {
-      headers,
-      noAuth: true,
-    });
+    let res;
+    try {
+      res = await http.getJson<{ tags: string[] }>(url, {
+        headers,
+        noAuth: true,
+      });
+    } catch (err) {
+      if (isECRMaxResultsError(err)) {
+        const maxResults = 1000;
+        url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
+        url = ensurePathPrefix(url, '/v2');
+        continue;
+      }
+      throw err;
+    }
     tags = tags.concat(res.body.tags);
     const linkHeader = parseLinkHeader(res.headers.link);
     url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
     page += 1;
   } while (url && page < 20);
   return tags;
+}
+
+function isECRMaxResultsError(err): boolean {
+  return (
+    err.response?.statusCode === 405 &&
+    err.response?.headers['docker-distribution-api-version'] &&
+    // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
+    err.response.body?.errors[0]?.message?.includes(
+      'Member must have value less than or equal to 1000'
+    )
+  );
 }
 
 async function getTags(
