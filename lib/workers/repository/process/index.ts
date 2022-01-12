@@ -14,7 +14,7 @@ import type { WriteUpdateResult } from './write';
 async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig
-): Promise<RenovateConfig | null> {
+): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
   let baseBranchConfig: RenovateConfig = config;
@@ -24,13 +24,14 @@ async function getBaseBranchConfig(
     baseBranch !== config.defaultBranch
   ) {
     logger.debug(
-      `Using config from branch ${baseBranch} because useBaseBranchConfig option specified`
+      { baseBranch },
+      `Using config from base branch because useBaseBranchConfig option specified`
     );
 
     // Retrieve config file name autodetected for this repo
     const cache = getCache();
     const configFileName =
-      cache.configFileName || config.onboardingConfigFileName;
+      cache.configFileName;
 
     try {
       baseBranchConfig = await platform.getJsonFile(
@@ -40,7 +41,8 @@ async function getBaseBranchConfig(
       );
     } catch (err) {
       logger.error(
-        `Error fetching config file ${configFileName} from branch ${baseBranch} - possible config name mismatch between branches?`
+        { configFileName, baseBranch },
+        `Error fetching config file from base branch - possible config name mismatch between branches?`
       );
       throw new Error(
         `config error: Error fetching config file ${configFileName} from branch ${baseBranch}`
