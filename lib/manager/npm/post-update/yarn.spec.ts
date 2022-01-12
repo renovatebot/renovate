@@ -190,7 +190,7 @@ describe('manager/npm/post-update/yarn', () => {
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
       Fixtures.mock(
         {
-          'yarn.lock': 'package-lock-contents',
+          'yarn.lock': null,
         },
         'some-dir'
       );
