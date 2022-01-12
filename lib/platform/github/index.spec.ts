@@ -195,8 +195,10 @@ describe('platform/github/index', () => {
         });
 
       const repos = await github.getRepos();
-      expect(repos).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(repos).toStricEqual([
+  "a/b",
+  "c/d",
+]);
     });
   });
 
