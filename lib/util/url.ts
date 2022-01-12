@@ -88,7 +88,7 @@ export type LinkHeaderLinks = _parseLinkHeader.Links;
 
 export function parseLinkHeader(
   linkHeader: string | null | undefined
-): LinkHeaderLinks {
+): LinkHeaderLinks | null {
   if (!is.nonEmptyString(linkHeader)) {
     return null;
   }
