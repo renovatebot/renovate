@@ -53,7 +53,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   let round = 0;
   while (round <= retryCount) {
     if (round > 0) {
-      logger.debug({ round }, 'gitRetry round');
+      logger.debug(`gitRetry round ${round}`);
     }
     try {
       return await gitFunc();
@@ -66,7 +66,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
       } catch (errChecked) {
         if (errChecked instanceof ExternalHostError) {
           logger.debug(
-            { errChecked },
+            { err: errChecked },
             `ExternalHostError thrown in round ${
               round + 1
             } of ${retryCount} - retrying in the next round`
@@ -78,7 +78,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
     }
 
     const nextDelay = delayFactor ^ ((round - 1) * delaySeconds);
-    logger.debug({ nextDelay }, `Waiting ${nextDelay} seconds`);
+    logger.trace({ nextDelay }, `Delay next round`);
     await delay(1000 * nextDelay);
 
     round++;
