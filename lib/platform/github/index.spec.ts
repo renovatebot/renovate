@@ -177,7 +177,10 @@ describe('platform/github/index', () => {
     });
     it('should return an array of repos when using Github App endpoint', async () => {
       //Use Github App token
-      hostRules.find.mockReturnValue({
+      await github.initPlatform({
+        endpoint: githubApiHost,
+        username: 'renovate-bot',
+        gitAuthor: 'Renovate Bot',
         token: 'x-access-token:123test',
       });
       httpMock
@@ -195,10 +198,7 @@ describe('platform/github/index', () => {
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStricEqual([
-  "a/b",
-  "c/d",
-]);
+      expect(repos).toStrictEqual(['a/b', 'c/d']);
     });
   });
 
