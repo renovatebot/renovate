@@ -1,3 +1,4 @@
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import {
   RenovateConfig,
   getConfig,
@@ -90,7 +91,7 @@ describe('workers/repository/process/index', () => {
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'replace';
       await expect(extractDependencies(config)).rejects.toThrow(
-        'config error: Error fetching config file renovate.json from branch dev'
+        CONFIG_VALIDATION
       );
     });
   });

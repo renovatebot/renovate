@@ -1,3 +1,4 @@
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -30,8 +31,7 @@ async function getBaseBranchConfig(
 
     // Retrieve config file name autodetected for this repo
     const cache = getCache();
-    const configFileName =
-      cache.configFileName;
+    const configFileName = cache.configFileName;
 
     try {
       baseBranchConfig = await platform.getJsonFile(
@@ -44,9 +44,12 @@ async function getBaseBranchConfig(
         { configFileName, baseBranch },
         `Error fetching config file from base branch - possible config name mismatch between branches?`
       );
-      throw new Error(
-        `config error: Error fetching config file ${configFileName} from branch ${baseBranch}`
-      );
+
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = 'config';
+      error.validationError = 'Error fetching config file';
+      error.validationMessage = `Error fetching config file ${configFileName} from branch ${baseBranch}`;
+      throw error;
     }
 
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
