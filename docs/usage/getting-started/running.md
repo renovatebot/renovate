@@ -36,6 +36,7 @@ If you use Forking Renovate, you'll miss out on these features of the regular Re
 
 - Dependency Dashboard (probably needs `write` rights to be able to open the issue?)
 - Automerge with the `branch` automerge strategy (needs `write` rights to create a branch in the first place)
+- The `baseBranches` config option is not supported
 - List more big ticket items here
 
 #### npm package (CLI)
