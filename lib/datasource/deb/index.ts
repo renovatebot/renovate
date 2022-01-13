@@ -34,10 +34,15 @@ export class DebDatasource extends Datasource {
    * @see{https://wiki.debian.org/DebianRepository/Format}
    *
    * However, for Renovate, we require the registry URLs to be
-   * valid URLs which is why the parameters are encoded in the URL
+   * valid URLs which is why the parameters are encoded in the URL.
+   *
+   * The following query parameters are required:
+   * - components: comma separated list of components
+   * - suite: stable, oldstable or other alias for a release, either this or release must be given
+   * - release: buster, etc.
    */
   override readonly defaultRegistryUrls = [
-    'deb https://ftp.debian.org/debian stable main contrib non-free',
+    'https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free',
   ];
 
   override readonly defaultConfig: DebLanguageConfig = {
@@ -91,10 +96,6 @@ export class DebDatasource extends Datasource {
     );
     const extractedFile = extractionDirectory + '/' + hashedPackageUrl + '.txt';
 
-    // curl will not modify the local file, if the upstream HTTP server
-    // does not return a modified version. We can use this information
-    // to not re-extract the same file again. For this to work we need
-    // the current modification timestamp of the local package file.
     let lastTimestamp: Date = null;
     try {
       const stats = statSync(compressedFile);
@@ -192,47 +193,48 @@ export class DebDatasource extends Datasource {
     const fullComponentUrls: string[] = [];
     const registryUrls = cfg.registryUrls || [cfg.registryUrl];
     registryUrls.forEach((aptUrl: string) => {
-      const aptUrlSplit = aptUrl.split(' ');
-      if (aptUrlSplit.length < 4) {
-        logger.warn(
-          'Skipping invalid apt repository url ' +
-            aptUrl +
-            ' - has invalid number of elements'
-        );
-        return;
-      } else if (aptUrlSplit[0] !== 'deb') {
-        logger.warn(
-          'Skipping invalid apt repository url ' +
-            aptUrl +
-            ' - can only deal with "deb" repos'
-        );
-        return;
-      }
-      let baseUrl: URL;
+      let url: URL;
       try {
-        baseUrl = new URL(aptUrlSplit[1]);
+        url = new URL(aptUrl);
       } catch (e) {
+        logger.warn('Invalid deb repo url ' + aptUrl + ' - see documentation');
+        return;
+      }
+      if (!url.searchParams.has('components')) {
         logger.warn(
-          'Skipping invalid apt repository url ' +
+          'No components query parameter for deb repo url ' +
             aptUrl +
-            ' - got error while parsing URL - ' +
-            JSON.stringify(e)
+            ' - see documentation'
         );
         return;
       }
-      baseUrl.pathname += '/dists/' + aptUrlSplit[2];
 
-      // now we are at the components, we require at least one but can have multiple components
-      for (let i = 3; i < aptUrlSplit.length; i++) {
-        const newUrl = new URL(baseUrl);
-        newUrl.pathname +=
-          '/' +
-          aptUrlSplit[i] +
-          '/binary-' +
-          cfg.deb.binaryArch +
-          '/Packages.xz';
-        fullComponentUrls.push(newUrl.toString());
+      let release: string;
+      if (url.searchParams.has('release')) {
+        release = url.searchParams.get('release');
+      } else if (url.searchParams.has('suite')) {
+        release = url.searchParams.get('suite');
+      } else {
+        logger.warn(
+          'No release or suite query parameter for deb repo url ' +
+            aptUrl +
+            ' - see documentation'
+        );
+        return;
       }
+
+      const components = url.searchParams.get('components').split(',');
+      url.searchParams.delete('release');
+      url.searchParams.delete('suite');
+      url.searchParams.delete('components');
+
+      url.pathname += '/dists/' + release;
+      components.forEach((component) => {
+        const newUrl = new URL(url);
+        newUrl.pathname +=
+          '/' + component + '/binary-' + cfg.deb.binaryArch + '/Packages.xz';
+        fullComponentUrls.push(newUrl.toString());
+      });
     });
 
     await this.initCacheDir(cfg);

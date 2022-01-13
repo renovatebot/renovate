@@ -28,7 +28,9 @@ describe('datasource/deb/index', () => {
         downloadDirectory: './deb/download',
         extractionDirectory: './deb/extract',
       },
-      registryUrls: ['deb http://ftp.debian.org/debian stable non-free'],
+      registryUrls: [
+        'http://ftp.debian.org/debian?suite=stable&components=non-free',
+      ],
     };
 
     // it('returns a valid version for the package `steam-devices`', async () => {
