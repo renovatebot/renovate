@@ -132,7 +132,7 @@
     "@aws-sdk/client-ecr": "3.46.0",
     "@breejs/later": "4.1.0",
     "@iarna/toml": "2.2.5",
-    "@renovate/pep440": "1.0.0",
+    "@renovatebot/pep440": "1.1.0",
     "@renovatebot/ruby-semver": "1.0.0",
     "@sindresorhus/is": "4.2.0",
     "@yarnpkg/core": "3.1.0",
