@@ -1,9 +1,12 @@
 import { exec } from 'child_process';
 import { createHash } from 'crypto';
-import { createReadStream, existsSync, statSync } from 'fs';
+import { constants, createReadStream, createWriteStream } from 'fs';
+import { access, stat } from 'fs/promises';
 import { performance } from 'perf_hooks';
 import readline from 'readline';
+import { pipeline } from 'stream';
 import { promisify } from 'util';
+import { createUnzip } from 'zlib';
 import { GetReleasesConfig, ReleaseResult } from '..';
 import { logger } from '../../logger';
 import * as fs from '../../util/fs';
@@ -20,6 +23,11 @@ export class DebDatasource extends Datasource {
   constructor() {
     super(DebDatasource.id);
   }
+
+  /**
+   * This is just an internal list of compressions that are supported and tried to be downloaded from the remote
+   */
+  static readonly compressions = ['gz'];
 
   /**
    * Users are able to specify custom Debian repositories as long as they follow
@@ -77,35 +85,96 @@ export class DebDatasource extends Datasource {
     logger.debug(stderr);
   }
 
+  async extract(
+    compressedFile: string,
+    compression: string,
+    outputFile: string
+  ): Promise<void> {
+    if (compression === 'gz') {
+      const source = createReadStream(compressedFile);
+      const destination = createWriteStream(outputFile);
+      const pipe = promisify(pipeline);
+      await pipe(source, createUnzip(), destination);
+    } else {
+      throw 'Unknown compression standard, this is probably a programming error';
+    }
+  }
+
   async downloadAndExtractPackage(
     cfg: DebLanguageConfig,
-    packageUrl: string
+    basePackageUrl: string
   ): Promise<string> {
     // we hash the package URL and export the hex to make it file system friendly
     // we use the hashed url as the filename for the local directories/files
     const hash = createHash('sha256');
-    hash.update(packageUrl);
+    hash.update(basePackageUrl);
     const hashedPackageUrl = hash.copy().digest('hex');
     const downloadDirectory = await fs.ensureCacheDir(
       cfg.deb.downloadDirectory
     );
-    const compressedFile = downloadDirectory + '/' + hashedPackageUrl + '.xz';
 
     const extractionDirectory = await fs.ensureCacheDir(
       cfg.deb.extractionDirectory
     );
     const extractedFile = extractionDirectory + '/' + hashedPackageUrl + '.txt';
+    let extractedFileExists = false;
+    try {
+      await access(extractedFile, constants.R_OK);
+      extractedFileExists = true;
+    } catch (e) {
+      //ignore
+    }
 
+    for (let i = 0; i < DebDatasource.compressions.length; i++) {
+      const compression = DebDatasource.compressions[i];
+      const compressedFile =
+        downloadDirectory + '/' + hashedPackageUrl + '.' + compression;
+      try {
+        const wasUpdated = await this.downloadPackageFile(
+          basePackageUrl,
+          compression,
+          compressedFile
+        );
+        if (wasUpdated || !extractedFileExists) {
+          await this.extract(compressedFile, compression, extractedFile);
+        }
+        return extractedFile;
+      } catch (e) {
+        logger.warn(
+          "Couldn't download package file with compression " +
+            compression +
+            ' from ' +
+            basePackageUrl
+        );
+      }
+    }
+
+    throw 'No compression standard worked for ' + basePackageUrl;
+  }
+
+  /**
+   *
+   * @param cfg
+   * @param basePackageUrl
+   * @param compression
+   * @returns a boolean indicating if the file was modified
+   */
+  async downloadPackageFile(
+    basePackageUrl: string,
+    compression: string,
+    compressedFile: string
+  ): Promise<boolean> {
     let lastTimestamp: Date = null;
     try {
-      const stats = statSync(compressedFile);
+      const stats = await stat(compressedFile);
       lastTimestamp = stats.mtime;
     } catch (e) {
       // ignore if the file doesnt exist
     }
 
+    const packageUri = basePackageUrl + '/Packages.' + compression;
     logger.debug(
-      'Downloading package file from ' + packageUrl + ' as ' + compressedFile
+      'Downloading package file from ' + packageUri + ' as ' + compressedFile
     );
     let needsToDownload = true;
     // we can use If-Modified-Since to avoid that we are redownloaded the file
@@ -115,42 +184,18 @@ export class DebDatasource extends Datasource {
       downloadOptions.headers = {
         'If-Modified-Since': lastTimestamp.toUTCString(),
       };
-      const headResult = await this.http.head(packageUrl, downloadOptions);
+      const headResult = await this.http.head(packageUri, downloadOptions);
       needsToDownload = headResult.statusCode !== 304;
     }
 
     if (needsToDownload) {
-      const readStream = this.http.stream(packageUrl);
+      const readStream = this.http.stream(packageUri);
       const writeStream = fs.createWriteStream(compressedFile);
 
       await fs.pipeline(readStream, writeStream);
     }
 
-    // const stats = statSync(compressedFile);
-    // const newTimestamp = stats.mtime;
-
-    if (!needsToDownload && existsSync(extractedFile)) {
-      logger.debug(
-        "No need to extract file as wget didn't update the file and it exists"
-      );
-      return extractedFile;
-    }
-
-    logger.debug(
-      'Extracting package file ' + compressedFile + ' to ' + extractedFile
-    );
-    /**
-     * --threads=0 use all available cores
-     * -k keep the downloaded file (needed by wget to not redownload)
-     * -c print to stdout (we pipe)
-     * -d decompress
-     */
-    await this.runCommand(
-      downloadDirectory,
-      ['xz --threads=0 -k -c -d', compressedFile, '>', extractedFile].join(' ')
-    );
-
-    return extractedFile;
+    return needsToDownload;
   }
 
   async probeExtractedPackage(
@@ -231,8 +276,7 @@ export class DebDatasource extends Datasource {
       url.pathname += '/dists/' + release;
       components.forEach((component) => {
         const newUrl = new URL(url);
-        newUrl.pathname +=
-          '/' + component + '/binary-' + cfg.deb.binaryArch + '/Packages.xz';
+        newUrl.pathname += '/' + component + '/binary-' + cfg.deb.binaryArch;
         fullComponentUrls.push(newUrl.toString());
       });
     });

@@ -1,5 +1,5 @@
-import { mkdir, mkdirSync, rmdirSync } from 'fs';
-import { copyFile, stat, rmdir } from 'fs/promises';
+import { mkdirSync, rmdirSync } from 'fs';
+import { copyFile, stat } from 'fs/promises';
 import { GetPkgReleasesConfig, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { GlobalConfig } from '../../config/global';
@@ -7,13 +7,13 @@ import { DebLanguageConfig } from './types';
 
 describe('datasource/deb/index', () => {
   describe('getReleases', () => {
-    const testPackagesFile = __dirname + '/test-data/Packages.xz';
+    const testPackagesFile = __dirname + '/test-data/Packages.gz';
     const downloadFolder = '/tmp/renovate-cache/others/deb/download/';
     const compressedPackageFile =
       downloadFolder +
-      'b7566e8ec1e0f0e128251b5373480cbe48a4316956e71f48f9d04935216b164b.xz';
+      '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.gz';
     const extractedPackageFile =
-      '/tmp/renovate-cache/others/deb/extract/b7566e8ec1e0f0e128251b5373480cbe48a4316956e71f48f9d04935216b164b.txt';
+      '/tmp/renovate-cache/others/deb/extract/0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.txt';
     const cacheDir = '/tmp/renovate-cache/';
 
     rmdirSync(cacheDir, { force: true, recursive: true });
@@ -36,7 +36,7 @@ describe('datasource/deb/index', () => {
     // it('returns a valid version for the package `steam-devices`', async () => {
     //   httpMock
     //     .scope('http://ftp.debian.org')
-    //     .get('/debian/dists/stable/non-free/binary-amd64/Packages.xz')
+    //     .get('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
     //     .replyWithFile(200, testPackagesFile);
 
     //   const res = await getPkgReleases(cfg);
@@ -45,7 +45,7 @@ describe('datasource/deb/index', () => {
     // });
 
     it('returns a valid version for the package `steam-devices` and does not require redownload', async () => {
-      // copy the Packages.xz file to the appropriate location
+      // copy the Packages.gz file to the appropriate location
       mkdirSync(downloadFolder, { recursive: true });
       await copyFile(testPackagesFile, compressedPackageFile);
       const stats = await stat(compressedPackageFile);
@@ -53,7 +53,7 @@ describe('datasource/deb/index', () => {
 
       httpMock
         .scope('http://ftp.debian.org')
-        .head('/debian/dists/stable/non-free/binary-amd64/Packages.xz')
+        .head('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
         .reply(304);
 
       const res = await getPkgReleases(cfg);
