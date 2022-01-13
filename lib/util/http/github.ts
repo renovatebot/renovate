@@ -11,10 +11,10 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { range } from '../range';
 import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
-import { range } from '../range';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
