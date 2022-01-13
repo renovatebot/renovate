@@ -24,6 +24,7 @@ const {
 function isVersion(input: string): boolean {
   return !!valid(input);
 }
+
 const isStable = (input: string): boolean => {
   const version = explain(input);
   if (!version) {
