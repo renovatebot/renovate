@@ -240,7 +240,7 @@ However, Renovate also allows users to explicitly configure `baseBranches`, e.g.
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
 
-Note: the `baseBranches` config option is not supported on the Forking Renovate app.
+Note: the `baseBranches` config option is not supported when `forkMode` is enabled, including in the Forking Renovate app.
 
 ## bbUseDefaultReviewers
 
