@@ -6842,29 +6842,6 @@ Array [
 ]
 `;
 
-exports[`platform/github/index getRepos should return an array of repos when using Github App endpoint 1`] = `
-Array [
-  "a/b",
-  "c/d",
-]
-`;
-
-exports[`platform/github/index getRepos should return an array of repos when using Github App endpoint 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.machine-man-preview+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/installation/repositories?per_page=100",
-  },
-]
-`;
-
 exports[`platform/github/index getVulnerabilityAlerts() handles network error 1`] = `
 Array [
   Object {
