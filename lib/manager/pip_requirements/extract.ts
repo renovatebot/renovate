@@ -63,7 +63,8 @@ export function extractPackageFile(
       if (isSkipComment(comment)) {
         dep.skipReason = SkipReason.Ignored;
       }
-      const lineNoHashes = line.split(' \\')[0];
+      const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
+      const lineNoHashes = lineNoEnvMarkers.split(' \\')[0];
       const matches =
         pkgValRegex.exec(lineNoHashes) || pkgRegex.exec(lineNoHashes);
       if (!matches) {
@@ -90,18 +91,18 @@ export function extractPackageFile(
   if (registryUrls.length > 0) {
     res.registryUrls = registryUrls.map((url) => {
       // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
-      const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), ''); // TODO #12071
+      const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
       if (!GlobalConfig.get('exposeAllEnv')) {
         return cleaned;
       }
       // interpolate any environment variables
       return cleaned.replace(
-        regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g), // TODO #12071
+        regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g),
         (match) => {
           const envvar = match
             .substring(1)
             .replace(regEx(/^{/), '')
-            .replace(regEx(/}$/), ''); // TODO #12071
+            .replace(regEx(/}$/), '');
           const sub = process.env[envvar];
           return sub || match;
         }

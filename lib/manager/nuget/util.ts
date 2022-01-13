@@ -69,7 +69,7 @@ export async function getConfiguredRegistries(
         logger.debug(`clearing registry URLs`);
         registries.length = 0;
       } else if (child.name === 'add') {
-        const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value); // TODO #12071
+        const isHttpUrl = regEx(/^https?:\/\//i).test(child.attr.value);
         if (isHttpUrl) {
           let registryUrl = child.attr.value;
           if (child.attr.protocolVersion) {

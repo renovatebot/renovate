@@ -5,11 +5,9 @@ export interface GradleDependency {
 }
 
 export interface UpdateFunction {
-  (
-    dependency: GradleDependency,
-    buildGradleContent: string,
-    newValue: string
-  ): string;
+  (dependency: GradleDependency, buildGradleContent: string, newValue: string):
+    | string
+    | null;
 }
 
 export interface GradleProject {

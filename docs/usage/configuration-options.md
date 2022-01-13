@@ -10,15 +10,19 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 
 You can store your Renovate configuration file in one of the following locations:
 
-- `.github/renovate.json`
-- `.github/renovate.json5`
-- `.gitlab/renovate.json`
-- `.gitlab/renovate.json5`
-- `.renovaterc.json`
-- `renovate.json`
-- `renovate.json5`
-- `.renovaterc`
-- `package.json` _(within a `"renovate"` section)_
+1. `renovate.json`
+1. `renovate.json5`
+1. `.github/renovate.json`
+1. `.github/renovate.json5`
+1. `.gitlab/renovate.json`
+1. `.gitlab/renovate.json5`
+1. `.renovaterc`
+1. `.renovaterc.json`
+1. `package.json` _(within a `"renovate"` section)_
+
+_Note_: Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
+
+When renovating a repository, Renovate will try to detect the configuration files in the order listed above, and stop after the first one is found.
 
 Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
@@ -114,7 +118,7 @@ Must be valid usernames on the platform in use.
 
 If enabled Renovate will try to determine PR assignees by matching rules defined in a CODEOWNERS file against the changes in the PR.
 
-See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
 
 ## assigneesSampleSize
 
@@ -363,10 +367,14 @@ The "topic" is usually refers to the dependency being updated, e.g. `"dependency
 
 ## composerIgnorePlatformReqs
 
-By default, Renovate will run Composer with `--ignore-platform-reqs` as the PHP platform used by Renovate most probably won't match with the required PHP environment of your project as configured in your `composer.json` file.
-However, this also means that all platform constraints (including PHP version) will be ignored by default, which can result in updated dependencies that are not compatible with your platform.
+By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match the required PHP environment of your project as configured in your `composer.json` file.
 
-To solve this, you should configure explicit ignored platform requirements (for example `ext-zip`) by setting them separately in this array.
+Composer `2.2` and up will be run with `--ignore-platform-req='ext-*' --ignore-platform-req='lib-*'`, which ignores extension and library platform requirements but not the PHP version itself and should work in most cases.
+
+Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default.
+This can result in updated dependencies that are not compatible with your platform.
+
+To customize this behaviour, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
 Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
 The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
@@ -422,6 +430,8 @@ If you need to _override_ constraints that Renovate detects from the repository,
 Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## deepExtract
+
+Note: the `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
 
 If configured to `true`, then dependency extraction will be done using the relevant package manager instead of JavaScript-based parsing.
 
@@ -745,9 +755,9 @@ Otherwise, if another bot or human shares the same email and pushes to one of Re
 
 Specify commit authors ignored by Renovate.
 
-By default, Renovate will treat any PR as modified if another git author has added to the branch.
+By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
-If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other git author(s) to `gitIgnoredAuthors`.
+If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other Git author(s) to `gitIgnoredAuthors`.
 
 Example:
 
@@ -768,7 +778,7 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (the `gomod` manager).
 
-For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://golang.org/ref/mod#module-proxy)).
+For self-hosted users, `GOPROXY`, `GONOPROXY` and `GOPRIVATE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
 
 Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
 Also we support the `off` keyword which will stop any fetching immediately.
@@ -1478,6 +1488,20 @@ Use this field to restrict rules to a particular branch. e.g.
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
+      "excludePackagePatterns": ["^eslint"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+This field also supports Regular Expressions if they begin and end with `/`. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchBaseBranches": ["/^release\\/.*/"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
@@ -2588,7 +2612,7 @@ Other managers can use the `"loose"` versioning fallback: the first 3 parts are 
 ## vulnerabilityAlerts
 
 Renovate can read from GitHub's Vulnerability Alerts and customize Pull Requests accordingly.
-For this to work, you must first ensure you have enabled "[Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/about-the-dependency-graph#enabling-the-dependency-graph)" and "[Dependabot alerts](https://docs.github.com/en/github/administering-a-repository/managing-security-and-analysis-settings-for-your-repository)" under the "Security & analysis" section of the repository's "Settings" tab.
+For this to work, you must first ensure you have enabled "[Dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph#enabling-the-dependency-graph)" and "[Dependabot alerts](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository)" under the "Security & analysis" section of the repository's "Settings" tab.
 
 Additionally, if you are running Renovate in app mode then you must make sure that the app has been granted the permissions to read "Vulnerability alerts".
 If you are the account admin, browse to the app (e.g. [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and verify that read access to "vulnerability alerts" is mentioned.
