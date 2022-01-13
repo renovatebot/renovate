@@ -866,7 +866,7 @@ describe('platform/bitbucket/index', () => {
         .reply(401);
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-      ).rejects.toThrowErrorMatchingSnapshot();
+      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
     it('rethrows exception when PR update error not due to inactive reviewers', async () => {
       const reviewer = {

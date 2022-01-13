@@ -1908,5 +1908,3 @@ Array [
   },
 ]
 `;
-
-exports[`platform/bitbucket/index updatePr() throws exception when unable to check reviewers workspace membership 1`] = `"Response code 401 (Unauthorized)"`;
