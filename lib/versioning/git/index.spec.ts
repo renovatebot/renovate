@@ -2,19 +2,24 @@ import git from '.';
 
 describe('versioning/git/index', () => {
   test.each`
-    input       | expected
-    ${''}       | ${true}
-    ${'1'}      | ${true}
-    ${'a'}      | ${true}
-    ${'a1'}     | ${true}
-    ${'foobar'} | ${false}
+    input                                         | expected
+    ${''}                                         | ${false}
+    ${'2'}                                        | ${false}
+    ${'29'}                                       | ${false}
+    ${'29c'}                                      | ${false}
+    ${'29c7'}                                     | ${false}
+    ${'29c79'}                                    | ${false}
+    ${'29c792'}                                   | ${false}
+    ${'29c7921'}                                  | ${true}
+    ${'29c792109259545157f4bc3f8d43f47ffcf34e20'} | ${true}
+    ${'foobar'}                                   | ${false}
   `('isValid("$input") === $expected', ({ input, expected }) => {
     expect(git.isValid(input)).toBe(expected);
   });
 
   test.each`
     version               | range | expected
-    ${''}                 | ${''} | ${true}
+    ${''}                 | ${''} | ${false}
     ${'1234567890aBcDeF'} | ${''} | ${true}
   `(
     'isCompatible("$version") === $expected',

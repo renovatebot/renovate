@@ -7,7 +7,7 @@ export const displayName = 'git';
 export const urls = ['https://git-scm.com/'];
 export const supportsRanges = false;
 
-const regex = regEx('^[0-9a-f]*$', 'i');
+const regex = regEx('^[0-9a-f]{7,40}$', 'i');
 
 class GitVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
