@@ -3,9 +3,14 @@ import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
+import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
+import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
+import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
+import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import type { Migration, MigrationConstructor } from './types';
 
@@ -37,9 +42,14 @@ export class MigrationsService {
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
     BinarySourceMigration,
+    EnabledManagersMigration,
     GoModTidyMigration,
     IgnoreNodeModulesMigration,
+    PinVersionsMigration,
+    RebaseConflictedPrs,
+    RebaseStalePrsMigration,
     RequiredStatusChecksMigration,
+    SemanticCommitsMigration,
     TrustLevelMigration,
   ];
 
