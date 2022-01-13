@@ -1,5 +1,4 @@
-import * as pep440 from '@renovate/pep440';
-import { filter } from '@renovate/pep440/lib/specifier.js';
+import * as pep440 from '@renovatebot/pep440';
 import type { VersioningApi } from '../types';
 import { getNewValue, isLessThanRange } from './range';
 
@@ -12,7 +11,7 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 const {
   compare: sortVersions,
   satisfies: matches,
-  valid: isVersion,
+  valid,
   validRange,
   explain,
   gt: isGreaterThan,
@@ -21,6 +20,10 @@ const {
   patch: getPatch,
   eq,
 } = pep440;
+
+function isVersion(input: string): boolean {
+  return !!valid(input);
+}
 
 const isStable = (input: string): boolean => {
   const version = explain(input);
@@ -32,14 +35,14 @@ const isStable = (input: string): boolean => {
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
 export function isValid(input: string): boolean {
-  return validRange(input) || !!isVersion(input);
+  return validRange(input) || isVersion(input);
 }
 
 function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const found = filter(versions, range).sort(sortVersions);
+  const found = pep440.filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
 }
 
@@ -47,15 +50,14 @@ function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const found = filter(versions, range).sort(sortVersions);
+  const found = pep440.filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[0];
 }
 
 export function isSingleVersion(constraint: string): boolean {
   return (
-    !!isVersion(constraint) ||
-    (constraint?.startsWith('==') &&
-      !!isVersion(constraint.substring(2).trim()))
+    isVersion(constraint) ||
+    (constraint?.startsWith('==') && isVersion(constraint.substring(2).trim()))
   );
 }
 
