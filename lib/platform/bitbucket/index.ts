@@ -792,16 +792,13 @@ export async function updatePr({
         // Validate that each previous PR reviewer account is still a member of this workspace
         for (const reviewer of pr.reviewers) {
           try {
-            const membership = await bitbucketHttp.head(
+            await bitbucketHttp.head(
               `/2.0/workspaces/${config.repository.split('/')[0]}/members/${
                 reviewer.account_id
               }`
             );
 
-            // HTTP 200: The user is part of this workspace.
-            if (membership.statusCode === 200) {
-              sanitizedReviewers.push(reviewer);
-            }
+            sanitizedReviewers.push(reviewer);
           } catch (err) {
             // HTTP 404: User cannot be found, or the user is not a member of this workspace.
             if (err.response?.statusCode !== 404) {
