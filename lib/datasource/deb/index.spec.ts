@@ -1,4 +1,5 @@
-import { copyFile, stat } from 'fs/promises';
+import { mkdir, mkdirSync, rmdirSync } from 'fs';
+import { copyFile, stat, rmdir } from 'fs/promises';
 import { GetPkgReleasesConfig, getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { GlobalConfig } from '../../config/global';
@@ -7,11 +8,16 @@ import { DebLanguageConfig } from './types';
 describe('datasource/deb/index', () => {
   describe('getReleases', () => {
     const testPackagesFile = __dirname + '/test-data/Packages.xz';
+    const downloadFolder = '/tmp/renovate-cache/others/deb/download/';
     const compressedPackageFile =
-      '/tmp/renovate-cache/others/deb/download/b7566e8ec1e0f0e128251b5373480cbe48a4316956e71f48f9d04935216b164b.xz';
+      downloadFolder +
+      'b7566e8ec1e0f0e128251b5373480cbe48a4316956e71f48f9d04935216b164b.xz';
     const extractedPackageFile =
       '/tmp/renovate-cache/others/deb/extract/b7566e8ec1e0f0e128251b5373480cbe48a4316956e71f48f9d04935216b164b.txt';
     const cacheDir = '/tmp/renovate-cache/';
+
+    rmdirSync(cacheDir, { force: true, recursive: true });
+
     GlobalConfig.set({ cacheDir: cacheDir });
 
     const cfg: GetPkgReleasesConfig & DebLanguageConfig = {
@@ -38,13 +44,14 @@ describe('datasource/deb/index', () => {
 
     it('returns a valid version for the package `steam-devices` and does not require redownload', async () => {
       // copy the Packages.xz file to the appropriate location
+      mkdirSync(downloadFolder, { recursive: true });
       await copyFile(testPackagesFile, compressedPackageFile);
       const stats = await stat(compressedPackageFile);
       const ts = stats.mtime;
 
       httpMock
         .scope('http://ftp.debian.org')
-        .get('/debian/dists/stable/non-free/binary-amd64/Packages.xz')
+        .head('/debian/dists/stable/non-free/binary-amd64/Packages.xz')
         .reply(304);
 
       const res = await getPkgReleases(cfg);
@@ -53,7 +60,7 @@ describe('datasource/deb/index', () => {
 
       // validate that the server was called correctly
       expect(httpMock.getTrace()).toHaveLength(1);
-      const modifiedTs = httpMock.getTrace()[0].headers['If-Modified-Since'];
+      const modifiedTs = httpMock.getTrace()[0].headers['if-modified-since'];
       expect(modifiedTs).toBeDefined();
       expect(modifiedTs).toEqual(ts.toUTCString());
     });

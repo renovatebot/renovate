@@ -106,28 +106,29 @@ export class DebDatasource extends Datasource {
     logger.debug(
       'Downloading package file from ' + packageUrl + ' as ' + compressedFile
     );
-    const downloadOptions: HttpOptions = {};
+    let needsToDownload = true;
     // we can use If-Modified-Since to avoid that we are redownloaded the file
     // More information can be found here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
     if (lastTimestamp !== null) {
+      const downloadOptions: HttpOptions = {};
       downloadOptions.headers = {
         'If-Modified-Since': lastTimestamp.toUTCString(),
       };
+      const headResult = await this.http.head(packageUrl, downloadOptions);
+      needsToDownload = headResult.statusCode !== 304;
     }
 
-    const readStream = this.http.stream(packageUrl, downloadOptions);
-    const writeStream = fs.createWriteStream(compressedFile);
+    if (needsToDownload) {
+      const readStream = this.http.stream(packageUrl);
+      const writeStream = fs.createWriteStream(compressedFile);
 
-    await fs.pipeline(readStream, writeStream);
+      await fs.pipeline(readStream, writeStream);
+    }
 
-    const stats = statSync(compressedFile);
-    const newTimestamp = stats.mtime;
+    // const stats = statSync(compressedFile);
+    // const newTimestamp = stats.mtime;
 
-    if (
-      lastTimestamp !== null &&
-      newTimestamp.getTime() <= lastTimestamp.getTime() &&
-      existsSync(extractedFile)
-    ) {
+    if (!needsToDownload && existsSync(extractedFile)) {
       logger.debug(
         "No need to extract file as wget didn't update the file and it exists"
       );
