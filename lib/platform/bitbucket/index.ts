@@ -789,13 +789,13 @@ export async function updatePr({
           'PR contains reviewer accounts which are no longer member of this workspace.  Will try setting only member reviewers'
         );
 
+        const workspace = config.repository.split('/')[0];
+
         // Validate that each previous PR reviewer account is still a member of this workspace
         for (const reviewer of pr.reviewers) {
           try {
             await bitbucketHttp.head(
-              `/2.0/workspaces/${config.repository.split('/')[0]}/members/${
-                reviewer.account_id
-              }`
+              `/2.0/workspaces/${workspace}/members/${reviewer.account_id}`
             );
 
             sanitizedReviewers.push(reviewer);
