@@ -70,7 +70,8 @@ describe('manager/gradle/shallow/parser-new', () => {
       ${'baz = "1.2.3"'}     | ${'group: "foo", name: "bar", version: baz'}                              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                  | ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                  | ${'(group : "foo", name : "bar", version : "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${''}                  | ${'(group = "foo", name = "bar", version = "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                  | ${'foobar("foo", "bar", "1.2.3")'}                                        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'foobar("foo", "bar", baz)'}                                            | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
     `(`$dep`, ({ vars, dep, result }) => {
       const input = [vars, dep].join('\n');
       const { deps } = parseGradle('build.gradle', input, {});

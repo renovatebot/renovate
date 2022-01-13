@@ -342,6 +342,37 @@ const keywordParamsDepQuery = q.many(
   3
 );
 
+const tripleStringCallQuery = q.sym<GradleContext>().tree({
+  type: 'wrapped-tree',
+  maxDepth: 1,
+  search: q
+    .begin<GradleContext>()
+    .str((ctx, { value: groupId }) => {
+      return { ...ctx, groupId };
+    })
+    .op(',')
+    .str((ctx, { value: artifactId }) => {
+      return { ...ctx, artifactId };
+    })
+    .op(',')
+    .alt(
+      q.str((ctx, { value: version, offset: fileReplacePosition }) => {
+        return { ...ctx, version, fileReplacePosition };
+      }),
+      q.sym((ctx, { value }) => {
+        const varData = ctx.result.vars[value];
+        if (varData) {
+          ctx.version = varData.value;
+          ctx.otherPackageFile = varData.packageFile;
+          ctx.fileReplacePosition = varData.fileReplacePosition;
+        }
+        return ctx;
+      })
+    )
+    .end(),
+  postHandler: handleKeywordParamsDep,
+});
+
 const query = q.alt<GradleContext>(
   assignmentQuery,
   assignmentSetQuery,
@@ -349,7 +380,8 @@ const query = q.alt<GradleContext>(
   depStringQuery,
   templateStringQuery,
   templateStringWithDataTypeQuery,
-  keywordParamsDepQuery
+  keywordParamsDepQuery,
+  tripleStringCallQuery
 );
 
 const groovy = lang.createLang('groovy');
