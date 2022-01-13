@@ -108,6 +108,6 @@ describe('workers/global/autodiscover', () => {
     ghApi.getRepos = jest.fn(() =>
       Promise.resolve(['project/repo', 'project/another-repo'])
     );
-    expect(await autodiscoverRepositories(config)).toEqual(config);
+    await expect(autodiscoverRepositories(config)).rejects.toThrow();
   });
 });

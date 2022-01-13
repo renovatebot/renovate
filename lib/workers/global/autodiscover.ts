@@ -34,11 +34,9 @@ export async function autodiscoverRepositories(
     if (isConfigRegex(config.autodiscoverFilter)) {
       const autodiscoveryPred = configRegexPredicate(config.autodiscoverFilter);
       if (!autodiscoveryPred) {
-        logger.error(
-          { autodiscoverFilter: config.autodiscoverFilter },
-          'Failed to parse regex pattern'
+        throw new Error(
+          `Failed to parse regex pattern "${config.autodiscoverFilter}"`
         );
-        return config;
       }
       discovered = discovered.filter(autodiscoveryPred);
     } else {
