@@ -373,6 +373,71 @@ const tripleStringCallQuery = q.sym<GradleContext>().tree({
   postHandler: handleKeywordParamsDep,
 });
 
+function handlePluginName(
+  ctx: GradleContext,
+  { value }: lex.StringValueToken
+): GradleContext {
+  ctx.groupId = ctx.groupId ? `${ctx.groupId}.${value}` : value;
+  ctx.artifactId = `${ctx.groupId}.gradle.plugin`;
+  return ctx;
+}
+
+const pluginQuery = q
+  .sym<GradleContext>(regEx(/^id|kotlin$/), (ctx, { value }) => {
+    if (value === 'kotlin') {
+      ctx.groupId = 'org.jetbrains.kotlin';
+    }
+    return ctx;
+  })
+  .alt(
+    q.str(handlePluginName),
+    q.tree<GradleContext>({
+      maxDepth: 1,
+      search: q.begin<GradleContext>().str(handlePluginName).end(),
+    })
+  )
+  .sym('version')
+  .alt(
+    q.str((ctx, { value: currentValue, offset: fileReplacePosition }) => {
+      const depName = ctx.artifactId.replace(regEx(/\.gradle\.plugin$/), '');
+      const dep: PackageDependency<GradleManagerData> = {
+        depName,
+        lookupName: `${ctx.groupId}:${ctx.artifactId}`,
+        currentValue,
+        managerData: {
+          packageFile: ctx.packageFile,
+          fileReplacePosition,
+        },
+      };
+
+      ctx.result.deps.push(dep);
+      return cleanupContext(ctx);
+    }),
+    q.sym((ctx, { value }) => {
+      const varData = ctx.result.vars[value];
+      if (varData) {
+        const currentValue = varData.value;
+        const packageFile = varData.packageFile;
+        const fileReplacePosition = varData.fileReplacePosition;
+
+        const depName = ctx.artifactId.replace(regEx(/\.gradle\.plugin$/), '');
+
+        const dep: PackageDependency<GradleManagerData> = {
+          depName,
+          lookupName: `${ctx.groupId}:${ctx.artifactId}`,
+          currentValue,
+          managerData: {
+            packageFile,
+            fileReplacePosition,
+          },
+        };
+
+        ctx.result.deps.push(dep);
+      }
+      return cleanupContext(ctx);
+    })
+  );
+
 const query = q.alt<GradleContext>(
   assignmentQuery,
   assignmentSetQuery,
@@ -381,7 +446,8 @@ const query = q.alt<GradleContext>(
   templateStringQuery,
   templateStringWithDataTypeQuery,
   keywordParamsDepQuery,
-  tripleStringCallQuery
+  tripleStringCallQuery,
+  pluginQuery
 );
 
 const groovy = lang.createLang('groovy');
