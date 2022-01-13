@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
-import parseLinkHeader from 'parse-link-header';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -13,6 +12,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
 import { range } from '../range';
 import { regEx } from '../regex';
+import { parseLinkHeader } from '../url';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
