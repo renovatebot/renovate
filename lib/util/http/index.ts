@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import type { IncomingHttpHeaders } from 'http';
 import merge from 'deepmerge';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -48,10 +49,14 @@ export interface InternalHttpOptions extends HttpOptions {
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
+export interface HttpHeaders extends IncomingHttpHeaders {
+  link?: string | undefined;
+}
+
 export interface HttpResponse<T = string> {
   statusCode: number;
   body: T;
-  headers: any;
+  headers: HttpHeaders;
   authorization?: boolean;
 }
 
