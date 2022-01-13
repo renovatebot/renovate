@@ -11,10 +11,7 @@ function getPath(page: number, imageType = 'jdk'): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
 }
 
-function* range(
-  start: number,
-  end: number
-): Generator<number, number, number> | void {
+function* range(start: number, end: number): Generator<number, void, void> {
   yield start;
   if (start === end) {
     return;
