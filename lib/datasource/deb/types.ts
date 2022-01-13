@@ -18,15 +18,13 @@ export interface DebLanguageConfig extends Record<string, unknown> {
     binaryArch: string;
 
     /**
-     * This specifies the download directory into which the packages file should be downloaded.
-     * This should be a folder on the "host" of renovate, e.g. the docker image.
+     * This specifies the download directory into which the packages file should be downloaded relative to cacheDir.
      * The folder will be created automatically if it doesn't exist.
      */
     downloadDirectory: string;
 
     /**
-     * This specifies the directory where the extracted packages files are stored.
-     * This should be a folder on the "host" of renovate, e.g. the docker image.
+     * This specifies the directory where the extracted packages files are stored relative to cacheDir.
      * The folder will be created automatically if it doesn't exist.
      */
     extractionDirectory: string;

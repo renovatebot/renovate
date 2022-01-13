@@ -1,11 +1,13 @@
 import { exec } from 'child_process';
 import { createHash } from 'crypto';
-import { createReadStream, existsSync, mkdirSync, statSync } from 'fs';
+import { createReadStream, existsSync, statSync } from 'fs';
 import { performance } from 'perf_hooks';
 import readline from 'readline';
 import { promisify } from 'util';
 import { GetReleasesConfig, ReleaseResult } from '..';
 import { logger } from '../../logger';
+import * as fs from '../../util/fs';
+import { HttpOptions } from '../../util/http';
 import { Datasource } from '../datasource';
 import { DebLanguageConfig, PackageDescription } from './types';
 
@@ -27,8 +29,12 @@ export class DebDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   /**
+   * The original apt source list file format is
    * deb uri distribution [component1] [component2] [...]
    * @see{https://wiki.debian.org/DebianRepository/Format}
+   *
+   * However, for Renovate, we require the registry URLs to be
+   * valid URLs which is why the parameters are encoded in the URL
    */
   override readonly defaultRegistryUrls = [
     'deb https://ftp.debian.org/debian stable main contrib non-free',
@@ -37,8 +43,8 @@ export class DebDatasource extends Datasource {
   override readonly defaultConfig: DebLanguageConfig = {
     deb: {
       binaryArch: 'amd64',
-      downloadDirectory: '/tmp/renovate-deb/packages-download',
-      extractionDirectory: '/tmp/renovate-deb/packages',
+      downloadDirectory: './others/deb/download',
+      extractionDirectory: './others/deb/extracted',
     },
   };
 
@@ -51,9 +57,9 @@ export class DebDatasource extends Datasource {
 
   requiredPackageKeys = ['Package', 'Version', 'Homepage'];
 
-  initCacheDir(cfg: DebLanguageConfig): void {
-    mkdirSync(cfg.deb.downloadDirectory, { recursive: true });
-    mkdirSync(cfg.deb.extractionDirectory, { recursive: true });
+  async initCacheDir(cfg: DebLanguageConfig): Promise<void> {
+    await fs.ensureCacheDir(cfg.deb.downloadDirectory);
+    await fs.ensureCacheDir(cfg.deb.extractionDirectory);
   }
 
   async runCommand(wd: string, command: string): Promise<void> {
@@ -75,39 +81,53 @@ export class DebDatasource extends Datasource {
     const hash = createHash('sha256');
     hash.update(packageUrl);
     const hashedPackageUrl = hash.copy().digest('hex');
-    const downloadLocation = cfg.deb.downloadDirectory + '/' + hashedPackageUrl;
-    const compressedFile = downloadLocation + '/Packages.xz';
-    const extractedFile =
-      cfg.deb.extractionDirectory + '/' + hashedPackageUrl + '.txt';
+    const downloadDirectory = await fs.ensureCacheDir(
+      cfg.deb.downloadDirectory
+    );
+    const compressedFile = downloadDirectory + '/' + hashedPackageUrl + '.xz';
+
+    const extractionDirectory = await fs.ensureCacheDir(
+      cfg.deb.extractionDirectory
+    );
+    const extractedFile = extractionDirectory + '/' + hashedPackageUrl + '.txt';
 
     // curl will not modify the local file, if the upstream HTTP server
     // does not return a modified version. We can use this information
     // to not re-extract the same file again. For this to work we need
     // the current modification timestamp of the local package file.
-    let lastTimestamp = -1;
+    let lastTimestamp: Date = null;
     try {
       const stats = statSync(compressedFile);
-      lastTimestamp = stats.mtime.getTime();
+      lastTimestamp = stats.mtime;
     } catch (e) {
       // ignore if the file doesnt exist
     }
 
     logger.debug(
-      'Downloading package file from ' + packageUrl + ' as ' + downloadLocation
+      'Downloading package file from ' + packageUrl + ' as ' + compressedFile
     );
-    /**
-     * curl -o "$file" -z "$file" "$uri"
-     */
-    mkdirSync(downloadLocation, { recursive: true });
-    await this.runCommand(
-      downloadLocation,
-      ['curl', '-o', 'Packages.xz', '-z', 'Packages.xz', packageUrl].join(' ')
-    );
+    const downloadOptions: HttpOptions = {};
+    // we can use If-Modified-Since to avoid that we are redownloaded the file
+    // More information can be found here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
+    if (lastTimestamp !== null) {
+      downloadOptions.headers = {
+        'If-Modified-Since': lastTimestamp.toUTCString(),
+      };
+    }
+
+    const readStream = this.http.stream(packageUrl, downloadOptions);
+    const writeStream = fs.createWriteStream(compressedFile);
+
+    await fs.pipeline(readStream, writeStream);
 
     const stats = statSync(compressedFile);
-    const newTimestamp = stats.mtime.getTime();
+    const newTimestamp = stats.mtime;
 
-    if (newTimestamp <= lastTimestamp && existsSync(extractedFile)) {
+    if (
+      lastTimestamp !== null &&
+      newTimestamp.getTime() <= lastTimestamp.getTime() &&
+      existsSync(extractedFile)
+    ) {
       logger.debug(
         "No need to extract file as wget didn't update the file and it exists"
       );
@@ -115,7 +135,7 @@ export class DebDatasource extends Datasource {
     }
 
     logger.debug(
-      'Extracting package file ' + downloadLocation + ' to ' + extractedFile
+      'Extracting package file ' + compressedFile + ' to ' + extractedFile
     );
     /**
      * --threads=0 use all available cores
@@ -124,8 +144,8 @@ export class DebDatasource extends Datasource {
      * -d decompress
      */
     await this.runCommand(
-      downloadLocation,
-      ['xz --threads=0 -k -c -d', 'Packages.xz', '>', extractedFile].join(' ')
+      downloadDirectory,
+      ['xz --threads=0 -k -c -d', compressedFile, '>', extractedFile].join(' ')
     );
 
     return extractedFile;
@@ -214,7 +234,7 @@ export class DebDatasource extends Datasource {
       }
     });
 
-    this.initCacheDir(cfg);
+    await this.initCacheDir(cfg);
 
     let release: ReleaseResult = null;
     for (let i = 0; i < fullComponentUrls.length && release === null; i++) {
