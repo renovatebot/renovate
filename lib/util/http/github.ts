@@ -14,6 +14,7 @@ import { maskToken } from '../mask';
 import { regEx } from '../regex';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
+import { range } from '../range';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
@@ -217,17 +218,17 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
-          const queue = Array.from(new Array(lastPage), (_, i) => `${i + 1}`)
-            .slice(1)
-            .map((pageNumber) => (): Promise<HttpResponse<T>> => {
+          const queue = [...range(2, lastPage)].map(
+            (pageNumber) => (): Promise<HttpResponse<T>> => {
               const nextUrl = new URL(linkHeader.next.url, baseUrl);
-              nextUrl.searchParams.set('page', pageNumber);
+              nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
                 { ...opts, paginate: false },
                 okToRetry
               );
-            });
+            }
+          );
           const pages = await pAll(queue, { concurrency: 5 });
           if (opts.paginationField && is.plainObject(result.body)) {
             const paginatedResult = result.body[opts.paginationField];
