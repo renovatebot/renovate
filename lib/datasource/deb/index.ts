@@ -68,6 +68,8 @@ export class DebDatasource extends Datasource {
    */
   override readonly registryStrategy = 'merge';
 
+  override readonly defaultVersioning = 'loose';
+
   requiredPackageKeys = ['Package', 'Version', 'Homepage'];
 
   async initCacheDir(cfg: DebLanguageConfig): Promise<void> {
@@ -227,6 +229,11 @@ export class DebDatasource extends Datasource {
           break;
         }
       }
+    }
+
+    // if the searched package is the last one, this is required
+    if (pd.Package === packageName) {
+      return { releases: [{ version: pd.Version }], homepage: pd.Homepage };
     }
 
     return null;
