@@ -2196,6 +2196,7 @@ const options: RenovateOptions[] = [
     description:
       'User-facing strings pertaining to the PR comment that gets posted when a PR is closed.',
     type: 'object',
+    freeChoice: true,
     default: {
       ignoreTopic: 'Renovate Ignore Notification',
       ignoreMajor:
