@@ -16,11 +16,11 @@ function compare(version1: string, version2: string): number {
   return 1;
 }
 
-function isValid(input: string): string | boolean | null {
-  return typeof input === 'string' && /^ami-[a-z0-9]{17}$/.test(input);
+function isValid(input: string): boolean {
+  return typeof input === 'string' && !!/^ami-[a-z0-9]{17}$/.test(input);
 }
 
-function isVersion(input: string): string | boolean | null {
+function isVersion(input: string): boolean {
   return isValid(input);
 }
 

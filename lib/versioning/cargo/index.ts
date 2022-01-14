@@ -57,7 +57,7 @@ function npm2cargo(input: string): string {
 const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(version, cargo2npm(range));
 
-export const isValid = (input: string): string | boolean =>
+export const isValid = (input: string): boolean =>
   npm.isValid(cargo2npm(input));
 
 const matches = (version: string, range: string): boolean =>

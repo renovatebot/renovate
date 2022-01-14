@@ -24,8 +24,7 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): string | boolean | null =>
-  valid(input);
+export const isVersion = (input: string): boolean => !!valid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 
@@ -41,6 +40,10 @@ function isSingleVersion(version: string): boolean {
   return !!isVersion(version);
 }
 
+function isValid(input: string): boolean {
+  return !!isVersion(input);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -51,7 +54,7 @@ export const api: VersioningApi = {
   isLessThanRange,
   isSingleVersion,
   isStable,
-  isValid: isVersion,
+  isValid,
   isVersion,
   matches,
   getSatisfyingVersion,

@@ -31,14 +31,14 @@ const {
   sortVersions,
 } = maven;
 
-function isValid(str: string): string | boolean {
+function isValid(str: string): boolean {
   if (!str) {
     return false;
   }
-  return maven.isVersion(str) || !!parseDynamicRevision(str);
+  return !!maven.isVersion(str) || !!parseDynamicRevision(str);
 }
 
-function isVersion(str: string): string | boolean {
+function isVersion(str: string): boolean {
   if (!str || LATEST_REGEX.test(str)) {
     return false;
   }

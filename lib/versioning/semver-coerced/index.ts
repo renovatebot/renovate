@@ -43,8 +43,8 @@ function equals(a: string, b: string): boolean {
   return aCoerced && bCoerced ? semver.eq(aCoerced, bCoerced) : false;
 }
 
-function isValid(version: string): string | boolean | null {
-  return semver.valid(semver.coerce(version));
+function isValid(version: string): boolean {
+  return !!semver.valid(semver.coerce(version));
 }
 
 function getSatisfyingVersion(
@@ -95,8 +95,7 @@ function isSingleVersion(version: string): boolean {
 }
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): string | boolean | null =>
-  isValid(input);
+export const isVersion = (input: string): boolean => isValid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 

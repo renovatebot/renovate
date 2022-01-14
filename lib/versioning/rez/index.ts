@@ -72,7 +72,7 @@ function isLessThanRange(version: string, range: string): boolean {
   );
 }
 
-export function isValid(input: string): string | boolean {
+export function isValid(input: string): boolean {
   return npm.isValid(rez2npm(input));
 }
 
@@ -80,7 +80,7 @@ function isStable(version: string): boolean {
   return npm.isStable(padZeroes(version));
 }
 
-function isVersion(input: string): string | boolean {
+function isVersion(input: string): boolean {
   return npm.isVersion(padZeroes(rez2npm(input)));
 }
 

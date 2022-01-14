@@ -11,14 +11,16 @@ const temporarilyUnstable = ['22.04'];
 
 // validation
 
-function isValid(input: string): boolean | null {
+function isValid(input: string): boolean {
   return (
     typeof input === 'string' &&
-    regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
+    !!regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(
+      input
+    )
   );
 }
 
-function isVersion(input: string): string | boolean | null {
+function isVersion(input: string): boolean {
   return isValid(input);
 }
 

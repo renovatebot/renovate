@@ -19,12 +19,11 @@ export interface VersionComparator {
 // parse should return null if version not valid
 // parse should return an object with property release, an array of version sections major.minor.patch
 export const parser = (parse: VersionParser): Partial<VersioningApi> => {
-  function isValid(version: string): string {
+  function isValid(version: string): boolean {
     if (!version) {
-      return null;
+      return false;
     }
-    const parsed = parse(version);
-    return parsed ? version : null;
+    return !!parse(version);
   }
   function getSection(version: string, index: number): number {
     const parsed = parse(version);
@@ -212,7 +211,7 @@ export abstract class GenericVersioningApi<
     return !!this.isValid(version);
   }
 
-  isVersion(version: string): string | boolean {
+  isVersion(version: string): boolean {
     return this.isValid(version);
   }
 
