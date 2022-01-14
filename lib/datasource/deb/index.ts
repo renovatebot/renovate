@@ -1,16 +1,21 @@
 import { createHash } from 'crypto';
-import { constants, createReadStream, createWriteStream } from 'fs';
-import { access, stat } from 'fs/promises';
 import readline from 'readline';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { createUnzip } from 'zlib';
-import { GetReleasesConfig, ReleaseResult } from '..';
+import {
+  access,
+  constants,
+  createReadStream,
+  createWriteStream,
+  stat,
+} from 'fs-extra';
+import type { GetReleasesConfig, ReleaseResult } from '..';
 import { logger } from '../../logger';
 import * as fs from '../../util/fs';
-import { HttpOptions } from '../../util/http';
+import type { HttpOptions } from '../../util/http';
 import { Datasource } from '../datasource';
-import { DebLanguageConfig, PackageDescription } from './types';
+import type { DebLanguageConfig, PackageDescription } from './types';
 
 /**
  * @brief This datasource allows to download

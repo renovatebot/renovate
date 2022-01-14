@@ -1,9 +1,9 @@
-import { mkdirSync, rmdirSync } from 'fs';
-import { copyFile, stat } from 'fs/promises';
-import { GetPkgReleasesConfig, getPkgReleases } from '..';
+import { copyFile, mkdirp, remove, stat } from 'fs-extra';
+import { getPkgReleases } from '..';
+import type { GetPkgReleasesConfig } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { GlobalConfig } from '../../config/global';
-import { DebLanguageConfig } from './types';
+import type { DebLanguageConfig } from './types';
 
 describe('datasource/deb/index', () => {
   describe('getReleases', () => {
@@ -12,17 +12,17 @@ describe('datasource/deb/index', () => {
     const compressedPackageFile =
       downloadFolder +
       '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.gz';
-    const extractedPackageFile =
-      '/tmp/renovate-cache/others/deb/extract/0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.txt';
+    // const extractedPackageFile =
+    //   '/tmp/renovate-cache/others/deb/extract/0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.txt';
     const cacheDir = '/tmp/renovate-cache/';
 
     GlobalConfig.set({ cacheDir: cacheDir });
 
     let cfg: GetPkgReleasesConfig & DebLanguageConfig; // this can be modified within the test cases
 
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.resetAllMocks();
-      rmdirSync(cacheDir, { force: true, recursive: true });
+      await remove(cacheDir);
       cfg = {
         datasource: 'deb',
         depName: 'steam-devices',
@@ -39,7 +39,7 @@ describe('datasource/deb/index', () => {
 
     it('returns a valid version for the package `steam-devices` and does not require redownload', async () => {
       // copy the Packages.gz file to the appropriate location
-      mkdirSync(downloadFolder, { recursive: true });
+      await mkdirp(downloadFolder);
       await copyFile(testPackagesFile, compressedPackageFile);
       const stats = await stat(compressedPackageFile);
       const ts = stats.mtime;
