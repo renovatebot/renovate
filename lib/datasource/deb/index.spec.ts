@@ -61,7 +61,7 @@ describe('datasource/deb/index', () => {
     });
 
     describe('without local version', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         httpMock
           .scope('http://ftp.debian.org')
           .get('/debian/dists/stable/non-free/binary-amd64/Packages.gz')
@@ -78,6 +78,23 @@ describe('datasource/deb/index', () => {
         cfg.depName = 'you-will-never-find-me';
         const res = await getPkgReleases(cfg);
         expect(res).toBeNull();
+      });
+
+      it('works for two releases of `steam-devices`', async () => {
+        const testPackagesFile2 = __dirname + '/test-data/Packages2.gz';
+
+        httpMock
+          .scope('http://ftp.debian.org')
+          .get('/debian/dists/unstable/non-free/binary-amd64/Packages.gz')
+          .replyWithFile(200, testPackagesFile2);
+
+        cfg.registryUrls.push(
+          'http://ftp.debian.org/debian?suite=unstable&components=non-free'
+        );
+
+        const res = await getPkgReleases(cfg);
+        expect(res).toBeObject();
+        expect(res.releases).toHaveLength(2);
       });
     });
 

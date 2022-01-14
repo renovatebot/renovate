@@ -233,11 +233,20 @@ export class DebDatasource extends Datasource {
     return null;
   }
 
+  releaseMetaInformationMatches(
+    lhs: ReleaseResult,
+    rhs: ReleaseResult
+  ): boolean {
+    return lhs.homepage === rhs.homepage;
+  }
+
   async getReleases(
     cfg: GetReleasesConfig & DebLanguageConfig
   ): Promise<ReleaseResult | null> {
     const fullComponentUrls: string[] = [];
-    const registryUrls = cfg.registryUrls || [cfg.registryUrl];
+    // when specifying n repository urls, this will be called n times in each call,
+    // cfg.registryUrl is filled with the next element of cfg.registryUrls
+    const registryUrls = [cfg.registryUrl];
     registryUrls.forEach((aptUrl: string) => {
       let url: URL;
       try {
@@ -291,7 +300,7 @@ export class DebDatasource extends Datasource {
     await this.initCacheDir(cfg);
 
     let release: ReleaseResult = null;
-    for (let i = 0; i < fullComponentUrls.length && release === null; i++) {
+    for (let i = 0; i < fullComponentUrls.length; i++) {
       let downloadedPackage: string;
       try {
         downloadedPackage = await this.downloadAndExtractPackage(
@@ -308,10 +317,23 @@ export class DebDatasource extends Datasource {
         continue;
       }
 
-      release = await this.probeExtractedPackage(
+      const newRelease = await this.probeExtractedPackage(
         downloadedPackage,
         cfg.lookupName
       );
+
+      if (newRelease !== null) {
+        if (release === null) {
+          release = newRelease;
+        } else {
+          if (!this.releaseMetaInformationMatches(release, newRelease)) {
+            logger.warn(
+              'package occurred in more than one repository but with different meta information - still adding it'
+            );
+          }
+          release.releases.push(newRelease.releases[0]);
+        }
+      }
     }
 
     return release;
