@@ -247,13 +247,13 @@ export class DebDatasource extends Datasource {
     // when specifying n repository urls, this will be called n times in each call,
     // cfg.registryUrl is filled with the next element of cfg.registryUrls
     const registryUrls = [cfg.registryUrl];
-    registryUrls.forEach((aptUrl: string) => {
+    for (const aptUrl of registryUrls) {
       let url: URL;
       try {
         url = new URL(aptUrl);
       } catch (e) {
         logger.warn('Invalid deb repo url ' + aptUrl + ' - see documentation');
-        return;
+        continue;
       }
       if (!url.searchParams.has('components')) {
         logger.warn(
@@ -261,7 +261,7 @@ export class DebDatasource extends Datasource {
             aptUrl +
             ' - see documentation'
         );
-        return;
+        continue;
       }
 
       let release: string;
@@ -275,7 +275,7 @@ export class DebDatasource extends Datasource {
             aptUrl +
             ' - see documentation'
         );
-        return;
+        continue;
       }
 
       let binaryArch = cfg.deb.defaultBinaryArch;
@@ -290,12 +290,12 @@ export class DebDatasource extends Datasource {
       url.searchParams.delete('binaryArch');
 
       url.pathname += '/dists/' + release;
-      components.forEach((component) => {
+      for (const component of components) {
         const newUrl = new URL(url);
         newUrl.pathname += '/' + component + '/binary-' + binaryArch;
         fullComponentUrls.push(newUrl.toString());
-      });
-    });
+      }
+    }
 
     await this.initCacheDir(cfg);
 
