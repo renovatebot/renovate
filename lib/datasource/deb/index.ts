@@ -71,6 +71,10 @@ export class DebDatasource extends Datasource {
    */
   override readonly registryStrategy = 'merge';
 
+  /**
+   * Not all Debian packages follow Semver, so it's wise to keep this loose but make sure to
+   * have enough tests in your application.
+   */
   override readonly defaultVersioning = 'loose';
 
   requiredPackageKeys = ['Package', 'Version', 'Homepage'];
