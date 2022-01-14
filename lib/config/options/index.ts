@@ -81,6 +81,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'jsonReportFilePath',
+    description:
+      'Outputs statistics about the run to the file path specified at the end of the run',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    cli: true,
+  },
+  {
     name: 'onboardingBranch',
     description:
       'Change this value in order to override the default onboarding branch name.',
