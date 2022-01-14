@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { regEx } from '../../util/regex';
 
 export enum TokenType {
@@ -145,7 +146,8 @@ function stringTokenCmp(left: string, right: string): number {
 
 function tokenCmp(left: Token | null, right: Token | null): number {
   if (left === null) {
-    if (right && right.type === TokenType.String) {
+    if (right?.type === TokenType.String) {
+
       return 1;
     }
     return -1;
@@ -255,23 +257,30 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
     return null;
   }
 
-  const match = mavenBasedRangeRegex.exec(input);
-  if (match?.groups) {
-    const { leftBoundStr, separator, rightBoundStr } = match.groups;
-    let { leftVal, rightVal } = match.groups;
+  const matchGroups = mavenBasedRangeRegex.exec(input)?.groups;
+  if (matchGroups) {
+    const { leftBoundStr, separator, rightBoundStr } = matchGroups;
+    let leftVal: string | null = matchGroups.leftVal;
+    let rightVal: string | null = matchGroups.rightVal;
     if (!leftVal) {
       leftVal = <string>(<unknown>null);
     }
     if (!rightVal) {
       rightVal = <string>(<unknown>null);
     }
-    const isVersionLeft = isVersion(leftVal);
-    const isVersionRight = isVersion(rightVal);
+    const isVersionLeft = is.string(leftVal) && isVersion(leftVal);
+    const isVersionRight = is.string(rightVal) && isVersion(rightVal);
     if (
       (leftVal === null || isVersionLeft) &&
       (rightVal === null || isVersionRight)
     ) {
-      if (isVersionLeft && isVersionRight && compare(leftVal, rightVal) === 1) {
+      if (
+        isVersionLeft &&
+        isVersionRight &&
+        leftVal &&
+        rightVal &&
+        compare(leftVal, rightVal) === 1
+      ) {
         return null;
       }
       const leftBound =
