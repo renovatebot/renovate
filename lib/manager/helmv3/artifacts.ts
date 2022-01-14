@@ -1,19 +1,30 @@
+import yaml from 'js-yaml';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
+import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';
 import {
   getSiblingFileName,
   getSubDirectory,
+  privateCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { ChartDefinition, Repository, RepositoryRule } from './types';
+import {
+  aliasRecordToRepositories,
+  getRepositories,
+  isOCIRegistry,
+} from './utils';
 
 async function helmCommands(
   manifestPath: string,
-  aliases?: Record<string, string>
+  repositories: Repository[]
 ): Promise<void> {
   const execOptions: ExecOptions = {
     docker: {
@@ -24,13 +35,77 @@ async function helmCommands(
     },
   };
   const cmd = [];
+  // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
+  const helmConfigParameters = [
+    `--registry-config ${upath.join(privateCacheDir(), 'registry.json')}`,
+    `--repository-config ${upath.join(privateCacheDir(), 'repositories.yaml')}`,
+    `--repository-cache ${upath.join(privateCacheDir(), 'repositories')}`,
+  ];
 
-  if (aliases) {
-    Object.entries(aliases).forEach(([alias, url]) =>
-      cmd.push(`helm repo add ${quote(alias)} ${quote(url)}`)
-    );
-  }
-  cmd.push(`helm dependency update ${quote(getSubDirectory(manifestPath))}`);
+  // get OCI registries and detect host rules
+  const registries: RepositoryRule[] = repositories
+    .filter(isOCIRegistry)
+    .map((value) => {
+      return {
+        ...value,
+        repository: value.repository.replace('oci://', ''),
+        hostRule: hostRules.find({
+          url: value.repository.replace('oci://', 'https://'), //TODO we need to replace this, as oci:// will not be accepted as protocol
+          hostType: datasourceDocker.id,
+        }),
+      };
+    });
+
+  // if credentials for the registry have been found, log into it
+  registries.forEach((value) => {
+    const { username, password } = value.hostRule;
+    const parameters = [...helmConfigParameters];
+    if (username && password) {
+      parameters.push(`--username ${quote(username)}`);
+      parameters.push(`--password ${quote(password)}`);
+
+      cmd.push(
+        `helm registry login ${parameters.join(' ')} ${value.repository}`
+      );
+    }
+  });
+
+  // find classic Chart repositories and fitting host rules
+  const classicRepositories: RepositoryRule[] = repositories
+    .filter((repository) => !isOCIRegistry(repository))
+    .map((value) => {
+      return {
+        ...value,
+        hostRule: hostRules.find({
+          url: value.repository,
+        }),
+      };
+    });
+
+  // add helm repos if an alias or credentials for the url are defined
+  classicRepositories.forEach((value) => {
+    const { username, password } = value.hostRule;
+    const parameters = [...helmConfigParameters];
+    const isPrivateRepo = username && password;
+    if (isPrivateRepo) {
+      parameters.push(`--username ${quote(username)}`);
+      parameters.push(`--password ${quote(password)}`);
+    }
+
+    if (value.isAlias || isPrivateRepo) {
+      cmd.push(
+        `helm repo add ${value.name} ${parameters.join(' ')} ${
+          value.repository
+        }`
+      );
+    }
+  });
+
+  cmd.push(
+    `helm dependency update ${helmConfigParameters.join(' ')} ${quote(
+      getSubDirectory(manifestPath)
+    )}`
+  );
 
   await exec(cmd, execOptions);
 }
@@ -60,9 +135,26 @@ export async function updateArtifacts({
     return null;
   }
   try {
+    // get repositories and registries defined in the package file
+    const packages = yaml.load(newPackageFileContent) as ChartDefinition; //TODO #9610
+    const locks = yaml.load(
+      existingLockFileContent.toString()
+    ) as ChartDefinition; //TODO #9610
+
+    const chartDefinitions = [];
+    // prioritize alias naming for Helm repositories
+    if (config.aliases) {
+      chartDefinitions.push({
+        dependencies: aliasRecordToRepositories(config.aliases),
+      });
+    }
+    chartDefinitions.push(packages, locks);
+
+    const repositories = getRepositories(chartDefinitions);
+
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    await helmCommands(packageFileName, config.aliases);
+    await helmCommands(packageFileName, repositories);
     logger.debug('Returning updated Chart.lock');
     const newHelmLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newHelmLockContent) {
