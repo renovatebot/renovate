@@ -1,4 +1,5 @@
-import * as generic from '../loose/generic';
+import { regEx } from '../../util/regex';
+import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'aws-machine-image';
@@ -8,34 +9,25 @@ export const urls = [];
 
 export const supportsRanges = false;
 
-function parse(version: string): any {
-  return { release: [1, 0, 0] };
+const awsMachineImageRegex = regEx('^ami-(?<suffix>[a-z0-9]{17})$');
+
+class AwsMachineImageVersioningApi extends GenericVersioningApi {
+  protected _parse(version: string): GenericVersion | null {
+    if (version) {
+      const matchGroups = awsMachineImageRegex.exec(version)?.groups;
+      if (matchGroups) {
+        const { suffix } = matchGroups;
+        return { release: [1, 0, 0], suffix };
+      }
+    }
+    return null;
+  }
+
+  protected override _compare(_version: string, _other: string): number {
+    return 0;
+  }
 }
 
-function compare(version1: string, version2: string): number {
-  return 1;
-}
-
-function isValid(input: string): boolean {
-  return typeof input === 'string' && !!/^ami-[a-z0-9]{17}$/.test(input);
-}
-
-function isVersion(input: string): boolean {
-  return isValid(input);
-}
-
-function isCompatible(version: string, _range?: string): boolean {
-  return isValid(version);
-}
-
-export const api: VersioningApi = {
-  ...generic.create({
-    parse,
-    compare,
-  }),
-  isValid,
-  isVersion,
-  isCompatible,
-};
+export const api: VersioningApi = new AwsMachineImageVersioningApi();
 
 export default api;
