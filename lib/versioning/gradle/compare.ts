@@ -44,7 +44,7 @@ function isTransition(prevChar: string, nextChar: string): boolean {
 }
 
 export function tokenize(versionStr: string): Token[] | null {
-  let result = [];
+  let result: Token[] | null = [];
   let currentVal = '';
 
   function yieldToken(): void {
@@ -145,7 +145,7 @@ function stringTokenCmp(left: string, right: string): number {
 
 function tokenCmp(left: Token | null, right: Token | null): number {
   if (left === null) {
-    if (right.type === TokenType.String) {
+    if (right && right.type === TokenType.String) {
       return 1;
     }
     return -1;
@@ -177,10 +177,10 @@ function tokenCmp(left: Token | null, right: Token | null): number {
 }
 
 export function compare(left: string, right: string): number {
-  const leftTokens = tokenize(left);
-  const rightTokens = tokenize(right);
+  const leftTokens = tokenize(left) ?? [];
+  const rightTokens = tokenize(right) ?? [];
   const length = Math.max(leftTokens.length, rightTokens.length);
-  for (let idx = 0; idx < length; idx += 1) {
+  for (let idx = 0; length && idx < length; idx += 1) {
     const leftToken = leftTokens[idx] || null;
     const rightToken = rightTokens[idx] || null;
     const cmpResult = tokenCmp(leftToken, rightToken);
@@ -256,14 +256,14 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
   }
 
   const match = mavenBasedRangeRegex.exec(input);
-  if (match) {
+  if (match?.groups) {
     const { leftBoundStr, separator, rightBoundStr } = match.groups;
     let { leftVal, rightVal } = match.groups;
     if (!leftVal) {
-      leftVal = null;
+      leftVal = <string>(<unknown>null);
     }
     if (!rightVal) {
-      rightVal = null;
+      rightVal = <string>(<unknown>null);
     }
     const isVersionLeft = isVersion(leftVal);
     const isVersionRight = isVersion(rightVal);

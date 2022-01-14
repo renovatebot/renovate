@@ -35,24 +35,26 @@ const getMajor = (version: string): number | null => {
 const getMinor = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version.replace(regEx(/^v/i), ''));
-    const majorToken = tokens[0];
-    const minorToken = tokens[1];
-    if (
-      majorToken &&
-      majorToken.type === TokenType.Number &&
-      minorToken &&
-      minorToken.type === TokenType.Number
-    ) {
-      return +minorToken.val;
+    if (tokens) {
+      const majorToken = tokens[0];
+      const minorToken = tokens[1];
+      if (
+        majorToken &&
+        majorToken.type === TokenType.Number &&
+        minorToken &&
+        minorToken.type === TokenType.Number
+      ) {
+        return +minorToken.val;
+      }
+      return 0;
     }
-    return 0;
   }
   return null;
 };
 
 const getPatch = (version: string): number | null => {
-  if (isVersion(version)) {
-    const tokens = tokenize(version.replace(regEx(/^v/i), ''));
+  const tokens = tokenize(version.replace(regEx(/^v/i), ''));
+  if (tokens && isVersion(version)) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     const patchToken = tokens[2];
@@ -87,9 +89,9 @@ const unstable = new Set([
   'snapshot',
 ]);
 
-const isStable = (version: string): boolean | null => {
-  if (isVersion(version)) {
-    const tokens = tokenize(version);
+const isStable = (version: string): boolean => {
+  const tokens = tokenize(version);
+  if (tokens && isVersion(version)) {
     for (const token of tokens) {
       if (token.type === TokenType.String) {
         const val = token.val.toString().toLowerCase();
@@ -100,7 +102,7 @@ const isStable = (version: string): boolean | null => {
     }
     return true;
   }
-  return null;
+  return false;
 };
 
 const matches = (a: string, b: string): boolean => {
@@ -112,12 +114,12 @@ const matches = (a: string, b: string): boolean => {
   }
 
   const prefixRange = parsePrefixRange(b);
-  if (prefixRange) {
+  const versionTokens = tokenize(a);
+  if (versionTokens && prefixRange) {
     const tokens = prefixRange.tokens;
     if (tokens.length === 0) {
       return true;
     }
-    const versionTokens = tokenize(a);
     const x = versionTokens
       .slice(0, tokens.length)
       .map(({ val }) => val)
@@ -128,7 +130,7 @@ const matches = (a: string, b: string): boolean => {
 
   const mavenBasedRange = parseMavenBasedRange(b);
   if (!mavenBasedRange) {
-    return null;
+    return false;
   }
 
   const { leftBound, leftVal, rightBound, rightVal } = mavenBasedRange;
@@ -152,31 +154,41 @@ const matches = (a: string, b: string): boolean => {
   return leftResult && rightResult;
 };
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  versions.reduce((result, version) => {
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  let result: string | null = null;
+  for (const version of versions) {
     if (matches(version, range)) {
       if (!result) {
-        return version;
+        result = version;
       }
       if (isGreaterThan(version, result)) {
-        return version;
+        result = version;
       }
     }
-    return result;
-  }, null);
+  }
+  return result;
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  versions.reduce((result, version) => {
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  let result: string | null = null;
+  for (const version of versions) {
     if (matches(version, range)) {
       if (!result) {
-        return version;
+        result = version;
       }
       if (compare(version, result) === -1) {
-        return version;
+        result = version;
       }
     }
-    return result;
-  }, null);
+  }
+  return result;
+}
 
 function getNewValue({
   currentValue,
