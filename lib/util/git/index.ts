@@ -702,14 +702,6 @@ export async function commitFiles({
     for (const file of files) {
       let fileName = file.name;
       // istanbul ignore if
-      if (
-        file.contents === null &&
-        !(await isDirectory(upath.join(localDir, fileName)))
-      ) {
-        logger.debug({ fileName }, 'Skipping git file with null contents');
-        continue;
-      }
-      // istanbul ignore if
       if (fileName === '|delete|') {
         fileName = file.contents as string;
         try {
@@ -724,6 +716,9 @@ export async function commitFiles({
         if (await isDirectory(upath.join(localDir, fileName))) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
+        } else if (file.contents === null) {
+          // istanbul ignore next
+          continue;
         } else {
           let contents: Buffer;
           // istanbul ignore else
