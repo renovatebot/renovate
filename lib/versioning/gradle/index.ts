@@ -67,7 +67,7 @@ const getPatch = (version: string): number | null => {
         patchToken &&
         patchToken.type === TokenType.Number
       ) {
-        return +patchToken.val;
+        return patchToken.val as number;
       }
       return 0;
     }
