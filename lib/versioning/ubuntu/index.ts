@@ -22,7 +22,7 @@ function isVersion(input: string): boolean {
   return isValid(input);
 }
 
-function isCompatible(version: string, _range?: string): boolean {
+function isCompatible(version: string, _current?: string): boolean {
   return isValid(version);
 }
 
