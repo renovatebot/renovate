@@ -40,6 +40,9 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
         state
         headRefName
         title
+        createdAt
+        closedAt
+        updatedAt
         comments(last: 100) {
           nodes {
             databaseId
@@ -73,6 +76,9 @@ query($owner: String!, $name: String!, $count: Int, $cursor: String) {
         headRefName
         baseRefName
         title
+        createdAt
+        closedAt
+        updatedAt
         mergeable
         mergeStateStatus
         labels(last: 100) {

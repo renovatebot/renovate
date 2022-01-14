@@ -3,10 +3,14 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { pkg } from '../../expose.cjs';
 import { logger, setMeta } from '../../logger';
+import { platform } from '../../platform';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
+import { branchExists } from '../../util/git';
 import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
+import { RepositoryStatisticsReporter } from '../../util/stats-reporter';
+import { BranchConfig } from '../types';
 import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
@@ -16,6 +20,66 @@ import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
 import { printRequestStats } from './stats';
+
+async function collectRepositoryStats(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): Promise<void> {
+  const repositoryStats = RepositoryStatisticsReporter.get();
+  repositoryStats.repository = config.repository;
+  for (const branch of branches) {
+    for (const upgrade of branch.upgrades) {
+      const depName = upgrade.depName;
+      const depCurrentVersion = upgrade.currentVersion;
+      const depCurrentDigest = upgrade.currentDigest;
+      const depNewVersion = upgrade.newVersion;
+      const depNewDigest = upgrade.newDigest;
+      const depDatasource = upgrade.datasource;
+      let prCreatedAt = '';
+      let prUpdatedAt = '';
+      let prClosedAt = '';
+      let prState = '';
+      let branchState = 'deleted';
+      let branchStatus = '';
+      if (branchExists(branch.branchName)) {
+        branchState = 'open';
+        branchStatus = await platform.getBranchStatus(branch.branchName);
+      }
+
+      if (branch.prNo) {
+        const pr = await platform.getPr(branch.prNo);
+        prCreatedAt = pr.createdAt;
+        prClosedAt = pr.closedAt;
+        prUpdatedAt = pr.updatedAt;
+        prState = pr.state;
+      }
+      repositoryStats.dependencyUpdates.push({
+        branch: branch.branchName,
+        prCreatedAt,
+        prClosedAt,
+        prUpdatedAt,
+        branchState:
+          RepositoryStatisticsReporter.getBranchState(branch.branchName) ??
+          branchState,
+        branchStatus,
+        prState:
+          RepositoryStatisticsReporter.getPrState(branch.prNo) ?? prState,
+        datasource: depDatasource,
+        depName: depName,
+        depCurrentVersion,
+        depNewVersion,
+        depCurrentDigest,
+        depNewDigest,
+        prNumber: branch.prNo,
+      });
+    }
+  }
+  RepositoryStatisticsReporter.save(repositoryStats);
+  await RepositoryStatisticsReporter.saveStatsToReportFile(
+    config.jsonReportFilePath
+  );
+  logger.debug(repositoryStats, 'repository statistics');
+}
 
 // istanbul ignore next
 export async function renovateRepository(
@@ -35,6 +99,7 @@ export async function renovateRepository(
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
+    RepositoryStatisticsReporter.initRepoStats(config.repository);
     addSplit('init');
     const { branches, branchList, packageFiles } = await extractDependencies(
       config
@@ -56,6 +121,7 @@ export async function renovateRepository(
     }
     await finaliseRepo(config, branchList);
     repoResult = processResult(config, res);
+    await collectRepositoryStats(config, branches);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);

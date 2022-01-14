@@ -3,8 +3,11 @@ import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
 import { branchExists, deleteBranch } from '../../util/git';
+import { RepositoryStatisticsReporter } from '../../util/stats-reporter';
 import * as template from '../../util/template';
 import { BranchConfig } from '../types';
+//import { StatsReporter } from '../../util/stats-reporter';
+//import { DependencyStats } from '../../util/stats-reporter/types';
 
 export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
   if (pr.state === PrState.Closed) {
@@ -36,6 +39,10 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
         logger.info('DRY-RUN: Would delete branch ' + config.branchName);
       } else {
         await deleteBranch(config.branchName);
+        RepositoryStatisticsReporter.setBranchState(
+          config.branchName,
+          'deleted'
+        );
       }
     }
   } else if (pr.state === PrState.Merged) {

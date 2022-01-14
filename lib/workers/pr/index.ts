@@ -13,6 +13,7 @@ import { sampleSize } from '../../util';
 import { stripEmojis } from '../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../util/git';
 import { regEx } from '../../util/regex';
+import { RepositoryStatisticsReporter } from '../../util/stats-reporter';
 import * as template from '../../util/template';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
@@ -20,6 +21,8 @@ import type { BranchConfig, BranchUpgradeConfig, PrBlockedBy } from '../types';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog/types';
 import { codeOwnersForPr } from './code-owners';
+//import { StatsReporter } from '../../util/stats-reporter';
+//import { DependencyStats } from '../../util/stats-reporter/types';
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
@@ -408,6 +411,7 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+        RepositoryStatisticsReporter.setPrState(existingPr.number, 'updated');
       }
       return {
         pr: existingPr,
@@ -444,6 +448,20 @@ export async function ensurePr(
         });
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr.number, prTitle }, 'PR created');
+        RepositoryStatisticsReporter.setPrState(pr.number, 'created');
+
+        /*let repositoryStats = StatsReporter.getRepositoryStats(
+          config.repository
+        );
+        repositoryStats.dependencyUpdates.push({
+          branch: config.branchName,
+          prNumber: pr.number,
+          createdAt: pr.createdAt,
+          dependencyName: config.depName,
+          dependencyVersion: config.newValue,
+          datasource: config.datasource,
+        } as DependencyStats);
+        StatsReporter.saveRepositoryStats(config.repository, repositoryStats);*/
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Pull request creation error');

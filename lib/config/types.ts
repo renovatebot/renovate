@@ -40,6 +40,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  jsonReportFilePath?: string;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;

@@ -660,13 +660,13 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   const openPrs = await getOpenPrs();
   const openPr = openPrs[prNo];
   if (openPr) {
-    logger.debug('Returning from graphql open PR list');
+    logger.debug({ prNo }, 'Returning from graphql open PR');
     return openPr;
   }
   const closedPrs = await getClosedPrs();
   const closedPr = closedPrs[prNo];
   if (closedPr) {
-    logger.debug('Returning from graphql closed PR list');
+    logger.debug({ prNo }, 'Returning from graphql closed PR');
     return closedPr;
   }
   logger.debug(

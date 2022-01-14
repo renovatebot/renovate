@@ -4,6 +4,7 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { PrState } from '../../types';
 import { regEx } from '../../util/regex';
+import { RepositoryStatisticsReporter } from '../../util/stats-reporter';
 
 export async function raiseConfigWarningIssue(
   config: RenovateConfig,
@@ -35,6 +36,7 @@ export async function raiseConfigWarningIssue(
           prTitle: config.onboardingPrTitle,
           prBody: body,
         });
+        RepositoryStatisticsReporter.setPrState(pr.number, 'error');
       } catch (err) /* istanbul ignore next */ {
         logger.warn({ err }, 'Error updating onboarding PR');
       }

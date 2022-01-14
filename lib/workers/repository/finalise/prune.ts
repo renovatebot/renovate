@@ -9,9 +9,10 @@ import {
   getBranchList,
   isBranchModified,
 } from '../../../util/git';
+import { RepositoryStatisticsReporter } from '../../../util/stats-reporter';
 
 async function cleanUpBranches(
-  { pruneStaleBranches: enabled }: RenovateConfig,
+  { pruneStaleBranches: enabled, repository }: RenovateConfig,
   remainingBranches: string[]
 ): Promise<void> {
   if (enabled === false) {
@@ -61,12 +62,15 @@ async function cleanUpBranches(
             state: PrState.Closed,
           });
           await deleteBranch(branchName);
+          RepositoryStatisticsReporter.setPrState(pr.number, 'autoclosed');
+          RepositoryStatisticsReporter.setBranchState(branchName, 'deleted');
         }
       } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
         logger.info({ branch: branchName }, `Deleting orphan branch`);
         await deleteBranch(branchName);
+        RepositoryStatisticsReporter.setBranchState(branchName, 'deleted');
       }
     } catch (err) /* istanbul ignore next */ {
       if (err.message === 'config-validation') {
@@ -99,10 +103,12 @@ export async function pruneStaleBranches(
   let renovateBranches = getBranchList().filter((branchName) =>
     branchName.startsWith(config.branchPrefix)
   );
+
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
     return;
   }
+
   logger.debug(
     {
       branchList: branchList?.sort(),

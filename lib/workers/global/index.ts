@@ -16,6 +16,7 @@ import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
 import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
+import { RepositoryStatisticsReporter } from '../../util/stats-reporter';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
@@ -91,13 +92,18 @@ export async function start(): Promise<number> {
     config = await getGlobalConfig();
     // initialize all submodules
     config = await globalInitialize(config);
-
     await validatePresets(config);
 
     checkEnv();
 
     // validate secrets. Will throw and abort if invalid
     validateConfigSecrets(config);
+
+    await RepositoryStatisticsReporter.initReportFile(
+      new Date().toISOString(),
+      config.jsonReportFilePath,
+      config.endpoint
+    );
 
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
@@ -141,6 +147,10 @@ export async function start(): Promise<number> {
     logger.debug(`Renovate exiting`);
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
+  await RepositoryStatisticsReporter.finalizeReportFile(
+    config.jsonReportFilePath,
+    loggerErrors
+  );
   if (loggerErrors.length) {
     logger.info(
       { loggerErrors },

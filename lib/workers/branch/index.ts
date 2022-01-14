@@ -33,6 +33,7 @@ import {
   satisfiesConfidenceLevel,
 } from '../../util/merge-confidence';
 import { regEx } from '../../util/regex';
+import { RepositoryStatisticsReporter } from '../../util/stats-reporter';
 import { Limit, isLimitReached } from '../global/limits';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -455,6 +456,7 @@ export async function processBranch(
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
+      RepositoryStatisticsReporter.setBranchState(config.branchName, action);
     }
     // Set branch statuses
     await setArtifactErrorStatus(config);
@@ -488,6 +490,10 @@ export async function processBranch(
           await deleteBranchSilently(config.branchName);
         }
         logger.debug('Branch is automerged - returning');
+        RepositoryStatisticsReporter.setBranchState(
+          config.branchName,
+          'automerged'
+        );
         return { branchExists: false, result: BranchResult.Automerged };
       }
       if (
@@ -670,6 +676,7 @@ export async function processBranch(
               topic: artifactErrorTopic,
               content,
             });
+            RepositoryStatisticsReporter.setPrState(pr.number, 'error');
           }
         }
       } else if (config.automerge) {

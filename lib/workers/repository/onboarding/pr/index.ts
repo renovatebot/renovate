@@ -5,6 +5,7 @@ import type { PackageFile } from '../../../../manager/types';
 import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch, isBranchModified } from '../../../../util/git';
+import { RepositoryStatisticsReporter } from '../../../../util/stats-reporter';
 import {
   addAssigneesReviewers,
   getPlatformPrOptions,
@@ -126,6 +127,7 @@ If you need any further assistance then you can also [request help here](${confi
         prTitle: existingPr.title,
         prBody,
       });
+      RepositoryStatisticsReporter.setPrState(existingPr.number, 'updated');
       logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
     }
     return;
@@ -145,6 +147,10 @@ If you need any further assistance then you can also [request help here](${confi
         platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
+      RepositoryStatisticsReporter.setBranchState(
+        config.onboardingBranch,
+        'created'
+      );
       await addAssigneesReviewers(config, pr);
     }
   } catch (err) /* istanbul ignore next */ {
