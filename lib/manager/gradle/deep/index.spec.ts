@@ -494,5 +494,13 @@ describe('manager/gradle/deep/index', () => {
 
       expect(execSnapshots).toBeEmpty();
     });
+
+    it('should return null for replacement', () => {
+      const res = updateDependency({
+        fileContent: undefined,
+        upgrade: { deepExtract: true, updateType: 'replacement' },
+      });
+      expect(res).toBeNull();
+    });
   });
 });

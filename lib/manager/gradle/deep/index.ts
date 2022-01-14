@@ -173,6 +173,11 @@ export function updateDependency({
   // prettier-ignore
   logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentValue} ==> ${upgrade.newValue}`);
 
+  if (upgrade.updateType === 'replacement') {
+    logger.warn('gradle manager does not support replacement updates yet');
+    return null;
+  }
+
   return updateGradleVersion(
     fileContent,
     buildGradleDependency(upgrade),
