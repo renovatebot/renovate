@@ -42,7 +42,7 @@ describe('versioning/loose/utils', () => {
           return null;
         }
         const { major, minor, patch } = matchGroups;
-        return { release: [major, minor, patch].map(n => parseInt(n, 10)) };
+        return { release: [major, minor, patch].map((n) => parseInt(n, 10)) };
       }
     }
 
