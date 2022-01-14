@@ -33,21 +33,19 @@ const getMajor = (version: string): number | null => {
 };
 
 const getMinor = (version: string): number | null => {
-  if (isVersion(version)) {
-    const tokens = tokenize(version.replace(regEx(/^v/i), ''));
-    if (tokens) {
-      const majorToken = tokens[0];
-      const minorToken = tokens[1];
-      if (
-        majorToken &&
-        majorToken.type === TokenType.Number &&
-        minorToken &&
-        minorToken.type === TokenType.Number
-      ) {
-        return +minorToken.val;
-      }
-      return 0;
+  const tokens = tokenize(version.replace(regEx(/^v/i), ''));
+  if (isVersion(version) && tokens) {
+    const majorToken = tokens[0];
+    const minorToken = tokens[1];
+    if (
+      majorToken &&
+      majorToken.type === TokenType.Number &&
+      minorToken &&
+      minorToken.type === TokenType.Number
+    ) {
+      return +minorToken.val;
     }
+    return 0;
   }
   return null;
 };
@@ -158,36 +156,34 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  let result: string | null = null;
-  for (const version of versions) {
+  return versions.reduce((result: string | null, version: string) => {
     if (matches(version, range)) {
       if (!result) {
-        result = version;
+        return version;
       }
       if (isGreaterThan(version, result)) {
-        result = version;
+        return version;
       }
     }
-  }
-  return result;
+    return result;
+  }, null);
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  let result: string | null = null;
-  for (const version of versions) {
+  return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
-        result = version;
+        return version;
       }
       if (compare(version, result) === -1) {
-        result = version;
+        return version;
       }
     }
-  }
-  return result;
+    return result;
+  }, null);
 }
 
 function getNewValue({
