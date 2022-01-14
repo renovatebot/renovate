@@ -35,20 +35,19 @@ const getMajor = (version: string): number | null => {
 const getMinor = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version.replace(regEx(/^v/i), ''));
-    if (!tokens) {
+    if (tokens) {
+      const majorToken = tokens[0];
+      const minorToken = tokens[1];
+      if (
+        majorToken &&
+        majorToken.type === TokenType.Number &&
+        minorToken &&
+        minorToken.type === TokenType.Number
+      ) {
+        return +minorToken.val;
+      }
       return 0;
     }
-    const majorToken = tokens[0];
-    const minorToken = tokens[1];
-    if (
-      majorToken &&
-      majorToken.type === TokenType.Number &&
-      minorToken &&
-      minorToken.type === TokenType.Number
-    ) {
-      return +minorToken.val;
-    }
-    return 0;
   }
   return null;
 };
@@ -56,23 +55,22 @@ const getMinor = (version: string): number | null => {
 const getPatch = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version.replace(regEx(/^v/i), ''));
-    if (!tokens) {
-      return null;
+    if (tokens) {
+      const majorToken = tokens[0];
+      const minorToken = tokens[1];
+      const patchToken = tokens[2];
+      if (
+        majorToken &&
+        majorToken.type === TokenType.Number &&
+        minorToken &&
+        minorToken.type === TokenType.Number &&
+        patchToken &&
+        patchToken.type === TokenType.Number
+      ) {
+        return +patchToken.val;
+      }
+      return 0;
     }
-    const majorToken = tokens[0];
-    const minorToken = tokens[1];
-    const patchToken = tokens[2];
-    if (
-      majorToken &&
-      majorToken.type === TokenType.Number &&
-      minorToken &&
-      minorToken.type === TokenType.Number &&
-      patchToken &&
-      patchToken.type === TokenType.Number
-    ) {
-      return +patchToken.val;
-    }
-    return 0;
   }
   return null;
 };
@@ -96,18 +94,17 @@ const unstable = new Set([
 const isStable = (version: string): boolean => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
-    if (!tokens) {
-      return false;
-    }
-    for (const token of tokens) {
-      if (token.type === TokenType.String) {
-        const val = token.val.toString().toLowerCase();
-        if (unstable.has(val)) {
-          return false;
+    if (tokens) {
+      for (const token of tokens) {
+        if (token.type === TokenType.String) {
+          const val = token.val.toString().toLowerCase();
+          if (unstable.has(val)) {
+            return false;
+          }
         }
       }
+      return true;
     }
-    return true;
   }
   return false;
 };
@@ -127,15 +124,14 @@ const matches = (a: string, b: string): boolean => {
     if (tokens.length === 0) {
       return true;
     }
-    if (!versionTokens) {
-      return false;
+    if (versionTokens) {
+      const x = versionTokens
+        .slice(0, tokens.length)
+        .map(({ val }) => val)
+        .join('.');
+      const y = tokens.map(({ val }) => val).join('.');
+      return equals(x, y);
     }
-    const x = versionTokens
-      .slice(0, tokens.length)
-      .map(({ val }) => val)
-      .join('.');
-    const y = tokens.map(({ val }) => val).join('.');
-    return equals(x, y);
   }
 
   const mavenBasedRange = parseMavenBasedRange(b);
