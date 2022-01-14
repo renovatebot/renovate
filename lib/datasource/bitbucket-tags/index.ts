@@ -23,12 +23,16 @@ export class BitBucketTagsDatasource extends Datasource {
     super(BitBucketTagsDatasource.id);
   }
 
-  static getRegistryURL(registryUrl: string): string {
+  static getRegistryURL(registryUrl?: string): string {
     // fallback to default API endpoint if custom not provided
     return registryUrl ?? this.defaultRegistryUrls[0];
   }
 
-  static getCacheKey(registryUrl: string, repo: string, type: string): string {
+  static getCacheKey(
+    registryUrl = this.defaultRegistryUrls[0],
+    repo: string,
+    type: string
+  ): string {
     return `${BitBucketTagsDatasource.getRegistryURL(
       registryUrl
     )}:${repo}:${type}`;
@@ -56,16 +60,17 @@ export class BitBucketTagsDatasource extends Datasource {
       await this.bitbucketHttp.getJson<utils.PagedResult<BitbucketTag>>(url)
     ).body;
 
-    const dependency: ReleaseResult = {
-      sourceUrl: BitBucketTagsDatasource.getSourceUrl(repo, registryUrl),
-      registryUrl: BitBucketTagsDatasource.getRegistryURL(registryUrl),
-      releases: null,
-    };
-    dependency.releases = bitbucketTags.values.map(({ name, target }) => ({
+    const releases = bitbucketTags.values.map(({ name, target }) => ({
       version: name,
       gitRef: name,
       releaseTimestamp: target?.date,
     }));
+
+    const dependency: ReleaseResult = {
+      sourceUrl: BitBucketTagsDatasource.getSourceUrl(repo, registryUrl),
+      registryUrl: BitBucketTagsDatasource.getRegistryURL(registryUrl),
+      releases,
+    };
 
     return dependency;
   }
@@ -76,17 +81,13 @@ export class BitBucketTagsDatasource extends Datasource {
     key: (registryUrl, repo, tag: string) =>
       BitBucketTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
   })
-  async getTagCommit(
-    registryUrl: string,
-    repo: string,
-    tag: string
-  ): Promise<string | null> {
+  async getTagCommit(repo: string, tag: string): Promise<string | null> {
     const url = `/2.0/repositories/${repo}/refs/tags/${tag}`;
 
     const bitbucketTag = (await this.bitbucketHttp.getJson<BitbucketTag>(url))
       .body;
 
-    return bitbucketTag.target.hash;
+    return bitbucketTag.target?.hash ?? null;
   }
 
   @cache({
@@ -111,11 +112,15 @@ export class BitBucketTagsDatasource extends Datasource {
       BitBucketTagsDatasource.getCacheKey(registryUrl, lookupName, 'digest'),
   })
   override async getDigest(
-    { lookupName: repo, registryUrl }: DigestConfig,
+    { lookupName: repo }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
+    if (!repo) {
+      return null;
+    }
+
     if (newValue?.length) {
-      return this.getTagCommit(registryUrl, repo, newValue);
+      return this.getTagCommit(repo, newValue);
     }
 
     const mainBranch = await this.getMainBranch(repo);
