@@ -17,4 +17,3 @@ ignore:
   - node_modules
   - SECURITY.md
   - test/e2e/node_modules
-  - lib/types/renovate_pep440.d.ts
