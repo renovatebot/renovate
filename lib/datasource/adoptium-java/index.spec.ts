@@ -2,6 +2,7 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import { range } from '../../util/range';
 import { datasource, defaultRegistryUrl, pageSize } from './common';
 
 const res1 = loadFixture('page.json');
@@ -9,14 +10,6 @@ const jre = loadFixture('jre.json');
 
 function getPath(page: number, imageType = 'jdk'): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&vendor=adoptium&page=${page}`;
-}
-
-function* range(start: number, end: number): Generator<number, void, void> {
-  yield start;
-  if (start === end) {
-    return;
-  }
-  yield* range(start + 1, end);
 }
 
 const depName = 'java';

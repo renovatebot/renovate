@@ -32,7 +32,7 @@ describe('versioning/pep440/index', () => {
   test.each`
     a          | b             | expected
     ${'1.0'}   | ${'1.0.0'}    | ${true}
-    ${'1.0.0'} | ${'1.0..foo'} | ${null}
+    ${'1.0.0'} | ${'1.0..foo'} | ${false}
   `('equals($a, $b) === $expected', ({ a, b, expected }) => {
     expect(pep440.equals(a, b)).toBe(expected);
   });
@@ -188,7 +188,7 @@ describe('versioning/pep440/index', () => {
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
-      expect(pep440.isLessThanRange(version, range)).toBe(expected);
+      expect(pep440.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 });

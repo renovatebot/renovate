@@ -49,6 +49,7 @@
     "lib/versioning/maven/**/*.ts",
     "lib/versioning/node/**/*.ts",
     "lib/versioning/npm/**/*.ts",
+    "lib/versioning/pep440/**/*.ts",
     "lib/versioning/ruby/**/*.ts",
     "lib/versioning/semver-coerced/**/*.ts",
     "lib/versioning/semver/**/*.ts",
