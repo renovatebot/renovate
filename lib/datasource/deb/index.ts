@@ -24,6 +24,18 @@ export class DebDatasource extends Datasource {
   static readonly compressions = ['gz'];
 
   /**
+   * This specifies the download directory into which the packages file should be downloaded relative to cacheDir.
+   * The folder will be created automatically if it doesn't exist.
+   */
+  static readonly downloadDirectory = './others/deb/download';
+
+  /**
+   * This specifies the directory where the extracted packages files are stored relative to cacheDir.
+   * The folder will be created automatically if it doesn't exist.
+   */
+  static readonly extractionDirectory: './others/deb/extracted';
+
+  /**
    * Users are able to specify custom Debian repositories as long as they follow
    * the Debian package repository format as specified here
    * @see{https://wiki.debian.org/DebianRepository/Format}
@@ -50,8 +62,6 @@ export class DebDatasource extends Datasource {
   override readonly defaultConfig: DebLanguageConfig = {
     deb: {
       binaryArch: 'amd64',
-      downloadDirectory: './others/deb/download',
-      extractionDirectory: './others/deb/extracted',
     },
   };
 
@@ -71,8 +81,8 @@ export class DebDatasource extends Datasource {
   requiredPackageKeys = ['Package', 'Version', 'Homepage'];
 
   async initCacheDir(cfg: DebLanguageConfig): Promise<void> {
-    await fs.ensureCacheDir(cfg.deb.downloadDirectory);
-    await fs.ensureCacheDir(cfg.deb.extractionDirectory);
+    await fs.ensureCacheDir(DebDatasource.downloadDirectory);
+    await fs.ensureCacheDir(DebDatasource.extractionDirectory);
   }
 
   async extract(
@@ -99,11 +109,11 @@ export class DebDatasource extends Datasource {
     hash.update(basePackageUrl);
     const hashedPackageUrl = hash.copy().digest('hex');
     const downloadDirectory = await fs.ensureCacheDir(
-      cfg.deb.downloadDirectory
+      DebDatasource.downloadDirectory
     );
 
     const extractionDirectory = await fs.ensureCacheDir(
-      cfg.deb.extractionDirectory
+      DebDatasource.extractionDirectory
     );
     const extractedFile = extractionDirectory + '/' + hashedPackageUrl + '.txt';
     let extractedFileExists = false;
