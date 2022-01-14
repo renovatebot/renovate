@@ -4,17 +4,19 @@ import type { GetPkgReleasesConfig } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { GlobalConfig } from '../../config/global';
 import type { DebLanguageConfig } from './types';
+import { DebDatasource } from '.';
 
 describe('datasource/deb/index', () => {
   describe('getReleases', () => {
     const testPackagesFile = __dirname + '/test-data/Packages.gz';
-    const downloadFolder = '/tmp/renovate-cache/others/deb/download/';
+    const cacheDir = '/tmp/renovate-cache/';
+    const downloadFolder =
+      cacheDir + 'others/' + DebDatasource.downloadDirectory + '/';
     const compressedPackageFile =
       downloadFolder +
       '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.gz';
     // const extractedPackageFile =
     //   '/tmp/renovate-cache/others/deb/extract/0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.txt';
-    const cacheDir = '/tmp/renovate-cache/';
 
     GlobalConfig.set({ cacheDir: cacheDir });
 
@@ -27,9 +29,7 @@ describe('datasource/deb/index', () => {
         datasource: 'deb',
         depName: 'steam-devices',
         deb: {
-          binaryArch: 'amd64',
-          downloadDirectory: './deb/download',
-          extractionDirectory: './deb/extract',
+          defaultBinaryArch: 'amd64',
         },
         registryUrls: [
           'http://ftp.debian.org/debian?suite=stable&components=non-free',
@@ -79,6 +79,21 @@ describe('datasource/deb/index', () => {
         const res = await getPkgReleases(cfg);
         expect(res).toBeNull();
       });
+    });
+
+    it('supports specifying a custom binary arch', async () => {
+      httpMock
+        .scope('http://ftp.debian.org')
+        .get('/debian/dists/stable/non-free/binary-riscv/Packages.gz')
+        .replyWithFile(200, testPackagesFile);
+
+      cfg.registryUrls = [
+        'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=riscv',
+      ];
+
+      const res = await getPkgReleases(cfg);
+      expect(res).toBeObject();
+      expect(res.releases).toHaveLength(1);
     });
   });
 });

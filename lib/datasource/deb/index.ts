@@ -27,13 +27,13 @@ export class DebDatasource extends Datasource {
    * This specifies the download directory into which the packages file should be downloaded relative to cacheDir.
    * The folder will be created automatically if it doesn't exist.
    */
-  static readonly downloadDirectory = './others/deb/download';
+  static readonly downloadDirectory = 'deb/download';
 
   /**
    * This specifies the directory where the extracted packages files are stored relative to cacheDir.
    * The folder will be created automatically if it doesn't exist.
    */
-  static readonly extractionDirectory: './others/deb/extracted';
+  static readonly extractionDirectory: 'deb/extracted';
 
   /**
    * Users are able to specify custom Debian repositories as long as they follow
@@ -54,14 +54,17 @@ export class DebDatasource extends Datasource {
    * - components: comma separated list of components
    * - suite: stable, oldstable or other alias for a release, either this or release must be given
    * - release: buster, etc.
+   *
+   * The following query parameters are optional:
+   * - binaryArch: e.g. amd64 resolves to http://ftp.debian.org/debian/dists/stable/non-free/binary-amd64/
    */
   override readonly defaultRegistryUrls = [
-    'https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free',
+    'https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
   ];
 
   override readonly defaultConfig: DebLanguageConfig = {
     deb: {
-      binaryArch: 'amd64',
+      defaultBinaryArch: 'amd64',
     },
   };
 
@@ -272,15 +275,21 @@ export class DebDatasource extends Datasource {
         return;
       }
 
+      let binaryArch = cfg.deb.defaultBinaryArch;
+      if (url.searchParams.has('binaryArch')) {
+        binaryArch = url.searchParams.get('binaryArch');
+      }
+
       const components = url.searchParams.get('components').split(',');
       url.searchParams.delete('release');
       url.searchParams.delete('suite');
       url.searchParams.delete('components');
+      url.searchParams.delete('binaryArch');
 
       url.pathname += '/dists/' + release;
       components.forEach((component) => {
         const newUrl = new URL(url);
-        newUrl.pathname += '/' + component + '/binary-' + cfg.deb.binaryArch;
+        newUrl.pathname += '/' + component + '/binary-' + binaryArch;
         fullComponentUrls.push(newUrl.toString());
       });
     });
