@@ -147,7 +147,6 @@ function stringTokenCmp(left: string, right: string): number {
 function tokenCmp(left: Token | null, right: Token | null): number {
   if (left === null) {
     if (right?.type === TokenType.String) {
-
       return 1;
     }
     return -1;
