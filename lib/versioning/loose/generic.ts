@@ -47,9 +47,13 @@ export const parser = (parse: VersionParser): Partial<VersioningApi> => {
     return parsed && !parsed.prerelease;
   }
 
+  function isCompatible(version: string): boolean {
+    return !!isValid(version);
+  }
+
   return {
     // validation
-    isCompatible: isValid,
+    isCompatible,
     isSingleVersion: isValid,
     isStable,
     isValid,

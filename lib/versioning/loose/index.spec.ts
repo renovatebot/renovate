@@ -47,4 +47,11 @@ describe('versioning/loose/index', () => {
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(loose.isGreaterThan(a, b)).toBe(expected);
   });
+
+  test.each`
+    version    | expected
+    ${'1.2.0'} | ${true}
+  `('isCompatible("$version") === $expected', ({ version, expected }) => {
+    expect(loose.isCompatible(version)).toBe(expected);
+  });
 });

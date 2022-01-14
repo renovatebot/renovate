@@ -234,12 +234,16 @@ function sortVersions(a: string, b: string): number {
   return npm.sortVersions(composer2npm(a), composer2npm(b));
 }
 
+function isCompatible(version: string): boolean {
+  return !!isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
   getPatch,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,

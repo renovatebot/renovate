@@ -101,12 +101,16 @@ function getNewValue({
   return autoExtendMavenRange(currentValue, newVersion);
 }
 
+function isCompatible(version: string): boolean {
+  return !!isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
   getPatch,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
   isSingleVersion: isVersion,
   isStable,

@@ -179,4 +179,11 @@ describe('versioning/ivy/index', () => {
       expect(ivy.getSatisfyingVersion(versions, range)).toBe(expected);
     }
   );
+
+  test.each`
+    version    | expected
+    ${'1.2.0'} | ${true}
+  `('isCompatible("$version") === $expected', ({ version, expected }) => {
+    expect(ivy.isCompatible(version)).toBe(expected);
+  });
 });

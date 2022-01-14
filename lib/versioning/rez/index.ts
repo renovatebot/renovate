@@ -192,6 +192,10 @@ function getNewValue({
   return null;
 }
 
+function isCompatible(version: string): boolean {
+  return !!isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -199,7 +203,7 @@ export const api: VersioningApi = {
   getPatch,
   getNewValue,
   getSatisfyingVersion,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,

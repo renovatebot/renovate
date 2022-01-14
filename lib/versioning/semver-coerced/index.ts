@@ -104,12 +104,16 @@ function getNewValue({ newVersion }: NewValueConfig): string {
   return newVersion;
 }
 
+function isCompatible(version: string): boolean {
+  return !!isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
   getPatch,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,
