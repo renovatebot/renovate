@@ -14,9 +14,7 @@ const temporarilyUnstable = ['22.04'];
 function isValid(input: string): boolean {
   return (
     typeof input === 'string' &&
-    !!regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(
-      input
-    )
+    regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
   );
 }
 
@@ -29,7 +27,7 @@ function isCompatible(version: string, _range?: string): boolean {
 }
 
 function isSingleVersion(version: string): boolean {
-  return isValid(version) ? true : false;
+  return isValid(version);
 }
 
 function isStable(version: string): boolean {

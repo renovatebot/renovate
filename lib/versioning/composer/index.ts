@@ -103,7 +103,7 @@ const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(composer2npm(version), composer2npm(range));
 
 const isSingleVersion = (input: string): boolean =>
-  !!(input && npm.isSingleVersion(composer2npm(input)));
+  !!input && npm.isSingleVersion(composer2npm(input));
 
 const isStable = (version: string): boolean =>
   version && npm.isStable(composer2npm(version));
