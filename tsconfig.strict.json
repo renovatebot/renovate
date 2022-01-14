@@ -45,6 +45,7 @@
     "lib/util/**/*.ts",
     "lib/versioning/gradle/compare.ts",
     "lib/versioning/hex/**/*.ts",
+    "lib/versioning/loose/**/*.ts",
     "lib/versioning/maven/**/*.ts",
     "lib/versioning/node/**/*.ts",
     "lib/versioning/npm/**/*.ts",
