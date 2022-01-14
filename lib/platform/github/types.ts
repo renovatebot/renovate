@@ -59,6 +59,7 @@ export interface PlatformConfig {
   endpoint: string;
   isGhe?: boolean;
   gheVersion?: string | null;
+  isGHApp?: boolean;
 }
 
 export interface LocalRepoConfig {

@@ -1,11 +1,10 @@
 import URL from 'url';
-import parseLinkHeader from 'parse-link-header';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { hasKey } from '../../util/object';
 import { regEx } from '../../util/regex';
-import { ensurePathPrefix } from '../../util/url';
+import { ensurePathPrefix, parseLinkHeader } from '../../util/url';
 import {
   api as dockerVersioning,
   id as dockerVersioningId,
