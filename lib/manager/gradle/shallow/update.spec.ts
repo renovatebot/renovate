@@ -75,4 +75,12 @@ describe('manager/gradle/shallow/update', () => {
       })
     ).toBeNull();
   });
+
+  it('should return null for replacement', () => {
+    const res = updateDependency({
+      fileContent: undefined,
+      upgrade: { updateType: 'replacement' },
+    });
+    expect(res).toBeNull();
+  });
 });
