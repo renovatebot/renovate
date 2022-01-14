@@ -279,5 +279,12 @@ describe('manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
     });
+    it('should return null for replacement', () => {
+      const res = updateDependency({
+        fileContent: undefined,
+        upgrade: { updateType: 'replacement' },
+      });
+      expect(res).toBeNull();
+    });
   });
 });
