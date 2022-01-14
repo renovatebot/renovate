@@ -78,7 +78,7 @@ export abstract class GenericVersioningApi<
     return this._parse(version) !== null;
   }
 
-  isCompatible(version: string, _range: string): boolean {
+  isCompatible(version: string, _current: string): boolean {
     return this.isValid(version);
   }
 
