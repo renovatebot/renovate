@@ -33,15 +33,15 @@ function getNewValue({ newVersion }: NewValueConfig): string {
 }
 
 function isCompatible(version: string): boolean {
-  return !!isVersion(version);
+  return isVersion(version);
 }
 
 function isSingleVersion(version: string): boolean {
-  return !!isVersion(version);
+  return isVersion(version);
 }
 
 function isValid(input: string): boolean {
-  return !!isVersion(input);
+  return isVersion(input);
 }
 
 export const api: VersioningApi = {

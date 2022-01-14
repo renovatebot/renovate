@@ -100,7 +100,7 @@ function minSatisfyingVersion(versions: string[], range: string): string {
 }
 
 function isSingleVersion(constraint: string): boolean {
-  return !!(
+  return (
     (constraint.trim().startsWith('==') &&
       isVersion(constraint.trim().substring(2).trim())) ||
     isVersion(constraint.trim())
@@ -193,7 +193,7 @@ function getNewValue({
 }
 
 function isCompatible(version: string): boolean {
-  return !!isVersion(version);
+  return isVersion(version);
 }
 
 export const api: VersioningApi = {

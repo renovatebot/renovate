@@ -11,7 +11,7 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
-const isVersion = (input: string): string | boolean => npm.isVersion(input);
+const isVersion = (input: string): boolean => npm.isVersion(input);
 
 function convertToCaret(item: string): string {
   // In Cargo, "1.2.3" doesn't mean exactly 1.2.3, it means >= 1.2.3 < 2.0.0
@@ -71,7 +71,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 
 const isSingleVersion = (constraint: string): boolean =>
   constraint.trim().startsWith('=') &&
-  !!isVersion(constraint.trim().substring(1).trim());
+  isVersion(constraint.trim().substring(1).trim());
 
 function getNewValue({
   currentValue,

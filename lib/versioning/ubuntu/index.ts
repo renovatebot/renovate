@@ -25,7 +25,7 @@ function isVersion(input: string): boolean {
 }
 
 function isCompatible(version: string, _range?: string): boolean {
-  return !!isValid(version);
+  return isValid(version);
 }
 
 function isSingleVersion(version: string): boolean {
@@ -71,7 +71,7 @@ function getPatch(version: string): null | number {
 // comparison
 
 function equals(version: string, other: string): boolean {
-  return !!isVersion(version) && !!isVersion(other) && version === other;
+  return isVersion(version) && isVersion(other) && version === other;
 }
 
 function isGreaterThan(version: string, other: string): boolean {

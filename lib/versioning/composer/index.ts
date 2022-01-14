@@ -235,7 +235,7 @@ function sortVersions(a: string, b: string): number {
 }
 
 function isCompatible(version: string): boolean {
-  return !!isVersion(version);
+  return isVersion(version);
 }
 
 export const api: VersioningApi = {

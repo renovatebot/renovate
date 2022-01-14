@@ -25,7 +25,7 @@ function isVersion(input: string): boolean {
 }
 
 function isCompatible(version: string, _range?: string): boolean | null {
-  return !!isValid(version);
+  return isValid(version);
 }
 
 export const api: VersioningApi = {

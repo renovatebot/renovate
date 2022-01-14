@@ -35,7 +35,7 @@ function isValid(str: string): boolean {
   if (!str) {
     return false;
   }
-  return !!maven.isVersion(str) || !!parseDynamicRevision(str);
+  return maven.isVersion(str) || !!parseDynamicRevision(str);
 }
 
 function isVersion(str: string): boolean {
@@ -102,11 +102,11 @@ function getNewValue({
 }
 
 function isCompatible(version: string): boolean {
-  return !!isVersion(version);
+  return isVersion(version);
 }
 
 function isSingleVersion(version: string): boolean {
-  return !!isVersion(version);
+  return isVersion(version);
 }
 
 export const api: VersioningApi = {
