@@ -110,7 +110,7 @@ export class DebDatasource extends Datasource {
     // we use the hashed url as the filename for the local directories/files
     const hash = createHash('sha256');
     hash.update(basePackageUrl);
-    const hashedPackageUrl = hash.copy().digest('hex');
+    const hashedPackageUrl = hash.digest('hex');
     const downloadDirectory = await fs.ensureCacheDir(
       DebDatasource.downloadDirectory
     );
@@ -119,13 +119,7 @@ export class DebDatasource extends Datasource {
       DebDatasource.extractionDirectory
     );
     const extractedFile = extractionDirectory + '/' + hashedPackageUrl + '.txt';
-    let extractedFileExists = false;
-    try {
-      await fs.access(extractedFile, fs.constants.R_OK);
-      extractedFileExists = true;
-    } catch (e) {
-      //ignore
-    }
+    const extractedFileExists = await fs.pathExists(extractedFile);
 
     for (let i = 0; i < DebDatasource.compressions.length; i++) {
       const compression = DebDatasource.compressions[i];
