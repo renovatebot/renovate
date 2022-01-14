@@ -87,11 +87,11 @@ export abstract class GenericVersioningApi<
     return parsed && !parsed.prerelease;
   }
 
-  isSingleVersion(version: string): string | boolean {
+  isSingleVersion(version: string): boolean {
     return this.isValid(version);
   }
 
-  isVersion(version: string): string | boolean {
+  isVersion(version: string): boolean {
     return this.isValid(version);
   }
 
