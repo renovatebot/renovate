@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
-import { mocked } from '../../../test/util';
+import { loadFixture, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { getDigest } from '.';
 
@@ -49,17 +49,36 @@ describe('datasource/go/digest', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('gitlab digest is not supported at the moment', async () => {
+    it('supports gitlab digest', async () => {
       httpMock
         .scope('https://gitlab.com/')
-        .get('/golang/text?go-get=1')
-        .reply(200, '');
+        .get('/group/subgroup?go-get=1')
+        .reply(200, loadFixture('go-get-gitlab.html'));
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/api/v4/projects/group%2Fsubgroup/repository/commits?per_page=1')
+        .reply(200, [{ id: 'abcdefabcdefabcdefabcdef' }]);
       const res = await getDigest(
-        { lookupName: 'gitlab.com/golang/text' },
+        { lookupName: 'gitlab.com/group/subgroup' },
         null
       );
-      expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).toBe('abcdefabcdefabcdefabcdef');
+    });
+    it('supports gitlab digest with a specific branch', async () => {
+      const branch = 'some-branch';
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/group/subgroup?go-get=1')
+        .reply(200, loadFixture('go-get-gitlab.html'));
+      httpMock
+        .scope('https://gitlab.com/')
+        .get(`/api/v4/projects/group%2Fsubgroup/repository/commits/${branch}`)
+        .reply(200, { id: 'abcdefabcdefabcdefabcdef' });
+      const res = await getDigest(
+        { lookupName: 'gitlab.com/group/subgroup' },
+        branch
+      );
+      expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
     it('returns digest', async () => {
       httpMock

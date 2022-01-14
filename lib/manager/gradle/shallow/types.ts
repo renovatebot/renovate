@@ -47,7 +47,7 @@ export type SyntaxHandlerOutput = {
 
 export interface SyntaxMatchConfig {
   matchers: SyntaxMatcher[];
-  handler: (MatcherHandlerInput) => SyntaxHandlerOutput;
+  handler: (_: SyntaxHandlerInput) => SyntaxHandlerOutput;
 }
 
 export interface MatchConfig {

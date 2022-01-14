@@ -7,7 +7,11 @@ export function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig<GradleManagerData>): string | null {
-  const { depName, currentValue, newValue, managerData } = upgrade;
+  const { depName, currentValue, newValue, managerData, updateType } = upgrade;
+  if (updateType === 'replacement') {
+    logger.warn('gradle manager does not support replacement updates yet');
+    return null;
+  }
   const offset = managerData.fileReplacePosition;
   const leftPart = fileContent.slice(0, offset);
   const rightPart = fileContent.slice(offset);
