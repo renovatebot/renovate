@@ -702,6 +702,14 @@ export async function commitFiles({
     for (const file of files) {
       let fileName = file.name;
       // istanbul ignore if
+      if (
+        file.contents === null &&
+        !(await isDirectory(upath.join(localDir, fileName)))
+      ) {
+        logger.debug({ fileName }, 'Skipping git file with null contents');
+        continue;
+      }
+      // istanbul ignore if
       if (fileName === '|delete|') {
         fileName = file.contents as string;
         try {
