@@ -73,7 +73,7 @@ function isLessThanRange(version: string, range: string): boolean {
 }
 
 export function isValid(input: string): boolean {
-  return !!npm.isValid(rez2npm(input));
+  return npm.isValid(rez2npm(input));
 }
 
 function isStable(version: string): boolean {
@@ -81,7 +81,7 @@ function isStable(version: string): boolean {
 }
 
 function isVersion(input: string): boolean {
-  return !!npm.isVersion(padZeroes(rez2npm(input)));
+  return npm.isVersion(padZeroes(rez2npm(input)));
 }
 
 function matches(version: string, range: string): boolean {
@@ -105,7 +105,7 @@ function minSatisfyingVersion(
   return npm.minSatisfyingVersion(versions, rez2npm(range));
 }
 
-function isSingleVersion(constraint: string): string | boolean {
+function isSingleVersion(constraint: string): boolean {
   return (
     (constraint.trim().startsWith('==') &&
       isVersion(constraint.trim().substring(2).trim())) ||
@@ -202,6 +202,10 @@ function getNewValue({
   return null;
 }
 
+function isCompatible(version: string): boolean {
+  return isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -209,7 +213,7 @@ export const api: VersioningApi = {
   getPatch,
   getNewValue,
   getSatisfyingVersion,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,
