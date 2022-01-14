@@ -20,9 +20,9 @@ Self-hosting Renovate means that you are the "administrator" of the bot, which e
 
 #### Forking Renovate app
 
-"Forking Renovate" is the sister app to Renovate Bot.
-The difference is that Forking Renovate operates using forks of repositories instead of as a collaborator, so needs only read-only permissions rather than read-write.
-It works on public (e.g. open source) repositories only.
+"Forking Renovate" is the sister app to the WhiteSource Renovate App on GitHub.com.
+The difference is that Forking Renovate does not require write permissions to create branches within the repo, and instead submits PRs from its own fork.
+Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
 
 [Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
 
@@ -34,10 +34,9 @@ Forking Renovate needs only `read` level access to any repository it runs on.
 
 If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
 
-- Dependency Dashboard (probably needs `write` rights to be able to open the issue?)
-- Automerge with the `branch` automerge strategy (needs `write` rights to create a branch in the first place)
+- Automerge is not supported
 - The `baseBranches` config option is not supported
-- List more big ticket items here
+- The app dashboard (`app.renovatebot.com`) is currently not supported
 
 #### npm package (CLI)
 
