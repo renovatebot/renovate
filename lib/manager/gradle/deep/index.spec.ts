@@ -498,7 +498,7 @@ describe('manager/gradle/deep/index', () => {
     it('should return null for replacement', () => {
       const res = updateDependency({
         fileContent: undefined,
-        upgrade: { updateType: 'replacement' },
+        upgrade: { deepExtract: true, updateType: 'replacement' },
       });
       expect(res).toBeNull();
     });
