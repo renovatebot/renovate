@@ -1,8 +1,6 @@
-import { exec } from 'child_process';
 import { createHash } from 'crypto';
 import { constants, createReadStream, createWriteStream } from 'fs';
 import { access, stat } from 'fs/promises';
-import { performance } from 'perf_hooks';
 import readline from 'readline';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
@@ -75,16 +73,6 @@ export class DebDatasource extends Datasource {
   async initCacheDir(cfg: DebLanguageConfig): Promise<void> {
     await fs.ensureCacheDir(cfg.deb.downloadDirectory);
     await fs.ensureCacheDir(cfg.deb.extractionDirectory);
-  }
-
-  async runCommand(wd: string, command: string): Promise<void> {
-    const pexec = promisify(exec);
-    logger.trace('running command ' + command + ' in directory ' + wd);
-    const { stdout, stderr } = await pexec(
-      ['cd', '"' + wd + '"', '&&', command].join(' ')
-    );
-    logger.debug(stdout);
-    logger.debug(stderr);
   }
 
   async extract(
@@ -308,13 +296,10 @@ export class DebDatasource extends Datasource {
         continue;
       }
 
-      const startTime = performance.now();
       release = await this.probeExtractedPackage(
         downloadedPackage,
         cfg.lookupName
       );
-      const endTime = performance.now();
-      logger.trace(`Inspected package file within  ${endTime - startTime} ms`);
     }
 
     return release;
