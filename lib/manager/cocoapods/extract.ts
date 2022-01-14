@@ -26,7 +26,7 @@ export function parseLine(line: string): ParsedLine {
     return result;
   }
   for (const regex of Object.values(regexMappings)) {
-    const match = regex.exec(line.replace(regEx(/#.*$/), '')); // TODO #12071
+    const match = regex.exec(line.replace(regEx(/#.*$/), ''));
     if (match?.groups) {
       result = { ...result, ...match.groups };
     }
@@ -105,7 +105,7 @@ export async function extractPackageFile(
     }: ParsedLine = parsedLine;
 
     if (source) {
-      registryUrls.push(source.replace(regEx(/\/*$/), '')); // TODO #12071
+      registryUrls.push(source.replace(regEx(/\/*$/), ''));
     }
 
     if (depName) {

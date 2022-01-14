@@ -274,8 +274,10 @@ describe('manager/npm/post-update/yarn', () => {
         }
         return new Promise<string>((resolve) => resolve(''));
       });
-      // FIXME: explicit assert condition
-      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
+        offlineMirror: true,
+        yarnPath: './.yarn/cli.js',
+      });
     });
 
     it('returns no offline mirror and unquoted yarn path', async () => {
@@ -293,8 +295,10 @@ describe('manager/npm/post-update/yarn', () => {
         }
         return new Promise<string>((resolve) => resolve(''));
       });
-      // FIXME: explicit assert condition
-      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toMatchSnapshot();
+      expect(await _yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
+        offlineMirror: false,
+        yarnPath: './.yarn/cli.js',
+      });
     });
 
     it('returns offline mirror and no yarn path for non-existant yarn-path binary', async () => {

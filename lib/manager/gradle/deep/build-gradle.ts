@@ -314,7 +314,7 @@ function updateGlobalMapVariables(
   newValue: string
 ): string | null {
   let variable = variables[`${dependency.group}:${dependency.name}`];
-  if (variable) {
+  if (variable && dependency.version) {
     while (variable && variable.split('.').length > 0) {
       const regex = variableMapDefinitionFormatMatch(
         variable,

@@ -11,7 +11,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const orbs = regEx(/^\s*orbs:\s*$/).exec(line); // TODO #12071
+      const orbs = regEx(/^\s*orbs:\s*$/).exec(line);
       if (orbs) {
         logger.trace(`Matched orbs on line ${lineNumber}`);
         let foundOrbOrNoop: boolean;
@@ -19,14 +19,14 @@ export function extractPackageFile(content: string): PackageFile | null {
           foundOrbOrNoop = false;
           const orbLine = lines[lineNumber + 1];
           logger.trace(`orbLine: "${orbLine}"`);
-          const yamlNoop = regEx(/^\s*(#|$)/).exec(orbLine); // TODO #12071
+          const yamlNoop = regEx(/^\s*(#|$)/).exec(orbLine);
           if (yamlNoop) {
             logger.debug('orbNoop');
             foundOrbOrNoop = true;
             lineNumber += 1;
             continue;
           }
-          const orbMatch = regEx(/^\s+([^:]+):\s(.+)$/).exec(orbLine); // TODO #12071
+          const orbMatch = regEx(/^\s+([^:]+):\s(.+)$/).exec(orbLine);
           if (orbMatch) {
             logger.trace('orbMatch');
             foundOrbOrNoop = true;
@@ -47,7 +47,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
         } while (foundOrbOrNoop);
       }
-      const match = regEx(/^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line); // TODO #12071
+      const match = regEx(/^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
       if (match) {
         const currentFrom = match[1];
         const dep = getDep(currentFrom);

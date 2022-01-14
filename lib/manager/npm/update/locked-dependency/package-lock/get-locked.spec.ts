@@ -16,16 +16,24 @@ describe('manager/npm/update/locked-dependency/package-lock/get-locked', () => {
       expect(getLockedDependencies({}, 'some-dep', '1.0.0')).toEqual([]);
     });
     it('finds direct dependency', () => {
-      // FIXME: explicit assert condition
       expect(
         getLockedDependencies(packageLockJson, 'express', '4.0.0')
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([
+        {
+          resolved: 'https://registry.npmjs.org/express/-/express-4.0.0.tgz',
+          version: '4.0.0',
+        },
+      ]);
     });
     it('finds indirect dependency', () => {
-      // FIXME: explicit assert condition
       expect(
         getLockedDependencies(packageLockJson, 'send', '0.2.0')
-      ).toMatchSnapshot();
+      ).toMatchSnapshot([
+        {
+          resolved: 'https://registry.npmjs.org/send/-/send-0.2.0.tgz',
+          version: '0.2.0',
+        },
+      ]);
     });
   });
 });
