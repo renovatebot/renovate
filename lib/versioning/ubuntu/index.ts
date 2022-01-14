@@ -11,26 +11,23 @@ const temporarilyUnstable = ['22.04'];
 
 // validation
 
-function isValid(input: string): string | boolean | null {
+function isValid(input: string): boolean {
   return (
     typeof input === 'string' &&
     regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
   );
 }
 
-function isVersion(input: string): string | boolean | null {
+function isVersion(input: string): boolean {
   return isValid(input);
 }
 
-function isCompatible(
-  version: string,
-  _range?: string
-): string | boolean | null {
+function isCompatible(version: string, _current?: string): boolean {
   return isValid(version);
 }
 
-function isSingleVersion(version: string): string | boolean | null {
-  return isValid(version) ? true : null;
+function isSingleVersion(version: string): boolean {
+  return isValid(version);
 }
 
 function isStable(version: string): boolean {
@@ -72,7 +69,7 @@ function getPatch(version: string): null | number {
 // comparison
 
 function equals(version: string, other: string): boolean {
-  return !!isVersion(version) && !!isVersion(other) && version === other;
+  return isVersion(version) && isVersion(other) && version === other;
 }
 
 function isGreaterThan(version: string, other: string): boolean {
