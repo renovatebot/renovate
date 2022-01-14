@@ -1,6 +1,10 @@
 import {
+  createURLFromHostOrURL,
   ensurePathPrefix,
+  ensureTrailingSlash,
+  getQueryString,
   joinUrlParts,
+  parseLinkHeader,
   parseUrl,
   resolveBaseUrl,
   trimTrailingSlash,
@@ -53,6 +57,10 @@ describe('util/url', () => {
     expect(resolveBaseUrl(baseUrl, x)).toBe(result);
   });
 
+  it('getQueryString', () => {
+    expect(getQueryString({ a: 1, b: [1, 2] })).toBe('a=1&b=1&b=2');
+  });
+
   it('validates URLs', () => {
     expect(validateUrl()).toBeFalse();
     expect(validateUrl(null as never)).toBeFalse();
@@ -60,6 +68,7 @@ describe('util/url', () => {
     expect(validateUrl('ssh://github.com')).toBeFalse();
     expect(validateUrl('http://github.com')).toBeTrue();
     expect(validateUrl('https://github.com')).toBeTrue();
+    expect(validateUrl('https://github.com', false)).toBeTrue();
   });
 
   it('parses URL', () => {
@@ -77,6 +86,11 @@ describe('util/url', () => {
     expect(trimTrailingSlash('/foo/bar')).toBe('/foo/bar');
     expect(trimTrailingSlash('foo/')).toBe('foo');
     expect(trimTrailingSlash('foo//////')).toBe('foo');
+  });
+
+  it('ensureTrailingSlash', () => {
+    expect(ensureTrailingSlash('')).toBe('/');
+    expect(ensureTrailingSlash('/')).toBe('/');
   });
 
   it('ensures path prefix', () => {
@@ -111,5 +125,46 @@ describe('util/url', () => {
       `${registryUrl}/api/foo/bar`
     );
     expect(joinUrlParts('foo//////')).toBe('foo/');
+  });
+
+  it('createURLFromHostOrURL', () => {
+    expect(createURLFromHostOrURL('https://some.test')).toEqual(
+      new URL('https://some.test/')
+    );
+    expect(createURLFromHostOrURL('some.test')).toEqual(
+      new URL('https://some.test/')
+    );
+  });
+
+  it('parseLinkHeader', () => {
+    expect(parseLinkHeader(null)).toBeNull();
+    expect(parseLinkHeader(' '.repeat(2001))).toBeNull();
+    expect(
+      parseLinkHeader(
+        '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next",' +
+          '<https://api.github.com/user/9287/repos?page=1&per_page=100>; rel="prev"; pet="cat", ' +
+          '<https://api.github.com/user/9287/repos?page=5&per_page=100>; rel="last"'
+      )
+    ).toStrictEqual({
+      next: {
+        page: '3',
+        per_page: '100',
+        rel: 'next',
+        url: 'https://api.github.com/user/9287/repos?page=3&per_page=100',
+      },
+      prev: {
+        page: '1',
+        per_page: '100',
+        rel: 'prev',
+        pet: 'cat',
+        url: 'https://api.github.com/user/9287/repos?page=1&per_page=100',
+      },
+      last: {
+        page: '5',
+        per_page: '100',
+        rel: 'last',
+        url: 'https://api.github.com/user/9287/repos?page=5&per_page=100',
+      },
+    });
   });
 });
