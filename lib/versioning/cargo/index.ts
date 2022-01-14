@@ -69,9 +69,9 @@ const getSatisfyingVersion = (versions: string[], range: string): string =>
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions, cargo2npm(range));
 
-const isSingleVersion = (constraint: string): string | boolean =>
+const isSingleVersion = (constraint: string): boolean =>
   constraint.trim().startsWith('=') &&
-  isVersion(constraint.trim().substring(1).trim());
+  !!isVersion(constraint.trim().substring(1).trim());
 
 function getNewValue({
   currentValue,

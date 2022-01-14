@@ -10,7 +10,7 @@ export interface NewValueConfig {
 export interface VersioningApi {
   // validation
   isCompatible(version: string, range?: string): boolean;
-  isSingleVersion(version: string): string | boolean | null;
+  isSingleVersion(version: string): boolean;
   isStable(version: string): boolean;
   isValid(version: string): string | boolean | null;
   isVersion(version: string): string | boolean | null;

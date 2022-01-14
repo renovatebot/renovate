@@ -37,6 +37,10 @@ function isCompatible(version: string): boolean {
   return !!isVersion(version);
 }
 
+function isSingleVersion(version: string): boolean {
+  return !!isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -45,7 +49,7 @@ export const api: VersioningApi = {
   isCompatible,
   isGreaterThan,
   isLessThanRange,
-  isSingleVersion: isVersion,
+  isSingleVersion,
   isStable,
   isValid: isVersion,
   isVersion,

@@ -84,14 +84,14 @@ function isGreaterThan(version: string, other: string): boolean {
 
 const startsWithNumberRegex = regEx(`^\\d`);
 
-function isSingleVersion(version: string): string | boolean | null {
+function isSingleVersion(version: string): boolean {
   // Since coercion accepts ranges as well as versions, we have to manually
   // check that the version string starts with either 'v' or a digit.
   if (!version.startsWith('v') && !startsWithNumberRegex.exec(version)) {
-    return null;
+    return false;
   }
 
-  return semver.valid(semver.coerce(version));
+  return !!semver.valid(semver.coerce(version));
 }
 
 // If this is left as an alias, inputs like "17.04.0" throw errors

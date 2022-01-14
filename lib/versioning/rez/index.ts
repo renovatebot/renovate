@@ -99,8 +99,8 @@ function minSatisfyingVersion(versions: string[], range: string): string {
   return npm.minSatisfyingVersion(versions, rez2npm(range));
 }
 
-function isSingleVersion(constraint: string): string | boolean {
-  return (
+function isSingleVersion(constraint: string): boolean {
+  return !!(
     (constraint.trim().startsWith('==') &&
       isVersion(constraint.trim().substring(2).trim())) ||
     isVersion(constraint.trim())

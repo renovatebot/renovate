@@ -26,8 +26,8 @@ function isCompatible(version: string, _range?: string): boolean {
   return !!isValid(version);
 }
 
-function isSingleVersion(version: string): string | boolean | null {
-  return isValid(version) ? true : null;
+function isSingleVersion(version: string): boolean {
+  return isValid(version) ? true : false;
 }
 
 function isStable(version: string): boolean {

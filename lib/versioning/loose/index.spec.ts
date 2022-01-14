@@ -54,4 +54,12 @@ describe('versioning/loose/index', () => {
   `('isCompatible("$version") === $expected', ({ version, expected }) => {
     expect(loose.isCompatible(version)).toBe(expected);
   });
+
+  test.each`
+    version     | expected
+    ${'1.2.0'}  | ${true}
+    ${'^1.2.0'} | ${false}
+  `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+    expect(loose.isSingleVersion(version)).toBe(expected);
+  });
 });

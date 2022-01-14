@@ -51,10 +51,14 @@ export const parser = (parse: VersionParser): Partial<VersioningApi> => {
     return !!isValid(version);
   }
 
+  function isSingleVersion(version: string): boolean {
+    return !!isValid(version);
+  }
+
   return {
     // validation
     isCompatible,
-    isSingleVersion: isValid,
+    isSingleVersion,
     isStable,
     isValid,
     isVersion: isValid,
@@ -204,8 +208,8 @@ export abstract class GenericVersioningApi<
     return parsed && !parsed.prerelease;
   }
 
-  isSingleVersion(version: string): string | boolean {
-    return this.isValid(version);
+  isSingleVersion(version: string): boolean {
+    return !!this.isValid(version);
   }
 
   isVersion(version: string): string | boolean {
