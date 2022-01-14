@@ -1,15 +1,6 @@
 import { createHash } from 'crypto';
 import readline from 'readline';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
 import { createUnzip } from 'zlib';
-import {
-  access,
-  constants,
-  createReadStream,
-  createWriteStream,
-  stat,
-} from 'fs-extra';
 import type { GetReleasesConfig, ReleaseResult } from '..';
 import { logger } from '../../logger';
 import * as fs from '../../util/fs';
@@ -90,10 +81,9 @@ export class DebDatasource extends Datasource {
     outputFile: string
   ): Promise<void> {
     if (compression === 'gz') {
-      const source = createReadStream(compressedFile);
-      const destination = createWriteStream(outputFile);
-      const pipe = promisify(pipeline);
-      await pipe(source, createUnzip(), destination);
+      const source = fs.createReadStream(compressedFile);
+      const destination = fs.createWriteStream(outputFile);
+      await fs.pipeline(source, createUnzip(), destination);
     } else {
       throw 'Unknown compression standard, this is probably a programming error';
     }
@@ -118,7 +108,7 @@ export class DebDatasource extends Datasource {
     const extractedFile = extractionDirectory + '/' + hashedPackageUrl + '.txt';
     let extractedFileExists = false;
     try {
-      await access(extractedFile, constants.R_OK);
+      await fs.access(extractedFile, fs.constants.R_OK);
       extractedFileExists = true;
     } catch (e) {
       //ignore
@@ -165,7 +155,7 @@ export class DebDatasource extends Datasource {
   ): Promise<boolean> {
     let lastTimestamp: Date = null;
     try {
-      const stats = await stat(compressedFile);
+      const stats = await fs.stat(compressedFile);
       lastTimestamp = stats.mtime;
     } catch (e) {
       // ignore if the file doesnt exist
@@ -204,7 +194,7 @@ export class DebDatasource extends Datasource {
     // read line by line to avoid high memory consumption as the extracted Packages
     // files can be multiple MBs in size
     const rl = readline.createInterface({
-      input: createReadStream(extractedFile),
+      input: fs.createReadStream(extractedFile),
       terminal: false,
     });
     let pd: PackageDescription = {};

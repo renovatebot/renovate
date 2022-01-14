@@ -9,6 +9,7 @@ import { logger } from '../../logger';
 export * from './proxies';
 
 export const pipeline = util.promisify(stream.pipeline);
+export const constants = fs.constants;
 
 export function getSubDirectory(fileName: string): string {
   return upath.parse(fileName).dir;
@@ -153,4 +154,12 @@ export async function readLocalDirectory(path: string): Promise<string[]> {
 
 export function createWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
+}
+
+export function createReadStream(path: string): fs.ReadStream {
+  return fs.createReadStream(path);
+}
+
+export function access(path: string, mode?: number): Promise<void> {
+  return fs.access(path, mode);
 }
