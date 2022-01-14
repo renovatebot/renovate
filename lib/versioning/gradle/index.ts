@@ -33,8 +33,11 @@ const getMajor = (version: string): number | null => {
 };
 
 const getMinor = (version: string): number | null => {
-  const tokens = tokenize(version.replace(regEx(/^v/i), ''));
-  if (isVersion(version) && tokens) {
+  if (isVersion(version)) {
+    const tokens = tokenize(version.replace(regEx(/^v/i), ''));
+    if (!tokens) {
+      return 0;
+    }
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     if (
@@ -51,8 +54,11 @@ const getMinor = (version: string): number | null => {
 };
 
 const getPatch = (version: string): number | null => {
-  const tokens = tokenize(version.replace(regEx(/^v/i), ''));
-  if (tokens && isVersion(version)) {
+  if (isVersion(version)) {
+    const tokens = tokenize(version.replace(regEx(/^v/i), ''));
+    if (!tokens) {
+      return null;
+    }
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     const patchToken = tokens[2];
@@ -88,8 +94,11 @@ const unstable = new Set([
 ]);
 
 const isStable = (version: string): boolean => {
-  const tokens = tokenize(version);
-  if (tokens && isVersion(version)) {
+  if (isVersion(version)) {
+    const tokens = tokenize(version);
+    if (!tokens) {
+      return false;
+    }
     for (const token of tokens) {
       if (token.type === TokenType.String) {
         const val = token.val.toString().toLowerCase();
@@ -112,11 +121,14 @@ const matches = (a: string, b: string): boolean => {
   }
 
   const prefixRange = parsePrefixRange(b);
-  const versionTokens = tokenize(a);
-  if (versionTokens && prefixRange) {
+  if (prefixRange) {
+    const versionTokens = tokenize(a);
     const tokens = prefixRange.tokens;
     if (tokens.length === 0) {
       return true;
+    }
+    if (!versionTokens) {
+      return false;
     }
     const x = versionTokens
       .slice(0, tokens.length)
@@ -156,7 +168,7 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return versions.reduce((result: string | null, version: string) => {
+  return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
