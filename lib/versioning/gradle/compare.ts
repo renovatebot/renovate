@@ -181,7 +181,7 @@ export function compare(left: string, right: string): number {
   const leftTokens = tokenize(left) ?? [];
   const rightTokens = tokenize(right) ?? [];
   const length = Math.max(leftTokens.length, rightTokens.length);
-  for (let idx = 0; length && idx < length; idx += 1) {
+  for (let idx = 0; idx < length; idx += 1) {
     const leftToken = leftTokens[idx] || null;
     const rightToken = rightTokens[idx] || null;
     const cmpResult = tokenCmp(leftToken, rightToken);
@@ -262,10 +262,10 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
     let leftVal: string | null = matchGroups.leftVal;
     let rightVal: string | null = matchGroups.rightVal;
     if (!leftVal) {
-      leftVal = <string>(<unknown>null);
+      leftVal = null;
     }
     if (!rightVal) {
-      rightVal = <string>(<unknown>null);
+      rightVal = null;
     }
     const isVersionLeft = is.string(leftVal) && isVersion(leftVal);
     const isVersionRight = is.string(rightVal) && isVersion(rightVal);
