@@ -177,6 +177,10 @@ describe('versioning/maven/compare', () => {
         ${'1-milestone'}                                | ${'1-snapshot'}
         ${'1-abc'}                                      | ${'1-xyz'}
         ${'Hoxton.RELEASE'}                             | ${'Hoxton.SR1'}
+        ${'2.0'}                                        | ${'2.0-PFD2'}
+        ${'2.0'}                                        | ${'2.0.SP1'}
+        ${'2.0-PFD2'}                                   | ${'2.0.SP1'}
+        ${'1.3.9'}                                      | ${'1.3.9.fix-log4j2'}
       `('$x < $y', ({ x, y }) => {
         expect(compare(x, y)).toBe(-1);
         expect(compare(y, x)).toBe(1);
