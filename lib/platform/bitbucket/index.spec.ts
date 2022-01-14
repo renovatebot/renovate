@@ -838,6 +838,7 @@ describe('platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws exception when unable to check reviewers workspace membership', async () => {
       const reviewer = {
