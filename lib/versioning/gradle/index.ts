@@ -44,7 +44,7 @@ const getMinor = (version: string): number | null => {
         minorToken &&
         minorToken.type === TokenType.Number
       ) {
-        return +minorToken.val;
+        return minorToken.val as number;
       }
       return 0;
     }
