@@ -160,7 +160,7 @@ export function generateBranchConfig(
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix);
       upgrade.toLowerCase =
-        regEx(/[A-Z]/).exec(upgrade.semanticCommitType) === null && // TODO #12071
+        regEx(/[A-Z]/).exec(upgrade.semanticCommitType) === null &&
         !upgrade.semanticCommitType.startsWith(':');
     }
     // Compile a few times in case there are nested templates
@@ -179,9 +179,9 @@ export function generateBranchConfig(
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
-    upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string // TODO #12071
+    upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
     upgrade.commitMessage = upgrade.commitMessage.replace(
-      regEx(/to vv(\d)/), // TODO #12071
+      regEx(/to vv(\d)/),
       'to v$1'
     );
     if (upgrade.toLowerCase) {
@@ -203,7 +203,7 @@ export function generateBranchConfig(
       upgrade.prTitle = template
         .compile(upgrade.prTitle, upgrade)
         .trim()
-        .replace(regEx(/\s+/g), ' '); // TODO #12071
+        .replace(regEx(/\s+/g), ' ');
       // istanbul ignore if
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
         logger.debug(

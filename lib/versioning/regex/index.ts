@@ -89,9 +89,9 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     };
   }
 
-  override isCompatible(version: string, range: string): boolean {
+  override isCompatible(version: string, current: string): boolean {
     return (
-      this._parse(version).compatibility === this._parse(range).compatibility
+      this._parse(version).compatibility === this._parse(current).compatibility
     );
   }
 
