@@ -67,8 +67,8 @@ function isGreaterThan(a: string, b: string): boolean {
 
 function isLessThanRange(version: string, range: string): boolean {
   return (
-    !!npm.isVersion(padZeroes(version)) &&
-    !!npm.isLessThanRange?.(padZeroes(version), rez2npm(range))
+    npm.isVersion(padZeroes(version)) &&
+    npm.isLessThanRange?.(padZeroes(version), rez2npm(range))
   );
 }
 
