@@ -6,7 +6,8 @@ import {
   JCENTER_REPO,
   MAVEN_REPO,
 } from './common';
-import { parseGradle, parseProps } from './parser';
+import { parseProps } from './parser';
+import { parseGradle } from './parser/parser-new';
 
 describe('manager/gradle/shallow/parser', () => {
   it('handles end of input', () => {

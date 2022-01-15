@@ -3,15 +3,13 @@ import {
   GRADLE_PLUGIN_PORTAL_REPO,
   JCENTER_REPO,
   MAVEN_REPO,
-} from './common';
+} from '../common';
 import { parseGradle } from './parser-new';
 
-describe('manager/gradle/shallow/parser-new', () => {
+describe('manager/gradle/shallow/parser/parser-new', () => {
   it('handles end of input', () => {
-    expect(parseGradle('build.gradle', 'version = ', {}).deps).toBeEmpty();
-    expect(
-      parseGradle('build.gradle', 'id "foo.bar" version', {}).deps
-    ).toBeEmpty();
+    expect(parseGradle('version = ').deps).toBeEmpty();
+    expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
   });
 
   describe('Variable definitions', () => {
@@ -23,7 +21,7 @@ describe('manager/gradle/shallow/parser-new', () => {
       ${'foo .bar. baz . qux = "1.2.3"'} | ${'foo.bar.baz.qux'} | ${'1.2.3'}
       ${'set("version", "1.2.3")'}       | ${'version'}         | ${'1.2.3'}
     `('$source', ({ source, name, value }) => {
-      const { vars } = parseGradle('build.gradle', source, {});
+      const { vars } = parseGradle(source);
       expect(vars).toContainKey(name);
 
       const varData = vars[name];
@@ -50,7 +48,7 @@ describe('manager/gradle/shallow/parser-new', () => {
       ${"maven { url 'https://foo.bar/baz' }"}        | ${'https://foo.bar/baz'}
     `('$source', ({ source, url }) => {
       const expected = [url].filter(Boolean);
-      const { urls } = parseGradle('build.gradle', source, {});
+      const { urls } = parseGradle(source);
       expect(urls).toStrictEqual(expected);
     });
   });
@@ -80,7 +78,7 @@ describe('manager/gradle/shallow/parser-new', () => {
       ${'baz = "1.3.71"'}    | ${'kotlin("jvm") version baz'}                                            | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
     `(`$dep`, ({ vars, dep, result }) => {
       const input = [vars, dep].join('\n');
-      const { deps } = parseGradle('build.gradle', input, {});
+      const { deps } = parseGradle(input);
       expect(deps).toMatchObject([result].filter(Boolean));
     });
   });
@@ -97,7 +95,7 @@ describe('manager/gradle/shallow/parser-new', () => {
   //       ${'createXmlValueRemover("defaults", "integer", "integer")'}              | ${{ depName: 'defaults:integer', currentValue: 'integer', skipReason: SkipReason.Ignored }}
   //       ${'"foo:bar:1.2.3@zip"'}                                                  | ${{ currentValue: '1.2.3', dataType: 'zip', depName: 'foo:bar' }}
   //     `('$input', ({ input, output }) => {
-  //       const { deps } = parseGradle(input);
+  //       const { deps } = parseGradle(in;
   //       expect(deps).toMatchObject([output].filter(Boolean));
   //     });
   //   });
@@ -114,7 +112,7 @@ describe('manager/gradle/shallow/parser-new', () => {
   //       ${'baz = "1.2.3"'}     | ${'group: "foo", name: "bar", version: baz'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
   //     `('$def | $str', ({ def, str, output }) => {
   //       const input = [def, str].join('\n');
-  //       const { deps } = parseGradle(input);
+  //       const { deps } = parseGradle(in;
   //       expect(deps).toMatchObject([output].filter(Boolean));
   //     });
   //   });
@@ -126,7 +124,7 @@ describe('manager/gradle/shallow/parser-new', () => {
   //       ${'id("foo.bar") version "1.2.3"'}  | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
   //       ${'kotlin("jvm") version "1.3.71"'} | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
   //     `('$input', ({ input, output }) => {
-  //       const { deps } = parseGradle(input);
+  //       const { deps } = parseGradle(in;
   //       expect(deps).toMatchObject([output].filter(Boolean));
   //     });
   //   });
@@ -148,7 +146,7 @@ describe('manager/gradle/shallow/parser-new', () => {
   //     ${"maven { url 'https://foo.bar/baz' }"}        | ${'https://foo.bar/baz'}
   //   `('$input', ({ input, url }) => {
   //     const expected = [url].filter(Boolean);
-  //     const { urls } = parseGradle(input);
+  //     const { urls } = parseGradle(in;
   //     expect(urls).toStrictEqual(expected);
   //   });
   // });
@@ -156,7 +154,7 @@ describe('manager/gradle/shallow/parser-new', () => {
   // describe('calculations', () => {
   //   it('calculates offset', () => {
   //     const content = "'foo:bar:1.2.3'";
-  //     const { deps } = parseGradle(content);
+  //     const { deps } = parseGradle(cont;
   //     const [res] = deps;
   //     const idx = content
   //       .slice(res.managerData.fileReplacePosition)
@@ -166,7 +164,7 @@ describe('manager/gradle/shallow/parser-new', () => {
 
   //   it('parses fixture from "gradle" manager', () => {
   //     const content = loadFixture('build.gradle.example1', '../deep/');
-  //     const { deps } = parseGradle(content, {}, 'build.gradle');
+  //     const { deps } = parseGradle(content, {}, 'build.grad;
   //     const replacementIndices = deps.map(({ managerData, currentValue }) =>
   //       content.slice(managerData.fileReplacePosition).indexOf(currentValue)
   //     );
