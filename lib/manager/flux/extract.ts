@@ -71,6 +71,9 @@ function resolveReleases(
 
 export function extractPackageFile(content: string): PackageFile | null {
   const manifest = readManifest(content);
+  if (!manifest) {
+    return null;
+  }
   const deps = resolveReleases(manifest.releases, manifest.repositories);
   return deps.length ? { deps: deps, datasource: HelmDatasource.id } : null;
 }
