@@ -83,10 +83,8 @@ export class AwsMachineImageDataSource extends Datasource {
       return null;
     }
 
-    return (
-      (await this.getReleases({ lookupName: serializedAmiFilter }))
-        ?.releases?.[0]?.newDigest ?? null
-    );
+    const res = await this.getReleases({ lookupName: serializedAmiFilter });
+    return res?.releases?.[0]?.newDigest ?? null;
   }
 
   @cache({
