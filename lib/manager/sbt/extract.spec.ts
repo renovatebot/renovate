@@ -142,6 +142,18 @@ describe('manager/sbt/extract', () => {
         ],
       });
     });
+    it('extracts deps when scala version is defined in a variable with a trailing comma', () => {
+      const content = `
+        val ScalaVersion = "2.12.10"
+        lazy val commonSettings = Seq(
+          scalaVersion := ScalaVersion,
+        )
+        libraryDependencies += "org.example" %% "bar" % "0.0.2"
+      `;
+      expect(extractPackageFile(content)).toMatchSnapshot({
+        deps: [{ lookupName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
+      });
+    });
     it('extracts deps when scala version is defined with ThisBuild scope', () => {
       const content = `
         ThisBuild / scalaVersion := "2.12.10"
@@ -160,16 +172,19 @@ describe('manager/sbt/extract', () => {
         ],
       });
     });
-    it('extracts deps when scala version is defined in a variable with a trailing comma', () => {
+    it('extracts deps when scala version is defined in a variable with ThisBuild scope', () => {
       const content = `
         val ScalaVersion = "2.12.10"
-        lazy val commonSettings = Seq(
-          scalaVersion := ScalaVersion,
-        )
+        ThisBuild / scalaVersion := ScalaVersion
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
       expect(extractPackageFile(content)).toMatchSnapshot({
-        deps: [{ lookupName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
+        deps: [
+          {
+            lookupName: 'org.example:bar_2.12',
+            currentValue: '0.0.2',
+          },
+        ],
       });
     });
     it('extract deps from native scala file with private variables', () => {

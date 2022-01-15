@@ -68,11 +68,13 @@ const normalizeScalaVersion = (str: string): string => {
 };
 
 const isScalaVersionVariable = (str: string): boolean =>
-  regEx(/^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*[\s,]*$/).test(str);
+  regEx(
+    /^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*[\s,]*$/
+  ).test(str);
 
 const getScalaVersionVariable = (str: string): string =>
   str
-    .replace(regEx(/^\s*scalaVersion\s*:=\s*/), '')
+    .replace(regEx(/^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*/), '')
     .replace(regEx(/[\s,]*$/), '');
 
 const isResolver = (str: string): boolean =>
