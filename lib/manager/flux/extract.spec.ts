@@ -27,7 +27,7 @@ describe('manager/flux/extract', () => {
       expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
     });
     it('ignores bad manifests', () => {
-      const result = extractPackageFile('blargh');
+      const result = extractPackageFile('"bad YAML');
       expect(result).toBeNull();
     });
   });
