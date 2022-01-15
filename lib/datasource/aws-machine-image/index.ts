@@ -98,23 +98,21 @@ export class AwsMachineImageDataSource extends Datasource {
     lookupName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
-    if (images.length === 0) {
+    const latestImage = images[images.length - 1];
+    if (!latestImage?.ImageId) {
       return null;
     }
-    const latestImage = images[images.length - 1];
-    return latestImage.ImageId
-      ? {
-          releases: [
-            {
-              version: latestImage.ImageId,
-              releaseTimestamp: latestImage.CreationDate,
-              isDeprecated:
-                Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
-                this.now,
-              newDigest: latestImage.Name,
-            },
-          ],
-        }
-      : null;
+    return {
+      releases: [
+        {
+          version: latestImage.ImageId,
+          releaseTimestamp: latestImage.CreationDate,
+          isDeprecated:
+            Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
+            this.now,
+          newDigest: latestImage.Name,
+        },
+      ],
+    };
   }
 }
