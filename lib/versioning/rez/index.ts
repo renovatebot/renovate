@@ -86,7 +86,7 @@ function isVersion(input: string): boolean {
 
 function matches(version: string, range: string): boolean {
   return (
-    !!npm.isVersion(padZeroes(version)) &&
+    npm.isVersion(padZeroes(version)) &&
     npm.matches(padZeroes(version), rez2npm(range))
   );
 }
