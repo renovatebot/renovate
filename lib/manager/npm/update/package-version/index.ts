@@ -1,4 +1,4 @@
-import { ReleaseType, inc } from 'semver';
+import semver, { ReleaseType } from 'semver';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import type { BumpPackageVersionResult } from '../../../types';
@@ -28,7 +28,7 @@ export function bumpPackageVersion(
         return { bumpedContent };
       }
     } else {
-      newPjVersion = inc(currentValue, bumpVersion as ReleaseType);
+      newPjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
     }
     logger.debug({ newPjVersion });
     bumpedContent = content.replace(

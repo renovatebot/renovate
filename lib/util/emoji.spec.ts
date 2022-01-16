@@ -47,7 +47,7 @@ describe('util/emoji', () => {
     });
 
     describe('unsupported characters', () => {
-      const unsupported = '🪆';
+      const unsupported = '🫠';
 
       it('uses replacement character', () => {
         setEmojiConfig({ unicodeEmoji: false });
@@ -77,10 +77,10 @@ describe('util/emoji', () => {
       const y: string = makeEmoji('26A0');
 
       setEmojiConfig({ unicodeEmoji: true });
-      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
+      expect(stripEmojis(`foo ${x} bar`)).toBe(`foo ${y} bar`);
 
       setEmojiConfig({ unicodeEmoji: false });
-      expect(stripEmojis(`foo ${x} bar`)).toEqual(`foo ${y} bar`);
+      expect(stripEmojis(`foo ${x} bar`)).toBe(`foo ${y} bar`);
     });
   });
 });

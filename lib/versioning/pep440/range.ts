@@ -1,6 +1,6 @@
-import { gte, lt, lte, satisfies } from '@renovate/pep440';
-import { parse as parseRange } from '@renovate/pep440/lib/specifier';
-import { parse as parseVersion } from '@renovate/pep440/lib/version';
+import { gte, lt, lte, satisfies } from '@renovatebot/pep440';
+import { parse as parseRange } from '@renovatebot/pep440/lib/specifier.js';
+import { parse as parseVersion } from '@renovatebot/pep440/lib/version.js';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { NewValueConfig } from '../types';
@@ -10,8 +10,8 @@ function getFutureVersion(
   newVersion: string,
   step: number
 ): string {
-  const toRelease: number[] = parseVersion(newVersion).release;
-  const baseRelease: number[] = parseVersion(baseVersion).release;
+  const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
+  const baseRelease: number[] = parseVersion(baseVersion)?.release ?? [];
   let found = false;
   const futureRelease = baseRelease.map((basePart, index) => {
     if (found) {
@@ -41,7 +41,7 @@ export function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   // easy pin
   if (rangeStrategy === 'pin') {
     return '==' + newVersion;
@@ -167,8 +167,8 @@ export function isLessThanRange(input: string, range: string): boolean {
       .split(',')
       .map((x) =>
         x
-          .replace(regEx(/\s*/g), '') // TODO #12071
-          .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/)) // TODO #12071
+          .replace(regEx(/\s*/g), '')
+          .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/))
           .slice(1)
       )
       .map(([op, version]) => {

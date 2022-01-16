@@ -57,5 +57,5 @@ The configuration below overrides Renovate's default `docker` versioning for the
 
 ## Supported Versioning
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->

@@ -1,4 +1,4 @@
-import * as URL from 'url';
+import URL from 'url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
@@ -68,23 +68,27 @@ export function massageBody(
 ): string {
   let body = input || '';
   // Convert line returns
-  body = body.replace(regEx(/\r\n/g), '\n'); // TODO #12071
+  body = body.replace(regEx(/\r\n/g), '\n');
   // semantic-release cleanup
-  body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), ''); // TODO #12071
+  body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
-    regEx(`^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`),
+    regEx(
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`,
+      undefined,
+      false
+    ),
     ''
-  ); // TODO #12071
+  );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
     regEx(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
     '\n'
-  ); // TODO #12071
+  );
   // Reduce headings size
   body = body
-    .replace(regEx(/\n\s*####? /g), '\n##### ') // TODO #12071
-    .replace(regEx(/\n\s*## /g), '\n#### ') // TODO #12071
-    .replace(regEx(/\n\s*# /g), '\n### '); // TODO #12071
+    .replace(regEx(/\n\s*####? /g), '\n##### ')
+    .replace(regEx(/\n\s*## /g), '\n#### ')
+    .replace(regEx(/\n\s*# /g), '\n### ');
   // Trim whitespace
   return body.trim();
 }
@@ -249,13 +253,13 @@ export async function getReleaseNotesMd(
           const deParenthesizedSection = section.replace(
             regEx(/[[\]()]/g),
             ' '
-          ); // TODO #12071
+          );
           const [heading] = deParenthesizedSection.split('\n');
           const title = heading
-            .replace(regEx(/^\s*#*\s*/), '') // TODO #12071
+            .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
-          let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim(); // TODO #12071
+          let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
@@ -264,7 +268,7 @@ export async function getReleaseNotesMd(
               const url =
                 notesSourceUrl +
                 '#' +
-                title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), ''); // TODO #12071
+                title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), '');
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {

@@ -2,7 +2,7 @@ import {
   GitCommit,
   GitPullRequestMergeStrategy,
   GitRef,
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../logger';
 import * as azureApi from './azure-got-wrapper';
 import {

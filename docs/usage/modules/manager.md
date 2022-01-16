@@ -11,7 +11,7 @@ The goal of Renovate is to detect and maintain all third-party dependencies in y
 
 ## Supported Managers
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->
 
 ## Configuring Managers

@@ -72,6 +72,10 @@ const lexer = moo.states({
       push: 'characterRange',
       value: (_: string) => '[',
     },
+    trailingSlash: {
+      match: /\/$/,
+      value: (_: string) => '',
+    },
     char: {
       match: /[^*?\\[\n]/,
       value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
@@ -107,7 +111,9 @@ export function parseNoproxy(
   }
   lexer.reset(input);
   const noproxyPattern = [...lexer].map(({ value }) => value).join('');
-  const result = noproxyPattern ? regEx(`^(?:${noproxyPattern})$`) : null;
+  const result = noproxyPattern
+    ? regEx(`^(?:${noproxyPattern})(?:/.*)?$`)
+    : null;
   parsedNoproxy[input] = result;
   return result;
 }

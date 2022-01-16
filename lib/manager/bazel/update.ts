@@ -1,4 +1,4 @@
-import { fromStream } from 'hasha';
+import hasha from 'hasha';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
@@ -55,7 +55,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     return cachedResult;
   }
   try {
-    const hash = await fromStream(http.stream(url), {
+    const hash = await hasha.fromStream(http.stream(url), {
       algorithm: 'sha256',
     });
     const cacheMinutes = 3 * 24 * 60; // 3 days
