@@ -140,7 +140,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
 }
 
 function nullFor(token: Token): Token {
-  return token.prefix === PREFIX_DOT
+  return token.type === TYPE_NUMBER
     ? {
         prefix: token.prefix,
         type: TYPE_NUMBER,
