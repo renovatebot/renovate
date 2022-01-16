@@ -11,7 +11,7 @@ import type {
   HelmRepository,
 } from './types';
 
-function readManifest(content: string): FluxManifest {
+function readManifest(content: string): FluxManifest | null {
   const manifest: FluxManifest = { releases: [], repositories: [] };
   let resources: FluxResource[];
   try {

@@ -1,6 +1,4 @@
-import { extractAllPackageFiles, extractPackageFile } from './extract';
-
-export { extractAllPackageFiles, extractPackageFile };
+export { extractAllPackageFiles, extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: [],

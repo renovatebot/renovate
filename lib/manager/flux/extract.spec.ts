@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { SkipReason } from '../../types';
 import type { ExtractConfig } from '../types';
-import { extractAllPackageFiles, extractPackageFile } from './extract';
+import { extractAllPackageFiles, extractPackageFile } from '.';
 
 const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };
@@ -13,14 +13,19 @@ describe('manager/flux/extract', () => {
     GlobalConfig.set(adminConfig);
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   describe('extractPackageFile()', () => {
     it('extracts multiple resources', () => {
       const result = extractPackageFile(loadFixture('multidoc.yaml'));
-      expect(result).toMatchSnapshot();
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.7.0',
+            depName: 'external-dns',
+            registryUrls: ['https://kubernetes-sigs.github.io/external-dns/'],
+          },
+        ],
+      });
     });
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(loadFixture('release.yaml'));
@@ -174,8 +179,19 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1`
         'lib/manager/flux/__fixtures__/release.yaml',
         'lib/manager/flux/__fixtures__/source.yaml',
       ]);
-      expect(result).toMatchSnapshot();
-      expect(result).toHaveLength(1);
+      expect(result).toEqual([
+        {
+          datasource: 'helm',
+          deps: [
+            {
+              depName: 'sealed-secrets',
+              currentValue: '2.0.2',
+              registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
+            },
+          ],
+          packageFile: 'lib/manager/flux/__fixtures__/release.yaml',
+        },
+      ]);
     });
     it('ignores files that do not exist', async () => {
       const result = await extractAllPackageFiles(config, [
