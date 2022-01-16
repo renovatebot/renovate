@@ -4,6 +4,7 @@ import { GitlabPackagesDatasource } from '../datasource/gitlab-packages';
 import { GitlabReleasesDatasource } from '../datasource/gitlab-releases';
 import { id as GL_TAGS_DS } from '../datasource/gitlab-tags';
 import { id as POD_DS } from '../datasource/pod';
+import { id as GITLAB_CHANGELOG_ID } from '../workers/pr/changelog/gitlab';
 import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -18,6 +19,9 @@ describe('constants/platform', () => {
     ).toBeTrue();
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(GitlabPackagesDatasource.id)
+    ).toBeTrue();
+    expect(
+      GITLAB_API_USING_HOST_TYPES.includes(GITLAB_CHANGELOG_ID)
     ).toBeTrue();
     expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformId.Gitlab)).toBeTrue();
   });

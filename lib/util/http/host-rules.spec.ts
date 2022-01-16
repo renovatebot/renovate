@@ -154,15 +154,41 @@ describe('util/http/host-rules', () => {
   });
 
   it('fallback to gitlab', () => {
-    expect(applyHostRules(url, { ...options, hostType: 'gitlab-tags' }))
-      .toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
-          "authType": undefined,
-        },
-        "hostType": "gitlab-tags",
-        "token": "abc",
-      }
-    `);
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-tags' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-tags',
+      token: 'abc',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-releases' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-releases',
+      token: 'abc',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-packages' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-packages',
+      token: 'abc',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-changelog' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-changelog',
+      token: 'abc',
+    });
   });
 });
