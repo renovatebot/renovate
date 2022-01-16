@@ -22,7 +22,7 @@ import type {
  * See https://github.com/composer/composer/blob/750a92b4b7aecda0e5b2f9b963f1cb1421900675/src/Composer/Repository/ComposerRepository.php#L815
  */
 function transformRegUrl(url: string): string {
-  return url.replace(regEx(/(\/packages\.json)$/), ''); // TODO #12071
+  return url.replace(regEx(/(\/packages\.json)$/), '');
 }
 
 /**
@@ -159,7 +159,7 @@ export async function extractPackageFile(
               (item) => item.name === dep.depName
             );
             if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
-              dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), ''); // TODO #12071
+              dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), '');
             }
           }
           deps.push(dep);

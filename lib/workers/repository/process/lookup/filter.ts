@@ -1,4 +1,4 @@
-import * as semver from 'semver';
+import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import type { Release } from '../../../../datasource/types';
 import { logger } from '../../../../logger';

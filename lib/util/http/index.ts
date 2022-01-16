@@ -1,7 +1,9 @@
 import crypto from 'crypto';
+import type { IncomingHttpHeaders } from 'http';
 import merge from 'deepmerge';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
+import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
@@ -47,10 +49,14 @@ export interface InternalHttpOptions extends HttpOptions {
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
+export interface HttpHeaders extends IncomingHttpHeaders {
+  link?: string | undefined;
+}
+
 export interface HttpResponse<T = string> {
   statusCode: number;
   body: T;
-  headers: any;
+  headers: HttpHeaders;
   authorization?: boolean;
 }
 
@@ -69,18 +75,11 @@ function cloneResponse<T extends Buffer | string | any>(
 }
 
 function applyDefaultHeaders(options: Options): void {
-  let renovateVersion = 'unknown';
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    renovateVersion = require('../../../package.json').version;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error getting renovate version');
-  }
-
+  const renovateVersion = pkg.version;
   options.headers = {
     ...options.headers,
     'user-agent':
-      process.env.RENOVATE_USER_AGENT ||
+      process.env.RENOVATE_USER_AGENT ??
       `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
@@ -101,7 +100,7 @@ async function gotRoutine<T>(
   // Otherwise it doesn't typecheck.
   const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
   const duration =
-    resp.timings.phases.total || /* istanbul ignore next: can't be tested */ 0;
+    resp.timings.phases.total ?? /* istanbul ignore next: can't be tested */ 0;
 
   const httpRequests = memCache.get('http-requests') || [];
   httpRequests.push({ ...requestStats, duration });
@@ -113,14 +112,14 @@ async function gotRoutine<T>(
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   private options?: GotOptions;
 
-  constructor(private hostType: string, options?: HttpOptions) {
+  constructor(private hostType: string, options: HttpOptions = {}) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
   protected async request<T>(
     requestUrl: string | URL,
-    httpOptions?: InternalHttpOptions
-  ): Promise<HttpResponse<T> | null> {
+    httpOptions: InternalHttpOptions = {}
+  ): Promise<HttpResponse<T>> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
@@ -166,7 +165,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     // Cache GET requests unless useCache=false
     if (
-      ['get', 'head'].includes(options.method) &&
+      (options.method === 'get' || options.method === 'head') &&
       options.useCache !== false
     ) {
       resPromise = memCache.get(cacheKey);
