@@ -191,6 +191,7 @@ describe('manager/npm/post-update/yarn', () => {
       Fixtures.mock(
         {
           '.yarnrc': null,
+          'yarn.lock': 'package-lock-contents',
         },
         'some-dir'
       );
