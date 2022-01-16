@@ -70,7 +70,6 @@ export function mergeBodyTransformer(
 ): MergeRequestBody {
   const body: MergeRequestBody = {
     close_source_branch: true,
-    message: 'auto merged',
   };
 
   // The `auto` strategy will use the strategy configured inside Bitbucket.

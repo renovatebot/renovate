@@ -154,6 +154,39 @@ describe('manager/sbt/extract', () => {
         deps: [{ lookupName: 'org.example:bar_2.12', currentValue: '0.0.2' }],
       });
     });
+    it('extracts deps when scala version is defined with ThisBuild scope', () => {
+      const content = `
+        ThisBuild / scalaVersion := "2.12.10"
+        libraryDependencies += "org.example" %% "bar" % "0.0.2"
+      `;
+      expect(extractPackageFile(content)).toMatchSnapshot({
+        deps: [
+          {
+            lookupName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+          },
+          {
+            lookupName: 'org.example:bar_2.12',
+            currentValue: '0.0.2',
+          },
+        ],
+      });
+    });
+    it('extracts deps when scala version is defined in a variable with ThisBuild scope', () => {
+      const content = `
+        val ScalaVersion = "2.12.10"
+        ThisBuild / scalaVersion := ScalaVersion
+        libraryDependencies += "org.example" %% "bar" % "0.0.2"
+      `;
+      expect(extractPackageFile(content)).toMatchSnapshot({
+        deps: [
+          {
+            lookupName: 'org.example:bar_2.12',
+            currentValue: '0.0.2',
+          },
+        ],
+      });
+    });
     it('extract deps from native scala file with private variables', () => {
       expect(
         extractPackageFile(sbtPrivateVariableDependencyFile)

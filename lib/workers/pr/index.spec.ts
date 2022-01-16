@@ -701,4 +701,52 @@ describe('workers/pr/index', () => {
       });
     });
   });
+
+  describe('prepareLabels(config)', () => {
+    it('returns empty array if no labels are configured', () => {
+      const result = prWorker.prepareLabels({});
+      expect(result).toBeArrayOfSize(0);
+    });
+
+    it('only labels', () => {
+      const result = prWorker.prepareLabels({ labels: ['labelA', 'labelB'] });
+      expect(result).toBeArrayOfSize(2);
+      expect(result).toEqual(['labelA', 'labelB']);
+    });
+
+    it('only addLabels', () => {
+      const result = prWorker.prepareLabels({
+        addLabels: ['labelA', 'labelB'],
+      });
+      expect(result).toBeArrayOfSize(2);
+      expect(result).toEqual(['labelA', 'labelB']);
+    });
+
+    it('merge labels and addLabels', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['labelA', 'labelB'],
+        addLabels: ['labelC'],
+      });
+      expect(result).toBeArrayOfSize(3);
+      expect(result).toEqual(['labelA', 'labelB', 'labelC']);
+    });
+
+    it('deduplicate merged labels and addLabels', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['labelA', 'labelB'],
+        addLabels: ['labelB', 'labelC'],
+      });
+      expect(result).toBeArrayOfSize(3);
+      expect(result).toEqual(['labelA', 'labelB', 'labelC']);
+    });
+
+    it('template labels', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['datasource-{{{datasource}}}'],
+        datasource: 'npm',
+      });
+      expect(result).toBeArrayOfSize(1);
+      expect(result).toEqual(['datasource-npm']);
+    });
+  });
 });
