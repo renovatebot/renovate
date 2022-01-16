@@ -19,4 +19,5 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-releases',
   'gitlab-tags',
   'gitlab-packages',
+  'gitlab-changelog',
 ];
