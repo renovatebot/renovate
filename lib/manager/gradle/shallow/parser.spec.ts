@@ -74,6 +74,9 @@ describe('manager/gradle/shallow/parser', () => {
         ${'z = "1.2.3"'}    | ${'id "x.y" version "$z"'}          | ${{ depName: 'x.y', lookupName: 'x.y:x.y.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "x.y" version "$z"'}          | ${{ depName: 'x.y', skipReason: SkipReason.UnknownVersion, currentValue: 'z' }}
         ${''}               | ${'id "x.y" version "x${y}z"'}      | ${{ depName: 'x.y', skipReason: SkipReason.UnknownVersion }}
+        ${'z = "1.2.3"'}    | ${'id("x.y") version "$z"'}         | ${{ depName: 'x.y', lookupName: 'x.y:x.y.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'id("x.y") version "$z"'}         | ${{ depName: 'x.y', skipReason: SkipReason.UnknownVersion, currentValue: 'z' }}
+        ${''}               | ${'id("x.y") version "x${y}z"'}     | ${{ depName: 'x.y', skipReason: SkipReason.UnknownVersion }}
       `('$input', ({ def, input, output }) => {
         const { deps } = parseGradle([def, input].join('\n'));
         expect(deps).toMatchObject([output].filter(Boolean));
