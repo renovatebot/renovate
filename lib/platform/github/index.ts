@@ -90,12 +90,13 @@ export async function detectGhe(token: string): Promise<void> {
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
+    const gheHeaders: Record<string, string | string[]> =
+      gheQueryRes?.headers || {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
       ) ?? [];
-    platformConfig.gheVersion = semver.valid(gheVersion) ?? null;
+    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
   }
 }
 
@@ -108,6 +109,8 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
+
+  platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
@@ -148,11 +151,21 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   try {
-    const res = await githubApi.getJson<{ full_name: string }[]>(
-      'user/repos?per_page=100',
-      { paginate: 'all' }
-    );
-    return res.body.map((repo) => repo.full_name);
+    if (platformConfig.isGHApp) {
+      const res = await githubApi.getJson<{
+        repositories: { full_name: string }[];
+      }>(`installation/repositories?per_page=100`, {
+        paginationField: 'repositories',
+        paginate: 'all',
+      });
+      return res.body.repositories.map((repo) => repo.full_name);
+    } else {
+      const res = await githubApi.getJson<{ full_name: string }[]>(
+        `user/repos?per_page=100`,
+        { paginate: 'all' }
+      );
+      return res.body.map((repo) => repo.full_name);
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;

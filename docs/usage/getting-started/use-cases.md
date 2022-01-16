@@ -111,7 +111,7 @@ Renovate allows users to define time ranges during which to create updates using
 
 ### On-demand updates
 
-Renovate's "Dependency Dashboard" capability is supported on platforms which support dynamic Markdown checkboxes (GitHub, GitLab, and Gitea).
+Renovate's "Dependency Dashboard" capability can be used on platforms which support dynamic Markdown checkboxes (GitHub, GitLab, and Gitea).
 When enabled, an issue titled "Dependency Dashboard" is created which lists all updates which are pending, in progress, or were previously closed ignored.
 
 Importantly, it also enables the concept of "Dependency Dashboard Approval", meaning that configured PRs won't be raised automatically and will instead only be created once the corresponding checkbox is clicked on the dashboard.
