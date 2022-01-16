@@ -174,7 +174,6 @@ Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
 List of repositories to run on.
-Auto discovery does not work with a GitHub App.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
@@ -207,7 +206,7 @@ Don't forget to configure `platform=bitbucket-server` somewhere in config.
 
 If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
-### Azure DevOps
+#### Azure DevOps
 
 First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.

@@ -737,6 +737,9 @@ export async function commitFiles(
         if (await isDirectory(upath.join(localDir, fileName))) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
+        } else if (file.contents === null) {
+          // istanbul ignore next
+          continue;
         } else {
           let contents: Buffer;
           // istanbul ignore else

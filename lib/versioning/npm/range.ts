@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../logger';
@@ -60,7 +61,7 @@ export function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return newVersion;
   }
@@ -110,9 +111,8 @@ export function getNewValue({
   const toVersionMajor = major(newVersion);
   const toVersionMinor = minor(newVersion);
   const toVersionPatch = patch(newVersion);
-  const suffix = prerelease(newVersion)
-    ? '-' + String(prerelease(newVersion)[0])
-    : '';
+  const toNewVersion = prerelease(newVersion);
+  const suffix = toNewVersion ? `-${toNewVersion[0]}` : '';
   // Simple range
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
@@ -166,26 +166,30 @@ export function getNewValue({
         return currentValue;
       }
     } else {
-      const newRange = semverUtils.parseRange(currentValue);
-      const versions = newRange.map((x) => {
-        const subRange = x.semver;
-        const bumpedSubRange = getNewValue({
-          currentValue: subRange,
-          rangeStrategy: 'bump',
-          currentVersion,
-          newVersion,
-        });
-        if (satisfies(newVersion, bumpedSubRange)) {
-          return bumpedSubRange;
-        }
-        return getNewValue({
-          currentValue: subRange,
-          rangeStrategy: 'replace',
-          currentVersion,
-          newVersion,
-        });
-      });
-      return versions.filter((x) => x !== null && x !== '').join(' ');
+      return semverUtils
+        .parseRange(currentValue)
+        .map((x) => x.semver)
+        .filter(is.string)
+        .map((subRange) => {
+          const bumpedSubRange = getNewValue({
+            currentValue: subRange,
+            rangeStrategy: 'bump',
+            currentVersion,
+            newVersion,
+          });
+          if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
+            return bumpedSubRange;
+          }
+
+          return getNewValue({
+            currentValue: subRange,
+            rangeStrategy: 'replace',
+            currentVersion,
+            newVersion,
+          });
+        })
+        .filter((x) => x !== null && x !== '')
+        .join(' ');
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue

@@ -80,6 +80,7 @@ Renovate will search repositories for all `pom.xml` files and processes them ind
 ## Custom registry support, and authentication
 
 Unless using `deepExtract`, Renovate does not make use of authentication credentials available to Gradle.
+Note: the `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
 
 The manager for Gradle makes use of the `maven` datasource.
 Renovate can be configured to access additional repositories and access repositories authenticated.
