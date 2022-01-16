@@ -14,7 +14,6 @@ You need the following dependencies for local development:
 - Node.js `>=14.15.4`
 - Yarn `^1.22.5`
 - C++ compiler
-- Python `^3.9`
 - Java between `8` and `12`
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
@@ -31,7 +30,7 @@ curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
-sudo apt-get install -y git python-minimal build-essential nodejs yarn default-jre-headless
+sudo apt-get install -y git build-essential nodejs yarn default-jre-headless
 ```
 
 You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
@@ -43,7 +42,7 @@ If you already installed a component, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
-- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`
+- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
 - Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
 - Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
 
@@ -53,8 +52,6 @@ If you already installed a component, skip the corresponding step.
   PS C:\Windows\system32> git --version
   PS C:\Windows\system32> node --version
   PS C:\Windows\system32> yarn --version
-  PS C:\Windows\system32> python --version
-  PS C:\Windows\system32> python -c "from unittest import mock; print(mock.__version__)"
   PS C:\Windows\system32> java -version
   ```
 
@@ -122,6 +119,8 @@ If this is working then in future you can create other test repos to verify your
 You can run `yarn test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
 `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
+
+Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
 ### Jest
 

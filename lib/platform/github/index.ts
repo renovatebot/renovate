@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
-import { valid as semverValid } from 'semver';
+import semver from 'semver';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -89,12 +89,13 @@ export async function detectGhe(token: string): Promise<void> {
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders: Record<string, string> = gheQueryRes?.headers || {};
+    const gheHeaders: Record<string, string | string[]> =
+      gheQueryRes?.headers || {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
       ) ?? [];
-    platformConfig.gheVersion = semverValid(gheVersion) ?? null;
+    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
   }
 }
 
@@ -107,6 +108,8 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
+
+  platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
@@ -147,11 +150,21 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   try {
-    const res = await githubApi.getJson<{ full_name: string }[]>(
-      'user/repos?per_page=100',
-      { paginate: 'all' }
-    );
-    return res.body.map((repo) => repo.full_name);
+    if (platformConfig.isGHApp) {
+      const res = await githubApi.getJson<{
+        repositories: { full_name: string }[];
+      }>(`installation/repositories?per_page=100`, {
+        paginationField: 'repositories',
+        paginate: 'all',
+      });
+      return res.body.repositories.map((repo) => repo.full_name);
+    } else {
+      const res = await githubApi.getJson<{ full_name: string }[]>(
+        `user/repos?per_page=100`,
+        { paginate: 'all' }
+      );
+      return res.body.map((repo) => repo.full_name);
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
@@ -173,9 +186,14 @@ async function getBranchProtection(
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
-  const url = `repos/${repo}/contents/${fileName}`;
+  const repo = repoName ?? config.repository;
+  let url = `repos/${repo}/contents/${fileName}`;
+  if (branchOrTag) {
+    url += `?ref=` + branchOrTag;
+  }
   const res = await githubApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -184,9 +202,10 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
@@ -405,23 +424,22 @@ export async function initRepo({
       );
       // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
       // with the base commit from the parent repository
+      const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
+      const sha = repo.defaultBranchRef.target.oid;
       try {
         logger.debug(
-          'Updating forked repository default sha to match upstream'
+          `Updating forked repository default sha ${sha} to match upstream`
         );
-        await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
-          {
-            body: {
-              sha: repo.defaultBranchRef.target.oid,
-              force: true,
-            },
-            token: forkToken || opts.token,
-          }
-        );
+        await githubApi.patchJson(url, {
+          body: {
+            sha,
+            force: true,
+          },
+          token: forkToken || opts.token,
+        });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
-          { err: err.err || err },
+          { url, sha, err: err.err || err },
           'Error updating fork from upstream - cannot continue'
         );
         if (err instanceof ExternalHostError) {
@@ -1239,7 +1257,7 @@ export async function addReviewers(
   const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
     .filter((e) => e.startsWith('team:'))
-    .map((e) => e.replace(regEx(/^team:/), '')); // TODO #12071
+    .map((e) => e.replace(regEx(/^team:/), ''));
   try {
     await githubApi.postJson(
       `repos/${

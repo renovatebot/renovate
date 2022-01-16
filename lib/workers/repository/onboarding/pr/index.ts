@@ -1,11 +1,15 @@
-import { getGlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../manager/types';
 import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch, isBranchModified } from '../../../../util/git';
-import { addAssigneesReviewers, getPlatformPrOptions } from '../../../pr';
+import {
+  addAssigneesReviewers,
+  getPlatformPrOptions,
+  prepareLabels,
+} from '../../../pr';
 import type { BranchConfig } from '../../../types';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
@@ -66,7 +70,7 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';
-  if (getGlobalConfig().dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch}`);
   } else if (await isBranchModified(config.onboardingBranch)) {
     configDesc = emojify(
@@ -114,7 +118,7 @@ If you need any further assistance then you can also [request help here](${confi
       return;
     }
     // PR must need updating
-    if (getGlobalConfig().dryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would update onboarding PR');
     } else {
       await platform.updatePr({
@@ -127,9 +131,9 @@ If you need any further assistance then you can also [request help here](${confi
     return;
   }
   logger.debug('Creating onboarding PR');
-  const labels: string[] = config.addLabels ?? [];
+  const labels: string[] = prepareLabels(config);
   try {
-    if (getGlobalConfig().dryRun) {
+    if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
       const pr = await platform.createPr({

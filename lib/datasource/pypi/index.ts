@@ -73,6 +73,10 @@ export class PypiDatasource extends Datasource {
   }
 
   private static normalizeName(input: string): string {
+    return input.toLowerCase().replace(regEx(/_/g), '-');
+  }
+
+  private static normalizeNameForUrlLookup(input: string): string {
     return input.toLowerCase().replace(regEx(/(_|\.|-)+/g), '-');
   }
 
@@ -80,7 +84,10 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string
   ): Promise<ReleaseResult | null> {
-    const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
+    const lookupUrl = url.resolve(
+      hostUrl,
+      `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`
+    );
     const dependency: ReleaseResult = { releases: null };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const rep = await this.http.getJson<PypiJSON>(lookupUrl);
@@ -164,27 +171,25 @@ export class PypiDatasource extends Datasource {
     text: string,
     packageName: string
   ): string | null {
-    const srcPrefixes = [
-      `${packageName}-`,
-      `${packageName.replace(regEx(/-/g), '_')}-`,
-    ];
-    for (const prefix of srcPrefixes) {
-      const suffix = '.tar.gz';
-      if (text.startsWith(prefix) && text.endsWith(suffix)) {
-        return text.replace(prefix, '').replace(regEx(/\.tar\.gz$/), ''); // TODO #12071
-      }
+    // source packages
+    const srcText = PypiDatasource.normalizeName(text);
+    const srcPrefix = `${packageName}-`;
+    const srcSuffix = '.tar.gz';
+    if (srcText.startsWith(srcPrefix) && srcText.endsWith(srcSuffix)) {
+      return srcText.replace(srcPrefix, '').replace(regEx(/\.tar\.gz$/), '');
     }
 
     // pep-0427 wheel packages
     //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
+    const wheelText = text.toLowerCase();
     const wheelPrefix = packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
     const wheelSuffix = '.whl';
     if (
-      text.startsWith(wheelPrefix) &&
-      text.endsWith(wheelSuffix) &&
-      text.split('-').length > 2
+      wheelText.startsWith(wheelPrefix) &&
+      wheelText.endsWith(wheelSuffix) &&
+      wheelText.split('-').length > 2
     ) {
-      return text.split('-')[1];
+      return wheelText.split('-')[1];
     }
 
     return null;
@@ -210,7 +215,10 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string
   ): Promise<ReleaseResult | null> {
-    const lookupUrl = url.resolve(hostUrl, ensureTrailingSlash(packageName));
+    const lookupUrl = url.resolve(
+      hostUrl,
+      ensureTrailingSlash(PypiDatasource.normalizeNameForUrlLookup(packageName))
+    );
     const dependency: ReleaseResult = { releases: null };
     const response = await this.http.get(lookupUrl);
     const dep = response?.body;

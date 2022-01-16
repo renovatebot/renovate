@@ -1,7 +1,7 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
-import * as upath from 'upath';
-import { setGlobalConfig } from '../../../config/global';
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import { exec } from '../../../util/exec';
 import { extraEnv } from '../../gradle-wrapper/utils';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
@@ -22,7 +22,7 @@ describe('manager/gradle/deep/gradle-updates-report', () => {
 
         beforeEach(async () => {
           workingDir = await tmp.dir({ unsafeCleanup: true });
-          setGlobalConfig({ localDir: workingDir.path });
+          GlobalConfig.set({ localDir: workingDir.path });
         });
 
         afterEach(() => workingDir.cleanup());

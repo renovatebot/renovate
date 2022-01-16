@@ -1,14 +1,10 @@
 import * as datasourceMaven from './maven';
-import { addMetaData } from './metadata';
+import { addMetaData, massageGithubUrl } from './metadata';
 import * as datasourceNpm from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
 
 describe('datasource/metadata', () => {
-  it('Should do nothing if dep is not specified', () => {
-    expect(addMetaData()).toBeUndefined();
-  });
-
   it('Should handle manualChangelogUrls', () => {
     const dep: ReleaseResult = {
       releases: [
@@ -73,6 +69,28 @@ describe('datasource/metadata', () => {
     addMetaData(dep, datasource, lookupName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://github.com/carltongibson/django-filter',
+    });
+  });
+
+  it('Should massage github sourceUrls', () => {
+    const dep: ReleaseResult = {
+      sourceUrl: 'https://some.github.com/repo',
+      releases: [
+        { version: '2.0.0', releaseTimestamp: '2018-07-13T10:14:17.000Z' },
+        {
+          version: '2.0.0.dev1',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+        },
+        { version: '2.1.0', releaseTimestamp: '2019-01-20T19:59:28.000Z' },
+        { version: '2.2.0', releaseTimestamp: '2019-07-16T18:29:00.000Z' },
+      ],
+    };
+    const datasource = PypiDatasource.id;
+    const lookupName = 'django-filter';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://github.com/some/repo',
     });
   });
 
@@ -204,5 +222,31 @@ describe('datasource/metadata', () => {
       { releaseTimestamp: '2000-01-02T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-03T12:34:56.000Z' },
     ]);
+  });
+
+  it('Should massage github git@ url to valid https url', () => {
+    expect(massageGithubUrl('git@example.com:foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
+  });
+  it('Should massage github http url to valid https url', () => {
+    expect(massageGithubUrl('http://example.com/foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
+  });
+  it('Should massage github http and git url to valid https url', () => {
+    expect(massageGithubUrl('http+git://example.com/foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
+  });
+  it('Should massage github ssh git@ url to valid https url', () => {
+    expect(massageGithubUrl('ssh://git@example.com/foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
+  });
+  it('Should massage github git url to valid https url', () => {
+    expect(massageGithubUrl('git://example.com/foo/bar')).toMatch(
+      'https://example.com/foo/bar'
+    );
   });
 });

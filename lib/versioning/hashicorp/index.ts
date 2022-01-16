@@ -18,8 +18,8 @@ function hashicorp2npm(input: string): string {
 const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(hashicorp2npm(version), hashicorp2npm(range));
 
-export const isValid = (input: string): string | boolean =>
-  input && npm.isValid(hashicorp2npm(input));
+export const isValid = (input: string): boolean =>
+  !!input && npm.isValid(hashicorp2npm(input));
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(hashicorp2npm(version), hashicorp2npm(range));
@@ -49,14 +49,14 @@ function getNewValue({
         replaceValue = `$<prefix>${npm.getMinor(newVersion)}$<suffix>`;
       }
       return currentValue.replace(
-        /(?<prefix>~>\s*0\.)\d+(?<suffix>.*)$/, // TODO #12070
+        regEx(`(?<prefix>~>\\s*0\\.)\\d+(?<suffix>.*)$`),
         replaceValue
       );
     }
     // handle special ~> 1.2 case
     if (regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
       return currentValue.replace(
-        /(?<prefix>~>\s*)\d+\.\d+$/, // TODO #12070
+        regEx(`(?<prefix>~>\\s*)\\d+\\.\\d+$`),
         `$<prefix>${npm.getMajor(newVersion)}.0`
       );
     }

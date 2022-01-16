@@ -1,9 +1,9 @@
 import stream from 'stream';
 import util from 'util';
 import is from '@sindresorhus/is';
-import * as fs from 'fs-extra';
-import { isAbsolute, join, parse } from 'upath';
-import { getGlobalConfig } from '../../config/global';
+import fs from 'fs-extra';
+import upath from 'upath';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 
 export * from './proxies';
@@ -11,7 +11,7 @@ export * from './proxies';
 export const pipeline = util.promisify(stream.pipeline);
 
 export function getSubDirectory(fileName: string): string {
-  return parse(fileName).dir;
+  return upath.parse(fileName).dir;
 }
 
 export function getSiblingFileName(
@@ -19,7 +19,7 @@ export function getSiblingFileName(
   otherFileName: string
 ): string {
   const subDirectory = getSubDirectory(existingFileNameWithPath);
-  return join(subDirectory, otherFileName);
+  return upath.join(subDirectory, otherFileName);
 }
 
 export async function readLocalFile(fileName: string): Promise<Buffer>;
@@ -30,11 +30,13 @@ export async function readLocalFile(
 export async function readLocalFile(
   fileName: string,
   encoding?: string
-): Promise<string | Buffer> {
-  const { localDir } = getGlobalConfig();
-  const localFileName = join(localDir, fileName);
+): Promise<string | Buffer | null> {
+  const { localDir } = GlobalConfig.get();
+  const localFileName = upath.join(localDir, fileName);
   try {
-    const fileContent = await fs.readFile(localFileName, encoding);
+    const fileContent = encoding
+      ? await fs.readFile(localFileName, encoding)
+      : await fs.readFile(localFileName);
     return fileContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');
@@ -46,15 +48,15 @@ export async function writeLocalFile(
   fileName: string,
   fileContent: string
 ): Promise<void> {
-  const { localDir } = getGlobalConfig();
-  const localFileName = join(localDir, fileName);
+  const { localDir } = GlobalConfig.get();
+  const localFileName = upath.join(localDir, fileName);
   await fs.outputFile(localFileName, fileContent);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   if (localDir) {
-    const localFileName = join(localDir, fileName);
+    const localFileName = upath.join(localDir, fileName);
     await fs.remove(localFileName);
   }
 }
@@ -64,8 +66,8 @@ export async function renameLocalFile(
   fromFile: string,
   toFile: string
 ): Promise<void> {
-  const { localDir } = getGlobalConfig();
-  await fs.move(join(localDir, fromFile), join(localDir, toFile));
+  const { localDir } = GlobalConfig.get();
+  await fs.move(upath.join(localDir, fromFile), upath.join(localDir, toFile));
 }
 
 // istanbul ignore next
@@ -77,13 +79,16 @@ export async function ensureDir(dirName: string): Promise<void> {
 
 // istanbul ignore next
 export async function ensureLocalDir(dirName: string): Promise<void> {
-  const { localDir } = getGlobalConfig();
-  const localDirName = join(localDir, dirName);
+  const { localDir } = GlobalConfig.get();
+  const localDirName = upath.join(localDir, dirName);
   await fs.ensureDir(localDirName);
 }
 
 export async function ensureCacheDir(name: string): Promise<string> {
-  const cacheDirName = join(getGlobalConfig().cacheDir, `others/${name}`);
+  const cacheDirName = upath.join(
+    GlobalConfig.get('cacheDir'),
+    `others/${name}`
+  );
   await fs.ensureDir(cacheDirName);
   return cacheDirName;
 }
@@ -94,15 +99,15 @@ export async function ensureCacheDir(name: string): Promise<string> {
  * without risk of that information leaking to other repositories/users.
  */
 export function privateCacheDir(): string {
-  const { cacheDir } = getGlobalConfig();
-  return join(cacheDir, '__renovate-private-cache');
+  const { cacheDir } = GlobalConfig.get();
+  return upath.join(cacheDir, '__renovate-private-cache');
 }
 
 export function localPathExists(pathName: string): Promise<boolean> {
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   // Works for both files as well as directories
   return fs
-    .stat(join(localDir, pathName))
+    .stat(upath.join(localDir, pathName))
     .then((s) => !!s)
     .catch(() => false);
 }
@@ -117,17 +122,17 @@ export async function findLocalSiblingOrParent(
   existingFileNameWithPath: string,
   otherFileName: string
 ): Promise<string | null> {
-  if (isAbsolute(existingFileNameWithPath)) {
+  if (upath.isAbsolute(existingFileNameWithPath)) {
     return null;
   }
-  if (isAbsolute(otherFileName)) {
+  if (upath.isAbsolute(otherFileName)) {
     return null;
   }
 
   let current = existingFileNameWithPath;
   while (current !== '') {
     current = getSubDirectory(current);
-    const candidate = join(current, otherFileName);
+    const candidate = upath.join(current, otherFileName);
     if (await localPathExists(candidate)) {
       return candidate;
     }
@@ -140,8 +145,8 @@ export async function findLocalSiblingOrParent(
  * Get files by name from directory
  */
 export async function readLocalDirectory(path: string): Promise<string[]> {
-  const { localDir } = getGlobalConfig();
-  const localPath = join(localDir, path);
+  const { localDir } = GlobalConfig.get();
+  const localPath = upath.join(localDir, path);
   const fileList = await fs.readdir(localPath);
   return fileList;
 }

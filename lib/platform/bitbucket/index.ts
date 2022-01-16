@@ -48,7 +48,13 @@ let config: utils.Config = {} as any;
 
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
+const pathSeparator = '/';
+
 let renovateUserUuid: string;
+
+const inactiveReviewersMessage = 'reviewers: Malformed reviewers list';
+const notMemberReviewersMessage =
+  'is not a member of this workspace and cannot be added to this pull request';
 
 export async function initPlatform({
   endpoint,
@@ -110,20 +116,33 @@ export async function getRepos(): Promise<string[]> {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   // See: https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/src/%7Bcommit%7D/%7Bpath%7D
+  const repo = repoName ?? config.repository;
   const path = fileName;
-  const url = `/2.0/repositories/${repo}/src/HEAD/${path}`;
+
+  let finalBranchOrTag = branchOrTag;
+  if (branchOrTag?.includes(pathSeparator)) {
+    // Branch name contans slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
+    finalBranchOrTag = await getBranchCommit(branchOrTag);
+  }
+
+  const url =
+    `/2.0/repositories/${repo}/src/` +
+    (finalBranchOrTag || `HEAD`) +
+    `/${path}`;
   const res = await bitbucketHttp.get(url);
   return res.body;
 }
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   if (fileName.endsWith('.json5')) {
     return JSON5.parse(raw);
   }
@@ -736,26 +755,56 @@ export async function updatePr({
   } catch (err) {
     if (
       err.statusCode === 400 &&
-      err.body?.error?.message.includes('reviewers: Malformed reviewers list')
+      [inactiveReviewersMessage, notMemberReviewersMessage].some((m) =>
+        err.body?.error?.message.includes(m)
+      )
     ) {
-      logger.warn(
-        { err },
-        'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
-      );
+      const sanitizedReviewers: PrReviewer[] = [];
 
       // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
-      const activeReviewers: PrReviewer[] = [];
+      if (err.body?.error?.message.includes(inactiveReviewersMessage)) {
+        logger.warn(
+          { err },
+          'PR contains inactive reviewer accounts.  Will try setting only active reviewers'
+        );
 
-      // Validate that each previous PR reviewer account is still active
-      for (const reviewer of pr.reviewers) {
-        const reviewerUser = (
-          await bitbucketHttp.getJson<UserResponse>(
-            `/2.0/users/${reviewer.account_id}`
-          )
-        ).body;
+        // Validate that each previous PR reviewer account is still active
+        for (const reviewer of pr.reviewers) {
+          const reviewerUser = (
+            await bitbucketHttp.getJson<UserResponse>(
+              `/2.0/users/${reviewer.account_id}`
+            )
+          ).body;
 
-        if (reviewerUser.account_status === 'active') {
-          activeReviewers.push(reviewer);
+          if (reviewerUser.account_status === 'active') {
+            sanitizedReviewers.push(reviewer);
+          }
+        }
+      }
+
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
+      if (err.body?.error?.message.includes(notMemberReviewersMessage)) {
+        logger.warn(
+          { err },
+          'PR contains reviewer accounts which are no longer member of this workspace.  Will try setting only member reviewers'
+        );
+
+        const workspace = config.repository.split('/')[0];
+
+        // Validate that each previous PR reviewer account is still a member of this workspace
+        for (const reviewer of pr.reviewers) {
+          try {
+            await bitbucketHttp.head(
+              `/2.0/workspaces/${workspace}/members/${reviewer.account_id}`
+            );
+
+            sanitizedReviewers.push(reviewer);
+          } catch (err) {
+            // HTTP 404: User cannot be found, or the user is not a member of this workspace.
+            if (err.response?.statusCode !== 404) {
+              throw err;
+            }
+          }
         }
       }
 
@@ -765,7 +814,7 @@ export async function updatePr({
           body: {
             title,
             description: sanitize(description),
-            reviewers: activeReviewers,
+            reviewers: sanitizedReviewers,
           },
         }
       );
@@ -803,6 +852,8 @@ export async function mergePr({
     );
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, `PR merge error`);
+    logger.info({ pr: prNo }, 'PR automerge failed');
     return false;
   }
   return true;

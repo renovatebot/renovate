@@ -24,7 +24,7 @@ const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 const getMajor = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version.replace(regEx(/^v/i), ''));
-    const majorToken = tokens[0];
+    const majorToken = tokens?.[0];
     if (majorToken && majorToken.type === TokenType.Number) {
       return +majorToken.val;
     }
@@ -87,7 +87,7 @@ const unstable = new Set([
   'snapshot',
 ]);
 
-const isStable = (version: string): boolean | null => {
+const isStable = (version: string): boolean => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     for (const token of tokens) {
@@ -100,7 +100,7 @@ const isStable = (version: string): boolean | null => {
     }
     return true;
   }
-  return null;
+  return false;
 };
 
 const matches = (a: string, b: string): boolean => {

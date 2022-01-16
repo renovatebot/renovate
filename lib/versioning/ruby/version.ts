@@ -2,7 +2,7 @@ import { eq, major, minor, patch, prerelease } from '@renovatebot/ruby-semver';
 import {
   SegmentElement,
   create,
-} from '@renovatebot/ruby-semver/dist/ruby/version';
+} from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { regEx } from '../../util/regex';
 
 interface RubyVersion {
@@ -74,13 +74,13 @@ const increment = (from: string, to: string): string => {
 
   const isStable = (x: string): boolean => regEx(/^[0-9.-/]+$/).test(x);
   if (major(from) !== major(adapted)) {
-    nextVersion = [incrementMajor(maj, min, ptch, pre || []), 0, 0].join('.');
+    nextVersion = [incrementMajor(maj, min, ptch, pre ?? []), 0, 0].join('.');
   } else if (minor(from) !== minor(adapted)) {
-    nextVersion = [maj, incrementMinor(min, ptch, pre || []), 0].join('.');
+    nextVersion = [maj, incrementMinor(min, ptch, pre ?? []), 0].join('.');
   } else if (patch(from) !== patch(adapted)) {
-    nextVersion = [maj, min, incrementPatch(ptch, pre || [])].join('.');
+    nextVersion = [maj, min, incrementPatch(ptch, pre ?? [])].join('.');
   } else if (isStable(from) && isStable(adapted)) {
-    nextVersion = [maj, min, incrementPatch(ptch, pre || [])].join('.');
+    nextVersion = [maj, min, incrementPatch(ptch, pre ?? [])].join('.');
   } else {
     nextVersion = [maj, min, ptch].join('.');
   }

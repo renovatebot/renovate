@@ -938,6 +938,95 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket/index getJsonFile() returns file content from branch or tag 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/dev/file.json",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index getJsonFile() returns file content from branch with a slash in its name 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/refs/branches/feat/123-test",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/src/1234567890/file.json",
+  },
+]
+`;
+
+exports[`platform/bitbucket/index getJsonFile() returns file content from given repo 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/different/repo/src/HEAD/file.json",
+  },
+]
+`;
+
 exports[`platform/bitbucket/index getJsonFile() returns file content in json5 format 1`] = `
 Array [
   Object {
@@ -1312,13 +1401,12 @@ Array [
   Object {
     "body": Object {
       "close_source_branch": true,
-      "message": "auto merged",
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
-      "content-length": "52",
+      "content-length": "28",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1346,13 +1434,12 @@ Array [
     "body": Object {
       "close_source_branch": true,
       "merge_strategy": "fast_forward",
-      "message": "auto merged",
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
-      "content-length": "84",
+      "content-length": "60",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1380,13 +1467,12 @@ Array [
     "body": Object {
       "close_source_branch": true,
       "merge_strategy": "merge_commit",
-      "message": "auto merged",
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
-      "content-length": "84",
+      "content-length": "60",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1413,13 +1499,12 @@ Array [
   Object {
     "body": Object {
       "close_source_branch": true,
-      "message": "auto merged",
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
-      "content-length": "52",
+      "content-length": "28",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -1447,13 +1532,12 @@ Array [
     "body": Object {
       "close_source_branch": true,
       "merge_strategy": "squash",
-      "message": "auto merged",
     },
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
-      "content-length": "78",
+      "content-length": "54",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

@@ -1,16 +1,15 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import Git, {
-  DiffResult as DiffResult_,
+import type {
   Options,
-  ResetMode,
   SimpleGit,
-  StatusResult as StatusResult_,
   TaskOptions,
+  ResetMode as _ResetMode,
 } from 'simple-git';
-import { join } from 'upath';
+import * as simpleGit from 'simple-git';
+import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
@@ -22,44 +21,26 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { GitOptions, GitProtocol } from '../../types/git';
+import type { GitProtocol } from '../../types/git';
+import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { GitNoVerifyOption, getNoVerify, simpleGitConfig } from './config';
+import { getNoVerify, simpleGitConfig } from './config';
 import { configSigningKey, writePrivateKey } from './private-key';
+import type {
+  CommitFilesConfig,
+  CommitSha,
+  LocalConfig,
+  StatusResult,
+  StorageConfig,
+} from './types';
 
-export { GitNoVerifyOption, setNoVerify } from './config';
+export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
 
-declare module 'fs-extra' {
-  export function exists(pathLike: string): Promise<boolean>;
-}
-
-export type StatusResult = StatusResult_;
-
-export type DiffResult = DiffResult_;
-
-export type CommitSha = string;
-
-interface StorageConfig {
-  currentBranch?: string;
-  url: string;
-  extraCloneOpts?: GitOptions;
-  cloneSubmodules?: boolean;
-  fullClone?: boolean;
-}
-
-interface LocalConfig extends StorageConfig {
-  additionalBranches: string[];
-  currentBranch: string;
-  currentBranchSha: string;
-  branchCommits: Record<string, CommitSha>;
-  branchIsModified: Record<string, boolean>;
-  ignoredAuthors: string[];
-  gitAuthorName?: string;
-  gitAuthorEmail?: string;
-}
+// TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
+const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
@@ -109,6 +90,11 @@ function checkForPlatformFailure(err: Error): void {
       message:
         'You need the Git `GenericContribute` permission to perform this action',
     },
+    {
+      error: 'matches more than one',
+      message:
+        "Renovate cannot push branches if there are tags with names the same as Renovate's branches. Please remove conflicting tag names or change Renovate's branchPrefix to avoid conflicts.",
+    },
   ];
   for (const { error, message } of configErrorStrings) {
     if (err.message.includes(error)) {
@@ -122,7 +108,7 @@ function checkForPlatformFailure(err: Error): void {
 }
 
 function localName(branchName: string): string {
-  return branchName.replace(regEx(/^origin\//), ''); // TODO #12071
+  return branchName.replace(regEx(/^origin\//), '');
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -163,6 +149,41 @@ let gitInitialized: boolean;
 
 let privateKeySet = false;
 
+export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
+
+export async function validateGitVersion(): Promise<boolean> {
+  let version: string;
+  const globalGit = simpleGit.default();
+  try {
+    const raw = await globalGit.raw(['--version']);
+    for (const section of raw.split(/\s+/)) {
+      if (semverCoerced.isVersion(section)) {
+        version = section;
+        break;
+      }
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Error fetching git version');
+    return false;
+  }
+  // istanbul ignore if
+  if (
+    !(
+      version &&
+      (version === GIT_MINIMUM_VERSION ||
+        semverCoerced.isGreaterThan(version, GIT_MINIMUM_VERSION))
+    )
+  ) {
+    logger.error(
+      { detectedVersion: version, minimumVersion: GIT_MINIMUM_VERSION },
+      'Git version needs upgrading'
+    );
+    return false;
+  }
+  logger.debug(`Found valid git version: ${version}`);
+  return true;
+}
+
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
   const opts = ['ls-remote', '--heads', config.url];
@@ -175,7 +196,7 @@ async function fetchBranchCommits(): Promise<void> {
     (await git.raw(opts))
       .split('\n')
       .filter(Boolean)
-      .map((line) => line.trim().split(regEx(/\s+/))) // TODO #12071
+      .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
@@ -194,8 +215,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  const { localDir } = getGlobalConfig();
-  git = Git(localDir, simpleGitConfig());
+  const { localDir } = GlobalConfig.get();
+  git = simpleGit.default(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -293,12 +314,12 @@ export async function syncGit(): Promise<void> {
     return;
   }
   gitInitialized = true;
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   logger.debug('Initializing git repository into ' + localDir);
-  const gitHead = join(localDir, '.git/HEAD');
+  const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
-  if (await fs.exists(gitHead)) {
+  if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       await resetToBranch(await getDefaultBranch(git));
@@ -467,7 +488,7 @@ export async function getFileList(): Promise<string[]> {
     .split('\n')
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(regEx(/\t/)).pop()) // TODO #12071
+    .map((line) => line.split(regEx(/\t/)).pop())
     .filter((file: string) =>
       submodules.every((submodule: string) => !file.startsWith(submodule))
     );
@@ -540,6 +561,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
   ) {
     // author matches - branch has not been modified
+    logger.debug({ branchName }, 'Branch has not been modified');
     config.branchIsModified[branchName] = false;
     return false;
   }
@@ -572,7 +594,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  let status;
+  let status: StatusResult;
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
@@ -655,33 +677,6 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
-/**
- * File to commit
- */
-export interface File {
-  /**
-   * Relative file path
-   */
-  name: string;
-
-  /**
-   * file contents
-   */
-  contents: string | Buffer;
-
-  /**
-   * the executable bit
-   */
-  executable?: boolean;
-}
-
-export type CommitFilesConfig = {
-  branchName: string;
-  files: File[];
-  message: string;
-  force?: boolean;
-};
-
 export async function commitFiles({
   branchName,
   files,
@@ -694,7 +689,7 @@ export async function commitFiles({
     await writePrivateKey();
     privateKeySet = true;
   }
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   await configSigningKey(localDir);
   await writeGitAuthor();
   try {
@@ -718,9 +713,12 @@ export async function commitFiles({
           ignoredFiles.push(fileName);
         }
       } else {
-        if (await isDirectory(join(localDir, fileName))) {
+        if (await isDirectory(upath.join(localDir, fileName))) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
+        } else if (file.contents === null) {
+          // istanbul ignore next
+          continue;
         } else {
           let contents: Buffer;
           // istanbul ignore else
@@ -731,7 +729,7 @@ export async function commitFiles({
           }
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
-          await fs.outputFile(join(localDir, fileName), contents, {
+          await fs.outputFile(upath.join(localDir, fileName), contents, {
             mode: file.executable ? 0o777 : 0o666,
           });
         }
@@ -759,7 +757,7 @@ export async function commitFiles({
     }
 
     const commitOptions: Options = {};
-    if (getNoVerify().includes(GitNoVerifyOption.Commit)) {
+    if (getNoVerify().includes('commit')) {
       commitOptions['--no-verify'] = null;
     }
 
@@ -790,7 +788,7 @@ export async function commitFiles({
       '--force-with-lease': null,
       '-u': null,
     };
-    if (getNoVerify().includes(GitNoVerifyOption.Push)) {
+    if (getNoVerify().includes('push')) {
       pushOptions['--no-verify'] = null;
     }
 

@@ -113,7 +113,7 @@ export async function checkHttpResource(
   try {
     const httpClient = httpByHostType(hostType);
     const res = await httpClient.head(pkgUrl.toString());
-    const timestamp = res?.headers?.['last-modified'] as string;
+    const timestamp = res?.headers?.['last-modified'];
     if (timestamp) {
       const isoTimestamp = normalizeDate(timestamp);
       if (isoTimestamp) {

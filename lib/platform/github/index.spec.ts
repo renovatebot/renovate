@@ -132,6 +132,30 @@ describe('platform/github/index', () => {
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('should support custom endpoint without version', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com')
+        .head('/')
+        .reply(200)
+
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, [
+          {
+            email: 'user@domain.com',
+          },
+        ]);
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: '123test',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
   describe('getRepos', () => {
@@ -150,6 +174,31 @@ describe('platform/github/index', () => {
       const repos = await github.getRepos();
       expect(repos).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should return an array of repos when using Github App endpoint', async () => {
+      //Use Github App token
+      await github.initPlatform({
+        endpoint: githubApiHost,
+        username: 'renovate-bot',
+        gitAuthor: 'Renovate Bot',
+        token: 'x-access-token:123test',
+      });
+      httpMock
+        .scope(githubApiHost)
+        .get('/installation/repositories?per_page=100')
+        .reply(200, {
+          repositories: [
+            {
+              full_name: 'a/b',
+            },
+            {
+              full_name: 'c/d',
+            },
+          ],
+        });
+
+      const repos = await github.getRepos();
+      expect(repos).toStrictEqual(['a/b', 'c/d']);
     });
   });
 
@@ -2410,6 +2459,7 @@ describe('platform/github/index', () => {
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('returns file content in json5 format', async () => {
       const json5Data = `
         {
@@ -2427,6 +2477,36 @@ describe('platform/github/index', () => {
       expect(res).toEqual({ foo: 'bar' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('returns file content from given repo', async () => {
+      const data = { foo: 'bar' };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'different/repo');
+      await github.initRepo({
+        repository: 'different/repo',
+        token: 'token',
+      } as any);
+      scope.get('/repos/different/repo/contents/file.json').reply(200, {
+        content: Buffer.from(JSON.stringify(data)).toString('base64'),
+      });
+      const res = await github.getJsonFile('file.json', 'different/repo');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns file content from branch or tag', async () => {
+      const data = { foo: 'bar' };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.get('/repos/some/repo/contents/file.json?ref=dev').reply(200, {
+        content: Buffer.from(JSON.stringify(data)).toString('base64'),
+      });
+      const res = await github.getJsonFile('file.json', 'some/repo', 'dev');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('throws on malformed JSON', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');

@@ -11,26 +11,23 @@ const temporarilyUnstable = ['22.04'];
 
 // validation
 
-function isValid(input: string): string | boolean | null {
+function isValid(input: string): boolean {
   return (
     typeof input === 'string' &&
     regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
   );
 }
 
-function isVersion(input: string): string | boolean | null {
+function isVersion(input: string): boolean {
   return isValid(input);
 }
 
-function isCompatible(
-  version: string,
-  _range?: string
-): string | boolean | null {
+function isCompatible(version: string, _current?: string): boolean {
   return isValid(version);
 }
 
-function isSingleVersion(version: string): string | boolean | null {
-  return isValid(version) ? true : null;
+function isSingleVersion(version: string): boolean {
+  return isValid(version);
 }
 
 function isStable(version: string): boolean {
@@ -76,8 +73,8 @@ function equals(version: string, other: string): boolean {
 }
 
 function isGreaterThan(version: string, other: string): boolean {
-  const xMajor = getMajor(version);
-  const yMajor = getMajor(other);
+  const xMajor = getMajor(version) ?? 0;
+  const yMajor = getMajor(other) ?? 0;
   if (xMajor > yMajor) {
     return true;
   }
@@ -85,8 +82,8 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  const xMinor = getMinor(version);
-  const yMinor = getMinor(other);
+  const xMinor = getMinor(version) ?? 0;
+  const yMinor = getMinor(other) ?? 0;
   if (xMinor > yMinor) {
     return true;
   }
@@ -94,8 +91,8 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  const xPatch = getPatch(version) || 0;
-  const yPatch = getPatch(other) || 0;
+  const xPatch = getPatch(version) ?? 0;
+  const yPatch = getPatch(other) ?? 0;
   return xPatch > yPatch;
 }
 

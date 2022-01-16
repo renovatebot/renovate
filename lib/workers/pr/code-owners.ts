@@ -27,7 +27,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       .map((line) => line.trim())
       .filter((line) => line && !line.startsWith('#'))
       .map((line) => {
-        const [pattern, ...usernames] = line.split(regEx(/\s+/)); // TODO #12071
+        const [pattern, ...usernames] = line.split(regEx(/\s+/));
         return {
           usernames,
           match: (path: string) => {
