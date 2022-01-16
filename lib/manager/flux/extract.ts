@@ -23,14 +23,22 @@ function readManifest(content: string): FluxManifest {
 
   // It's possible there are other non-Flux HelmRelease/HelmRepository CRs out there, so we filter based on apiVersion.
   for (const resource of resources) {
-    switch (resource.kind) {
+    switch (resource?.kind) {
       case 'HelmRelease':
-        if (resource.apiVersion.startsWith('helm.toolkit.fluxcd.io/')) {
+        if (
+          resource.apiVersion?.startsWith('helm.toolkit.fluxcd.io/') &&
+          resource.spec?.chart?.spec?.chart
+        ) {
           manifest.releases.push(resource);
         }
         break;
       case 'HelmRepository':
-        if (resource.apiVersion.startsWith('source.toolkit.fluxcd.io/')) {
+        if (
+          resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
+          resource.metadata?.name &&
+          resource.metadata.namespace &&
+          resource.spec?.url
+        ) {
           manifest.repositories.push(resource);
         }
         break;
@@ -52,16 +60,15 @@ function resolveReleases(
 
     const matchingRepositories = repositories.filter(
       (rep) =>
-        rep.kind === release.spec.chart.spec.sourceRef.kind &&
+        rep.kind === release.spec.chart.spec.sourceRef?.kind &&
         rep.metadata.name === release.spec.chart.spec.sourceRef.name &&
         rep.metadata.namespace ===
           (release.spec.chart.spec.sourceRef.namespace ||
-            release.metadata.namespace)
+            release.metadata?.namespace)
     );
     if (matchingRepositories.length) {
       res.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
     } else {
-      // TODO: Not sure if this is the right SkipReason.
       res.skipReason = SkipReason.UnknownRegistry;
     }
 
