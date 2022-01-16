@@ -29,7 +29,6 @@
     "lib/manager/gradle/deep/build-gradle.ts",
     "lib/manager/gradle/shallow/tokenizer.ts",
     "lib/manager/gradle/shallow/utils.ts",
-    "lib/manager/flux/**/*.ts",
     "lib/manager/helm-values/util.ts",
     "lib/manager/homebrew/util.ts",
     "lib/manager/npm/extract/type.ts",
