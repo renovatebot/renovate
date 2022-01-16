@@ -11,7 +11,8 @@ import { GithubHttp } from '../../../../util/http/github';
 import { ensureTrailingSlash } from '../../../../util/url';
 import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
-const http = new GithubHttp();
+export const id = 'github-changelog';
+const http = new GithubHttp(id);
 
 export async function getTags(
   endpoint: string,
