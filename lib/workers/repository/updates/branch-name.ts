@@ -1,4 +1,4 @@
-import { clean as cleanGitRef } from 'clean-git-ref';
+import cleanGitRef from 'clean-git-ref';
 import hasha from 'hasha';
 import slugify from 'slugify';
 import type { RenovateConfig } from '../../../config/types';
@@ -19,7 +19,8 @@ const RE_MULTIPLE_DASH = regEx(/--+/g);
  * - chained dashes(breaks markdown comments) are replaced by single dash
  */
 function cleanBranchName(branchName: string): string {
-  return cleanGitRef(branchName)
+  return cleanGitRef
+    .clean(branchName)
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace

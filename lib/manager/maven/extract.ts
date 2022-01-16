@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { basename, dirname, join, normalize } from 'upath';
+import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
@@ -154,13 +154,13 @@ function applyProps(
 function resolveParentFile(packageFile: string, parentPath: string): string {
   let parentFile = 'pom.xml';
   let parentDir = parentPath;
-  const parentBasename = basename(parentPath);
+  const parentBasename = upath.basename(parentPath);
   if (parentBasename === 'pom.xml' || parentBasename.endsWith('.pom.xml')) {
     parentFile = parentBasename;
-    parentDir = dirname(parentPath);
+    parentDir = upath.dirname(parentPath);
   }
-  const dir = dirname(packageFile);
-  return normalize(join(dir, parentDir, parentFile));
+  const dir = upath.dirname(packageFile);
+  return upath.normalize(upath.join(dir, parentDir, parentFile));
 }
 
 export function extractPackage(
