@@ -3,6 +3,7 @@ import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
+import { PlatformId } from '../../constants/platforms';
 import * as docker from '../../util/exec/docker';
 import type { StatusResult } from '../../util/git/types';
 import * as _hostRules from '../../util/host-rules';
@@ -222,6 +223,7 @@ describe('manager/gomod/artifacts', () => {
       {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
+        hostType: PlatformId.Github,
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -263,6 +265,7 @@ describe('manager/gomod/artifacts', () => {
       {
         token: 'some-enterprise-token',
         matchHost: 'gitlab.enterprise.com',
+        hostType: PlatformId.Gitlab,
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -287,7 +290,7 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '1',
               GIT_CONFIG_KEY_0:
-                'url.https://some-enterprise-token@gitlab.enterprise.com/.insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/',
             }),
           }),
@@ -302,10 +305,12 @@ describe('manager/gomod/artifacts', () => {
       {
         token: 'some-enterprise-token-repo1',
         matchHost: 'https://gitlab.enterprise.com/repo1',
+        hostType: PlatformId.Gitlab,
       },
       {
         token: 'some-enterprise-token-repo2',
         matchHost: 'https://gitlab.enterprise.com/repo2',
+        hostType: PlatformId.Gitlab,
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -330,9 +335,9 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '2',
               GIT_CONFIG_KEY_0:
-                'url.https://some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
               GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/repo1',
               GIT_CONFIG_VALUE_1: 'https://gitlab.enterprise.com/repo2',
             }),
@@ -348,10 +353,12 @@ describe('manager/gomod/artifacts', () => {
       {
         token: 'some-token',
         matchHost: 'ssh://github.enterprise.com',
+        hostType: PlatformId.Github,
       },
       {
         token: 'some-gitlab-token',
         matchHost: 'gitlab.enterprise.com',
+        hostType: PlatformId.Gitlab,
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -376,7 +383,7 @@ describe('manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '1',
               GIT_CONFIG_KEY_0:
-                'url.https://some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'https://gitlab.enterprise.com/',
             }),
           }),
@@ -394,14 +401,17 @@ describe('manager/gomod/artifacts', () => {
       {
         token: 'some-token',
         matchHost: 'api.github.com',
+        hostType: PlatformId.Github,
       },
       {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
+        hostType: PlatformId.Github,
       },
       {
         token: 'some-gitlab-token',
         matchHost: 'gitlab.enterprise.com',
+        hostType: PlatformId.Gitlab,
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -431,7 +441,7 @@ describe('manager/gomod/artifacts', () => {
               GIT_CONFIG_KEY_2:
                 'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'https://github.com/',
               GIT_CONFIG_VALUE_1: 'https://api.github.com/',
               GIT_CONFIG_VALUE_2: 'https://github.enterprise.com/',
@@ -506,6 +516,33 @@ describe('manager/gomod/artifacts', () => {
         config: {
           ...config,
           postUpdateOptions: ['gomodTidy'],
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('supports docker mode with gomodTidy1.17', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({});
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidy1.17'],
         },
       })
     ).not.toBeNull();

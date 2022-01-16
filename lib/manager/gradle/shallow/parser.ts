@@ -1,4 +1,4 @@
-import * as url from 'url';
+import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
@@ -203,6 +203,7 @@ function processDepInterpolation({
 function processPlugin({
   tokenMap,
   packageFile,
+  variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const { pluginName, pluginVersion, methodName } = tokenMap;
   const plugin = pluginName.value;
@@ -212,20 +213,36 @@ function processPlugin({
     methodName.value === 'kotlin'
       ? `org.jetbrains.kotlin.${plugin}:org.jetbrains.kotlin.${plugin}.gradle.plugin`
       : `${plugin}:${plugin}.gradle.plugin`;
-  const currentValue = pluginVersion.value;
-  const fileReplacePosition = pluginVersion.offset;
-  const dep = {
+
+  const dep: PackageDependency<GradleManagerData> = {
     depType: 'plugin',
     depName,
     lookupName,
     registryUrls: ['https://plugins.gradle.org/m2/'],
-    currentValue,
     commitMessageTopic: `plugin ${depName}`,
-    managerData: {
-      fileReplacePosition,
-      packageFile,
-    },
   };
+
+  if (pluginVersion.type === TokenType.Word) {
+    const varData = variables[pluginVersion.value];
+    if (varData) {
+      const currentValue = varData.value;
+      const fileReplacePosition = varData.fileReplacePosition;
+      dep.currentValue = currentValue;
+      dep.managerData = { fileReplacePosition, packageFile };
+    } else {
+      const currentValue = pluginVersion.value;
+      const fileReplacePosition = pluginVersion.offset;
+      dep.currentValue = currentValue;
+      dep.managerData = { fileReplacePosition, packageFile };
+      dep.skipReason = SkipReason.UnknownVersion;
+    }
+  } else {
+    const currentValue = pluginVersion.value;
+    const fileReplacePosition = pluginVersion.offset;
+    dep.currentValue = currentValue;
+    dep.managerData = { fileReplacePosition, packageFile };
+  }
+
   return { deps: [dep] };
 }
 
@@ -363,7 +380,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       },
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      {
+        matchType: [TokenType.String, TokenType.Word],
+        tokenMapKey: 'pluginVersion',
+      },
       endOfInstruction,
     ],
     handler: processPlugin,
@@ -380,7 +400,10 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.RightParen },
       { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      {
+        matchType: [TokenType.String, TokenType.Word],
+        tokenMapKey: 'pluginVersion',
+      },
       endOfInstruction,
     ],
     handler: processPlugin,

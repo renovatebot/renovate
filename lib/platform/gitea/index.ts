@@ -1,7 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { lt } from 'semver';
+import semver from 'semver';
 import { PlatformId } from '../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -840,7 +840,7 @@ const platform: Platform = {
 
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
-    if (lt(defaults.version, '1.14.0')) {
+    if (semver.lt(defaults.version, '1.14.0')) {
       logger.debug(
         { version: defaults.version },
         'Adding reviewer not yet supported.'

@@ -1,5 +1,5 @@
 import toml from '@iarna/toml';
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
+import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';

@@ -5,6 +5,7 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { regEx } from '../../util/regex';
+import { ensureTrailingSlash } from '../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
@@ -306,7 +307,7 @@ export async function getReleases({
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const dependency = getDependencyParts(lookupName);
-  const repoUrl = registryUrl.replace(/\/?$/, '/'); // TODO #12071
+  const repoUrl = ensureTrailingSlash(registryUrl);
 
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 

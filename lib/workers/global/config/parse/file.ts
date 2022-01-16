@@ -1,8 +1,8 @@
-import is from 'is';
+import is from '@sindresorhus/is';
+import fs from 'fs-extra';
 import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
-import { massageConfig } from '../../../../config/massage';
 import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -22,7 +22,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       const tmpConfig = await import(file);
       let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
       // Allow the config to be a function
-      if (is.fn(config)) {
+      if (is.function_(config)) {
         config = config();
       }
       return config;
@@ -37,6 +37,15 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
   }
+
+  if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
+    logger.fatal(
+      { configFile },
+      `Custom config file specified in RENOVATE_CONFIG_FILE must exist`
+    );
+    process.exit(1);
+  }
+
   logger.debug('Checking for config file in ' + configFile);
   let config: AllConfig = {};
   try {
@@ -45,6 +54,11 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     // istanbul ignore if
     if (err instanceof SyntaxError || err instanceof TypeError) {
       logger.fatal(`Could not parse config file \n ${err.stack}`);
+      process.exit(1);
+    } else if (err instanceof ReferenceError) {
+      logger.fatal(
+        `Error parsing config file due to unresolved variable(s): ${err.message}`
+      );
       process.exit(1);
     } else if (err.message === 'Unsupported file type') {
       logger.fatal(err.message);
@@ -65,5 +79,5 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     );
     config = migratedConfig;
   }
-  return massageConfig(config);
+  return config;
 }

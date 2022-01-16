@@ -1,4 +1,5 @@
 import * as github from '../github-tags';
+import * as gitlab from '../gitlab-tags';
 import type { DigestConfig } from '../types';
 import { bitbucket } from './common';
 import { getDatasource } from './get-datasource';
@@ -31,6 +32,9 @@ export async function getDigest(
     }
     case bitbucket.id: {
       return bitbucket.getDigest(source, tag);
+    }
+    case gitlab.id: {
+      return gitlab.getDigest(source, tag);
     }
     /* istanbul ignore next: can never happen, makes lint happy */
     default: {
