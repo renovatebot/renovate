@@ -91,21 +91,21 @@ describe('util/http/github', () => {
     });
 
     it('paginates', async () => {
-      const url = '/some-url';
+      const url = '/some-url?per_page=2';
       httpMock
         .scope(githubApiHost)
         .get(url)
-        .reply(200, ['a'], {
-          link: `<${url}?page=2>; rel="next", <${url}?page=3>; rel="last"`,
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&page=2>; rel="next", <${url}&page=3>; rel="last"`,
         })
-        .get(`${url}?page=2`)
-        .reply(200, ['b', 'c'], {
-          link: `<${url}?page=3>; rel="next", <${url}?page=3>; rel="last"`,
+        .get(`${url}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&page=3>; rel="next", <${url}&page=3>; rel="last"`,
         })
-        .get(`${url}?page=3`)
-        .reply(200, ['d']);
-      const res = await githubApi.getJson('some-url', { paginate: true });
-      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+        .get(`${url}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(3);
     });
@@ -157,7 +157,7 @@ describe('util/http/github', () => {
       async function fail(
         code: number,
         body: any = undefined,
-        headers: httpMock.ReplyHeaders = undefined
+        headers: httpMock.ReplyHeaders = {}
       ) {
         const url = '/some-url';
         httpMock
@@ -452,9 +452,9 @@ describe('util/http/github', () => {
         .post('/graphql')
         .reply(200, { data: { repository } });
 
-      const { data } = await githubApi.requestGraphql(graphqlQuery);
+      const res = await githubApi.requestGraphql(graphqlQuery);
       expect(httpMock.getTrace()).toHaveLength(1);
-      expect(data).toStrictEqual({ repository });
+      expect(res?.data).toStrictEqual({ repository });
     });
     it('queryRepoField', async () => {
       httpMock
