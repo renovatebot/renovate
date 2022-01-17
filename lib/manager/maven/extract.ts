@@ -371,6 +371,10 @@ export async function extractAllPackageFiles(
       if (packageFile.endsWith('settings.xml')) {
         const registries = extractRegistries(content);
         if (registries) {
+          logger.info(
+            { registries, packageFile },
+            'found registryUrls in settings.xml'
+          );
           config.registryUrls.push(...registries);
         }
       } else {
