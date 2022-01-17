@@ -227,7 +227,7 @@ export class DebDatasource extends Datasource {
     const fullComponentUrls: string[] = [];
     // when specifying n repository urls, this will be called n times in each call,
     // cfg.registryUrl is filled with the next element of cfg.registryUrls
-    const registryUrls = [cfg.registryUrl];
+    const registryUrls: [string] = [cfg.registryUrl];
     for (const aptUrl of registryUrls) {
       let url: URL;
       try {
