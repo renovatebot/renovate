@@ -236,6 +236,29 @@ function processPlugin({
       dep.managerData = { fileReplacePosition, packageFile };
       dep.skipReason = SkipReason.UnknownVersion;
     }
+  } else if (pluginVersion.type === TokenType.StringInterpolation) {
+    const versionTpl = pluginVersion as StringInterpolation;
+    const children = versionTpl.children;
+    const [child] = children;
+    if (child?.type === TokenType.Variable && children.length === 1) {
+      const varData = variables[child.value];
+      if (varData) {
+        const currentValue = varData.value;
+        const fileReplacePosition = varData.fileReplacePosition;
+        dep.currentValue = currentValue;
+        dep.managerData = { fileReplacePosition, packageFile };
+      } else {
+        const currentValue = child.value;
+        const fileReplacePosition = child.offset;
+        dep.currentValue = currentValue;
+        dep.managerData = { fileReplacePosition, packageFile };
+        dep.skipReason = SkipReason.UnknownVersion;
+      }
+    } else {
+      const fileReplacePosition = versionTpl.offset;
+      dep.managerData = { fileReplacePosition, packageFile };
+      dep.skipReason = SkipReason.UnknownVersion;
+    }
   } else {
     const currentValue = pluginVersion.value;
     const fileReplacePosition = pluginVersion.offset;
@@ -372,6 +395,8 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // id 'foo.bar' version '1.2.3'
+    // id 'foo.bar' version fooBarVersion
+    // id 'foo.bar' version "$fooBarVersion"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -381,7 +406,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.Word, matchValue: 'version' },
       {
-        matchType: [TokenType.String, TokenType.Word],
+        matchType: [
+          TokenType.String,
+          TokenType.Word,
+          TokenType.StringInterpolation,
+        ],
         tokenMapKey: 'pluginVersion',
       },
       endOfInstruction,
@@ -390,6 +419,8 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // id('foo.bar') version '1.2.3'
+    // id('foo.bar') version fooBarVersion
+    // id('foo.bar') version "$fooBarVersion"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -401,7 +432,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.RightParen },
       { matchType: TokenType.Word, matchValue: 'version' },
       {
-        matchType: [TokenType.String, TokenType.Word],
+        matchType: [
+          TokenType.String,
+          TokenType.Word,
+          TokenType.StringInterpolation,
+        ],
         tokenMapKey: 'pluginVersion',
       },
       endOfInstruction,
