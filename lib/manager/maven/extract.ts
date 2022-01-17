@@ -238,7 +238,7 @@ export function extractRegistries(rawContent: string): string[] {
   const mirrorUrls = parseUrls(settings, 'mirrors');
   urls.push(...mirrorUrls);
 
-  settings.childNamed('profiles').eachChild((profile) => {
+  settings.childNamed('profiles')?.eachChild((profile) => {
     const repositoryUrls = parseUrls(profile, 'repositories');
     urls.push(...repositoryUrls);
   });
@@ -361,10 +361,12 @@ function cleanResult(
 }
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
+  _config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
+  const additionalRegistryUrls = [];
+
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
@@ -375,10 +377,7 @@ export async function extractAllPackageFiles(
             { registries, packageFile },
             'found registryUrls in settings.xml'
           );
-          if (!config.registryUrls) {
-            config.registryUrls = [];
-          }
-          config.registryUrls.push(...registries);
+          additionalRegistryUrls.push(...registries);
         }
       } else {
         const pkg = extractPackage(content, packageFile);
@@ -391,6 +390,17 @@ export async function extractAllPackageFiles(
     } else {
       logger.debug({ packageFile }, 'packageFile has no content');
     }
+  }
+  if (additionalRegistryUrls) {
+    packages.map((pkgFile) => {
+      pkgFile.deps.map((dep) => {
+        if (dep.registryUrls) {
+          dep.registryUrls.push(...additionalRegistryUrls);
+        } else {
+          dep.registryUrls = additionalRegistryUrls;
+        }
+      });
+    });
   }
   return cleanResult(resolveParents(packages));
 }

@@ -29,20 +29,30 @@ describe('manager/maven/index', () => {
       expect(res).toBeEmptyArray();
     });
 
-    it('should return empty for a settings file', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(settingsContent);
-      const config = {};
-      const res = await extractAllPackageFiles(config, ['settings.xml']);
-      expect(res).toBeEmptyArray();
-      expect(config).toMatchSnapshot({
-        registryUrls: [
-          'https://artifactory.company.com/artifactory/my-maven-repo',
-          'https://repo.adobe.com/nexus/content/groups/public',
-          'https://repo.adobe.com/v2/nexus/content/groups/public',
-          'https://repo.adobe.com/v3/nexus/content/groups/public',
-          'https://repo.adobe.com/v4/nexus/content/groups/public',
-        ],
+    it('should return packages with urls from a settings file', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(settingsContent)
+        .mockResolvedValueOnce(pomContent);
+      const packages = await extractAllPackageFiles({}, [
+        'settings.xml',
+        'simple.pom.xml',
+      ]);
+      const urls = new Set([
+        'https://repo.maven.apache.org/maven2',
+        'https://artifactory.company.com/artifactory/my-maven-repo',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://repo.adobe.com/nexus/content/groups/public',
+        'https://repo.adobe.com/v2/nexus/content/groups/public',
+        'https://repo.adobe.com/v3/nexus/content/groups/public',
+        'https://repo.adobe.com/v4/nexus/content/groups/public',
+      ]);
+      packages.forEach(({ deps }) => {
+        deps.forEach(({ registryUrls }) => {
+          const depUrls = new Set([...registryUrls]);
+          expect(depUrls).toEqual(urls);
+        });
       });
+      expect(packages).toMatchSnapshot();
     });
 
     it('should return package files info', async () => {
