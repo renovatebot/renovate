@@ -805,14 +805,18 @@ export async function commitFiles(
       return null;
     }
 
-    const commit = await pushCallback({
-      ...commitConfig,
-      files: files.filter(({ name }) => !ignoredFiles.includes(name)),
-    });
-    config.branchCommits[branchName] = commit;
+    const filteredFiles = files.filter(
+      ({ name }) => !ignoredFiles.includes(name)
+    );
+    const pushConfig = { ...commitConfig, files: filteredFiles };
+    const commitSha =
+      pushCallback === pushFiles
+        ? await pushFiles(pushConfig)
+        : (await pushCallback(pushConfig)) ?? (await pushFiles(pushConfig));
+    config.branchCommits[branchName] = commitSha;
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
-    return commit?.slice(0, 7) ?? 'unknown';
+    return commitSha?.slice(0, 7) ?? 'unknown';
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (err.message.includes(`'refs/heads/renovate' exists`)) {

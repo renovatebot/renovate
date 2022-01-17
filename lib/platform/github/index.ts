@@ -1749,6 +1749,17 @@ export async function pushFiles({
   files,
   message,
 }: CommitFilesConfig): Promise<CommitSha | null> {
+  const executableFiles = files
+    .filter(({ executable }) => !!executable)
+    .map(({ name }) => name);
+  if (executableFiles.length) {
+    logger.debug(
+      { branchName, executableFiles },
+      'Platform-native commit: found executable files'
+    );
+    return null;
+  }
+
   const additions = files.map(({ name: path, contents }) => ({
     path,
     contents: Buffer.from(contents).toString('base64'),
@@ -1764,15 +1775,22 @@ export async function pushFiles({
     message,
   };
 
-  const { data, errors } = await githubApi.requestGraphql<{
-    createCommitOnBranch: { commit: { oid: string } };
-  }>(commitFilesMutation, { variables });
+  try {
+    const { data, errors } = await githubApi.requestGraphql<{
+      createCommitOnBranch: { commit: { oid: string } };
+    }>(commitFilesMutation, { variables });
 
-  if (errors) {
-    const errorMessage = 'GraphQL commit error';
-    logger.debug({ branchName, errors }, errorMessage);
-    throw new Error(errorMessage);
+    if (errors) {
+      logger.debug(
+        { branchName, errors },
+        'Platform-native commit: GraphQL errors'
+      );
+      return null;
+    }
+
+    return data?.createCommitOnBranch?.commit?.oid;
+  } catch (err) {
+    logger.debug({ branchName, err }, 'Platform-native commit: unknown error');
+    return null;
   }
-
-  return data?.createCommitOnBranch?.commit?.oid;
 }
