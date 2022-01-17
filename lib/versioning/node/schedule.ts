@@ -11,26 +11,28 @@ interface NodeJsSchedule {
 
 export type NodeJsData = Record<string, NodeJsSchedule>;
 
-export const nodeSchedule: NodeJsData = JSON.parse(
+const nodeSchedule: NodeJsData = JSON.parse(
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   dataFiles.get('data/node-js-schedule.json')!
 );
 
 export type NodeJsScheduleWithVersion = { version: string } & NodeJsSchedule;
 
+const nodeCodenames = new Map<string, NodeJsScheduleWithVersion>();
+for (const version of Object.keys(nodeSchedule)) {
+  const schedule = nodeSchedule[version];
+  if (schedule.codename) {
+    nodeCodenames.set(schedule.codename.toUpperCase(), {
+      version: version,
+      ...schedule,
+    });
+  }
+}
+
 export function findScheduleForCodename(
   codename: string
 ): NodeJsScheduleWithVersion | null {
-  for (const version of Object.keys(nodeSchedule)) {
-    const schedule = nodeSchedule[version];
-    if (
-      schedule.codename &&
-      schedule.codename.toUpperCase() === codename?.toUpperCase()
-    ) {
-      return { version: version, ...schedule };
-    }
-  }
-  return null;
+  return nodeCodenames.get(codename?.toUpperCase()) || null;
 }
 
 export function findScheduleForVersion(version: string): NodeJsSchedule | null {

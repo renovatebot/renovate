@@ -2,11 +2,7 @@ import { DateTime } from 'luxon';
 import { valid } from 'semver';
 import npm, { isVersion } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
-import {
-  findScheduleForCodename,
-  findScheduleForVersion,
-  nodeSchedule,
-} from './schedule';
+import { findScheduleForCodename, findScheduleForVersion } from './schedule';
 
 export const id = 'node';
 export const displayName = 'Node.js';
@@ -48,14 +44,13 @@ function getNewValue({
   return res;
 }
 
-export function isValid(version: string): boolean | string {
+export function isValid(version: string): boolean | string | null {
   return npm.isValid(normalizeValue(version));
 }
 
 export function isStable(version: string): boolean {
   if (npm.isStable(version)) {
-    const major = npm.getMajor(version);
-    const schedule = nodeSchedule[`v${major}`];
+    const schedule = findScheduleForVersion(version);
     if (schedule?.lts) {
       // TODO: use the exact release that started LTS (#9716)
       return DateTime.local() > DateTime.fromISO(schedule.lts);
