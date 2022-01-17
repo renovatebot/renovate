@@ -35,7 +35,7 @@ export function parseRepository(
 export function resolveAlias(
   repository: string,
   aliases: Record<string, string>
-): string {
+): string | null {
   if (!(repository.startsWith('@') || repository.startsWith('alias:'))) {
     return repository;
   }
