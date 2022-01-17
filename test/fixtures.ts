@@ -4,6 +4,8 @@ import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import upath from 'upath';
 
+const realFs = jest.requireActual<typeof fs>('fs');
+
 /**
  * Class to work with in-memory file-system
  */
@@ -11,11 +13,10 @@ export class Fixtures {
   /**
    * Returns content from fixture file from __fixtures__ folder
    * @param name name of the fixture file
-   * @param fixturesRoot is an optional, by default is current folder
+   * @param fixturesRoot is an optional, by default is current test folder
    * @returns
    */
   static get(name: string, fixturesRoot = '.'): string {
-    const realFs = jest.requireActual<typeof fs>('fs');
     return realFs.readFileSync(
       upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
       {
@@ -78,7 +79,10 @@ function readFile(fileName: string, encoding?: string): Promise<unknown> {
   return memfs.promises.readFile(fileName, encoding ?? 'utf8');
 }
 
-export async function outputFile(file: string, data: any): Promise<void> {
+export async function outputFile(
+  file: string,
+  data: string | Buffer | Uint8Array
+): Promise<void> {
   const dir = upath.dirname(file);
 
   if (await pathExists(dir)) {
