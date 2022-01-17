@@ -88,6 +88,7 @@ describe('datasource/go/get-datasource', () => {
         expect(res).toEqual({
           datasource: githubDatasource,
           lookupName: 'golang/text',
+          registryUrl: 'https://github.com',
         });
       });
 
