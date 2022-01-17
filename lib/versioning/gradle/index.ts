@@ -22,7 +22,7 @@ export const supportedRangeStrategies = ['pin'];
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 const getMajor = (version: string): number | null => {
-  const tokens = valid(version.replace(regEx(/^v/i), ''));
+  const tokens = valid(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens?.[0];
     if (majorToken && majorToken.type === TokenType.Number) {
@@ -33,7 +33,7 @@ const getMajor = (version: string): number | null => {
 };
 
 const getMinor = (version: string): number | null => {
-  const tokens = valid(version.replace(regEx(/^v/i), ''));
+  const tokens = valid(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
@@ -51,7 +51,7 @@ const getMinor = (version: string): number | null => {
 };
 
 const getPatch = (version: string): number | null => {
-  const tokens = valid(version.replace(regEx(/^v/i), ''));
+  const tokens = valid(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
