@@ -166,3 +166,13 @@ Object {
   "packageFile": null,
 }
 `;
+
+exports[`manager/maven/extract extractRegistries extract registries from a settings file 1`] = `
+Array [
+  "https://artifactory.company.com/artifactory/my-maven-repo",
+  "https://repo.adobe.com/nexus/content/groups/public",
+  "https://repo.adobe.com/v2/nexus/content/groups/public",
+  "https://repo.adobe.com/v3/nexus/content/groups/public",
+  "https://repo.adobe.com/v4/nexus/content/groups/public",
+]
+`;

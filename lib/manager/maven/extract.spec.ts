@@ -1,8 +1,10 @@
 import { loadFixture } from '../../../test/util';
-import { extractPackage } from './extract';
+import { extractPackage, extractRegistries } from './extract';
 
 const minimumContent = loadFixture(`minimum.pom.xml`);
 const simpleContent = loadFixture(`simple.pom.xml`);
+
+const settingsContent = loadFixture(`settings.xml`);
 
 describe('manager/maven/extract', () => {
   describe('extractDependencies', () => {
@@ -79,6 +81,25 @@ describe('manager/maven/extract', () => {
         mavenProps: {},
         packageFile: null,
       });
+    });
+  });
+  describe('extractRegistries', () => {
+    it('returns null for invalid XML', () => {
+      expect(extractRegistries(undefined)).toBeEmptyArray();
+      expect(extractRegistries('invalid xml content')).toBeEmptyArray();
+      expect(extractRegistries('<foobar></foobar>')).toBeEmptyArray();
+      expect(extractRegistries('<settings></settings>')).toBeEmptyArray();
+    });
+
+    it('extract registries from a settings file', () => {
+      const res = extractRegistries(settingsContent);
+      expect(res).toMatchSnapshot([
+        'https://artifactory.company.com/artifactory/my-maven-repo',
+        'https://repo.adobe.com/nexus/content/groups/public',
+        'https://repo.adobe.com/v2/nexus/content/groups/public',
+        'https://repo.adobe.com/v3/nexus/content/groups/public',
+        'https://repo.adobe.com/v4/nexus/content/groups/public',
+      ]);
     });
   });
 });
