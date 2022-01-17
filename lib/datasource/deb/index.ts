@@ -24,16 +24,10 @@ export class DebDatasource extends Datasource {
   static readonly compressions = ['gz'];
 
   /**
-   * This specifies the download directory into which the packages file should be downloaded relative to cacheDir.
+   * This specifies the directory where the extracted and downloaded packages files are stored relative to cacheDir.
    * The folder will be created automatically if it doesn't exist.
    */
-  static readonly downloadDirectory = 'deb/download';
-
-  /**
-   * This specifies the directory where the extracted packages files are stored relative to cacheDir.
-   * The folder will be created automatically if it doesn't exist.
-   */
-  static readonly extractionDirectory: 'deb/extracted';
+  static readonly cacheSubDir: string = 'deb';
 
   /**
    * Users are able to specify custom Debian repositories as long as they follow
@@ -83,11 +77,6 @@ export class DebDatasource extends Datasource {
 
   requiredPackageKeys = ['Package', 'Version', 'Homepage'];
 
-  async initCacheDir(cfg: DebLanguageConfig): Promise<void> {
-    await fs.ensureCacheDir(DebDatasource.downloadDirectory);
-    await fs.ensureCacheDir(DebDatasource.extractionDirectory);
-  }
-
   async extract(
     compressedFile: string,
     compression: string,
@@ -102,23 +91,15 @@ export class DebDatasource extends Datasource {
     }
   }
 
-  async downloadAndExtractPackage(
-    cfg: DebLanguageConfig,
-    basePackageUrl: string
-  ): Promise<string> {
+  async downloadAndExtractPackage(basePackageUrl: string): Promise<string> {
     // we hash the package URL and export the hex to make it file system friendly
     // we use the hashed url as the filename for the local directories/files
     const hash = createHash('sha256');
     hash.update(basePackageUrl);
     const hashedPackageUrl = hash.digest('hex');
-    const downloadDirectory = await fs.ensureCacheDir(
-      DebDatasource.downloadDirectory
-    );
 
-    const extractionDirectory = await fs.ensureCacheDir(
-      DebDatasource.extractionDirectory
-    );
-    const extractedFile = extractionDirectory + '/' + hashedPackageUrl + '.txt';
+    const fullCacheDir = await fs.ensureCacheDir(DebDatasource.cacheSubDir);
+    const extractedFile = fullCacheDir + '/' + hashedPackageUrl + '.txt';
     const extractedFileExists = await fs.pathExists(extractedFile);
 
     let lastTimestamp: Date = null;
@@ -130,7 +111,7 @@ export class DebDatasource extends Datasource {
     for (let i = 0; i < DebDatasource.compressions.length; i++) {
       const compression = DebDatasource.compressions[i];
       const compressedFile =
-        downloadDirectory + '/' + hashedPackageUrl + '.' + compression;
+        fullCacheDir + '/' + hashedPackageUrl + '.' + compression;
       try {
         const wasUpdated = await this.downloadPackageFile(
           basePackageUrl,
@@ -303,14 +284,11 @@ export class DebDatasource extends Datasource {
       }
     }
 
-    await this.initCacheDir(cfg);
-
     let release: ReleaseResult = null;
     for (let i = 0; i < fullComponentUrls.length; i++) {
       let downloadedPackage: string;
       try {
         downloadedPackage = await this.downloadAndExtractPackage(
-          cfg,
           fullComponentUrls[i]
         );
       } catch (e) {

@@ -14,7 +14,7 @@ describe('datasource/deb/index', () => {
     // const downloadFolder =
     //   cacheDir + 'others/' + DebDatasource.downloadDirectory + '/';
     const extractionFolder =
-      cacheDir + 'others/' + DebDatasource.extractionDirectory + '/';
+      cacheDir + 'others/' + DebDatasource.cacheSubDir + '/';
     // const compressedPackageFile =
     //   downloadFolder +
     //   '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.gz';
