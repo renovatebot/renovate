@@ -53,6 +53,14 @@ function prepareAssigneesReviewers(
   return filterUnavailableUsers(config, normalizedUsernames);
 }
 
+export function prepareLabels(config: RenovateConfig): string[] {
+  const labels = config.labels ?? [];
+  const addLabels = config.addLabels ?? [];
+  return [...new Set([...labels, ...addLabels])].map((label) =>
+    template.compile(label, config)
+  );
+}
+
 export async function addAssigneesReviewers(
   config: RenovateConfig,
   pr: Pr
@@ -285,14 +293,15 @@ export async function ensurePr(
         if (logJSON.project) {
           upgrade.repoName = logJSON.project.repository;
         }
-        upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
+        upgrade.hasReleaseNotes = false;
         upgrade.releases = [];
         if (
-          upgrade.hasReleaseNotes &&
+          logJSON.hasReleaseNotes &&
           upgrade.repoName &&
           !commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
         ) {
           commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+          upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
             logJSON.versions.forEach((version) => {
               const release = { ...version };
@@ -429,9 +438,7 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: [...new Set([...config.labels, ...config.addLabels])].map(
-            (label) => template.compile(label, config)
-          ),
+          labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });

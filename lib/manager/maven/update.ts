@@ -28,6 +28,10 @@ export function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): string | null {
+  if (upgrade.updateType === 'replacement') {
+    logger.warn('maven manager does not support replacement updates yet');
+    return null;
+  }
   const offset = fileContent.indexOf('<');
   const spaces = fileContent.slice(0, offset);
   const restContent = fileContent.slice(offset);

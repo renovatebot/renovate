@@ -1,4 +1,4 @@
-import { ReleaseType, inc } from 'semver';
+import semver, { ReleaseType } from 'semver';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { BumpPackageVersionResult } from '../types';
@@ -15,7 +15,7 @@ export function bumpPackageVersion(
   let newChartVersion: string;
   let bumpedContent = content;
   try {
-    newChartVersion = inc(currentValue, bumpVersion as ReleaseType);
+    newChartVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
     if (!newChartVersion) {
       throw new Error('semver inc failed');
     }

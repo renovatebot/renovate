@@ -56,16 +56,16 @@ export function rez2npm(input: string): string {
   if (upperBound.test(input)) {
     return input;
   }
-  if (ascendingRange.test(input)) {
-    const match = ascendingRange.exec(input);
-    const lowerBoundAsc = match.groups.range_lower_asc;
-    const upperBoundAsc = match.groups.range_upper_asc;
+  const matchAscRange = ascendingRange.exec(input);
+  if (matchAscRange?.groups) {
+    const lowerBoundAsc = matchAscRange.groups.range_lower_asc;
+    const upperBoundAsc = matchAscRange.groups.range_upper_asc;
     return plus2npm(lowerBoundAsc) + ' ' + plus2npm(upperBoundAsc);
   }
-  if (descendingRange.test(input)) {
-    const match = descendingRange.exec(input);
-    const upperBoundDesc = match.groups.range_upper_desc;
-    const lowerBoundDesc = match.groups.range_lower_desc;
+  const matchDscRange = descendingRange.exec(input);
+  if (matchDscRange?.groups) {
+    const upperBoundDesc = matchDscRange.groups.range_upper_desc;
+    const lowerBoundDesc = matchDscRange.groups.range_lower_desc;
     return plus2npm(lowerBoundDesc) + ' ' + plus2npm(upperBoundDesc);
   }
   return input;
@@ -87,16 +87,16 @@ export function rez2pep440(input: string): string {
   if (upperBound.test(input)) {
     return input;
   }
-  if (ascendingRange.test(input)) {
-    const match = ascendingRange.exec(input);
-    const lowerBoundAsc = match.groups.range_lower_asc;
-    const upperBoundAsc = match.groups.range_upper_asc;
+  const matchAscRange = ascendingRange.exec(input);
+  if (matchAscRange?.groups) {
+    const lowerBoundAsc = matchAscRange.groups.range_lower_asc;
+    const upperBoundAsc = matchAscRange.groups.range_upper_asc;
     return plus2npm(lowerBoundAsc) + ', ' + plus2npm(upperBoundAsc);
   }
-  if (descendingRange.test(input)) {
-    const match = descendingRange.exec(input);
-    const upperBoundDesc = match.groups.range_upper_desc;
-    const lowerBoundDesc = match.groups.range_lower_desc;
+  const matchDscRange = descendingRange.exec(input);
+  if (matchDscRange?.groups) {
+    const upperBoundDesc = matchDscRange.groups.range_upper_desc;
+    const lowerBoundDesc = matchDscRange.groups.range_lower_desc;
     return plus2npm(lowerBoundDesc) + ', ' + plus2npm(upperBoundDesc);
   }
   return input;
@@ -105,7 +105,7 @@ export function rez2pep440(input: string): string {
 export function pep4402rezInclusiveBound(input: string): string {
   return input
     .split(',')
-    .map((v) => v.trim().replace(regEx(/[<>=]/g), '')) // TODO #12071
+    .map((v) => v.trim().replace(regEx(/[<>=]/g), ''))
     .join('..');
 }
 

@@ -2,9 +2,9 @@ import later from '@breejs/later';
 import { parseCron } from '@cheap-glitch/mi-cron';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { fixShortHours } from '../../config/migration';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
 
 const minutesChar = '*';
 
@@ -12,10 +12,6 @@ const scheduleMappings: Record<string, string> = {
   'every month': 'before 3am on the first day of the month',
   monthly: 'before 3am on the first day of the month',
 };
-
-function fixShortHours(input: string): string {
-  return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
-}
 
 export function hasValidTimezone(
   timezone: string

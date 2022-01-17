@@ -1,10 +1,11 @@
-import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
+import { ECR } from '@aws-sdk/client-ecr';
+import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
 import { parse } from 'auth-header';
 import hasha from 'hasha';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { HostRule } from '../../types';
+import type { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';

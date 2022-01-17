@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
+import { re2 } from '../expose.cjs';
 
 import { logger } from '../logger';
 
@@ -8,8 +9,7 @@ let RegEx: RegExpConstructor;
 const cache = new Map<string, RegExp>();
 
 try {
-  // eslint-disable-next-line
-  const RE2 = require('re2');
+  const RE2 = re2();
   // Test if native is working
   new RE2('.*').exec('test');
   logger.debug('Using RE2 as regex engine');
@@ -19,17 +19,23 @@ try {
   RegEx = RegExp;
 }
 
-export function regEx(pattern: string | RegExp, flags?: string): RegExp {
-  const key = `${pattern.toString()}:${flags}`;
-
-  const cachedResult = cache.get(key);
-  if (cachedResult) {
-    return cachedResult;
+export function regEx(
+  pattern: string | RegExp,
+  flags?: string | undefined,
+  useCache = true
+): RegExp {
+  const key = flags ? `${pattern.toString()}:${flags}` : pattern.toString();
+  if (useCache) {
+    const cachedResult = cache.get(key);
+    if (cachedResult) {
+      return cachedResult;
+    }
   }
-
   try {
     const instance = new RegEx(pattern, flags);
-    cache.set(key, instance);
+    if (useCache) {
+      cache.set(key, instance);
+    }
     return instance;
   } catch (err) {
     const error = new Error(CONFIG_VALIDATION);
@@ -40,7 +46,7 @@ export function regEx(pattern: string | RegExp, flags?: string): RegExp {
 }
 
 export function escapeRegExp(input: string): string {
-  return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string // TODO #12071
+  return input.replace(regEx(/[.*+\-?^${}()|[\]\\]/g), '\\$&'); // $& means the whole matched string
 }
 
 const configValStart = regEx(/^!?\//);

@@ -1,4 +1,4 @@
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -91,7 +91,7 @@ export async function generateLockFile(
     }
 
     // TODO: don't assume package-lock.json is in the same directory
-    const lockFileName = join(cwd, filename);
+    const lockFileName = upath.join(cwd, filename);
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
@@ -113,16 +113,16 @@ export async function generateLockFile(
     // massage to shrinkwrap if necessary
     if (
       filename === 'npm-shrinkwrap.json' &&
-      (await pathExists(join(cwd, 'package-lock.json')))
+      (await pathExists(upath.join(cwd, 'package-lock.json')))
     ) {
       await move(
-        join(cwd, 'package-lock.json'),
-        join(cwd, 'npm-shrinkwrap.json')
+        upath.join(cwd, 'package-lock.json'),
+        upath.join(cwd, 'npm-shrinkwrap.json')
       );
     }
 
     // Read the result
-    lockFile = await readFile(join(cwd, filename), 'utf8');
+    lockFile = await readFile(upath.join(cwd, filename), 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

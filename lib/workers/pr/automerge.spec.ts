@@ -29,8 +29,7 @@ describe('workers/pr/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ automerged: true, branchRemoved: true });
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
     it('should indicate if automerge failed', async () => {
@@ -38,8 +37,10 @@ describe('workers/pr/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(false);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'PlatformRejection',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(1);
     });
     it('should automerge comment', async () => {
@@ -49,8 +50,7 @@ describe('workers/pr/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.ensureComment.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -62,8 +62,7 @@ describe('workers/pr/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.ensureComment.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -72,32 +71,40 @@ describe('workers/pr/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       git.isBranchModified.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'BranchModified',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'BranchNotGreen',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
       pr.canMerge = undefined;
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'PlatformNotReady',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
       pr.isConflicted = true;
       const res = await prAutomerge.checkAutoMerge(pr, config);
-      // FIXME: explicit assert condition
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'Conflicted',
+      });
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
   });
