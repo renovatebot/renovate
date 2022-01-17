@@ -121,6 +121,12 @@ export class DebDatasource extends Datasource {
     const extractedFile = extractionDirectory + '/' + hashedPackageUrl + '.txt';
     const extractedFileExists = await fs.pathExists(extractedFile);
 
+    let lastTimestamp: Date = null;
+    if (extractedFileExists) {
+      const stats = await fs.stat(extractedFile);
+      lastTimestamp = stats.ctime;
+    }
+
     for (let i = 0; i < DebDatasource.compressions.length; i++) {
       const compression = DebDatasource.compressions[i];
       const compressedFile =
@@ -129,10 +135,15 @@ export class DebDatasource extends Datasource {
         const wasUpdated = await this.downloadPackageFile(
           basePackageUrl,
           compression,
-          compressedFile
+          compressedFile,
+          lastTimestamp
         );
         if (wasUpdated || !extractedFileExists) {
-          await this.extract(compressedFile, compression, extractedFile);
+          try {
+            await this.extract(compressedFile, compression, extractedFile);
+          } finally {
+            await fs.rm(compressedFile);
+          }
         }
         return extractedFile;
       } catch (e) {
@@ -153,21 +164,16 @@ export class DebDatasource extends Datasource {
    * @param cfg
    * @param basePackageUrl
    * @param compression
+   * @param lastDownloadTimestamp indicating the last time the Packages file was requested,
+   *                               set to null if no previous download has occurred
    * @returns a boolean indicating if the file was modified
    */
   async downloadPackageFile(
     basePackageUrl: string,
     compression: string,
-    compressedFile: string
+    compressedFile: string,
+    lastDownloadTimestamp: Date
   ): Promise<boolean> {
-    let lastTimestamp: Date = null;
-    try {
-      const stats = await fs.stat(compressedFile);
-      lastTimestamp = stats.mtime;
-    } catch (e) {
-      // ignore if the file doesnt exist
-    }
-
     const packageUri = basePackageUrl + '/Packages.' + compression;
     logger.debug(
       'Downloading package file from ' + packageUri + ' as ' + compressedFile
@@ -175,10 +181,10 @@ export class DebDatasource extends Datasource {
     let needsToDownload = true;
     // we can use If-Modified-Since to avoid that we are redownloaded the file
     // More information can be found here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
-    if (lastTimestamp !== null) {
+    if (lastDownloadTimestamp !== null) {
       const downloadOptions: HttpOptions = {};
       downloadOptions.headers = {
-        'If-Modified-Since': lastTimestamp.toUTCString(),
+        'If-Modified-Since': lastDownloadTimestamp.toUTCString(),
       };
       const headResult = await this.http.head(packageUri, downloadOptions);
       needsToDownload = headResult.statusCode !== 304;

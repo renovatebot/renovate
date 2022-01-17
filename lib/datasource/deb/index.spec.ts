@@ -9,14 +9,18 @@ import { DebDatasource } from '.';
 describe('datasource/deb/index', () => {
   describe('getReleases', () => {
     const testPackagesFile = __dirname + '/test-data/Packages.gz';
+    const extractedTestFile = __dirname + '/test-data/Packages';
     const cacheDir = '/tmp/renovate-cache/';
-    const downloadFolder =
-      cacheDir + 'others/' + DebDatasource.downloadDirectory + '/';
-    const compressedPackageFile =
-      downloadFolder +
-      '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.gz';
-    // const extractedPackageFile =
-    //   '/tmp/renovate-cache/others/deb/extract/0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.txt';
+    // const downloadFolder =
+    //   cacheDir + 'others/' + DebDatasource.downloadDirectory + '/';
+    const extractionFolder =
+      cacheDir + 'others/' + DebDatasource.extractionDirectory + '/';
+    // const compressedPackageFile =
+    //   downloadFolder +
+    //   '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.gz';
+    const extractedPackageFile =
+      extractionFolder +
+      '0b01d9df270158d22c09c85f21b0f403d31b0da3cae4930fdb305df8f7749c27.txt';
 
     GlobalConfig.set({ cacheDir: cacheDir });
 
@@ -38,11 +42,11 @@ describe('datasource/deb/index', () => {
     });
 
     it('returns a valid version for the package `steam-devices` and does not require redownload', async () => {
-      // copy the Packages.gz file to the appropriate location
-      await mkdirp(downloadFolder);
-      await copyFile(testPackagesFile, compressedPackageFile);
-      const stats = await stat(compressedPackageFile);
-      const ts = stats.mtime;
+      // copy the Packages file to the appropriate location
+      await mkdirp(extractionFolder);
+      await copyFile(extractedTestFile, extractedPackageFile);
+      const stats = await stat(extractedPackageFile);
+      const ts = stats.ctime;
 
       httpMock
         .scope('http://ftp.debian.org')

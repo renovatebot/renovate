@@ -1,0 +1,42 @@
+Package: album
+Version: 4.15-1
+Installed-Size: 288
+Maintainer: Salvo 'LtWorf' Tomaselli <tiposchi@tiscali.it>
+Architecture: all
+Depends: perl:any, imagemagick
+Recommends: album-data
+Suggests: httpd, jhead, libav-tools
+Description: HTML photo album generator with theme support
+Homepage: http://marginalhacks.com/Hacks/album
+Description-md5: 3eaaefa453087570fb45ac51eeccbe7c
+Tag: implemented-in::perl, interface::commandline, interface::web,
+ role::program, scope::application, use::browsing, use::organizing,
+ web::application, works-with-format::html, works-with::image,
+ works-with::image:raster, works-with::text
+Section: non-free/web
+Priority: optional
+Filename: pool/non-free/a/album/album_4.15-1_all.deb
+Size: 89962
+MD5sum: 7ed9561371bc198dab9f88741b3386ae
+SHA256: 336d96db2998e9a80d00fef36ad38756463cfbd516d1f89b97ecdff22f2b6ec1
+
+Package: steam-devices
+Source: steam
+Version: 1.0.0.68-1
+Installed-Size: 86
+Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
+Architecture: all
+Replaces: steam (>= 1.0.0.68-1.), steam (<< 1.0.0.68-1), steam-launcher
+Recommends: steam
+Conflicts: steam-launcher
+Breaks: steam (>= 1.0.0.68-1.), steam (<< 1.0.0.68-1)
+Description: Device support for Steam-related hardware
+Multi-Arch: foreign
+Homepage: https://steamcommunity.com/linux
+Description-md5: f9b7ac135061c71ccbe81df2a894fb55
+Section: non-free/games
+Priority: optional
+Filename: pool/non-free/s/steam/steam-devices_1.0.0.68-1_all.deb
+Size: 34368
+MD5sum: 5d8c56b7c2d3e94bb12aee3663eb5638
+SHA256: c181ae5d218abda7a97b672ed9aa5d81da43523a2671f38facf9405954497ba2
