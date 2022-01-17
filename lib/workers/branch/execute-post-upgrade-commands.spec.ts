@@ -25,8 +25,8 @@ describe('workers/branch/execute-post-upgrade-commands', () => {
       const config: BranchConfig = {
         updatedPackageFiles: [],
         updatedArtifacts: [
-          { name: __dirname + '/__fixtures__/sandbox', contents: '' },
-          { name: __dirname + '/__fixtures__/artifact', contents: '' },
+          { name: 'some-existing-dir', contents: '' },
+          { name: 'artifact', contents: '' },
         ],
         artifactErrors: [],
         upgrades: [],
@@ -37,7 +37,16 @@ describe('workers/branch/execute-post-upgrade-commands', () => {
         not_added: [],
         deleted: [],
       } as StatusResult);
-      GlobalConfig.set({ allowedPostUpgradeCommands: ['some-command'] });
+      GlobalConfig.set({
+        localDir: __dirname,
+        allowedPostUpgradeCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
         commands,

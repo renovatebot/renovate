@@ -1,11 +1,15 @@
-import fs from './../util/fs';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { GlobalConfig } from '../../config/global';
 import { addMeta, logger } from '../../logger';
 import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
+import {
+  localPathExists,
+  localPathIsFile,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import type { File } from '../../util/git/types';
 import { regEx } from '../../util/regex';
@@ -41,13 +45,10 @@ export async function postUpgradeCommandsExecutor(
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles.concat(updatedArtifacts)) {
-        let stat;
-        try {
-          stat = await fs.promises.lstat(file.name);
-        } catch (err) {
-          stat = null;
-        }
-        if (file.name !== '|delete|' && stat?.isFile()) {
+        const canWriteFile =
+          !(await localPathExists(file.name)) ||
+          (await localPathIsFile(file.name));
+        if (file.name !== '|delete|' && canWriteFile) {
           let contents;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);

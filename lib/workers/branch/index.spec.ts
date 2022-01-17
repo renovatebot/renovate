@@ -10,6 +10,7 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
+import * as _fsUtil from '../../util/fs';
 import type { File, StatusResult } from '../../util/git/types';
 import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
@@ -42,6 +43,7 @@ jest.mock('../../util/exec');
 jest.mock('../../util/merge-confidence');
 jest.mock('../../util/sanitize');
 jest.mock('../../util/git');
+jest.mock('../../util/fs');
 jest.mock('fs-extra');
 jest.mock('../global/limits');
 
@@ -58,6 +60,7 @@ const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
+const fsUtil = mocked(_fsUtil);
 const limits = mocked(_limits);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
@@ -964,6 +967,12 @@ describe('workers/branch/index', () => {
 
       fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fsUtil.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fsUtil.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1045,6 +1054,12 @@ describe('workers/branch/index', () => {
 
       fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fsUtil.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fsUtil.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1115,6 +1130,12 @@ describe('workers/branch/index', () => {
 
       fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fsUtil.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fsUtil.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1193,11 +1214,23 @@ describe('workers/branch/index', () => {
         } as StatusResult);
 
       fs.outputFile.mockReturnValue();
-      fs.readFile
-        .mockResolvedValueOnce(Buffer.from('modified file content'))
-        .mockResolvedValueOnce(Buffer.from('this file will not exists'))
-        .mockResolvedValueOnce(Buffer.from('modified file content again'))
-        .mockResolvedValueOnce(Buffer.from('this file was once deleted'));
+      fsUtil.readLocalFile
+        .mockResolvedValueOnce(Buffer.from('modified file content') as never)
+        .mockResolvedValueOnce(
+          Buffer.from('this file will not exists') as never
+        )
+        .mockResolvedValueOnce(
+          Buffer.from('modified file content again') as never
+        )
+        .mockResolvedValueOnce(
+          Buffer.from('this file was once deleted') as never
+        );
+      fsUtil.localPathExists
+        .mockResolvedValue(true)
+        .mockResolvedValueOnce(true);
+      fsUtil.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1333,9 +1366,17 @@ describe('workers/branch/index', () => {
       } as StatusResult);
 
       fs.outputFile.mockReturnValue();
-      fs.readFile
-        .mockResolvedValueOnce(Buffer.from('modified file content'))
-        .mockResolvedValueOnce(Buffer.from('this file will not exists'));
+      fsUtil.readLocalFile
+        .mockResolvedValueOnce(Buffer.from('modified file content') as never)
+        .mockResolvedValueOnce(
+          Buffer.from('this file will not exists') as never
+        );
+      fsUtil.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fsUtil.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1410,6 +1451,7 @@ describe('workers/branch/index', () => {
         ).toString()
       ).toBe('modified file content');
     });
+
     it('returns when rebaseWhen=never', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
