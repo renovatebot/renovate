@@ -7,7 +7,8 @@ import { GitlabHttp } from '../../../../util/http/gitlab';
 import { ensureTrailingSlash } from '../../../../util/url';
 import type { ChangeLogFile, ChangeLogNotes } from '../types';
 
-const http = new GitlabHttp('gitlab-changelog');
+export const id = 'gitlab-changelog';
+const http = new GitlabHttp(id);
 
 export async function getTags(
   endpoint: string,
