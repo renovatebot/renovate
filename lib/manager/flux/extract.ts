@@ -95,11 +95,6 @@ export async function extractAllPackageFiles(
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    if (!content) {
-      logger.debug({ file }, 'Empty or non existent Flux manifest');
-      continue;
-    }
-
     const manifest = readManifest(content);
     if (manifest) {
       releases.set(file, manifest.releases);
@@ -118,6 +113,5 @@ export async function extractAllPackageFiles(
     }
   }
 
-  logger.debug({ packageFiles }, 'extracted all Flux manifests');
   return results.length ? results : null;
 }
