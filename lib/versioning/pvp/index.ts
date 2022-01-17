@@ -1,17 +1,97 @@
+import { regEx } from '../../util/regex';
+import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import { VersioningApi } from '../types';
 
 export const id = 'pvp';
 export const displayName = 'PVP';
 export const urls = ['https://pvp.haskell.org'];
-export const supportsRanges = true;
+export const supportsRanges = false;
 
-// https://pvp.haskell.org/#version-numbers
-type PVP = {
-  A: number; // Major
-  B: number; // Major
-  C: number; // Minor
-  additional: number[]; // First element is patch. Can be empty (no patch version)
-};
+/**
+ * At least 3 components and no leading 0s
+ */
+const regex = regEx(/^(([0-9])|([1-9][0-9]*)\.){2,}([0-9])|([1-9][0-9]]*)$/);
+class PvpVersioningApi extends GenericVersioningApi {
+  /**
+   *  https://pvp.haskell.org/#version-numbers
+   */
+  protected _parse(version: string): GenericVersion {
+    const [a, b, c, ...rest] = version.split('.');
+    const a_ = parseInt(a);
+    const b_ = parseInt(b);
+    const c_ = parseInt(c);
+    console.log(c_);
+    const additional = rest ?? [];
+
+    if (isNaN(a) || isNaN(b_) || isNaN(c_)) {
+      return null;
+    }
+
+    const additional_: number[] = [];
+    for (const ele of additional) {
+      const ele_ = parseInt(ele);
+      if (isNaN(ele_)) {
+        //throwInvalidVersionError(version);
+        return null; // TODO exit loop
+      } else {
+        additional_.push(ele_);
+      }
+    }
+
+    if (anyElementHasLeadingZero([a, b, c, ...additional].flat())) {
+      //throwInvalidVersionError(version);
+      return null;
+    }
+
+    return {
+      release: [a_, b_, c_, ...additional_],
+    };
+  }
+
+  // PVP has two major components A.B
+  // To keep compatability with Renovate's versioning API we will treat it as a float
+  override getMajor(version: string): number | null {
+    const { release } = this._parse(version);
+    return parseFloat(`${release[0]}.${release[1]}`);
+  }
+
+  override getMinor(version: string): number | null {
+    const { release } = this._parse(version);
+    return release[2];
+  }
+
+  override getPatch(version: string): number | null {
+    const { release } = this._parse(version);
+    return release[3];
+  }
+
+  /**
+   * Compare similar to GenericVersioningApi._compare implementation
+   * except 2.1.1.0 and 2.1.1 are not equivilant instead 2.1.1.0 > 2.1.1
+   */
+  override _compare(version: string, other: string): number {
+    const left = this._parse(version);
+    const right = this._parse(other);
+
+    // istanbul ignore if
+    if (!(left && right)) {
+      return 1;
+    }
+
+    // support variable length compare
+    const length = Math.max(left.release.length, right.release.length);
+    for (let i = 0; i < length; i += 1) {
+      // 2.1.0 > 2.1
+      const part1 = left.release[i] ?? -1;
+      const part2 = right.release[i] ?? -1;
+      if (part1 !== part2) {
+        return part1 - part2;
+      }
+    }
+
+    return 0;
+  }
+}
 
 const hasLeadingZero = (str: string): boolean =>
   str.length > 1 && str.startsWith('0');
@@ -27,139 +107,6 @@ const throwInvalidVersionError = (version: string): void => {
   );
 };
 
-const parse = (version: string): PVP => {
-  const [a, b, c, ...additional] = version.split('.');
-  if (anyElementHasLeadingZero([a, b, c, additional].flat())) {
-    throwInvalidVersionError(version);
-  }
-  const a_ = parseInt(a);
-  const b_ = parseInt(b);
-  const c_ = parseInt(c);
-  if (isNaN(a_) || isNaN(b_) || isNaN(c_)) {
-    throwInvalidVersionError(version);
-  }
-  const additional_: number[] = [];
-  additional.forEach((ele) => {
-    const ele_ = parseInt(ele);
-    if (isNaN(ele_)) {
-      throwInvalidVersionError(version);
-    } else {
-      additional_.push(ele_);
-    }
-  });
-  return { A: a_, B: b_, C: c_, additional: additional_ };
-};
+export const api: VersioningApi = new PvpVersioningApi();
 
-/**
- * Represents major version as a float
- * A.B
- * B is optional so if it is not included it defaults to A.0
- */
-const getMajor = (version: string): number => {
-  const { A, B } = parse(version);
-  return parseFloat(`${A}.${B}`);
-};
-
-const getMinor = (version: string): number => {
-  const { C } = parse(version);
-  return C;
-};
-
-// Patch version is optional
-const getPatch = (version: string): number | null => {
-  const { additional } = parse(version);
-  return additional[0];
-};
-
-const isValid = (version: string): boolean => {
-  try {
-    parse(version);
-  } catch {
-    return false;
-  }
-  return true;
-};
-
-/**
- * PVP does not specify a stable version
- * https://pvp.haskell.org/faq/#how-does-the-pvp-relate-to-semantic-versioning-semver
- */
-const isStable = (): boolean => true;
-
-const isVersion = (version: string): string | boolean | null =>
-  !!isValid(version);
-
-// credit: https://stackoverflow.com/a/22015930/12963115
-const zip = (a: number[], b: number[]): [number?, number?][] =>
-  Array.from(Array(Math.max(b.length, a.length)), (_, i) => [a[i], b[i]]);
-
-/**
- * Compare 2 versions
- * Note if the last component (D) is not defined it is considered less than 0
- * e.g. 2.0.1.0 > 2.0.1
- */
-const compare = (version: string, other: string): number => {
-  const versionA = parse(version);
-  const versionB = parse(other);
-
-  const versionAL = [
-    versionA.A,
-    versionA.B,
-    versionA.C,
-    ...versionA.additional,
-  ];
-  const versionBL = [
-    versionB.A,
-    versionB.B,
-    versionB.C,
-    ...versionB.additional,
-  ];
-  const zippedVersions = zip(versionAL, versionBL);
-
-  for (const currentComponents of zippedVersions) {
-    const [component, otherComponent] = currentComponents;
-    if (component > otherComponent || otherComponent === undefined) {
-      return 1;
-    } else if (component < otherComponent || component === undefined) {
-      return -1;
-    }
-  }
-
-  return 0;
-};
-
-const equals = (a: string, b: string): boolean => compare(a, b) === 0;
-const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
-
-/**
- * Verifies the version is a single version but since we don't handle non single versions
- * so if it fails to parse then it's not a single version.
- */
-const isSingleVersion = (version: string): string | boolean | null => {
-  try {
-    parse(version);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-export const api: VersioningApi = {
-  equals,
-  getMajor,
-  getMinor,
-  getPatch,
-  isCompatible: isVersion,
-  isGreaterThan,
-  isSingleVersion,
-  isStable,
-  isValid,
-  isVersion,
-  sortVersions: compare,
-  // TODO Range related functions not sure how to implement these if we won't be handling ranges
-  getNewValue,
-  isLessThanRange,
-  matches,
-  getSatisfyingVersion,
-  minSatisfyingVersion,
-};
+export default api;
