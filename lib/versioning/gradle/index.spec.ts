@@ -1,9 +1,4 @@
-import {
-  compare,
-  parseMavenBasedRange,
-  parsePrefixRange,
-  valid,
-} from './compare';
+import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
 import { api } from '.';
 
 describe('versioning/gradle/index', () => {
@@ -116,16 +111,6 @@ describe('versioning/gradle/index', () => {
   `('parseMavenBasedRange("$rangeStr") is null', ({ rangeStr }) => {
     const range = parseMavenBasedRange(rangeStr);
     expect(range).toBeNull();
-  });
-
-  test.each`
-    version      | expected
-    ${'1'}       | ${[{ type: 1, val: 1 }]}
-    ${undefined} | ${null}
-    ${'latest'}  | ${null}
-    ${'1!a!1'}   | ${null}
-  `('valid("$input") === $expected', ({ version, expected }) => {
-    expect(JSON.stringify(valid(version))).toBe(JSON.stringify(expected));
   });
 
   test.each`
