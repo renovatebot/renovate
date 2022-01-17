@@ -50,9 +50,16 @@ export interface File {
   executable?: boolean;
 }
 
-export type CommitFilesConfig = {
+export interface CommitFilesConfig {
   branchName: string;
   files: File[];
   message: string;
   force?: boolean;
-};
+}
+
+export interface PushFilesConfig {
+  message: string;
+  branchName: string;
+  additions: File[];
+  deletions: string[];
+}

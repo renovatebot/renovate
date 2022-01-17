@@ -2541,7 +2541,8 @@ describe('platform/github/index', () => {
 
       const res = await github.pushFiles({
         branchName: 'foo/bar',
-        files: [{ name: 'foo.bar', contents: 'foobar' }],
+        additions: [{ name: 'foo.bar', contents: 'foobar' }],
+        deletions: [],
         message: 'foobar',
       });
 
@@ -2551,7 +2552,8 @@ describe('platform/github/index', () => {
     it('returns null if executable files are found', async () => {
       const res = await github.pushFiles({
         branchName: 'foo/bar',
-        files: [{ name: 'foo.bar', contents: 'foobar', executable: true }],
+        additions: [{ name: 'foo.bar', contents: 'foobar', executable: true }],
+        deletions: [],
         message: 'foobar',
       });
 
@@ -2565,7 +2567,8 @@ describe('platform/github/index', () => {
 
       const res = await github.pushFiles({
         branchName: 'foo/bar',
-        files: [{ name: 'foo.bar', contents: 'foobar' }],
+        additions: [{ name: 'foo.bar', contents: 'foobar' }],
+        deletions: [],
         message: 'foobar',
       });
 
@@ -2582,7 +2585,8 @@ describe('platform/github/index', () => {
 
       const res = await github.pushFiles({
         branchName: 'foo/bar',
-        files: [{ name: 'foo.bar', contents: 'foobar' }],
+        additions: [{ name: 'foo.bar', contents: 'foobar' }],
+        deletions: [],
         message: 'foobar',
       });
 

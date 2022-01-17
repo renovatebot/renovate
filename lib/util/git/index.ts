@@ -32,6 +32,7 @@ import type {
   CommitFilesConfig,
   CommitSha,
   LocalConfig,
+  PushFilesConfig,
   StatusResult,
   StorageConfig,
 } from './types';
@@ -677,9 +678,9 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
-type PushCallback = (x: CommitFilesConfig) => Promise<string | null>;
+type PushCallback = (x: PushFilesConfig) => Promise<string | null>;
 
-async function pushFiles({ branchName }: CommitFilesConfig): Promise<string> {
+async function pushFiles({ branchName }: PushFilesConfig): Promise<string> {
   const pushOptions: TaskOptions = {
     '--force-with-lease': null,
     '-u': null,
@@ -807,10 +808,15 @@ export async function commitFiles(
       return null;
     }
 
-    const filteredFiles = files.filter(
-      ({ name }) => !ignoredFiles.includes(name)
-    );
-    const pushConfig = { ...commitConfig, files: filteredFiles };
+    const pushConfig: PushFilesConfig = {
+      message,
+      branchName,
+      additions: files.filter(
+        ({ name }) =>
+          addedModifiedFiles.includes(name) && !ignoredFiles.includes(name)
+      ),
+      deletions: deletedFiles,
+    };
     let commitSha: string | null = null;
     // istanbul ignore if
     if (pushCallback) {

@@ -5,7 +5,7 @@ import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { commitFiles } from '../../util/git';
-import type { CommitFilesConfig } from '../../util/git/types';
+import type { PushFilesConfig } from '../../util/git/types';
 import { sanitize } from '../../util/sanitize';
 import type { BranchConfig } from '../types';
 
@@ -60,6 +60,6 @@ export function commitFilesToBranch(
   // API will know whether to create new branch or not
   // istanbul ignore next
   return config.platformCommit && !!platform.pushFiles
-    ? commitFiles(commitConfig, (x: CommitFilesConfig) => platform.pushFiles(x))
+    ? commitFiles(commitConfig, (x: PushFilesConfig) => platform.pushFiles(x))
     : commitFiles(commitConfig);
 }
