@@ -460,10 +460,6 @@ export async function processBranch(
           result: BranchResult.NoWork,
         };
       }
-
-      logger.debug(
-        'Branch will be rebased if necessary despite of stopRebasingLabel since Rebase checkbox is checked in PR body'
-      );
     }
 
     const commitSha = await commitFilesToBranch(config);
