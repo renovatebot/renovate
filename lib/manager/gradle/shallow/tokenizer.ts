@@ -35,7 +35,7 @@ const lexer = moo.states({
     [TokenType.Comma]: ',',
     [TokenType.Operator]: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/, // TODO #12870
     [TokenType.Assignment]: '=',
-    [TokenType.Word]: { match: /[a-zA-Z$_][a-zA-Z0-9$_]+/ }, // TODO #12870
+    [TokenType.Word]: { match: /[a-zA-Z$_][a-zA-Z0-9$_]*/ }, // TODO #12870
     [TokenType.LeftParen]: { match: '(' },
     [TokenType.RightParen]: { match: ')' },
     [TokenType.LeftBracket]: { match: '[' },
