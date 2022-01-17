@@ -441,7 +441,7 @@ export async function processBranch(
     const forcedManually = userRebaseRequested || !branchExists;
     config.forceCommit = forcedManually || branchPr?.isConflicted;
 
-    const stopRebasingLabelPresents = branchPr?.labels?.includes(
+    const stopRebasingLabelPresent = branchPr?.labels?.includes(
       config.stopRebasingLabel
     );
 
