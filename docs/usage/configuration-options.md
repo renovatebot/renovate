@@ -1769,7 +1769,7 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 ## platformCommit
 
-Commits peformed by platform-native API will be marked as verified.
+Commits will be performed by the platform API rather than using `git` directly.
 Supports GitHub-only.
 
 ## postUpdateOptions
