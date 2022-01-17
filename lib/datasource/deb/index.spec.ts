@@ -3,7 +3,6 @@ import { getPkgReleases } from '..';
 import type { GetPkgReleasesConfig } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { GlobalConfig } from '../../config/global';
-import type { DebLanguageConfig } from './types';
 import { DebDatasource } from '.';
 
 describe('datasource/deb/index', () => {
@@ -24,7 +23,7 @@ describe('datasource/deb/index', () => {
 
     GlobalConfig.set({ cacheDir: cacheDir });
 
-    let cfg: GetPkgReleasesConfig & DebLanguageConfig; // this can be modified within the test cases
+    let cfg: GetPkgReleasesConfig; // this can be modified within the test cases
 
     beforeEach(async () => {
       jest.resetAllMocks();
@@ -32,9 +31,6 @@ describe('datasource/deb/index', () => {
       cfg = {
         datasource: 'deb',
         depName: 'steam-devices',
-        deb: {
-          defaultBinaryArch: 'amd64',
-        },
         registryUrls: [
           'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
         ],
@@ -65,7 +61,7 @@ describe('datasource/deb/index', () => {
     });
 
     describe('without local version', () => {
-      beforeEach(async () => {
+      beforeEach(() => {
         httpMock
           .scope('http://ftp.debian.org')
           .get('/debian/dists/stable/non-free/binary-amd64/Packages.gz')

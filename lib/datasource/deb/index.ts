@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 import * as fs from '../../util/fs';
 import type { HttpOptions } from '../../util/http';
 import { Datasource } from '../datasource';
-import type { DebLanguageConfig, PackageDescription } from './types';
+import type { PackageDescription } from './types';
 
 /**
  * @brief This datasource allows to download
@@ -221,9 +221,7 @@ export class DebDatasource extends Datasource {
     return lhs.homepage === rhs.homepage;
   }
 
-  async getReleases(
-    cfg: GetReleasesConfig & DebLanguageConfig
-  ): Promise<ReleaseResult | null> {
+  async getReleases(cfg: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fullComponentUrls: string[] = [];
     // when specifying n repository urls, this will be called n times in each call,
     // cfg.registryUrl is filled with the next element of cfg.registryUrls
