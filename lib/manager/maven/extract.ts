@@ -375,6 +375,9 @@ export async function extractAllPackageFiles(
             { registries, packageFile },
             'found registryUrls in settings.xml'
           );
+          if (!config.registryUrls) {
+            config.registryUrls = [];
+          }
           config.registryUrls.push(...registries);
         }
       } else {

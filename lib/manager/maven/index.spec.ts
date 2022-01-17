@@ -9,6 +9,7 @@ const pomContent = loadFixture('simple.pom.xml');
 const pomParent = loadFixture('parent.pom.xml');
 const pomChild = loadFixture('child.pom.xml');
 const origContent = loadFixture('grouping.pom.xml');
+const settingsContent = loadFixture('settings.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
@@ -26,6 +27,22 @@ describe('manager/maven/index', () => {
       fs.readLocalFile.mockResolvedValueOnce('invalid content');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
       expect(res).toBeEmptyArray();
+    });
+
+    it('should return empty for a settings file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(settingsContent);
+      const config = {};
+      const res = await extractAllPackageFiles(config, ['settings.xml']);
+      expect(res).toBeEmptyArray();
+      expect(config).toMatchSnapshot({
+        registryUrls: [
+          'https://artifactory.company.com/artifactory/my-maven-repo',
+          'https://repo.adobe.com/nexus/content/groups/public',
+          'https://repo.adobe.com/v2/nexus/content/groups/public',
+          'https://repo.adobe.com/v3/nexus/content/groups/public',
+          'https://repo.adobe.com/v4/nexus/content/groups/public',
+        ],
+      });
     });
 
     it('should return package files info', async () => {
