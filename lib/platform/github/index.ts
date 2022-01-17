@@ -1753,11 +1753,10 @@ export async function pushFiles({
     .filter(({ executable }) => !!executable)
     .map(({ name }) => name);
   if (executableFiles.length) {
-    logger.debug(
+    logger.warn(
       { branchName, executableFiles },
       'Platform-native commit: found executable files'
     );
-    return null;
   }
 
   const additions = files.map(({ name: path, contents }) => ({
@@ -1781,7 +1780,7 @@ export async function pushFiles({
     }>(commitFilesMutation, { variables });
 
     if (errors) {
-      logger.debug(
+      logger.warn(
         { branchName, errors },
         'Platform-native commit: GraphQL errors'
       );
