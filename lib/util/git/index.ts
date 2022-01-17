@@ -677,6 +677,8 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
+type PushCallback = (x: CommitFilesConfig) => Promise<string | null>;
+
 async function pushFiles({ branchName }: CommitFilesConfig): Promise<string> {
   const pushOptions: TaskOptions = {
     '--force-with-lease': null,
@@ -701,7 +703,7 @@ async function pushFiles({ branchName }: CommitFilesConfig): Promise<string> {
 
 export async function commitFiles(
   commitConfig: CommitFilesConfig,
-  pushCallback = pushFiles
+  pushCallback?: PushCallback
 ): Promise<CommitSha | null> {
   const { branchName, files, message, force = false } = commitConfig;
   await syncGit();
@@ -809,10 +811,12 @@ export async function commitFiles(
       ({ name }) => !ignoredFiles.includes(name)
     );
     const pushConfig = { ...commitConfig, files: filteredFiles };
-    const commitSha =
-      pushCallback === pushFiles
-        ? await pushFiles(pushConfig)
-        : (await pushCallback(pushConfig)) ?? (await pushFiles(pushConfig));
+    let commitSha: string | null = null;
+    // istanbul ignore if
+    if (pushCallback) {
+      commitSha = await pushCallback(pushConfig);
+    }
+    commitSha ??= await pushFiles(pushConfig);
     config.branchCommits[branchName] = commitSha;
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
