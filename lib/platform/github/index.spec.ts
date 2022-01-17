@@ -2549,11 +2549,6 @@ describe('platform/github/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null if executable files are found', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      scope.post('/graphql').replyWithError('unknown');
-
       const res = await github.pushFiles({
         branchName: 'foo/bar',
         files: [{ name: 'foo.bar', contents: 'foobar', executable: true }],
@@ -2561,7 +2556,6 @@ describe('platform/github/index', () => {
       });
 
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null on REST error', async () => {
       const scope = httpMock.scope(githubApiHost);
@@ -2569,7 +2563,7 @@ describe('platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       scope.post('/graphql').replyWithError('unknown');
 
-      const res = github.pushFiles({
+      const res = await github.pushFiles({
         branchName: 'foo/bar',
         files: [{ name: 'foo.bar', contents: 'foobar' }],
         message: 'foobar',
@@ -2586,7 +2580,7 @@ describe('platform/github/index', () => {
         .post('/graphql')
         .reply(200, { errors: { message: 'Something is wrong' } });
 
-      const res = github.pushFiles({
+      const res = await github.pushFiles({
         branchName: 'foo/bar',
         files: [{ name: 'foo.bar', contents: 'foobar' }],
         message: 'foobar',
