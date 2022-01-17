@@ -114,7 +114,7 @@ describe('config/secrets', () => {
           { hostType: 'npm', token: '{{ secrets.ARTIFACTORY_TOKEN }}' },
         ],
       };
-      const res = applySecretsToConfig(config, undefined, false);
+      const res = applySecretsToConfig(config, config.secrets, false);
       expect(res).toStrictEqual({
         secrets: { ARTIFACTORY_TOKEN: '123test==' },
         hostRules: [{ hostType: 'npm', token: '123test==' }],
@@ -126,7 +126,7 @@ describe('config/secrets', () => {
         secrets: { SECRET_MANAGER: 'npm' },
         allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
-      const res = applySecretsToConfig(config, undefined, false);
+      const res = applySecretsToConfig(config, config.secrets, false);
       expect(res).toStrictEqual({
         secrets: { SECRET_MANAGER: 'npm' },
         allowedManagers: ['npm'],

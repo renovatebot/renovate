@@ -85,8 +85,8 @@ function replaceSecretsInString(
 
 function replaceSecretsinObject(
   config_: RenovateConfig,
-  secrets: Record<string, string> = {},
-  deleteSecrets = true
+  secrets: Record<string, string>,
+  deleteSecrets: boolean
 ): RenovateConfig {
   const config = { ...config_ };
   if (deleteSecrets) {
