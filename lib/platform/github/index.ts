@@ -109,6 +109,8 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitHub personal access token');
   }
 
+  platformConfig.isGHApp = token.startsWith('x-access-token:');
+
   if (endpoint) {
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(platformConfig.endpoint);
@@ -148,11 +150,21 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   try {
-    const res = await githubApi.getJson<{ full_name: string }[]>(
-      'user/repos?per_page=100',
-      { paginate: 'all' }
-    );
-    return res.body.map((repo) => repo.full_name);
+    if (platformConfig.isGHApp) {
+      const res = await githubApi.getJson<{
+        repositories: { full_name: string }[];
+      }>(`installation/repositories?per_page=100`, {
+        paginationField: 'repositories',
+        paginate: 'all',
+      });
+      return res.body.repositories.map((repo) => repo.full_name);
+    } else {
+      const res = await githubApi.getJson<{ full_name: string }[]>(
+        `user/repos?per_page=100`,
+        { paginate: 'all' }
+      );
+      return res.body.map((repo) => repo.full_name);
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
