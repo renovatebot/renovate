@@ -1770,6 +1770,7 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
+- `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
