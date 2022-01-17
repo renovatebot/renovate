@@ -194,7 +194,6 @@ Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
 List of repositories to run on.
-Auto discovery does not work with a GitHub App.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
