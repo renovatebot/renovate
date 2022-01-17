@@ -207,7 +207,7 @@ export function valid(input: string): Token[] | null {
 
   const tokens = tokenize(input);
 
-  return tokens;
+  return tokens?.length ? tokens : null;
 }
 
 export function isVersion(input: string): boolean {
