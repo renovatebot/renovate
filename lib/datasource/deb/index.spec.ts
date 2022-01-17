@@ -36,7 +36,7 @@ describe('datasource/deb/index', () => {
           defaultBinaryArch: 'amd64',
         },
         registryUrls: [
-          'http://ftp.debian.org/debian?suite=stable&components=non-free',
+          'http://ftp.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
         ],
       };
     });
@@ -93,7 +93,7 @@ describe('datasource/deb/index', () => {
           .replyWithFile(200, testPackagesFile2);
 
         cfg.registryUrls.push(
-          'http://ftp.debian.org/debian?suite=unstable&components=non-free'
+          'http://ftp.debian.org/debian?suite=unstable&components=non-free&binaryArch=amd64'
         );
 
         const res = await getPkgReleases(cfg);

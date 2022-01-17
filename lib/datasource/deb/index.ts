@@ -56,12 +56,6 @@ export class DebDatasource extends Datasource {
     'https://ftp.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
   ];
 
-  override readonly defaultConfig: DebLanguageConfig = {
-    deb: {
-      defaultBinaryArch: 'amd64',
-    },
-  };
-
   override readonly caching = false; // TODO: how can this be used?
 
   /**
@@ -265,10 +259,15 @@ export class DebDatasource extends Datasource {
         continue;
       }
 
-      let binaryArch = cfg.deb.defaultBinaryArch;
-      if (url.searchParams.has('binaryArch')) {
-        binaryArch = url.searchParams.get('binaryArch');
+      if (!url.searchParams.has('binaryArch')) {
+        logger.warn(
+          'No binaryArch query parameter for deb repo url ' +
+            aptUrl +
+            ' - see documentation'
+        );
+        continue;
       }
+      const binaryArch: string = url.searchParams.get('binaryArch');
 
       const components = url.searchParams.get('components').split(',');
       url.searchParams.delete('release');
