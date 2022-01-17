@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
-import * as gitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { ApplicationDefinition } from './types';
@@ -9,10 +9,10 @@ import { fileTestRegex } from './util';
 function createDependency(
   definition: ApplicationDefinition
 ): PackageDependency {
-  const source = definition.spec?.source;
+  const source = definition?.spec?.source;
 
   if (
-    source == null ||
+    !source ||
     !is.nonEmptyString(source.repoURL) ||
     !is.nonEmptyString(source.targetRevision)
   ) {
@@ -31,7 +31,7 @@ function createDependency(
   return {
     depName: source.repoURL,
     currentValue: source.targetRevision,
-    datasource: gitTags.id,
+    datasource: GitTagsDatasource.id,
   };
 }
 

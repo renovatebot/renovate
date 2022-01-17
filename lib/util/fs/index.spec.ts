@@ -2,7 +2,7 @@ import { withDir } from 'tmp-promise';
 import { join } from 'upath';
 import { envMock } from '../../../test/exec-util';
 import { mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import * as _env from '../exec/env';
 import {
   ensureCacheDir,
@@ -22,7 +22,7 @@ const env = mocked(_env);
 describe('util/fs/index', () => {
   describe('readLocalFile', () => {
     beforeEach(() => {
-      setGlobalConfig({ localDir: '' });
+      GlobalConfig.set({ localDir: '' });
     });
 
     it('reads buffer', async () => {
@@ -40,10 +40,10 @@ describe('util/fs/index', () => {
 
   describe('localPathExists', () => {
     it('returns true for file', async () => {
-      expect(await localPathExists(__filename)).toBe(true);
+      expect(await localPathExists(__filename)).toBeTrue();
     });
     it('returns true for directory', async () => {
-      expect(await localPathExists(getSubDirectory(__filename))).toBe(true);
+      expect(await localPathExists(getSubDirectory(__filename))).toBeTrue();
     });
     it('returns false', async () => {
       expect(await localPathExists(__filename.replace('.ts', '.txt'))).toBe(
@@ -56,7 +56,7 @@ describe('util/fs/index', () => {
     it('returns path for file', async () => {
       await withDir(
         async (localDir) => {
-          setGlobalConfig({
+          GlobalConfig.set({
             localDir: localDir.path,
           });
 
@@ -110,7 +110,7 @@ describe('util/fs/index', () => {
     it('returns dir content', async () => {
       await withDir(
         async (localDir) => {
-          setGlobalConfig({
+          GlobalConfig.set({
             localDir: localDir.path,
           });
           await writeLocalFile('test/Cargo.toml', '');
@@ -138,7 +138,7 @@ describe('util/fs/index', () => {
     it('return empty array for non existing directory', async () => {
       await withDir(
         async (localDir) => {
-          setGlobalConfig({
+          GlobalConfig.set({
             localDir: localDir.path,
           });
           await expect(readLocalDirectory('somedir')).rejects.toThrow();
@@ -170,7 +170,7 @@ describe('util/fs/index', () => {
         ...envMock.basic,
       });
 
-      setGlobalConfig({
+      GlobalConfig.set({
         cacheDir: join(dirFromConfig),
       });
 

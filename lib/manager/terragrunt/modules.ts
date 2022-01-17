@@ -1,4 +1,4 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { logger } from '../../logger';
@@ -24,7 +24,6 @@ export function extractTerragruntModule(
   const moduleName = 'terragrunt';
   const result = extractTerragruntProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // eslint-disable-next-line no-param-reassign
     dep.managerData.terragruntDependencyType =
       TerragruntDependencyTypes.terragrunt;
   });
@@ -34,7 +33,7 @@ export function extractTerragruntModule(
 export function analyseTerragruntModule(dep: PackageDependency): void {
   const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
-  /* eslint-disable no-param-reassign */
+
   if (githubRefMatch) {
     dep.depType = 'github';
     dep.lookupName = githubRefMatch.groups.project.replace(regEx(/\.git$/), '');
@@ -53,7 +52,7 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
       dep.lookupName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = datasourceGitTags.id;
+    dep.datasource = GitTagsDatasource.id;
   } else if (dep.managerData.source) {
     const moduleParts = dep.managerData.source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
@@ -71,5 +70,4 @@ export function analyseTerragruntModule(dep: PackageDependency): void {
     logger.debug({ dep }, 'terragrunt dep has no source');
     dep.skipReason = SkipReason.NoSource;
   }
-  /* eslint-enable no-param-reassign */
 }

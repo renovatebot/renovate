@@ -5,7 +5,7 @@ import { mergeChildConfig } from '../config';
 import type { PackageRule, PackageRuleInputConfig } from '../config/types';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
-import { configRegexPredicate, isConfigRegex, regEx } from './regex';
+import { configRegexPredicate, regEx } from './regex';
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -29,6 +29,7 @@ function matchesRule(
     manager,
     datasource,
   } = inputConfig;
+  const unconstrainedValue = lockedVersion && is.undefined(currentValue);
   // Setting empty arrays simplifies our logic later
   const matchFiles = packageRule.matchFiles || [];
   const matchPaths = packageRule.matchPaths || [];
@@ -99,7 +100,14 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchBaseBranches.length) {
-    const isMatch = matchBaseBranches.includes(baseBranch);
+    const isMatch = matchBaseBranches.some((matchBaseBranch): boolean => {
+      const isAllowedPred = configRegexPredicate(matchBaseBranch);
+      if (isAllowedPred) {
+        return isAllowedPred(baseBranch);
+      }
+      return matchBaseBranch === baseBranch;
+    });
+
     if (!isMatch) {
       return false;
     }
@@ -193,8 +201,9 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchSourceUrlPrefixes.length) {
+    const upperCaseSourceUrl = sourceUrl?.toUpperCase();
     const isMatch = matchSourceUrlPrefixes.some((prefix) =>
-      sourceUrl?.startsWith(prefix)
+      upperCaseSourceUrl?.startsWith(prefix.toUpperCase())
     );
     if (!isMatch) {
       return false;
@@ -204,16 +213,20 @@ function matchesRule(
   if (matchCurrentVersion) {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
-    if (isConfigRegex(matchCurrentVersionStr)) {
-      const matches = configRegexPredicate(matchCurrentVersionStr);
-      if (!matches(currentValue)) {
+    const matchCurrentVersionPred = configRegexPredicate(
+      matchCurrentVersionStr
+    );
+    if (matchCurrentVersionPred) {
+      if (!unconstrainedValue && !matchCurrentVersionPred(currentValue)) {
         return false;
       }
       positiveMatch = true;
     } else if (version.isVersion(matchCurrentVersionStr)) {
       let isMatch = false;
       try {
-        isMatch = version.matches(matchCurrentVersionStr, currentValue);
+        isMatch =
+          unconstrainedValue ||
+          version.matches(matchCurrentVersionStr, currentValue);
       } catch (err) {
         // Do nothing
       }

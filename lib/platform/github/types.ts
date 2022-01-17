@@ -54,6 +54,14 @@ export interface GhGraphQlPr extends GhPr {
   labels: string[] & { nodes?: { name: string }[] };
 }
 
+export interface PlatformConfig {
+  hostType: string;
+  endpoint: string;
+  isGhe?: boolean;
+  gheVersion?: string | null;
+  isGHApp?: boolean;
+}
+
 export interface LocalRepoConfig {
   repositoryName: string;
   pushProtection: boolean;
@@ -66,15 +74,16 @@ export interface LocalRepoConfig {
   openPrList: PrList | null;
   prList: GhPr[] | null;
   issueList: any[] | null;
-  mergeMethod: string;
+  mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
-  isGhe: boolean;
   renovateUsername: string;
   productLinks: any;
   ignorePrAuthor: boolean;
   branchPrs: Pr[];
+  autoMergeAllowed: boolean;
+  hasIssuesEnabled: boolean;
 }
 
 export type BranchProtection = any;
@@ -84,6 +93,8 @@ export interface GhRepo {
   isFork: boolean;
   isArchived: boolean;
   nameWithOwner: string;
+  autoMergeAllowed: boolean;
+  hasIssuesEnabled: boolean;
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;

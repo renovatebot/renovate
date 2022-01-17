@@ -1,7 +1,9 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import { DateTime } from 'luxon';
+import semver from 'semver';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -19,7 +21,6 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { getCache } from '../../util/cache/repository';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
@@ -65,6 +66,7 @@ import {
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
+  PlatformConfig,
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
@@ -73,13 +75,29 @@ const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig = {} as any;
 
-const defaults = {
+const platformConfig: PlatformConfig = {
   hostType: PlatformId.Github,
   endpoint: 'https://api.github.com/',
 };
 
 const escapeHash = (input: string): string =>
   input ? input.replace(regEx(/#/g), '%23') : input;
+
+export async function detectGhe(token: string): Promise<void> {
+  platformConfig.isGhe =
+    URL.parse(platformConfig.endpoint).host !== 'api.github.com';
+  if (platformConfig.isGhe) {
+    const gheHeaderKey = 'x-github-enterprise-version';
+    const gheQueryRes = await githubApi.headJson('/', { token });
+    const gheHeaders: Record<string, string | string[]> =
+      gheQueryRes?.headers || {};
+    const [, gheVersion] =
+      Object.entries(gheHeaders).find(
+        ([k]) => k.toLowerCase() === gheHeaderKey
+      ) ?? [];
+    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
+  }
+}
 
 export async function initPlatform({
   endpoint,
@@ -91,47 +109,62 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitHub personal access token');
   }
 
+  platformConfig.isGHApp = token.startsWith('x-access-token:');
+
   if (endpoint) {
-    defaults.endpoint = ensureTrailingSlash(endpoint);
-    githubHttp.setBaseUrl(defaults.endpoint);
+    platformConfig.endpoint = ensureTrailingSlash(endpoint);
+    githubHttp.setBaseUrl(platformConfig.endpoint);
   } else {
-    logger.debug('Using default github endpoint: ' + defaults.endpoint);
+    logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
   }
+
+  await detectGhe(token);
+
   let userDetails: UserDetails;
   let renovateUsername: string;
   if (username) {
     renovateUsername = username;
   } else {
-    userDetails = await getUserDetails(defaults.endpoint, token);
+    userDetails = await getUserDetails(platformConfig.endpoint, token);
     renovateUsername = userDetails.username;
   }
   let discoveredGitAuthor: string;
   if (!gitAuthor) {
-    userDetails = await getUserDetails(defaults.endpoint, token);
-    const userEmail = await getUserEmail(defaults.endpoint, token);
+    userDetails = await getUserDetails(platformConfig.endpoint, token);
+    const userEmail = await getUserEmail(platformConfig.endpoint, token);
     if (userEmail) {
       discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
     }
   }
-  logger.debug('Authenticated as GitHub user: ' + renovateUsername);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
+  logger.debug({ platformConfig, renovateUsername }, 'Platform config');
+  const platformResult: PlatformResult = {
+    endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
 
-  return platformConfig;
+  return platformResult;
 }
 
 // Get all repositories that the user has access to
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   try {
-    const res = await githubApi.getJson<{ full_name: string }[]>(
-      'user/repos?per_page=100',
-      { paginate: 'all' }
-    );
-    return res.body.map((repo) => repo.full_name);
+    if (platformConfig.isGHApp) {
+      const res = await githubApi.getJson<{
+        repositories: { full_name: string }[];
+      }>(`installation/repositories?per_page=100`, {
+        paginationField: 'repositories',
+        paginate: 'all',
+      });
+      return res.body.repositories.map((repo) => repo.full_name);
+    } else {
+      const res = await githubApi.getJson<{ full_name: string }[]>(
+        `user/repos?per_page=100`,
+        { paginate: 'all' }
+      );
+      return res.body.map((repo) => repo.full_name);
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
@@ -153,9 +186,14 @@ async function getBranchProtection(
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
-  const url = `repos/${repo}/contents/${fileName}`;
+  const repo = repoName ?? config.repository;
+  let url = `repos/${repo}/contents/${fileName}`;
+  if (branchOrTag) {
+    url += `?ref=` + branchOrTag;
+  }
   const res = await githubApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -164,9 +202,13 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -184,26 +226,36 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { repository, cloneSubmodules, ignorePrAuthor } as any;
+  config = {
+    repository,
+    cloneSubmodules,
+    ignorePrAuthor,
+  } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
     logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
-    defaults.endpoint = endpoint;
+    platformConfig.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
     hostType: PlatformId.Github,
-    url: defaults.endpoint,
+    url: platformConfig.endpoint,
   });
-  config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
+    let infoQuery = repoInfoQuery;
+
+    if (platformConfig.isGhe) {
+      infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
+      infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
+    }
+
     const res = await githubApi.requestGraphql<{
       repository: GhRepo;
-    }>(repoInfoQuery, {
+    }>(infoQuery, {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
@@ -246,6 +298,8 @@ export async function initRepo({
       // This happens if we don't have Administrator read access, it is not a critical error
       logger.debug('Could not find allowed merge methods for repo');
     }
+    config.autoMergeAllowed = repo.autoMergeAllowed;
+    config.hasIssuesEnabled = repo.hasIssuesEnabled;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -370,23 +424,22 @@ export async function initRepo({
       );
       // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
       // with the base commit from the parent repository
+      const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
+      const sha = repo.defaultBranchRef.target.oid;
       try {
         logger.debug(
-          'Updating forked repository default sha to match upstream'
+          `Updating forked repository default sha ${sha} to match upstream`
         );
-        await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
-          {
-            body: {
-              sha: repo.defaultBranchRef.target.oid,
-              force: true,
-            },
-            token: forkToken || opts.token,
-          }
-        );
+        await githubApi.patchJson(url, {
+          body: {
+            sha,
+            force: true,
+          },
+          token: forkToken || opts.token,
+        });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
-          { err: err.err || err },
+          { url, sha, err: err.err || err },
           'Error updating fork from upstream - cannot continue'
         );
         if (err instanceof ExternalHostError) {
@@ -402,7 +455,7 @@ export async function initRepo({
     }
   }
 
-  const parsedEndpoint = URL.parse(defaults.endpoint);
+  const parsedEndpoint = URL.parse(platformConfig.endpoint);
   // istanbul ignore else
   if (forkMode) {
     logger.debug('Using forkToken for git init');
@@ -1005,6 +1058,10 @@ async function getIssues(): Promise<Issue[]> {
 }
 
 export async function getIssueList(): Promise<Issue[]> {
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    return [];
+  }
   if (!config.issueList) {
     logger.debug('Retrieving issueList');
     config.issueList = await getIssues();
@@ -1016,6 +1073,10 @@ export async function getIssue(
   number: number,
   useCache = true
 ): Promise<Issue | null> {
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    return null;
+  }
   try {
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
@@ -1064,6 +1125,13 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    logger.info(
+      'Cannot ensure issue because issues are disabled in this repository'
+    );
+    return null;
+  }
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
@@ -1151,6 +1219,13 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
+  // istanbul ignore if
+  if (config.hasIssuesEnabled === false) {
+    logger.info(
+      'Cannot ensure issue because issues are disabled in this repository'
+    );
+    return;
+  }
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1182,7 +1257,7 @@ export async function addReviewers(
   const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
     .filter((e) => e.startsWith('team:'))
-    .map((e) => e.replace(regEx(/^team:/), '')); // TODO #12071
+    .map((e) => e.replace(regEx(/^team:/), ''));
   try {
     await githubApi.postJson(
       `repos/${
@@ -1386,56 +1461,37 @@ async function tryPrAutomerge(
   prNumber: number,
   prNodeId: string,
   platformOptions: PlatformPrOptions
-): Promise<boolean> {
-  if (!platformOptions?.usePlatformAutomerge) {
+): Promise<void> {
+  if (platformConfig.isGhe || !platformOptions?.usePlatformAutomerge) {
     return;
   }
 
-  const repoCache = getCache();
-  const { lastPlatformAutomergeFailure } = repoCache;
-  if (lastPlatformAutomergeFailure) {
-    const lastFailedAt = DateTime.fromISO(lastPlatformAutomergeFailure);
-    const now = DateTime.local();
-    if (now < lastFailedAt.plus({ hours: 24 })) {
-      logger.debug(
-        { prNumber },
-        'GitHub-native automerge: skipping attempt due to earlier failure'
-      );
-      return;
-    }
-    delete repoCache.lastPlatformAutomergeFailure;
+  if (!config.autoMergeAllowed) {
+    logger.debug(
+      { prNumber },
+      'GitHub-native automerge: not enabled in repo settings'
+    );
+    return;
   }
 
   try {
-    const variables = { pullRequestId: prNodeId };
+    const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
+    const variables = { pullRequestId: prNodeId, mergeMethod };
     const queryOptions = { variables };
+
     const { errors } = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
       queryOptions
     );
+
     if (errors) {
-      const disabledByPlatform = errors.find(
-        ({ type, message }) =>
-          type === 'UNPROCESSABLE' &&
-          message ===
-            'Pull request is not in the correct state to enable auto-merge'
-      );
-
-      // istanbul ignore else
-      if (disabledByPlatform) {
-        logger.debug(
-          { prNumber },
-          'GitHub automerge is not enabled for this repository'
-        );
-
-        const now = DateTime.local();
-        repoCache.lastPlatformAutomergeFailure = now.toISO();
-      } else {
-        logger.debug({ prNumber, errors }, 'GitHub automerge unknown error');
-      }
+      logger.debug({ prNumber, errors }, 'GitHub-native automerge: fail');
+      return;
     }
+
+    logger.debug({ prNumber }, 'GitHub-native automerge: success');
   } catch (err) {
-    logger.warn({ prNumber, err }, 'GitHub automerge: HTTP request error');
+    logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
 
@@ -1619,7 +1675,7 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
-  if (config.isGhe) {
+  if (platformConfig.isGhe) {
     return smartTruncate(input, 60000);
   }
   const massagedInput = massageMarkdownLinks(input)

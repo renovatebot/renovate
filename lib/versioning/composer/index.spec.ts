@@ -169,4 +169,11 @@ describe('versioning/composer/index', () => {
   `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
     expect(versions.sort(semver.sortVersions)).toEqual(expected);
   });
+
+  test.each`
+    version    | expected
+    ${'1.2.0'} | ${true}
+  `('isCompatible("$version") === $expected', ({ version, expected }) => {
+    expect(semver.isCompatible(version)).toBe(expected);
+  });
 });

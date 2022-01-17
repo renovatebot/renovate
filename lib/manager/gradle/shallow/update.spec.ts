@@ -13,7 +13,7 @@ describe('manager/gradle/shallow/update', () => {
           },
         },
       })
-    ).toEqual('___1.2.4___');
+    ).toBe('___1.2.4___');
   });
 
   it('groups', () => {
@@ -29,7 +29,7 @@ describe('manager/gradle/shallow/update', () => {
           },
         },
       })
-    ).toEqual('___1.2.5___');
+    ).toBe('___1.2.5___');
   });
 
   it('returns same content', () => {
@@ -74,5 +74,13 @@ describe('manager/gradle/shallow/update', () => {
         },
       })
     ).toBeNull();
+  });
+
+  it('should return null for replacement', () => {
+    const res = updateDependency({
+      fileContent: undefined,
+      upgrade: { updateType: 'replacement' },
+    });
+    expect(res).toBeNull();
   });
 });

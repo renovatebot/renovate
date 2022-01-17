@@ -1,8 +1,9 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import JSON5 from 'json5';
 import pAll from 'p-all';
-import { lt } from 'semver';
+import semver from 'semver';
 import { PlatformId } from '../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -125,7 +126,7 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  draftPrefix = lt(defaults.version, '13.2.0')
+  draftPrefix = semver.lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
 
@@ -156,10 +157,14 @@ function urlEscape(str: string): string {
 
 export async function getRawFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=HEAD`;
+  const repo = repoName ?? config.repository;
+  const url =
+    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
+    (branchOrTag || `HEAD`);
   const res = await gitlabApi.getJson<{ content: string }>(url);
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -168,9 +173,13 @@ export async function getRawFile(
 
 export async function getJsonFile(
   fileName: string,
-  repo: string = config.repository
+  repoName?: string,
+  branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repo);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  if (fileName.endsWith('.json5')) {
+    return JSON5.parse(raw);
+  }
   return JSON.parse(raw);
 }
 
@@ -323,6 +332,7 @@ type BranchState =
   | 'pending'
   | 'created'
   | 'running'
+  | 'waiting_for_resource'
   | 'manual'
   | 'success'
   | 'failed'
@@ -363,6 +373,7 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
   created: BranchStatus.yellow,
   manual: BranchStatus.yellow,
   running: BranchStatus.yellow,
+  waiting_for_resource: BranchStatus.yellow,
   success: BranchStatus.green,
   failed: BranchStatus.red,
   canceled: BranchStatus.red,
@@ -674,13 +685,15 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/PR/g), 'MR')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
 
-  if (lt(defaults.version, '13.4.0')) {
+  if (semver.lt(defaults.version, '13.4.0')) {
     logger.debug(
       { version: defaults.version },
       'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters'
     );
 
     desc = smartTruncate(desc, 25000);
+  } else {
+    desc = smartTruncate(desc, 1000000);
   }
 
   return desc;
@@ -856,6 +869,7 @@ export async function ensureIssue({
   reuseTitle,
   body,
   labels,
+  confidential,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
@@ -880,6 +894,7 @@ export async function ensureIssue({
               title,
               description,
               labels: (labels || issue.labels || []).join(','),
+              confidential: confidential ?? false,
             },
           }
         );
@@ -891,6 +906,7 @@ export async function ensureIssue({
           title,
           description,
           labels: (labels || []).join(','),
+          confidential: confidential ?? false,
         },
       });
       logger.info('Issue created');
@@ -957,7 +973,7 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${iid}`);
 
-  if (lt(defaults.version, '13.9.0')) {
+  if (semver.lt(defaults.version, '13.9.0')) {
     logger.warn(
       { version: defaults.version },
       'Adding reviewers is only available in GitLab 13.9 and onwards'

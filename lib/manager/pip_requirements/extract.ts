@@ -1,6 +1,6 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
-import { getGlobalConfig } from '../../config/global';
+import { RANGE_PATTERN } from '@renovatebot/pep440';
+import { GlobalConfig } from '../../config/global';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -53,7 +53,8 @@ export function extractPackageFile(
   }
   registryUrls = registryUrls.concat(extraUrls);
 
-  const regex = regEx(`^${dependencyPattern}$`, 'g');
+  const pkgRegex = regEx(`^(${packagePattern})$`);
+  const pkgValRegex = regEx(`^${dependencyPattern}$`);
   const deps = content
     .split('\n')
     .map((rawline) => {
@@ -62,13 +63,15 @@ export function extractPackageFile(
       if (isSkipComment(comment)) {
         dep.skipReason = SkipReason.Ignored;
       }
-      regex.lastIndex = 0;
-      const matches = regex.exec(line.split(' \\')[0]);
+      const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
+      const lineNoHashes = lineNoEnvMarkers.split(' \\')[0];
+      const matches =
+        pkgValRegex.exec(lineNoHashes) || pkgRegex.exec(lineNoHashes);
       if (!matches) {
         return null;
       }
       const [, depName, , currVal] = matches;
-      const currentValue = currVal.trim();
+      const currentValue = currVal?.trim();
       dep = {
         ...dep,
         depName,
@@ -88,18 +91,18 @@ export function extractPackageFile(
   if (registryUrls.length > 0) {
     res.registryUrls = registryUrls.map((url) => {
       // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
-      const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), ''); // TODO #12071
-      if (!getGlobalConfig().exposeAllEnv) {
+      const cleaned = url.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
+      if (!GlobalConfig.get('exposeAllEnv')) {
         return cleaned;
       }
       // interpolate any environment variables
       return cleaned.replace(
-        regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g), // TODO #12071
+        regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g),
         (match) => {
           const envvar = match
             .substring(1)
             .replace(regEx(/^{/), '')
-            .replace(regEx(/}$/), ''); // TODO #12071
+            .replace(regEx(/}$/), '');
           const sub = process.env[envvar];
           return sub || match;
         }

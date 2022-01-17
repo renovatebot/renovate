@@ -112,19 +112,19 @@ describe('manager/gradle/shallow/tokenizer', () => {
         TokenType.Chars,
         TokenType.DoubleQuotedFinish,
       ],
-      // eslint-disable-next-line no-template-curly-in-string
+
       '"${x}"': [
         TokenType.DoubleQuotedStart,
         TokenType.Variable,
         TokenType.DoubleQuotedFinish,
       ],
-      // eslint-disable-next-line no-template-curly-in-string
+
       '"${foo}"': [
         TokenType.DoubleQuotedStart,
         TokenType.Variable,
         TokenType.DoubleQuotedFinish,
       ],
-      // eslint-disable-next-line no-template-curly-in-string
+
       '"${x()}"': [
         TokenType.DoubleQuotedStart,
         TokenType.IgnoredInterpolationStart,
@@ -132,7 +132,7 @@ describe('manager/gradle/shallow/tokenizer', () => {
         TokenType.RightBrace,
         TokenType.DoubleQuotedFinish,
       ],
-      // eslint-disable-next-line no-template-curly-in-string
+
       '"${x{}}"': [
         TokenType.DoubleQuotedStart,
         TokenType.IgnoredInterpolationStart,
@@ -162,7 +162,7 @@ describe('manager/gradle/shallow/tokenizer', () => {
           children: [{ type: TokenType.Variable }],
         },
       ],
-      // eslint-disable-next-line no-template-curly-in-string
+
       '" foo ${ bar } baz "': [
         {
           type: TokenType.StringInterpolation,
@@ -173,7 +173,7 @@ describe('manager/gradle/shallow/tokenizer', () => {
           ],
         },
       ],
-      // eslint-disable-next-line no-template-curly-in-string
+
       '"${ x + y }"': [{ type: TokenType.StringInterpolation, isValid: false }],
     };
     for (const [str, result] of Object.entries(samples)) {

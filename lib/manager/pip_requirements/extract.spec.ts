@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { extractPackageFile } from './extract';
 
 const requirements1 = loadFixture('requirements1.txt');
@@ -9,15 +9,17 @@ const requirements4 = loadFixture('requirements4.txt');
 const requirements5 = loadFixture('requirements5.txt');
 const requirements6 = loadFixture('requirements6.txt');
 const requirements7 = loadFixture('requirements7.txt');
+const requirements8 = loadFixture('requirements8.txt');
+const requirementsWithEnvMarkers = loadFixture('requirements-env-markers.txt');
 
 describe('manager/pip_requirements/extract', () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
   afterEach(() => {
     delete process.env.PIP_TEST_TOKEN;
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
   describe('extractPackageFile()', () => {
     let config;
@@ -39,7 +41,7 @@ describe('manager/pip_requirements/extract', () => {
       const res = extractPackageFile(requirements1, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toEqual(['http://example.com/private-pypi/']);
-      expect(res.deps).toHaveLength(3);
+      expect(res.deps).toHaveLength(4);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(
@@ -114,16 +116,16 @@ describe('manager/pip_requirements/extract', () => {
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',
         'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
-        // eslint-disable-next-line no-template-curly-in-string
+
         'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
         'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
-        // eslint-disable-next-line no-template-curly-in-string
+
         'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
       ]);
     });
     it('should replace env vars in high trust mode', () => {
       process.env.PIP_TEST_TOKEN = 'its-a-secret';
-      setGlobalConfig({ exposeAllEnv: true });
+      GlobalConfig.set({ exposeAllEnv: true });
       const res = extractPackageFile(requirements7, 'unused_file_name', {});
       expect(res.registryUrls).toEqual([
         'https://pypi.org/pypi/',
@@ -132,6 +134,30 @@ describe('manager/pip_requirements/extract', () => {
         'http://its-a-secret:example.com/private-pypi/',
         'http://its-a-secret:example.com/private-pypi/',
       ]);
+    });
+
+    it('should handle hashes', () => {
+      const res = extractPackageFile(requirements8, 'unused_file_name', {});
+      expect(res).toMatchSnapshot();
+      expect(res.deps).toHaveLength(3);
+    });
+
+    it('should handle dependency and ignore env markers', () => {
+      const res = extractPackageFile(
+        requirementsWithEnvMarkers,
+        'unused_file_name',
+        {}
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '==20.3.0',
+            currentVersion: '20.3.0',
+            datasource: 'pypi',
+            depName: 'attrs',
+          },
+        ],
+      });
     });
   });
 });

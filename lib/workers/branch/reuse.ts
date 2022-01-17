@@ -1,4 +1,4 @@
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import type { RangeStrategy } from '../../types';
@@ -36,7 +36,7 @@ export async function shouldReuseExistingBranch(
     if (pr.labels?.includes(config.rebaseLabel)) {
       logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
       // istanbul ignore if
-      if (getGlobalConfig().dryRun) {
+      if (GlobalConfig.get('dryRun')) {
         logger.info(
           `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
         );
@@ -60,6 +60,7 @@ export async function shouldReuseExistingBranch(
         logger.debug('Cannot rebase branch as it has been modified');
         return { reuseExistingBranch: true, isModified: true };
       }
+      logger.debug('Branch is unmodified, so can be rebased');
       return { reuseExistingBranch: false };
     }
     logger.debug('Branch is up-to-date');

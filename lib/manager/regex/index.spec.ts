@@ -21,6 +21,7 @@ describe('manager/regex/index', () => {
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
+      depTypeTemplate: 'final',
     };
     const res = await extractPackageFile(
       dockerfileContent,
@@ -29,12 +30,13 @@ describe('manager/regex/index', () => {
     );
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(8);
-    expect(res.deps.find((dep) => dep.depName === 'yarn').versioning).toEqual(
+    expect(res.deps.find((dep) => dep.depName === 'yarn').versioning).toBe(
       'semver'
     );
-    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
+    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toBe(
       'maven'
     );
+    expect(res.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
   it('returns null if no dependencies found', async () => {
     const config = {
@@ -78,7 +80,7 @@ describe('manager/regex/index', () => {
       res.deps.find(
         (dep) => dep.depName === 'openresty/headers-more-nginx-module'
       ).extractVersion
-    ).toEqual('^v(?<version>.*)$');
+    ).toBe('^v(?<version>.*)$');
   });
   it('extracts registryUrl', async () => {
     const config = {
@@ -104,8 +106,16 @@ describe('manager/regex/index', () => {
       'Dockerfile',
       config
     );
-    // FIXME: explicit assert condition
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchSnapshot({
+      deps: [
+        {
+          currentValue: '8.12.13',
+          datasource: 'helm',
+          depName: 'prometheus-operator',
+          registryUrls: ['https://charts.helm.sh/stable'],
+        },
+      ],
+    });
   });
   it('extracts and applies a registryUrlTemplate', async () => {
     const config = {
@@ -138,8 +148,16 @@ describe('manager/regex/index', () => {
       'Dockerfile',
       config
     );
-    // FIXME: explicit assert condition
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchSnapshot({
+      deps: [
+        {
+          currentValue: '6.2',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          versioning: 'maven',
+        },
+      ],
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-gradle' },
       'Invalid regex manager registryUrl'
@@ -163,8 +181,8 @@ describe('manager/regex/index', () => {
     expect(res.deps).toHaveLength(2);
     expect(
       res.deps.find((dep) => dep.depName === 'nodejs/node').versioning
-    ).toEqual('node');
-    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
+    ).toBe('node');
+    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toBe(
       'maven'
     );
   });
@@ -204,6 +222,29 @@ describe('manager/regex/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
   });
+
+  it('extracts with combination strategy and non standard capture groups', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        'prometheus_registry:\\s*"(?<registry>.*)"\\s*\\/\\/',
+        'prometheus_repository:\\s*"(?<repository>.*)"\\s*\\/\\/',
+        'prometheus_tag:\\s*"(?<tag>.*)"\\s*\\/\\/',
+        'prometheus_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/',
+      ],
+      matchStringsStrategy: 'combination',
+      datasourceTemplate: 'docker',
+      depNameTemplate: '{{{ registry }}}/{{{ repository }}}',
+    };
+    const res = await extractPackageFile(
+      ansibleYamlContent,
+      'ansible.yml',
+      config
+    );
+    expect(res.deps).toHaveLength(1);
+    expect(res.deps[0].depName).toBe('docker.io/prom/prometheus');
+    expect(res).toMatchSnapshot();
+  });
+
   it('extracts with combination strategy and multiple matches', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
@@ -347,5 +388,23 @@ describe('manager/regex/index', () => {
     );
     expect(res).toMatchSnapshot();
     expect(res).toBeNull();
+  });
+  it('extracts with recursive strategy and merged groups', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '"(?<first>[^"]*)":\\s*{[^}]*}',
+        '"(?<second>[^"]*)":\\s*\\{[^}]*}',
+        '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
+      ],
+      matchStringsStrategy: 'recursive',
+      depNameTemplate: '{{{ first }}}/{{{ second }}}/{{{ depName }}}',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(4);
   });
 });

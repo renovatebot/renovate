@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import * as _env from '../../../util/exec/env';
 import * as _lernaHelper from './lerna';
 
@@ -34,7 +34,7 @@ describe('manager/npm/post-update/lerna', () => {
     });
     it('returns if no lernaClient', async () => {
       const res = await lernaHelper.generateLockFiles({}, 'some-dir', {}, {});
-      expect(res.error).toBe(false);
+      expect(res.error).toBeFalse();
     });
     it('returns if invalid lernaClient', async () => {
       const res = await lernaHelper.generateLockFiles(
@@ -43,7 +43,7 @@ describe('manager/npm/post-update/lerna', () => {
         {},
         {}
       );
-      expect(res.error).toBe(false);
+      expect(res.error).toBeFalse();
     });
     it('generates package-lock.json files', async () => {
       const execSnapshots = mockExecAll(exec);
@@ -55,7 +55,7 @@ describe('manager/npm/post-update/lerna', () => {
         {},
         skipInstalls
       );
-      expect(res.error).toBe(false);
+      expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchSnapshot();
     });
     it('performs full npm install', async () => {
@@ -68,7 +68,7 @@ describe('manager/npm/post-update/lerna', () => {
         {},
         skipInstalls
       );
-      expect(res.error).toBe(false);
+      expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchSnapshot();
     });
     it('generates yarn.lock files', async () => {
@@ -80,7 +80,7 @@ describe('manager/npm/post-update/lerna', () => {
         {}
       );
       expect(execSnapshots).toMatchSnapshot();
-      expect(res.error).toBe(false);
+      expect(res.error).toBeFalse();
     });
     it('defaults to latest if lerna version unspecified', async () => {
       const execSnapshots = mockExecAll(exec);
@@ -90,19 +90,19 @@ describe('manager/npm/post-update/lerna', () => {
         {},
         {}
       );
-      expect(res.error).toBe(false);
+      expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchSnapshot();
     });
     it('allows scripts for trust level high', async () => {
       const execSnapshots = mockExecAll(exec);
-      setGlobalConfig({ allowScripts: true });
+      GlobalConfig.set({ allowScripts: true });
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
         { constraints: { npm: '^6.0.0' } },
         {}
       );
-      expect(res.error).toBe(false);
+      expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchSnapshot();
     });
   });

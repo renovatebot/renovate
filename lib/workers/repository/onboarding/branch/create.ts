@@ -1,5 +1,5 @@
 import { configFileNames } from '../../../../config/app-strings';
-import { getGlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';
@@ -11,13 +11,13 @@ const defaultConfigFile = configFileNames[0];
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
-  logger.debug('createOnboardingBranch()');
-  const contents = await getOnboardingConfigContents(config);
-  logger.debug('Creating onboarding branch');
-
   const configFile = configFileNames.includes(config.onboardingConfigFileName)
     ? config.onboardingConfigFileName
     : defaultConfigFile;
+
+  logger.debug('createOnboardingBranch()');
+  const contents = await getOnboardingConfigContents(config, configFile);
+  logger.debug('Creating onboarding branch');
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
@@ -26,7 +26,7 @@ export async function createOnboardingBranch(
   const commitMessage = commitMessageFactory.create();
 
   // istanbul ignore if
-  if (getGlobalConfig().dryRun) {
+  if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }

@@ -1,11 +1,12 @@
 import type { Stats } from 'fs';
 import upath from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as datasourceMaven from '../../../datasource/maven';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { ExecOptions, exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile, stat } from '../../../util/fs';
 import {
   extraEnv,
@@ -74,8 +75,8 @@ export async function executeGradle(
       tagConstraint:
         config.constraints?.java ?? (await getDockerConstraint(gradleRoot)),
       tagScheme: getJavaVersioning(),
-      preCommands: await getDockerPreCommands(gradleRoot),
     },
+    preCommands: await getDockerPreCommands(gradleRoot),
     extraEnv,
   };
   try {
@@ -101,7 +102,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   let rootBuildGradle: string | undefined;
   let gradlew: Stats | null;
-  const { localDir } = getGlobalConfig();
+  const { localDir } = GlobalConfig.get();
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
     const gradlewPath = upath.join(dirname, gradleWrapperFileName());
@@ -140,6 +141,7 @@ export async function extractAllPackageFiles(
   const gradleFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
+    // istanbul ignore else
     if (content) {
       gradleFiles.push({
         packageFile,
@@ -149,7 +151,6 @@ export async function extractAllPackageFiles(
 
       collectVersionVariables(dependencies, content);
     } else {
-      // istanbul ignore next
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
@@ -171,6 +172,11 @@ export function updateDependency({
 }: UpdateDependencyConfig): string {
   // prettier-ignore
   logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentValue} ==> ${upgrade.newValue}`);
+
+  if (upgrade.updateType === 'replacement') {
+    logger.warn('gradle manager does not support replacement updates yet');
+    return null;
+  }
 
   return updateGradleVersion(
     fileContent,

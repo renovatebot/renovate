@@ -1,6 +1,6 @@
 import { git, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
-import { setGlobalConfig } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import * as _lockFiles from '../../../manager/npm/post-update';
 import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _npm from '../../../manager/npm/post-update/npm';
@@ -31,7 +31,7 @@ const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 describe('workers/branch/lock-files/index', () => {
   describe('writeUpdatedPackageFiles', () => {
     beforeEach(() => {
-      setGlobalConfig({
+      GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
       fs.outputFile = jest.fn();
@@ -70,7 +70,7 @@ describe('workers/branch/lock-files/index', () => {
   });
   describe('getAdditionalFiles', () => {
     beforeEach(() => {
-      setGlobalConfig({
+      GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
       git.getFile.mockResolvedValueOnce('some lock file contents');

@@ -28,7 +28,8 @@ describe('config/presets/github/index', () => {
       const res = await github.fetchJSONFile(
         'some/repo',
         'some-filename.json',
-        githubApiHost
+        githubApiHost,
+        undefined
       );
       expect(res).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -197,7 +198,48 @@ describe('config/presets/github/index', () => {
             'some/repo',
             'default',
             undefined,
-            'https://api.github.example.org'
+            'https://api.github.example.org',
+            undefined
+          )
+          .catch(() => ({ from: 'api' }))
+      ).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('uses default endpoint with a tag', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/default.json?ref=someTag`)
+        .reply(200, {
+          content: Buffer.from('{"from":"api"}').toString('base64'),
+        });
+      expect(
+        await github.getPresetFromEndpoint(
+          'some/repo',
+          'default',
+          undefined,
+          githubApiHost,
+          'someTag'
+        )
+      ).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('uses custom endpoint with a tag', async () => {
+      httpMock
+        .scope('https://api.github.example.org')
+        .get(`${basePath}/default.json?ref=someTag`)
+        .reply(200, {
+          content: Buffer.from('{"from":"api"}').toString('base64'),
+        });
+      expect(
+        await github
+          .getPresetFromEndpoint(
+            'some/repo',
+            'default',
+            undefined,
+            'https://api.github.example.org',
+            'someTag'
           )
           .catch(() => ({ from: 'api' }))
       ).toEqual({ from: 'api' });

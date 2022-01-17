@@ -1,5 +1,5 @@
 import { logger } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { extractAllPackageFiles } from './extract';
@@ -10,11 +10,11 @@ const adminConfig: RepoGlobalConfig = { localDir: '' };
 
 describe('manager/gitlabci/extract', () => {
   beforeEach(() => {
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
   });
 
   afterEach(() => {
-    setGlobalConfig();
+    GlobalConfig.reset();
   });
 
   describe('extractAllPackageFiles()', () => {
@@ -66,7 +66,7 @@ describe('manager/gitlabci/extract', () => {
       });
       expect(deps).toHaveLength(8);
 
-      expect(deps.some((dep) => dep.currentValue.includes("'"))).toBe(false);
+      expect(deps.some((dep) => dep.currentValue.includes("'"))).toBeFalse();
     });
 
     it('extracts multiple image lines with comments', async () => {

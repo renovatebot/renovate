@@ -36,6 +36,7 @@ export class PypiDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let dependency: ReleaseResult = null;
     const hostUrl = ensureTrailingSlash(registryUrl);
+    const normalizedLookupName = PypiDatasource.normalizeName(lookupName);
 
     // not all simple indexes use this identifier, but most do
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
@@ -43,12 +44,15 @@ export class PypiDatasource extends Datasource {
         { lookupName, hostUrl },
         'Looking up pypi simple dependency'
       );
-      dependency = await this.getSimpleDependency(lookupName, hostUrl);
+      dependency = await this.getSimpleDependency(
+        normalizedLookupName,
+        hostUrl
+      );
     } else {
       logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
       try {
         // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
-        dependency = await this.getDependency(lookupName, hostUrl);
+        dependency = await this.getDependency(normalizedLookupName, hostUrl);
       } catch (err) {
         if (err.statusCode !== 404) {
           throw err;
@@ -59,21 +63,31 @@ export class PypiDatasource extends Datasource {
           { lookupName, hostUrl },
           'Looking up pypi simple dependency via fallback'
         );
-        dependency = await this.getSimpleDependency(lookupName, hostUrl);
+        dependency = await this.getSimpleDependency(
+          normalizedLookupName,
+          hostUrl
+        );
       }
     }
     return dependency;
   }
 
   private static normalizeName(input: string): string {
-    return input.toLowerCase().replace(regEx(/(-|\.)/g), '_');
+    return input.toLowerCase().replace(regEx(/_/g), '-');
+  }
+
+  private static normalizeNameForUrlLookup(input: string): string {
+    return input.toLowerCase().replace(regEx(/(_|\.|-)+/g), '-');
   }
 
   private async getDependency(
     packageName: string,
     hostUrl: string
   ): Promise<ReleaseResult | null> {
-    const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
+    const lookupUrl = url.resolve(
+      hostUrl,
+      `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`
+    );
     const dependency: ReleaseResult = { releases: null };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const rep = await this.http.getJson<PypiJSON>(lookupUrl);
@@ -86,19 +100,6 @@ export class PypiDatasource extends Datasource {
       dependency.isPrivate = true;
     }
     logger.trace({ lookupUrl }, 'Got pypi api result');
-    if (
-      !(
-        dep.info &&
-        PypiDatasource.normalizeName(dep.info.name) ===
-          PypiDatasource.normalizeName(packageName)
-      )
-    ) {
-      logger.warn(
-        { lookupUrl, lookupName: packageName, returnedName: dep.info.name },
-        'Returned name does not match with requested name'
-      );
-      return null;
-    }
 
     if (dep.info?.home_page) {
       dependency.homepage = dep.info.home_page;
@@ -170,27 +171,25 @@ export class PypiDatasource extends Datasource {
     text: string,
     packageName: string
   ): string | null {
-    const srcPrefixes = [
-      `${packageName}-`,
-      `${packageName.replace(regEx(/-/g), '_')}-`,
-    ];
-    for (const prefix of srcPrefixes) {
-      const suffix = '.tar.gz';
-      if (text.startsWith(prefix) && text.endsWith(suffix)) {
-        return text.replace(prefix, '').replace(regEx(/\.tar\.gz$/), ''); // TODO #12071
-      }
+    // source packages
+    const srcText = PypiDatasource.normalizeName(text);
+    const srcPrefix = `${packageName}-`;
+    const srcSuffix = '.tar.gz';
+    if (srcText.startsWith(srcPrefix) && srcText.endsWith(srcSuffix)) {
+      return srcText.replace(srcPrefix, '').replace(regEx(/\.tar\.gz$/), '');
     }
 
     // pep-0427 wheel packages
     //  {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
+    const wheelText = text.toLowerCase();
     const wheelPrefix = packageName.replace(regEx(/[^\w\d.]+/g), '_') + '-';
     const wheelSuffix = '.whl';
     if (
-      text.startsWith(wheelPrefix) &&
-      text.endsWith(wheelSuffix) &&
-      text.split('-').length > 2
+      wheelText.startsWith(wheelPrefix) &&
+      wheelText.endsWith(wheelSuffix) &&
+      wheelText.split('-').length > 2
     ) {
-      return text.split('-')[1];
+      return wheelText.split('-')[1];
     }
 
     return null;
@@ -216,7 +215,10 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string
   ): Promise<ReleaseResult | null> {
-    const lookupUrl = url.resolve(hostUrl, ensureTrailingSlash(packageName));
+    const lookupUrl = url.resolve(
+      hostUrl,
+      ensureTrailingSlash(PypiDatasource.normalizeNameForUrlLookup(packageName))
+    );
     const dependency: ReleaseResult = { releases: null };
     const response = await this.http.get(lookupUrl);
     const dep = response?.body;

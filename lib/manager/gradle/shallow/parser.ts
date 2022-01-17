@@ -1,4 +1,4 @@
-import * as url from 'url';
+import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
@@ -113,14 +113,32 @@ function handleAssignment({
   packageFile,
   tokenMap,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
-  const { keyToken, valToken } = tokenMap;
-  const variableData: VariableData = {
-    key: keyToken.value,
+  const { objectToken, keyToken, valToken } = tokenMap;
+  const obj = objectToken?.value;
+  const key = obj ? `${obj}.${keyToken.value}` : keyToken.value;
+
+  const dep = parseDependencyString(valToken.value);
+  if (dep) {
+    dep.groupName = key;
+    dep.managerData = {
+      fileReplacePosition: valToken.offset + dep.depName.length + 1,
+      packageFile,
+    };
+  }
+
+  const varData: VariableData = {
+    key,
     value: valToken.value,
     fileReplacePosition: valToken.offset,
     packageFile,
   };
-  return { vars: { [variableData.key]: variableData } };
+
+  const result: SyntaxHandlerOutput = {
+    vars: { [key]: varData },
+    deps: dep ? [dep] : [],
+  };
+
+  return result;
 }
 
 function processDepString({
@@ -142,6 +160,7 @@ function processDepString({
 function processDepInterpolation({
   tokenMap,
   variables,
+  packageFile: packageFileOrig,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const token = tokenMap.depInterpolation as StringInterpolation;
   const interpolationResult = interpolateString(token.children, variables);
@@ -162,8 +181,18 @@ function processDepInterpolation({
         }
       });
       if (!dep.managerData) {
+        const lastToken = token.children[token.children.length - 1];
+        if (
+          lastToken.type === TokenType.String &&
+          lastToken.value.startsWith(`:${dep.currentValue}`)
+        ) {
+          packageFile = packageFileOrig;
+          fileReplacePosition = lastToken.offset + 1;
+          delete dep.groupName;
+        } else {
+          dep.skipReason = SkipReason.ContainsVariable;
+        }
         dep.managerData = { fileReplacePosition, packageFile };
-        dep.skipReason = SkipReason.ContainsVariable;
       }
       return { deps: [dep] };
     }
@@ -174,6 +203,7 @@ function processDepInterpolation({
 function processPlugin({
   tokenMap,
   packageFile,
+  variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const { pluginName, pluginVersion, methodName } = tokenMap;
   const plugin = pluginName.value;
@@ -183,20 +213,59 @@ function processPlugin({
     methodName.value === 'kotlin'
       ? `org.jetbrains.kotlin.${plugin}:org.jetbrains.kotlin.${plugin}.gradle.plugin`
       : `${plugin}:${plugin}.gradle.plugin`;
-  const currentValue = pluginVersion.value;
-  const fileReplacePosition = pluginVersion.offset;
-  const dep = {
+
+  const dep: PackageDependency<GradleManagerData> = {
     depType: 'plugin',
     depName,
     lookupName,
     registryUrls: ['https://plugins.gradle.org/m2/'],
-    currentValue,
     commitMessageTopic: `plugin ${depName}`,
-    managerData: {
-      fileReplacePosition,
-      packageFile,
-    },
   };
+
+  if (pluginVersion.type === TokenType.Word) {
+    const varData = variables[pluginVersion.value];
+    if (varData) {
+      const currentValue = varData.value;
+      const fileReplacePosition = varData.fileReplacePosition;
+      dep.currentValue = currentValue;
+      dep.managerData = { fileReplacePosition, packageFile };
+    } else {
+      const currentValue = pluginVersion.value;
+      const fileReplacePosition = pluginVersion.offset;
+      dep.currentValue = currentValue;
+      dep.managerData = { fileReplacePosition, packageFile };
+      dep.skipReason = SkipReason.UnknownVersion;
+    }
+  } else if (pluginVersion.type === TokenType.StringInterpolation) {
+    const versionTpl = pluginVersion as StringInterpolation;
+    const children = versionTpl.children;
+    const [child] = children;
+    if (child?.type === TokenType.Variable && children.length === 1) {
+      const varData = variables[child.value];
+      if (varData) {
+        const currentValue = varData.value;
+        const fileReplacePosition = varData.fileReplacePosition;
+        dep.currentValue = currentValue;
+        dep.managerData = { fileReplacePosition, packageFile };
+      } else {
+        const currentValue = child.value;
+        const fileReplacePosition = child.offset;
+        dep.currentValue = currentValue;
+        dep.managerData = { fileReplacePosition, packageFile };
+        dep.skipReason = SkipReason.UnknownVersion;
+      }
+    } else {
+      const fileReplacePosition = versionTpl.offset;
+      dep.managerData = { fileReplacePosition, packageFile };
+      dep.skipReason = SkipReason.UnknownVersion;
+    }
+  } else {
+    const currentValue = pluginVersion.value;
+    const fileReplacePosition = pluginVersion.offset;
+    dep.currentValue = currentValue;
+    dep.managerData = { fileReplacePosition, packageFile };
+  }
+
   return { deps: [dep] };
 }
 
@@ -230,6 +299,8 @@ function processPredefinedRegistryUrl({
   return { urls: [registryUrl] };
 }
 
+const annoyingMethods = new Set(['createXmlValueRemover']);
+
 function processLongFormDep({
   tokenMap,
   variables,
@@ -243,6 +314,7 @@ function processLongFormDep({
     const versionToken: Token = tokenMap.version;
     if (versionToken.type === TokenType.Word) {
       const variable = variables[versionToken.value];
+      dep.groupName = variable.key;
       dep.managerData = {
         fileReplacePosition: variable.fileReplacePosition,
         packageFile: variable.packageFile,
@@ -253,12 +325,29 @@ function processLongFormDep({
         packageFile,
       };
     }
+    const methodName = tokenMap.methodName?.value;
+    if (annoyingMethods.has(methodName)) {
+      dep.skipReason = SkipReason.Ignored;
+    }
+
     return { deps: [dep] };
   }
   return null;
 }
 
 const matcherConfigs: SyntaxMatchConfig[] = [
+  {
+    // foo.bar = 'baz'
+    matchers: [
+      { matchType: TokenType.Word, tokenMapKey: 'objectToken' },
+      { matchType: TokenType.Dot },
+      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      endOfInstruction,
+    ],
+    handler: handleAssignment,
+  },
   {
     // foo = 'bar'
     matchers: [
@@ -306,6 +395,8 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // id 'foo.bar' version '1.2.3'
+    // id 'foo.bar' version fooBarVersion
+    // id 'foo.bar' version "$fooBarVersion"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -314,13 +405,22 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       },
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      {
+        matchType: [
+          TokenType.String,
+          TokenType.Word,
+          TokenType.StringInterpolation,
+        ],
+        tokenMapKey: 'pluginVersion',
+      },
       endOfInstruction,
     ],
     handler: processPlugin,
   },
   {
     // id('foo.bar') version '1.2.3'
+    // id('foo.bar') version fooBarVersion
+    // id('foo.bar') version "$fooBarVersion"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -331,7 +431,14 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.RightParen },
       { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      {
+        matchType: [
+          TokenType.String,
+          TokenType.Word,
+          TokenType.StringInterpolation,
+        ],
+        tokenMapKey: 'pluginVersion',
+      },
       endOfInstruction,
     ],
     handler: processPlugin,
@@ -462,6 +569,20 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: potentialStringTypes, tokenMapKey: 'version' },
       { matchType: TokenType.RightParen },
       endOfInstruction,
+    ],
+    handler: processLongFormDep,
+  },
+  {
+    // fooBarBaz("com.example", "my.dependency", "1.2.3")
+    matchers: [
+      { matchType: TokenType.Word, tokenMapKey: 'methodName' },
+      { matchType: TokenType.LeftParen },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      { matchType: TokenType.RightParen },
     ],
     handler: processLongFormDep,
   },

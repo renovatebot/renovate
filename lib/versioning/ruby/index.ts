@@ -7,6 +7,7 @@ import {
   valid,
 } from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { isSingleOperator, isValidOperator } from './operator';
 import { ltr, parse as parseRange } from './range';
@@ -25,7 +26,7 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function vtrim<T = unknown>(version: T): string | T {
   if (typeof version === 'string') {
-    return version.replace(/^v/, '').replace(/('|")/g, '');
+    return version.replace(regEx(/^v/), '').replace(regEx(/('|")/g), '');
   }
   return version;
 }
@@ -44,7 +45,7 @@ export const isVersion = (version: string): boolean => !!valid(vtrim(version));
 const isGreaterThan = (left: string, right: string): boolean =>
   gt(vtrim(left), vtrim(right));
 const isLessThanRange = (version: string, range: string): boolean =>
-  ltr(vtrim(version), vtrim(range));
+  !!ltr(vtrim(version), vtrim(range));
 
 const isSingleVersion = (range: string): boolean => {
   const { version, operator } = parseRange(vtrim(range));
@@ -73,21 +74,29 @@ export const isValid = (input: string): boolean =>
 
 export const matches = (version: string, range: string): boolean =>
   satisfies(vtrim(version), vtrim(range));
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  maxSatisfying(versions.map(vtrim), vtrim(range));
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  minSatisfying(versions.map(vtrim), vtrim(range));
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return maxSatisfying(versions.map(vtrim), vtrim(range));
+}
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return minSatisfying(versions.map(vtrim), vtrim(range));
+}
 
 const getNewValue = ({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string => {
+}: NewValueConfig): string | null => {
   let newValue = null;
   if (isVersion(currentValue)) {
     newValue = currentValue.startsWith('v') ? 'v' + newVersion : newVersion;
-  } else if (currentValue.replace(/^=\s*/, '') === currentVersion) {
+  } else if (currentValue.replace(regEx(/^=\s*/), '') === currentVersion) {
     newValue = currentValue.replace(currentVersion, newVersion);
   } else {
     switch (rangeStrategy) {
@@ -122,12 +131,20 @@ const getNewValue = ({
         logger.warn(`Unsupported strategy ${rangeStrategy}`);
     }
   }
-  if (/^('|")/.exec(currentValue)) {
+  if (newValue && regEx(/^('|")/).exec(currentValue)) {
     const delimiter = currentValue[0];
     return newValue
       .split(',')
-      .map((element) => element.replace(/^(\s*)/, `$1${delimiter}`))
-      .map((element) => element.replace(/(\s*)$/, `${delimiter}$1`))
+      .map((element) =>
+        element.replace(
+          regEx(`^(?<whitespace>\\s*)`),
+          `$<whitespace>${delimiter}`
+        )
+      )
+      .map(
+        (element) =>
+          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12875 adds ' at front when re2 is used
+      )
       .join(',');
   }
   return newValue;

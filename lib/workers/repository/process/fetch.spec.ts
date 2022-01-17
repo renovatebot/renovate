@@ -20,8 +20,9 @@ describe('workers/repository/process/fetch', () => {
         npm: [{ packageFile: 'package.json', deps: [] }],
       };
       await fetchUpdates(config, packageFiles);
-      // FIXME: explicit assert condition
-      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles).toEqual({
+        npm: [{ deps: [], packageFile: 'package.json' }],
+      });
     });
     it('handles ignored, skipped and disabled', async () => {
       config.ignoreDeps = ['abcd'];
@@ -45,9 +46,9 @@ describe('workers/repository/process/fetch', () => {
       };
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles.npm[0].deps[0].skipReason).toEqual('ignored');
+      expect(packageFiles.npm[0].deps[0].skipReason).toBe('ignored');
       expect(packageFiles.npm[0].deps[0].updates).toHaveLength(0);
-      expect(packageFiles.npm[0].deps[1].skipReason).toEqual('disabled');
+      expect(packageFiles.npm[0].deps[1].skipReason).toBe('disabled');
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
     it('fetches updates', async () => {

@@ -4,10 +4,10 @@ import { getRangeStrategy } from '.';
 describe('manager/setup-cfg/range', () => {
   it('returns same if not auto', () => {
     const config: RangeConfig = { rangeStrategy: 'widen' };
-    expect(getRangeStrategy(config)).toEqual('widen');
+    expect(getRangeStrategy(config)).toBe('widen');
   });
   it('replaces if auto', () => {
     const config: RangeConfig = { rangeStrategy: 'auto' };
-    expect(getRangeStrategy(config)).toEqual('replace');
+    expect(getRangeStrategy(config)).toBe('replace');
   });
 });

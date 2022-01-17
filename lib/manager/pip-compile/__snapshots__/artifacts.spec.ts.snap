@@ -1,20 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/pip-compile/artifacts catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "requirements.txt",
-      "stderr": "not found",
-    },
-  },
-]
-`;
-
 exports[`manager/pip-compile/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "pip-compile",
+    "cmd": "pip-compile requirements.in",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -37,7 +26,7 @@ Array [
 exports[`manager/pip-compile/artifacts returns updated requirements.txt 1`] = `
 Array [
   Object {
-    "cmd": "pip-compile",
+    "cmd": "pip-compile requirements.in",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -60,7 +49,7 @@ Array [
 exports[`manager/pip-compile/artifacts returns updated requirements.txt when doing lockfile maintenance 1`] = `
 Array [
   Object {
-    "cmd": "pip-compile",
+    "cmd": "pip-compile requirements.in",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -95,7 +84,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pip-tools && pip-compile\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pip-tools && pip-compile requirements.in\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -130,7 +119,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pip-tools1.2.3 && pip-compile\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/python bash -l -c \\"pip install --user pip-tools1.2.3 && pip-compile requirements.in\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

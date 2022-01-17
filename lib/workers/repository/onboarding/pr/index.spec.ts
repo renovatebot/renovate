@@ -5,7 +5,7 @@ import {
   partial,
   platform,
 } from '../../../../../test/util';
-import { setGlobalConfig } from '../../../../config/global';
+import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../manager/types';
 import { Pr } from '../../../../platform';
@@ -31,7 +31,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       branches = [];
       platform.massageMarkdown = jest.fn((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
-      setGlobalConfig();
+      GlobalConfig.reset();
     });
     let createPrBody: string;
     it('returns if onboarded', async () => {
@@ -45,6 +45,24 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       createPrBody = platform.createPr.mock.calls[0][0].prBody;
     });
+
+    it('creates PR with labels', async () => {
+      await ensureOnboardingPr(
+        {
+          ...config,
+          labels: ['label'],
+          addLabels: ['label', 'additional-label'],
+        },
+        packageFiles,
+        branches
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].labels).toEqual([
+        'label',
+        'additional-label',
+      ]);
+    });
+
     it('returns if PR does not need updating', async () => {
       platform.getBranchPr.mockResolvedValue(
         partial<Pr>({
@@ -89,7 +107,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
     it('dryrun of updates PR when modified', async () => {
-      setGlobalConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
@@ -108,7 +126,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       );
     });
     it('dryrun of creates PR', async () => {
-      setGlobalConfig({ dryRun: true });
+      GlobalConfig.set({ dryRun: true });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/configure'

@@ -32,7 +32,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       "runtime (  'mysql:mysql-connector-java:7.0.0'  )"
     );
   });
@@ -49,7 +49,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       },
       '2.10.1'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       "runtime (  'com.crashlytics.sdk.android:crashlytics:2.10.1@aar'  )"
     );
   });
@@ -61,7 +61,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'junit', name: 'junit', version: '4.0' },
       '5.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       "runtime (  'junit:junit:5.0:javadoc@jar'  )"
     );
   });
@@ -75,7 +75,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',
                version: '7.0.0'`
@@ -91,7 +91,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile name : 'mysql-connector-java',
                group  : 'mysql',
                version: '7.0.0'`
@@ -107,7 +107,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',
                version: "7.0.0"`
@@ -123,7 +123,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile name   : 'mysql-connector-java',
                version: "7.0.0",
                group  : 'mysql'`
@@ -139,7 +139,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',
                version: '''7.0.0'''`
@@ -155,7 +155,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile version: '''7.0.0''',
                group  : 'mysql',
                name   : 'mysql-connector-java'`
@@ -171,7 +171,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',
                version: """7.0.0"""`
@@ -187,7 +187,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile version: """7.0.0""",
                name   : 'mysql-connector-java',
                group  : 'mysql'`
@@ -203,7 +203,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile(group   = "mysql"               ,
                name    = "mysql-connector-java",
                version = "7.0.0")`
@@ -219,7 +219,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `compile(group = "mysql",
                version = "7.0.0",
                name    = "mysql-connector-java")`
@@ -235,7 +235,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(`String mysqlVersion= "7.0.0"
+    expect(updatedGradleFile).toBe(`String mysqlVersion= "7.0.0"
     runtime (  "mysql:mysql-connector-java:$mysqlVersion"  )
     `);
   });
@@ -249,7 +249,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(`String mysqlVersion = "7.0.0"
+    expect(updatedGradleFile).toBe(`String mysqlVersion = "7.0.0"
     runtime (  "mysql:mysql-connector-java:\${mysqlVersion}"  )
     `);
   });
@@ -265,7 +265,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `String mysqlVersion = "7.0.0"
                compile group  : 'mysql'               ,
                name           : 'mysql-connector-java',
@@ -285,7 +285,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `String mysqlVersion = "7.0.0"
                compile name   : 'mysql-connector-java',
                group          : 'mysql'               ,
@@ -305,7 +305,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `String mysqlVersion = "7.0.0"
                compile group  : 'mysql'               ,
                name           : 'mysql-connector-java',
@@ -325,7 +325,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `String mysqlVersion = "7.0.0"
                compile group  : 'mysql'               ,
                name           : 'mysql-connector-java',
@@ -345,7 +345,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `String mysqlVersion = "7.0.0"
                compile name   : 'mysql-connector-java',
                version        : "\${mysqlVersion}",
@@ -365,7 +365,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `String mysqlVersion = "7.0.0"
                compile group  : 'mysql'               ,
                name           : 'mysql-connector-java',
@@ -385,7 +385,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `String mysqlVersion = "7.0.0"
                compile group  : 'mysql'               ,
                name           : 'mysql-connector-java',
@@ -405,7 +405,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `val mysqlVersion = "7.0.0"
                compile(group = "mysql"               ,
                name          = "mysql-connector-java",
@@ -425,7 +425,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `val mysqlVersion = "7.0.0"
                compile(name  = "mysql-connector-java",
                group         = "mysql"               ,
@@ -445,7 +445,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `val mysqlVersion = "7.0.0"
                compile(group = "mysql"               ,
                name          = "mysql-connector-java",
@@ -465,7 +465,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `val mysqlVersion = "7.0.0"
                compile(group = "mysql"               ,
                name          = "mysql-connector-java",
@@ -485,7 +485,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `val mysqlVersion = "7.0.0"
                compile(version = "\${mysqlVersion}"    ,
                name            = "mysql-connector-java",
@@ -503,7 +503,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `val mysqlVersion = "7.0.0"
                id("mysql") version mysqlVersion
                `
@@ -519,7 +519,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `val mysqlVersion = "7.0.0"
                id("mysql") version "$mysqlVersion"
                `
@@ -535,7 +535,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `val mysqlVersion = "7.0.0"
                id("mysql") version "\${mysqlVersion}"
                `
@@ -551,7 +551,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       `String mysqlVersion = "7.0.0"
                id 'mysql' version """$mysqlVersion"""
                `
@@ -560,7 +560,7 @@ describe('manager/gradle/deep/build-gradle', () => {
 
   it('should replace a external groovy variable assigned to a specific dependency', () => {
     const gradleFile =
-      'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+      'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -575,12 +575,12 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
+    expect(updatedGradleFile).toBe('String mysqlVersion = "7.0.0"');
   });
 
   it('should replace a external groovy map variable assigned to a specific dependency', () => {
     const gradleFile =
-      'runtime (  "mysql:mysql-connector-java:${versions.mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+      'runtime (  "mysql:mysql-connector-java:${versions.mysqlVersion}"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -595,14 +595,12 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
-      'ext.versions = [ mysqlVersion: "7.0.0" ]'
-    );
+    expect(updatedGradleFile).toBe('ext.versions = [ mysqlVersion: "7.0.0" ]');
   });
 
   it('should replace a external groovy map nested variable assigned to a specific dependency', () => {
     const gradleFile =
-      'runtime (  "mysql:mysql-connector-java:${versions.nested.mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+      'runtime (  "mysql:mysql-connector-java:${versions.nested.mysqlVersion}"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -618,14 +616,14 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(
+    expect(updatedGradleFile).toBe(
       'ext.versions = [ nested: [ mysqlVersion: "7.0.0" ] ]'
     );
   });
 
   it('should replace a external property variable assigned to a specific dependency', () => {
     const gradleFile =
-      'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
+      'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -640,12 +638,12 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('mysqlVersion=7.0.0');
+    expect(updatedGradleFile).toBe('mysqlVersion=7.0.0');
   });
 
   it('should replace a external property variable assigned to a specific dependency parenthesis syntax', () => {
     const gradleFile =
-      "implementation platform(group: 'mysql', name: 'mysql-connector-java', version: mysqlVersion)"; // eslint-disable-line no-template-curly-in-string
+      "implementation platform(group: 'mysql', name: 'mysql-connector-java', version: mysqlVersion)";
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
@@ -660,7 +658,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('mysqlVersion=7.0.0');
+    expect(updatedGradleFile).toBe('mysqlVersion=7.0.0');
   });
 
   it('should replace a external variable assigned to a map dependency', () => {
@@ -682,7 +680,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
+    expect(updatedGradleFile).toBe('String mysqlVersion = "7.0.0"');
   });
 
   it('should replace a external variable assigned to a Kotlin named argument dependency', () => {
@@ -704,7 +702,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('val mysqlVersion = "7.0.0"');
+    expect(updatedGradleFile).toBe('val mysqlVersion = "7.0.0"');
   });
 
   it('should replace a external variable assigned to a interpolated dependency', () => {
@@ -724,7 +722,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
+    expect(updatedGradleFile).toBe('String mysqlVersion = "7.0.0"');
   });
 
   it('should replace a external extra variable assigned to a Kotlin named argument dependency', () => {
@@ -746,7 +744,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('val mysqlVersion by extra("7.0.0")');
+    expect(updatedGradleFile).toBe('val mysqlVersion by extra("7.0.0")');
   });
 
   it('should replace a external lazy extra variable assigned to a Kotlin named argument dependency', () => {
@@ -768,7 +766,7 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('val mysqlVersion by extra { "7.0.0" }');
+    expect(updatedGradleFile).toBe('val mysqlVersion by extra { "7.0.0" }');
   });
 
   it('should replace a external variable assigned to a plugin dependency', () => {
@@ -787,6 +785,6 @@ describe('manager/gradle/deep/build-gradle', () => {
       mysqlDependency,
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
+    expect(updatedGradleFile).toBe('String mysqlVersion = "7.0.0"');
   });
 });

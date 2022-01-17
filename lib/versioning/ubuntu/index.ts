@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'ubuntu';
@@ -5,35 +6,38 @@ export const displayName = 'Ubuntu';
 export const urls = ['https://changelogs.ubuntu.com/meta-release'];
 export const supportsRanges = false;
 
+// #12509
+const temporarilyUnstable = ['22.04'];
+
 // validation
 
-function isValid(input: string): string | boolean | null {
+function isValid(input: string): boolean {
   return (
     typeof input === 'string' &&
-    /^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/.test(input)
+    regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
   );
 }
 
-function isVersion(input: string): string | boolean | null {
+function isVersion(input: string): boolean {
   return isValid(input);
 }
 
-function isCompatible(
-  version: string,
-  _range?: string
-): string | boolean | null {
+function isCompatible(version: string, _current?: string): boolean {
   return isValid(version);
 }
 
-function isSingleVersion(version: string): string | boolean | null {
-  return isValid(version) ? true : null;
+function isSingleVersion(version: string): boolean {
+  return isValid(version);
 }
 
 function isStable(version: string): boolean {
   if (!isValid(version)) {
     return false;
   }
-  return /^\d?[02468]\.04/.test(version);
+  if (temporarilyUnstable.includes(version)) {
+    return false;
+  }
+  return regEx(/^\d?[02468]\.04/).test(version);
 }
 
 // digestion of version
@@ -69,8 +73,8 @@ function equals(version: string, other: string): boolean {
 }
 
 function isGreaterThan(version: string, other: string): boolean {
-  const xMajor = getMajor(version);
-  const yMajor = getMajor(other);
+  const xMajor = getMajor(version) ?? 0;
+  const yMajor = getMajor(other) ?? 0;
   if (xMajor > yMajor) {
     return true;
   }
@@ -78,8 +82,8 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  const xMinor = getMinor(version);
-  const yMinor = getMinor(other);
+  const xMinor = getMinor(version) ?? 0;
+  const yMinor = getMinor(other) ?? 0;
   if (xMinor > yMinor) {
     return true;
   }
@@ -87,8 +91,8 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  const xPatch = getPatch(version) || 0;
-  const yPatch = getPatch(other) || 0;
+  const xPatch = getPatch(version) ?? 0;
+  const yPatch = getPatch(other) ?? 0;
   return xPatch > yPatch;
 }
 

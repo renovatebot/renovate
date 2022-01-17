@@ -1,3 +1,5 @@
+import type { ModuleApi } from '../types';
+
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -28,6 +30,8 @@ export interface GetPkgReleasesConfig extends ReleasesConfigBase {
   versioning?: string;
   extractVersion?: string;
   constraints?: Record<string, string>;
+  replacementName?: string;
+  replacementVersion?: string;
 }
 
 export interface Release {
@@ -60,9 +64,11 @@ export interface ReleaseResult {
   sourceUrl?: string;
   sourceDirectory?: string;
   registryUrl?: string;
+  replacementName?: string;
+  replacementVersion?: string;
 }
 
-export interface DatasourceApi {
+export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
@@ -89,4 +95,7 @@ export interface DatasourceApi {
    * false: caching is not performed, or performed within the datasource implementation
    */
   caching?: boolean;
+
+  /** optional URLs to add to docs as references */
+  urls?: string[];
 }

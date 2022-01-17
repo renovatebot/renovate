@@ -1,14 +1,20 @@
 import url from 'url';
+import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
 import { regEx } from '../../util/regex';
+import { normalizeDate } from '../metadata';
 
 import type { ReleaseResult } from '../types';
 import { MAVEN_REPO, id } from './common';
-import type { MavenDependency, MavenXml } from './types';
+import type {
+  HttpResourceCheckResult,
+  MavenDependency,
+  MavenXml,
+} from './types';
 
 const http: Record<string, Http> = {};
 
@@ -100,23 +106,35 @@ export async function downloadHttpProtocol(
   }
 }
 
-export async function isHttpResourceExists(
+export async function checkHttpResource(
   pkgUrl: url.URL | string,
   hostType = id
-): Promise<boolean | string | null> {
+): Promise<HttpResourceCheckResult> {
   try {
     const httpClient = httpByHostType(hostType);
     const res = await httpClient.head(pkgUrl.toString());
-    const timestamp = res?.headers?.['last-modified'] as string;
-    return timestamp || true;
+    const timestamp = res?.headers?.['last-modified'];
+    if (timestamp) {
+      const isoTimestamp = normalizeDate(timestamp);
+      if (isoTimestamp) {
+        const releaseDate = DateTime.fromISO(isoTimestamp, {
+          zone: 'UTC',
+        }).toJSDate();
+        return releaseDate;
+      }
+    }
+    return 'found';
   } catch (err) {
     if (isNotFoundError(err)) {
-      return false;
+      return 'not-found';
     }
 
     const failedUrl = pkgUrl.toString();
-    logger.debug({ failedUrl }, `Can't check HTTP resource existence`);
-    return null;
+    logger.debug(
+      { failedUrl, statusCode: err.statusCode },
+      `Can't check HTTP resource existence`
+    );
+    return 'error';
   }
 }
 
@@ -141,12 +159,15 @@ export async function downloadMavenXml(
   }
   let rawContent: string;
   let authorization: boolean;
+  let statusCode: number;
   switch (pkgUrl.protocol) {
     case 'http:':
     case 'https:':
-      ({ authorization, body: rawContent } = await downloadHttpProtocol(
-        pkgUrl
-      ));
+      ({
+        authorization,
+        body: rawContent,
+        statusCode,
+      } = await downloadHttpProtocol(pkgUrl));
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
@@ -157,7 +178,10 @@ export async function downloadMavenXml(
   }
 
   if (!rawContent) {
-    logger.debug(`Content is not found for Maven url: ${pkgUrl.toString()}`);
+    logger.debug(
+      { url: pkgUrl.toString(), statusCode },
+      `Content is not found for Maven url`
+    );
     return {};
   }
 

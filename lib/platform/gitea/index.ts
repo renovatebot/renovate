@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import { lt } from 'semver';
+import JSON5 from 'json5';
+import semver from 'semver';
 import { PlatformId } from '../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -210,17 +211,23 @@ const platform: Platform = {
 
   async getRawFile(
     fileName: string,
-    repo: string = config.repository
+    repoName?: string,
+    branchOrTag?: string
   ): Promise<string | null> {
-    const contents = await helper.getRepoContents(repo, fileName);
+    const repo = repoName ?? config.repository;
+    const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
     return contents.contentString;
   },
 
   async getJsonFile(
     fileName: string,
-    repo: string = config.repository
+    repoName?: string,
+    branchOrTag?: string
   ): Promise<any | null> {
-    const raw = await platform.getRawFile(fileName, repo);
+    const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
+    if (fileName.endsWith('.json5')) {
+      return JSON5.parse(raw);
+    }
     return JSON.parse(raw);
   },
 
@@ -833,7 +840,7 @@ const platform: Platform = {
 
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
-    if (lt(defaults.version, '1.14.0')) {
+    if (semver.lt(defaults.version, '1.14.0')) {
       logger.debug(
         { version: defaults.version },
         'Adding reviewer not yet supported.'

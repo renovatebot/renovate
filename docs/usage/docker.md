@@ -126,11 +126,13 @@ If you wish to override Docker settings for one particular type of manager, use 
 For example, to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would use this:
 
 ```json
+{
   "docker-compose": {
     "digest": {
       "enabled": false
     }
   }
+}
 ```
 
 The following configuration options are applicable to Docker:
@@ -220,14 +222,14 @@ When running Renovate in this context the Google access token must be retrieved 
 _This documentation gives **a few hints** on **a possible way** to achieve this end result._
 
 The basic approach is that you create a custom image and then run Renovate as one of the stages of your project.
-To make this run independent of any user you should use a [`Project Access Token`](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) (with Scopes: `api`, `read_api` and `write_repository`) for the project and use this as the `RENOVATE_TOKEN` variable for Gitlab CI.
+To make this run independent of any user you should use a [`Project Access Token`](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) (with Scopes: `api`, `read_api` and `write_repository`) for the project and use this as the `RENOVATE_TOKEN` variable for GitLab CI.
 See also the [renovate-runner repository on GitLab](https://gitlab.com/renovate-bot/renovate-runner) where `.gitlab-ci.yml` configuration examples can be found.
 
 To get access to the token a custom Renovate Docker image is needed that includes the Google Cloud SDK.
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:28.0.2
+FROM renovate/renovate:31.28.2
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
@@ -252,22 +254,3 @@ script:
   - 'echo "module.exports = { hostRules: [ { matchHost: ''eu.gcr.io'', token: ''"$(gcloud auth print-access-token)"'' } ] };" > config.js'
   - renovate $RENOVATE_EXTRA_FLAGS
 ```
-
-#### ChartMuseum
-
-Maybe you're running your own ChartMuseum server to host your private Helm Charts.
-This is how you connect to a private Helm repository:
-
-```js
-module.exports = {
-  hostRules: [
-    {
-      matchHost: 'your.host.io',
-      username: '<your-username>',
-      password: process.env.SELF_HOSTED_HELM_CHARTS_PASSWORD,
-    },
-  ],
-};
-```
-
-If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`).

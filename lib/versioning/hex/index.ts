@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -9,11 +10,11 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 function hex2npm(input: string): string {
   return input
-    .replace(/~>\s*(\d+\.\d+)$/, '^$1')
-    .replace(/~>\s*(\d+\.\d+\.\d+)/, '~$1')
-    .replace(/==|and/, '')
+    .replace(regEx(/~>\s*(\d+\.\d+)$/), '^$1')
+    .replace(regEx(/~>\s*(\d+\.\d+\.\d+)/), '~$1')
+    .replace(regEx(/==|and/), '')
     .replace('or', '||')
-    .replace(/!=\s*(\d+\.\d+(\.\d+.*)?)/, '>$1 <$1')
+    .replace(regEx(/!=\s*(\d+\.\d+(\.\d+.*)?)/), '>$1 <$1')
     .trim();
 }
 
@@ -41,52 +42,63 @@ function npm2hex(input: string): string {
   return output;
 }
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange(hex2npm(version), hex2npm(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return !!npm.isLessThanRange?.(hex2npm(version), hex2npm(range));
+}
 
-const isValid = (input: string): string | boolean =>
-  npm.isValid(hex2npm(input));
+const isValid = (input: string): boolean => !!npm.isValid(hex2npm(input));
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(hex2npm(version), hex2npm(range));
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.getSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.getSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.minSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.minSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
+}
 
-const getNewValue = ({
+function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string => {
+}: NewValueConfig): string | null {
   let newSemver = npm.getNewValue({
     currentValue: hex2npm(currentValue),
     rangeStrategy,
     currentVersion,
     newVersion,
   });
-  newSemver = npm2hex(newSemver);
-  if (/~>\s*(\d+\.\d+\.\d+)$/.test(currentValue)) {
-    newSemver = newSemver.replace(
-      /[\^~]\s*(\d+\.\d+\.\d+)/,
-      (_str, p1: string) => `~> ${p1}`
-    );
-  } else if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
-    newSemver = newSemver.replace(
-      /\^\s*(\d+\.\d+)(\.\d+)?/,
-      (_str, p1: string) => `~> ${p1}`
-    );
-  } else {
-    newSemver = newSemver.replace(/~\s*(\d+\.\d+\.\d)/, '~> $1');
-  }
-  if (npm.isVersion(newSemver)) {
-    newSemver = `== ${newSemver}`;
+  if (newSemver) {
+    newSemver = npm2hex(newSemver);
+
+    if (regEx(/~>\s*(\d+\.\d+\.\d+)$/).test(currentValue)) {
+      newSemver = newSemver.replace(
+        regEx(/[\^~]\s*(\d+\.\d+\.\d+)/),
+        (_str, p1: string) => `~> ${p1}`
+      );
+    } else if (regEx(/~>\s*(\d+\.\d+)$/).test(currentValue)) {
+      newSemver = newSemver.replace(
+        regEx(/\^\s*(\d+\.\d+)(\.\d+)?/),
+        (_str, p1: string) => `~> ${p1}`
+      );
+    } else {
+      newSemver = newSemver.replace(regEx(/~\s*(\d+\.\d+\.\d)/), '~> $1');
+    }
+    if (npm.isVersion(newSemver)) {
+      newSemver = `== ${newSemver}`;
+    }
   }
   return newSemver;
-};
+}
 
 export { isValid };
 

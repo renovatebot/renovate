@@ -1,7 +1,7 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
 import type { HostRule } from '../types';
-import type { GitNoVerifyOption } from '../util/git';
+import type { GitNoVerifyOption } from '../util/git/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -27,6 +27,7 @@ export interface RenovateSharedConfig {
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  confidential?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -75,6 +76,7 @@ export interface GlobalOnlyConfig {
   autodiscoverFilter?: string;
   baseDir?: string;
   cacheDir?: string;
+  detectHostRulesFromEnv?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -91,15 +93,17 @@ export interface GlobalOnlyConfig {
 // The below should contain config options where globalOnly=true
 export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
+  allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
-  binarySource?: 'docker' | 'global';
+  binarySource?: 'docker' | 'global' | 'install';
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: boolean;
+  executionTimeout?: number;
   exposeAllEnv?: boolean;
   migratePresets?: Record<string, string>;
   privateKey?: string;
@@ -118,6 +122,7 @@ export interface LegacyAdminConfig {
   onboarding?: boolean;
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
+  onboardingNoDeps?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
@@ -231,7 +236,8 @@ export type UpdateType =
   | 'lockFileMaintenance'
   | 'lockfileUpdate'
   | 'rollback'
-  | 'bump';
+  | 'bump'
+  | 'replacement';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
@@ -315,25 +321,35 @@ export interface RenovateArrayOption<
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
   subType: 'string';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
   subType: 'number';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
   default?: boolean;
   type: 'boolean';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
   default?: number;
   type: 'integer';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
@@ -343,6 +359,8 @@ export interface RenovateStringOption extends RenovateOptionBase {
   // Not used
   replaceLineReturns?: boolean;
   type: 'string';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
@@ -350,6 +368,8 @@ export interface RenovateObjectOption extends RenovateOptionBase {
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
+  supportedManagers?: string[] | 'all';
+  supportedPlatforms?: string[] | 'all';
 }
 
 export type RenovateOptions =

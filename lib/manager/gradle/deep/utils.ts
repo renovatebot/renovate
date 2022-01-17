@@ -1,5 +1,5 @@
-import { join } from 'upath';
-import { getGlobalConfig } from '../../../config/global';
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import { localPathExists, readLocalFile } from '../../../util/fs';
 import {
   extractGradleVersion,
@@ -11,13 +11,13 @@ const GradleWrapperProperties = 'gradle/wrapper/gradle-wrapper.properties';
 export async function getDockerConstraint(
   gradleRoot: string
 ): Promise<string | null> {
-  if (getGlobalConfig()?.binarySource !== 'docker') {
+  if (GlobalConfig.get('binarySource') !== 'docker') {
     // ignore
     return null;
   }
 
   const fileContent = await readLocalFile(
-    join(gradleRoot, GradleWrapperProperties),
+    upath.join(gradleRoot, GradleWrapperProperties),
     'utf8'
   );
 
@@ -29,12 +29,12 @@ export async function getDockerConstraint(
 export async function getDockerPreCommands(
   gradleRoot: string
 ): Promise<string[]> {
-  if (getGlobalConfig()?.binarySource !== 'docker') {
+  if (GlobalConfig.get('binarySource') !== 'docker') {
     // ignore
     return null;
   }
 
-  if (await localPathExists(join(gradleRoot, GradleWrapperProperties))) {
+  if (await localPathExists(upath.join(gradleRoot, GradleWrapperProperties))) {
     return null;
   }
 

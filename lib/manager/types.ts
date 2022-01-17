@@ -5,8 +5,8 @@ import type {
   ValidationMessage,
 } from '../config/types';
 import type { ProgrammingLanguage } from '../constants';
-import type { RangeStrategy, SkipReason } from '../types';
-import type { File } from '../util/git';
+import type { ModuleApi, RangeStrategy, SkipReason } from '../types';
+import type { File } from '../util/git/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -35,6 +35,7 @@ export interface CustomExtractConfig extends ExtractConfig {
   lookupNameTemplate?: string;
   datasourceTemplate?: string;
   versioningTemplate?: string;
+  depTypeTemplate?: string;
 }
 
 export interface UpdateArtifactsConfig {
@@ -43,11 +44,13 @@ export interface UpdateArtifactsConfig {
   composerIgnorePlatformReqs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
+  ignorePlugins?: boolean;
   ignoreScripts?: boolean;
   updateType?: UpdateType;
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
+  aliases?: Record<string, string>;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -128,15 +131,18 @@ export interface LookupUpdate {
   isPin?: boolean;
   isRange?: boolean;
   isRollback?: boolean;
+  isReplacement?: boolean;
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
+  newName?: string;
   newValue: string;
   semanticCommitType?: string;
   pendingChecks?: boolean;
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  userStrings?: Record<string, string>;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -175,6 +181,7 @@ export interface Upgrade<T = Record<string, any>>
   newDigest?: string;
   newFrom?: string;
   newMajor?: number;
+  newName?: string;
   newValue?: string;
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
@@ -221,6 +228,12 @@ export interface UpdateLockedConfig {
   depName?: string;
   currentVersion?: string;
   newVersion?: string;
+  allowParentUpdates?: boolean;
+}
+
+export interface UpdateLockedResult {
+  status: 'unsupported' | 'updated' | 'already-updated' | 'update-failed';
+  files?: Record<string, string>;
 }
 
 export interface GlobalManagerConfig {
@@ -228,7 +241,7 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
-export interface ManagerApi {
+export interface ManagerApi extends ModuleApi {
   defaultConfig: Record<string, unknown>;
   language?: ProgrammingLanguage;
   supportsLockFileMaintenance?: boolean;
@@ -264,7 +277,7 @@ export interface ManagerApi {
 
   updateLockedDependency?(
     config: UpdateLockedConfig
-  ): Result<Record<string, string | null>>;
+  ): Result<UpdateLockedResult>;
 }
 
 // TODO: name and properties used by npm manager

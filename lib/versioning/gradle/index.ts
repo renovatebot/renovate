@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   RangeBound,
@@ -22,8 +23,8 @@ const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 const getMajor = (version: string): number | null => {
   if (isVersion(version)) {
-    const tokens = tokenize(version.replace(/^v/i, ''));
-    const majorToken = tokens[0];
+    const tokens = tokenize(version.replace(regEx(/^v/i), ''));
+    const majorToken = tokens?.[0];
     if (majorToken && majorToken.type === TokenType.Number) {
       return +majorToken.val;
     }
@@ -33,7 +34,7 @@ const getMajor = (version: string): number | null => {
 
 const getMinor = (version: string): number | null => {
   if (isVersion(version)) {
-    const tokens = tokenize(version.replace(/^v/i, ''));
+    const tokens = tokenize(version.replace(regEx(/^v/i), ''));
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     if (
@@ -51,7 +52,7 @@ const getMinor = (version: string): number | null => {
 
 const getPatch = (version: string): number | null => {
   if (isVersion(version)) {
-    const tokens = tokenize(version.replace(/^v/i, ''));
+    const tokens = tokenize(version.replace(regEx(/^v/i), ''));
     const majorToken = tokens[0];
     const minorToken = tokens[1];
     const patchToken = tokens[2];
@@ -82,10 +83,11 @@ const unstable = new Set([
   'milestone',
   'rc',
   'cr',
+  'preview',
   'snapshot',
 ]);
 
-const isStable = (version: string): boolean | null => {
+const isStable = (version: string): boolean => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     for (const token of tokens) {
@@ -98,7 +100,7 @@ const isStable = (version: string): boolean | null => {
     }
     return true;
   }
-  return null;
+  return false;
 };
 
 const matches = (a: string, b: string): boolean => {

@@ -12,15 +12,30 @@ const supportedSchemes = getOptions().find(
 
 describe('versioning/index', () => {
   it('has api', () => {
-    // FIXME: explicit assert condition
-    expect(Object.keys(allVersioning.get('semver')).sort()).toMatchSnapshot();
+    expect(Object.keys(allVersioning.get('semver')).sort()).toEqual([
+      'equals',
+      'getMajor',
+      'getMinor',
+      'getNewValue',
+      'getPatch',
+      'getSatisfyingVersion',
+      'isCompatible',
+      'isGreaterThan',
+      'isLessThanRange',
+      'isSingleVersion',
+      'isStable',
+      'isValid',
+      'isVersion',
+      'matches',
+      'minSatisfyingVersion',
+      'sortVersions',
+    ]);
   });
   it('validates', () => {
     function validate(
       module: VersioningApi | VersioningApiConstructor,
       name: string
     ): boolean {
-      // eslint-disable-next-line new-cap
       const mod = isVersioningApiConstructor(module) ? new module() : module;
 
       // TODO: test required api (#9715)
@@ -37,7 +52,7 @@ describe('versioning/index', () => {
 
     for (const name of vers.keys()) {
       const ver = vers.get(name);
-      expect(validate(ver, name)).toBe(true);
+      expect(validate(ver, name)).toBeTrue();
     }
   });
 
@@ -81,7 +96,6 @@ describe('versioning/index', () => {
             props.push(prop);
           }
         });
-        // eslint-disable-next-line no-cond-assign
       } while ((o = Object.getPrototypeOf(o)));
 
       return props;
@@ -112,12 +126,10 @@ describe('versioning/index', () => {
 
     it('dummy', () => {
       class DummyScheme extends GenericVersioningApi {
-        // eslint-disable-next-line class-methods-use-this
         protected override _compare(_version: string, _other: string): number {
           throw new Error('Method not implemented.');
         }
 
-        // eslint-disable-next-line class-methods-use-this
         protected _parse(_version: string): GenericVersion {
           throw new Error('Method not implemented.');
         }

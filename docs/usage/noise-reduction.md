@@ -28,12 +28,14 @@ You may wish to take this further, for example you might want to group together 
 In that case you might create a config like this:
 
 ```json
+{
   "packageRules": [
     {
-      "matchPackagePatterns": [ "eslint" ],
+      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint"
     }
   ]
+}
 ```
 
 By setting `matchPackagePatterns` to "eslint", it means that any package with ESLint anywhere in its name will be grouped into a `renovate/eslint` branch and related PR.
@@ -79,25 +81,29 @@ If you think about it, updates to `eslint` rules don't exactly need to be applie
 You don't want to get too far behind, so how about we update `eslint` packages only once a month?
 
 ```json
+{
   "packageRules": [
     {
-      "matchPackagePatterns": [ "eslint" ],
+      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
       "schedule": ["on the first day of the month"]
     }
   ]
+}
 ```
 
 Or perhaps at least weekly:
 
 ```json
+{
   "packageRules": [
     {
-      "matchPackagePatterns": [ "eslint" ],
+      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
       "schedule": ["before 2am on monday"]
     }
   ]
+}
 ```
 
 If you're wondering what is supported and not, under the hood, the schedule is parsed using [@breejs/later](https://github.com/breejs/later) using the `later.parse.text(scheduleString)` API.
@@ -149,15 +155,17 @@ Remember our running `eslint` example?
 Let's automerge it if all the linting updates pass:
 
 ```json
+{
   "packageRules": [
     {
-      "matchPackagePatterns": [ "eslint" ],
+      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
       "schedule": ["before 2am on monday"],
       "automerge": true,
       "automergeType": "branch"
     }
   ]
+}
 ```
 
 Have you come up with a rule that you think others would benefit from?

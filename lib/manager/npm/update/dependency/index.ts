@@ -9,14 +9,22 @@ function replaceAsString(
   fileContent: string,
   depType: string,
   depName: string,
-  oldVersion: string,
+  oldValue: string,
   newValue: string
 ): string | null {
-  // Update the file = this is what we want
-  // eslint-disable-next-line no-param-reassign
-  parsedContents[depType][depName] = newValue;
+  if (depType === 'packageManager') {
+    parsedContents[depType] = newValue;
+  } else if (depName === oldValue) {
+    // The old value is the name of the dependency itself
+    delete Object.assign(parsedContents[depType], {
+      [newValue]: parsedContents[depType][oldValue],
+    })[oldValue];
+  } else {
+    // The old value is the version of the dependency
+    parsedContents[depType][depName] = newValue;
+  }
   // Look for the old version number
-  const searchString = `"${oldVersion}"`;
+  const searchString = `"${oldValue}"`;
   const newString = `"${newValue}"`;
   // Skip ahead to depType section
   let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
@@ -72,7 +80,13 @@ export function updateDependency({
   try {
     const parsedContents: PackageJson = JSON.parse(fileContent);
     // Save the old version
-    const oldVersion: string = parsedContents[depType][depName];
+    let oldVersion: string;
+    if (depType === 'packageManager') {
+      oldVersion = parsedContents[depType];
+      newValue = `${depName}@${newValue}`;
+    } else {
+      oldVersion = parsedContents[depType][depName];
+    }
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
       return fileContent;
@@ -85,6 +99,16 @@ export function updateDependency({
       oldVersion,
       newValue
     );
+    if (upgrade.newName) {
+      newFileContent = replaceAsString(
+        parsedContents,
+        newFileContent,
+        depType,
+        depName,
+        depName,
+        upgrade.newName
+      );
+    }
     // istanbul ignore if
     if (!newFileContent) {
       logger.debug(
@@ -121,6 +145,20 @@ export function updateDependency({
           parsedContents.resolutions[depKey],
           newValue
         );
+        if (upgrade.newName) {
+          if (depKey === `**/${depName}`) {
+            // handles the case where a replacement is in a resolution
+            upgrade.newName = `**/${upgrade.newName}`;
+          }
+          newFileContent = replaceAsString(
+            parsedContents,
+            newFileContent,
+            'resolutions',
+            depKey,
+            depKey,
+            upgrade.newName
+          );
+        }
       }
     }
     return newFileContent;

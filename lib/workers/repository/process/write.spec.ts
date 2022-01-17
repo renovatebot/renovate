@@ -49,7 +49,7 @@ describe('workers/repository/process/write', () => {
         result: BranchResult.Automerged,
       });
       const res = await writeUpdates(config, branches);
-      expect(res).toEqual('automerged');
+      expect(res).toBe('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
     it('increments branch counter', async () => {

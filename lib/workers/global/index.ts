@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
-import { satisfies } from 'semver';
+import semver from 'semver';
 import upath from 'upath';
-import * as pkg from '../../../package.json';
 import * as configParser from '../../config';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
@@ -13,6 +12,7 @@ import type {
   RenovateRepository,
 } from '../../config/types';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
+import { pkg } from '../../expose.cjs';
 import { getProblems, logger, setMeta } from '../../logger';
 import { writeFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
@@ -60,12 +60,15 @@ function checkEnv(): void {
       { release: process.release, versions: process.versions },
       'Unknown node environment detected.'
     );
-  } else if (!satisfies(process.versions?.node, range)) {
+  } else if (!semver.satisfies(process.versions?.node, range)) {
     logger.error(
       { versions: process.versions, range },
       'Unsupported node environment detected. Please update your node version.'
     );
-  } else if (rangeNext && !satisfies(process.versions?.node, rangeNext)) {
+  } else if (
+    rangeNext &&
+    !semver.satisfies(process.versions?.node, rangeNext)
+  ) {
     logger.warn(
       { versions: process.versions },
       `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`

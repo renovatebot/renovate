@@ -16,7 +16,11 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
-    const { depName, depType } = upgrade;
+    const { depName, depType, updateType } = upgrade;
+    if (updateType === 'replacement') {
+      logger.warn('gomod manager does not support replacement updates yet');
+      return null;
+    }
     const depNameNoVersion = getDepNameWithNoVersion(depName);
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
@@ -33,13 +37,15 @@ export function updateDependency({
     let updateLineExp: RegExp;
     if (depType === 'replace') {
       updateLineExp = regEx(
-        /^(replace\s+[^\s]+[\s]+[=][>]+\s+)([^\s]+\s+)([^\s]+)/
+        /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
       );
     } else if (depType === 'require') {
       if (upgrade.managerData.multiLine) {
-        updateLineExp = regEx(/^(\s+[^\s]+)(\s+)([^\s]+)/);
+        updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
-        updateLineExp = regEx(/^(require\s+[^\s]+)(\s+)([^\s]+)/);
+        updateLineExp = regEx(
+          /^(?<depPart>require\s+[^\s]+)(?<divider>\s+)[^\s]+/
+        );
       }
     }
     if (updateLineExp && !updateLineExp.test(lineToChange)) {
@@ -61,10 +67,13 @@ export function updateDependency({
       );
       newLine = lineToChange.replace(
         updateLineExp,
-        `$1$2${newDigestRightSized}`
+        `$<depPart>$<divider>${newDigestRightSized}`
       );
     } else {
-      newLine = lineToChange.replace(updateLineExp, `$1$2${upgrade.newValue}`);
+      newLine = lineToChange.replace(
+        updateLineExp,
+        `$<depPart>$<divider>${upgrade.newValue}`
+      );
     }
     if (upgrade.updateType === 'major') {
       logger.debug({ depName }, 'gomod: major update');
@@ -87,7 +96,7 @@ export function updateDependency({
           // Replace version
           const [oldV] = upgrade.currentValue.split('.');
           newLine = newLine.replace(
-            regEx(`/${oldV}(\\s+)`),
+            regEx(`/${oldV}(\\s+)`, undefined, false),
             `/v${upgrade.newMajor}$1`
           );
         }

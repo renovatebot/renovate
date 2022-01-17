@@ -47,7 +47,7 @@ export type SyntaxHandlerOutput = {
 
 export interface SyntaxMatchConfig {
   matchers: SyntaxMatcher[];
-  handler: (MatcherHandlerInput) => SyntaxHandlerOutput;
+  handler: (_: SyntaxHandlerInput) => SyntaxHandlerOutput;
 }
 
 export interface MatchConfig {
@@ -68,7 +68,7 @@ export interface GradleCatalog {
     string,
     GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor | string
   >;
-  plugins?: Record<string, GradleCatalogPluginDescriptor>;
+  plugins?: Record<string, GradleCatalogPluginDescriptor | string>;
 }
 
 export interface GradleCatalogModuleDescriptor {

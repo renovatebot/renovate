@@ -1,4 +1,4 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import * as datasourcePod from '../../datasource/pod';
@@ -10,12 +10,14 @@ import type { PackageDependency, PackageFile } from '../types';
 import type { ParsedLine } from './types';
 
 const regexMappings = [
-  /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/, // TODO #12070
-  /^\s*pod\s+(['"])[^'"]+\1\s*,\s*(['"])(?<currentValue>[^'"]+)\2\s*$/, // TODO #12070
-  /,\s*:git\s*=>\s*(['"])(?<git>[^'"]+)\1/, // TODO #12070
-  /,\s*:tag\s*=>\s*(['"])(?<tag>[^'"]+)\1/, // TODO #12070
-  /,\s*:path\s*=>\s*(['"])(?<path>[^'"]+)\1/, // TODO #12070
-  /^\s*source\s*(['"])(?<source>[^'"]+)\1/, // TODO #12070
+  regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(\\/(?<subspec>[^'"]+))?(['"])`),
+  regEx(
+    `^\\s*pod\\s+(['"])[^'"]+(['"])\\s*,\\s*(['"])(?<currentValue>[^'"]+)(['"])\\s*$`
+  ),
+  regEx(`,\\s*:git\\s*=>\\s*(['"])(?<git>[^'"]+)(['"])`),
+  regEx(`,\\s*:tag\\s*=>\\s*(['"])(?<tag>[^'"]+)(['"])`),
+  regEx(`,\\s*:path\\s*=>\\s*(['"])(?<path>[^'"]+)(['"])`),
+  regEx(`^\\s*source\\s*(['"])(?<source>[^'"]+)(['"])`),
 ];
 
 export function parseLine(line: string): ParsedLine {
@@ -24,7 +26,7 @@ export function parseLine(line: string): ParsedLine {
     return result;
   }
   for (const regex of Object.values(regexMappings)) {
-    const match = regex.exec(line.replace(regEx(/#.*$/), '')); // TODO #12071
+    const match = regex.exec(line.replace(regEx(/#.*$/), ''));
     if (match?.groups) {
       result = { ...result, ...match.groups };
     }
@@ -72,7 +74,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   }
 
   return {
-    datasource: datasourceGitTags.id,
+    datasource: GitTagsDatasource.id,
     depName,
     lookupName: git,
     currentValue: tag,
@@ -103,7 +105,7 @@ export async function extractPackageFile(
     }: ParsedLine = parsedLine;
 
     if (source) {
-      registryUrls.push(source.replace(regEx(/\/*$/), '')); // TODO #12071
+      registryUrls.push(source.replace(regEx(/\/*$/), ''));
     }
 
     if (depName) {

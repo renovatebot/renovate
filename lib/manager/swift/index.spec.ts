@@ -97,45 +97,38 @@ describe('manager/swift/index', () => {
       ).not.toBeNull();
     });
     it('parses package descriptions', () => {
-      // FIXME: explicit assert condition
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]`
         )
-      ).toMatchSnapshot();
-      // FIXME: explicit assert condition
+      ).toMatchSnapshot({ deps: [{ currentValue: 'from:"1.2.3"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"...)]`
         )
-      ).toMatchSnapshot();
-      // FIXME: explicit assert condition
+      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"...' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..."1.2.4")]`
         )
-      ).toMatchSnapshot();
-      // FIXME: explicit assert condition
+      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"..."1.2.4"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..<"1.2.4")]`
         )
-      ).toMatchSnapshot();
-      // FIXME: explicit assert condition
+      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"..<"1.2.4"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..."1.2.3")]`
         )
-      ).toMatchSnapshot();
-      // FIXME: explicit assert condition
+      ).toMatchSnapshot({ deps: [{ currentValue: '..."1.2.3"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..<"1.2.3")]`
         )
-      ).toMatchSnapshot();
+      ).toMatchSnapshot({ deps: [{ currentValue: '..<"1.2.3"' }] });
     });
     it('parses multiple packages', () => {
-      // FIXME: explicit assert condition
       expect(extractPackageFile(pkgContent)).toMatchSnapshot();
     });
   });

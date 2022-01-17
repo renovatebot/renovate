@@ -1,5 +1,5 @@
 import { GalaxyDatasource } from '../../datasource/galaxy';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
@@ -54,7 +54,7 @@ function finalize(dependency: PackageDependency): boolean {
   const source: string = dep.managerData.src;
   const sourceMatch = nameMatchRegex.exec(source);
   if (sourceMatch) {
-    dep.datasource = datasourceGitTags.id;
+    dep.datasource = GitTagsDatasource.id;
     dep.depName = sourceMatch.groups.depName.replace(regEx(/.git$/), '');
     // remove leading `git+` from URLs like `git+https://...`
     dep.lookupName = source.replace(regEx(/git\+/), '');
@@ -94,7 +94,7 @@ export function extractRoles(lines: string[]): PackageDependency[] {
       };
       do {
         const localdep = interpretLine(lineMatch, lineNumber, dep);
-        if (localdep == null) {
+        if (!localdep) {
           break;
         }
         const line = lines[lineNumber + 1];

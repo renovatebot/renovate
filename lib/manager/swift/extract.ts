@@ -1,4 +1,4 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import type { MatchResult } from './types';
@@ -152,7 +152,7 @@ export function extractPackageFile(
     const depName = getDepName(lookupName);
     if (depName && currentValue) {
       const dep: PackageDependency = {
-        datasource: datasourceGitTags.id,
+        datasource: GitTagsDatasource.id,
         depName,
         lookupName,
         currentValue,
@@ -166,7 +166,7 @@ export function extractPackageFile(
 
   while (match) {
     const { idx, len, label, substr } = match;
-    // eslint-disable-next-line default-case
+
     switch (state) {
       case null:
         if (deps.length) {

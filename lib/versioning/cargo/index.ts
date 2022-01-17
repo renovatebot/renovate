@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -10,7 +11,7 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
-const isVersion = (input: string): string | boolean => npm.isVersion(input);
+const isVersion = (input: string): boolean => npm.isVersion(input);
 
 function convertToCaret(item: string): string {
   // In Cargo, "1.2.3" doesn't mean exactly 1.2.3, it means >= 1.2.3 < 2.0.0
@@ -40,7 +41,7 @@ function npm2cargo(input: string): string {
   }
   // Note: this doesn't remove the ^
   const res = input
-    .split(/\s+,?\s*|\s*,?\s+/)
+    .split(regEx(/\s+,?\s*|\s*,?\s+/))
     .map((str) => str.trim())
     .filter(notEmpty);
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
@@ -56,7 +57,7 @@ function npm2cargo(input: string): string {
 const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(version, cargo2npm(range));
 
-export const isValid = (input: string): string | boolean =>
+export const isValid = (input: string): boolean =>
   npm.isValid(cargo2npm(input));
 
 const matches = (version: string, range: string): boolean =>
@@ -68,7 +69,7 @@ const getSatisfyingVersion = (versions: string[], range: string): string =>
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions, cargo2npm(range));
 
-const isSingleVersion = (constraint: string): string | boolean =>
+const isSingleVersion = (constraint: string): boolean =>
   constraint.trim().startsWith('=') &&
   isVersion(constraint.trim().substring(1).trim());
 

@@ -1,5 +1,5 @@
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
@@ -49,15 +49,14 @@ function handleGitDep(
   dep: PackageDependency,
   nameMatch: RegExpExecArray
 ): void {
-  /* eslint-disable no-param-reassign */
-  dep.datasource = datasourceGitTags.id;
+  dep.datasource = GitTagsDatasource.id;
 
   if (nameMatch) {
     // if a github.com repository is referenced use github-tags instead of git-tags
     if (nameMatch.groups.hostname === 'github.com') {
       dep.datasource = datasourceGithubTags.id;
     } else {
-      dep.datasource = datasourceGitTags.id;
+      dep.datasource = GitTagsDatasource.id;
     }
     // source definition without version appendix
     const source = nameMatch.groups.source;
@@ -76,16 +75,13 @@ function handleGitDep(
       dep.currentValue = dep.managerData.version;
     }
   }
-  /* eslint-enable no-param-reassign */
 }
 
 function handleGalaxyDep(dep: PackageDependency): void {
-  /* eslint-disable no-param-reassign */
   dep.datasource = GalaxyCollectionDatasource.id;
   dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
   dep.currentValue = dep.managerData.version;
-  /* eslint-enable no-param-reassign */
 }
 
 function finalize(dependency: PackageDependency): boolean {
@@ -124,7 +120,7 @@ function finalize(dependency: PackageDependency): boolean {
       return true;
   }
 
-  if (dependency.currentValue == null && dep.skipReason == null) {
+  if (!dependency.currentValue && !dep.skipReason) {
     dep.skipReason = SkipReason.NoVersion;
   }
   return true;

@@ -28,7 +28,7 @@ describe('manager/npm/post-update/pnpm', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
@@ -38,8 +38,8 @@ describe('manager/npm/post-update/pnpm', () => {
     }) as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBe(true);
-    expect(res.lockFile).not.toBeDefined();
+    expect(res.error).toBeTrue();
+    expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('finds pnpm globally', async () => {
@@ -47,7 +47,7 @@ describe('manager/npm/post-update/pnpm', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lock file maintenance', async () => {
@@ -58,7 +58,23 @@ describe('manager/npm/post-update/pnpm', () => {
     ]);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(fs.remove).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('uses the new version if packageManager is updated', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
+      {
+        depType: 'packageManager',
+        depName: 'pnpm',
+        newValue: '6.16.1',
+      },
+    ]);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+    // TODO: check docker preCommands
   });
 });

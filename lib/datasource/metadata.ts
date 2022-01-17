@@ -9,7 +9,7 @@ import type { ReleaseResult } from './types';
 
 // Use this object to define changelog URLs for packages
 // Only necessary when the changelog data cannot be found in the package's source repository
-const manualChangelogUrls = {
+const manualChangelogUrls: Record<string, Record<string, string>> = {
   npm: {
     'babel-preset-react-app':
       'https://github.com/facebook/create-react-app/releases',
@@ -66,7 +66,7 @@ const manualChangelogUrls = {
 
 // Use this object to define manual source URLs for packages
 // Only necessary if the datasource is unable to locate the source URL itself
-const manualSourceUrls = {
+const manualSourceUrls: Record<string, Record<string, string>> = {
   orb: {
     'cypress-io/cypress': 'https://github.com/cypress-io/circleci-orb',
     'hutson/library-release-workflows':
@@ -103,14 +103,28 @@ const manualSourceUrls = {
   },
   pypi: {
     mkdocs: 'https://github.com/mkdocs/mkdocs',
+    'mkdocs-material': 'https://github.com/squidfunk/mkdocs-material',
     mypy: 'https://github.com/python/mypy',
   },
 };
 
-function massageGithubUrl(url: string): string {
-  return url
+const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
+const gitPrefix = regEx('^git:/?/?');
+
+export function massageGithubUrl(url: string): string {
+  let massagedUrl = url;
+
+  if (url.startsWith('git@')) {
+    massagedUrl = url.replace(':', '/').replace('git@', 'https://');
+  }
+
+  return massagedUrl
     .replace('http:', 'https:')
-    .replace(regEx(/^git:\/?\/?/), 'https://')
+    .replace('http+git:', 'https:')
+    .replace('https+git:', 'https:')
+    .replace('ssh://git@', 'https://')
+    .replace(gitPrefix, 'https://')
+    .replace(githubPages, 'https://github.com/$1/$2')
     .replace('www.github.com', 'github.com')
     .split('/')
     .slice(0, 5)
@@ -126,7 +140,7 @@ function massageGitlabUrl(url: string): string {
     .replace('.git', '');
 }
 
-function normalizeDate(input: any): string | null {
+export function normalizeDate(input: any): string | null {
   if (
     typeof input === 'number' &&
     !Number.isNaN(input) &&
@@ -175,24 +189,23 @@ function massageTimestamps(dep: ReleaseResult): void {
   }
 }
 
-/* eslint-disable no-param-reassign */
 export function addMetaData(
-  dep?: ReleaseResult,
-  datasource?: string,
-  lookupName?: string
+  dep: ReleaseResult,
+  datasource: string,
+  lookupName: string
 ): void {
-  if (!dep) {
-    return;
-  }
-
   massageTimestamps(dep);
 
-  const lookupNameLowercase = lookupName ? lookupName.toLowerCase() : null;
-  if (manualChangelogUrls[datasource]?.[lookupNameLowercase]) {
-    dep.changelogUrl = manualChangelogUrls[datasource][lookupNameLowercase];
+  const lookupNameLowercase = lookupName.toLowerCase();
+  const manualChangelogUrl =
+    manualChangelogUrls[datasource]?.[lookupNameLowercase];
+  if (manualChangelogUrl) {
+    dep.changelogUrl = manualChangelogUrl;
   }
-  if (manualSourceUrls[datasource]?.[lookupNameLowercase]) {
-    dep.sourceUrl = manualSourceUrls[datasource][lookupNameLowercase];
+
+  const manualSourceUrl = manualSourceUrls[datasource]?.[lookupNameLowercase];
+  if (manualSourceUrl) {
+    dep.sourceUrl = manualSourceUrl;
   }
 
   if (
@@ -234,12 +247,18 @@ export function addMetaData(
   }
 
   // Clean up any empty urls
-  const urls = ['homepage', 'sourceUrl', 'changelogUrl', 'dependencyUrl'];
-  for (const url of urls) {
-    if (is.string(dep[url]) && validateUrl(dep[url].trim())) {
-      dep[url] = dep[url].trim();
+  const urlKeys: (keyof ReleaseResult)[] = [
+    'homepage',
+    'sourceUrl',
+    'changelogUrl',
+    'dependencyUrl',
+  ];
+  for (const urlKey of urlKeys) {
+    const urlVal = dep[urlKey];
+    if (is.string(urlVal) && validateUrl(urlVal.trim())) {
+      dep[urlKey] = urlVal.trim() as never;
     } else {
-      delete dep[url];
+      delete dep[urlKey];
     }
   }
 }

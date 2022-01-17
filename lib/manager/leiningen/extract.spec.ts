@@ -13,14 +13,12 @@ describe('manager/leiningen/extract', () => {
   it('trimAtKey', () => {
     expect(trimAtKey('foo', 'bar')).toBeNull();
     expect(trimAtKey(':dependencies    ', 'dependencies')).toBeNull();
-    expect(trimAtKey(':dependencies \nfoobar', 'dependencies')).toEqual(
-      'foobar'
-    );
+    expect(trimAtKey(':dependencies \nfoobar', 'dependencies')).toBe('foobar');
   });
   it('extractFromVectors', () => {
-    expect(extractFromVectors('')).toEqual([]);
-    expect(extractFromVectors('[]')).toEqual([]);
-    expect(extractFromVectors('[[]]')).toEqual([]);
+    expect(extractFromVectors('')).toBeEmptyArray();
+    expect(extractFromVectors('[]')).toBeEmptyArray();
+    expect(extractFromVectors('[[]]')).toBeEmptyArray();
     expect(extractFromVectors('[[foo/bar "1.2.3"]]')).toEqual([
       {
         datasource: ClojureDatasource.id,
@@ -35,6 +33,7 @@ describe('manager/leiningen/extract', () => {
         datasource: ClojureDatasource.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
+        groupName: 'baz',
       },
     ]);
     expect(
@@ -64,7 +63,11 @@ describe('manager/leiningen/extract', () => {
         { depName: 'org.lwjgl.lwjgl:lwjgl-platform', currentValue: '2.8.5' },
         { depName: 'org.clojure:clojure', currentValue: '1.4.0' },
         { depName: 'org.clojure:clojure', currentValue: '1.5.0' },
-        { depName: 'clj-stacktrace:clj-stacktrace', currentValue: '0.2.4' },
+        {
+          depName: 'clj-stacktrace:clj-stacktrace',
+          currentValue: '0.2.4',
+          groupName: 'clj-stacktrace-version',
+        },
         {
           depName: 'clj-time:clj-time',
           currentValue: '0.12.0',

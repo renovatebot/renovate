@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 
 describe('manager/metadata', () => {
   const managerList: string[] = fs
@@ -29,6 +29,6 @@ describe('manager/metadata', () => {
 
     expect(
       res.some((line) => line.startsWith('# ') || line.startsWith('## '))
-    ).toBe(false);
+    ).toBeFalse();
   });
 });

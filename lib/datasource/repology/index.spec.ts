@@ -51,6 +51,7 @@ const fixtureGccDefaults = loadFixture(`gcc-defaults.json`);
 const fixtureGcc = loadFixture(`gcc.json`);
 const fixturePulseaudio = loadFixture(`pulseaudio.json`);
 const fixtureJdk = loadFixture(`openjdk.json`);
+const fixturePython = loadFixture(`python.json`);
 
 describe('datasource/repology/index', () => {
   describe('getReleases', () => {
@@ -221,7 +222,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.14.2-2+deb10u1');
+      expect(res.releases[0].version).toBe('1.14.2-2+deb10u1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -241,7 +242,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.181');
+      expect(res.releases[0].version).toBe('1.181');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -258,7 +259,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('1.181');
+      expect(res.releases[0].version).toBe('1.181');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -275,7 +276,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('9.3.0-r2');
+      expect(res.releases[0].version).toBe('9.3.0-r2');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -292,7 +293,7 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toEqual('12.2-4+deb10u1');
+      expect(res.releases[0].version).toBe('12.2-4+deb10u1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -312,8 +313,8 @@ describe('datasource/repology/index', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(6);
-      expect(res.releases[0].version).toEqual('1:11.0.7.10-1.el8_1');
-      expect(res.releases[5].version).toEqual('1:11.0.9.11-3.el8_3');
+      expect(res.releases[0].version).toBe('1:11.0.7.10-1.el8_1');
+      expect(res.releases[5].version).toBe('1:11.0.9.11-3.el8_3');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -342,6 +343,122 @@ describe('datasource/repology/index', () => {
 
       expect(release).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns correct package types for api_call', async () => {
+      const pkgs: RepologyPackage[] = [
+        {
+          repo: 'some_repo',
+          version: '1.0.0',
+          visiblename: 'some-package',
+          srcname: 'some-package',
+        },
+        {
+          repo: 'some_repo',
+          version: '2.0.0',
+          visiblename: 'not-some-package',
+          srcname: 'not-some-package',
+        },
+        {
+          repo: 'some_repo',
+          version: '3.0.0',
+          visiblename: 'some-package',
+          srcname: 'not-some-package',
+        },
+        {
+          repo: 'some_repo',
+          version: '4.0.0',
+          visiblename: 'some-package',
+          binname: 'some-package',
+        },
+        {
+          repo: 'some_repo',
+          version: '5.0.0',
+          visiblename: 'not-some-package',
+          binname: 'not-some-package',
+        },
+        {
+          repo: 'some_repo',
+          version: '6.0.0',
+          visiblename: 'some-package',
+          binname: 'not-some-package',
+        },
+        { repo: 'some_repo', version: '7.0.0', visiblename: 'some-package' },
+        {
+          repo: 'some_repo',
+          version: '8.0.0',
+          visiblename: 'not-some-package',
+        },
+        {
+          repo: 'not_some_repo',
+          version: '9.0.0',
+          visiblename: 'some-package',
+        },
+        {
+          repo: 'not_some_repo',
+          version: '10.0.0',
+          visiblename: 'some-package',
+          srcname: 'some-package',
+        },
+        {
+          repo: 'not_some_repo',
+          version: '11.0.0',
+          visiblename: 'some-package',
+          binname: 'some-package',
+        },
+      ];
+      const pkgsJSON = JSON.stringify(pkgs);
+
+      mockResolverCall('some_repo', 'some-package', 'binname', {
+        status: 403,
+      });
+
+      mockApiCall('some-package', {
+        status: 200,
+        body: pkgsJSON,
+      });
+
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        depName: 'some_repo/some-package',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          { version: '1.0.0' },
+          {
+            version: '4.0.0',
+          },
+        ],
+      });
+    });
+
+    it('returns correct package versions for multi-package project', async () => {
+      mockResolverCall('ubuntu_20_04', 'python3.8', 'binname', {
+        status: 200,
+        body: fixturePython,
+      });
+
+      mockResolverCall('ubuntu_20_04', 'python3.8', 'srcname', {
+        status: 200,
+        body: fixturePython,
+      });
+
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        depName: 'ubuntu_20_04/python3.8',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          { version: '3.8.2-1ubuntu1' },
+          {
+            version: '3.8.10-0ubuntu1~20.04.2',
+          },
+        ],
+      });
     });
   });
 });

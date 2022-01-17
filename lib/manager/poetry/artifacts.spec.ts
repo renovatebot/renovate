@@ -3,7 +3,7 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/exec-util';
 import { loadFixture, mocked } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';
@@ -36,7 +36,7 @@ describe('manager/poetry/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
   it('returns null if no poetry.lock found', async () => {
@@ -130,7 +130,7 @@ describe('manager/poetry/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
@@ -155,7 +155,7 @@ describe('manager/poetry/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock using docker (constraints)', async () => {
-    setGlobalConfig({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readFile.mockResolvedValueOnce(
       '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
     );
@@ -184,7 +184,6 @@ describe('manager/poetry/artifacts', () => {
       throw new Error('not found');
     });
     const updatedDeps = [{ depName: 'dep1' }];
-    // FIXME: explicit assert condition
     expect(
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
@@ -192,7 +191,7 @@ describe('manager/poetry/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot();
+    ).toMatchSnapshot([{ artifactError: { lockFile: 'poetry.lock' } }]);
   });
   it('returns updated poetry.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);

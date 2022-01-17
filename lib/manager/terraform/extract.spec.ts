@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { fs, loadFixture } from '../../../test/util';
-import { setGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { extractPackageFile } from '.';
 
@@ -12,6 +12,7 @@ const tf2 = `module "relative" {
 const helm = loadFixture('helm.tf');
 const lockedVersion = loadFixture('lockedVersion.tf');
 const lockedVersionLockfile = loadFixture('rangeStrategy.hcl');
+const terraformBlock = loadFixture('terraformBlock.tf');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -24,7 +25,7 @@ jest.mock('../../util/fs');
 
 describe('manager/terraform/extract', () => {
   beforeEach(() => {
-    setGlobalConfig(adminConfig);
+    GlobalConfig.set(adminConfig);
   });
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
@@ -34,8 +35,8 @@ describe('manager/terraform/extract', () => {
     it('extracts', async () => {
       const res = await extractPackageFile(tf1, '1.tf', {});
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(46);
-      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(8);
+      expect(res.deps).toHaveLength(51);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(9);
     });
 
     it('returns null if only local deps', async () => {
@@ -61,6 +62,17 @@ describe('manager/terraform/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+    });
+
+    it('test terraform block with only requirement_terraform_version', async () => {
+      const res = await extractPackageFile(
+        terraformBlock,
+        'terraformBlock.tf',
+        {}
+      );
+      expect(res.deps).toHaveLength(1);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+      expect(res).toMatchSnapshot();
     });
   });
 });

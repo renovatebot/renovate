@@ -1,4 +1,9 @@
+import is from '@sindresorhus/is';
+// eslint-disable-next-line no-restricted-imports
+import _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
+import { logger } from '../logger';
+import { regEx } from './regex';
 
 export function joinUrlParts(...parts: string[]): string {
   return urlJoin(...parts);
@@ -14,11 +19,11 @@ export function ensurePathPrefix(url: string, prefix: string): string {
 }
 
 export function ensureTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '/');
+  return url.replace(/\/?$/, '/'); // TODO #12875 adds slash at the front when re2 is used
 }
 
 export function trimTrailingSlash(url: string): string {
-  return url.replace(/\/+$/, '');
+  return url.replace(regEx(/\/+$/), '');
 }
 
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
@@ -68,4 +73,28 @@ export function parseUrl(url: string): URL | null {
   } catch (err) {
     return null;
   }
+}
+
+/**
+ * Tries to create an URL object from either a full URL string or a hostname
+ * @param url either the full url or a hostname
+ * @returns an URL object or null
+ */
+export function createURLFromHostOrURL(url: string): URL | null {
+  return parseUrl(url) ?? parseUrl(`https://${url}`);
+}
+
+export type LinkHeaderLinks = _parseLinkHeader.Links;
+
+export function parseLinkHeader(
+  linkHeader: string | null | undefined
+): LinkHeaderLinks | null {
+  if (!is.nonEmptyString(linkHeader)) {
+    return null;
+  }
+  if (linkHeader.length > 2000) {
+    logger.warn({ linkHeader }, 'Link header too long.');
+    return null;
+  }
+  return _parseLinkHeader(linkHeader);
 }

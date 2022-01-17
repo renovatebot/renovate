@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { getGlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -8,7 +7,8 @@ import {
 } from '../../constants/error-messages';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
 import {
   ensureCacheDir,
   ensureLocalDir,
@@ -21,12 +21,13 @@ import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { AuthJson } from './types';
+import type { AuthJson, ComposerLock } from './types';
 import {
   composerVersioningId,
   extractContraints,
-  getComposerConstraint,
+  getComposerArguments,
   getPhpConstraint,
+  requireComposerDependencyInstallation,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -94,17 +95,16 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
+    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
     const constraints = {
-      ...extractContraints(
-        JSON.parse(newPackageFileContent),
-        JSON.parse(existingLockFileContent)
-      ),
+      ...extractContraints(JSON.parse(newPackageFileContent), existingLockFile),
       ...config.constraints,
     };
 
-    const preCommands: string[] = [
-      `install-tool composer ${await getComposerConstraint(constraints)}`,
-    ];
+    const composerToolConstraint: ToolConstraint = {
+      toolName: 'composer',
+      constraint: constraints.composer,
+    };
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -112,13 +112,25 @@ export async function updateArtifacts({
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
       },
+      toolConstraints: [composerToolConstraint],
       docker: {
-        preCommands,
         image: 'php',
         tagConstraint: getPhpConstraint(constraints),
         tagScheme: composerVersioningId,
       },
     };
+
+    const commands: string[] = [];
+
+    // Determine whether install is required before update
+    if (requireComposerDependencyInstallation(existingLockFile)) {
+      const preCmd = 'composer';
+      const preArgs =
+        'install' + getComposerArguments(config, composerToolConstraint);
+      logger.debug({ preCmd, preArgs }, 'composer pre-update command');
+      commands.push(`${preCmd} ${preArgs}`);
+    }
+
     const cmd = 'composer';
     let args: string;
     if (config.isLockFileMaintenance) {
@@ -129,21 +141,11 @@ export async function updateArtifacts({
           'update ' + updatedDeps.map((dep) => quote(dep.depName)).join(' ')
         ).trim() + ' --with-dependencies';
     }
-    if (config.composerIgnorePlatformReqs) {
-      if (config.composerIgnorePlatformReqs.length === 0) {
-        args += ' --ignore-platform-reqs';
-      } else {
-        config.composerIgnorePlatformReqs.forEach((req) => {
-          args += ' --ignore-platform-req ' + quote(req);
-        });
-      }
-    }
-    args += ' --no-ansi --no-interaction';
-    if (!getGlobalConfig().allowScripts || config.ignoreScripts) {
-      args += ' --no-scripts --no-autoloader --no-plugins';
-    }
+    args += getComposerArguments(config, composerToolConstraint);
     logger.debug({ cmd, args }, 'composer command');
-    await exec(`${cmd} ${args}`, execOptions);
+    commands.push(`${cmd} ${args}`);
+
+    await exec(commands, execOptions);
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;

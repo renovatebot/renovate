@@ -1,7 +1,7 @@
 import type { Stats } from 'fs';
 import os from 'os';
 import upath from 'upath';
-import { getGlobalConfig } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { chmod } from '../../util/fs';
 import { regEx } from '../../util/regex';
@@ -17,7 +17,7 @@ export const extraEnv = {
 export function gradleWrapperFileName(): string {
   if (
     os.platform() === 'win32' &&
-    getGlobalConfig()?.binarySource !== 'docker'
+    GlobalConfig.get('binarySource') !== 'docker'
   ) {
     return 'gradlew.bat';
   }
@@ -30,7 +30,6 @@ export async function prepareGradleCommand(
   gradlew: Stats | null,
   args: string | null
 ): Promise<string> {
-  /* eslint-disable no-bitwise */
   // istanbul ignore if
   if (gradlew?.isFile() === true) {
     // if the file is not executable by others
@@ -54,7 +53,7 @@ export async function prepareGradleCommand(
  * @returns A Java semver range
  */
 export function getJavaContraint(gradleVersion: string): string | null {
-  if (getGlobalConfig()?.binarySource !== 'docker') {
+  if (GlobalConfig.get('binarySource') !== 'docker') {
     // ignore
     return null;
   }

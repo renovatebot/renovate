@@ -1,15 +1,17 @@
 import is from '@sindresorhus/is';
-import { quote } from 'shlex';
-import { dirname, join } from 'upath';
-import { getGlobalConfig } from '../../config/global';
+import upath from 'upath';
+import { GlobalConfig } from '../../config/global';
 import { PlatformId } from '../../constants';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExecOptions, exec } from '../../util/exec';
+import { exec } from '../../util/exec';
+import type { ExecOptions } from '../../util/exec/types';
 import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import { find } from '../../util/host-rules';
+import { getGitAuthenticatedEnvironmentVariables } from '../../util/git/auth';
+import { find, getAll } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
+import { createURLFromHostOrURL, validateUrl } from '../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -18,19 +20,62 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-function getPreCommands(): string[] | null {
-  const credentials = find({
+function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
+  let environmentVariables: NodeJS.ProcessEnv = {};
+
+  // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
+  const githubToken = find({
     hostType: PlatformId.Github,
     url: 'https://api.github.com/',
   });
-  let preCommands = null;
-  if (credentials?.token) {
-    const token = quote(credentials.token);
-    preCommands = [
-      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
-    ];
+
+  if (githubToken?.token) {
+    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+      'https://github.com/',
+      githubToken
+    );
   }
-  return preCommands;
+
+  // get extra host rules for other git-based Go Module hosts
+  const hostRules = getAll() || [];
+
+  const goGitAllowedHostType: string[] = [
+    // All known git platforms
+    PlatformId.Azure,
+    PlatformId.Bitbucket,
+    PlatformId.BitbucketServer,
+    PlatformId.Gitea,
+    PlatformId.Github,
+    PlatformId.Gitlab,
+    // plus all without a host type (=== undefined)
+    undefined,
+  ];
+
+  // for each hostRule we add additional authentication variables to the environmentVariables
+  for (const hostRule of hostRules) {
+    if (
+      hostRule?.token &&
+      hostRule.matchHost &&
+      goGitAllowedHostType.includes(hostRule.hostType)
+    ) {
+      const httpUrl = createURLFromHostOrURL(hostRule.matchHost).toString();
+      if (validateUrl(httpUrl)) {
+        logger.debug(
+          `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
+        );
+        environmentVariables = getGitAuthenticatedEnvironmentVariables(
+          httpUrl,
+          hostRule,
+          environmentVariables
+        );
+      } else {
+        logger.warn(
+          `Could not parse registryUrl ${hostRule.matchHost} or not using http(s). Ignoring`
+        );
+      }
+    }
+  }
+  return environmentVariables;
 }
 
 function getUpdateImportPathCmds(
@@ -102,8 +147,8 @@ export async function updateArtifacts({
     return null;
   }
 
-  const vendorDir = join(dirname(goModFileName), 'vendor/');
-  const vendorModulesFileName = join(vendorDir, 'modules.txt');
+  const vendorDir = upath.join(upath.dirname(goModFileName), 'vendor/');
+  const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   try {
@@ -125,14 +170,15 @@ export async function updateArtifacts({
         GOPRIVATE: process.env.GOPRIVATE,
         GONOPROXY: process.env.GONOPROXY,
         GONOSUMDB: process.env.GONOSUMDB,
+        GOSUMDB: process.env.GOSUMDB,
         GOFLAGS: useModcacherw(config.constraints?.go) ? '-modcacherw' : null,
-        CGO_ENABLED: getGlobalConfig().binarySource === 'docker' ? '0' : null,
+        CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
+        ...getGitEnvironmentVariables(),
       },
       docker: {
         image: 'go',
         tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
-        preCommands: getPreCommands(),
       },
     };
 
@@ -156,11 +202,23 @@ export async function updateArtifacts({
       }
     }
 
-    const isGoModTidyRequired =
-      config.postUpdateOptions?.includes('gomodTidy') ||
+    const mustSkipGoModTidy =
+      !config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
+    if (mustSkipGoModTidy) {
+      logger.debug({ cmd, args }, 'go mod tidy command skipped');
+    }
+
+    const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
+      ? ' -compat=1.17'
+      : '';
+    const isGoModTidyRequired =
+      !mustSkipGoModTidy &&
+      (config.postUpdateOptions?.includes('gomodTidy') ||
+        config.postUpdateOptions?.includes('gomodTidy1.17') ||
+        (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
-      args = 'mod tidy';
+      args = 'mod tidy' + tidyOpts;
       logger.debug({ cmd, args }, 'go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -170,7 +228,7 @@ export async function updateArtifacts({
       logger.debug({ cmd, args }, 'go mod vendor command included');
       execCommands.push(`${cmd} ${args}`);
       if (isGoModTidyRequired) {
-        args = 'mod tidy';
+        args = 'mod tidy' + tidyOpts;
         logger.debug({ cmd, args }, 'go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -178,7 +236,7 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy';
+      args = 'mod tidy' + tidyOpts;
       logger.debug({ cmd, args }, 'additional go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }

@@ -1,14 +1,15 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import * as datasourceDocker from '../../datasource/docker';
-import * as datasourceGitTags from '../../datasource/git-tags';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
+import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { splitImageParts } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import type { Image, Kustomize } from './types';
+import type { HelmChart, Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format
@@ -16,7 +17,7 @@ const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
 
-export function extractBase(base: string): PackageDependency | null {
+export function extractResource(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
 
   if (!match) {
@@ -33,7 +34,7 @@ export function extractBase(base: string): PackageDependency | null {
   }
 
   return {
-    datasource: datasourceGitTags.id,
+    datasource: GitTagsDatasource.id,
     depName: path.replace('.git', ''),
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,
@@ -106,10 +107,25 @@ export function extractImage(image: Image): PackageDependency | null {
   return null;
 }
 
+export function extractHelmChart(
+  helmChart: HelmChart
+): PackageDependency | null {
+  if (!helmChart.name) {
+    return null;
+  }
+
+  return {
+    depName: helmChart.name,
+    currentValue: helmChart.version,
+    registryUrls: [helmChart.repo],
+    datasource: HelmDatasource.id,
+  };
+}
+
 export function parseKustomize(content: string): Kustomize | null {
-  let pkg = null;
+  let pkg: Kustomize | null = null;
   try {
-    pkg = load(content, { json: true });
+    pkg = load(content, { json: true }) as Kustomize;
   } catch (e) /* istanbul ignore next */ {
     return null;
   }
@@ -118,15 +134,9 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  if (pkg.kind !== 'Kustomization') {
+  if (!['Kustomization', 'Component'].includes(pkg.kind)) {
     return null;
   }
-
-  pkg.bases = (pkg.bases || []).concat(
-    pkg.resources || [],
-    pkg.components || []
-  );
-  pkg.images = pkg.images || [];
 
   return pkg;
 }
@@ -141,18 +151,57 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote bases
-  for (const base of pkg.bases) {
-    const dep = extractBase(base);
+  for (const base of pkg.bases ?? []) {
+    const dep = extractResource(base);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote resources
+  for (const resource of pkg.resources ?? []) {
+    const dep = extractResource(resource);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote components
+  for (const component of pkg.components ?? []) {
+    const dep = extractResource(component);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
     }
   }
 
   // grab the image tags
-  for (const image of pkg.images) {
+  for (const image of pkg.images ?? []) {
     const dep = extractImage(image);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the helm charts
+  for (const helmChart of pkg.helmCharts ?? []) {
+    const dep = extractHelmChart(helmChart);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: 'HelmChart',
+      });
     }
   }
 

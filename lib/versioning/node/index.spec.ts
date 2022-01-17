@@ -47,13 +47,13 @@ describe('versioning/node/index', () => {
       ${'10.0.0a'}  | ${t1} | ${false}
       ${'9.0.0'}    | ${t1} | ${false}
     `('isStable("$version") === $expected', ({ version, time, expected }) => {
-      DateTime.local = (...args) =>
+      DateTime.local = (...args: (string | any)[]) =>
         args.length ? dtLocal.apply(DateTime, args) : time;
       expect(isStable(version as string)).toBe(expected);
     });
   });
 
   it('isValid', () => {
-    expect(isValid === nodever.isValid).toBe(true);
+    expect(isValid === nodever.isValid).toBeTrue();
   });
 });
