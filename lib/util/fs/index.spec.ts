@@ -201,7 +201,7 @@ describe('util/fs/index', () => {
     });
 
     it('returns false for directory', async () => {
-      expect(await localPathIsFile(getSubDirectory(__filename))).toBeFalse();
+      expect(await localPathIsFile(__dirname)).toBeFalse();
     });
 
     it('returns false for non-existing path', async () => {

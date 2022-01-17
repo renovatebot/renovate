@@ -60,7 +60,6 @@ const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
-const fsUtil = mocked(_fsUtil);
 const limits = mocked(_limits);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
