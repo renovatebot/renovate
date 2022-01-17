@@ -81,7 +81,7 @@ WhiteSource Remediate supports GitHub Enterprise Server, GitLab self-hosted, and
 #### Forking Renovate app
 
 "Forking Renovate" is the sister app to the WhiteSource Renovate App on GitHub.com.
-The difference is that Forking Renovate does not require write permissions to create branches within the repo, and instead submits PRs from its own fork.
+The difference is that Forking Renovate does not require `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
 Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
 
 [Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
