@@ -2212,7 +2212,7 @@ const options: RenovateOptions[] = [
     description: `Perform commits by taking advantage of the platform-native API.`,
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github', 'gitlab', 'azure'],
+    supportedPlatforms: ['github'],
   },
 ];
 
