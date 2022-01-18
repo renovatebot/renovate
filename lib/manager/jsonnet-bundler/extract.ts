@@ -48,7 +48,6 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
   const match = gitUrl.exec(dependency.source.git.remote);
 
   return {
-    datasource: GitRefsDatasource.id,
     depName:
       dependency.name || match.groups.depName || dependency.source.git.remote,
     lookupName: dependency.source.git.remote,

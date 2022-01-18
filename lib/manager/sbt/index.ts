@@ -8,8 +8,8 @@ export { bumpPackageVersion } from './update';
 
 export const supportedDatasources = [
   datasourceMaven.id,
-  datasourceSbtPackage,
-  datasourceSbtPlugin,
+  datasourceSbtPackage.id,
+  datasourceSbtPlugin.id,
 ];
 
 export const defaultConfig = {

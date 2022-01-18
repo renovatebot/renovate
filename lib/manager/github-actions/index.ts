@@ -1,4 +1,5 @@
 import * as githubTagsDatasource from '../../datasource/github-tags';
+import * as dockerVersioning from '../../versioning/docker';
 import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
@@ -10,4 +11,4 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [githubTagsDatasource.id];
+export const supportedDatasources = [githubTagsDatasource.id, dockerVersioning.id];

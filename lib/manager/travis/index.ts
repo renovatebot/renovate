@@ -6,7 +6,7 @@ export { extractPackageFile } from './extract';
 
 export const language = ProgrammingLanguage.NodeJS;
 
-export const supportedDatasources = [datasourceGithubTags.id, 'foo'];
+export const supportedDatasources = [datasourceGithubTags.id];
 
 export const defaultConfig = {
   fileMatch: ['^.travis.yml$'],
