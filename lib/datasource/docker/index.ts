@@ -20,6 +20,7 @@ import {
   getRegistryRepository,
   http,
   id,
+  isECRMaxResultsError,
 } from './common';
 import { getTagsQuayRegistry } from './quay';
 
@@ -96,17 +97,6 @@ async function getDockerApiTags(
     page += 1;
   } while (url && page < 20);
   return tags;
-}
-
-function isECRMaxResultsError(err): boolean {
-  return (
-    err.response?.statusCode === 405 &&
-    err.response?.headers['docker-distribution-api-version'] &&
-    // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    err.response.body?.errors[0]?.message?.includes(
-      'Member must have value less than or equal to 1000'
-    )
-  );
 }
 
 async function getTags(

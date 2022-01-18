@@ -511,3 +511,14 @@ export async function getLabels(
     return {};
   }
 }
+
+export function isECRMaxResultsError(err): boolean {
+  return (
+    err.response?.statusCode === 405 &&
+    err.response?.headers['docker-distribution-api-version'] &&
+    // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
+    err.response.body?.errors[0]?.message?.includes(
+      'Member must have value less than or equal to 1000'
+    )
+  );
+}
