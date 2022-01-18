@@ -1,8 +1,7 @@
 import * as githubTagsDatasource from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
-import { extractPackageFile } from './extract';
 
-export { extractPackageFile };
+export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: [
@@ -11,4 +10,7 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [githubTagsDatasource.id, dockerVersioning.id];
+export const supportedDatasources = [
+  githubTagsDatasource.id,
+  dockerVersioning.id,
+];
