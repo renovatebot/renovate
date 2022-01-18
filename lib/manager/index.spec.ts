@@ -1,10 +1,28 @@
+import { getDatasourceList } from '../datasource';
 import { loadModules } from '../util/modules';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
 jest.mock('../util/fs');
 
+const datasources = getDatasourceList();
+
 describe('manager/index', () => {
+  describe('supportedDatasources', () => {
+    for (const m of manager.getManagerList()) {
+      if (m === 'regex') {
+        // regex supports any
+        continue;
+      }
+      const supportedDatasources = manager.get(m, 'supportedDatasources');
+      it(`has valid supportedDatasources for ${m}`, () => {
+        expect(supportedDatasources).toBeNonEmptyArray();
+        supportedDatasources.every((d) => {
+          expect(datasources.includes(d)).toBeTrue();
+        });
+      });
+    }
+  });
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
