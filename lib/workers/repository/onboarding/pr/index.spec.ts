@@ -67,8 +67,8 @@ describe('workers/repository/onboarding/pr/index', () => {
       await ensureOnboardingPr(
         {
           ...config,
-          prHeader: 'And this is a header for {{{repository}}}',
-          prFooter: 'And this is a footer for {{{repository}}}',
+          prHeader: 'And this is a header',
+          prFooter: 'And this is a footer',
         },
         packageFiles,
         branches

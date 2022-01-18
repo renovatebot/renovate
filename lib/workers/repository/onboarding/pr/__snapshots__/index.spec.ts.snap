@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header 1`] = `
-"And this is a header for 
+"And this is a header
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
@@ -26,5 +26,5 @@ If you need any further assistance then you can also [request help here](https:/
 
 ---
 
-And this is a footer for "
+And this is a footer"
 `;
