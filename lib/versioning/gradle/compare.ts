@@ -192,7 +192,7 @@ export function compare(left: string, right: string): number {
   return 0;
 }
 
-export function valid(input: string): Token[] | null {
+export function parse(input: string): Token[] | null {
   if (!input) {
     return null;
   }
@@ -214,7 +214,7 @@ export function valid(input: string): Token[] | null {
 }
 
 export function isVersion(input: string): boolean {
-  return !!valid(input);
+  return !!parse(input);
 }
 
 interface PrefixRange {

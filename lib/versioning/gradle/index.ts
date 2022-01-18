@@ -6,9 +6,9 @@ import {
   compare,
   isValid,
   isVersion,
+  parse,
   parseMavenBasedRange,
   parsePrefixRange,
-  valid,
 } from './compare';
 
 export const id = 'gradle';
@@ -22,7 +22,7 @@ export const supportedRangeStrategies = ['pin'];
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 const getMajor = (version: string): number | null => {
-  const tokens = valid(version?.replace(regEx(/^v/i), ''));
+  const tokens = parse(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens?.[0];
     if (majorToken && majorToken.type === TokenType.Number) {
@@ -33,7 +33,7 @@ const getMajor = (version: string): number | null => {
 };
 
 const getMinor = (version: string): number | null => {
-  const tokens = valid(version?.replace(regEx(/^v/i), ''));
+  const tokens = parse(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
@@ -51,7 +51,7 @@ const getMinor = (version: string): number | null => {
 };
 
 const getPatch = (version: string): number | null => {
-  const tokens = valid(version?.replace(regEx(/^v/i), ''));
+  const tokens = parse(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
@@ -88,7 +88,7 @@ const unstable = new Set([
 ]);
 
 const isStable = (version: string): boolean => {
-  const tokens = valid(version);
+  const tokens = parse(version);
   if (tokens) {
     for (const token of tokens) {
       if (token.type === TokenType.String) {
@@ -104,7 +104,7 @@ const isStable = (version: string): boolean => {
 };
 
 const matches = (a: string, b: string): boolean => {
-  const versionTokens = valid(a);
+  const versionTokens = parse(a);
   if (!a || !versionTokens || !b) {
     return false;
   }
