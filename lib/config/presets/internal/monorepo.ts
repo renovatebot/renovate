@@ -184,7 +184,7 @@ const repoGroups = {
   uppy: 'https://github.com/transloadit/uppy',
   vue: 'https://github.com/vuejs/vue',
   vuepress: 'https://github.com/vuejs/vuepress',
-  wcf: 'https://github.com/dotnet/wcf',
+  'dotnet-wcf': 'https://github.com/dotnet/wcf',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
