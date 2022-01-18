@@ -2397,7 +2397,7 @@ every 3 months on the first day of the month
 * 0 2 * *
 ```
 
-Note: For Cron schedules, you _must_ use `*` for minutes, as Renovate doesn't support minute granularity.
+Note: For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates.
 You could then configure a schedule like this at the repository level:
