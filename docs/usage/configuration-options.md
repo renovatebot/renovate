@@ -2376,7 +2376,7 @@ You can configure the `rollbackPrs` property globally, per-lanuage, or per-packa
 
 The `schedule` option allows you to define times of week or month for Renovate updates.
 Running Renovate around the clock can be too "noisy" for some projects.
-To reduce the noise you can use the `schedule` config option to limit the time frame in which Renovate will run on your repository.
+To reduce the noise you can use the `schedule` config option to limit the time frame in which Renovate will perform actions on your repository.
 You can use the standard [Cron syntax](https://crontab.guru/crontab.5.html) and [Later syntax](https://github.com/breejs/later) to define your schedule.
 
 The default value for `schedule` is "at any time", which is functionally the same as declaring a `null` schedule.
