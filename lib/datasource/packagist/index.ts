@@ -201,7 +201,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   }
   let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
-  const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
+  const pkgUrl = URL.resolve(regUrl, `/p2/${name}.json`);
   // TODO: fix types (#9610)
   const res = (await http.getJson<any>(pkgUrl)).body.packages[name];
   if (res) {
@@ -237,7 +237,7 @@ async function packageLookup(
     if (includesPackages?.[name]) {
       return includesPackages[name];
     }
-    let pkgUrl;
+    let pkgUrl: string;
     if (name in providerPackages) {
       pkgUrl = URL.resolve(
         regUrl,
