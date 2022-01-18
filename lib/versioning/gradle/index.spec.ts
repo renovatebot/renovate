@@ -156,12 +156,13 @@ describe('versioning/gradle/index', () => {
     input                                   | expected
     ${''}                                   | ${false}
     ${'latest'}                             | ${false}
-    ${'1..2'}                               | ${false}
     ${'foobar'}                             | ${true}
     ${'final'}                              | ${true}
     ${'1'}                                  | ${true}
+    ${'1..2'}                               | ${false}
     ${'1.2'}                                | ${true}
     ${'1.2.3'}                              | ${true}
+    ${'1.2.3.4 s'}                          | ${false}
     ${'1.2.3.4'}                            | ${true}
     ${'v1.2.3.4'}                           | ${true}
     ${'1-alpha-1'}                          | ${false}
