@@ -47,7 +47,7 @@ describe('versioning/hex/index', () => {
   `(
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
-      expect(hexScheme.isLessThanRange(version, range)).toBe(expected);
+      expect(hexScheme.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 
