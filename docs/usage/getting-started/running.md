@@ -78,6 +78,26 @@ It is integrated with WhiteSource's vulnerability detection capabilities and add
 
 WhiteSource Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
 
+#### Forking Renovate app
+
+"Forking Renovate" is the sister app to the WhiteSource Renovate App on GitHub.com.
+The difference is that Forking Renovate does not require `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
+Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
+
+[Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
+
+##### Benefits
+
+Forking Renovate needs only `read` level access to any repository it runs on.
+
+##### Drawbacks
+
+If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
+
+- Automerge is not supported
+- The `baseBranches` config option is not supported
+- The app dashboard (`app.renovatebot.com`) is currently not supported
+
 ### Hosting Renovate
 
 Once you have decided on a Renovate distribution, you need to decide where and how to run it.
@@ -174,7 +194,6 @@ Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
 List of repositories to run on.
-Auto discovery does not work with a GitHub App.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
