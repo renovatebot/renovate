@@ -143,6 +143,8 @@ describe('workers/repository/updates/flatten', () => {
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(14);
       expect(res.filter((update) => update.sourceRepoSlug)).toHaveLength(3);
+      expect(res.filter((update) => update.sourceRepoOrg)).toHaveLength(3);
+      expect(res.filter((update) => update.sourceRepoName)).toHaveLength(3);
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);

@@ -116,6 +116,8 @@ export const allowedFields = {
   releaseNotes: 'A ChangeLogNotes object for the release',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
+  sourceRepoName: 'The repository name in the sourceUrl, if present',
+  sourceRepoOrg: 'The repository organization in the sourceUrl, if present',
   sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
   sourceUrl: 'The source URL for the package',
   updateType: 'One of digest, pin, rollback, patch, minor, major, replacement',
