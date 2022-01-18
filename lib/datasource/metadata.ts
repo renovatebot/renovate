@@ -103,6 +103,7 @@ const manualSourceUrls: Record<string, Record<string, string>> = {
   },
   pypi: {
     mkdocs: 'https://github.com/mkdocs/mkdocs',
+    'mkdocs-material': 'https://github.com/squidfunk/mkdocs-material',
     mypy: 'https://github.com/python/mypy',
   },
 };

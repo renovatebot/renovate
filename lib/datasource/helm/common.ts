@@ -11,14 +11,19 @@ const githubRelease = regEx(
 
 export function findSourceUrl(release: HelmRelease): RepoSource {
   // it's a github release :)
-  let match = githubRelease.exec(release.urls[0]);
-  if (match) {
-    return { sourceUrl: match[1] };
+  const releaseMatch = githubRelease.exec(release.urls[0]);
+  if (releaseMatch) {
+    return { sourceUrl: releaseMatch[1] };
   }
 
-  match = githubUrl.exec(release.home);
-  if (chartRepo.test(match?.groups.repo)) {
-    return { sourceUrl: match.groups.url, sourceDirectory: match.groups.path };
+  if (release.home) {
+    const githubUrlMatch = githubUrl.exec(release.home);
+    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
+      return {
+        sourceUrl: githubUrlMatch.groups.url,
+        sourceDirectory: githubUrlMatch.groups.path,
+      };
+    }
   }
 
   if (!release.sources?.length) {
@@ -26,11 +31,11 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
   }
 
   for (const url of release.sources) {
-    match = githubUrl.exec(url);
-    if (chartRepo.test(match?.groups.repo)) {
+    const githubUrlMatch = githubUrl.exec(url);
+    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
       return {
-        sourceUrl: match.groups.url,
-        sourceDirectory: match.groups.path,
+        sourceUrl: githubUrlMatch.groups.url,
+        sourceDirectory: githubUrlMatch.groups.path,
       };
     }
   }
