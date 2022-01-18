@@ -206,8 +206,11 @@ export function valid(input: string): Token[] | null {
   }
 
   const tokens = tokenize(input);
-
-  return tokens?.length ? tokens : null;
+  // istanbul ignore if: should not happen
+  if (!tokens?.length) {
+    return null;
+  }
+  return tokens;
 }
 
 export function isVersion(input: string): boolean {
