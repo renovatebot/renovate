@@ -209,12 +209,16 @@ export async function updateArtifacts({
       logger.debug({ cmd, args }, 'go mod tidy command skipped');
     }
 
+    const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
+      ? ' -compat=1.17'
+      : '';
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') ||
+        config.postUpdateOptions?.includes('gomodTidy1.17') ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
-      args = 'mod tidy';
+      args = 'mod tidy' + tidyOpts;
       logger.debug({ cmd, args }, 'go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -224,7 +228,7 @@ export async function updateArtifacts({
       logger.debug({ cmd, args }, 'go mod vendor command included');
       execCommands.push(`${cmd} ${args}`);
       if (isGoModTidyRequired) {
-        args = 'mod tidy';
+        args = 'mod tidy' + tidyOpts;
         logger.debug({ cmd, args }, 'go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -232,7 +236,7 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy';
+      args = 'mod tidy' + tidyOpts;
       logger.debug({ cmd, args }, 'additional go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }

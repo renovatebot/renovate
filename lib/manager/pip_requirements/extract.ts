@@ -1,5 +1,5 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier.js';
+import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { GlobalConfig } from '../../config/global';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
