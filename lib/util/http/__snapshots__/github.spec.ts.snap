@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`util/http/github GraphQL shrinks items count on 50x 1`] = `
+exports[`util/http/github GraphQL expands items count on timeout 1`] = `
 Array [
   Object {
     "graphql": Object {
@@ -42,14 +42,14 @@ Array [
         },
       },
       "variables": Object {
-        "count": 100,
+        "count": 84,
         "cursor": null,
       },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "494",
+      "content-length": "493",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -97,14 +97,129 @@ Array [
         },
       },
       "variables": Object {
-        "count": 100,
+        "count": 84,
         "cursor": "cursor1",
       },
     },
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
-      "content-length": "499",
+      "content-length": "498",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$name",
+          },
+          "testItem": Object {
+            "__args": Object {
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+      "variables": Object {
+        "count": 84,
+        "cursor": "cursor2",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "498",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+]
+`;
+
+exports[`util/http/github GraphQL shrinks items count on 50x 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$name",
+          },
+          "testItem": Object {
+            "__args": Object {
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+      "variables": Object {
+        "count": 50,
+        "cursor": null,
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "493",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -207,7 +322,62 @@ Array [
         },
       },
       "variables": Object {
-        "count": 50,
+        "count": 25,
+        "cursor": "cursor1",
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "content-length": "498",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "__vars": Object {
+          "$count": "Int",
+          "$cursor": "String",
+          "$name": "String!",
+          "$owner": "String!",
+        },
+        "repository": Object {
+          "__args": Object {
+            "name": "$name",
+            "owner": "$name",
+          },
+          "testItem": Object {
+            "__args": Object {
+              "after": "$cursor",
+              "filterBy": Object {
+                "createdBy": "someone",
+              },
+              "first": "$count",
+              "orderBy": Object {
+                "direction": "DESC",
+                "field": "UPDATED_AT",
+              },
+            },
+            "nodes": Object {
+              "body": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": null,
+            },
+          },
+        },
+      },
+      "variables": Object {
+        "count": 25,
         "cursor": "cursor2",
       },
     },
