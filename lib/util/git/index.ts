@@ -821,6 +821,8 @@ export async function commitFiles(
     // istanbul ignore if
     if (pushCallback) {
       commitSha = await pushCallback(pushConfig);
+      const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+      await git.fetch(['origin', ref, '--force']);
     }
     commitSha ??= await pushFiles(pushConfig);
     config.branchCommits[branchName] = commitSha;
