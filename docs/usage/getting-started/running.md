@@ -93,7 +93,7 @@ WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-live
 ### Global config
 
 Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file, environment variables, or CLI parameters.
-By default Renovate checks if a file named `config.js` if present.
+By default Renovate checks if a file named `config.js` is present.
 Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (e.g. `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
