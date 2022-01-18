@@ -1,14 +1,17 @@
 # Bitbucket Server Support
 
+> Note: For Assignees support use username slug as asignee name. Which can be easy found here: `https://{bitbucket_server}/rest/api/1.0/users`
+
 ## Unsupported platform features/concepts
 
-- Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
-- Adding/removing labels (Bitbucket limitation?)
+- Adding/removing labels (Bitbucket limitation)
 
 ## Features awaiting implementation
 
 - Creating issues not implemented yet, used to alert users when there is a config error
 - The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will implicitly use the merge strategy configured as 'default' in the Bitbucket Server repository itself, and this cannot be overridden yet
+
+
 
 ## Testing
 
