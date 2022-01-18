@@ -394,6 +394,7 @@ export async function extractAllPackageFiles(
   if (additionalRegistryUrls) {
     for (const pkgFile of packages) {
       for (const dep of pkgFile.deps) {
+        /* istanbul ignore else */
         if (dep.registryUrls) {
           dep.registryUrls.push(...additionalRegistryUrls);
         } else {
