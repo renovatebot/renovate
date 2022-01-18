@@ -9,7 +9,7 @@ const pomContent = loadFixture('simple.pom.xml');
 const pomParent = loadFixture('parent.pom.xml');
 const pomChild = loadFixture('child.pom.xml');
 const origContent = loadFixture('grouping.pom.xml');
-const settingsContent = loadFixture('settings.xml');
+const settingsContent = loadFixture('mirror.settings.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
@@ -37,22 +37,17 @@ describe('manager/maven/index', () => {
         'settings.xml',
         'simple.pom.xml',
       ]);
-      const urls = new Set([
+      const urls = [
         'https://repo.maven.apache.org/maven2',
-        'https://artifactory.company.com/artifactory/my-maven-repo',
         'https://maven.atlassian.com/content/repositories/atlassian-public/',
-        'https://repo.adobe.com/nexus/content/groups/public',
-        'https://repo.adobe.com/v2/nexus/content/groups/public',
-        'https://repo.adobe.com/v3/nexus/content/groups/public',
-        'https://repo.adobe.com/v4/nexus/content/groups/public',
-      ]);
+        'https://artifactory.company.com/artifactory/my-maven-repo',
+      ];
       packages.forEach(({ deps }) => {
         deps.forEach(({ registryUrls }) => {
-          const depUrls = new Set([...registryUrls]);
+          const depUrls = [...registryUrls];
           expect(depUrls).toEqual(urls);
         });
       });
-      expect(packages).toMatchSnapshot();
     });
 
     it('should return package files info', async () => {

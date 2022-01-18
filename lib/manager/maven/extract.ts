@@ -397,7 +397,7 @@ export async function extractAllPackageFiles(
         if (dep.registryUrls) {
           dep.registryUrls.push(...additionalRegistryUrls);
         } else {
-          dep.registryUrls = additionalRegistryUrls;
+          dep.registryUrls = [...additionalRegistryUrls];
         }
       });
     });

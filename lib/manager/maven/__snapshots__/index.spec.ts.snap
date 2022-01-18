@@ -1,17 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/maven/index extractAllPackageFiles should return empty for a settings file 1`] = `
-Object {
-  "registryUrls": Array [
-    "https://artifactory.company.com/artifactory/my-maven-repo",
-    "https://repo.adobe.com/nexus/content/groups/public",
-    "https://repo.adobe.com/v2/nexus/content/groups/public",
-    "https://repo.adobe.com/v3/nexus/content/groups/public",
-    "https://repo.adobe.com/v4/nexus/content/groups/public",
-  ],
-}
-`;
-
 exports[`manager/maven/index extractAllPackageFiles should return package files info 1`] = `
 Array [
   Object {
@@ -184,10 +172,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -199,10 +183,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -214,10 +194,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -229,10 +205,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -244,10 +216,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -259,10 +227,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
         "skipReason": "name-placeholder",
       },
@@ -275,10 +239,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
         "skipReason": "name-placeholder",
       },
@@ -292,10 +252,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -308,10 +264,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -324,10 +276,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -339,10 +287,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -354,10 +298,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
       Object {
@@ -369,10 +309,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
         "skipReason": "version-placeholder",
       },
@@ -385,10 +321,6 @@ Array [
           "https://repo.maven.apache.org/maven2",
           "https://maven.atlassian.com/content/repositories/atlassian-public/",
           "https://artifactory.company.com/artifactory/my-maven-repo",
-          "https://repo.adobe.com/nexus/content/groups/public",
-          "https://repo.adobe.com/v2/nexus/content/groups/public",
-          "https://repo.adobe.com/v3/nexus/content/groups/public",
-          "https://repo.adobe.com/v4/nexus/content/groups/public",
         ],
       },
     ],
