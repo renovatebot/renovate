@@ -1,4 +1,6 @@
 import type { AllConfig } from '../../../config/types';
+import { logger } from '../../../logger';
+import { regEx } from '../../regex';
 import * as memCache from '../memory';
 import * as fileCache from './file';
 import * as redisCache from './redis';
@@ -6,8 +8,19 @@ import type { PackageCache } from './types';
 
 let cacheProxy: PackageCache;
 
+const nullableString = regEx('undefined|null');
+
 function getGlobalKey(namespace: string, key: string): string {
-  return `global%%${namespace}%%${key}`;
+  const result = `global%%${namespace}%%${key}`;
+  // istanbul ignore if
+  if (namespace === '' || key === '' || result.match(nullableString)) {
+    logger.warn(
+      { namespace, key, globalKey: result },
+      `Package cache: potentially wrong cache key`
+    );
+  }
+
+  return result;
 }
 
 export async function get<T = any>(
