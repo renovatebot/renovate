@@ -1,5 +1,11 @@
 import * as _fs from 'fs-extra';
-import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import {
+  defaultConfig,
+  fs as fsUtil,
+  git,
+  mocked,
+  platform,
+} from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import {
@@ -10,7 +16,6 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
-import * as _fsUtil from '../../util/fs';
 import type { File, StatusResult } from '../../util/git/types';
 import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
@@ -42,8 +47,8 @@ jest.mock('../pr/automerge');
 jest.mock('../../util/exec');
 jest.mock('../../util/merge-confidence');
 jest.mock('../../util/sanitize');
-jest.mock('../../util/git');
 jest.mock('../../util/fs');
+jest.mock('../../util/git');
 jest.mock('fs-extra');
 jest.mock('../global/limits');
 
@@ -60,7 +65,6 @@ const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
 const fs = mocked(_fs);
-const fsUtil = mocked(_fsUtil);
 const limits = mocked(_limits);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
