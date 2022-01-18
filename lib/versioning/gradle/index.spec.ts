@@ -154,7 +154,7 @@ describe('versioning/gradle/index', () => {
 
   test.each`
     input                                   | expected
-    ${''}                                   | ${null}
+    ${''}                                   | ${false}
     ${'foobar'}                             | ${true}
     ${'final'}                              | ${true}
     ${'1'}                                  | ${true}
