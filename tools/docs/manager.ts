@@ -58,9 +58,10 @@ sidebar_label: ${displayName}
       md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching).\n\n`;
       md += '## Supported datasources\n\n';
       const escapedDatasources = (supportedDatasources || [])
-        .map(
-          (datasource) =>
-            `[\`${datasource}\`](../datasource/#${datasource}-datasource)`
+        .map((datasource) =>
+          datasource === 'ANY'
+            ? `\`datasource\``
+            : `[\`${datasource}\`](../datasource/#${datasource}-datasource)`
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
