@@ -1,5 +1,5 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier.js';
+import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { GlobalConfig } from '../../config/global';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
@@ -63,7 +63,8 @@ export function extractPackageFile(
       if (isSkipComment(comment)) {
         dep.skipReason = SkipReason.Ignored;
       }
-      const lineNoHashes = line.split(' \\')[0];
+      const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
+      const lineNoHashes = lineNoEnvMarkers.split(' \\')[0];
       const matches =
         pkgValRegex.exec(lineNoHashes) || pkgRegex.exec(lineNoHashes);
       if (!matches) {

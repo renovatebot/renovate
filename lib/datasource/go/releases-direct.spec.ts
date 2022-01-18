@@ -42,6 +42,7 @@ describe('datasource/go/releases-direct', () => {
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'golang/text',
+        registryUrl: 'https://github.com',
       });
       httpMock
         .scope('https://api.github.com/')
@@ -98,6 +99,7 @@ describe('datasource/go/releases-direct', () => {
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'bitbucket-tags',
         lookupName: 'golang/text',
+        registryUrl: 'https://bitbucket.org',
       });
       httpMock
         .scope('https://api.bitbucket.org/')
@@ -139,14 +141,17 @@ describe('datasource/go/releases-direct', () => {
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'x/text',
+        registryUrl: 'https://github.com',
       });
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'x/text',
+        registryUrl: 'https://github.com',
       });
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'go-x/x',
+        registryUrl: 'https://github.com',
       });
       httpMock
         .scope('https://api.github.com/')
@@ -199,14 +204,17 @@ describe('datasource/go/releases-direct', () => {
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'x/text',
+        registryUrl: 'https://github.com',
       });
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'x/text',
+        registryUrl: 'https://github.com',
       });
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'x/text',
+        registryUrl: 'https://github.com',
       });
       const packages = [
         { lookupName: 'github.com/x/text/a' },
@@ -236,10 +244,12 @@ describe('datasource/go/releases-direct', () => {
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'x/text',
+        registryUrl: 'https://github.com',
       });
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'x/text',
+        registryUrl: 'https://github.com',
       });
       const packages = [
         { lookupName: 'github.com/x/text/a' },
@@ -267,6 +277,7 @@ describe('datasource/go/releases-direct', () => {
       ds.getDatasource.mockResolvedValueOnce({
         datasource: 'github-tags',
         lookupName: 'x/text',
+        registryUrl: 'https://github.com',
       });
       const pkg = { lookupName: 'github.com/x/text/b/v2' };
       const tags = [

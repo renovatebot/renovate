@@ -16,7 +16,11 @@ export function updateDependency({
 }: UpdateDependencyConfig): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
-    const { depName, depType } = upgrade;
+    const { depName, depType, updateType } = upgrade;
+    if (updateType === 'replacement') {
+      logger.warn('gomod manager does not support replacement updates yet');
+      return null;
+    }
     const depNameNoVersion = getDepNameWithNoVersion(depName);
     const lines = fileContent.split('\n');
     const lineToChange = lines[upgrade.managerData.lineNumber];
