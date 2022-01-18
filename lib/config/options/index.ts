@@ -1745,6 +1745,7 @@ const options: RenovateOptions[] = [
     allowedValues: [
       'gomodUpdateImportPaths',
       'gomodTidy',
+      'gomodTidy1.17',
       'npmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
