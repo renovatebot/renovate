@@ -63,6 +63,20 @@ describe('workers/repository/onboarding/pr/index', () => {
       ]);
     });
 
+    it('creates PR with footer and header', async () => {
+      await ensureOnboardingPr(
+        {
+          ...config,
+          prHeader: 'And this is a header for {{{repository}}}',
+          prFooter: 'And this is a footer for {{{repository}}}',
+        },
+        packageFiles,
+        branches
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+    });
+
     it('returns if PR does not need updating', async () => {
       platform.getBranchPr.mockResolvedValue(
         partial<Pr>({

@@ -23,23 +23,21 @@ These updates await pending status checks. To force their creation now, click th
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"And this is a header
 
 This repository currently has no open or pending branches.
 
 ---
-And this is a footer
-"
+And this is a footer"
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when rules contain approvals 1`] = `
-"This issue provides visibility into Renovate updates and their statuses. [Learn more](https://docs.renovatebot.com/key-concepts/dashboard/)
+"And this is a header
 
 This repository currently has no open or pending branches.
 
 ---
-And this is a footer
-"
+And this is a footer"
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rechecks branches 1`] = `
