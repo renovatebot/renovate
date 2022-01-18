@@ -193,27 +193,28 @@ export function compare(left: string, right: string): number {
 }
 
 export function valid(input: string): Token[] | null {
-  if (isVersion(input)) {
-    return tokenize(input);
-  }
-  return null;
-}
-
-export function isVersion(input: string): boolean {
   if (!input) {
-    return false;
+    return null;
   }
 
   if (!regEx(/^[-._+a-zA-Z0-9]+$/i).test(input)) {
-    return false;
+    return null;
   }
 
   if (regEx(/^latest\.?/i).test(input)) {
-    return false;
+    return null;
   }
 
   const tokens = tokenize(input);
-  return !!tokens && !!tokens.length;
+  // istanbul ignore if: should not happen
+  if (!tokens?.length) {
+    return null;
+  }
+  return tokens;
+}
+
+export function isVersion(input: string): boolean {
+  return !!valid(input);
 }
 
 interface PrefixRange {
