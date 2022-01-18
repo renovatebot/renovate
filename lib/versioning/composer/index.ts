@@ -87,26 +87,31 @@ function composer2npm(input: string): string {
 const equals = (a: string, b: string): boolean =>
   npm.equals(composer2npm(a), composer2npm(b));
 
-const getMajor = (version: string): number =>
-  npm.getMajor(semver.coerce(composer2npm(version)));
+function getMajor(version: string): number | null {
+  const coercedVersion = semver.coerce(composer2npm(version));
+  return coercedVersion ? npm.getMajor(coercedVersion) : null;
+}
 
-const getMinor = (version: string): number =>
-  npm.getMinor(semver.coerce(composer2npm(version)));
-
-const getPatch = (version: string): number =>
-  npm.getPatch(semver.coerce(composer2npm(version)));
+function getMinor(version: string): number | null {
+  const coercedVersion = semver.coerce(composer2npm(version));
+  return coercedVersion ? npm.getMinor(coercedVersion) : null;
+}
+function getPatch(version: string): number | null {
+  const coercedVersion = semver.coerce(composer2npm(version));
+  return coercedVersion ? npm.getPatch(coercedVersion) : null;
+}
 
 const isGreaterThan = (a: string, b: string): boolean =>
   npm.isGreaterThan(composer2npm(a), composer2npm(b));
 
 const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange(composer2npm(version), composer2npm(range));
+  !!npm.isLessThanRange?.(composer2npm(version), composer2npm(range));
 
 const isSingleVersion = (input: string): boolean =>
   !!input && npm.isSingleVersion(composer2npm(input));
 
 const isStable = (version: string): boolean =>
-  version && npm.isStable(composer2npm(version));
+  !!version && npm.isStable(composer2npm(version));
 
 export const isValid = (input: string): boolean =>
   !!input && npm.isValid(composer2npm(input));
@@ -117,10 +122,16 @@ export const isVersion = (input: string): boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(composer2npm(version), composer2npm(range));
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
+const getSatisfyingVersion = (
+  versions: string[],
+  range: string
+): string | null =>
   npm.getSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
+const minSatisfyingVersion = (
+  versions: string[],
+  range: string
+): string | null =>
   npm.minSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
 function getNewValue({
@@ -128,7 +139,7 @@ function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   if (rangeStrategy === 'pin') {
     return newVersion;
   }

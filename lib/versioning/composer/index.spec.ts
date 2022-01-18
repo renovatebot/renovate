@@ -71,7 +71,7 @@ describe('versioning/composer/index', () => {
     ${'0.3.1'} | ${'~0.4'} | ${true}
     ${'0.5.1'} | ${'~0.4'} | ${false}
   `('isLessThanRange("$a", "$b") === $expected', ({ a, b, expected }) => {
-    expect(semver.isLessThanRange(a, b)).toBe(expected);
+    expect(semver.isLessThanRange?.(a, b)).toBe(expected);
   });
 
   test.each`
