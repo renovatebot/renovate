@@ -392,15 +392,15 @@ export async function extractAllPackageFiles(
     }
   }
   if (additionalRegistryUrls) {
-    packages.map((pkgFile) => {
-      pkgFile.deps.map((dep) => {
+    for (const pkgFile of packages) {
+      for (const dep of pkgFile.deps) {
         if (dep.registryUrls) {
           dep.registryUrls.push(...additionalRegistryUrls);
         } else {
           dep.registryUrls = [...additionalRegistryUrls];
         }
-      });
-    });
+      }
+    }
   }
   return cleanResult(resolveParents(packages));
 }

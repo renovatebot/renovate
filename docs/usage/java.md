@@ -77,13 +77,13 @@ Renovate can update dependency versions found in Maven `pom.xml` files.
 
 Renovate will search repositories for all `pom.xml` files and processes them independently.
 
-Renovate will also parse `settings.xml` files in one of the following locations:
+Renovate will also parse `settings.xml` files in the following locations:
 
 - `.mvn/settings.xml`
 - `.m2/settings.xml`
 - `settings.xml`
 
-and adds the repository urls to the dependencies.
+Any repository URLs found within will be added as `registryUrls` to extracted dependencies.
 
 ## Custom registry support, and authentication
 

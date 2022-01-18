@@ -42,12 +42,12 @@ describe('manager/maven/index', () => {
         'https://maven.atlassian.com/content/repositories/atlassian-public/',
         'https://artifactory.company.com/artifactory/my-maven-repo',
       ];
-      packages.forEach(({ deps }) => {
-        deps.forEach(({ registryUrls }) => {
-          const depUrls = [...registryUrls];
+      for (const pkg of packages) {
+        for (const dep of pkg.deps) {
+          const depUrls = [...dep.registryUrls];
           expect(depUrls).toEqual(urls);
-        });
-      });
+        }
+      }
     });
 
     it('should return package files info', async () => {
