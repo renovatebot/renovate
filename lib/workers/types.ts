@@ -115,5 +115,5 @@ export interface BranchConfig
   packageFiles?: Record<string, PackageFile[]>;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
-  stopRebasingLabelPresents?: boolean;
+  stopRebasingLabelPresent?: boolean;
 }
