@@ -156,7 +156,7 @@ function getNewValue({
   }
   const toMajor = getMajor(newVersion);
   const toMinor = getMinor(newVersion);
-  let newValue: string;
+  let newValue: string | null = null;
   if (isVersion(currentValue)) {
     newValue = newVersion;
   } else if (regEx(/^[~^](0\.[1-9][0-9]*)$/).test(currentValue)) {
