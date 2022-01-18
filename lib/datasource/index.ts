@@ -394,14 +394,13 @@ export function getDigest(
   config: GetDigestInputConfig,
   value?: string
 ): Promise<string | null> {
-  if (config.datasource) {
-    const datasource = getDatasourceFor(config.datasource);
-    if (datasource) {
-      const digestConfig = getDigestConfig(datasource, config);
-      return datasource.getDigest(digestConfig, value);
-    }
+  const datasource = getDatasourceFor(config.datasource);
+  if (!datasource) {
+    return null;
   }
-  return null;
+
+  const digestConfig = getDigestConfig(datasource, config);
+  return datasource.getDigest(digestConfig, value);
 }
 
 export function getDefaultConfig(
