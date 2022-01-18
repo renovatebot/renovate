@@ -7,6 +7,7 @@ jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
 const depName = 'https://github.com/example/example.git';
+const registryUrl = 'https://github.com';
 
 const lsRemote1 = loadFixture('ls-remote-1.txt');
 
@@ -74,7 +75,7 @@ describe('datasource/git-refs/index', () => {
         },
       });
       const digest = await new GitRefsDatasource().getDigest(
-        { lookupName: 'a tag to look up' },
+        { lookupName: 'a tag to look up', registryUrl },
         'v2.0.0'
       );
       expect(digest).toBeNull();
@@ -86,7 +87,7 @@ describe('datasource/git-refs/index', () => {
         },
       });
       const digest = await new GitRefsDatasource().getDigest(
-        { lookupName: 'a tag to look up' },
+        { lookupName: 'a tag to look up', registryUrl },
         'v1.0.4'
       );
       expect(digest).toMatchSnapshot();
@@ -98,7 +99,7 @@ describe('datasource/git-refs/index', () => {
         },
       });
       const digest = await new GitRefsDatasource().getDigest(
-        { lookupName: 'a tag to look up' },
+        { lookupName: 'a tag to look up', registryUrl },
         'master'
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
@@ -110,7 +111,7 @@ describe('datasource/git-refs/index', () => {
         },
       });
       const digest = await new GitRefsDatasource().getDigest(
-        { lookupName: 'another tag to look up' },
+        { lookupName: 'another tag to look up', registryUrl },
         undefined
       );
       expect(digest).toMatchSnapshot();
