@@ -8,7 +8,7 @@ import type { PackageCache } from './types';
 
 let cacheProxy: PackageCache;
 
-const nullableString = regEx('undefined|null');
+const nullableString = regEx('undefined|null', 'i');
 
 function getGlobalKey(namespace: string, key: string): string {
   const result = `global%%${namespace}%%${key}`;
