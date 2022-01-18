@@ -11,8 +11,6 @@
 - Creating issues not implemented yet, used to alert users when there is a config error
 - The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will implicitly use the merge strategy configured as 'default' in the Bitbucket Server repository itself, and this cannot be overridden yet
 
-
-
 ## Testing
 
 If you want a test Bitbucket server locally rather than with your production server, [Atlassian's Bitbucket Server Docker image](https://hub.docker.com/r/atlassian/bitbucket-server) is really convenient.
