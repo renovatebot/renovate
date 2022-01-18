@@ -42,7 +42,9 @@ export async function getPrConfigDescription(
   }
   prBody += '\n\n';
   prBody += emojify(':recycle: **Rebasing**: ');
-  if (config.rebaseWhen === 'behind-base-branch') {
+  if (config.stopRebasingLabelPresent) {
+    prBody += 'Only once (due to `stopRebasingLabel` config option)';
+  } else if (config.rebaseWhen === 'behind-base-branch') {
     prBody += 'Whenever PR is behind base branch';
   } else if (config.rebaseWhen === 'never') {
     prBody += 'Never';

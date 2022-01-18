@@ -444,15 +444,16 @@ export async function processBranch(
     const stopRebasingLabelPresent = branchPr?.labels?.includes(
       config.stopRebasingLabel
     );
+    config.stopRebasingLabelPresent = stopRebasingLabelPresent;
 
     const prRebaseChecked = branchPr?.body?.includes(
       `- [x] <!-- rebase-check -->`
     );
 
-    if (branchExists && stopRebasingLabelPresents) {
+    if (branchExists && stopRebasingLabelPresent) {
       if (!prRebaseChecked) {
         logger.info(
-          'Branch rebasing is skipped because stopRebasingLabel presents in config'
+          'Branch rebasing is skipped because stopRebasingLabel is present in config'
         );
         return {
           branchExists: true,
@@ -482,13 +483,6 @@ export async function processBranch(
     await setArtifactErrorStatus(config);
     await setStability(config);
     await setConfidence(config);
-
-    if (branchExists && stopRebasingLabelPresents && prRebaseChecked) {
-      logger.debug(
-        'Updating existing PR to indicate that further rebasing is turned off'
-      );
-      config.prRebaseBoxUnchecked = true;
-    }
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     // but do not break when there are artifact errors
