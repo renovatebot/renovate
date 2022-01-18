@@ -47,8 +47,7 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(regEx(/\/.*/g), ''); // remove everything after first slash
       updateConfig.sourceRepoName = parsedSourceUrl.pathname
         .replace(regEx(/^\//), '') // remove leading slash
-        .replace(regEx(/^(.*?)\//g), '') // remove everything up to first slash
-        .replace(regEx(/-+/g), '-'); // remove multiple hyphens
+        .replace(regEx(/^(.*?)\//g), ''); // remove everything up to first slash
     }
   }
   generateBranchName(updateConfig);
