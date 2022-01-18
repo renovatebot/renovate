@@ -10,15 +10,19 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 
 You can store your Renovate configuration file in one of the following locations:
 
-- `.github/renovate.json`
-- `.github/renovate.json5`
-- `.gitlab/renovate.json`
-- `.gitlab/renovate.json5`
-- `.renovaterc.json`
-- `renovate.json`
-- `renovate.json5`
-- `.renovaterc`
-- `package.json` _(within a `"renovate"` section)_
+1. `renovate.json`
+1. `renovate.json5`
+1. `.github/renovate.json`
+1. `.github/renovate.json5`
+1. `.gitlab/renovate.json`
+1. `.gitlab/renovate.json5`
+1. `.renovaterc`
+1. `.renovaterc.json`
+1. `package.json` _(within a `"renovate"` section)_
+
+_Note_: Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
+
+When renovating a repository, Renovate will try to detect the configuration files in the order listed above, and stop after the first one is found.
 
 Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
@@ -236,6 +240,8 @@ However, Renovate also allows users to explicitly configure `baseBranches`, e.g.
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
 
+Note: the `baseBranches` config option is not supported when `forkMode` is enabled, including in the Forking Renovate app.
+
 ## bbUseDefaultReviewers
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
@@ -426,6 +432,8 @@ If you need to _override_ constraints that Renovate detects from the repository,
 Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## deepExtract
+
+Note: the `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
 
 If configured to `true`, then dependency extraction will be done using the relevant package manager instead of JavaScript-based parsing.
 
@@ -1762,6 +1770,7 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
+- `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates

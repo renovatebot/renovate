@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
-import parseLinkHeader from 'parse-link-header';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -11,7 +10,9 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { range } from '../range';
 import { regEx } from '../regex';
+import { parseLinkHeader } from '../url';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -210,24 +211,17 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       if (opts.paginate) {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
-        const linkHeader =
-          result?.headers?.link &&
-          parseLinkHeader(result.headers.link as string);
+        const linkHeader = parseLinkHeader(result?.headers?.link);
         if (linkHeader?.next && linkHeader?.last) {
-          let lastPage = +linkHeader.last.page;
+          let lastPage = parseInt(linkHeader.last.page, 10);
           // istanbul ignore else: needs a test
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
-          const pageNumbers = Array.from(
-            new Array(lastPage),
-            (x, i) => i + 1
-          ).slice(1);
-          const queue = pageNumbers.map(
-            (page) => (): Promise<HttpResponse<T>> => {
+          const queue = [...range(2, lastPage)].map(
+            (pageNumber) => (): Promise<HttpResponse<T>> => {
               const nextUrl = new URL(linkHeader.next.url, baseUrl);
-              nextUrl.search = '';
-              nextUrl.searchParams.set('page', page.toString());
+              nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
                 { ...opts, paginate: false },

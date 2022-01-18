@@ -15,14 +15,14 @@ Some are configuration options passed through, while others are generated as par
 
 ## Exposed config options
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->
 
 <!-- Automatically insert exposed configuration options here -->
 
 ## Other available fields
 
-<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
 <!-- Autogenerate end -->
 
 <!-- Insert runtime fields here -->
