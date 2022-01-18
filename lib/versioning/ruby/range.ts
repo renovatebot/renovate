@@ -18,25 +18,25 @@ const parse = (range: string): Range => {
   const value = (range || '').trim();
 
   const match = regExp.exec(value);
-  if (match) {
-    const { version = null, operator = null, delimiter = ' ' } = match.groups;
+  if (match?.groups) {
+    const { version = '', operator = '', delimiter = ' ' } = match.groups;
     return { version, operator, delimiter };
   }
 
   return {
-    version: null,
-    operator: null,
+    version: '',
+    operator: '',
     delimiter: ' ',
   };
 };
 
 type GemRequirement = [string, Version];
 
-const ltr = (version: string, range: string): boolean | null => {
+const ltr = (version: string, range: string): boolean => {
   const gemVersion = create(version);
   if (!gemVersion) {
     logger.warn(`Invalid ruby version '${version}'`);
-    return null;
+    return false;
   }
   const requirements: GemRequirement[] = range.split(',').map(_parse);
 
@@ -58,7 +58,7 @@ const ltr = (version: string, range: string): boolean | null => {
       // istanbul ignore next
       default:
         logger.warn(`Unsupported operator '${operator}'`);
-        return null;
+        return false;
     }
   });
 
