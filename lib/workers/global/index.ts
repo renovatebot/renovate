@@ -80,6 +80,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
   try {
     await resolveConfigPresets(config);
   } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, CONFIG_PRESETS_INVALID);
     throw new Error(CONFIG_PRESETS_INVALID);
   }
 }

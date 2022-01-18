@@ -175,6 +175,31 @@ describe('platform/github/index', () => {
       expect(repos).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should return an array of repos when using Github App endpoint', async () => {
+      //Use Github App token
+      await github.initPlatform({
+        endpoint: githubApiHost,
+        username: 'renovate-bot',
+        gitAuthor: 'Renovate Bot',
+        token: 'x-access-token:123test',
+      });
+      httpMock
+        .scope(githubApiHost)
+        .get('/installation/repositories?per_page=100')
+        .reply(200, {
+          repositories: [
+            {
+              full_name: 'a/b',
+            },
+            {
+              full_name: 'c/d',
+            },
+          ],
+        });
+
+      const repos = await github.getRepos();
+      expect(repos).toStrictEqual(['a/b', 'c/d']);
+    });
   });
 
   function initRepoMock(
