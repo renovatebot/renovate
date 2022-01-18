@@ -1,5 +1,4 @@
 import { mock } from 'jest-mock-extended';
-import { git } from '../../../../test/util';
 import { BranchConfig } from '../../types';
 import { getPrConfigDescription } from './config-description';
 
