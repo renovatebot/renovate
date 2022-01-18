@@ -193,24 +193,10 @@ export function compare(left: string, right: string): number {
 }
 
 export function valid(input: string): Token[] | null {
-  if (!input) {
-    return null;
+  if (isVersion(input)) {
+    return tokenize(input);
   }
-
-  if (!regEx(/^[-._+a-zA-Z0-9]+$/i).test(input)) {
-    return null;
-  }
-
-  if (regEx(/^latest\.?/i).test(input)) {
-    return null;
-  }
-
-  const tokens = tokenize(input);
-  // istanbul ignore if: should not happen
-  if (!tokens?.length) {
-    return null;
-  }
-  return tokens;
+  return null;
 }
 
 export function isVersion(input: string): boolean {
