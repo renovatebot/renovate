@@ -13,7 +13,7 @@ function normalizeValue(value: string): string {
   const schedule = findScheduleForCodename(value);
   if (schedule) {
     const major = schedule.version.replace('v', '');
-    return `^${major}.x`;
+    return `^${major}`;
   }
   return value;
 }

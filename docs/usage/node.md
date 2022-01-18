@@ -10,7 +10,7 @@ This way you're using the latest bug fixes, performance improvements, security m
 
 ## LTS codenames
 
-Renovate understands [codenames for Node.js LTS releases](https://github.com/nodejs/Release/blob/main/CODENAMES.md) and will offer upgrades for them (e.g. from `fermium` to `gallium`).
+Renovate understands [codenames for Node.js LTS releases](https://github.com/nodejs/Release/blob/main/CODENAMES.md) and will offer upgrades for them (e.g. from `fermium` to `gallium`) as long as `node` versioning scheme is being used.
 
 ## File Support
 
