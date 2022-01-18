@@ -1,3 +1,4 @@
+import * as githubTagsDatasource from '../../datasource/github-tags';
 import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
@@ -8,3 +9,5 @@ export const defaultConfig = {
     '(^|\\/)action\\.ya?ml$',
   ],
 };
+
+export const supportedDatasources = [githubTagsDatasource.id];
