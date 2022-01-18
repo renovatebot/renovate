@@ -55,6 +55,7 @@ describe('manager/index', () => {
     it('returns null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         await manager.extractAllPackageFiles('unknown', {} as any, [])
@@ -66,6 +67,7 @@ describe('manager/index', () => {
     it('returns non-null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
@@ -81,6 +83,7 @@ describe('manager/index', () => {
     it('returns null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(manager.extractPackageFile('unknown', null)).toBeNull();
       expect(manager.extractPackageFile('dummy', null)).toBeNull();
@@ -88,6 +91,7 @@ describe('manager/index', () => {
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
 
@@ -102,6 +106,7 @@ describe('manager/index', () => {
     it('returns null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' })
@@ -110,6 +115,7 @@ describe('manager/index', () => {
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         getRangeStrategy: () => 'replace',
       });
       expect(
@@ -118,6 +124,7 @@ describe('manager/index', () => {
 
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' })

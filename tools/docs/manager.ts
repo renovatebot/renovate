@@ -21,7 +21,7 @@ export async function generateManagers(dist: string): Promise<void> {
     const language = definition.language || 'other';
     allLanguages[language] = allLanguages[language] || [];
     allLanguages[language].push(manager);
-    const { defaultConfig } = definition;
+    const { defaultConfig, supportedDatasources } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
     let md = `---
@@ -56,6 +56,11 @@ sidebar_label: ${displayName}
         }
       }
       md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching).\n\n`;
+      md += '## Supported datasources\n\n';
+      const escapedDatasources = (supportedDatasources || [])
+        .map((datasource) => `\`${datasource}\``)
+        .join(', ');
+      md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n`;
     }
 
     const managerReadmeContent = await readFile(
