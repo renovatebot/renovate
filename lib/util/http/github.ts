@@ -189,12 +189,10 @@ function getGraphqlPageSize(
   defaultPageSize = MAX_GRAPHQL_PAGE_SIZE
 ): number {
   const cache = getCache();
-  cache.platform ??= {};
-  cache.platform.github ??= {};
-  cache.platform.github.graphqlPageCache ??= {};
-  const cachedRecord = cache.platform.github.graphqlPageCache[fieldName];
+  const graphqlPageCache = cache?.platform?.github?.graphqlPageCache;
+  const cachedRecord = graphqlPageCache?.[fieldName];
 
-  if (cachedRecord) {
+  if (graphqlPageCache && cachedRecord) {
     logger.debug(
       { fieldName, ...cachedRecord },
       'GraphQL page size: found cached value'
@@ -215,17 +213,15 @@ function getGraphqlPageSize(
           'GraphQL page size: expanding'
         );
 
-        cache.platform.github.graphqlPageCache[fieldName] = {
-          pageLastResizedAt: timestamp,
-          pageSize: newPageSize,
-        };
+        cachedRecord.pageLastResizedAt = timestamp;
+        cachedRecord.pageSize = newPageSize;
       } else {
         logger.debug(
           { fieldName, oldPageSize, newPageSize },
           'GraphQL page size: expanded to default page size'
         );
 
-        delete cache.platform.github.graphqlPageCache[fieldName];
+        delete graphqlPageCache[fieldName];
       }
 
       return newPageSize;
