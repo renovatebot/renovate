@@ -2542,7 +2542,7 @@ describe('platform/github/index', () => {
       const res = await github.pushFiles({
         branchName: 'foo/bar',
         additions: [{ name: 'foo.bar', contents: 'foobar' }],
-        deletions: [],
+        deletions: ['baz', 'qux'],
         message: 'foobar',
       });
 

@@ -8706,7 +8706,14 @@ Array [
               "path": "foo.bar",
             },
           ],
-          "deletions": Array [],
+          "deletions": Array [
+            Object {
+              "path": "baz",
+            },
+            Object {
+              "path": "qux",
+            },
+          ],
         },
         "message": "foobar",
         "oid": "1234",
@@ -8717,7 +8724,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "812",
+      "content-length": "841",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
