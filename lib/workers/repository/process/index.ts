@@ -57,7 +57,7 @@ async function getBaseBranchConfig(
   }
 
   baseBranchConfig = mergeChildConfig(baseBranchConfig, { baseBranch });
-  if (baseBranchConfig.baseBranches.length > 1) {
+  if (config.baseBranches.length > 1) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
