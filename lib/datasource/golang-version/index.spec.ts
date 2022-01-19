@@ -1,7 +1,7 @@
-import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadFixture } from '../../../test/util';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GolangVersionDatasource } from '.';
 
 const golangReleasesContent = loadFixture('releases.go');
