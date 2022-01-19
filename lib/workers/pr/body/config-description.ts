@@ -46,7 +46,7 @@ export async function getPrConfigDescription(
     prBody += 'Only once (due to `stopRebasingLabel` config option)';
   } else if (config.rebaseWhen === 'behind-base-branch') {
     prBody += 'Whenever PR is behind base branch';
-  } else if (config.rebaseWhen === 'never') {
+  } else if (config.rebaseWhen === 'never' || config.stopRebasingLabelPresent) {
     prBody += 'Never';
   } else {
     prBody += 'Whenever PR becomes conflicted';
