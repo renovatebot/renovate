@@ -65,6 +65,10 @@ describe('workers/branch/lock-files/index', () => {
           contents:
             '{ "name": "some-other-name", "engines": { "node": "^6.0.0" }}',
         },
+        {
+          type: 'deletion',
+          path: 'frontent/package.json',
+        },
       ];
       config.upgrades = [];
       await writeUpdatedPackageFiles(config);

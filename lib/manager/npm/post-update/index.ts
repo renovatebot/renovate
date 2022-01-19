@@ -255,7 +255,6 @@ export async function writeUpdatedPackageFiles(
   const { localDir } = GlobalConfig.get();
   const supportedLockFiles = ['package-lock.json'];
   for (const packageFile of config.updatedPackageFiles) {
-    // istanbul ignore if
     if (packageFile.type !== 'addition') {
       continue;
     }
