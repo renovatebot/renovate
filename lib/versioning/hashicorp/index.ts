@@ -18,8 +18,8 @@ function hashicorp2npm(input: string): string {
 const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(hashicorp2npm(version), hashicorp2npm(range));
 
-export const isValid = (input: string): string | boolean =>
-  input && npm.isValid(hashicorp2npm(input));
+export const isValid = (input: string): boolean =>
+  !!input && npm.isValid(hashicorp2npm(input));
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(hashicorp2npm(version), hashicorp2npm(range));

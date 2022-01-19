@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../test/util';
-import extractPackageFile from './extract';
+import { extractPackageFile } from './extract';
 
 const yamlFile1 = loadFixture('main1.yaml');
 const yamlFile2 = loadFixture('main2.yaml');

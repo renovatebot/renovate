@@ -3,7 +3,7 @@ import type { ModuleApi } from '../../lib/types';
 import { readFile } from '../utils';
 
 const replaceStart =
-  '<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->';
+  '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';
 const replaceStop = '<!-- Autogenerate end -->';
 
 export function capitalize(input: string): string {
