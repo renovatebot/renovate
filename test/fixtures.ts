@@ -13,7 +13,7 @@ export class Fixtures {
   /**
    * Returns content from fixture file from __fixtures__ folder
    * @param name name of the fixture file
-   * @param fixturesRoot is an optional, by default is current test folder
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
    * @returns
    */
   static get(name: string, fixturesRoot = '.'): string {
