@@ -104,7 +104,7 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
-  let newCargo = npm2cargo(newSemver ?? '');
+  let newCargo = newSemver ? npm2cargo(newSemver): null;
   // istanbul ignore if
   if (!newCargo) {
     logger.info(
