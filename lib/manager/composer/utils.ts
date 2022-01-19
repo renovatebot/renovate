@@ -69,7 +69,9 @@ export function extractContraints(
   const res: Record<string, string> = { composer: '1.*' };
 
   // extract php
-  if (composerJson.require?.php) {
+  if (composerJson.config?.platform?.php) {
+    res.php = composerJson.config?.platform?.php;
+  } else if (composerJson.require?.php) {
     res.php = composerJson.require?.php;
   }
 

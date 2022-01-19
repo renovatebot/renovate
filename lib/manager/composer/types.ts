@@ -8,6 +8,11 @@ export interface Repo {
 }
 export interface ComposerConfig {
   type?: string;
+  config?: {
+    platform?: {
+      php?: string;
+    };
+  };
   /**
    * A repositories field can be an array of Repo objects or an object of repoName: Repo
    * Also it can be a boolean (usually false) to disable packagist.
