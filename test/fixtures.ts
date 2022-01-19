@@ -75,8 +75,13 @@ export class Fixtures {
   }
 }
 
-function readFile(fileName: string, encoding?: string): Promise<unknown> {
-  return memfs.promises.readFile(fileName, encoding ?? 'utf8');
+function readFile(fileName: string): Promise<Buffer>;
+function readFile(fileName: string, encoding: 'utf8'): Promise<string>;
+function readFile(
+  fileName: string,
+  encoding = 'utf8'
+): Promise<Buffer | string> {
+  return memfs.promises.readFile(fileName, encoding);
 }
 
 export async function outputFile(
