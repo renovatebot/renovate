@@ -142,9 +142,33 @@ describe('workers/repository/updates/flatten', () => {
       };
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(14);
-      expect(res.filter((update) => update.sourceRepoSlug)).toHaveLength(3);
-      expect(res.filter((update) => update.sourceRepoOrg)).toHaveLength(3);
-      expect(res.filter((update) => update.sourceRepoName)).toHaveLength(3);
+      expect(
+        res.filter((update) => update.sourceRepoSlug)[0].sourceRepoSlug
+      ).toEqual('org-repo');
+      expect(
+        res.filter((update) => update.sourceRepoOrg)[0].sourceRepoOrg
+      ).toEqual('org');
+      expect(
+        res.filter((update) => update.sourceRepoOrg)[0].sourceRepoName
+      ).toEqual('repo');
+      expect(
+        res.filter((update) => update.sourceRepoSlug)[1].sourceRepoSlug
+      ).toEqual('org-repo');
+      expect(
+        res.filter((update) => update.sourceRepoOrg)[1].sourceRepoOrg
+      ).toEqual('org');
+      expect(
+        res.filter((update) => update.sourceRepoOrg)[1].sourceRepoName
+      ).toEqual('repo');
+      expect(
+        res.filter((update) => update.sourceRepoSlug)[2].sourceRepoSlug
+      ).toEqual('nodejs-node');
+      expect(
+        res.filter((update) => update.sourceRepoOrg)[2].sourceRepoOrg
+      ).toEqual('nodejs');
+      expect(
+        res.filter((update) => update.sourceRepoOrg)[2].sourceRepoName
+      ).toEqual('node');
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
