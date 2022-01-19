@@ -370,7 +370,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
-      logger.debug({ packageFile }, 'packageFile has no content');
+      logger.trace({ packageFile }, 'packageFile has no content');
       continue;
     }
     if (packageFile.endsWith('settings.xml')) {
