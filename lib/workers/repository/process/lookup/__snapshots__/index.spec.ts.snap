@@ -238,7 +238,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() handles the in-range-only strategy 1`] = `
+exports[`workers/repository/process/lookup/index .lookupUpdates() handles the in-range-only strategy and updates lockfile within range 1`] = `
 Array [
   Object {
     "bucket": "non-major",

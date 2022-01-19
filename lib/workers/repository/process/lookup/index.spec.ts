@@ -343,9 +343,9 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates[0].updateType).toBe('minor');
     });
 
-    it('handles the in-range-only strategy', async () => {
-      config.currentValue = '~1.2.0';
-      config.lockedVersion = '1.2.0';
+    it('handles the in-range-only strategy and updates lockfile within range', async () => {
+      config.currentValue = '^1.2.1';
+      config.lockedVersion = '1.2.1';
       config.rangeStrategy = 'in-range-only';
       config.depName = 'q';
       config.datasource = datasourceNpmId;
@@ -353,6 +353,17 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].updateType).toBe('minor');
+    });
+
+    it('handles the in-range-only strategy and discads changes not within range', async () => {
+      config.currentValue = '~1.2.0';
+      config.lockedVersion = '1.2.0';
+      config.rangeStrategy = 'in-range-only';
+      config.depName = 'q';
+      config.datasource = datasourceNpmId;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toBeEmptyArray();
     });
 
     it('handles unconstrainedValue values', async () => {
