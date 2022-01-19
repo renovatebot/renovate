@@ -8,6 +8,12 @@ export interface Repo {
 }
 export interface ComposerConfig {
   type?: string;
+  /**
+   * Setting a fixed PHP version (e.g. {"php": "7.0.3"}) will let you fake the
+   * platform version so that you can emulate a production env or define your
+   * target platform in the config.
+   * See https://getcomposer.org/doc/06-config.md#platform
+   */
   config?: {
     platform?: {
       php?: string;
