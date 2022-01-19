@@ -159,6 +159,7 @@ const repoGroups = {
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
+  quartznet: 'https://github.com/quartznet/quartznet',
   react: 'https://github.com/facebook/react',
   'react-router': [
     'https://github.com/ReactTraining/react-router', // old repo
