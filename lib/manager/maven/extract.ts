@@ -384,7 +384,7 @@ export async function extractAllPackageFiles(
         if (pkg) {
           packages.push(pkg);
         } else {
-          logger.debug({ packageFile }, 'can not read dependencies');
+          logger.trace({ packageFile }, 'can not read dependencies');
         }
       }
     } else {
