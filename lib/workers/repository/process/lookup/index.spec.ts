@@ -355,7 +355,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates[0].updateType).toBe('minor');
     });
 
-    it('handles the in-range-only strategy and discads changes not within range', async () => {
+    it('handles the in-range-only strategy and discards changes not within range', async () => {
       config.currentValue = '~1.2.0';
       config.lockedVersion = '1.2.0';
       config.rangeStrategy = 'in-range-only';
