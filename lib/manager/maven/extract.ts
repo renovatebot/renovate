@@ -369,26 +369,26 @@ export async function extractAllPackageFiles(
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
-    if (content) {
-      if (packageFile.endsWith('settings.xml')) {
-        const registries = extractRegistries(content);
-        if (registries) {
-          logger.debug(
-            { registries, packageFile },
-            'Found registryUrls in settings.xml'
-          );
-          additionalRegistryUrls.push(...registries);
-        }
-      } else {
-        const pkg = extractPackage(content, packageFile);
-        if (pkg) {
-          packages.push(pkg);
-        } else {
-          logger.trace({ packageFile }, 'can not read dependencies');
-        }
+    if (!content) {
+      logger.debug({ packageFile }, 'packageFile has no content');
+      continue;
+    }
+    if (packageFile.endsWith('settings.xml')) {
+      const registries = extractRegistries(content);
+      if (registries) {
+        logger.debug(
+          { registries, packageFile },
+          'Found registryUrls in settings.xml'
+        );
+        additionalRegistryUrls.push(...registries);
       }
     } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+      const pkg = extractPackage(content, packageFile);
+      if (pkg) {
+        packages.push(pkg);
+      } else {
+        logger.trace({ packageFile }, 'can not read dependencies');
+      }
     }
   }
   if (additionalRegistryUrls) {
