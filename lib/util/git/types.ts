@@ -31,24 +31,36 @@ export interface LocalConfig extends StorageConfig {
 }
 
 export interface FileAddition {
-  // Addition creates new file or modifies existing one
+  /**
+   * Addition creates new file or modifies existing one
+   */
   type: 'addition';
 
-  // Relative file path
+  /**
+   * Relative file path
+   */
   path: string;
 
-  // File contents
+  /**
+   * File contents
+   */
   contents: string | Buffer;
 
-  // The executable bit
+  /**
+   * The executable bit
+   */
   isExecutable?: boolean;
 }
 
 export interface FileDeletion {
-  // Deletion removes the file
+  /**
+   * Deletion removes the file
+   */
   type: 'deletion';
 
-  // Relative file path
+  /**
+   * Relative file path
+   */
   path: string;
 }
 
