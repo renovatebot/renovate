@@ -36,6 +36,16 @@ describe('datasource/adoptium-java/index', () => {
       ).toBeNull();
     });
 
+    it('returns null for empty result', async () => {
+      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, {});
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName,
+        })
+      ).toBeNull();
+    });
+
     it('returns null for empty 200 OK', async () => {
       httpMock
         .scope(defaultRegistryUrl)
@@ -69,7 +79,7 @@ describe('datasource/adoptium-java/index', () => {
         depName,
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
+      expect(res?.releases).toHaveLength(3);
     });
 
     it('processes real data (jre)', async () => {
@@ -82,16 +92,17 @@ describe('datasource/adoptium-java/index', () => {
         depName: 'java-jre',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
+      expect(res?.releases).toHaveLength(2);
     });
 
     it('pages', async () => {
+      const versions = [...range(1, 50)].map((v: number) => ({
+        semver: `1.${v}.0`,
+      }));
       httpMock
         .scope(defaultRegistryUrl)
         .get(getPath(0))
-        .reply(200, {
-          versions: [...range(1, 50)].map((v) => ({ semver: `1.${v}.0` })),
-        })
+        .reply(200, { versions })
         .get(getPath(1))
         .reply(404);
       const res = await getPkgReleases({
@@ -99,7 +110,7 @@ describe('datasource/adoptium-java/index', () => {
         depName,
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(50);
+      expect(res?.releases).toHaveLength(50);
     });
   });
 });
