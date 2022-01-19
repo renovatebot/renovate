@@ -700,10 +700,8 @@ export async function commitFiles({
     const addedModifiedFiles: string[] = [];
     const ignoredFiles: string[] = [];
     for (const file of files) {
-      let fileName = file.path;
-      // istanbul ignore if
+      const fileName = file.path;
       if (file.type === 'deletion') {
-        fileName = file.path;
         try {
           await git.rm([fileName]);
           deletedFiles.push(fileName);
