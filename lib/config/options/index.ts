@@ -1306,10 +1306,10 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
-    name: 'stopRebasingLabel',
-    description: 'Label to use to request the bot to stop rebasing a PR.',
+    name: 'stopUpdatingLabel',
+    description: 'Label to use to request the bot to stop updating a PR.',
     type: 'string',
-    default: 'stop-rebasing',
+    default: 'stop-updating',
     supportedPlatforms: ['github'],
   },
   {
