@@ -81,6 +81,7 @@
     "lib/datasource/helm/common.ts",
     "lib/logger/err-serializer.spec.ts",
     "lib/util/cache/**/*.spec.ts",
+    "lib/util/cache/package/redis.ts",
     "lib/util/exec/buildpack.spec.ts",
     "lib/util/exec/buildpack.ts",
     "lib/util/exec/docker/index.spec.ts",
