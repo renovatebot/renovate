@@ -2183,7 +2183,6 @@ Followed by some information.
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
-
         it('throws on long content', async () => {
           const scope = await initRepo();
           scope
@@ -2197,7 +2196,6 @@ Followed by some information.
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
-
         it('throws on errors', async () => {
           const scope = await initRepo();
           scope
