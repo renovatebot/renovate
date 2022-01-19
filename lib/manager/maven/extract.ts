@@ -388,7 +388,7 @@ export async function extractAllPackageFiles(
         }
       }
     } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+      logger.trace({ packageFile }, 'packageFile has no content');
     }
   }
   if (additionalRegistryUrls) {
