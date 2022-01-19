@@ -17,6 +17,25 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
+handlebars.registerHelper('containsString', (str, subStr, options) =>
+  str.includes(subStr)
+);
+
+handlebars.registerHelper({
+  and(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.every(Boolean);
+  },
+  or(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.some(Boolean);
+  },
+});
+
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',

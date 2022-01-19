@@ -25,6 +25,7 @@ import {
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { ensureTrailingSlash } from '../../../util/url';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import * as lerna from './lerna';
@@ -376,10 +377,9 @@ async function updateYarnOffline(
         .split('\n')
         .find((line) => line.startsWith('yarn-offline-mirror '));
       if (mirrorLine) {
-        const mirrorPath = mirrorLine
-          .split(' ')[1]
-          .replace(regEx(/"/g), '')
-          .replace(regEx(/\/?$/), '/');
+        const mirrorPath = ensureTrailingSlash(
+          mirrorLine.split(' ')[1].replace(regEx(/"/g), '')
+        );
         resolvedPaths.push(upath.join(lockFileDir, mirrorPath));
       }
     }

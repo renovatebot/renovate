@@ -15,7 +15,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       .split(',')
       .map((dep) => dep.trim())
       .filter((dep) => dep.length)
-      .map((dep) => dep.split(regEx(/:(.*)/))) // TODO #12071
+      .map((dep) => dep.split(regEx(/:(.*)/)))
       .map((arr) => {
         const [depName, currentValue] = arr;
         // istanbul ignore if
