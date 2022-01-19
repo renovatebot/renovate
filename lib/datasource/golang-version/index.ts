@@ -1,3 +1,4 @@
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { cache } from '../../util/cache/package/decorator';
 import { regEx } from '../../util/regex';
 import { isVersion, id as semverVersioningId } from '../../versioning/semver';
@@ -90,9 +91,10 @@ export class GolangVersionDatasource extends Datasource {
       }
     }
 
-    // istanbul ignore if
     if (res.releases.length === 0) {
-      throw new Error(`Invalid file - zero releases extracted`);
+      throw new ExternalHostError(
+        new Error(`Invalid file - zero releases extracted`)
+      );
     }
 
     return res;
