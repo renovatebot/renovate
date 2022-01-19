@@ -37,7 +37,7 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() ope
 This repository currently has no open or pending branches.
 
 ---
-And this is a footer for "
+And this is a footer"
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rechecks branches 1`] = `

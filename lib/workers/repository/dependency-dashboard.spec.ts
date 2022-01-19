@@ -167,8 +167,7 @@ describe('workers/repository/dependency-dashboard', () => {
         {},
       ];
       config.dependencyDashboardHeader = 'This is a header for {{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for {{baseBranch}}';
+      config.dependencyDashboardFooter = 'And this is a footer';
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
