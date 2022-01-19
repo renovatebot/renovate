@@ -147,7 +147,7 @@ export async function ensureDependencyDashboard(
   let issueBody = '';
   if (config.dependencyDashboardHeader?.length) {
     issueBody +=
-      template.compile(config.dependencyDashboardHeader, config) + `\n\n`;
+      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
   }
 
   issueBody = appendRepoProblems(config, issueBody);
@@ -315,7 +315,7 @@ export async function ensureDependencyDashboard(
 
   if (config.dependencyDashboardFooter?.length) {
     issueBody +=
-      `---\n` + template.compile(config.dependencyDashboardFooter, config);
+      '---\n' + template.compile(config.dependencyDashboardFooter, config);
   }
 
   if (config.dependencyDashboardIssue) {
