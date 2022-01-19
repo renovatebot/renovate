@@ -1,7 +1,5 @@
 # Bitbucket Server Support
 
-> Note: For Assignees support use username slug as asignee name. Which can be easy found here: `https://{bitbucket_server}/rest/api/1.0/users`
-
 ## Unsupported platform features/concepts
 
 - Adding/removing labels (Bitbucket limitation)
@@ -54,3 +52,9 @@ You should then receive a "Configure Renovate" onboarding PR in any projects tha
 
 We support all Bitbucket Server versions which are not EOL.
 See [Atlassian Support End of Life Policy](https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer) for uptodate versions.
+
+## Assignees support
+Assignee support is added in version 17.2.0 of Renovate.
+It's available in all supported Bitbucket versions.
+> Note: Use username slug as asignee name.
+> Which can be easy found here: `https://{bitbucket_server}/rest/api/1.0/users`
