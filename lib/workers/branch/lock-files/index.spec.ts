@@ -44,7 +44,8 @@ describe('workers/branch/lock-files/index', () => {
     it('returns if no updated packageFiles are package.json', async () => {
       config.updatedPackageFiles = [
         {
-          name: 'Dockerfile',
+          type: 'addition',
+          path: 'Dockerfile',
           contents: 'some-contents',
         },
       ];
@@ -54,11 +55,13 @@ describe('workers/branch/lock-files/index', () => {
     it('writes updated packageFiles', async () => {
       config.updatedPackageFiles = [
         {
-          name: 'package.json',
+          type: 'addition',
+          path: 'package.json',
           contents: '{ "name": "{{some-template}}" }',
         },
         {
-          name: 'backend/package.json',
+          type: 'addition',
+          path: 'backend/package.json',
           contents:
             '{ "name": "some-other-name", "engines": { "node": "^6.0.0" }}',
         },

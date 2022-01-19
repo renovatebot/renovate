@@ -71,8 +71,10 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
+      const file = git.commitFiles.mock.calls[0][0].files[0];
+      expect(file.type).toBe('addition');
       const contents =
-        git.commitFiles.mock.calls[0][0].files[0].contents?.toString();
+        file.type === 'addition' ? file.contents?.toString() : null;
       expect(contents).toBeJsonString();
       expect(JSON.parse(contents)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
@@ -100,8 +102,10 @@ describe('workers/repository/onboarding/branch/index', () => {
         },
         configFileNames[0]
       );
+      const file = git.commitFiles.mock.calls[0][0].files[0];
+      expect(file.type).toBe('addition');
       const contents =
-        git.commitFiles.mock.calls[0][0].files[0].contents?.toString();
+        file.type === 'addition' ? file.contents?.toString() : null;
       expect(contents).toBeJsonString();
       expect(JSON.parse(contents)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
