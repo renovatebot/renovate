@@ -8,3 +8,5 @@ export const defaultConfig = {
   fileMatch: ['(^|/)jsonnetfile.json$'],
   datasource: GitTagsDatasource.id,
 };
+
+export const supportedDatasources = [GitTagsDatasource.id];
