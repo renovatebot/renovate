@@ -144,7 +144,7 @@ describe('workers/repository/dependency-dashboard', () => {
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
-      config.dependencyDashboardHeader = 'And this is a header';
+      config.dependencyDashboardHeader = 'This is a header';
       config.dependencyDashboardFooter = 'And this is a footer';
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
@@ -166,8 +166,9 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader = 'And this is a header';
-      config.dependencyDashboardFooter = 'And this is a footer';
+      config.dependencyDashboardHeader = 'This is a header for {{platform}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for {{baseBranch}}';
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);

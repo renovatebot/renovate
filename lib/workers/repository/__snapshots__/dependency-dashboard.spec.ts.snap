@@ -23,7 +23,7 @@ These updates await pending status checks. To force their creation now, click th
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
-"And this is a header
+"This is a header
 
 This repository currently has no open or pending branches.
 
@@ -32,12 +32,12 @@ And this is a footer"
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when rules contain approvals 1`] = `
-"And this is a header
+"This is a header for github
 
 This repository currently has no open or pending branches.
 
 ---
-And this is a footer"
+And this is a footer for "
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rechecks branches 1`] = `

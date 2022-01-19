@@ -106,12 +106,12 @@ If you need any further assistance then you can also [request help here](${confi
   // istanbul ignore if
   if (config.prHeader) {
     const prHeader = String(config.prHeader || '');
-    prBody = template.compile(prHeader, config) + `\n\n${prBody}`;
+    prBody = `${template.compile(prHeader, config)}\n\n${prBody}`;
   }
   // istanbul ignore if
   if (config.prFooter) {
-    const prFooter = String(config.prFooter);
-    prBody = `${prBody}\n---\n\n` + template.compile(prFooter, config);
+    const prFooter = String(config.prFooter || '');
+    prBody = `${prBody}\n---\n\n${template.compile(prFooter, config)}`;
   }
   logger.trace('prBody:\n' + prBody);
 

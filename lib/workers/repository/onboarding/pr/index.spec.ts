@@ -63,11 +63,25 @@ describe('workers/repository/onboarding/pr/index', () => {
       ]);
     });
 
+    it('creates PR with empty footer and header', async () => {
+      await ensureOnboardingPr(
+        {
+          ...config,
+          prHeader: '',
+          prFooter: '',
+        },
+        packageFiles,
+        branches
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+    });
+
     it('creates PR with footer and header', async () => {
       await ensureOnboardingPr(
         {
           ...config,
-          prHeader: 'And this is a header',
+          prHeader: 'This is a header for {{platform}}',
           prFooter: 'And this is a footer',
         },
         packageFiles,
