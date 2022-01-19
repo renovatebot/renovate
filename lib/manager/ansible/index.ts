@@ -1,10 +1,11 @@
 import { ProgrammingLanguage } from '../../constants';
-import extractPackageFile from './extract';
+import * as datasourceDocker from '../../datasource/docker';
+export { extractPackageFile } from './extract';
 
-const language = ProgrammingLanguage.Docker;
-
-export { extractPackageFile, language };
+export const language = ProgrammingLanguage.Docker;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)tasks/[^/]+\\.ya?ml$'],
 };
+
+export const supportedDatasources = [datasourceDocker.id];
