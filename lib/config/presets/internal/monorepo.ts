@@ -85,6 +85,7 @@ const repoGroups = {
     'https://github.com/dotnet/extensions',
     'https://github.com/dotnet/runtime',
   ],
+  'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',

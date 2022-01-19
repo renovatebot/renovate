@@ -1,3 +1,4 @@
+import * as datasourceDocker from '../../datasource/docker';
 export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
@@ -5,3 +6,5 @@ export const defaultConfig = {
   fileMatch: ['(^|/)values.yaml$'],
   pinDigests: false,
 };
+
+export const supportedDatasources = [datasourceDocker.id];
