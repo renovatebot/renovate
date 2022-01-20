@@ -22,4 +22,16 @@ describe('config/migrations/custom/composer-ignore-platform-reqs-migration', () 
       }
     );
   });
+
+  it('should not migrate array', () => {
+    expect(ComposerIgnorePlatformReqsMigration).toMigrate(
+      {
+        composerIgnorePlatformReqs: [],
+      },
+      {
+        composerIgnorePlatformReqs: [],
+      },
+      false
+    );
+  });
 });

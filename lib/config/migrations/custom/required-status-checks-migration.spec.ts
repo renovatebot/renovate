@@ -11,4 +11,13 @@ describe('config/migrations/custom/required-status-checks-migration', () => {
       }
     );
   });
+
+  it('should remove requiredStatusChecks property', () => {
+    expect(RequiredStatusChecksMigration).toMigrate(
+      {
+        requiredStatusChecks: [],
+      },
+      {}
+    );
+  });
 });

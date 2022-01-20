@@ -670,32 +670,6 @@ describe('config/migration', () => {
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
   });
 
-  it('it migrates composerIgnorePlatformReqs values', () => {
-    let config: TestRenovateConfig;
-    let res: MigratedConfig;
-
-    config = {
-      composerIgnorePlatformReqs: true,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
-
-    config = {
-      composerIgnorePlatformReqs: false,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toBeNull();
-
-    config = {
-      composerIgnorePlatformReqs: [],
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeFalse();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
-  });
-
   it('it migrates gradle-lite', () => {
     const config: RenovateConfig = {
       gradle: {
@@ -719,18 +693,6 @@ describe('config/migration', () => {
     expect(isMigrated).toBeTrue();
     expect(migratedConfig).toMatchSnapshot();
   });
-  it('migrates empty requiredStatusChecks', () => {
-    const config: RenovateConfig = {
-      requiredStatusChecks: [],
-    };
-    const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-      config,
-      defaultConfig
-    );
-    expect(isMigrated).toBe(true);
-    expect(migratedConfig).toMatchInlineSnapshot(`Object {}`);
-  });
-
   it('migrates azureAutoComplete', () => {
     const migrate = (config: RenovateConfig): MigratedConfig =>
       configMigration.migrateConfig(config, defaultConfig);
