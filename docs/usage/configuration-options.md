@@ -2580,6 +2580,14 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
 
+## useBaseBranchConfig
+
+By default, Renovate will read config file from the default branch only and will ignore any config files in base branches.
+You can configure `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
+
+The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
+This scenario may be useful for testing the config changes in base branches instantly.
+
 ## userStrings
 
 When a PR is closed, Renovate posts a comment to let users know that future updates will be ignored.
