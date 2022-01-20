@@ -49,22 +49,32 @@ export abstract class GenericVersioningApi<
     const length = Math.max(left.release.length, right.release.length);
     for (let i = 0; i < length; i += 1) {
       // 2.1 and 2.1.0 are equivalent
-      const part1 = left.release[i] ?? 0;
-      const part2 = right.release[i] ?? 0;
-      if (part1 !== part2) {
-        return part1 - part2;
+      const leftPart = left.release[i] ?? 0;
+      const rightPart = right.release[i] ?? 0;
+      if (leftPart < rightPart) {
+        return -1;
+      } else if (leftPart > rightPart) {
+        return 1;
       }
     }
 
+    const leftLength = left.release.length;
+    const rightLength = right.release.length;
+    if (leftLength < rightLength) {
+      return -1;
+    } else if (leftLength > rightLength) {
+      return 1;
+    }
+
+    return this._compareOther(left, right);
+  }
+
+  protected _compareOther(left: T, right: T): number {
     return (
       strCmp(left.prerelease, right.prerelease) ??
       strCmp(left.suffix, right.suffix) ??
       0
     );
-  }
-
-  protected _compareOther(_left: T, _right: T): number {
-    return 0;
   }
 
   private _getSection(version: string, index: number): number | null {
