@@ -21,7 +21,7 @@ async function getBaseBranchConfig(
   let baseBranchConfig: RenovateConfig = config;
 
   if (
-    config.useBaseBranchConfig === 'replace' &&
+    config.useBaseBranchConfig === 'merge' &&
     baseBranch !== config.defaultBranch
   ) {
     logger.debug(
@@ -57,10 +57,6 @@ async function getBaseBranchConfig(
   }
 
   baseBranchConfig = mergeChildConfig(baseBranchConfig, { baseBranch });
-  if (config.baseBranches.length > 1) {
-    baseBranchConfig.branchPrefix += `${baseBranch}-`;
-    baseBranchConfig.hasBaseBranches = true;
-  }
 
   return baseBranchConfig;
 }

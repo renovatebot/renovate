@@ -66,7 +66,7 @@ describe('workers/repository/process/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getJsonFile = jest.fn().mockResolvedValue({});
       config.baseBranches = ['master', 'dev'];
-      config.useBaseBranchConfig = 'replace';
+      config.useBaseBranchConfig = 'merge';
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
@@ -93,7 +93,7 @@ describe('workers/repository/process/index', () => {
         });
       getCache().configFileName = 'renovate.json';
       config.baseBranches = ['master', 'dev'];
-      config.useBaseBranchConfig = 'replace';
+      config.useBaseBranchConfig = 'merge';
       await expect(extractDependencies(config)).rejects.toThrow(
         CONFIG_VALIDATION
       );
