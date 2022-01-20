@@ -70,7 +70,7 @@ function replaceSecretsInString(
     throw error;
   }
   return value.replace(secretTemplateRegex, (_, secretName) => {
-    if (secrets[secretName]) {
+    if (secrets?.[secretName]) {
       return secrets[secretName];
     }
     const error = new Error(CONFIG_VALIDATION);
