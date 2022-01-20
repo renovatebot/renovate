@@ -35,7 +35,19 @@ export interface HelmRepository extends KubernetesResource {
 
 export type FluxResource = HelmRelease | HelmRepository;
 
-export interface FluxManifest {
+export interface FluxFile {
+  file: string;
+}
+
+export interface ResourceFluxManifest extends FluxFile {
+  kind: 'resource';
   releases: HelmRelease[];
   repositories: HelmRepository[];
 }
+
+export interface SystemFluxManifest extends FluxFile {
+  kind: 'system';
+  version: string;
+}
+
+export type FluxManifest = ResourceFluxManifest | SystemFluxManifest;
