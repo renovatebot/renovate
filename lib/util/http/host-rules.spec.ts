@@ -44,6 +44,11 @@ describe('util/http/host-rules', () => {
       username: 'some',
       password: 'xxx',
     });
+
+    hostRules.add({
+      hostType: PlatformId.Bitbucket,
+      token: 'cdef',
+    });
   });
 
   afterEach(() => {
@@ -222,6 +227,33 @@ describe('util/http/host-rules', () => {
       },
       hostType: 'gitlab-packages',
       token: 'abc',
+    });
+  });
+
+  it('no fallback to bitbucket', () => {
+    hostRules.add({
+      hostType: 'bitbucket-tags',
+      username: 'some',
+      password: 'xxx',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'bitbucket-tags' })
+    ).toEqual({
+      hostType: 'bitbucket-tags',
+      username: 'some',
+      password: 'xxx',
+    });
+  });
+
+  it('fallback to bitbucket', () => {
+    expect(
+      applyHostRules(url, { ...options, hostType: 'bitbucket-tags' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'bitbucket-tags',
+      token: 'cdef',
     });
   });
 });
