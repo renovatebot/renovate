@@ -2340,7 +2340,7 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 
 ```json
 {
-  "reviewers": "team:foo"
+  "reviewers": ["team:foo"]
 }
 ```
 
