@@ -8,7 +8,7 @@ export const urls = ['https://pvp.haskell.org'];
 export const supportsRanges = false;
 
 /**
- * At least 3 components and no leading 0s
+ * At least three components and no leading zeros
  * https://pvp.haskell.org/#version-number
  */
 const versionPattern = regEx(
@@ -18,7 +18,7 @@ const versionPattern = regEx(
 class PvpVersioningApi extends GenericVersioningApi {
   /**
    * PVP has two major components A.B
-   * To keep compatability with Renovate's versioning API we will treat it as a float
+   * To keep compatibility with Renovate's versioning API we will treat it as a float
    */
   protected _parse(version: string): GenericVersion {
     const matches = versionPattern.exec(version);
@@ -49,7 +49,7 @@ class PvpVersioningApi extends GenericVersioningApi {
 
   /**
    * Compare similar to GenericVersioningApi._compare implementation
-   * except 2.1.1.0 and 2.1.1 are not equivilant instead 2.1.1.0 > 2.1.1
+   * except 2.1.1.0 and 2.1.1 are not equivalent instead 2.1.1.0 > 2.1.1
    */
   override _compare(version: string, other: string): number {
     const left = this._parse(version);
