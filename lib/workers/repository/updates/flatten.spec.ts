@@ -144,40 +144,40 @@ describe('workers/repository/updates/flatten', () => {
       expect(res).toHaveLength(14);
       expect(
         res.filter((update) => update.sourceRepoSlug)[0].sourceRepoSlug
-      ).toEqual('org-repo');
-      expect(res.filter((update) => update.sourceRepo)[0].sourceRepo).toEqual(
+      ).toBe('org-repo');
+      expect(res.filter((update) => update.sourceRepo)[0].sourceRepo).toBe(
         'org/repo'
       );
       expect(
         res.filter((update) => update.sourceRepoOrg)[0].sourceRepoOrg
-      ).toEqual('org');
+      ).toBe('org');
       expect(
         res.filter((update) => update.sourceRepoName)[0].sourceRepoName
-      ).toEqual('repo');
+      ).toBe('repo');
       expect(
         res.filter((update) => update.sourceRepoSlug)[1].sourceRepoSlug
-      ).toEqual('org-repo');
-      expect(res.filter((update) => update.sourceRepo)[1].sourceRepo).toEqual(
+      ).toBe('org-repo');
+      expect(res.filter((update) => update.sourceRepo)[1].sourceRepo).toBe(
         'org/repo'
       );
       expect(
         res.filter((update) => update.sourceRepoOrg)[1].sourceRepoOrg
-      ).toEqual('org');
+      ).toBe('org');
       expect(
         res.filter((update) => update.sourceRepoName)[1].sourceRepoName
-      ).toEqual('repo');
+      ).toBe('repo');
       expect(
         res.filter((update) => update.sourceRepoSlug)[2].sourceRepoSlug
-      ).toEqual('nodejs-node');
-      expect(res.filter((update) => update.sourceRepo)[2].sourceRepo).toEqual(
+      ).toBe('nodejs-node');
+      expect(res.filter((update) => update.sourceRepo)[2].sourceRepo).toBe(
         'nodejs/node'
       );
       expect(
         res.filter((update) => update.sourceRepoOrg)[2].sourceRepoOrg
-      ).toEqual('nodejs');
+      ).toBe('nodejs');
       expect(
         res.filter((update) => update.sourceRepoName)[2].sourceRepoName
-      ).toEqual('node');
+      ).toBe('node');
       expect(
         res.filter((r) => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
