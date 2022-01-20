@@ -60,7 +60,7 @@ sidebar_label: ${displayName}
       const escapedDatasources = (supportedDatasources || [])
         .map(
           (datasource) =>
-            `[\`${datasource}\`](../datasource/#${datasource}-datasource)`
+            `[\`${datasource}\`](../../datasource/#${datasource}-datasource)`
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
