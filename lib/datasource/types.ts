@@ -12,7 +12,7 @@ export type GetDigestInputConfig = {
 
 export interface DigestConfig {
   lookupName: string;
-  registryUrl: string;
+  registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
 }

@@ -381,13 +381,14 @@ function getDigestConfig(
   datasource: DatasourceApi,
   config: GetDigestInputConfig
 ): DigestConfig {
-  const lookupName = config.lookupName ?? config.depName;
-  const [registryUrl = ''] = resolveRegistryUrls(
-    datasource,
-    config.registryUrls
-  );
   const { currentValue, currentDigest } = config;
-  return { registryUrl, lookupName, currentValue, currentDigest };
+  const lookupName = config.lookupName ?? config.depName;
+  const [registryUrl] = resolveRegistryUrls(datasource, config.registryUrls);
+  const result: DigestConfig = { lookupName, currentValue, currentDigest };
+  if (registryUrl) {
+    result.registryUrl = registryUrl;
+  }
+  return result;
 }
 
 export function getDigest(
