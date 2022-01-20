@@ -70,9 +70,9 @@ export function extractContraints(
 
   // extract php
   if (composerJson.config?.platform?.php) {
-    res.php = composerJson.config?.platform?.php;
+    res.php = composerJson.config.platform.php;
   } else if (composerJson.require?.php) {
-    res.php = composerJson.require?.php;
+    res.php = composerJson.require.php;
   }
 
   // extract direct composer dependency
