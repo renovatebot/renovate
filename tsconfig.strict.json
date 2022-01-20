@@ -45,6 +45,7 @@
     "lib/types/**/*.ts",
     "lib/util/**/*.ts",
     "lib/versioning/gradle/**/*.ts",
+    "lib/versioning/cargo/**/*.ts",
     "lib/versioning/hex/**/*.ts",
     "lib/versioning/loose/**/*.ts",
     "lib/versioning/maven/**/*.ts",
