@@ -158,17 +158,76 @@ describe('util/http/host-rules', () => {
     `);
   });
 
+  it('no fallback to gitlab', () => {
+    hostRules.add({
+      hostType: 'gitlab-packages',
+      token: 'package-token',
+    });
+    hostRules.add({
+      hostType: 'gitlab-releases',
+      token: 'release-token',
+    });
+    hostRules.add({
+      hostType: 'gitlab-tags',
+      token: 'tags-token',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-tags' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-tags',
+      token: 'tags-token',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-releases' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-releases',
+      token: 'release-token',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-packages' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-packages',
+      token: 'package-token',
+    });
+  });
+
   it('fallback to gitlab', () => {
-    expect(applyHostRules(url, { ...options, hostType: 'gitlab-tags' }))
-      .toMatchInlineSnapshot(`
-      Object {
-        "context": Object {
-          "authType": undefined,
-        },
-        "hostType": "gitlab-tags",
-        "token": "abc",
-      }
-    `);
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-tags' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-tags',
+      token: 'abc',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-releases' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-releases',
+      token: 'abc',
+    });
+    expect(
+      applyHostRules(url, { ...options, hostType: 'gitlab-packages' })
+    ).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'gitlab-packages',
+      token: 'abc',
+    });
   });
 
   it('no fallback to bitbucket', () => {
