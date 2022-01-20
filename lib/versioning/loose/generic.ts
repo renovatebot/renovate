@@ -66,10 +66,6 @@ export abstract class GenericVersioningApi<
       return 1;
     }
 
-    return this._compareOther(left, right);
-  }
-
-  protected _compareOther(left: T, right: T): number {
     return (
       strCmp(left.prerelease, right.prerelease) ??
       strCmp(left.suffix, right.suffix) ??
