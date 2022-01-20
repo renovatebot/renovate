@@ -62,6 +62,25 @@
     },
     {
       "type": "node",
+      "request": "launch",
+      "name": "Jest Current Folder",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--runInBand",
+        "--collectCoverage=false",
+        "--testTimeout=100000000",
+        "--roots=${workspaceFolder}/${relativeFileDirname}"
+      ],
+      "console": "integratedTerminal",
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      },
+      "runtimeArgs": ["--preserve-symlinks"],
+      "protocol": "inspector",
+      "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "type": "node",
       "name": "vscode-jest-tests",
       "request": "launch",
       "console": "integratedTerminal",

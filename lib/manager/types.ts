@@ -246,6 +246,8 @@ export interface ManagerApi extends ModuleApi {
   language?: ProgrammingLanguage;
   supportsLockFileMaintenance?: boolean;
 
+  supportedDatasources: string[];
+
   bumpPackageVersion?(
     content: string,
     currentValue: string,

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import pAll from 'p-all';
-import parseLinkHeader from 'parse-link-header';
 import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -10,8 +10,11 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getCache } from '../../util/cache/repository';
 import { maskToken } from '../mask';
+import { range } from '../range';
 import { regEx } from '../regex';
+import { parseLinkHeader } from '../url';
 import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -179,6 +182,77 @@ function constructAcceptString(input?: any): string {
   return acceptStrings.join(', ');
 }
 
+const MAX_GRAPHQL_PAGE_SIZE = 100;
+
+function getGraphqlPageSize(
+  fieldName: string,
+  defaultPageSize = MAX_GRAPHQL_PAGE_SIZE
+): number {
+  const cache = getCache();
+  const graphqlPageCache = cache?.platform?.github?.graphqlPageCache;
+  const cachedRecord = graphqlPageCache?.[fieldName];
+
+  if (graphqlPageCache && cachedRecord) {
+    logger.debug(
+      { fieldName, ...cachedRecord },
+      'GraphQL page size: found cached value'
+    );
+
+    const oldPageSize = cachedRecord.pageSize;
+
+    const now = DateTime.local();
+    const then = DateTime.fromISO(cachedRecord.pageLastResizedAt);
+    const expiry = then.plus({ hours: 24 });
+    if (now > expiry) {
+      const newPageSize = Math.min(oldPageSize * 2, MAX_GRAPHQL_PAGE_SIZE);
+      if (newPageSize < MAX_GRAPHQL_PAGE_SIZE) {
+        const timestamp = now.toISO();
+
+        logger.debug(
+          { fieldName, oldPageSize, newPageSize, timestamp },
+          'GraphQL page size: expanding'
+        );
+
+        cachedRecord.pageLastResizedAt = timestamp;
+        cachedRecord.pageSize = newPageSize;
+      } else {
+        logger.debug(
+          { fieldName, oldPageSize, newPageSize },
+          'GraphQL page size: expanded to default page size'
+        );
+
+        delete graphqlPageCache[fieldName];
+      }
+
+      return newPageSize;
+    }
+
+    return oldPageSize;
+  }
+
+  return defaultPageSize;
+}
+
+function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
+  const oldPageSize = getGraphqlPageSize(fieldName);
+  if (newPageSize !== oldPageSize) {
+    const now = DateTime.local();
+    const pageLastResizedAt = now.toISO();
+    logger.debug(
+      { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
+      'GraphQL page size: shrinking'
+    );
+    const cache = getCache();
+    cache.platform ??= {};
+    cache.platform.github ??= {};
+    cache.platform.github.graphqlPageCache ??= {};
+    cache.platform.github.graphqlPageCache[fieldName] = {
+      pageLastResizedAt,
+      pageSize: newPageSize,
+    };
+  }
+}
+
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   constructor(
     hostType: string = PlatformId.Github,
@@ -210,24 +284,17 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       if (opts.paginate) {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
-        const linkHeader =
-          result?.headers?.link &&
-          parseLinkHeader(result.headers.link as string);
+        const linkHeader = parseLinkHeader(result?.headers?.link);
         if (linkHeader?.next && linkHeader?.last) {
-          let lastPage = +linkHeader.last.page;
+          let lastPage = parseInt(linkHeader.last.page, 10);
           // istanbul ignore else: needs a test
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
-          const pageNumbers = Array.from(
-            new Array(lastPage),
-            (x, i) => i + 1
-          ).slice(1);
-          const queue = pageNumbers.map(
-            (page) => (): Promise<HttpResponse<T>> => {
+          const queue = [...range(2, lastPage)].map(
+            (pageNumber) => (): Promise<HttpResponse<T>> => {
               const nextUrl = new URL(linkHeader.next.url, baseUrl);
-              nextUrl.search = '';
-              nextUrl.searchParams.set('page', page.toString());
+              nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
                 { ...opts, paginate: false },
@@ -269,7 +336,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   ): Promise<GithubGraphqlResponse<T> | null> {
     const path = 'graphql';
 
-    const { paginate, count = 100, cursor = null } = options;
+    const { paginate, count = MAX_GRAPHQL_PAGE_SIZE, cursor = null } = options;
     let { variables } = options;
     if (paginate) {
       variables = {
@@ -314,8 +381,10 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const { paginate = true } = options;
 
     let optimalCount: null | number = null;
-    const initialCount = options.count ?? 100;
-    let count = initialCount;
+    let count = getGraphqlPageSize(
+      fieldName,
+      options.count ?? MAX_GRAPHQL_PAGE_SIZE
+    );
     let limit = options.limit ?? 1000;
     let cursor: string | null = null;
 
@@ -368,17 +437,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       }
     }
 
-    // See: https://github.com/renovatebot/renovate/issues/12703
-    // istanbul ignore if
-    if (
-      optimalCount &&
-      optimalCount < initialCount && // log only shrinked results
-      baseUrl === githubBaseUrl
-    ) {
-      logger.debug(
-        { fieldName, optimalCount },
-        'Successful GraphQL query with shrinked pagination size'
-      );
+    if (optimalCount && optimalCount < MAX_GRAPHQL_PAGE_SIZE) {
+      setGraphqlPageSize(fieldName, optimalCount);
     }
 
     return result;

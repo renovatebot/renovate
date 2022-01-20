@@ -452,35 +452,6 @@ describe('config/migration', () => {
       });
       expect(isMigrated).toBeTrue();
     });
-    it('it migrates semanticCommits', () => {
-      let config: TestRenovateConfig;
-      let res: MigratedConfig;
-
-      config = { semanticCommits: true as never };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
-
-      config = { semanticCommits: false as never };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
-
-      config = { semanticCommits: null as never };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'auto' });
-
-      config = { semanticCommits: 'enabled' };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeFalse();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
-
-      config = { semanticCommits: 'disabled' };
-      res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBeFalse();
-      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
-    });
 
     it('it migrates preset strings to array', () => {
       let config: TestRenovateConfig;
