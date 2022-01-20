@@ -48,8 +48,7 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
       ); // remove leading slash
       updateConfig.sourceRepoOrg = updateConfig.sourceRepo
         .replace(regEx(/\/.*/g), ''); // remove everything after first slash
-      updateConfig.sourceRepoName = parsedSourceUrl.pathname
-        .replace(regEx(/^\//), '') // remove leading slash
+      updateConfig.sourceRepoName = updateConfig.sourceRepo
         .replace(regEx(/.*\//g), ''); // remove everything up to the last slash
     }
   }
