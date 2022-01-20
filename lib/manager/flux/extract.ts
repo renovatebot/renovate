@@ -95,10 +95,23 @@ export async function extractAllPackageFiles(
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    const manifest = readManifest(content);
-    if (manifest) {
-      releases.set(file, manifest.releases);
-      repositories.push(...manifest.repositories);
+    if (file.endsWith('/flux-system/gotk-components.yaml')) {
+      results.push({
+        packageFile: file,
+        deps: [
+          {
+            depName: 'fluxcd/flux2',
+            currentValue: content.match(/#\s*Flux\s+Version:\s*(\S+)/)[1],
+          },
+        ],
+        datasource: 'github-releases',
+      });
+    } else {
+      const manifest = readManifest(content);
+      if (manifest) {
+        releases.set(file, manifest.releases);
+        repositories.push(...manifest.repositories);
+      }
     }
   }
 
