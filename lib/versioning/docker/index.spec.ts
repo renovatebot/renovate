@@ -60,7 +60,7 @@ describe('versioning/docker/index', () => {
   `(
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
-      expect(docker.isLessThanRange(version, range)).toBe(expected);
+      expect(docker.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 
@@ -205,7 +205,7 @@ describe('versioning/docker/index', () => {
     ${'3.8.2'}          | ${'3.8.2'}
     ${undefined}        | ${undefined}
   `('valueToVersion("$value") === $expected', ({ value, expected }) => {
-    const res = docker.valueToVersion(value);
+    const res = docker.valueToVersion?.(value);
     expect(res).toBe(expected);
   });
 });

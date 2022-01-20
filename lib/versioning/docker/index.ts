@@ -22,8 +22,8 @@ class DockerVersioningApi extends GenericVersioningApi {
       return null;
     }
     const versionPieces = version.replace(regEx(/^v/), '').split('-');
-    const prefix = versionPieces.shift();
-    const suffix = versionPieces.join('-');
+    const prefix = versionPieces[0];
+    const suffix = versionPieces.slice(1).join('-');
     const m = versionPattern.exec(prefix);
     if (!m?.groups) {
       return null;
@@ -56,7 +56,11 @@ class DockerVersioningApi extends GenericVersioningApi {
         return part1 - part2;
       }
     }
-    if (parsed1.prerelease !== parsed2.prerelease) {
+    if (
+      parsed1.prerelease &&
+      parsed2.prerelease &&
+      parsed1.prerelease !== parsed2.prerelease
+    ) {
       // unstable is lower
       if (!parsed1.prerelease && parsed2.prerelease) {
         return 1;
