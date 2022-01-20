@@ -392,10 +392,6 @@ export function getDigest(
   value?: string
 ): Promise<string | null> {
   const datasource = getDatasourceFor(config.datasource);
-  if (!datasource) {
-    return null;
-  }
-
   const digestConfig = getDigestConfig(datasource, config);
   return datasource.getDigest(digestConfig, value);
 }
