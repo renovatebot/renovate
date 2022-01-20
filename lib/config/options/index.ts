@@ -1378,7 +1378,7 @@ const options: RenovateOptions[] = [
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
   },
   // Automatic merging
   {
