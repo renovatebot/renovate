@@ -48,7 +48,9 @@ export class GolangVersionDatasource extends Datasource {
 
     const startOfReleases = lines.indexOf('var Releases = []*Release{');
     if (startOfReleases === -1) {
-      throw new Error('Invalid file - could not find the Releases section');
+      throw new ExternalHostError(
+        new Error('Invalid file - could not find the Releases section')
+      );
     }
 
     // Remove part before releases
@@ -61,13 +63,15 @@ export class GolangVersionDatasource extends Datasource {
 
       if (line === releaseBeginningChar) {
         if (release.version !== undefined) {
-          throw new Error(
-            'Invalid file - unexpected error while parsing a release'
+          throw new ExternalHostError(
+            new Error('Invalid file - unexpected error while parsing a release')
           );
         }
       } else if (line === releaseTerminationChar) {
         if (release.version === undefined) {
-          throw new Error('Invalid file - release has empty version');
+          throw new ExternalHostError(
+            new Error('Invalid file - release has empty version')
+          );
         }
         res.releases.push(release);
         release = { version: undefined };
@@ -85,7 +89,9 @@ export class GolangVersionDatasource extends Datasource {
           release.version = `${releaseVersionMatch.groups.versionMajor}.${releaseVersionMatch.groups.versionMinor}.${releaseVersionMatch.groups.patch}`;
           // istanbul ignore if
           if (!isVersion(release.version)) {
-            throw new Error(`Version ${release.version} is not a valid semver`);
+            throw new ExternalHostError(
+              new Error(`Version ${release.version} is not a valid semver`)
+            );
           }
         }
       }

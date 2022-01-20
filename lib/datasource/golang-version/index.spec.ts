@@ -25,38 +25,40 @@ describe('datasource/golang-version/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('returns null for invalid release with no versions', async () => {
+    it('throws ExternalHostError for invalid release with no versions', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/master/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent);
-      const res = await getPkgReleases({
-        datasource,
-        depName: 'golang',
-      });
-      expect(res).toBeNull();
+      await expect(
+        getPkgReleases({
+          datasource,
+          depName: 'golang',
+        })
+      ).rejects.toThrow(ExternalHostError);
     });
 
-    it('returns null for invalid release with wrong termination', async () => {
+    it('throws ExternalHostError for invalid release with wrong termination', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/master/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent2);
-      const res = await getPkgReleases({
-        datasource,
-        depName: 'golang',
-      });
-      expect(res).toBeNull();
+      await expect(
+        getPkgReleases({
+          datasource,
+          depName: 'golang',
+        })
+      ).rejects.toThrow(ExternalHostError);
     });
 
-    it('returns null for empty result', async () => {
+    it('throws ExternalHostError for empty result', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/master/internal/history/release.go')
         .reply(200, {});
-      expect(
-        await getPkgReleases({ datasource, depName: 'golang' })
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, depName: 'golang' })
+      ).rejects.toThrow(ExternalHostError);
     });
 
     it('throws ExternalHostError for zero releases extracted', async () => {
