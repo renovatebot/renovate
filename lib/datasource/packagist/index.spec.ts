@@ -3,8 +3,9 @@ import * as httpMock from '../../../test/http-mock';
 import { loadJsonFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
-import { id as versioning } from '../../versioning/composer';
 import { id as datasource } from '.';
+
+const versioning = composerVersioning.id;
 
 jest.mock('../../util/host-rules');
 
@@ -24,7 +25,7 @@ describe('datasource/packagist/index', () => {
       hostRules.find = jest.fn((input) => input);
       hostRules.hosts = jest.fn(() => []);
       config = {
-        versioning: composerVersioning.id,
+        versioning,
         registryUrls: [
           'https://composer.renovatebot.com',
           'https://packagist.org',
