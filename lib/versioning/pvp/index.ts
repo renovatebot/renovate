@@ -9,47 +9,29 @@ export const supportsRanges = false;
 
 /**
  * At least 3 components and no leading 0s
+ * https://pvp.haskell.org/#version-number
  */
-const regex = regEx(/^(([0-9])|([1-9][0-9]*)\.){2,}([0-9])|([1-9][0-9]]*)$/);
+const versionPattern = regEx(
+  /^((([0-9])|([1-9][0-9]*))\.){2,}(([0-9])|([1-9][0-9]*))$/
+);
+
 class PvpVersioningApi extends GenericVersioningApi {
   /**
-   *  https://pvp.haskell.org/#version-numbers
+   * PVP has two major components A.B
+   * To keep compatability with Renovate's versioning API we will treat it as a float
    */
   protected _parse(version: string): GenericVersion {
-    const [a, b, c, ...rest] = version.split('.');
-    const a_ = parseInt(a);
-    const b_ = parseInt(b);
-    const c_ = parseInt(c);
-    console.log(c_);
-    const additional = rest ?? [];
-
-    if (isNaN(a) || isNaN(b_) || isNaN(c_)) {
+    const matches = versionPattern.exec(version);
+    if (!matches) {
       return null;
     }
 
-    const additional_: number[] = [];
-    for (const ele of additional) {
-      const ele_ = parseInt(ele);
-      if (isNaN(ele_)) {
-        //throwInvalidVersionError(version);
-        return null; // TODO exit loop
-      } else {
-        additional_.push(ele_);
-      }
-    }
-
-    if (anyElementHasLeadingZero([a, b, c, ...additional].flat())) {
-      //throwInvalidVersionError(version);
-      return null;
-    }
-
-    return {
-      release: [a_, b_, c_, ...additional_],
-    };
+    const components = version.split('.');
+    const major = parseFloat(`${components[0]}.${components[1]}`);
+    const rest = components.slice(2).map((i) => parseInt(i));
+    return { release: [major, ...rest] };
   }
 
-  // PVP has two major components A.B
-  // To keep compatability with Renovate's versioning API we will treat it as a float
   override getMajor(version: string): number | null {
     const { release } = this._parse(version);
     return parseFloat(`${release[0]}.${release[1]}`);
@@ -92,20 +74,6 @@ class PvpVersioningApi extends GenericVersioningApi {
     return 0;
   }
 }
-
-const hasLeadingZero = (str: string): boolean =>
-  str.length > 1 && str.startsWith('0');
-
-const anyElementHasLeadingZero = (strings: string[]): boolean => {
-  const bools = strings.map((str) => hasLeadingZero(str));
-  return bools.includes(true);
-};
-
-const throwInvalidVersionError = (version: string): void => {
-  throw new Error(
-    `${version} is not a valid version. See https://pvp.haskell.org.`
-  );
-};
 
 export const api: VersioningApi = new PvpVersioningApi();
 
