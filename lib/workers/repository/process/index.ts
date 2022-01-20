@@ -26,7 +26,7 @@ async function getBaseBranchConfig(
   ) {
     logger.debug(
       { baseBranch },
-      `Using config from base branch because useBaseBranchConfig option specified`
+      `Merging config from base branch because useBaseBranchConfig=merge`
     );
 
     // Retrieve config file name autodetected for this repo
@@ -53,6 +53,7 @@ async function getBaseBranchConfig(
     }
 
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
+    // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranches = config.baseBranches;
   }
 
