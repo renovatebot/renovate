@@ -84,9 +84,13 @@ async function getDockerApiTags(
       });
     } catch (err) {
       if (isECRMaxResultsError(err)) {
+        if (page !== 1) {
+          throw err;
+        }
         const maxResults = 1000;
         url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
         url = ensurePathPrefix(url, '/v2');
+        page += 1;
         continue;
       }
       throw err;

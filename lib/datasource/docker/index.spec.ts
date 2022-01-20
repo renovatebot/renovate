@@ -517,9 +517,7 @@ describe('datasource/docker/index', () => {
         depName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
       };
-      await expect(getPkgReleases(config)).rejects.toThrow(
-        'external-host-error'
-      );
+      await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('uses lower tag limit for ECR deps', async () => {
@@ -598,6 +596,37 @@ describe('datasource/docker/index', () => {
         releases: [],
         sourceUrl: 'https://github.com/renovatebot/renovate',
       });
+    });
+
+    it('returns null when it receives ECR max results error more than once', async () => {
+      const maxResultsErrorBody = {
+        errors: [
+          {
+            code: 'UNSUPPORTED',
+            message:
+              "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+          },
+        ],
+      };
+
+      httpMock
+        .scope('https://ecr-proxy.company.com/v2')
+        .get('/')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(405, maxResultsErrorBody, {
+          'Docker-Distribution-Api-Version': 'registry/2.0',
+        })
+        .get('/node/tags/list?n=1000')
+        .reply(405, maxResultsErrorBody, {
+          'Docker-Distribution-Api-Version': 'registry/2.0',
+        });
+      expect(
+        await getPkgReleases({
+          datasource: id,
+          depName: 'ecr-proxy.company.com/node',
+        })
+      ).toBeNull();
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
