@@ -28,7 +28,8 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() ope
 This repository currently has no open or pending branches.
 
 ---
-And this is a footer"
+And this is a footer
+"
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when rules contain approvals 1`] = `
@@ -37,7 +38,8 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() ope
 This repository currently has no open or pending branches.
 
 ---
-And this is a footer for repository:test"
+And this is a footer for repository:test
+"
 `;
 
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() rechecks branches 1`] = `

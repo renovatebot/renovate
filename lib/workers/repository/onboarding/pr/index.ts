@@ -108,7 +108,7 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
   if (is.string(config.prFooter)) {
-    prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}`;
+    prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
   logger.trace('prBody:\n' + prBody);
 

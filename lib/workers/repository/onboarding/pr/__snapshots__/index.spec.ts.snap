@@ -26,6 +26,7 @@ If you need any further assistance then you can also [request help here](https:/
 
 ---
 
+
 "
 `;
 
@@ -55,5 +56,6 @@ If you need any further assistance then you can also [request help here](https:/
 
 ---
 
-And this is a footer for repository:test baseBranch:some-branch"
+And this is a footer for repository:test baseBranch:some-branch
+"
 `;

@@ -315,7 +315,9 @@ export async function ensureDependencyDashboard(
 
   if (config.dependencyDashboardFooter?.length) {
     issueBody +=
-      '---\n' + template.compile(config.dependencyDashboardFooter, config);
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
   }
 
   if (config.dependencyDashboardIssue) {
