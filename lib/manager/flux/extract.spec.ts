@@ -15,28 +15,49 @@ describe('manager/flux/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('extracts multiple resources', () => {
-      const result = extractPackageFile(loadFixture('multidoc.yaml'));
+      const result = extractPackageFile(
+        loadFixture('multidoc.yaml'),
+        'multidoc.yaml'
+      );
       expect(result).toEqual({
-        datasource: 'helm',
         deps: [
           {
             currentValue: '1.7.0',
+            datasource: 'helm',
             depName: 'external-dns',
             registryUrls: ['https://kubernetes-sigs.github.io/external-dns/'],
           },
         ],
       });
     });
+    it('extracts version from system manifests', () => {
+      const result = extractPackageFile(
+        loadFixture('system.yaml'),
+        'clusters/my-cluster/flux-system/gotk-components.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v0.24.1',
+            datasource: 'github-releases',
+            depName: 'fluxcd/flux2',
+          },
+        ],
+      });
+    });
     it('extracts releases without repositories', () => {
-      const result = extractPackageFile(loadFixture('release.yaml'));
+      const result = extractPackageFile(
+        loadFixture('release.yaml'),
+        'release.yaml'
+      );
       expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
     });
     it('ignores HelmRelease resources without an apiVersion', () => {
-      const result = extractPackageFile('kind: HelmRelease');
+      const result = extractPackageFile('kind: HelmRelease', 'test.yaml');
       expect(result).toBeNull();
     });
     it('ignores HelmRepository resources without an apiVersion', () => {
-      const result = extractPackageFile('kind: HelmRepository');
+      const result = extractPackageFile('kind: HelmRepository', 'test.yaml');
       expect(result).toBeNull();
     });
     it('ignores HelmRepository resources without metadata', () => {
@@ -45,7 +66,8 @@ describe('manager/flux/extract', () => {
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
-`
+`,
+        'test.yaml'
       );
       expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
     });
@@ -63,7 +85,8 @@ spec:
         kind: HelmRepository
         name: sealed-secrets
       version: "2.0.2"
-`
+`,
+        'test.yaml'
       );
       expect(result).toBeNull();
     });
@@ -86,7 +109,8 @@ spec:
         kind: HelmRepository
         name: sealed-secrets
       version: "2.0.2"
-`
+`,
+        'test.yaml'
       );
       expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
     });
@@ -103,7 +127,8 @@ spec:
     spec:
       chart: sealed-secrets
       version: "2.0.2"
-`
+`,
+        'test.yaml'
       );
       expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
     });
@@ -121,7 +146,8 @@ spec:
         kind: HelmRepository
         name: sealed-secrets
       version: "2.0.2"
-`
+`,
+        'test.yaml'
       );
       expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
     });
@@ -133,7 +159,8 @@ apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 metadata:
   name: test
-`
+`,
+        'test.yaml'
       );
       expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
     });
@@ -146,29 +173,32 @@ kind: HelmRepository
 metadata:
   name: sealed-secrets
   namespace: kube-system
-`
+`,
+        'test.yaml'
       );
       expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
     });
     it('ignores resources of an unknown kind', () => {
       const result = extractPackageFile(
         `kind: SomethingElse
-apiVersion: helm.toolkit.fluxcd.io/v2beta1`
+apiVersion: helm.toolkit.fluxcd.io/v2beta1`,
+        'test.yaml'
       );
       expect(result).toBeNull();
     });
     it('ignores resources without a kind', () => {
       const result = extractPackageFile(
-        'apiVersion: helm.toolkit.fluxcd.io/v2beta1'
+        'apiVersion: helm.toolkit.fluxcd.io/v2beta1',
+        'test.yaml'
       );
       expect(result).toBeNull();
     });
     it('ignores bad manifests', () => {
-      const result = extractPackageFile('"bad YAML');
+      const result = extractPackageFile('"bad YAML', 'test.yaml');
       expect(result).toBeNull();
     });
     it('ignores null resources', () => {
-      const result = extractPackageFile('null');
+      const result = extractPackageFile('null', 'test.yaml');
       expect(result).toBeNull();
     });
   });
@@ -181,11 +211,11 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1`
       ]);
       expect(result).toEqual([
         {
-          datasource: 'helm',
           deps: [
             {
-              depName: 'sealed-secrets',
               currentValue: '2.0.2',
+              datasource: 'helm',
+              depName: 'sealed-secrets',
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],
