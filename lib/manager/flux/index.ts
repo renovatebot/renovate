@@ -1,3 +1,4 @@
+import { id as GithubReleasesId } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
@@ -10,7 +11,7 @@ export const defaultConfig = {
   fileMatch: [],
 };
 
-export const supportedDatasources = [HelmDatasource.id];
+export const supportedDatasources = [GithubReleasesId, HelmDatasource.id];
 
 export async function updateDependency({
   upgrade,

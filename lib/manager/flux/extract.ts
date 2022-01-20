@@ -1,4 +1,5 @@
 import { loadAll } from 'js-yaml';
+import { id as GithubReleasesId } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -104,7 +105,7 @@ export async function extractAllPackageFiles(
             currentValue: content.match(/#\s*Flux\s+Version:\s*(\S+)/)[1],
           },
         ],
-        datasource: 'github-releases',
+        datasource: GithubReleasesId,
       });
     } else {
       const manifest = readManifest(content);
