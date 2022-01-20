@@ -23,5 +23,13 @@ Array [
     "datasource": "git-tags",
     "depName": "https://git.example.com/foo/bar.git",
   },
+  Object {
+    "currentValue": "v1.2.0",
+    "datasource": "docker",
+    "depName": "some/image",
+    "registryUrls": Array [
+      "somecontainer.registry.io",
+    ],
+  },
 ]
 `;

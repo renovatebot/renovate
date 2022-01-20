@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
+import { id } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -21,12 +22,21 @@ function createDependency(
 
   // a chart variable is defined this is helm declaration
   if (source.chart) {
-    return {
-      depName: source.chart,
-      registryUrls: [source.repoURL],
-      currentValue: source.targetRevision,
-      datasource: HelmDatasource.id,
-    };
+    if (source.repoURL.includes('://')) {
+      return {
+        depName: source.chart,
+        registryUrls: [source.repoURL],
+        currentValue: source.targetRevision,
+        datasource: HelmDatasource.id,
+      };
+    } else {
+      return {
+        depName: source.chart,
+        registryUrls: [source.repoURL],
+        currentValue: source.targetRevision,
+        datasource: id,
+      };
+    }
   }
   return {
     depName: source.repoURL,

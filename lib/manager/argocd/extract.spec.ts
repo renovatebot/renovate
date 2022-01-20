@@ -27,7 +27,7 @@ describe('manager/argocd/extract', () => {
     it('full test', () => {
       const result = extractPackageFile(validApplication, 'applications.yml');
       expect(result).not.toBeNull();
-      expect(result.deps).toBeArrayOfSize(3);
+      expect(result.deps).toBeArrayOfSize(4);
       expect(result.deps).toMatchSnapshot();
     });
   });

@@ -43,3 +43,11 @@ kind: Application
 spec:
   target:
     namespace: testing
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    repoURL: somecontainer.registry.io
+    targetRevision: v1.2.0
+    chart: some/image
