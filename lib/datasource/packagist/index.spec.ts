@@ -3,7 +3,7 @@ import * as httpMock from '../../../test/http-mock';
 import { loadJsonFixture } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
-import { id as versioning } from '../../versioning/loose';
+import { id as versioning } from '../../versioning/composer';
 import { id as datasource } from '.';
 
 jest.mock('../../util/host-rules');

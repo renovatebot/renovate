@@ -25,37 +25,7 @@ class LooseVersioningApi extends GenericVersioningApi {
     if (release.length > 6) {
       return null;
     }
-    return { release, suffix: suffix || '' };
-  }
-
-  protected override _compare(version: string, other: string): number {
-    const parsed1 = this._parse(version);
-    const parsed2 = this._parse(other);
-    // istanbul ignore if
-    if (!(parsed1 && parsed2)) {
-      return 1;
-    }
-    const length = Math.max(parsed1.release.length, parsed2.release.length);
-    for (let i = 0; i < length; i += 1) {
-      const part1 = parsed1.release[i];
-      const part2 = parsed2.release[i];
-      // shorter is smaller 2.1 < 2.1.0
-      if (part1 === undefined) {
-        return -1;
-      }
-      if (part2 === undefined) {
-        return 1;
-      }
-      if (part1 !== part2) {
-        return part1 - part2;
-      }
-    }
-    // istanbul ignore if
-    if (!(parsed1.suffix && parsed2.suffix)) {
-      return 1;
-    }
-    // equals
-    return parsed1.suffix.localeCompare(parsed2.suffix);
+    return { release, suffix: suffix ?? '' };
   }
 }
 

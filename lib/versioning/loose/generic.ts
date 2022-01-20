@@ -15,16 +15,26 @@ export interface VersionComparator {
   (version: string, other: string): number;
 }
 
+function strCmp(
+  left: string | undefined,
+  right: string | undefined
+): number | null {
+  if (is.nonEmptyString(left) && is.nonEmptyString(right)) {
+    return left.localeCompare(right);
+  } else if (is.nonEmptyString(left)) {
+    return -1;
+  } else if (is.nonEmptyString(right)) {
+    return 1;
+  }
+
+  return null;
+}
+
 export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion
 > implements VersioningApi
 {
-  private _getSection(version: string, index: number): number | null {
-    const parsed = this._parse(version);
-    return parsed && parsed.release.length > index
-      ? parsed.release[index]
-      : null;
-  }
+  protected abstract _parse(version: string): T | null;
 
   protected _compare(version: string, other: string): number {
     const left = this._parse(version);
@@ -46,33 +56,23 @@ export abstract class GenericVersioningApi<
       }
     }
 
-    if (
-      is.nonEmptyString(left.prerelease) &&
-      is.nonEmptyString(right.prerelease)
-    ) {
-      const pre = left.prerelease.localeCompare(right.prerelease);
-
-      if (pre !== 0) {
-        return pre;
-      }
-    } else if (is.nonEmptyString(left.prerelease)) {
-      return -1;
-    } else if (is.nonEmptyString(right.prerelease)) {
-      return 1;
-    }
-
-    return this._compareOther(left, right);
+    return (
+      strCmp(left.prerelease, right.prerelease) ??
+      strCmp(left.suffix, right.suffix) ??
+      0
+    );
   }
-
-  /*
-   * virtual
-   */
 
   protected _compareOther(_left: T, _right: T): number {
     return 0;
   }
 
-  protected abstract _parse(version: string): T | null;
+  private _getSection(version: string, index: number): number | null {
+    const parsed = this._parse(version);
+    return parsed && parsed.release.length > index
+      ? parsed.release[index]
+      : null;
+  }
 
   isValid(version: string): boolean {
     return this._parse(version) !== null;

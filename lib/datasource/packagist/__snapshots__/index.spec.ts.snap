@@ -555,10 +555,6 @@ Object {
       "version": "0.0.1",
     },
     Object {
-      "gitRef": "1.0.x-dev",
-      "version": "1.0.x-dev",
-    },
-    Object {
       "gitRef": "1.0.0",
       "version": "1.0.0",
     },
