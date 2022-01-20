@@ -39,8 +39,8 @@ describe('versioning/loose/index', () => {
 
   test.each`
     a             | b              | expected
-    ${'2.4'}      | ${'2.4'}       | ${true}
-    ${'2.4.0'}    | ${'2.4'}       | ${false}
+    ${'2.4.0'}    | ${'2.4'}       | ${true}
+    ${'2.4'}      | ${'2.4.0'}     | ${true}
     ${'2.4.2'}    | ${'2.4.1'}     | ${false}
     ${'2.4.beta'} | ${'2.4.alpha'} | ${false}
     ${'1.9'}      | ${'2'}         | ${false}
@@ -51,8 +51,6 @@ describe('versioning/loose/index', () => {
 
   test.each`
     a              | b              | expected
-    ${'2.4.0'}     | ${'2.4'}       | ${true}
-    ${'2.4'}       | ${'2.4.0'}     | ${false}
     ${'2.4.2'}     | ${'2.4.1'}     | ${true}
     ${'2.4.alpha'} | ${'2.4'}       | ${false}
     ${'2.4'}       | ${'2.4.alpha'} | ${true}

@@ -58,19 +58,7 @@ export abstract class GenericVersioningApi<
       }
     }
 
-    const leftLength = left.release.length;
-    const rightLength = right.release.length;
-    if (leftLength < rightLength) {
-      return -1;
-    } else if (leftLength > rightLength) {
-      return 1;
-    }
-
-    return (
-      strCmp(left.prerelease, right.prerelease) ??
-      strCmp(left.suffix, right.suffix) ??
-      0
-    );
+    return strCmp(left.prerelease, right.prerelease) ?? 0;
   }
 
   private _getSection(version: string, index: number): number | null {

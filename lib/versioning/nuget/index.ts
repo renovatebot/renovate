@@ -10,7 +10,9 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const pattern = regEx(/^(\d+(?:\.\d+)*)(-[^+]+)?(\+.*)?$/);
+const pattern = regEx(
+  /^(?<prefix>\d+(?:\.\d+)*)(?<prerelease>-[^+]+)?(?<suffix>\+.*)?$/
+);
 
 class NugetVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion {
@@ -18,7 +20,7 @@ class NugetVersioningApi extends GenericVersioningApi {
     if (!matches) {
       return null;
     }
-    const [, prefix, prerelease] = matches;
+    const { prefix, prerelease } = matches.groups;
     const release = prefix.split('.').map(Number);
     return { release, prerelease: prerelease || '' };
   }
@@ -27,10 +29,11 @@ class NugetVersioningApi extends GenericVersioningApi {
     const parsed1 = semver.parse(version);
     const parsed2 = semver.parse(other);
 
-    if (!(parsed1 && parsed2)) {
-      return super._compare(version, other);
+    if (parsed1 && parsed2) {
+      return parsed1.compare(parsed2);
     }
-    return parsed1.compare(parsed2);
+
+    return super._compare(version, other);
   }
 }
 

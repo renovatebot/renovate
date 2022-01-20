@@ -20,12 +20,12 @@ class LooseVersioningApi extends GenericVersioningApi {
     if (!matches) {
       return null;
     }
-    const [, prefix, suffix] = matches;
+    const [, prefix, prerelease] = matches;
     const release = prefix.split('.').map(Number);
     if (release.length > 6) {
       return null;
     }
-    return { release, suffix: suffix ?? '' };
+    return { release, prerelease: prerelease ?? '' };
   }
 }
 
