@@ -1,14 +1,13 @@
 import type { ModuleApi } from '../types';
 
-export type GetDigestInputConfig = {
+export interface GetDigestInputConfig {
   datasource?: string;
+  lookupName?: string;
+  depName: string;
   registryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
-} & (
-  | { lookupName: string; depName?: string }
-  | { lookupName?: string; depName: string }
-);
+}
 
 export interface DigestConfig {
   lookupName: string;

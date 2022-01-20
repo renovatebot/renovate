@@ -73,14 +73,14 @@ describe('datasource/github-releases/index', () => {
   });
 
   describe('getDigest', () => {
-    const lookupName = 'some/dep';
+    const depName = 'some/dep';
     const currentValue = 'v1.0.0';
     const currentDigest = 'v1.0.0-digest';
 
-    const releaseMock = new GitHubReleaseMocker(githubApiHost, lookupName);
+    const releaseMock = new GitHubReleaseMocker(githubApiHost, depName);
 
     it('requires currentDigest', async () => {
-      const digest = await getDigest({ datasource, lookupName }, currentValue);
+      const digest = await getDigest({ datasource, depName }, currentValue);
       expect(digest).toBeNull();
     });
 
@@ -88,7 +88,7 @@ describe('datasource/github-releases/index', () => {
       const digest = await getDigest(
         {
           datasource,
-          lookupName,
+          depName,
           currentDigest,
         },
         currentValue
@@ -107,7 +107,7 @@ describe('datasource/github-releases/index', () => {
       const digest = await getDigest(
         {
           datasource,
-          lookupName,
+          depName,
           currentValue,
           currentDigest,
         },
@@ -123,7 +123,7 @@ describe('datasource/github-releases/index', () => {
       const digest = await getDigest(
         {
           datasource,
-          lookupName,
+          depName,
           currentValue,
           currentDigest,
         },
