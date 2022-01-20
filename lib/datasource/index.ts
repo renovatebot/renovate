@@ -384,11 +384,7 @@ function getDigestConfig(
   const { currentValue, currentDigest } = config;
   const lookupName = config.lookupName ?? config.depName;
   const [registryUrl] = resolveRegistryUrls(datasource, config.registryUrls);
-  const result: DigestConfig = { lookupName, currentValue, currentDigest };
-  if (registryUrl) {
-    result.registryUrl = registryUrl;
-  }
-  return result;
+  return { lookupName, registryUrl, currentValue, currentDigest };
 }
 
 export function getDigest(
