@@ -38,6 +38,18 @@ describe('versioning/loose/index', () => {
   });
 
   test.each`
+    a             | b              | expected
+    ${'2.4'}      | ${'2.4'}       | ${true}
+    ${'2.4.0'}    | ${'2.4'}       | ${false}
+    ${'2.4.2'}    | ${'2.4.1'}     | ${false}
+    ${'2.4.beta'} | ${'2.4.alpha'} | ${false}
+    ${'1.9'}      | ${'2'}         | ${false}
+    ${'1.9'}      | ${'1.9.1'}     | ${false}
+  `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
+    expect(loose.equals(a, b)).toBe(expected);
+  });
+
+  test.each`
     a              | b              | expected
     ${'2.4.0'}     | ${'2.4'}       | ${true}
     ${'2.4'}       | ${'2.4.0'}     | ${false}
@@ -49,18 +61,6 @@ describe('versioning/loose/index', () => {
     ${'1.9'}       | ${'1.9.1'}     | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(loose.isGreaterThan(a, b)).toBe(expected);
-  });
-
-  test.each`
-    a             | b              | expected
-    ${'2.4'}      | ${'2.4'}       | ${true}
-    ${'2.4.0'}    | ${'2.4'}       | ${false}
-    ${'2.4.2'}    | ${'2.4.1'}     | ${false}
-    ${'2.4.beta'} | ${'2.4.alpha'} | ${false}
-    ${'1.9'}      | ${'2'}         | ${false}
-    ${'1.9'}      | ${'1.9.1'}     | ${false}
-  `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
-    expect(loose.equals(a, b)).toBe(expected);
   });
 
   test.each`
