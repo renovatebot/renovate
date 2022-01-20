@@ -173,8 +173,16 @@ function getNewValue({
     newValue = `${operator}${toMajor}`;
   } else if (regEx(/^[~^]([0-9]*(?:\.[0-9]*)?)$/).test(currentValue)) {
     const operator = currentValue.substr(0, 1);
+    const currentVersionMajor = currentVersion
+      ? getMajor(currentVersion)
+      : null;
     // handle ~4.1 case
-    if (currentVersion && toMajor > getMajor(currentVersion)) {
+    if (
+      currentVersion &&
+      toMajor &&
+      currentVersionMajor &&
+      toMajor > currentVersionMajor
+    ) {
       newValue = `${operator}${toMajor}.0`;
     } else {
       newValue = `${operator}${toMajor}.${toMinor}`;
@@ -184,10 +192,13 @@ function getNewValue({
     npm.isValid(normalizeVersion(currentValue)) &&
     composer2npm(currentValue) === normalizeVersion(currentValue)
   ) {
+    const normalizedCurrentVersion = currentVersion
+      ? normalizeVersion(currentVersion)
+      : currentVersion;
     newValue = npm.getNewValue({
       currentValue: normalizeVersion(currentValue),
       rangeStrategy,
-      currentVersion: normalizeVersion(currentVersion),
+      currentVersion: normalizedCurrentVersion,
       newVersion: padZeroes(normalizeVersion(newVersion)),
     });
   }
@@ -198,7 +209,7 @@ function getNewValue({
     const hasOr = currentValue.includes(' || ');
     if (hasOr || rangeStrategy === 'widen') {
       const lastValue = hasOr
-        ? currentValue.split('||').pop().trim()
+        ? currentValue.split('||').slice(-1).join().trim()
         : currentValue;
       const replacementValue = getNewValue({
         currentValue: lastValue,
@@ -209,14 +220,18 @@ function getNewValue({
       if (rangeStrategy === 'replace') {
         newValue = replacementValue;
       } else {
-        const parsedRange = parseRange(replacementValue);
+        const parsedRange = replacementValue
+          ? parseRange(replacementValue)
+          : [];
         const element = parsedRange[parsedRange.length - 1];
         if (element.operator?.startsWith('<')) {
           const splitCurrent = currentValue.split(element.operator);
           splitCurrent.pop();
           newValue = splitCurrent.join(element.operator) + replacementValue;
         } else {
-          newValue = currentValue + ' || ' + replacementValue;
+          newValue = replacementValue
+            ? currentValue + ' || ' + replacementValue
+            : currentValue; // unsure
         }
       }
     }
