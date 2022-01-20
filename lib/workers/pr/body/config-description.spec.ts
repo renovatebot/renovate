@@ -13,10 +13,10 @@ describe('workers/pr/body/config-description', () => {
       branchConfig.branchName = 'branchName';
     });
 
-    it('handles stopRebasingLabel correctly', async () => {
-      branchConfig.stopRebasingLabelPresents = true;
+    it('handles stopUpdatingLabel correctly', async () => {
+      branchConfig.stopUpdatingLabelPresents = true;
       expect(await getPrConfigDescription(branchConfig)).toContain(
-        `**Rebasing**: Only once (due to \`stopRebasingLabel\` config option), or you tick the rebase/retry checkbox.`
+        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`
       );
     });
   });

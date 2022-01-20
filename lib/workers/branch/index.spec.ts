@@ -931,7 +931,7 @@ describe('workers/branch/index', () => {
       });
     });
 
-    it('skips branch rebase if stopRebasingLabel presents', async () => {
+    it('skips branch update if stopUpdatingLabel presents', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
         artifactErrors: [],
@@ -944,7 +944,7 @@ describe('workers/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PrState.Open,
-        labels: ['stop-rebasing'],
+        labels: ['stop-updating'],
         body: `- [ ] <!-- rebase-check -->`,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -953,6 +953,7 @@ describe('workers/branch/index', () => {
       expect(
         await branchWorker.processBranch({
           ...config,
+          dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
@@ -965,7 +966,7 @@ describe('workers/branch/index', () => {
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
-    it('rebases branch if stopRebasingLabel presents and PR rebase/retry box checked', async () => {
+    it('updates branch if stopUpdatingLabel presents and PR rebase/retry box checked', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
         artifactErrors: [],
@@ -978,7 +979,7 @@ describe('workers/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'Update dependency',
         state: PrState.Open,
-        labels: ['stop-rebasing'],
+        labels: ['stop-updating'],
         body: `- [x] <!-- rebase-check -->`,
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
