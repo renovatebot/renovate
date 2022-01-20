@@ -77,17 +77,26 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
     });
 
-    it('creates PR with footer and header', async () => {
+    it('creates PR with footer and header using templating', async () => {
+      config.baseBranch = 'some-branch';
+      config.repository = 'test';
       await ensureOnboardingPr(
         {
           ...config,
-          prHeader: 'This is a header for {{platform}}',
-          prFooter: 'And this is a footer',
+          prHeader: 'This is a header for platform:{{platform}}',
+          prFooter:
+            'And this is a footer for repository:{{repository}} baseBranch:{{baseBranch}}',
         },
         packageFiles,
         branches
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
+        /platform:github/
+      );
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
+        /repository:test/
+      );
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
     });
 
