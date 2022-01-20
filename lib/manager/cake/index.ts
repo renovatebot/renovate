@@ -69,3 +69,5 @@ export function extractPackageFile(content: string): PackageFile {
   }
   return { deps };
 }
+
+export const supportedDatasources = [datasource];
