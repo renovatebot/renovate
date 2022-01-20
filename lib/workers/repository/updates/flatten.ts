@@ -42,6 +42,10 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
         .replace(regEx(/^\//), '') // remove leading slash
         .replace(regEx(/\//g), '-') // change slashes to hyphens
         .replace(regEx(/-+/g), '-'); // remove multiple hyphens
+      updateConfig.sourceRepo = parsedSourceUrl.pathname.replace(
+        regEx(/^\//),
+        ''
+      ); // remove leading slash
       updateConfig.sourceRepoOrg = parsedSourceUrl.pathname
         .replace(regEx(/^\//), '') // remove leading slash
         .replace(regEx(/\/.*/g), ''); // remove everything after first slash
