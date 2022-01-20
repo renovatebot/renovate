@@ -8,8 +8,8 @@ export const setBaseUrl = (url: string): void => {
 };
 
 export class BitbucketHttp extends Http {
-  constructor(options?: HttpOptions) {
-    super(PlatformId.Bitbucket, options);
+  constructor(type: string = PlatformId.Bitbucket, options?: HttpOptions) {
+    super(type, options);
   }
 
   protected override request<T>(
