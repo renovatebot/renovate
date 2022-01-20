@@ -27,7 +27,7 @@ describe('manager/composer/utils', () => {
           },
           {}
         )
-      ).toEqual({ php: '7.4.27' });
+      ).toEqual({ composer: '1.*', php: '7.4.27' });
     });
 
     it('returns from require-dev', () => {
