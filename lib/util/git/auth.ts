@@ -48,13 +48,14 @@ export function getGitAuthenticatedEnvironmentVariables(
   const newEnvironmentVariables = {
     ...environmentVariables,
   };
-  authenticationRules.forEach(({ url, insteadOf }) => {
+  for (const rule of authenticationRules) {
     newEnvironmentVariables[
       `GIT_CONFIG_KEY_${gitConfigCount}`
-    ] = `url."${url}".insteadOf`;
-    newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] = insteadOf;
+    ] = `url."${rule.url}".insteadOf`;
+    newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] =
+      rule.insteadOf;
     gitConfigCount++;
-  });
+  }
   newEnvironmentVariables['GIT_CONFIG_COUNT'] = gitConfigCount.toString();
 
   return newEnvironmentVariables;
@@ -83,19 +84,12 @@ export function getAuthenticationRules(
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
   const insteadUrl = gitUrlParse(gitUrl);
-  const url = gitUrlParse(gitUrl);
-  const protocol = regEx(/^https?$/).exec(url.protocol)
+  const url = { ...insteadUrl };
+  const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol
     : 'https';
 
-  // https protocol
-  url.token = hasUser ? token : `api:${token}`;
-  authenticationRules.push({
-    url: url.toString(protocol),
-    insteadOf: insteadUrl.toString(protocol),
-  });
-
-  // ssh protocol
+  // ssh protocol with user if empty
   url.token = hasUser ? token : `ssh:${token}`;
   authenticationRules.push({
     url: url.toString(protocol),
@@ -106,11 +100,18 @@ export function getAuthenticationRules(
     }/${insteadUrl.full_name}${insteadUrl.git_suffix ? '.git' : ''}`,
   });
 
-  // alternative ssh protocol
+  // alternative ssh protocol with user if empty
   url.token = hasUser ? token : `git:${token}`;
   authenticationRules.push({
     url: url.toString(protocol),
     insteadOf: insteadUrl.toString('ssh'),
+  });
+
+  // https protocol with no user as default fallback
+  url.token = token;
+  authenticationRules.push({
+    url: url.toString(protocol),
+    insteadOf: insteadUrl.toString(protocol),
   });
 
   return authenticationRules;
