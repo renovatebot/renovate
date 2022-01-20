@@ -223,6 +223,61 @@ export function extractPackage(
   return result;
 }
 
+export function extractRegistries(rawContent: string): string[] {
+  if (!rawContent) {
+    return [];
+  }
+
+  const settings = parseSettings(rawContent);
+  if (!settings) {
+    return [];
+  }
+
+  const urls = [];
+
+  const mirrorUrls = parseUrls(settings, 'mirrors');
+  urls.push(...mirrorUrls);
+
+  settings.childNamed('profiles')?.eachChild((profile) => {
+    const repositoryUrls = parseUrls(profile, 'repositories');
+    urls.push(...repositoryUrls);
+  });
+
+  // filter out duplicates
+  return [...new Set(urls)];
+}
+
+function parseUrls(xmlNode: XmlElement, path: string): string[] {
+  const children = xmlNode.descendantWithPath(path);
+  const urls = [];
+  if (children?.children) {
+    children.eachChild((child) => {
+      const url = child.valueWithPath('url');
+      if (url) {
+        urls.push(url);
+      }
+    });
+  }
+  return urls;
+}
+
+export function parseSettings(raw: string): XmlDocument | null {
+  let settings: XmlDocument;
+  try {
+    settings = new XmlDocument(raw);
+  } catch (e) {
+    return null;
+  }
+  const { name, attr } = settings;
+  if (name !== 'settings') {
+    return null;
+  }
+  if (attr.xmlns === 'http://maven.apache.org/SETTINGS/1.0.0') {
+    return settings;
+  }
+  return null;
+}
+
 export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
   const extractedPackages: Record<string, PackageFile> = {};
@@ -310,17 +365,42 @@ export async function extractAllPackageFiles(
   packageFiles: string[]
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
+  const additionalRegistryUrls = [];
+
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
-    if (content) {
+    if (!content) {
+      logger.trace({ packageFile }, 'packageFile has no content');
+      continue;
+    }
+    if (packageFile.endsWith('settings.xml')) {
+      const registries = extractRegistries(content);
+      if (registries) {
+        logger.debug(
+          { registries, packageFile },
+          'Found registryUrls in settings.xml'
+        );
+        additionalRegistryUrls.push(...registries);
+      }
+    } else {
       const pkg = extractPackage(content, packageFile);
       if (pkg) {
         packages.push(pkg);
       } else {
-        logger.debug({ packageFile }, 'can not read dependencies');
+        logger.trace({ packageFile }, 'can not read dependencies');
       }
-    } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+    }
+  }
+  if (additionalRegistryUrls) {
+    for (const pkgFile of packages) {
+      for (const dep of pkgFile.deps) {
+        /* istanbul ignore else */
+        if (dep.registryUrls) {
+          dep.registryUrls.push(...additionalRegistryUrls);
+        } else {
+          dep.registryUrls = [...additionalRegistryUrls];
+        }
+      }
     }
   }
   return cleanResult(resolveParents(packages));

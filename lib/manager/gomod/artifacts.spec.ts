@@ -591,6 +591,33 @@ describe('manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('supports docker mode with gomodTidy1.17', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({});
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidy1.17'],
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');

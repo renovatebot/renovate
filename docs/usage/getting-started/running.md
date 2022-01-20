@@ -78,6 +78,26 @@ It is integrated with WhiteSource's vulnerability detection capabilities and add
 
 WhiteSource Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
 
+#### Forking Renovate app
+
+"Forking Renovate" is the sister app to the WhiteSource Renovate App on GitHub.com.
+The difference is that Forking Renovate does not require `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
+Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
+
+[Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
+
+##### Benefits
+
+Forking Renovate needs only `read` level access to any repository it runs on.
+
+##### Drawbacks
+
+If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
+
+- Automerge is not supported
+- The `baseBranches` config option is not supported
+- The app dashboard (`app.renovatebot.com`) is currently not supported
+
 ### Hosting Renovate
 
 Once you have decided on a Renovate distribution, you need to decide where and how to run it.
@@ -92,7 +112,9 @@ WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-live
 
 ### Global config
 
-Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js`, `config.json`, `config.json5`, `config.yaml` or `config.yml`), environment variables, or CLI parameters.
+Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file, environment variables, or CLI parameters.
+By default Renovate checks if a file named `config.js` is present.
+Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (e.g. `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -174,7 +196,6 @@ Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
 List of repositories to run on.
-Auto discovery does not work with a GitHub App.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
