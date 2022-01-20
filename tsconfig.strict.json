@@ -14,6 +14,7 @@
     "lib/data-files.generated.ts",
     "lib/datasource/**/common.ts",
     "lib/datasource/**/types.ts",
+    "lib/datasource/adoptium-java",
     "lib/datasource/artifactory",
     "lib/datasource/gitlab-tags/util.ts",
     "lib/datasource/helm/common.ts",
@@ -43,6 +44,7 @@
     "lib/proxy.ts",
     "lib/types/**/*.ts",
     "lib/util/**/*.ts",
+    "lib/versioning/cargo/**/*.ts",
     "lib/versioning/gradle/compare.ts",
     "lib/versioning/hex/**/*.ts",
     "lib/versioning/loose/**/*.ts",
@@ -70,6 +72,7 @@
   ],
   "exclude": [
     "lib/constants/platform.spec.ts",
+    "lib/datasource/adoptium-java/**/*.spec.ts",
     "lib/datasource/artifactory/**/*.spec.ts",
     "lib/datasource/docker/common.ts",
     "lib/datasource/github-releases/common.ts",
