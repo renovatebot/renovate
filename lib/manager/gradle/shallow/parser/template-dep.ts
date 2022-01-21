@@ -5,6 +5,7 @@ import { GradleManagerData } from '../../types';
 import {
   artifactIdRegexPart,
   cleanupContext,
+  dataTypeRegexPart,
   groupIdRegexPart,
 } from './common';
 import { GradleContext } from './types';
@@ -90,7 +91,7 @@ export const templateStringWithDataTypeQuery = q.str<GradleContext>({
       handleTemplateDepName
     ),
     q.sym(handleTemplateVersion),
-    q.str(handleTemplateDataType),
+    q.str(regEx(`^${dataTypeRegexPart}$`), handleTemplateDataType),
   ],
   postHandler: handleTemplate,
 });

@@ -1,3 +1,4 @@
+import { SkipReason } from '../../../../types';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
@@ -58,24 +59,32 @@ describe('manager/gradle/shallow/parser/parser-new', () => {
       vars                   | dep                                                                       | result
       ${''}                  | ${'"foo:bar:1.2.3"'}                                                      | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                  | ${'"foo:bar:1.2.3@zip"'}                                                  | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz"'}                                                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}"'}                                                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:${ baz }"'}                                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz.qux = "1.2.3"'} | ${'"foo:bar:${ baz.qux }"'}                                               | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz@zip"'}                                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
-      ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}@zip"'}                                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz@@@"'}                                                    | ${null}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz"'}                                                       | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}"'}                                                     | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:${ baz }"'}                                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz.qux = "1.2.3"'} | ${'"foo:bar:${ baz.qux }"'}                                               | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz.qux' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz@zip"'}                                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz', dataType: 'zip' }}
+      ${'baz = "1.2.3"'}     | ${'"foo:bar:${baz}@zip"'}                                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz', dataType: 'zip' }}
       ${''}                  | ${'group: "foo", name: "bar", version: "1.2.3"'}                          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'group: "foo", name: "bar", version: baz'}                              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'group: "foo", name: "bar", version: baz'}                              | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
       ${''}                  | ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                  | ${'(group : "foo", name : "bar", version : "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                  | ${'foobar("foo", "bar", "1.2.3")'}                                        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'foobar("foo", "bar", baz)'}                                            | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'foobar("foo", "bar", baz)'}                                            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
       ${''}                  | ${'id "foo.bar" version "1.2.3"'}                                         | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
       ${''}                  | ${'id("foo.bar") version "1.2.3"'}                                        | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-      ${''}                  | ${'kotlin("jvm") version "1.3.71"'}                                       | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
-      ${'baz = "1.2.3"'}     | ${'id "foo.bar" version baz'}                                             | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}     | ${'id("foo.bar") version baz'}                                            | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-      ${'baz = "1.3.71"'}    | ${'kotlin("jvm") version baz'}                                            | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
+      ${''}                  | ${'kotlin("jvm") version "1.2.3"'}                                        | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}     | ${'id "foo.bar" version baz'}                                             | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'id("foo.bar") version baz'}                                            | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'kotlin("jvm") version baz'}                                            | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'id "foo.bar" version "$baz"'}                                          | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'id("foo.bar") version "$baz"'}                                         | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'kotlin("jvm") version "$baz"'}                                         | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'id "foo.bar" version "${ baz }"'}                                      | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'id("foo.bar") version "${ baz }"'}                                     | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'kotlin("jvm") version "${ baz }"'}                                     | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
+      ${'baz = "1.2.3"'}     | ${'id "foo.bar" version "foo${baz}bar"'}                                  | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', skipReason: SkipReason.UnknownVersion }}
     `(`$dep`, ({ vars, dep, result }) => {
       const input = [vars, dep].join('\n');
       const { deps } = parseGradle(input);
@@ -103,7 +112,6 @@ describe('manager/gradle/shallow/parser/parser-new', () => {
   //   describe('variable substitutions', () => {
   //     test.each`
   //       def                    | str                                          | output
-  //       ${'foo = "1.2.3"'}     | ${'"foo:bar:$foo@@@"'}                       | ${null}
   //       ${'baz = "1.2.3"'}     | ${'"foo:bar:$baz"'}                          | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
   //       ${'foo.bar = "1.2.3"'} | ${'"foo:bar:$foo.bar"'}                      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
   //       ${'foo = "1.2.3"'}     | ${'"foo:bar_$foo:4.5.6"'}                    | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}
@@ -122,7 +130,7 @@ describe('manager/gradle/shallow/parser/parser-new', () => {
   //       input                               | output
   //       ${'id "foo.bar" version "1.2.3"'}   | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
   //       ${'id("foo.bar") version "1.2.3"'}  | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-  //       ${'kotlin("jvm") version "1.3.71"'} | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
+  //       ${'kotlin("jvm") version "1.2.3"'} | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.2.3' }}
   //     `('$input', ({ input, output }) => {
   //       const { deps } = parseGradle(in;
   //       expect(deps).toMatchObject([output].filter(Boolean));
