@@ -695,14 +695,6 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'useBaseBranchConfig',
-    description:
-      'Whether to read configuration from baseBranches instead of only the default branch',
-    type: 'string',
-    allowedValues: ['merge', 'none'],
-    default: 'none',
-  },
-  {
     name: 'gitAuthor',
     description: 'Author to use for Git commits. Must conform to RFC5322.',
     type: 'string',
