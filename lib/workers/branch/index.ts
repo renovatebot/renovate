@@ -441,16 +441,15 @@ export async function processBranch(
     const forcedManually = userRebaseRequested || !branchExists;
     config.forceCommit = forcedManually || branchPr?.isConflicted;
 
-    const stopUpdatingLabelPresent = branchPr?.labels?.includes(
+    config.stopUpdatingLabelPresent = branchPr?.labels?.includes(
       config.stopUpdatingLabel
     );
-    config.stopUpdatingLabelPresent = stopUpdatingLabelPresent;
 
     const prRebaseChecked = branchPr?.body?.includes(
       `- [x] <!-- rebase-check -->`
     );
 
-    if (branchExists && dependencyDashboardCheck && stopUpdatingLabelPresent) {
+    if (branchExists && dependencyDashboardCheck && config.stopUpdatingLabelPresent) {
       if (!prRebaseChecked) {
         logger.info(
           'Branch updating is skipped because stopUpdatingLabel is present in config'
