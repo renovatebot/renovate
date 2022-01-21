@@ -1,3 +1,4 @@
+import type { File } from '../../../util/git/types';
 import type { PackageFile } from '../../types';
 
 export interface DetermineLockFileDirsResult {
@@ -16,15 +17,9 @@ export interface ArtifactError {
   stderr: string;
 }
 
-export interface UpdatedArtifacts {
-  name: string;
-  contents: string | Buffer;
-  executable?: boolean;
-}
-
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
-  updatedArtifacts: UpdatedArtifacts[];
+  updatedArtifacts: File[];
 }
 
 export interface GenerateLockFileResult {

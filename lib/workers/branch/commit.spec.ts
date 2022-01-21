@@ -29,7 +29,8 @@ describe('workers/branch/commit', () => {
     });
     it('commits files', async () => {
       config.updatedPackageFiles.push({
-        name: 'package.json',
+        type: 'addition',
+        path: 'package.json',
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
@@ -39,7 +40,8 @@ describe('workers/branch/commit', () => {
     it('dry runs', async () => {
       GlobalConfig.set({ dryRun: true });
       config.updatedPackageFiles.push({
-        name: 'package.json',
+        type: 'addition',
+        path: 'package.json',
         contents: 'some contents',
       });
       await commitFilesToBranch(config);

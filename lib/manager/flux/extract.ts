@@ -1,7 +1,6 @@
 import { loadAll } from 'js-yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {
@@ -69,7 +68,7 @@ function resolveReleases(
     if (matchingRepositories.length) {
       res.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
     } else {
-      res.skipReason = SkipReason.UnknownRegistry;
+      res.skipReason = 'unknown-registry';
     }
 
     return res;
