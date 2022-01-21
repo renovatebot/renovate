@@ -262,6 +262,7 @@
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-jest": "25.3.4",
     "eslint-plugin-promise": "6.0.0",
+    "eslint-plugin-typescript-enum": "2.1.0",
     "expect-more-jest": "5.4.0",
     "glob": "7.2.0",
     "graphql": "15.8.0",
