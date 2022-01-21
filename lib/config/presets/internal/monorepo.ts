@@ -194,6 +194,7 @@ const repoGroups = {
 };
 
 const patternGroups = {
+  'apache-camel': '^org.apache.camel:',
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   wordpress: '^@wordpress/',
