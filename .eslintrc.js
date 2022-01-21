@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['@renovate'],
+  plugins: ['@renovate', 'typescript-enum'],
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -119,6 +119,9 @@ module.exports = {
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
     '@renovate/jest-root-describe': 2,
+
+    'typescript-enum/no-const-enum': 2,
+    'typescript-enum/no-enum': 2,
   },
   settings: {
     'import/parsers': {
