@@ -14,7 +14,7 @@ describe('workers/pr/body/config-description', () => {
     });
 
     it('handles stopUpdatingLabel correctly', async () => {
-      branchConfig.stopUpdatingLabelPresents = true;
+      branchConfig.stopUpdating = true;
       expect(await getPrConfigDescription(branchConfig)).toContain(
         `**Rebasing**: Never, or you tick the rebase/retry checkbox.`
       );
