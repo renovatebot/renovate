@@ -199,6 +199,25 @@ export const presets: Record<string, Preset> = {
         matchDepTypes: ['dependencies', 'require'],
         semanticCommitType: 'fix',
       },
+      {
+        matchDatasources: ['maven'],
+        matchPackagePatterns: ['*'],
+        matchDepTypes: ['test', 'build'],
+        semanticCommitType: 'chore',
+      },
+      {
+        matchDatasources: ['maven'],
+        matchPackagePatterns: ['*'],
+        matchDepTypes: [
+          'compile',
+          'provided',
+          'runtime',
+          'system',
+          'import',
+          'parent',
+        ],
+        semanticCommitType: 'fix',
+      },
     ],
   },
   semanticCommitTypeAll: {
