@@ -385,7 +385,7 @@ export async function processBranch(
       logger.debug(
         {
           updatedArtifacts: config.updatedArtifacts.map((f) =>
-            f.name === '|delete|' ? `${String(f.contents)} (delete)` : f.name
+            f.type === 'deletion' ? `${f.path} (delete)` : f.path
           ),
         },
         `Updated ${config.updatedArtifacts.length} lock files`

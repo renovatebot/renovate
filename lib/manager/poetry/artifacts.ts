@@ -153,7 +153,8 @@ export async function updateArtifacts({
     return [
       {
         file: {
-          name: lockFileName,
+          type: 'addition',
+          path: lockFileName,
           contents: newPoetryLockContent,
         },
       },

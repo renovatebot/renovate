@@ -86,7 +86,13 @@ describe('manager/helmv3/artifacts', () => {
         config,
       })
     ).toMatchSnapshot([
-      { file: { contents: 'New Chart.lock', name: 'Chart.lock' } },
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: 'New Chart.lock',
+        },
+      },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -103,7 +109,13 @@ describe('manager/helmv3/artifacts', () => {
         config: { ...config, updateType: 'lockFileMaintenance' },
       })
     ).toMatchSnapshot([
-      { file: { contents: 'New Chart.lock', name: 'Chart.lock' } },
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: 'New Chart.lock',
+        },
+      },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -122,7 +134,13 @@ describe('manager/helmv3/artifacts', () => {
         config,
       })
     ).toMatchSnapshot([
-      { file: { contents: 'New Chart.lock', name: 'Chart.lock' } },
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: 'New Chart.lock',
+        },
+      },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -165,7 +183,13 @@ describe('manager/helmv3/artifacts', () => {
         },
       })
     ).toMatchSnapshot([
-      { file: { contents: 'New Chart.lock', name: 'Chart.lock' } },
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: 'New Chart.lock',
+        },
+      },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -187,7 +211,13 @@ describe('manager/helmv3/artifacts', () => {
         },
       })
     ).toMatchSnapshot([
-      { file: { contents: 'New Chart.lock', name: 'Chart.lock' } },
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: 'New Chart.lock',
+        },
+      },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
