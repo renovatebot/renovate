@@ -122,19 +122,19 @@ Array [
 exports[`manager/helmv3/artifacts returns updated Chart.lock with docker 2`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/helm",
+    "cmd": "docker pull renovate/sidecar",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_helm -aq",
+    "cmd": "docker ps --filter name=renovate_sidecar -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm dependency update ''\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool helm v3.7.2 && helm dependency update ''\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -244,19 +244,19 @@ Array [
 exports[`manager/helmv3/artifacts sets repositories from aliases with docker 2`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/helm",
+    "cmd": "docker pull renovate/sidecar",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_helm -aq",
+    "cmd": "docker ps --filter name=renovate_sidecar -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm repo add stable the_stable_url && helm repo add repo1 the_repo1_url && helm dependency update ''\\"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/sidecar bash -l -c \\"install-tool helm v3.7.2 && helm repo add stable the_stable_url && helm repo add repo1 the_repo1_url && helm dependency update ''\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

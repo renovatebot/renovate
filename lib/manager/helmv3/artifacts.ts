@@ -2,7 +2,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
-import type { ExecOptions } from '../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
 import {
   getSiblingFileName,
   getSubDirectory,
@@ -12,17 +12,10 @@ import {
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function helmCommands(
+  execOptions: ExecOptions,
   manifestPath: string,
   aliases?: Record<string, string>
 ): Promise<void> {
-  const execOptions: ExecOptions = {
-    docker: {
-      image: 'helm',
-    },
-    extraEnv: {
-      HELM_EXPERIMENTAL_OCI: '1',
-    },
-  };
   const cmd = [];
 
   if (aliases) {
@@ -62,7 +55,21 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    await helmCommands(packageFileName, config.aliases);
+    const helmToolConstraint: ToolConstraint = {
+      toolName: 'helm',
+      constraint: config.constraints?.helm,
+    };
+
+    const execOptions: ExecOptions = {
+      docker: {
+        image: 'sidecar',
+      },
+      extraEnv: {
+        HELM_EXPERIMENTAL_OCI: '1',
+      },
+      toolConstraints: [helmToolConstraint],
+    };
+    await helmCommands(execOptions, packageFileName, config.aliases);
     logger.debug('Returning updated Chart.lock');
     const newHelmLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newHelmLockContent) {
