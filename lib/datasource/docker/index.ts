@@ -2,6 +2,7 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
+import { HttpError } from '../../util/http/types';
 import { hasKey } from '../../util/object';
 import { regEx } from '../../util/regex';
 import { ensurePathPrefix, parseLinkHeader } from '../../util/url';
@@ -83,10 +84,7 @@ async function getDockerApiTags(
         noAuth: true,
       });
     } catch (err) {
-      if (isECRMaxResultsError(err)) {
-        if (page !== 1) {
-          throw err;
-        }
+      if (page === 1 && err instanceof HttpError && isECRMaxResultsError(err)) {
         const maxResults = 1000;
         url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
         url = ensurePathPrefix(url, '/v2');

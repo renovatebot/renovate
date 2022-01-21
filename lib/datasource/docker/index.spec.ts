@@ -544,15 +544,130 @@ describe('datasource/docker/index', () => {
       });
     });
 
-    it('resolves requests to ECR proxy', async () => {
-      httpMock
-        .scope('https://ecr-proxy.company.com/v2')
-        .get('/')
-        .reply(200, '', {})
-        .get('/node/tags/list?n=10000')
-        .reply(
-          405,
-          {
+    describe('when making requests that interact with an ECR proxy', () => {
+      it('resolves requests to ECR proxy', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [
+                {
+                  code: 'UNSUPPORTED',
+                  message:
+                    "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+                },
+              ],
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          )
+          .get('/')
+          .reply(200)
+          .get('/node/tags/list?n=1000')
+          .reply(200, { tags: ['some'] }, {})
+          .get('/node/manifests/some')
+          .reply(200, {
+            schemaVersion: 2,
+            mediaType: MediaType.manifestV2,
+            config: { digest: 'some-config-digest' },
+          })
+          .get('/')
+          .reply(200)
+          .get('/node/blobs/some-config-digest')
+          .reply(200, {
+            config: {
+              Labels: {
+                'org.opencontainers.image.source':
+                  'https://github.com/renovatebot/renovate',
+              },
+            },
+          });
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toEqual({
+          registryUrl: 'https://ecr-proxy.company.com',
+          releases: [],
+          sourceUrl: 'https://github.com/renovatebot/renovate',
+        });
+      });
+
+      it('returns null when it receives ECR max results error more than once', async () => {
+        const maxResultsErrorBody = {
+          errors: [
+            {
+              code: 'UNSUPPORTED',
+              message:
+                "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+            },
+          ],
+        };
+
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(405, maxResultsErrorBody, {
+            'Docker-Distribution-Api-Version': 'registry/2.0',
+          })
+          .get('/node/tags/list?n=1000')
+          .reply(405, maxResultsErrorBody, {
+            'Docker-Distribution-Api-Version': 'registry/2.0',
+          });
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the response code is not 405', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            401,
+            {
+              body: {
+                errors: [
+                  {
+                    code: 'UNSUPPORTED',
+                    message:
+                      "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+                  },
+                ],
+              },
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when no response headers are present', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(405, {
             errors: [
               {
                 code: 'UNSUPPORTED',
@@ -560,73 +675,142 @@ describe('datasource/docker/index', () => {
                   "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
               },
             ],
-          },
-          {
-            'Docker-Distribution-Api-Version': 'registry/2.0',
-          }
-        )
-        .get('/')
-        .reply(200)
-        .get('/node/tags/list?n=1000')
-        .reply(200, { tags: ['some'] }, {})
-        .get('/node/manifests/some')
-        .reply(200, {
-          schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
-          config: { digest: 'some-config-digest' },
-        })
-        .get('/')
-        .reply(200)
-        .get('/node/blobs/some-config-digest')
-        .reply(200, {
-          config: {
-            Labels: {
-              'org.opencontainers.image.source':
-                'https://github.com/renovatebot/renovate',
-            },
-          },
-        });
-      expect(
-        await getPkgReleases({
-          datasource: id,
-          depName: 'ecr-proxy.company.com/node',
-        })
-      ).toEqual({
-        registryUrl: 'https://ecr-proxy.company.com',
-        releases: [],
-        sourceUrl: 'https://github.com/renovatebot/renovate',
+          });
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
       });
-    });
 
-    it('returns null when it receives ECR max results error more than once', async () => {
-      const maxResultsErrorBody = {
-        errors: [
-          {
-            code: 'UNSUPPORTED',
-            message:
-              "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
-          },
-        ],
-      };
+      it('returns null when the expected docker header is missing', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [
+                {
+                  code: 'UNSUPPORTED',
+                  message:
+                    "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+                },
+              ],
+            },
+            {
+              'Irrelevant-Header': 'irrelevant-value',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
 
-      httpMock
-        .scope('https://ecr-proxy.company.com/v2')
-        .get('/')
-        .reply(200, '', {})
-        .get('/node/tags/list?n=10000')
-        .reply(405, maxResultsErrorBody, {
-          'Docker-Distribution-Api-Version': 'registry/2.0',
-        })
-        .get('/node/tags/list?n=1000')
-        .reply(405, maxResultsErrorBody, {
-          'Docker-Distribution-Api-Version': 'registry/2.0',
-        });
-      expect(
-        await getPkgReleases({
-          datasource: id,
-          depName: 'ecr-proxy.company.com/node',
-        })
-      ).toBeNull();
+      it('returns null when the response body does not contain an errors object', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {},
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the response body does not contain errors', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [],
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the the response errors does not have a message property', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [
+                {
+                  code: 'UNSUPPORTED',
+                },
+              ],
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
+
+      it('returns null when the the error message does not have the expected max results error', async () => {
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/tags/list?n=10000')
+          .reply(
+            405,
+            {
+              errors: [
+                {
+                  code: 'UNSUPPORTED',
+                  message: 'Some unrelated error message',
+                },
+              ],
+            },
+            {
+              'Docker-Distribution-Api-Version': 'registry/2.0',
+            }
+          );
+        expect(
+          await getPkgReleases({
+            datasource: id,
+            depName: 'ecr-proxy.company.com/node',
+          })
+        ).toBeNull();
+      });
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {

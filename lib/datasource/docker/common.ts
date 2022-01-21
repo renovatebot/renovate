@@ -11,6 +11,7 @@ import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions, HttpResponse } from '../../util/http';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
+import { HttpError } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import {
   ensureTrailingSlash,
@@ -512,12 +513,12 @@ export async function getLabels(
   }
 }
 
-export function isECRMaxResultsError(err): boolean | undefined {
+export function isECRMaxResultsError(err: HttpError): boolean | undefined {
   return (
     err.response?.statusCode === 405 &&
     err.response?.headers?.['docker-distribution-api-version'] &&
     // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    err.response.body?.errors?.[0]?.message?.includes(
+    err.response.body?.['errors']?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000'
     )
   );
