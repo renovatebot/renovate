@@ -211,7 +211,8 @@ export function writeLockUpdates(
 
   return {
     file: {
-      name: lockFilePath,
+      type: 'addition',
+      path: lockFilePath,
       contents: newContent,
     },
   };

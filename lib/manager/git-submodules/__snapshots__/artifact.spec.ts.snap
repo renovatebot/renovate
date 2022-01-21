@@ -5,7 +5,8 @@ Array [
   Object {
     "file": Object {
       "contents": "",
-      "name": "",
+      "path": "",
+      "type": "addition",
     },
   },
 ]
@@ -16,13 +17,15 @@ Array [
   Object {
     "file": Object {
       "contents": "",
-      "name": "renovate",
+      "path": "renovate",
+      "type": "addition",
     },
   },
   Object {
     "file": Object {
       "contents": "",
-      "name": "renovate-pro",
+      "path": "renovate-pro",
+      "type": "addition",
     },
   },
 ]

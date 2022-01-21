@@ -24,7 +24,7 @@ describe('manager/mix/extract', () => {
             depName: 'cowboy',
             currentValue: 'ninenines/cowboy',
             datasource: 'github',
-            skipReason: 'non-hex depTypes',
+            skipReason: 'non-hex-dep-types',
           },
           {
             depName: 'secret',
