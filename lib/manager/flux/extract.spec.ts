@@ -1,7 +1,6 @@
 import { loadFixture } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
-import { SkipReason } from '../../types';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
@@ -29,7 +28,7 @@ describe('manager/flux/extract', () => {
     });
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(loadFixture('release.yaml'));
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores HelmRelease resources without an apiVersion', () => {
       const result = extractPackageFile('kind: HelmRelease');
@@ -47,7 +46,7 @@ apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 `
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores HelmRelease resources without a chart name', () => {
       const result = extractPackageFile(
@@ -88,7 +87,7 @@ spec:
       version: "2.0.2"
 `
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
@@ -105,7 +104,7 @@ spec:
       version: "2.0.2"
 `
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
@@ -123,7 +122,7 @@ spec:
       version: "2.0.2"
 `
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
@@ -135,7 +134,7 @@ metadata:
   name: test
 `
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores HelmRepository resources without a URL', () => {
       const result = extractPackageFile(
@@ -148,7 +147,7 @@ metadata:
   namespace: kube-system
 `
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores resources of an unknown kind', () => {
       const result = extractPackageFile(
