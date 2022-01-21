@@ -36,8 +36,9 @@ const config: UpdateArtifactsConfig = {};
 
 const updatedGemfileLock = {
   file: {
+    type: 'addition',
+    path: 'Gemfile.lock',
     contents: 'Updated Gemfile.lock',
-    name: 'Gemfile.lock',
   },
 };
 

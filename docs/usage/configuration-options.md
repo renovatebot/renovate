@@ -2529,6 +2529,11 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 <!-- markdownlint-enable MD001 -->
 
+## stopUpdatingLabel
+
+On supported platforms it is possible to add a label to a PR to request Renovate stop updating the PR.
+By default this label is `"stop-updating"` however you can configure it to anything you want by changing this `stopUpdatingLabel` field.
+
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
