@@ -14,10 +14,11 @@ export async function shouldReuseExistingBranch(
   config: BranchConfig
 ): Promise<ParentBranch> {
   const { branchName } = config;
+  const result: ParentBranch = { reuseExistingBranch: false };
   // Check if branch exists
   if (!branchExists(branchName)) {
     logger.debug(`Branch needs creating`);
-    return { reuseExistingBranch: false };
+    return result;
   }
   logger.debug(`Branch already exists`);
 
@@ -27,11 +28,11 @@ export async function shouldReuseExistingBranch(
   if (pr) {
     if (pr.title?.startsWith('rebase!')) {
       logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
-      return { reuseExistingBranch: false };
+      return result;
     }
     if (pr.body?.includes(`- [x] <!-- rebase-check -->`)) {
       logger.debug(`Manual rebase requested via PR checkbox for #${pr.number}`);
-      return { reuseExistingBranch: false };
+      return result;
     }
     if (pr.labels?.includes(config.rebaseLabel)) {
       logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
@@ -43,7 +44,7 @@ export async function shouldReuseExistingBranch(
       } else {
         await platform.deleteLabel(pr.number, config.rebaseLabel);
       }
-      return { reuseExistingBranch: false };
+      return result;
     }
   }
 
@@ -58,10 +59,12 @@ export async function shouldReuseExistingBranch(
       if (await isBranchModified(branchName)) {
         // TODO: Warn here so that it appears in PR body (#9720)
         logger.debug('Cannot rebase branch as it has been modified');
-        return { reuseExistingBranch: true, isModified: true };
+        result.reuseExistingBranch = true;
+        result.isModified = true;
+      } else {
+        logger.debug('Branch is unmodified, so can be rebased');
       }
-      logger.debug('Branch is unmodified, so can be rebased');
-      return { reuseExistingBranch: false };
+      return result;
     }
     logger.debug('Branch is up-to-date');
   } else {
@@ -78,10 +81,11 @@ export async function shouldReuseExistingBranch(
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (config.rebaseWhen === 'never') {
         logger.debug('Rebasing disabled by config');
-        return { reuseExistingBranch: true, isModified: false };
+        result.reuseExistingBranch = true;
+        result.isModified = false;
       }
       // Setting reuseExistingBranch back to undefined means that we'll use the default branch
-      return { reuseExistingBranch: false };
+      return result;
     }
     // Don't do anything different, but warn
     // TODO: Add warning to PR (#9720)
@@ -107,12 +111,13 @@ export async function shouldReuseExistingBranch(
       logger.debug(
         `Detected multiple rangeStrategies along with update-lockfile`
       );
-      return {
-        reuseExistingBranch: false,
-        isModified: false,
-      };
+      result.reuseExistingBranch = false;
+      result.isModified = false;
+      return result;
     }
   }
 
-  return { reuseExistingBranch: true, isModified: false };
+  result.reuseExistingBranch = true;
+  result.isModified = false;
+  return result;
 }
