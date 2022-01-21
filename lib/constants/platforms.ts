@@ -20,3 +20,8 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-tags',
   'gitlab-packages',
 ];
+
+export const BITBUCKET_API_USING_HOST_TYPES = [
+  PlatformId.Bitbucket,
+  'bitbucket-tags',
+];
