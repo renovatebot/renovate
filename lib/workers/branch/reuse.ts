@@ -74,7 +74,7 @@ export async function shouldReuseExistingBranch(
   }
 
   // Now check if PR is unmergeable. If so then we also rebase
-  result.isConflicted = pr?.isConflicted;
+  result.isConflicted = !!pr?.isConflicted;
   if (result.isConflicted) {
     logger.debug('PR is conflicted');
 
