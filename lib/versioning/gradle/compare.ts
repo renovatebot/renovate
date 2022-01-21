@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../util/regex';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum TokenType {
   Number = 1,
   String,
@@ -85,6 +86,7 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum QualifierRank {
   Dev = -1,
   Default = 0,
@@ -221,6 +223,7 @@ interface PrefixRange {
   tokens: Token[];
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum RangeBound {
   Inclusive = 1,
   Exclusive,
