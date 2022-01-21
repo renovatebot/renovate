@@ -77,8 +77,9 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
           'gradlew.bat',
         ].map((fileProjectPath) => ({
           file: {
-            name: fileProjectPath,
             contents: readBinSync(`./testFiles/${fileProjectPath}`),
+            path: fileProjectPath,
+            type: 'addition',
           },
         }))
       );

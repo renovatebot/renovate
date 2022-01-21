@@ -1,6 +1,5 @@
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
 
 export function parseRepository(
@@ -17,14 +16,14 @@ export function parseRepository(
         res.lookupName = `${repositoryURL.replace('oci://', '')}/${depName}`;
         break;
       case 'file:':
-        res.skipReason = SkipReason.LocalDependency;
+        res.skipReason = 'local-dependency';
         break;
       default:
         res.registryUrls = [repositoryURL];
     }
   } catch (err) {
     logger.debug({ err }, 'Error parsing url');
-    res.skipReason = SkipReason.InvalidUrl;
+    res.skipReason = 'invalid-url';
   }
   return res;
 }
