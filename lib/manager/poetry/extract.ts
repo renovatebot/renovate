@@ -44,20 +44,20 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (path) {
-          skipReason = SkipReason.PathDependency;
+          skipReason = 'path-dependency';
         }
         if (git) {
-          skipReason = SkipReason.GitDependency;
+          skipReason = 'git-dependency';
         }
       } else if (path) {
         currentValue = '';
-        skipReason = SkipReason.PathDependency;
+        skipReason = 'path-dependency';
       } else if (git) {
         currentValue = '';
-        skipReason = SkipReason.GitDependency;
+        skipReason = 'git-dependency';
       } else {
         currentValue = '';
-        skipReason = SkipReason.MultipleConstraintDep;
+        skipReason = 'multiple-constraint-dep';
       }
     }
     const dep: PackageDependency = {
@@ -77,7 +77,7 @@ function extractFromSection(
     } else if (poetryVersioning.isValid(dep.currentValue)) {
       dep.versioning = poetryVersioning.id;
     } else {
-      dep.skipReason = SkipReason.UnknownVersion;
+      dep.skipReason = 'unknown-version';
     }
     deps.push(dep);
   });
