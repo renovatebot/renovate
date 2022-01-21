@@ -449,7 +449,11 @@ export async function processBranch(
       `- [x] <!-- rebase-check -->`
     );
 
-    if (branchExists && dependencyDashboardCheck && config.stopUpdatingLabelPresent) {
+    if (
+      branchExists &&
+      dependencyDashboardCheck &&
+      config.stopUpdatingLabelPresent
+    ) {
       if (!prRebaseChecked) {
         logger.info(
           'Branch updating is skipped because stopUpdatingLabel is present in config'

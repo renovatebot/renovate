@@ -1310,7 +1310,7 @@ const options: RenovateOptions[] = [
     description: 'Label to use to request the bot to stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
-    supportedPlatforms: ['github'],
+    supportedPlatforms: ['azure', 'github', 'gitlab', 'gitea'],
   },
   {
     name: 'stabilityDays',
