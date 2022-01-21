@@ -9,6 +9,7 @@ Array [
         "currentValue": "42",
         "datasource": "maven",
         "depName": "org.example:parent",
+        "depType": "parent",
         "fileReplacePosition": 186,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -19,6 +20,7 @@ Array [
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "org.example:foo",
+        "depType": "compile",
         "fileReplacePosition": 905,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -29,6 +31,7 @@ Array [
         "currentValue": "1.0.0",
         "datasource": "maven",
         "depName": "org.example:bar",
+        "depType": "compile",
         "fileReplacePosition": 1093,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -39,6 +42,7 @@ Array [
         "currentValue": "2.4.2",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-release-plugin",
+        "depType": "plugin",
         "fileReplacePosition": 1347,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -49,6 +53,7 @@ Array [
         "currentValue": "1.8.1",
         "datasource": "maven",
         "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
+        "depType": "plugin",
         "fileReplacePosition": 1545,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -59,6 +64,7 @@ Array [
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "org.example:\${artifact-id-placeholder}",
+        "depType": "compile",
         "fileReplacePosition": 2290,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -70,6 +76,7 @@ Array [
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "\${group-id-placeholder}:baz",
+        "depType": "compile",
         "fileReplacePosition": 2440,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -81,6 +88,7 @@ Array [
         "currentValue": "1.2.3.4",
         "datasource": "maven",
         "depName": "org.example:quux",
+        "depType": "compile",
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "registryUrls": Array [
@@ -92,6 +100,7 @@ Array [
         "currentValue": "1.2.3.4",
         "datasource": "maven",
         "depName": "org.example:quux-test",
+        "depType": "compile",
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "registryUrls": Array [
@@ -114,6 +123,7 @@ Array [
         "currentValue": "it's not a version",
         "datasource": "maven",
         "depName": "org.example:quuuz",
+        "depType": "compile",
         "fileReplacePosition": 3058,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -124,6 +134,7 @@ Array [
         "currentValue": "[1.0.0]",
         "datasource": "maven",
         "depName": "org.example:hard-range",
+        "depType": "compile",
         "fileReplacePosition": 3216,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -134,6 +145,7 @@ Array [
         "currentValue": "\${profile-placeholder}",
         "datasource": "maven",
         "depName": "org.example:profile-artifact",
+        "depType": "compile",
         "fileReplacePosition": 3478,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -145,6 +157,7 @@ Array [
         "currentValue": "2.17",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
+        "depType": "plugin",
         "fileReplacePosition": 3754,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -167,6 +180,7 @@ Array [
         "currentValue": "42",
         "datasource": "maven",
         "depName": "org.example:child",
+        "depType": "parent",
         "fileReplacePosition": 185,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -178,6 +192,7 @@ Array [
         "currentValue": "1.2.3.4",
         "datasource": "maven",
         "depName": "org.example:quux",
+        "depType": "compile",
         "editFile": "parent.pom.xml",
         "fileReplacePosition": 470,
         "groupName": "quuxVersion",
@@ -198,6 +213,7 @@ Array [
         "currentValue": "42",
         "datasource": "maven",
         "depName": "org.example:parent",
+        "depType": "parent",
         "fileReplacePosition": 186,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -209,6 +225,7 @@ Array [
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "org.example:foo",
+        "depType": "compile",
         "fileReplacePosition": 806,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -220,6 +237,7 @@ Array [
         "currentValue": "1.0.0",
         "datasource": "maven",
         "depName": "org.example:bar",
+        "depType": "compile",
         "fileReplacePosition": 954,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -231,6 +249,7 @@ Array [
         "currentValue": "2.4.2",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-release-plugin",
+        "depType": "plugin",
         "fileReplacePosition": 1188,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -242,6 +261,7 @@ Array [
         "currentValue": "1.8.1",
         "datasource": "maven",
         "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
+        "depType": "plugin",
         "fileReplacePosition": 1386,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -253,6 +273,7 @@ Array [
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "org.example:\${artifact-id-placeholder}",
+        "depType": "compile",
         "fileReplacePosition": 2131,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -265,6 +286,7 @@ Array [
         "currentValue": "0.0.1",
         "datasource": "maven",
         "depName": "\${group-id-placeholder}:baz",
+        "depType": "compile",
         "fileReplacePosition": 2281,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -277,6 +299,7 @@ Array [
         "currentValue": "1.2.3",
         "datasource": "maven",
         "depName": "org.example:quuz",
+        "depType": "compile",
         "fileReplacePosition": 2574,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -288,6 +311,7 @@ Array [
         "currentValue": "it's not a version",
         "datasource": "maven",
         "depName": "org.example:quuuz",
+        "depType": "compile",
         "fileReplacePosition": 2714,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -299,6 +323,7 @@ Array [
         "currentValue": "[1.0.0]",
         "datasource": "maven",
         "depName": "org.example:hard-range",
+        "depType": "compile",
         "fileReplacePosition": 2872,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -310,6 +335,7 @@ Array [
         "currentValue": "\${profile-placeholder}",
         "datasource": "maven",
         "depName": "org.example:profile-artifact",
+        "depType": "compile",
         "fileReplacePosition": 3134,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
@@ -322,6 +348,7 @@ Array [
         "currentValue": "2.17",
         "datasource": "maven",
         "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
+        "depType": "plugin",
         "fileReplacePosition": 3410,
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2",
