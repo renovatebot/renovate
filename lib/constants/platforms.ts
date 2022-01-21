@@ -1,5 +1,4 @@
-/* eslint-disable typescript-enum/no-enum */
-// eslint-disable-next-line typescript-enum/no-const-enum
+// eslint-disable-next-line typescript-enum/no-enum, typescript-enum/no-const-enum
 export const enum PlatformId {
   Azure = 'azure',
   Bitbucket = 'bitbucket',
