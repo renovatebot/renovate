@@ -1770,6 +1770,7 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 ## postUpdateOptions
 
 - `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
+- `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
 - `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
@@ -2339,7 +2340,7 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 
 ```json
 {
-  "reviewers": "team:foo"
+  "reviewers": ["team:foo"]
 }
 ```
 
@@ -2374,7 +2375,9 @@ You can configure the `rollbackPrs` property globally, per-lanuage, or per-packa
 ## schedule
 
 The `schedule` option allows you to define times of week or month for Renovate updates.
-Running Renovate around the clock may seem too "noisy" for some projects and therefore `schedule` is a good way to reduce the noise by reducing the timeframe in which Renovate will operate on your repository.
+Running Renovate around the clock can be too "noisy" for some projects.
+To reduce the noise you can use the `schedule` config option to limit the time frame in which Renovate will perform actions on your repository.
+You can use the standard [Cron syntax](https://crontab.guru/crontab.5.html) and [Later syntax](https://github.com/breejs/later) to define your schedule.
 
 The default value for `schedule` is "at any time", which is functionally the same as declaring a `null` schedule.
 i.e. Renovate will run on the repository around the clock.
@@ -2391,7 +2394,10 @@ after 10pm and before 5:00am
 after 10pm and before 5am every weekday
 on friday and saturday
 every 3 months on the first day of the month
+* 0 2 * *
 ```
+
+Note: For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates.
 You could then configure a schedule like this at the repository level:
@@ -2421,6 +2427,7 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 
 Technical details: We mostly rely on the text parsing of the library [@breejs/later](https://github.com/breejs/later) but only its concepts of "days", "time_before", and "time_after".
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
+To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 ## semanticCommitScope
@@ -2522,6 +2529,11 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 <!-- markdownlint-enable MD001 -->
 
+## stopUpdatingLabel
+
+On supported platforms it is possible to add a label to a PR to request Renovate stop updating the PR.
+By default this label is `"stop-updating"` however you can configure it to anything you want by changing this `stopUpdatingLabel` field.
+
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
@@ -2572,6 +2584,14 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
+## useBaseBranchConfig
+
+By default, Renovate will read config file from the default branch only and will ignore any config files in base branches.
+You can configure `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
+
+The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
+This scenario may be useful for testing the config changes in base branches instantly.
 
 ## userStrings
 
