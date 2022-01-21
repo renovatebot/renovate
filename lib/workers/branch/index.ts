@@ -440,6 +440,26 @@ export async function processBranch(
     }
     const forcedManually = userRebaseRequested || !branchExists;
     config.forceCommit = forcedManually || branchPr?.isConflicted;
+
+    config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel);
+
+    const prRebaseChecked = branchPr?.body?.includes(
+      `- [x] <!-- rebase-check -->`
+    );
+
+    if (branchExists && dependencyDashboardCheck && config.stopUpdating) {
+      if (!prRebaseChecked) {
+        logger.info(
+          'Branch updating is skipped because stopUpdatingLabel is present in config'
+        );
+        return {
+          branchExists: true,
+          prNo: branchPr?.number,
+          result: BranchResult.NoWork,
+        };
+      }
+    }
+
     const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
