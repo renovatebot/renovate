@@ -8,6 +8,7 @@ import type { BranchConfig } from '../types';
 type ParentBranch = {
   reuseExistingBranch: boolean;
   isModified?: boolean;
+  isConflicted?: boolean;
 };
 
 export async function shouldReuseExistingBranch(
@@ -74,7 +75,8 @@ export async function shouldReuseExistingBranch(
   }
 
   // Now check if PR is unmergeable. If so then we also rebase
-  if (pr?.isConflicted) {
+  result.isConflicted = pr?.isConflicted;
+  if (result.isConflicted) {
     logger.debug('PR is conflicted');
 
     if ((await isBranchModified(branchName)) === false) {
