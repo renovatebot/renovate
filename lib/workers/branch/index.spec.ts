@@ -962,7 +962,7 @@ describe('workers/branch/index', () => {
         await branchWorker.processBranch({
           ...config,
           dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
-          updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
+          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -997,7 +997,7 @@ describe('workers/branch/index', () => {
         await branchWorker.processBranch({
           ...config,
           reuseExistingBranch: false,
-          updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
+          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
         })
       ).toMatchInlineSnapshot(`
         Object {
