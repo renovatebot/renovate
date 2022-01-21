@@ -79,7 +79,7 @@ describe('manager/helmv3/extract', () => {
       dependencies:
       - name: library
         version: 0.1.0
-        repository: oci://ghcr.io/ankitabhopatkar13/library
+        repository: oci://ghcr.io/ankitabhopatkar13
         import-values:
           - defaults
       - name: postgresql
@@ -119,12 +119,16 @@ describe('manager/helmv3/extract', () => {
         - name: example
           version: 1.0.0
           repository: alias:longalias
+        - name: oci-example
+          version: 2.2.0
+          repository: alias:ociRegistry
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, {
         aliases: {
           placeholder: 'https://my-registry.gcr.io/',
           longalias: 'https://registry.example.com/',
+          ociRegistry: 'oci://quay.example.com/organization',
         },
       });
       expect(result).not.toBeNull();

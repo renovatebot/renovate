@@ -102,7 +102,7 @@ describe('workers/pr/changelog/gitlab', () => {
     it('uses GitLab tags', async () => {
       httpMock
         .scope(matchHost)
-        .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
         .reply(200, [
           { name: 'v5.2.0' },
           { name: 'v5.4.0' },
@@ -112,10 +112,10 @@ describe('workers/pr/changelog/gitlab', () => {
           { name: 'v5.7.0' },
         ])
         .persist()
-        .get('/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
         .reply(200, [])
         .persist()
-        .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
       expect(
         await getChangeLogJSON({
@@ -144,13 +144,13 @@ describe('workers/pr/changelog/gitlab', () => {
     it('handles empty GitLab tags response', async () => {
       httpMock
         .scope(matchHost)
-        .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
         .reply(200, [])
         .persist()
-        .get('/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
         .reply(200, [])
         .persist()
-        .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
       expect(
         await getChangeLogJSON({
@@ -179,13 +179,13 @@ describe('workers/pr/changelog/gitlab', () => {
     it('uses GitLab tags with error', async () => {
       httpMock
         .scope(matchHost)
-        .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
         .replyWithError('Unknown GitLab Repo')
         .persist()
-        .get('/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
         .reply(200, [])
         .persist()
-        .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
+        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
       expect(
         await getChangeLogJSON({
