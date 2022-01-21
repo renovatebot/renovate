@@ -70,6 +70,8 @@ export interface BranchUpgradeConfig
   dependencyUrl?: string;
   sourceUrl?: string;
   sourceRepo?: string;
+  sourceRepoOrg?: string;
+  sourceRepoName?: string;
 }
 
 export type PrBlockedBy =
