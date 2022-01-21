@@ -1,5 +1,4 @@
 import { fs } from '../../../test/util';
-import { SkipReason } from '../../types';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
@@ -207,7 +206,7 @@ describe('manager/helm-requirements/extract', () => {
             {
               currentValue: undefined,
               depName: undefined,
-              skipReason: SkipReason.InvalidName,
+              skipReason: 'invalid-name',
             },
           ],
         },
@@ -224,7 +223,7 @@ describe('manager/helm-requirements/extract', () => {
             {
               currentValue: undefined,
               depName: 'postgres',
-              skipReason: SkipReason.InvalidVersion,
+              skipReason: 'invalid-version',
             },
           ],
         },
@@ -242,7 +241,7 @@ describe('manager/helm-requirements/extract', () => {
             {
               currentValue: '0.1.0',
               depName: 'postgres',
-              skipReason: SkipReason.NoRepository,
+              skipReason: 'no-repository',
             },
           ],
         },
