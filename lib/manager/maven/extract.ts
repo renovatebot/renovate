@@ -4,7 +4,6 @@ import { XmlDocument, XmlElement } from 'xmldoc';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -139,9 +138,9 @@ function applyProps(
   }
 
   if (containsPlaceholder(depName)) {
-    result.skipReason = SkipReason.NamePlaceholder;
+    result.skipReason = 'name-placeholder';
   } else if (containsPlaceholder(currentValue)) {
-    result.skipReason = SkipReason.VersionPlaceholder;
+    result.skipReason = 'version-placeholder';
   }
 
   if (propSource && depPackageFile !== propSource) {

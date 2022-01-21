@@ -3,7 +3,6 @@ import * as datasourceDocker from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
-import { SkipReason } from '../../types';
 import {
   extractHelmChart,
   extractImage,
@@ -259,7 +258,7 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps).toHaveLength(6);
       expect(res.deps[0].currentValue).toBe('v0.1.0');
       expect(res.deps[1].currentValue).toBe('v0.0.1');
-      expect(res.deps[5].skipReason).toEqual(SkipReason.InvalidValue);
+      expect(res.deps[5].skipReason).toBe('invalid-value');
     });
     it('ignores non-Kubernetes empty files', () => {
       expect(extractPackageFile('')).toBeNull();
@@ -315,7 +314,7 @@ describe('manager/kustomize/extract', () => {
             replaceString: `11@${postgresDigest}`,
           },
           {
-            skipReason: SkipReason.InvalidValue,
+            skipReason: 'invalid-value',
           },
         ],
       });
@@ -335,13 +334,13 @@ describe('manager/kustomize/extract', () => {
             replaceString: postgresDigest,
           },
           {
-            skipReason: SkipReason.InvalidDependencySpecification,
+            skipReason: 'invalid-dependency-specification',
           },
           {
-            skipReason: SkipReason.InvalidValue,
+            skipReason: 'invalid-value',
           },
           {
-            skipReason: SkipReason.InvalidValue,
+            skipReason: 'invalid-value',
           },
         ],
       });
