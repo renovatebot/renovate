@@ -1,3 +1,4 @@
+// eslint-disable-next-line typescript-enum/no-enum
 export enum SkipReason {
   AnyVersion = 'any-version',
   ContainsVariable = 'contains-variable',

@@ -78,6 +78,7 @@ export type PrBlockedBy =
   | 'RateLimited'
   | 'Error';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum BranchResult {
   AlreadyExisted = 'already-existed',
   Automerged = 'automerged',

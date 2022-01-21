@@ -1,3 +1,4 @@
+/* eslint-disable typescript-enum/no-enum */
 import crypto from 'crypto';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -22,6 +23,7 @@ const cacheMinutes = 30;
 const githubHttp = new GithubHttp(id);
 const http = new Http(id);
 
+// eslint-disable-next-line typescript-enum/no-const-enum
 const enum URLFormatOptions {
   WithShardWithSpec,
   WithShardWithoutSpec,
