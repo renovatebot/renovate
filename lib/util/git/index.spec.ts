@@ -4,6 +4,7 @@ import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import type { File } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
@@ -205,8 +206,9 @@ describe('util/git/index', () => {
   });
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
-      const file = {
-        name: 'some-new-file',
+      const file: File = {
+        type: 'addition',
+        path: 'some-new-file',
         contents: 'some new-contents',
       };
       await git.commitFiles({
@@ -267,8 +269,9 @@ describe('util/git/index', () => {
   });
   describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
-      const file = {
-        name: 'some-new-file',
+      const file: File = {
+        type: 'addition',
+        path: 'some-new-file',
         contents: 'some new-contents',
       };
       const commit = await git.commitFiles({
@@ -279,9 +282,9 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('deletes file', async () => {
-      const file = {
-        name: '|delete|',
-        contents: 'file_to_delete',
+      const file: File = {
+        type: 'deletion',
+        path: 'file_to_delete',
       };
       const commit = await git.commitFiles({
         branchName: 'renovate/something',
@@ -291,13 +294,15 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('updates multiple files', async () => {
-      const files = [
+      const files: File[] = [
         {
-          name: 'some-existing-file',
+          type: 'addition',
+          path: 'some-existing-file',
           contents: 'updated content',
         },
         {
-          name: 'some-other-existing-file',
+          type: 'addition',
+          path: 'some-other-existing-file',
           contents: 'other updated content',
         },
       ];
@@ -309,9 +314,10 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('updates git submodules', async () => {
-      const files = [
+      const files: File[] = [
         {
-          name: '.',
+          type: 'addition',
+          path: '.',
           contents: 'some content',
         },
       ];
@@ -323,9 +329,10 @@ describe('util/git/index', () => {
       expect(commit).toBeNull();
     });
     it('does not push when no diff', async () => {
-      const files = [
+      const files: File[] = [
         {
-          name: 'future_file',
+          type: 'addition',
+          path: 'future_file',
           contents: 'future',
         },
       ];
@@ -341,9 +348,10 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: File[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
@@ -370,9 +378,10 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: File[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
@@ -400,9 +409,10 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: File[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
@@ -427,10 +437,11 @@ describe('util/git/index', () => {
     });
 
     it('creates file with the executable bit', async () => {
-      const file = {
-        name: 'some-executable',
+      const file: File = {
+        type: 'addition',
+        path: 'some-executable',
         contents: 'some new-contents',
-        executable: true,
+        isExecutable: true,
       };
       const commit = await git.commitFiles({
         branchName: 'renovate/past_branch',

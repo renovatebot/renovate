@@ -695,6 +695,14 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'useBaseBranchConfig',
+    description:
+      'Whether to read configuration from baseBranches instead of only the default branch',
+    type: 'string',
+    allowedValues: ['merge', 'none'],
+    default: 'none',
+  },
+  {
     name: 'gitAuthor',
     description: 'Author to use for Git commits. Must conform to RFC5322.',
     type: 'string',
@@ -2209,7 +2217,7 @@ const options: RenovateOptions[] = [
       ignoreMajor:
         'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{newMajor}}}.x releases. However, if you upgrade to {{{newMajor}}}.x manually then Renovate will reenable minor and patch updates automatically.',
       ignoreDigest:
-        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future {{{depName}}}:{{{currentValue}}} digest updates. Digest updates will resume if you update the specified tag at any time.',
+        'As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for the `{{{depName}}}` `{{{newDigestShort}}}` update again.',
       ignoreOther:
         'As this PR has been closed unmerged, Renovate will now ignore this update ({{{newValue}}}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the `ignoreDeps` array of your renovate config.',
     },
