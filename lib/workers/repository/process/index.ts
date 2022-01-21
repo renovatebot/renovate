@@ -56,7 +56,7 @@ async function getBaseBranchConfig(
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranches = config.baseBranches;
   }
-    
+
   if (config.baseBranches.length > 1) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
