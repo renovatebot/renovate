@@ -58,7 +58,6 @@ export async function shouldReuseExistingBranch(
       logger.debug(`Branch is stale and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (await isBranchModified(branchName)) {
-        // TODO: Warn here so that it appears in PR body (#9720)
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
         result.isModified = true;
