@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { Doc } from './types';
@@ -43,7 +42,7 @@ export function extractPackageFile(
       if (!is.string(dep.chart)) {
         return {
           depName: dep.name,
-          skipReason: SkipReason.InvalidName,
+          skipReason: 'invalid-name',
         };
       }
 
@@ -51,7 +50,7 @@ export function extractPackageFile(
       if (dep.chart.startsWith('./')) {
         return {
           depName,
-          skipReason: SkipReason.LocalChart,
+          skipReason: 'local-chart',
         };
       }
 
@@ -73,18 +72,18 @@ export function extractPackageFile(
 
       // If version is null is probably a local chart
       if (!res.currentValue) {
-        res.skipReason = SkipReason.LocalChart;
+        res.skipReason = 'local-chart';
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
       // However helmfile support templating of that field
       if (!isValidChartName(res.depName)) {
-        res.skipReason = SkipReason.UnsupportedChartType;
+        res.skipReason = 'unsupported-chart-type';
       }
 
       // Skip in case we cannot locate the registry
       if (is.emptyArray(res.registryUrls)) {
-        res.skipReason = SkipReason.UnknownRegistry;
+        res.skipReason = 'unknown-registry';
       }
 
       return res;
