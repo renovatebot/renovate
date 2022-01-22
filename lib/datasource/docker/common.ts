@@ -513,8 +513,8 @@ export async function getLabels(
   }
 }
 
-export function isECRMaxResultsError(err: HttpError): boolean | undefined {
-  return (
+export function isECRMaxResultsError(err: HttpError): boolean {
+  return !!(
     err.response?.statusCode === 405 &&
     err.response?.headers?.['docker-distribution-api-version'] &&
     // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
