@@ -4,10 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
 import { commitFiles } from '../../../../util/git';
-import type {
-  CommitFilesConfig,
-  PushFilesConfig,
-} from '../../../../util/git/types';
+import { CommitFilesConfig } from '../../../../util/git/types';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -48,8 +45,5 @@ export async function createOnboardingBranch(
     message: commitMessage.toString(),
   };
 
-  // istanbul ignore next
-  return config.platformCommit && !!platform.pushFiles
-    ? commitFiles(commitConfig, (x: PushFilesConfig) => platform.pushFiles(x))
-    : commitFiles(commitConfig);
+  return commitFiles(commitConfig, config.platformCommit && platform.pushFiles);
 }

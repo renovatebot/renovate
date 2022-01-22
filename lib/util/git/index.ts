@@ -32,6 +32,7 @@ import type {
   CommitFilesConfig,
   CommitSha,
   LocalConfig,
+  PushCallback,
   PushFilesConfig,
   StatusResult,
   StorageConfig,
@@ -678,8 +679,6 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
-type PushCallback = (x: PushFilesConfig) => Promise<string | null>;
-
 async function pushFiles({ branchName }: PushFilesConfig): Promise<string> {
   const pushOptions: TaskOptions = {
     '--force-with-lease': null,
@@ -704,7 +703,7 @@ async function pushFiles({ branchName }: PushFilesConfig): Promise<string> {
 
 export async function commitFiles(
   commitConfig: CommitFilesConfig,
-  pushCallback?: PushCallback
+  pushCallback?: PushCallback | undefined | null | false
 ): Promise<CommitSha | null> {
   const { branchName, files, message, force = false } = commitConfig;
   await syncGit();
@@ -811,6 +810,7 @@ export async function commitFiles(
       branchName,
       files: files.filter(({ path }) => !ignoredFiles.includes(path)),
     };
+
     let commitSha: string | null = null;
     // istanbul ignore if
     if (pushCallback) {
@@ -819,6 +819,7 @@ export async function commitFiles(
       await git.fetch(['origin', ref, '--force']);
     }
     commitSha ??= await pushFiles(pushConfig);
+
     config.branchCommits[branchName] = commitSha;
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);

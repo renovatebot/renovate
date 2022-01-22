@@ -74,7 +74,9 @@ export interface CommitFilesConfig {
 }
 
 export interface PushFilesConfig {
-  message: string;
   branchName: string;
   files: FileChange[];
+  message: string;
 }
+
+export type PushCallback = (x: PushFilesConfig) => Promise<string | null>;
