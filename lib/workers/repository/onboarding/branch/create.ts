@@ -40,7 +40,8 @@ export async function createOnboardingBranch(
     branchName: config.onboardingBranch,
     files: [
       {
-        name: configFile,
+        type: 'addition',
+        path: configFile,
         contents,
       },
     ],

@@ -18,7 +18,8 @@ const buildExpectedCommitFilesArgument = (
   branchName: 'renovate/configure',
   files: [
     {
-      name: filename,
+      type: 'addition',
+      path: filename,
       contents: '{"foo":"bar"}',
     },
   ],

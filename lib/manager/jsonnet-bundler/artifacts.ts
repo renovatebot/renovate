@@ -70,25 +70,19 @@ export async function updateArtifacts(
 
     for (const f of status.modified ?? []) {
       res.push({
-        file: {
-          name: f,
-          contents: await readLocalFile(f),
-        },
+        file: { type: 'addition', path: f, contents: await readLocalFile(f) },
       });
     }
     for (const f of status.not_added ?? []) {
       res.push({
-        file: {
-          name: f,
-          contents: await readLocalFile(f),
-        },
+        file: { type: 'addition', path: f, contents: await readLocalFile(f) },
       });
     }
     for (const f of status.deleted ?? []) {
       res.push({
         file: {
-          name: '|delete|',
-          contents: f,
+          type: 'deletion',
+          path: f,
         },
       });
     }
