@@ -12,6 +12,7 @@ import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
+import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import type { Migration, MigrationConstructor } from './types';
 
 export class MigrationsService {
@@ -51,6 +52,7 @@ export class MigrationsService {
     RequiredStatusChecksMigration,
     SemanticCommitsMigration,
     TrustLevelMigration,
+    UpgradeInRangeMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
