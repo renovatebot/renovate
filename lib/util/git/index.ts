@@ -700,10 +700,8 @@ export async function commitFiles({
     const addedModifiedFiles: string[] = [];
     const ignoredFiles: string[] = [];
     for (const file of files) {
-      let fileName = file.name;
-      // istanbul ignore if
-      if (fileName === '|delete|') {
-        fileName = file.contents as string;
+      const fileName = file.path;
+      if (file.type === 'deletion') {
         try {
           await git.rm([fileName]);
           deletedFiles.push(fileName);
@@ -716,6 +714,9 @@ export async function commitFiles({
         if (await isDirectory(upath.join(localDir, fileName))) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
+        } else if (file.contents === null) {
+          // istanbul ignore next
+          continue;
         } else {
           let contents: Buffer;
           // istanbul ignore else
@@ -727,7 +728,7 @@ export async function commitFiles({
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
           await fs.outputFile(upath.join(localDir, fileName), contents, {
-            mode: file.executable ? 0o777 : 0o666,
+            mode: file.isExecutable ? 0o777 : 0o666,
           });
         }
         try {
@@ -735,7 +736,7 @@ export async function commitFiles({
           const addParams =
             fileName === configFileNames[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
-          if (file.executable) {
+          if (file.isExecutable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
           addedModifiedFiles.push(fileName);
@@ -748,7 +749,7 @@ export async function commitFiles({
             throw err;
           }
           logger.debug({ fileName }, 'Cannot commit ignored file');
-          ignoredFiles.push(file.name);
+          ignoredFiles.push(file.path);
         }
       }
     }
@@ -827,7 +828,7 @@ export async function commitFiles({
     if (
       (err.message.includes('remote rejected') ||
         err.message.includes('403')) &&
-      files?.some((file) => file.name?.startsWith('.github/workflows/'))
+      files?.some((file) => file.path?.startsWith('.github/workflows/'))
     ) {
       logger.debug({ err }, 'commitFiles error');
       logger.info('Workflows update rejection - aborting branch.');

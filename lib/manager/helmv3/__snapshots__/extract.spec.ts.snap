@@ -9,7 +9,6 @@ Object {
       "datasource": "docker",
       "depName": "library",
       "lookupName": "ghcr.io/ankitabhopatkar13/library",
-      "registryUrls": Array [],
     },
     Object {
       "currentValue": "0.8.1",
@@ -64,6 +63,12 @@ Object {
         "https://registry.example.com/",
       ],
     },
+    Object {
+      "currentValue": "2.2.0",
+      "datasource": "docker",
+      "depName": "oci-example",
+      "lookupName": "quay.example.com/organization/oci-example",
+    },
   ],
   "packageFileVersion": "0.1.0",
 }
@@ -76,17 +81,11 @@ Object {
     Object {
       "currentValue": "0.9.0",
       "depName": "redis",
-      "registryUrls": Array [
-        "@placeholder",
-      ],
       "skipReason": "placeholder-url",
     },
     Object {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "registryUrls": Array [
-        "nope",
-      ],
       "skipReason": "invalid-url",
     },
     Object {
@@ -113,9 +112,6 @@ Object {
     Object {
       "currentValue": "0.8.1",
       "depName": "postgresql",
-      "registryUrls": Array [
-        "file:///some/local/path/",
-      ],
       "skipReason": "local-dependency",
     },
   ],
