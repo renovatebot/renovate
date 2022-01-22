@@ -129,7 +129,7 @@ export async function updateArtifacts({
   }
 
   const lockFileName = getSiblingFileName(packageFileName, 'Chart.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Chart.lock found');
     return null;
@@ -137,9 +137,7 @@ export async function updateArtifacts({
   try {
     // get repositories and registries defined in the package file
     const packages = yaml.load(newPackageFileContent) as ChartDefinition; //TODO #9610
-    const locks = yaml.load(
-      existingLockFileContent.toString()
-    ) as ChartDefinition; //TODO #9610
+    const locks = yaml.load(existingLockFileContent) as ChartDefinition; //TODO #9610
 
     const chartDefinitions = [];
     // prioritize alias naming for Helm repositories
@@ -156,7 +154,7 @@ export async function updateArtifacts({
     logger.debug('Updating ' + lockFileName);
     await helmCommands(packageFileName, repositories);
     logger.debug('Returning updated Chart.lock');
-    const newHelmLockContent = await readLocalFile(lockFileName);
+    const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newHelmLockContent) {
       logger.debug('Chart.lock is unchanged');
       return null;
