@@ -40,7 +40,8 @@ Array [
   Object {
     "file": Object {
       "contents": "New Chart.lock",
-      "name": "Chart.lock",
+      "path": "Chart.lock",
+      "type": "addition",
     },
   },
 ]
@@ -75,7 +76,8 @@ Array [
   Object {
     "file": Object {
       "contents": "New Chart.lock",
-      "name": "Chart.lock",
+      "path": "Chart.lock",
+      "type": "addition",
     },
   },
 ]
@@ -110,7 +112,8 @@ Array [
   Object {
     "file": Object {
       "contents": "New Chart.lock",
-      "name": "Chart.lock",
+      "path": "Chart.lock",
+      "type": "addition",
     },
   },
 ]
@@ -157,7 +160,8 @@ Array [
   Object {
     "file": Object {
       "contents": "New Chart.lock",
-      "name": "Chart.lock",
+      "path": "Chart.lock",
+      "type": "addition",
     },
   },
 ]
@@ -230,7 +234,8 @@ Array [
   Object {
     "file": Object {
       "contents": "New Chart.lock",
-      "name": "Chart.lock",
+      "path": "Chart.lock",
+      "type": "addition",
     },
   },
 ]

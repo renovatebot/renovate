@@ -1,3 +1,4 @@
+// eslint-disable-next-line typescript-enum/no-enum, typescript-enum/no-const-enum
 export const enum PlatformId {
   Azure = 'azure',
   Bitbucket = 'bitbucket',
@@ -19,4 +20,9 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-releases',
   'gitlab-tags',
   'gitlab-packages',
+];
+
+export const BITBUCKET_API_USING_HOST_TYPES = [
+  PlatformId.Bitbucket,
+  'bitbucket-tags',
 ];

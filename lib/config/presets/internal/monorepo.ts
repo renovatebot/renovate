@@ -85,6 +85,7 @@ const repoGroups = {
     'https://github.com/dotnet/extensions',
     'https://github.com/dotnet/runtime',
   ],
+  'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
@@ -158,6 +159,7 @@ const repoGroups = {
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
+  quartznet: 'https://github.com/quartznet/quartznet',
   react: 'https://github.com/facebook/react',
   'react-router': [
     'https://github.com/ReactTraining/react-router', // old repo
@@ -167,6 +169,7 @@ const repoGroups = {
   redwood: 'https://github.com/redwoodjs/redwood',
   remark: 'https://github.com/remarkjs/remark',
   router5: 'https://github.com/router5/router5',
+  'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   springfox: 'https://github.com/springfox/springfox',
@@ -181,15 +184,17 @@ const repoGroups = {
   treat: 'https://github.com/seek-oss/treat',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   uppy: 'https://github.com/transloadit/uppy',
-  vue: 'https://github.com/vuejs/vue',
+  vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
   vstest: 'https://github.com/microsoft/vstest',
   xterm: 'https://github.com/xtermjs/xterm.js',
+  'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
 const patternGroups = {
+  'apache-camel': '^org.apache.camel:',
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   wordpress: '^@wordpress/',

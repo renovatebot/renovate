@@ -17,6 +17,25 @@ handlebars.registerHelper(
     (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
 );
 
+handlebars.registerHelper('containsString', (str, subStr, options) =>
+  str.includes(subStr)
+);
+
+handlebars.registerHelper({
+  and(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.every(Boolean);
+  },
+  or(...args) {
+    // Need to remove the 'options', as last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.some(Boolean);
+  },
+});
+
 export const exposedConfigOptions = [
   'additionalBranchPrefix',
   'addLabels',
@@ -97,6 +116,9 @@ export const allowedFields = {
   releaseNotes: 'A ChangeLogNotes object for the release',
   repository: 'The current repository',
   semanticPrefix: 'The fully generated semantic prefix for commit messages',
+  sourceRepo: 'The repository in the sourceUrl, if present',
+  sourceRepoName: 'The repository name in the sourceUrl, if present',
+  sourceRepoOrg: 'The repository organization in the sourceUrl, if present',
   sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
   sourceUrl: 'The source URL for the package',
   updateType: 'One of digest, pin, rollback, patch, minor, major, replacement',

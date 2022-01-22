@@ -8,18 +8,15 @@ export const setBaseUrl = (url: string): void => {
 };
 
 export class BitbucketHttp extends Http {
-  constructor(options?: HttpOptions) {
-    super(PlatformId.Bitbucket, options);
+  constructor(type: string = PlatformId.Bitbucket, options?: HttpOptions) {
+    super(type, options);
   }
 
   protected override request<T>(
     url: string | URL,
     options?: InternalHttpOptions
-  ): Promise<HttpResponse<T> | null> {
-    const opts = {
-      baseUrl,
-      ...options,
-    };
+  ): Promise<HttpResponse<T>> {
+    const opts = { baseUrl, ...options };
     return super.request<T>(url, opts);
   }
 }
