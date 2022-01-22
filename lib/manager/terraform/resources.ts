@@ -1,5 +1,4 @@
 import { HelmDatasource } from '../../datasource/helm';
-import { SkipReason } from '../../types';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
@@ -71,7 +70,7 @@ export function analyseTerraformResource(
         applyDockerDependency(dep, dep.managerData.image);
         dep.depType = 'docker_container';
       } else {
-        dep.skipReason = SkipReason.InvalidDependencySpecification;
+        dep.skipReason = 'invalid-dependency-specification';
       }
       break;
 
@@ -80,7 +79,7 @@ export function analyseTerraformResource(
         applyDockerDependency(dep, dep.managerData.name);
         dep.depType = 'docker_image';
       } else {
-        dep.skipReason = SkipReason.InvalidDependencySpecification;
+        dep.skipReason = 'invalid-dependency-specification';
       }
       break;
 
@@ -89,15 +88,15 @@ export function analyseTerraformResource(
         applyDockerDependency(dep, dep.managerData.image);
         dep.depType = 'docker_service';
       } else {
-        dep.skipReason = SkipReason.InvalidDependencySpecification;
+        dep.skipReason = 'invalid-dependency-specification';
       }
       break;
 
     case TerraformResourceTypes.helm_release:
       if (!dep.managerData.chart) {
-        dep.skipReason = SkipReason.InvalidName;
+        dep.skipReason = 'invalid-name';
       } else if (checkIfStringIsPath(dep.managerData.chart)) {
-        dep.skipReason = SkipReason.LocalChart;
+        dep.skipReason = 'local-chart';
       }
       dep.depType = 'helm_release';
       dep.registryUrls = [dep.managerData.repository];
@@ -106,7 +105,7 @@ export function analyseTerraformResource(
       break;
 
     default:
-      dep.skipReason = SkipReason.InvalidValue;
+      dep.skipReason = 'invalid-value';
       break;
   }
 }

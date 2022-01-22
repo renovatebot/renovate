@@ -25,6 +25,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     hash: true,
     versioning: npmVersioningId,
   },
+  pnpm: {
+    datasource: 'npm',
+    depName: 'pnpm',
+    versioning: npmVersioningId,
+  },
 };
 
 export function supportsDynamicInstall(toolName: string): boolean {

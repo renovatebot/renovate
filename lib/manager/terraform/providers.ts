@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
@@ -82,7 +81,7 @@ export function analyzeTerraformProvider(
   if (is.nonEmptyString(dep.managerData.source)) {
     const source = sourceExtractionRegex.exec(dep.managerData.source);
     if (!source) {
-      dep.skipReason = SkipReason.UnsupportedUrl;
+      dep.skipReason = 'unsupported-url';
       return;
     }
 
@@ -101,6 +100,6 @@ export function analyzeTerraformProvider(
   dep.lockedVersion = getLockedVersion(dep, locks);
 
   if (!dep.currentValue) {
-    dep.skipReason = SkipReason.NoVersion;
+    dep.skipReason = 'no-version';
   }
 }
