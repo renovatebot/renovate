@@ -8,7 +8,7 @@ export async function updateArtifacts({
   packageFileName,
   updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  if (!isSystemManifest(packageFileName)) {
+  if (!isSystemManifest(packageFileName) || !updatedDeps[0]?.newVersion) {
     return null;
   }
   try {
@@ -17,7 +17,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       docker: {
         image: 'fluxcd/flux-cli',
-        tag: updatedDeps[0].newVersion, // TODO: We assume there's only one dependency for these files.
+        tag: updatedDeps[0].newVersion,
       },
     };
     const result = await exec(cmd, execOptions);

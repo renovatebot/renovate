@@ -102,6 +102,7 @@ function resolveManifest(
         return res;
       });
   }
+  // istanbul ignore next: unreachable code
   return null;
 }
 
