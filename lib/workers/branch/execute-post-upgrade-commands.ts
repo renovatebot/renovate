@@ -6,14 +6,14 @@ import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import type { File } from '../../util/git/types';
+import type { FileChange } from '../../util/git/types';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { compile } from '../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 export type PostUpgradeCommandsExecutionResult = {
-  updatedArtifacts: File[];
+  updatedArtifacts: FileChange[];
   artifactErrors: ArtifactError[];
 };
 

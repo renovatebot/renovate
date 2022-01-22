@@ -23,7 +23,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
-import type { File } from '../../../util/git/types';
+import type { FileChange } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -361,7 +361,7 @@ async function resetNpmrcContent(
 async function updateYarnOffline(
   lockFileDir: string,
   localDir: string,
-  updatedArtifacts: File[]
+  updatedArtifacts: FileChange[]
 ): Promise<void> {
   try {
     const resolvedPaths: string[] = [];
@@ -414,7 +414,7 @@ async function updateYarnOffline(
 // exported for testing
 export async function updateYarnBinary(
   lockFileDir: string,
-  updatedArtifacts: File[],
+  updatedArtifacts: FileChange[],
   existingYarnrcYmlContent: string | undefined
 ): Promise<string | undefined> {
   let yarnrcYml = existingYarnrcYmlContent;
@@ -463,7 +463,7 @@ export async function getAdditionalFiles(
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
-  const updatedArtifacts: File[] = [];
+  const updatedArtifacts: FileChange[] = [];
   if (!packageFiles.npm?.length) {
     return { artifactErrors, updatedArtifacts };
   }
