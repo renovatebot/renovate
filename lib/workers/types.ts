@@ -14,7 +14,7 @@ import type {
   PackageFile,
 } from '../manager/types';
 import type { PlatformPrOptions } from '../platform/types';
-import type { File } from '../util/git/types';
+import type { FileChange } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence';
 import type { ChangeLogRelease, ChangeLogResult } from './pr/changelog/types';
 
@@ -59,8 +59,8 @@ export interface BranchUpgradeConfig
   minimumConfidence?: MergeConfidence;
   sourceDirectory?: string;
 
-  updatedPackageFiles?: File[];
-  updatedArtifacts?: File[];
+  updatedPackageFiles?: FileChange[];
+  updatedArtifacts?: FileChange[];
 
   logJSON?: ChangeLogResult;
 

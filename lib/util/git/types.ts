@@ -64,11 +64,11 @@ export interface FileDeletion {
   path: string;
 }
 
-export type File = FileAddition | FileDeletion;
+export type FileChange = FileAddition | FileDeletion;
 
 export interface CommitFilesConfig {
   branchName: string;
-  files: File[];
+  files: FileChange[];
   message: string;
   force?: boolean;
 }
@@ -76,5 +76,5 @@ export interface CommitFilesConfig {
 export interface PushFilesConfig {
   message: string;
   branchName: string;
-  files: File[];
+  files: FileChange[];
 }
