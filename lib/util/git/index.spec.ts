@@ -211,11 +211,14 @@ describe('util/git/index', () => {
         path: 'some-new-file',
         contents: 'some new-contents',
       };
-      await git.commitFiles({
-        branchName: 'renovate/branch_with_changes',
-        files: [file],
-        message: 'Create something',
-      });
+      await git.commitFiles(
+        {
+          branchName: 'renovate/branch_with_changes',
+          files: [file],
+          message: 'Create something',
+        },
+        null
+      );
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes'
       );
@@ -274,11 +277,14 @@ describe('util/git/index', () => {
         path: 'some-new-file',
         contents: 'some new-contents',
       };
-      const commit = await git.commitFiles({
-        branchName: 'renovate/past_branch',
-        files: [file],
-        message: 'Create something',
-      });
+      const commit = await git.commitFiles(
+        {
+          branchName: 'renovate/past_branch',
+          files: [file],
+          message: 'Create something',
+        },
+        null
+      );
       expect(commit).not.toBeNull();
     });
     it('deletes file', async () => {
@@ -286,11 +292,14 @@ describe('util/git/index', () => {
         type: 'deletion',
         path: 'file_to_delete',
       };
-      const commit = await git.commitFiles({
-        branchName: 'renovate/something',
-        files: [file],
-        message: 'Delete something',
-      });
+      const commit = await git.commitFiles(
+        {
+          branchName: 'renovate/something',
+          files: [file],
+          message: 'Delete something',
+        },
+        null
+      );
       expect(commit).not.toBeNull();
     });
     it('updates multiple files', async () => {
@@ -306,11 +315,14 @@ describe('util/git/index', () => {
           contents: 'other updated content',
         },
       ];
-      const commit = await git.commitFiles({
-        branchName: 'renovate/something',
-        files,
-        message: 'Update something',
-      });
+      const commit = await git.commitFiles(
+        {
+          branchName: 'renovate/something',
+          files,
+          message: 'Update something',
+        },
+        null
+      );
       expect(commit).not.toBeNull();
     });
     it('updates git submodules', async () => {
@@ -321,11 +333,14 @@ describe('util/git/index', () => {
           contents: 'some content',
         },
       ];
-      const commit = await git.commitFiles({
-        branchName: 'renovate/something',
-        files,
-        message: 'Update something',
-      });
+      const commit = await git.commitFiles(
+        {
+          branchName: 'renovate/something',
+          files,
+          message: 'Update something',
+        },
+        null
+      );
       expect(commit).toBeNull();
     });
     it('does not push when no diff', async () => {
@@ -336,11 +351,14 @@ describe('util/git/index', () => {
           contents: 'future',
         },
       ];
-      const commit = await git.commitFiles({
-        branchName: 'renovate/future_branch',
-        files,
-        message: 'No change update',
-      });
+      const commit = await git.commitFiles(
+        {
+          branchName: 'renovate/future_branch',
+          files,
+          message: 'No change update',
+        },
+        null
+      );
       expect(commit).toBeNull();
     });
 
@@ -356,11 +374,14 @@ describe('util/git/index', () => {
         },
       ];
 
-      await git.commitFiles({
-        branchName: 'renovate/something',
-        files,
-        message: 'Pass no-verify',
-      });
+      await git.commitFiles(
+        {
+          branchName: 'renovate/something',
+          files,
+          message: 'Pass no-verify',
+        },
+        null
+      );
 
       expect(commitSpy).toHaveBeenCalledWith(
         expect.anything(),
@@ -387,11 +408,14 @@ describe('util/git/index', () => {
       ];
       setNoVerify(['commit']);
 
-      await git.commitFiles({
-        branchName: 'renovate/something',
-        files,
-        message: 'Pass no-verify',
-      });
+      await git.commitFiles(
+        {
+          branchName: 'renovate/something',
+          files,
+          message: 'Pass no-verify',
+        },
+        null
+      );
 
       expect(commitSpy).toHaveBeenCalledWith(
         expect.anything(),
@@ -418,11 +442,14 @@ describe('util/git/index', () => {
       ];
       setNoVerify(['push']);
 
-      await git.commitFiles({
-        branchName: 'renovate/something',
-        files,
-        message: 'Pass no-verify',
-      });
+      await git.commitFiles(
+        {
+          branchName: 'renovate/something',
+          files,
+          message: 'Pass no-verify',
+        },
+        null
+      );
 
       expect(commitSpy).toHaveBeenCalledWith(
         expect.anything(),
@@ -443,11 +470,14 @@ describe('util/git/index', () => {
         contents: 'some new-contents',
         isExecutable: true,
       };
-      const commit = await git.commitFiles({
-        branchName: 'renovate/past_branch',
-        files: [file],
-        message: 'Create something',
-      });
+      const commit = await git.commitFiles(
+        {
+          branchName: 'renovate/past_branch',
+          files: [file],
+          message: 'Create something',
+        },
+        null
+      );
       expect(commit).not.toBeNull();
 
       const repo = Git(tmpDir.path);
