@@ -1,7 +1,7 @@
 import { getOptions } from '../config/options';
 import { loadModules } from '../util/modules';
 import { isVersioningApiConstructor } from './common';
-import { GenericVersion, GenericVersioningApi } from './loose/generic';
+import { GenericVersion, GenericVersioningApi } from './generic';
 import * as semverVersioning from './semver';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
