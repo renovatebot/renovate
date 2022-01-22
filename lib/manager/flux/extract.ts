@@ -2,7 +2,6 @@ import { loadAll } from 'js-yaml';
 import { id as GithubReleasesId } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { FluxManifest, FluxResource, ResourceFluxManifest } from './types';
@@ -96,7 +95,7 @@ function resolveManifest(
         if (matchingRepositories.length) {
           res.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
         } else {
-          res.skipReason = SkipReason.UnknownRegistry;
+          res.skipReason = 'unknown-registry';
         }
 
         return res;

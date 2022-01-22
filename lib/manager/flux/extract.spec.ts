@@ -1,7 +1,6 @@
 import { loadFixture } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
-import { SkipReason } from '../../types';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
@@ -50,7 +49,7 @@ describe('manager/flux/extract', () => {
         loadFixture('release.yaml'),
         'release.yaml'
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores HelmRelease resources without an apiVersion', () => {
       const result = extractPackageFile('kind: HelmRelease', 'test.yaml');
@@ -69,7 +68,7 @@ kind: HelmRepository
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores HelmRelease resources without a chart name', () => {
       const result = extractPackageFile(
@@ -112,7 +111,7 @@ spec:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
@@ -130,7 +129,7 @@ spec:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
@@ -149,7 +148,7 @@ spec:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
@@ -162,7 +161,7 @@ metadata:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores HelmRepository resources without a URL', () => {
       const result = extractPackageFile(
@@ -176,7 +175,7 @@ metadata:
 `,
         'test.yaml'
       );
-      expect(result.deps[0].skipReason).toBe(SkipReason.UnknownRegistry);
+      expect(result.deps[0].skipReason).toBe('unknown-registry');
     });
     it('ignores resources of an unknown kind', () => {
       const result = extractPackageFile(

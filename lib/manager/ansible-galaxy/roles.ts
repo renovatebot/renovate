@@ -1,6 +1,5 @@
 import { GalaxyDatasource } from '../../datasource/galaxy';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import {
@@ -47,7 +46,7 @@ function interpretLine(
 function finalize(dependency: PackageDependency): boolean {
   const dep = dependency;
   if (dependency.managerData.version === null) {
-    dep.skipReason = SkipReason.NoVersion;
+    dep.skipReason = 'no-version';
     return false;
   }
 
@@ -67,7 +66,7 @@ function finalize(dependency: PackageDependency): boolean {
     dep.depName = dep.managerData.name;
     dep.lookupName = dep.managerData.name;
   } else {
-    dep.skipReason = SkipReason.NoSourceMatch;
+    dep.skipReason = 'no-source-match';
     return false;
   }
   if (dep.managerData.name !== null) {

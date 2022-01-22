@@ -4,7 +4,6 @@ import { GlobalConfig } from '../../config/global';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
 import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -65,7 +64,7 @@ export function extractPackageFile(
       let dep: PackageDependency = {};
       const [line, comment] = rawline.split('#').map((part) => part.trim());
       if (isSkipComment(comment)) {
-        dep.skipReason = SkipReason.Ignored;
+        dep.skipReason = 'ignored';
       }
       const [lineNoEnvMarkers] = line.split(';').map((part) => part.trim());
       const lineNoHashes = lineNoEnvMarkers.split(' \\')[0];

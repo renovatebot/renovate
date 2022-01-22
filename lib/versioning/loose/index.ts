@@ -1,6 +1,6 @@
 import { regEx } from '../../util/regex';
+import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
-import { GenericVersion, GenericVersioningApi } from './generic';
 
 export const id = 'loose';
 export const displayName = 'Loose';
