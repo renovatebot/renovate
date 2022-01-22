@@ -809,11 +809,7 @@ export async function commitFiles(
     const pushConfig: PushFilesConfig = {
       message,
       branchName,
-      additions: files.filter(
-        ({ name }) =>
-          addedModifiedFiles.includes(name) && !ignoredFiles.includes(name)
-      ),
-      deletions: deletedFiles,
+      files: files.filter(({ path }) => !ignoredFiles.includes(path)),
     };
     let commitSha: string | null = null;
     // istanbul ignore if

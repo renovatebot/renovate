@@ -76,6 +76,5 @@ export interface CommitFilesConfig {
 export interface PushFilesConfig {
   message: string;
   branchName: string;
-  additions: File[];
-  deletions: string[];
+  files: File[];
 }

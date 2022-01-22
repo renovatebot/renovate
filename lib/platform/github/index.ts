@@ -22,7 +22,12 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
-import type { CommitSha, PushFilesConfig } from '../../util/git/types';
+import type {
+  CommitSha,
+  FileAddition,
+  FileDeletion,
+  PushFilesConfig,
+} from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { regEx } from '../../util/regex';
@@ -1746,28 +1751,35 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 
 export async function pushFiles({
   branchName,
-  additions,
-  deletions,
+  files,
   message,
 }: PushFilesConfig): Promise<CommitSha | null> {
-  const executableFiles = additions
-    .filter(({ executable }) => !!executable)
-    .map(({ name }) => name);
+  const additions: FileAddition[] = [];
+  const deletions: FileDeletion[] = [];
 
+  for (const file of files) {
+    if (file.type === 'addition') {
+      additions.push(file);
+    } else {
+      deletions.push(file);
+    }
+  }
+
+  const executableFiles = additions.filter(({ isExecutable }) => isExecutable);
   if (executableFiles.length) {
     logger.warn(
-      { branchName, executableFiles },
+      { branchName, executableFiles: executableFiles.map(({ path }) => path) },
       'Platform-native commit: found executable files'
     );
     return null;
   }
 
   const fileChanges = {
-    additions: additions.map(({ name: path, contents }) => ({
+    additions: additions.map(({ path, contents }) => ({
       path,
       contents: Buffer.from(contents).toString('base64'),
     })),
-    deletions: deletions.map((path) => ({ path })),
+    deletions: deletions.map(({ path }) => ({ path })),
   };
 
   const variables = {
