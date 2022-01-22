@@ -266,10 +266,11 @@ export async function getUpdatedPackageFiles(
           // istanbul ignore else
           if (
             file &&
+            file.contents !== '' && // only check if artifact is non-empty --> ignore git-submodule artifacts
             (await getFile(
               file.name,
               reuseExistingBranch ? config.branchName : config.baseBranch
-            )) !== file.contents
+            )) !== file.contents.toString() // convert to string if defined as buffer
           ) {
             updatedArtifacts.push(file);
             updated = true;
