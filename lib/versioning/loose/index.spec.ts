@@ -44,8 +44,10 @@ describe('versioning/loose/index', () => {
     ${'2.4.beta'} | ${'2.4.alpha'} | ${true}
     ${'1.9'}      | ${'2'}         | ${false}
     ${'1.9'}      | ${'1.9.1'}     | ${false}
-    ${'2.4'}      | ${'2.4.beta'}  | ${false}
+    ${'2.4'}      | ${'2.4.beta'}  | ${true}
+    ${'2.4.0'}    | ${'2.4.beta'}  | ${true}
     ${'2.4.beta'} | ${'2.4'}       | ${false}
+    ${'2.4.beta'} | ${'2.4.0'}     | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(loose.isGreaterThan(a, b)).toBe(expected);
   });
