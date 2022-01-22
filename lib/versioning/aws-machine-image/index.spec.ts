@@ -43,9 +43,8 @@ describe('versioning/aws-machine-image/index', () => {
     });
   });
   describe('isGreaterThan(version1, version2)', () => {
-    it('should return false', () => {
-      expect(aws.isGreaterThan('ami-00', 'ami-99')).toBeFalse();
-      expect(aws.isGreaterThan('ami-99', 'ami-00')).toBeFalse();
+    it('should return true', () => {
+      expect(aws.isGreaterThan('', '')).toBeTruthy();
     });
   });
 });
