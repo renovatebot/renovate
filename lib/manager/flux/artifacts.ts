@@ -25,7 +25,8 @@ export async function updateArtifacts({
     return [
       {
         file: {
-          name: packageFileName,
+          type: 'addition',
+          path: packageFileName,
           contents: result.stdout,
         },
       },

@@ -21,7 +21,8 @@ describe('manager/flux/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
-          name: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          type: 'addition',
+          path: 'clusters/my-cluster/flux-system/gotk-components.yaml',
           contents: 'test',
         },
       },
