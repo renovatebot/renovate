@@ -10,6 +10,7 @@ import {
 import { resolveBranchStatus } from '../branch/status-checks';
 import { BranchConfig } from '../types';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum PrAutomergeBlockReason {
   BranchModified = 'BranchModified',
   BranchNotGreen = 'BranchNotGreen',

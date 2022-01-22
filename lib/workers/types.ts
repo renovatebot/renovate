@@ -69,6 +69,9 @@ export interface BranchUpgradeConfig
   changelogUrl?: string;
   dependencyUrl?: string;
   sourceUrl?: string;
+  sourceRepo?: string;
+  sourceRepoOrg?: string;
+  sourceRepoName?: string;
 }
 
 export type PrBlockedBy =
@@ -78,6 +81,7 @@ export type PrBlockedBy =
   | 'RateLimited'
   | 'Error';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum BranchResult {
   AlreadyExisted = 'already-existed',
   Automerged = 'automerged',
@@ -115,5 +119,6 @@ export interface BranchConfig
   packageFiles?: Record<string, PackageFile[]>;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
+  stopUpdating?: boolean;
   isConflicted?: boolean;
 }

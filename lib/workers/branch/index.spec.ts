@@ -939,6 +939,76 @@ describe('workers/branch/index', () => {
       });
     });
 
+    it('skips branch update if stopUpdatingLabel presents', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        labels: ['stop-updating'],
+        body: `- [ ] <!-- rebase-check -->`,
+      } as Pr);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
+          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "branchExists": true,
+          "prNo": undefined,
+          "result": "no-work",
+        }
+      `);
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+    });
+
+    it('updates branch if stopUpdatingLabel presents and PR rebase/retry box checked', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      } as WriteExistingFilesResult);
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'Update dependency',
+        state: PrState.Open,
+        labels: ['stop-updating'],
+        body: `- [x] <!-- rebase-check -->`,
+      } as Pr);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          reuseExistingBranch: false,
+          updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "branchExists": true,
+          "prNo": undefined,
+          "result": "done",
+        }
+      `);
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+    });
+
     it('executes post-upgrade tasks if trust is high', async () => {
       const updatedPackageFile: File = {
         type: 'addition',
