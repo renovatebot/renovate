@@ -8,7 +8,6 @@ import {
   platform,
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { PlatformId } from '../../constants';
 import type { Platform } from '../../platform';
 import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
@@ -19,7 +18,7 @@ let config: RenovateConfig;
 beforeEach(() => {
   jest.clearAllMocks();
   config = getConfig();
-  config.platform = PlatformId.Github;
+  config.platform = 'github';
   config.errors = [];
   config.warnings = [];
 });

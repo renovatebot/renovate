@@ -68,7 +68,7 @@ let config: {
 } = {} as any;
 
 const defaults = {
-  hostType: PlatformId.Gitlab,
+  hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };

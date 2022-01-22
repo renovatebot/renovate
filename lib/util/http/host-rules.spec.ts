@@ -1,4 +1,3 @@
-import { PlatformId } from '../../constants';
 import { bootstrap } from '../../proxy';
 import * as hostRules from '../host-rules';
 import { applyHostRules } from './host-rules';
@@ -9,7 +8,7 @@ jest.mock('global-agent');
 
 describe('util/http/host-rules', () => {
   const options = {
-    hostType: PlatformId.Github,
+    hostType: 'github',
   };
   beforeEach(() => {
     // reset module
@@ -20,11 +19,11 @@ describe('util/http/host-rules', () => {
     // clean up hostRules
     hostRules.clear();
     hostRules.add({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       token: 'token',
     });
     hostRules.add({
-      hostType: PlatformId.Gitea,
+      hostType: 'gitea',
       password: 'password',
     });
 
@@ -35,7 +34,7 @@ describe('util/http/host-rules', () => {
     });
 
     hostRules.add({
-      hostType: PlatformId.Gitlab,
+      hostType: 'gitlab',
       token: 'abc',
     });
 
@@ -46,7 +45,7 @@ describe('util/http/host-rules', () => {
     });
 
     hostRules.add({
-      hostType: PlatformId.Bitbucket,
+      hostType: 'bitbucket',
       token: 'cdef',
     });
   });
@@ -68,8 +67,7 @@ describe('util/http/host-rules', () => {
   });
 
   it('adds auth', () => {
-    expect(applyHostRules(url, { hostType: PlatformId.Gitea }))
-      .toMatchInlineSnapshot(`
+    expect(applyHostRules(url, { hostType: 'gitea' })).toMatchInlineSnapshot(`
       Object {
         "hostType": "gitea",
         "password": "password",

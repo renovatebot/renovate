@@ -25,7 +25,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
 
   // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
   const githubToken = find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: 'https://api.github.com/',
   });
 
@@ -41,12 +41,12 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
 
   const goGitAllowedHostType: string[] = [
     // All known git platforms
-    PlatformId.Azure,
-    PlatformId.Bitbucket,
-    PlatformId.BitbucketServer,
-    PlatformId.Gitea,
-    PlatformId.Github,
-    PlatformId.Gitlab,
+    'azure',
+    'bitbucket',
+    'bitbucket-server',
+    'gitea',
+    'github',
+    'gitlab',
     // plus all without a host type (=== undefined)
     undefined,
   ];

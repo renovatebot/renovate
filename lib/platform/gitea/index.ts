@@ -2,7 +2,6 @@ import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
-import { PlatformId } from '../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -51,7 +50,7 @@ interface GiteaRepoConfig {
 }
 
 const defaults = {
-  hostType: PlatformId.Gitea,
+  hostType: 'gitea',
   endpoint: 'https://gitea.com/api/v1/',
   version: '0.0.0',
 };
@@ -294,7 +293,7 @@ const platform: Platform = {
 
     // Find options for current host and determine Git endpoint
     const opts = hostRules.find({
-      hostType: PlatformId.Gitea,
+      hostType: 'gitea',
       url: defaults.endpoint,
     });
     const gitEndpoint = URL.parse(repo.clone_url);

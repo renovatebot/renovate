@@ -1,6 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';
-import { PlatformId } from '../../../constants';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import type { BranchConfig } from '../../types';
@@ -36,7 +35,7 @@ describe('workers/pr/changelog/index', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://api.github.com/',
         token: 'abc',
       });
@@ -257,7 +256,7 @@ describe('workers/pr/changelog/index', () => {
     it('supports github enterprise and github.com changelog', async () => {
       httpMock.scope(githubApiHost).persist().get(/.*/).reply(200, []);
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
@@ -293,7 +292,7 @@ describe('workers/pr/changelog/index', () => {
         .get(/.*/)
         .reply(200, []);
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
@@ -332,7 +331,7 @@ describe('workers/pr/changelog/index', () => {
         .get(/.*/)
         .reply(200, []);
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });

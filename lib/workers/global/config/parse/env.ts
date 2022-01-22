@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig, RenovateOptions } from '../../../../config/types';
-import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
 
 function normalizePrefixes(
@@ -111,7 +110,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   if (env.GITHUB_COM_TOKEN) {
     logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
     config.hostRules.push({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });

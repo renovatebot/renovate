@@ -1,5 +1,4 @@
 import URL from 'url';
-import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
@@ -70,7 +69,7 @@ async function goGetDatasource(goModule: string): Promise<DataSource | null> {
     }
 
     const opts = hostRules.find({
-      hostType: PlatformId.Gitlab,
+      hostType: 'gitlab',
       url: goSourceUrl,
     });
     if (opts.token) {

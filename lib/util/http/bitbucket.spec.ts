@@ -16,7 +16,7 @@ describe('util/http/bitbucket', () => {
     // clean up hostRules
     hostRules.clear();
     hostRules.add({
-      hostType: PlatformId.Bitbucket,
+      hostType: 'bitbucket',
       matchHost: baseUrl,
       token: 'token',
     });

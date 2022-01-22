@@ -53,7 +53,7 @@ function getUrlWithToken(
   authToken: string
 ): string {
   let token = authToken;
-  if (hostType === PlatformId.Gitlab) {
+  if (hostType === 'gitlab') {
     token = `gitlab-ci-token:${token}`;
   }
 

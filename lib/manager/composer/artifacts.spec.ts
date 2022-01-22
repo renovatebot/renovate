@@ -3,7 +3,6 @@ import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
-import { PlatformId } from '../../constants';
 import * as _datasource from '../../datasource';
 import * as datasourcePackagist from '../../datasource/packagist';
 import * as docker from '../../util/exec/docker';
@@ -99,12 +98,12 @@ describe('manager/composer/artifacts', () => {
 
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'api.github.com',
       token: 'github-token',
     });
     hostRules.add({
-      hostType: PlatformId.Gitlab,
+      hostType: 'gitlab',
       matchHost: 'gitlab.com',
       token: 'gitlab-token',
     });

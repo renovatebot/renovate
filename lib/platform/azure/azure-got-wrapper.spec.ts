@@ -1,4 +1,3 @@
-import { PlatformId } from '../../constants';
 import * as _hostRules from '../../util/host-rules';
 
 describe('platform/azure/azure-got-wrapper', () => {
@@ -19,7 +18,7 @@ describe('platform/azure/azure-got-wrapper', () => {
     });
     it('should set personal access token and endpoint', () => {
       hostRules.add({
-        hostType: PlatformId.Azure,
+        hostType: 'azure',
         token: '123test',
         matchHost: 'https://dev.azure.com/renovate1',
       });
@@ -35,7 +34,7 @@ describe('platform/azure/azure-got-wrapper', () => {
     });
     it('should set bearer token and endpoint', () => {
       hostRules.add({
-        hostType: PlatformId.Azure,
+        hostType: 'azure',
         token: 'testtoken',
         matchHost: 'https://dev.azure.com/renovate2',
       });
@@ -52,7 +51,7 @@ describe('platform/azure/azure-got-wrapper', () => {
 
     it('should set password and endpoint', () => {
       hostRules.add({
-        hostType: PlatformId.Azure,
+        hostType: 'azure',
         username: 'user',
         password: 'pass',
         matchHost: 'https://dev.azure.com/renovate3',

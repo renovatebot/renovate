@@ -10,7 +10,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'token1234',
-          hostType: PlatformId.Github,
+          hostType: 'github',
           matchHost: 'github.com',
         })
       ).toStrictEqual({
@@ -24,7 +24,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'x-access-token:token1234',
-          hostType: PlatformId.Github,
+          hostType: 'github',
           matchHost: 'github.com',
         })
       ).toStrictEqual({
@@ -41,7 +41,7 @@ describe('util/git/auth', () => {
           'https://github.com/',
           {
             token: 'token1234',
-            hostType: PlatformId.Github,
+            hostType: 'github',
             matchHost: 'github.com',
           },
           { GIT_CONFIG_COUNT: '1' }
@@ -60,7 +60,7 @@ describe('util/git/auth', () => {
           'https://github.com/',
           {
             token: 'token1234',
-            hostType: PlatformId.Github,
+            hostType: 'github',
             matchHost: 'github.com',
           },
           { GIT_CONFIG_COUNT: '1' }
@@ -77,7 +77,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'token1234',
-          hostType: PlatformId.Github,
+          hostType: 'github',
           matchHost: 'github.com',
         })
       ).toStrictEqual({
@@ -93,7 +93,7 @@ describe('util/git/auth', () => {
           'https://github.com/',
           {
             token: 'token1234',
-            hostType: PlatformId.Github,
+            hostType: 'github',
             matchHost: 'github.com',
           },
           { RANDOM_VARIABLE: 'random' }
@@ -111,7 +111,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables('https://github.com/', {
           token: 'token1234',
-          hostType: PlatformId.Github,
+          hostType: 'github',
           matchHost: 'github.com',
         })
       ).toStrictEqual({
@@ -125,7 +125,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables('https://gitlab.com/', {
           token: 'token1234',
-          hostType: PlatformId.Gitlab,
+          hostType: 'gitlab',
           matchHost: 'github.com',
         })
       ).toStrictEqual({
@@ -143,7 +143,7 @@ describe('util/git/auth', () => {
           {
             username: 'testing',
             password: '1234',
-            hostType: PlatformId.Gitlab,
+            hostType: 'gitlab',
             matchHost: 'github.com',
           },
           { env: 'value' }

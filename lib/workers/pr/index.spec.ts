@@ -1,5 +1,4 @@
 import { getConfig, git, mocked, partial, platform } from '../../../test/util';
-import { PlatformId } from '../../constants';
 import type { Pr } from '../../platform/types';
 import { BranchStatus } from '../../types';
 import * as _limits from '../global/limits';
@@ -674,7 +673,7 @@ describe('workers/pr/index', () => {
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       config.prCreation = 'not-pending';
       config.artifactErrors = [{}];
-      config.platform = PlatformId.Gitlab;
+      config.platform = 'gitlab';
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });

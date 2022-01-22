@@ -7,13 +7,21 @@ import * as github from '../github';
 import * as gitlab from '../gitlab';
 import type { Preset, PresetConfig } from '../types';
 
-const resolvers = {
-  [PlatformId.Azure]: azure,
-  [PlatformId.Bitbucket]: bitbucket,
-  [PlatformId.BitbucketServer]: bitbucketServer,
-  [PlatformId.Gitea]: gitea,
-  [PlatformId.Github]: github,
-  [PlatformId.Gitlab]: gitlab,
+type PresetApi =
+  | typeof azure
+  | typeof bitbucket
+  | typeof bitbucketServer
+  | typeof gitea
+  | typeof github
+  | typeof gitlab;
+
+const resolvers: Record<PlatformId, PresetApi> = {
+  ['azure']: azure,
+  ['bitbucket']: bitbucket,
+  ['bitbucket-server']: bitbucketServer,
+  ['gitea']: gitea,
+  ['github']: github,
+  ['gitlab']: gitlab,
 };
 
 export function getPreset({

@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import pAll from 'p-all';
-import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -66,15 +65,15 @@ function handleGotError(
     err.code === 'ECONNRESET'
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    return new ExternalHostError(err, PlatformId.Github);
+    return new ExternalHostError(err, 'github');
   }
   if (err.name === 'ParseError') {
     logger.debug({ err }, '');
-    return new ExternalHostError(err, PlatformId.Github);
+    return new ExternalHostError(err, 'github');
   }
   if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
-    return new ExternalHostError(err, PlatformId.Github);
+    return new ExternalHostError(err, 'github');
   }
   if (
     err.statusCode === 403 &&
@@ -118,7 +117,7 @@ function handleGotError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      return new ExternalHostError(err, PlatformId.Github);
+      return new ExternalHostError(err, 'github');
     }
     return new Error(PLATFORM_BAD_CREDENTIALS);
   }
@@ -138,7 +137,7 @@ function handleGotError(
       return err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
-    return new ExternalHostError(err, PlatformId.Github);
+    return new ExternalHostError(err, 'github');
   }
   if (
     err.statusCode === 410 &&
@@ -254,10 +253,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
 }
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
-  constructor(
-    hostType: string = PlatformId.Github,
-    options?: GithubHttpOptions
-  ) {
+  constructor(hostType = 'github', options?: GithubHttpOptions) {
     super(hostType, options);
   }
 

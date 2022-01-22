@@ -1,5 +1,4 @@
 import * as httpMock from '../../../../test/http-mock';
-import { PlatformId } from '../../../constants';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import type { BranchUpgradeConfig } from '../../types';
@@ -39,7 +38,7 @@ describe('workers/pr/changelog/github', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://api.github.com/',
         token: 'abc',
       });
@@ -231,7 +230,7 @@ describe('workers/pr/changelog/github', () => {
 
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
@@ -262,7 +261,7 @@ describe('workers/pr/changelog/github', () => {
 
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });

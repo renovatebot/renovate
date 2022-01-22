@@ -51,7 +51,7 @@ describe('platform/index', () => {
       .basicAuth({ user: 'abc', pass: '123' })
       .reply(200, { uuid: 123 });
     const config = {
-      platform: PlatformId.Bitbucket,
+      platform: 'bitbucket',
       gitAuthor: 'user@domain.com',
       username: 'abc',
       password: '123',
@@ -67,7 +67,7 @@ describe('platform/index', () => {
           username: 'abc',
         },
       ],
-      platform: PlatformId.Bitbucket,
+      platform: 'bitbucket',
     });
   });
 });

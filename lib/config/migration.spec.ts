@@ -1,4 +1,3 @@
-import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
 import { GlobalConfig } from './global';
 import * as configMigration from './migration';
@@ -20,7 +19,7 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
-        platform: PlatformId.Github,
+        platform: 'github',
         hostRules: [
           {
             platform: 'docker',
