@@ -63,7 +63,8 @@ class LooseVersioningApi extends GenericVersioningApi {
       return 1;
     }
 
-    return this._compareOther(parsed1, parsed2);
+    // istanbul ignore next
+    return 0;
   }
 }
 
