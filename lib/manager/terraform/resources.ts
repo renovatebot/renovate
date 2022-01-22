@@ -1,13 +1,9 @@
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
-import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
-import type { ExtractionResult, ResourceManagerData } from './types';
-import {
-  checkIfStringIsPath,
-  keyValueExtractionRegex,
-  resourceTypeExtractionRegex,
-} from './util';
+import { TerraformResourceTypes } from './common';
+import type { ResourceManagerData } from './types';
+import { checkIfStringIsPath } from './util';
 
 function applyDockerDependency(
   dep: PackageDependency<ResourceManagerData>,
@@ -17,53 +13,9 @@ function applyDockerDependency(
   Object.assign(dep, dockerDep);
 }
 
-export function extractTerraformResource(
-  startingLine: number,
-  lines: string[]
-): ExtractionResult {
-  let lineNumber = startingLine;
-  let line = lines[lineNumber];
-  const deps: PackageDependency[] = [];
-  const dep: PackageDependency<ResourceManagerData> = {
-    managerData: {
-      terraformDependencyType: TerraformDependencyTypes.resource,
-    },
-  };
-
-  const typeMatch = resourceTypeExtractionRegex.exec(line);
-
-  dep.managerData.resourceType =
-    TerraformResourceTypes[typeMatch?.groups?.type] ??
-    TerraformResourceTypes.unknown;
-
-  do {
-    lineNumber += 1;
-    line = lines[lineNumber];
-    const kvMatch = keyValueExtractionRegex.exec(line);
-    if (kvMatch) {
-      switch (kvMatch.groups.key) {
-        case 'chart':
-        case 'image':
-        case 'name':
-        case 'repository':
-          dep.managerData[kvMatch.groups.key] = kvMatch.groups.value;
-          break;
-        case 'version':
-          dep.currentValue = kvMatch.groups.value;
-          break;
-        default:
-          /* istanbul ignore next */
-          break;
-      }
-    }
-  } while (line.trim() !== '}');
-  deps.push(dep);
-  return { lineNumber, dependencies: deps };
-}
-
 export function analyseTerraformResource(
   dep: PackageDependency<ResourceManagerData>
-): void {
+): PackageDependency<ResourceManagerData> {
   switch (dep.managerData.resourceType) {
     case TerraformResourceTypes.docker_container:
       if (dep.managerData.image) {
@@ -108,4 +60,5 @@ export function analyseTerraformResource(
       dep.skipReason = 'invalid-value';
       break;
   }
+  return dep;
 }

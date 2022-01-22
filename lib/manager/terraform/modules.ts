@@ -5,9 +5,6 @@ import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
-import { TerraformDependencyTypes } from './common';
-import { extractTerraformProvider } from './providers';
-import type { ExtractionResult } from './types';
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
@@ -20,19 +17,22 @@ export const gitTagsRefMatchRegex = regEx(
 );
 const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
-export function extractTerraformModule(
-  startingLine: number,
-  lines: string[],
-  moduleName: string
-): ExtractionResult {
-  const result = extractTerraformProvider(startingLine, lines, moduleName);
-  result.dependencies.forEach((dep) => {
-    dep.managerData.terraformDependencyType = TerraformDependencyTypes.module;
+export function extractTerraformModule(modules: any[]): PackageDependency[] {
+  return Object.keys(modules).flatMap((module) => {
+    return modules[module]
+      .map((value) => {
+        return {
+          currentValue: value.version,
+          managerData: {
+            source: value.source,
+          },
+        };
+      })
+      .map(analyseTerraformModule);
   });
-  return result;
 }
 
-export function analyseTerraformModule(dep: PackageDependency): void {
+function analyseTerraformModule(dep: PackageDependency): PackageDependency {
   const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
   const bitbucketRefMatch = bitbucketRefMatchRegex.exec(dep.managerData.source);
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
@@ -82,4 +82,6 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     logger.debug({ dep }, 'terraform dep has no source');
     dep.skipReason = 'no-source';
   }
+
+  return dep;
 }

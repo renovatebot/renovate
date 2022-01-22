@@ -52,6 +52,12 @@ describe('manager/terraform/extract', () => {
 
     it('extracts providers', async () => {
       const res = await extractPackageFile(providers, 'providers.tf', {});
+      expect(
+        res.deps.filter((dep) => dep.depType === 'required_provider')
+      ).toHaveLength(8);
+      expect(res.deps.filter((dep) => dep.depType === 'provider')).toHaveLength(
+        5
+      );
       expect(res.deps).toHaveLength(14);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res).toMatchSnapshot();
@@ -59,8 +65,17 @@ describe('manager/terraform/extract', () => {
 
     it('extracts docker resources', async () => {
       const res = await extractPackageFile(docker, 'docker.tf', {});
-      expect(res.deps).toHaveLength(8);
-      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
+      expect(
+        res.deps.filter((dep) => dep.depType === 'docker_image')
+      ).toHaveLength(2);
+      expect(
+        res.deps.filter((dep) => dep.depType === 'docker_container')
+      ).toHaveLength(1);
+      expect(
+        res.deps.filter((dep) => dep.depType === 'docker_service')
+      ).toHaveLength(1);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
+      expect(res.deps).toHaveLength(7);
       expect(res).toMatchSnapshot();
     });
 

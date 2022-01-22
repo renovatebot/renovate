@@ -2,16 +2,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 // eslint-disable-next-line typescript-enum/no-enum
-export enum TerraformDependencyTypes {
-  unknown = 'unknown',
-  module = 'module',
-  provider = 'provider',
-  required_providers = 'required_providers',
-  resource = 'resource',
-  terraform_version = 'terraform_version',
-}
-
-// eslint-disable-next-line typescript-enum/no-enum
 export enum TerraformResourceTypes {
   unknown = 'unknown',
   /**

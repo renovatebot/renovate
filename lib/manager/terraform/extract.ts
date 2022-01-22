@@ -1,35 +1,16 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import { newlineRegex, regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { TerraformDependencyTypes } from './common';
+import { TerraformResourceTypes } from './common';
+import * as hcl from './hcl';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
-import { analyseTerraformModule, extractTerraformModule } from './modules';
-import {
-  analyzeTerraformProvider,
-  extractTerraformProvider,
-} from './providers';
-import {
-  analyzeTerraformRequiredProvider,
-  extractTerraformRequiredProviders,
-} from './required-providers';
-import {
-  analyseTerraformVersion,
-  extractTerraformRequiredVersion,
-} from './required-version';
-import {
-  analyseTerraformResource,
-  extractTerraformResource,
-} from './resources';
-import type { TerraformManagerData } from './types';
-import {
-  checkFileContainsDependency,
-  getTerraformDependencyType,
-} from './util';
+import { extractTerraformModule } from './modules';
+import { extractTerraformProvider } from './providers';
+import { extractTerraformRequiredProviders } from './required-providers';
+import { analyseTerraformVersion } from './required-version';
+import { analyseTerraformResource } from './resources';
+import { checkFileContainsDependency } from './util';
 
-const dependencyBlockExtractionRegex = regEx(
-  /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/
-);
 const contentCheckList = [
   'module "',
   'provider "',
@@ -52,66 +33,6 @@ export async function extractPackageFile(
     );
     return null;
   }
-  let deps: PackageDependency<TerraformManagerData>[] = [];
-  try {
-    const lines = content.split(newlineRegex);
-    for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      const line = lines[lineNumber];
-      const terraformDependency = dependencyBlockExtractionRegex.exec(line);
-      if (terraformDependency) {
-        logger.trace(
-          `Matched ${terraformDependency.groups.type} on line ${lineNumber}`
-        );
-        const tfDepType = getTerraformDependencyType(
-          terraformDependency.groups.type
-        );
-        let result = null;
-        switch (tfDepType) {
-          case TerraformDependencyTypes.required_providers: {
-            result = extractTerraformRequiredProviders(lineNumber, lines);
-            break;
-          }
-          case TerraformDependencyTypes.provider: {
-            result = extractTerraformProvider(
-              lineNumber,
-              lines,
-              terraformDependency.groups.lookupName
-            );
-            break;
-          }
-          case TerraformDependencyTypes.module: {
-            result = extractTerraformModule(
-              lineNumber,
-              lines,
-              terraformDependency.groups.lookupName
-            );
-            break;
-          }
-          case TerraformDependencyTypes.resource: {
-            result = extractTerraformResource(lineNumber, lines);
-            break;
-          }
-          case TerraformDependencyTypes.terraform_version: {
-            result = extractTerraformRequiredVersion(lineNumber, lines);
-            break;
-          }
-          /* istanbul ignore next */
-          default:
-            logger.trace(
-              `Could not identify TerraformDependencyType ${terraformDependency.groups.type} on line ${lineNumber}.`
-            );
-            break;
-        }
-        if (result) {
-          lineNumber = result.lineNumber;
-          deps = deps.concat(result.dependencies);
-          result = null;
-        }
-      }
-    }
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting terraform plugins');
-  }
 
   const locks = [];
   const lockFilePath = findLockFile(fileName);
@@ -125,31 +46,113 @@ export async function extractPackageFile(
     }
   }
 
-  deps.forEach((dep) => {
-    switch (dep.managerData.terraformDependencyType) {
-      case TerraformDependencyTypes.required_providers:
-        analyzeTerraformRequiredProvider(dep, locks);
-        break;
-      case TerraformDependencyTypes.provider:
-        analyzeTerraformProvider(dep, locks);
-        break;
-      case TerraformDependencyTypes.module:
-        analyseTerraformModule(dep);
-        break;
-      case TerraformDependencyTypes.resource:
-        analyseTerraformResource(dep);
-        break;
-      case TerraformDependencyTypes.terraform_version:
-        analyseTerraformVersion(dep);
-        break;
-      /* istanbul ignore next */
-      default:
-    }
+  const dependencies: PackageDependency[] = [];
+  const hclMap = hcl.parseHCL(content);
 
-    delete dep.managerData;
-  });
-  if (deps.some((dep) => dep.skipReason !== 'local')) {
-    return { deps };
+  const terraformBlocks = hclMap.terraform;
+  if (terraformBlocks) {
+    terraformBlocks.flatMap((terraformBlock) => {
+      const requiredProviders = terraformBlock['required_providers'];
+      dependencies.push(
+        ...extractTerraformRequiredProviders(requiredProviders, locks)
+      );
+
+      const required_version = terraformBlock.required_version;
+      if (required_version) {
+        dependencies.push(
+          analyseTerraformVersion({
+            currentValue: required_version,
+          })
+        );
+      }
+    });
+  }
+
+  const providers = hclMap.provider;
+  if (providers) {
+    dependencies.push(...extractTerraformProvider(providers, locks));
+  }
+
+  const modules = hclMap.module;
+  if (modules) {
+    dependencies.push(...extractTerraformModule(modules));
+  }
+
+  const helmReleases = hclMap.resource?.helm_release;
+  if (helmReleases) {
+    const deps = Object.keys(helmReleases)
+      .flatMap((helmRelease) => {
+        return helmReleases[helmRelease].map((value) => {
+          return {
+            currentValue: value.version,
+            managerData: {
+              resourceType: TerraformResourceTypes.helm_release,
+              chart: value.chart,
+              repository: value.repository,
+            },
+          };
+        });
+      })
+      .map(analyseTerraformResource);
+    dependencies.push(...deps);
+  }
+
+  const dockerImages = hclMap.resource?.docker_image;
+  if (dockerImages) {
+    const deps = Object.keys(dockerImages)
+      .flatMap((dockerImage) => {
+        return dockerImages[dockerImage].map((value) => {
+          return {
+            currentValue: value.version,
+            managerData: {
+              resourceType: TerraformResourceTypes.docker_image,
+              name: value.name,
+            },
+          };
+        });
+      })
+      .map(analyseTerraformResource);
+    dependencies.push(...deps);
+  }
+
+  const dockerContainers = hclMap.resource?.docker_container;
+  if (dockerContainers) {
+    const deps = Object.keys(dockerContainers)
+      .flatMap((dockerContainer) => {
+        return dockerContainers[dockerContainer].map((value) => {
+          return {
+            managerData: {
+              resourceType: TerraformResourceTypes.docker_container,
+              image: value.image,
+            },
+          };
+        });
+      })
+      .map(analyseTerraformResource);
+    dependencies.push(...deps);
+  }
+
+  const dockerServices = hclMap.resource?.docker_service;
+  if (dockerServices) {
+    const deps = Object.keys(dockerServices)
+      .flatMap((dockerService) => {
+        return dockerServices[dockerService].map((value) => {
+          return {
+            managerData: {
+              resourceType: TerraformResourceTypes.docker_service,
+              image: value?.task_spec?.[0]?.container_spec?.[0]?.image,
+            },
+          };
+        });
+      })
+      .map(analyseTerraformResource);
+    dependencies.push(...deps);
+  }
+
+  dependencies.forEach((value) => delete value.managerData);
+
+  if (dependencies.some((dep) => dep.skipReason !== 'local')) {
+    return { deps: dependencies };
   }
   return null;
 }

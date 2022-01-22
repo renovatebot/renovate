@@ -8,7 +8,7 @@ provider "gitlab" {
   version = "=2.4"
 }
 
-provider "gitlab1" {
+provider "gitlab" {
   token = "${var.gitlab_token}"
   version = "=1.3"
 }
