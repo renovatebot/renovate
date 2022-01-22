@@ -11,4 +11,13 @@ describe('config/migrations/custom/upgrade-in-range-migration', () => {
       }
     );
   });
+
+  it('should just remove property when upgradeInRange not equals to true', () => {
+    expect(UpgradeInRangeMigration).toMigrate(
+      {
+        upgradeInRange: false,
+      },
+      {}
+    );
+  });
 });
