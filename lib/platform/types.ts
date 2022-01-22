@@ -1,5 +1,6 @@
 import type { MergeStrategy } from '../config/types';
 import type { BranchStatus, PrState, VulnerabilityAlert } from '../types';
+import type { PushCallback } from '../util/git/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -15,6 +16,7 @@ export interface PlatformParams {
   username?: string;
   password?: string;
   gitAuthor?: string;
+  platformCommit?: boolean;
 }
 
 export interface PlatformResult {
@@ -196,4 +198,5 @@ export interface Platform {
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
+  pushFiles?: PushCallback;
 }

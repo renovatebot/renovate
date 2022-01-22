@@ -2,12 +2,14 @@ import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
+import { platform } from '../../../../platform';
 import {
   commitFiles,
   getFile,
   isBranchModified,
   isBranchStale,
 } from '../../../../util/git';
+import type { CommitFilesConfig } from '../../../../util/git/types';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -47,7 +49,8 @@ export async function rebaseOnboardingBranch(
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }
-  return commitFiles({
+
+  const commitConfig: CommitFilesConfig = {
     branchName: config.onboardingBranch,
     files: [
       {
@@ -57,5 +60,7 @@ export async function rebaseOnboardingBranch(
       },
     ],
     message: commitMessage.toString(),
-  });
+  };
+
+  return commitFiles(commitConfig, config.platformCommit && platform.pushFiles);
 }

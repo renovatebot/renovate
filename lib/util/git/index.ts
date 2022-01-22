@@ -32,6 +32,8 @@ import type {
   CommitFilesConfig,
   CommitSha,
   LocalConfig,
+  PushCallback,
+  PushFilesConfig,
   StatusResult,
   StorageConfig,
 } from './types';
@@ -677,12 +679,33 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
-export async function commitFiles({
-  branchName,
-  files,
-  message,
-  force = false,
-}: CommitFilesConfig): Promise<CommitSha | null> {
+async function pushFiles({ branchName }: PushFilesConfig): Promise<string> {
+  const pushOptions: TaskOptions = {
+    '--force-with-lease': null,
+    '-u': null,
+  };
+  if (getNoVerify().includes('push')) {
+    pushOptions['--no-verify'] = null;
+  }
+
+  const pushRes = await git.push(
+    'origin',
+    `${branchName}:${branchName}`,
+    pushOptions
+  );
+  delete pushRes.repo;
+  logger.debug({ result: pushRes }, 'git push');
+  // Fetch it after create
+  const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+  await git.fetch(['origin', ref, '--force']);
+  return (await git.revparse([branchName])).trim();
+}
+
+export async function commitFiles(
+  commitConfig: CommitFilesConfig,
+  pushCallback?: PushCallback | undefined | null | false
+): Promise<CommitSha | null> {
+  const { branchName, files, message, force = false } = commitConfig;
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
@@ -773,7 +796,7 @@ export async function commitFiles({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    const commit = commitRes?.commit || 'unknown';
+
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
@@ -782,30 +805,25 @@ export async function commitFiles({
       return null;
     }
 
-    const pushOptions: TaskOptions = {
-      '--force-with-lease': null,
-      '-u': null,
+    const pushConfig: PushFilesConfig = {
+      message,
+      branchName,
+      files: files.filter(({ path }) => !ignoredFiles.includes(path)),
     };
-    if (getNoVerify().includes('push')) {
-      pushOptions['--no-verify'] = null;
-    }
 
-    const pushRes = await git.push(
-      'origin',
-      `${branchName}:${branchName}`,
-      pushOptions
-    );
-    delete pushRes.repo;
-    logger.debug({ result: pushRes }, 'git push');
-    // Fetch it after create
-    const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
-    await git.fetch(['origin', ref, '--force']);
-    config.branchCommits[branchName] = (
-      await git.revparse([branchName])
-    ).trim();
+    let commitSha: string | null = null;
+    // istanbul ignore if
+    if (pushCallback) {
+      commitSha = await pushCallback(pushConfig);
+      const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+      await git.fetch(['origin', ref, '--force']);
+    }
+    commitSha ??= await pushFiles(pushConfig);
+    config.branchCommits[branchName] = commitSha;
+
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
-    return commit;
+    return commitSha?.slice(0, 7) ?? 'unknown';
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (err.message.includes(`'refs/heads/renovate' exists`)) {
