@@ -6,7 +6,8 @@ If you need to change the versioning format, read the [versioning](https://docs.
 
 ### Private repositories and registries
 
-To use private sources of Helm charts, HostRules have to be defined.
+To use private sources of Helm charts, you must set the password and username you use to authenticate to the private source.
+For this you use a custom `hostRules` array.
 
 #### OCI registries
 
