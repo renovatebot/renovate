@@ -206,7 +206,6 @@ export const presets: Record<string, Preset> = {
       },
       {
         matchDatasources: ['maven'],
-        matchPackagePatterns: ['*'],
         matchDepTypes: [
           'compile',
           'provided',
