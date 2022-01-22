@@ -10,8 +10,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions, HttpResponse } from '../../util/http';
-import type { OutgoingHttpHeaders } from '../../util/http/types';
-import { HttpError } from '../../util/http/types';
+import type { HttpError, OutgoingHttpHeaders } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import {
   ensureTrailingSlash,

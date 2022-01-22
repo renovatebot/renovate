@@ -76,6 +76,7 @@ async function getDockerApiTags(
     return null;
   }
   let page = 1;
+  let foundMaxResultsError = false;
   do {
     let res;
     try {
@@ -84,11 +85,15 @@ async function getDockerApiTags(
         noAuth: true,
       });
     } catch (err) {
-      if (page === 1 && err instanceof HttpError && isECRMaxResultsError(err)) {
+      if (
+        !foundMaxResultsError &&
+        err instanceof HttpError &&
+        isECRMaxResultsError(err)
+      ) {
         const maxResults = 1000;
         url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
         url = ensurePathPrefix(url, '/v2');
-        page += 1;
+        foundMaxResultsError = true;
         continue;
       }
       throw err;
