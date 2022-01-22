@@ -70,16 +70,6 @@ Object {
         "maven",
       ],
       "matchDepTypes": Array [
-        "test",
-        "build",
-      ],
-      "semanticCommitType": "chore",
-    },
-    Object {
-      "matchDatasources": Array [
-        "maven",
-      ],
-      "matchDepTypes": Array [
         "compile",
         "provided",
         "runtime",

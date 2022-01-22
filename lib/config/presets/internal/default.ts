@@ -201,11 +201,6 @@ export const presets: Record<string, Preset> = {
       },
       {
         matchDatasources: ['maven'],
-        matchDepTypes: ['test', 'build'],
-        semanticCommitType: 'chore',
-      },
-      {
-        matchDatasources: ['maven'],
         matchDepTypes: [
           'compile',
           'provided',
