@@ -703,7 +703,7 @@ async function pushFiles({ branchName }: PushFilesConfig): Promise<string> {
 
 export async function commitFiles(
   commitConfig: CommitFilesConfig,
-  pushCallback?: PushCallback | undefined | null | false
+  pushCallback: PushCallback | null
 ): Promise<CommitSha | null> {
   const { branchName, files, message, force = false } = commitConfig;
   await syncGit();

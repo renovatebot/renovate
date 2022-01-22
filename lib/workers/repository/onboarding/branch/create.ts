@@ -45,5 +45,8 @@ export async function createOnboardingBranch(
     message: commitMessage.toString(),
   };
 
-  return commitFiles(commitConfig, config.platformCommit && platform.pushFiles);
+  // istanbul ignore next
+  const pushCallback = (config.platformCommit && platform.pushFiles) ?? null;
+
+  return commitFiles(commitConfig, pushCallback);
 }

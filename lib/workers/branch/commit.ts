@@ -5,14 +5,16 @@ import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { commitFiles } from '../../util/git';
-import type { CommitFilesConfig } from '../../util/git/types';
+import type { CommitFilesConfig, FileChange } from '../../util/git/types';
 import { sanitize } from '../../util/sanitize';
 import type { BranchConfig } from '../types';
 
 export function commitFilesToBranch(
   config: BranchConfig
 ): Promise<string | null> {
-  let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
+  let updatedFiles: FileChange[] = config.updatedPackageFiles.concat(
+    config.updatedArtifacts
+  );
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
@@ -57,5 +59,8 @@ export function commitFilesToBranch(
     force: !!config.forceCommit,
   };
 
-  return commitFiles(commitConfig, config.platformCommit && platform.pushFiles);
+  // istanbul ignore next
+  const pushCallback = (config.platformCommit && platform.pushFiles) ?? null;
+
+  return commitFiles(commitConfig, pushCallback);
 }
