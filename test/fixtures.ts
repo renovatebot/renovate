@@ -62,7 +62,7 @@ export class Fixtures {
       ...memfs,
       pathExists: jest.fn().mockImplementation(pathExists),
       remove: jest.fn().mockImplementation(memfs.promises.rm),
-      readFile: jest.fn().mockImplementation(readFile),
+      readFile: jest.fn().mockImplementation(memfs.promises.readFile),
       writeFile: jest.fn().mockImplementation(memfs.promises.writeFile),
       outputFile: jest.fn().mockImplementation(outputFile),
     };
@@ -73,15 +73,6 @@ export class Fixtures {
     const callerDir = upath.dirname(stack[2].getFileName());
     return upath.resolve(callerDir, fixturesRoot, '__fixtures__');
   }
-}
-
-function readFile(fileName: string): Promise<Buffer>;
-function readFile(fileName: string, encoding: 'utf8'): Promise<string>;
-function readFile(
-  fileName: string,
-  encoding = 'utf8'
-): Promise<Buffer | string> {
-  return memfs.promises.readFile(fileName, encoding);
 }
 
 export async function outputFile(
