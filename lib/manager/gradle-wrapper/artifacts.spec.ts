@@ -88,7 +88,8 @@ describe('manager/gradle-wrapper/artifacts', () => {
         'gradlew.bat',
       ].map((fileProjectPath) => ({
         file: {
-          name: fileProjectPath,
+          type: 'addition',
+          path: fileProjectPath,
           contents: 'test',
         },
       }))

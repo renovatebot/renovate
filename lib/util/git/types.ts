@@ -30,29 +30,45 @@ export interface LocalConfig extends StorageConfig {
   gitAuthorEmail?: string;
 }
 
-/**
- * File to commit
- */
-export interface File {
+export interface FileAddition {
+  /**
+   * Addition creates new file or modifies existing one
+   */
+  type: 'addition';
+
   /**
    * Relative file path
    */
-  name: string;
+  path: string;
 
   /**
-   * file contents
+   * File contents
    */
   contents: string | Buffer;
 
   /**
-   * the executable bit
+   * The executable bit
    */
-  executable?: boolean;
+  isExecutable?: boolean;
 }
 
-export type CommitFilesConfig = {
+export interface FileDeletion {
+  /**
+   * Deletion removes the file
+   */
+  type: 'deletion';
+
+  /**
+   * Relative file path
+   */
+  path: string;
+}
+
+export type FileChange = FileAddition | FileDeletion;
+
+export interface CommitFilesConfig {
   branchName: string;
-  files: File[];
+  files: FileChange[];
   message: string;
   force?: boolean;
-};
+}
