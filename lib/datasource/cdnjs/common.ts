@@ -21,9 +21,13 @@ const Response = t.intersection([
 
 export type IResponse = CdnjsResponse;
 
-export function validResponse(input: unknown): IResponse | null {
-  return pipe(
+export function validResponse(input: unknown): IResponse {
+  const res: IResponse | null = pipe(
     Response.decode(input),
     fold(() => null, identity)
   );
+  if (!res) {
+    throw new Error('Cdnjs: invalid response');
+  }
+  return res;
 }
