@@ -277,7 +277,7 @@
     "jest-mock-extended": "2.0.4",
     "jest-silent-reporter": "0.5.0",
     "markdownlint-cli2": "0.4.0",
-    "memfs": "3.3.0",
+    "memfs": "3.4.1",
     "mock-fs": "5.1.2",
     "mockdate": "3.0.5",
     "nock": "13.2.2",
