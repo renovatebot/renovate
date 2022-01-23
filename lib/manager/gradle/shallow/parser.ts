@@ -1,7 +1,6 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
@@ -190,7 +189,7 @@ function processDepInterpolation({
           fileReplacePosition = lastToken.offset + 1;
           delete dep.groupName;
         } else {
-          dep.skipReason = SkipReason.ContainsVariable;
+          dep.skipReason = 'contains-variable';
         }
         dep.managerData = { fileReplacePosition, packageFile };
       }
@@ -234,7 +233,7 @@ function processPlugin({
       const fileReplacePosition = pluginVersion.offset;
       dep.currentValue = currentValue;
       dep.managerData = { fileReplacePosition, packageFile };
-      dep.skipReason = SkipReason.UnknownVersion;
+      dep.skipReason = 'unknown-version';
     }
   } else if (pluginVersion.type === TokenType.StringInterpolation) {
     const versionTpl = pluginVersion as StringInterpolation;
@@ -252,12 +251,12 @@ function processPlugin({
         const fileReplacePosition = child.offset;
         dep.currentValue = currentValue;
         dep.managerData = { fileReplacePosition, packageFile };
-        dep.skipReason = SkipReason.UnknownVersion;
+        dep.skipReason = 'unknown-version';
       }
     } else {
       const fileReplacePosition = versionTpl.offset;
       dep.managerData = { fileReplacePosition, packageFile };
-      dep.skipReason = SkipReason.UnknownVersion;
+      dep.skipReason = 'unknown-version';
     }
   } else {
     const currentValue = pluginVersion.value;
@@ -327,7 +326,7 @@ function processLongFormDep({
     }
     const methodName = tokenMap.methodName?.value;
     if (annoyingMethods.has(methodName)) {
-      dep.skipReason = SkipReason.Ignored;
+      dep.skipReason = 'ignored';
     }
 
     return { deps: [dep] };

@@ -41,7 +41,8 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
   ]
 }
 ",
-  "name": ".terraform.lock.hcl",
+  "path": ".terraform.lock.hcl",
+  "type": "addition",
 }
 `;
 
@@ -101,7 +102,8 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
   ]
 }
 ",
-  "name": "subfolder/.terraform.lock.hcl",
+  "path": "subfolder/.terraform.lock.hcl",
+  "type": "addition",
 }
 `;
 
@@ -178,7 +180,8 @@ provider \\"registry.terraform.io/telmate/proxmox\\" {
   ]
 }
 ",
-  "name": "test/.terraform.lock.hcl",
+  "path": "test/.terraform.lock.hcl",
+  "type": "addition",
 }
 `;
 
@@ -258,7 +261,8 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
   ]
 }
 ",
-  "name": "test/.terraform.lock.hcl",
+  "path": "test/.terraform.lock.hcl",
+  "type": "addition",
 }
 `;
 
@@ -325,7 +329,8 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
   ]
 }
 ",
-  "name": ".terraform.lock.hcl",
+  "path": ".terraform.lock.hcl",
+  "type": "addition",
 }
 `;
 
@@ -392,7 +397,8 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
   ]
 }
 ",
-  "name": ".terraform.lock.hcl",
+  "path": ".terraform.lock.hcl",
+  "type": "addition",
 }
 `;
 
@@ -457,7 +463,8 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
   ]
 }
 ",
-  "name": ".terraform.lock.hcl",
+  "path": ".terraform.lock.hcl",
+  "type": "addition",
 }
 `;
 
@@ -523,7 +530,8 @@ provider \\"registry.terraform.io/hashicorp/random\\" {
   ]
 }
 ",
-  "name": ".terraform.lock.hcl",
+  "path": ".terraform.lock.hcl",
+  "type": "addition",
 }
 `;
 

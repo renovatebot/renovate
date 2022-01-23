@@ -193,10 +193,10 @@ describe('manager/composer/artifacts', () => {
     });
     expect(res).not.toBeNull();
     expect(res?.map(({ file }) => file)).toEqual([
-      { contents: '{  }', name: 'composer.lock' },
-      { contents: 'Foo', name: foo },
-      { contents: 'Bar', name: bar },
-      { contents: baz, name: '|delete|' },
+      { type: 'addition', path: 'composer.lock', contents: '{  }' },
+      { type: 'addition', path: foo, contents: 'Foo' },
+      { type: 'addition', path: bar, contents: 'Bar' },
+      { type: 'deletion', path: baz },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
