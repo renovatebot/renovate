@@ -2,9 +2,9 @@ import { AbstractMigration } from '../base/abstract-migration';
 
 export class UpgradeInRangeMigration extends AbstractMigration {
   override readonly deprecated = true;
-  readonly propertyName = 'upgradeInRange';
+  override readonly propertyName = 'upgradeInRange';
 
-  override run(value): void {
+  override run(value: unknown): void {
     if (value === true) {
       this.setSafely('rangeStrategy', 'bump');
     }
