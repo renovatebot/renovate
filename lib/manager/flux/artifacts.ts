@@ -16,9 +16,14 @@ export async function updateArtifacts({
     const cmd = 'flux install --export';
     const execOptions: ExecOptions = {
       docker: {
-        image: 'fluxcd/flux-cli',
-        tag: updatedDeps[0].newVersion,
+        image: 'sidecar',
       },
+      toolConstraints: [
+        {
+          toolName: 'flux',
+          constraint: updatedDeps[0].newVersion,
+        },
+      ],
     };
     const result = await exec(cmd, execOptions);
 
