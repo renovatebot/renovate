@@ -163,9 +163,6 @@ export function migrateConfig(
           '{{managerBranchPrefix}}',
           '{{additionalBranchPrefix}}'
         );
-      } else if (key === 'managerBranchPrefix') {
-        delete migratedConfig.managerBranchPrefix;
-        migratedConfig.additionalBranchPrefix = val;
       } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
@@ -434,12 +431,6 @@ export function migrateConfig(
           migratedConfig.suppressNotifications =
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
-        }
-      } else if (key === 'composerIgnorePlatformReqs') {
-        if (val === true) {
-          migratedConfig.composerIgnorePlatformReqs = [];
-        } else if (val === false) {
-          migratedConfig.composerIgnorePlatformReqs = null;
         }
       } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
         if (migratedConfig[key] !== undefined) {
