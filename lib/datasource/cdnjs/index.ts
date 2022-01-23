@@ -1,7 +1,7 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { validResponse } from './types';
+import { validResponse } from './common';
 
 export class CdnJsDatasource extends Datasource {
   static readonly id = 'cdnjs';

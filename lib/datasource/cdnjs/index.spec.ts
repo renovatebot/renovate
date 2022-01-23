@@ -36,7 +36,6 @@ describe('datasource/cdnjs/index', () => {
           depName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for error', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
