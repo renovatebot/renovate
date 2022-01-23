@@ -13,6 +13,7 @@ import { RequiredStatusChecksMigration } from './custom/required-status-checks-m
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
+import { VersionStrategyMigration } from './custom/version-strategy-migration';
 import type { Migration, MigrationConstructor } from './types';
 
 export class MigrationsService {
@@ -53,6 +54,7 @@ export class MigrationsService {
     SemanticCommitsMigration,
     TrustLevelMigration,
     UpgradeInRangeMigration,
+    VersionStrategyMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
