@@ -35,10 +35,11 @@ export class MigrationsService {
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
-    ['exposeEnv', 'exposeAllEnv'],
-    ['separatePatchReleases', 'separateMinorPatch'],
-    ['multipleMajorPrs', 'separateMultipleMajor'],
     ['excludedPackageNames', 'excludePackageNames'],
+    ['exposeEnv', 'exposeAllEnv'],
+    ['managerBranchPrefix', 'additionalBranchPrefix'],
+    ['multipleMajorPrs', 'separateMultipleMajor'],
+    ['separatePatchReleases', 'separateMinorPatch'],
     ['versionScheme', 'versioning'],
   ]);
 
