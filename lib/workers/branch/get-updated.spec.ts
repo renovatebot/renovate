@@ -44,7 +44,9 @@ describe('workers/branch/get-updated', () => {
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        updatedPackageFiles: [{ name: 'index.html', contents: 'updated-file' }],
+        updatedPackageFiles: [
+          { type: 'addition', path: 'index.html', contents: 'updated-file' },
+        ],
       });
     });
     it('handles autoreplace branch no update', async () => {
@@ -78,7 +80,9 @@ describe('workers/branch/get-updated', () => {
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        updatedPackageFiles: [{ contents: 'updated-file', name: 'index.html' }],
+        updatedPackageFiles: [
+          { type: 'addition', path: 'index.html', contents: 'updated-file' },
+        ],
       });
     });
     it('handles empty', async () => {
@@ -107,7 +111,11 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
-          { name: 'package.json', contents: 'some new content' },
+          {
+            type: 'addition',
+            path: 'package.json',
+            contents: 'some new content',
+          },
         ],
       });
     });
@@ -122,7 +130,8 @@ describe('workers/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
-            name: 'composer.json',
+            type: 'addition',
+            path: 'composer.json',
             contents: 'some contents',
           },
         },
@@ -130,10 +139,18 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedArtifacts: [
-          { name: 'composer.json', contents: 'some contents' },
+          {
+            type: 'addition',
+            path: 'composer.json',
+            contents: 'some contents',
+          },
         ],
         updatedPackageFiles: [
-          { name: 'composer.json', contents: 'some new content' },
+          {
+            type: 'addition',
+            path: 'composer.json',
+            contents: 'some new content',
+          },
         ],
       });
     });
@@ -145,7 +162,8 @@ describe('workers/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
-            name: 'composer.json',
+            type: 'addition',
+            path: 'composer.json',
             contents: 'some contents',
           },
         },
@@ -153,7 +171,11 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedArtifacts: [
-          { name: 'composer.json', contents: 'some contents' },
+          {
+            type: 'addition',
+            path: 'composer.json',
+            contents: 'some contents',
+          },
         ],
       });
     });
@@ -170,7 +192,11 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
-          { name: 'package-lock.json', contents: 'new contents' },
+          {
+            type: 'addition',
+            path: 'package-lock.json',
+            contents: 'new contents',
+          },
         ],
       });
     });
@@ -188,7 +214,11 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
-          { name: 'package-lock.json', contents: 'new contents' },
+          {
+            type: 'addition',
+            path: 'package-lock.json',
+            contents: 'new contents',
+          },
         ],
       });
     });
@@ -240,7 +270,11 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
-          { name: '.gitmodules', contents: 'existing content' },
+          {
+            type: 'addition',
+            path: '.gitmodules',
+            contents: 'existing content',
+          },
         ],
       });
     });
@@ -257,7 +291,8 @@ describe('workers/branch/get-updated', () => {
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
-            name: 'composer.lock',
+            type: 'addition',
+            path: 'composer.lock',
             contents: 'some contents',
           },
         },
@@ -265,10 +300,18 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedArtifacts: [
-          { name: 'composer.lock', contents: 'some contents' },
+          {
+            type: 'addition',
+            path: 'composer.lock',
+            contents: 'some contents',
+          },
         ],
         updatedPackageFiles: [
-          { name: 'composer.json', contents: 'existing content' },
+          {
+            type: 'addition',
+            path: 'composer.json',
+            contents: 'existing content',
+          },
         ],
       });
     });
@@ -282,16 +325,23 @@ describe('workers/branch/get-updated', () => {
       poetry.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
-            name: 'poetry.lock',
+            type: 'addition',
+            path: 'poetry.lock',
             contents: 'some contents',
           },
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
-        updatedArtifacts: [{ name: 'poetry.lock', contents: 'some contents' }],
+        updatedArtifacts: [
+          { type: 'addition', path: 'poetry.lock', contents: 'some contents' },
+        ],
         updatedPackageFiles: [
-          { name: 'pyproject.toml', contents: 'existing content' },
+          {
+            type: 'addition',
+            path: 'pyproject.toml',
+            contents: 'existing content',
+          },
         ],
       });
     });
@@ -375,7 +425,8 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
           {
-            name: 'package.json',
+            type: 'addition',
+            path: 'package.json',
             contents: 'new version',
           },
         ],
@@ -396,8 +447,9 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
           {
+            type: 'addition',
+            path: 'Chart.yaml',
             contents: 'version: 0.0.2',
-            name: 'Chart.yaml',
           },
         ],
       });

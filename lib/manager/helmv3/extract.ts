@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseRepository, resolveAlias } from './utils';
@@ -58,13 +57,13 @@ export async function extractPackageFile(
       currentValue: dep.version,
     };
     if (!dep.repository) {
-      res.skipReason = SkipReason.NoRepository;
+      res.skipReason = 'no-repository';
       return res;
     }
 
     const repository = resolveAlias(dep.repository, config.aliases);
     if (!repository) {
-      res.skipReason = SkipReason.PlaceholderUrl;
+      res.skipReason = 'placeholder-url';
       return res;
     }
 
