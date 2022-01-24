@@ -584,6 +584,7 @@ export async function isBranchConflicted(
 ): Promise<boolean> {
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
   await syncGit();
+  await writeGitAuthor();
   if (!branchExists(baseBranch) || !branchExists(branch)) {
     logger.warn(
       { baseBranch, branch },
