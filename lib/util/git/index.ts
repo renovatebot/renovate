@@ -175,7 +175,7 @@ export async function validateGitVersion(): Promise<boolean> {
   if (
     !(
       version &&
-      (version === GIT_MINIMUM_VERSION ||
+      (semverCoerced.equals(version, GIT_MINIMUM_VERSION) ||
         semverCoerced.isGreaterThan(version, GIT_MINIMUM_VERSION))
     )
   ) {
