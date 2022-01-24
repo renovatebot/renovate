@@ -1,21 +1,20 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { loadFixture } from '../../../test/util';
 import * as mavenVersioning from '../../versioning/maven';
 import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from '../sbt-plugin/util';
 import * as sbtPackage from '.';
 
-const mavenIndexHtml = loadFixture(`maven-index.html`);
-const sbtPluginIndex = loadFixture(`sbt-plugins-index.html`);
-
 describe('datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
-    expect(parseIndexDir(mavenIndexHtml)).toMatchSnapshot();
+    expect(parseIndexDir(Fixtures.get(`maven-index.html`))).toMatchSnapshot();
   });
 
   it('parses sbt index directory', () => {
-    expect(parseIndexDir(sbtPluginIndex)).toMatchSnapshot();
+    expect(
+      parseIndexDir(Fixtures.get(`sbt-plugins-index.html`))
+    ).toMatchSnapshot();
   });
 
   describe('getPkgReleases', () => {
