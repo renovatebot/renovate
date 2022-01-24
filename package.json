@@ -134,7 +134,7 @@
     "@cheap-glitch/mi-cron": "1.0.1",
     "@iarna/toml": "2.2.5",
     "@renovatebot/pep440": "2.0.0",
-    "@renovatebot/ruby-semver": "1.0.0",
+    "@renovatebot/ruby-semver": "1.1.2",
     "@sindresorhus/is": "4.3.0",
     "@yarnpkg/core": "3.1.0",
     "@yarnpkg/parsers": "2.4.1",
