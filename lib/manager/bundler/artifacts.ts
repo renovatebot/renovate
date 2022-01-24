@@ -101,9 +101,9 @@ export async function updateArtifacts(
     let cmd;
 
     if (config.isLockFileMaintenance) {
-      cmd = 'bundle lock';
+      cmd = 'bundler lock';
     } else {
-      cmd = `bundle lock --update ${updatedDeps
+      cmd = `bundler lock --update ${updatedDeps
         .map((dep) => dep.depName)
         .map(quote)
         .join(' ')}`;
