@@ -45,5 +45,7 @@ export async function createOnboardingBranch(
     message: commitMessage.toString(),
   };
 
-  return commitFiles(commitConfig, config.platformCommit && platform.pushFiles);
+  const pushCallback =
+    config.platformCommit && platform.pushFiles ? platform.pushFiles : null;
+  return commitFiles(commitConfig, pushCallback);
 }

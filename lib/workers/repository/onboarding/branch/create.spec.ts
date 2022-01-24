@@ -37,7 +37,7 @@ describe('workers/repository/onboarding/branch/create', () => {
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
         buildExpectedCommitFilesArgument('Add renovate.json'),
-        undefined
+        null
       );
     });
     it('applies supplied commit message', async () => {
@@ -47,7 +47,7 @@ describe('workers/repository/onboarding/branch/create', () => {
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
         buildExpectedCommitFilesArgument(`${message}`),
-        undefined
+        null
       );
     });
     describe('applies the commitMessagePrefix value', () => {
@@ -59,7 +59,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           ),
-          undefined
+          null
         );
       });
       it('to the supplied commit message', async () => {
@@ -73,7 +73,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} ${message}`
           ),
-          undefined
+          null
         );
       });
     });
@@ -86,7 +86,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           ),
-          undefined
+          null
         );
       });
       it('to the supplied commit message', async () => {
@@ -100,7 +100,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} ${message}`
           ),
-          undefined
+          null
         );
       });
     });
@@ -114,7 +114,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           ),
-          undefined
+          null
         );
       });
       it('falls back to the default option if in list of allowed names', async () => {
@@ -126,7 +126,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           ),
-          undefined
+          null
         );
       });
       it('uses the given name if valid', async () => {
@@ -139,7 +139,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             `${prefix}${CommitMessage.SEPARATOR} add ${config.onboardingConfigFileName}`,
             config.onboardingConfigFileName
           ),
-          undefined
+          null
         );
       });
       it('applies to the default commit message', async () => {
@@ -152,7 +152,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             `${prefix}${CommitMessage.SEPARATOR} add ${config.onboardingConfigFileName}`,
             config.onboardingConfigFileName
           ),
-          undefined
+          null
         );
       });
     });

@@ -57,5 +57,7 @@ export function commitFilesToBranch(
     force: !!config.forceCommit,
   };
 
-  return commitFiles(commitConfig, config.platformCommit && platform.pushFiles);
+  const pushCallback =
+    config.platformCommit && platform.pushFiles ? platform.pushFiles : null;
+  return commitFiles(commitConfig, pushCallback);
 }
