@@ -72,3 +72,19 @@ export interface CommitFilesConfig {
   message: string;
   force?: boolean;
 }
+
+type BranchName = string;
+type TargetBranchName = BranchName;
+type SourceBranchName = BranchName;
+
+export type GitConflictsCache = Record<TargetBranchName, TargetBranchConflicts>;
+
+interface TargetBranchConflicts {
+  targetBranchSha: CommitSha;
+  sourceBranches: Record<SourceBranchName, SourceBranchConflict>;
+}
+
+interface SourceBranchConflict {
+  sourceBranchSha: CommitSha;
+  isConflicted: boolean;
+}
