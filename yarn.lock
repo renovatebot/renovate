@@ -1897,12 +1897,12 @@
   resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.0.0.tgz#c9faec210d3eefed9c556f796dc1ff00ab55c979"
   integrity sha512-9dw67KZW+k1VzzlScH10/4ukaqyYR8TQm3QHBD4EkbUt2NPYlalXvdIjvx9tk15h4xubglDgYpsEMQkfEHMbvA==
 
-"@renovatebot/ruby-semver@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-1.0.0.tgz#79b5b8edbfa09b9c7c99a1c60b0fc68af7bae9b4"
-  integrity sha512-Ov06M77JxuZXMmYPfUjwr9CQhzKfx26POT+XNSE8CCrTuXns/Nb970cwJMxDEn6E3+qJ079rhuiVa1YpRtyoIQ==
+"@renovatebot/ruby-semver@1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-1.1.2.tgz#ffc4d751c41dc7d256858de746f6afdddb87d482"
+  integrity sha512-qFIqLwJgasTQbVchq08ShNwOWn3LqzMiESmzD8OTO8sghYRFY365luQ8TAaQveuQbJ50k0FKMTJ/kcr2Vc2tiA==
   dependencies:
-    tslib "2.1.0"
+    tslib "2.3.1"
 
 "@semantic-release/commit-analyzer@^9.0.2":
   version "9.0.2"
@@ -1996,12 +1996,7 @@
     lodash "^4.17.4"
     read-pkg-up "^7.0.0"
 
-"@sindresorhus/is@4.2.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.2.1.tgz#b88b5724283db80b507cd612caee9a1947412a20"
-  integrity sha512-BrzrgtaqEre0qfvI8sMTaEvx+bayuhPmfe2rfeUGPPHYr/PLxCOqkOe4TQTDPb+qcqgNcsAtXV/Ew74mcDIE8w==
-
-"@sindresorhus/is@^4.0.0":
+"@sindresorhus/is@4.3.0", "@sindresorhus/is@^4.0.0":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.3.0.tgz#344fd9bf808a84567ba563d00cc54b2f428dbab1"
   integrity sha512-wwOvh0eO3PiTEivGJWiZ+b946SlMSb4pe+y+Ur/4S87cwo09pYi+FWHHnbrM3W9W7cBYKDqQXcrFYjYUCOJUEQ==
@@ -2417,10 +2412,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.10.tgz#616f16e9d3a2a3d618136b1be244315d95bd7cab"
   integrity sha512-S/3xB4KzyFxYGCppyDt68yzBU9ysL88lSdIah4D6cptdcltc4NCPCAMc0+PCpg/lLIyC7IPvj2Z52OJWeIUkog==
 
-"@types/node@16.11.19":
-  version "16.11.19"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.19.tgz#1afa165146997b8286b6eabcb1c2d50729055169"
-  integrity sha512-BPAcfDPoHlRQNKktbsbnpACGdypPFBuX4xQlsWDE7B8XXcfII+SpOLay3/qZmCLb39kV5S1RTYwXdkx2lwLYng==
+"@types/node@16.11.20":
+  version "16.11.20"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.20.tgz#334b116c6d41143c92599965e14b5a3dd68c5d1f"
+  integrity sha512-lAKaZ0Lc1Umwd0AqLr6iy5U8u/1DpK7/JzNgQn9cMMUk2mFR8bbhEP8BQrI9Cm5CU0bOVCaWbkGBvgqKMOJHsw==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -7623,11 +7618,6 @@ parse-conflict-json@*, parse-conflict-json@^2.0.1:
     just-diff "^5.0.1"
     just-diff-apply "^4.0.1"
 
-parse-diff@0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/parse-diff/-/parse-diff-0.9.0.tgz#2e71b5dc5d8f4b9c19c471fd6325646dc9f21724"
-  integrity sha512-Jn+VZORAezkfOXR6B40EZcXxdJBamtgBpfeoFH6hxD+p0e74nVaCL9SWlQj1ggc8b6AexgPKlDiiE0CMMZDSbQ==
-
 parse-entities@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/parse-entities/-/parse-entities-2.0.0.tgz#53c6eb5b9314a1f4ec99fa0fdf7ce01ecda0cbe8"
@@ -9078,11 +9068,6 @@ tsconfig-paths@^3.12.0:
     json5 "^1.0.1"
     minimist "^1.2.0"
     strip-bom "^3.0.0"
-
-tslib@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
-  integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
 
 tslib@2.3.1, tslib@^2.1.0, tslib@^2.3.0, tslib@^2.3.1:
   version "2.3.1"
