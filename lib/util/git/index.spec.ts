@@ -631,13 +631,6 @@ describe('util/git/index', () => {
       await repo.checkout(defaultBranch);
     });
 
-    afterAll(async () => {
-      const repo = Git(base.path);
-      await repo.init();
-      await repo.checkout(defaultBranch);
-      await repo.reset(['--hard', 'HEAD~1']);
-    });
-
     it('returns true for non-existing source branch', async () => {
       const res = await git.isBranchConflicted(
         defaultBranch,
