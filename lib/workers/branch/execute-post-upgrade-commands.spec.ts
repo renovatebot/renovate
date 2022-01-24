@@ -1,14 +1,11 @@
 import { fs, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import * as _git from '../../util/git';
 import type { StatusResult } from '../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as postUpgradeCommands from './execute-post-upgrade-commands';
 
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
-
-const git = mocked(_git);
 
 describe('workers/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
