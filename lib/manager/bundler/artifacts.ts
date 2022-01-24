@@ -138,7 +138,7 @@ export async function updateArtifacts(
     );
 
     const { bundler } = constraints || {};
-    const preCommands = [];
+    const preCommands = ['ruby --version'];
 
     // Bundler < 2 has a different config option syntax than >= 2
     if (
