@@ -1735,7 +1735,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       logger.debug('No vulnerability alerts found');
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ err }, 'Error processing vulnerabity alerts');
+    logger.warn({ err }, 'Error processing vulnerabity alerts');
   }
   return alerts;
 }
