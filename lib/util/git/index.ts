@@ -58,7 +58,11 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
       logger.debug(`gitRetry round ${round}`);
     }
     try {
-      return await gitFunc();
+      const res = await gitFunc();
+      if (round > 1) {
+        logger.debug('Successful retry of git function');
+      }
+      return res;
     } catch (err) {
       lastError = err;
       logger.debug({ err }, `Git function thrown`);
