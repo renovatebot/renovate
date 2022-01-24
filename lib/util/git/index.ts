@@ -587,7 +587,7 @@ export async function isBranchConflicted(
 
   const baseBranchSha = getBranchCommit(baseBranch)?.slice(0, 7);
   const branchSha = getBranchCommit(branch)?.slice(0, 7);
-  if (!baseBranchSha || !branchExists(branchSha)) {
+  if (!baseBranchSha || !branchSha) {
     logger.warn(
       { baseBranch, branch },
       'isBranchConflicted: branch does not exist'
