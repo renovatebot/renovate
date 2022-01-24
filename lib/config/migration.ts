@@ -163,9 +163,6 @@ export function migrateConfig(
           '{{managerBranchPrefix}}',
           '{{additionalBranchPrefix}}'
         );
-      } else if (key === 'managerBranchPrefix') {
-        delete migratedConfig.managerBranchPrefix;
-        migratedConfig.additionalBranchPrefix = val;
       } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
@@ -174,11 +171,6 @@ export function migrateConfig(
         const templateIndex = val.indexOf(`{{`);
         migratedConfig.branchPrefix = val.substring(0, templateIndex);
         migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
-      } else if (key === 'versionStrategy') {
-        delete migratedConfig.versionStrategy;
-        if (val === 'widen') {
-          migratedConfig.rangeStrategy = 'widen';
-        }
       } else if (key === 'semanticPrefix' && is.string(val)) {
         delete migratedConfig.semanticPrefix;
         let [text] = val.split(':') as any; // TODO: fixme
@@ -439,12 +431,6 @@ export function migrateConfig(
           migratedConfig.suppressNotifications =
             migratedConfig.suppressNotifications || [];
           migratedConfig.suppressNotifications.push('deprecationWarningIssues');
-        }
-      } else if (key === 'composerIgnorePlatformReqs') {
-        if (val === true) {
-          migratedConfig.composerIgnorePlatformReqs = [];
-        } else if (val === false) {
-          migratedConfig.composerIgnorePlatformReqs = null;
         }
       } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
         if (migratedConfig[key] !== undefined) {

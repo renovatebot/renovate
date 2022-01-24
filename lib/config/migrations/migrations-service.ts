@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
+import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -13,6 +14,7 @@ import { RequiredStatusChecksMigration } from './custom/required-status-checks-m
 import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
+import { VersionStrategyMigration } from './custom/version-strategy-migration';
 import type { Migration, MigrationConstructor } from './types';
 
 export class MigrationsService {
@@ -34,15 +36,17 @@ export class MigrationsService {
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
-    ['exposeEnv', 'exposeAllEnv'],
-    ['separatePatchReleases', 'separateMinorPatch'],
-    ['multipleMajorPrs', 'separateMultipleMajor'],
     ['excludedPackageNames', 'excludePackageNames'],
+    ['exposeEnv', 'exposeAllEnv'],
+    ['managerBranchPrefix', 'additionalBranchPrefix'],
+    ['multipleMajorPrs', 'separateMultipleMajor'],
+    ['separatePatchReleases', 'separateMinorPatch'],
     ['versionScheme', 'versioning'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
     BinarySourceMigration,
+    ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
     GoModTidyMigration,
     IgnoreNodeModulesMigration,
@@ -53,6 +57,7 @@ export class MigrationsService {
     SemanticCommitsMigration,
     TrustLevelMigration,
     UpgradeInRangeMigration,
+    VersionStrategyMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
