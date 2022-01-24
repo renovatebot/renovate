@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import type { ExecOptions } from '../../util/exec/types';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { isSystemManifest } from '.';
+import { isSystemManifest } from './common';
 
 export async function updateArtifacts({
   packageFileName,

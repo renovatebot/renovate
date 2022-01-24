@@ -44,6 +44,13 @@ describe('manager/flux/extract', () => {
         ],
       });
     });
+    it('ignores system manifests without a version', () => {
+      const result = extractPackageFile(
+        'not actually a system manifest!',
+        'clusters/my-cluster/flux-system/gotk-components.yaml'
+      );
+      expect(result).toBeNull();
+    });
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(
         loadFixture('release.yaml'),

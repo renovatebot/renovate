@@ -3,16 +3,21 @@ import { id as GithubReleasesId } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import { isSystemManifest } from './common';
 import type { FluxManifest, FluxResource, ResourceFluxManifest } from './types';
-import { isSystemManifest } from '.';
 
 function readManifest(content: string, file: string): FluxManifest | null {
   if (isSystemManifest(file)) {
+    const versionMatch = regEx(/#\s*Flux\s+Version:\s*(\S+)/).exec(content);
+    if (!versionMatch) {
+      return null;
+    }
     return {
       kind: 'system',
       file: file,
-      version: content.match(/#\s*Flux\s+Version:\s*(\S+)/)[1],
+      version: versionMatch[1],
     };
   }
 
