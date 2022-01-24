@@ -9,6 +9,11 @@ import { id as semverVersioningId } from '../../versioning/semver';
 import type { ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
+  bundler: {
+    datasource: 'rubygems',
+    depName: 'bundler',
+    versioning: 'ruby',
+  },
   composer: {
     datasource: 'github-releases',
     depName: 'composer/composer',
