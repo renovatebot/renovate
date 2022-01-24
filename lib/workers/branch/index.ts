@@ -48,6 +48,13 @@ import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setConfidence, setStability } from './status-checks';
 
+function pendingCheck(branchPr: Pr): boolean {
+  const prRebaseChecked = branchPr.body?.includes(
+    `- [x] <!-- pending-version-check -->`
+  );
+  return prRebaseChecked;
+}
+
 function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   const titleRebase = branchPr.title?.startsWith('rebase!');
   const labelRebase = branchPr.labels?.includes(config.rebaseLabel);
@@ -88,6 +95,23 @@ export async function processBranch(
     config.dependencyDashboardChecks?.[config.branchName];
   logger.debug(`dependencyDashboardCheck=${dependencyDashboardCheck}`);
   if (branchPr) {
+    config.pendingVersionsRequested = pendingCheck(branchPr);
+    if (config.pendingVersionsRequested) {
+      logger.debug(`PR pending versions requested`);
+      config.upgrades.every((upgrade) => {
+        if (upgrade.pendingVersions?.length) {
+          upgrade.newVersion = upgrade.pendingVersions.slice(-1).pop();
+          upgrade.newValue = upgrade.newVersion;
+        }
+      });
+      config.newVersion =
+        config.pendingVersions[config.pendingVersions.length - 1];
+      // TODO: fix all these properly
+      config.newValue = config.newVersion;
+      // config.displayTo
+      // config.prTitle
+    }
+    debugger;
     config.rebaseRequested = rebaseCheck(config, branchPr);
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }

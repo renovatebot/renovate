@@ -302,6 +302,9 @@ export function generateBranchConfig(
   config.dependencyDashboardPrApproval = config.upgrades.some(
     (upgrade) => upgrade.prCreation === 'approval'
   );
+  config.hasPendingVersions = config.upgrades.some(
+    (upgrade) => upgrade.pendingVersions?.length
+  );
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
   // combine all labels
   config.labels = [

@@ -113,6 +113,8 @@ export interface BranchConfig
   dependencyDashboardChecks?: Record<string, string>;
   releaseTimestamp?: string;
   forceCommit?: boolean;
+  hasPendingVersions?: boolean;
+  pendingVersionsRequested?: boolean;
   rebaseRequested?: boolean;
   result?: BranchResult;
   upgrades: BranchUpgradeConfig[];
