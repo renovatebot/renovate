@@ -34,10 +34,4 @@ describe('platform/bitbucket/utils', () => {
     expect(httpMock.getTrace()).toHaveLength(3);
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
-
-  it('isConflicted', () => {
-    expect(
-      utils.isConflicted([{ chunks: [{ changes: [{ content: '+=======' }] }] }])
-    ).toBeTrue();
-  });
 });

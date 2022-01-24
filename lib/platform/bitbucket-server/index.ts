@@ -297,7 +297,6 @@ export async function getPr(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
       { useCache: !refreshCache }
     );
-    pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
   }
 
