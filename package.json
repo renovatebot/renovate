@@ -187,7 +187,6 @@
     "p-all": "3.0.0",
     "p-map": "4.0.0",
     "p-queue": "6.6.2",
-    "parse-diff": "0.9.0",
     "parse-link-header": "2.0.0",
     "redis": "4.0.2",
     "registry-auth-token": "4.2.1",
