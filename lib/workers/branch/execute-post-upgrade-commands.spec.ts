@@ -1,4 +1,4 @@
-import { fs, git, mocked } from '../../../test/util';
+import { fs, git } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { StatusResult } from '../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';

@@ -4,12 +4,7 @@ import { GlobalConfig } from '../../config/global';
 import { addMeta, logger } from '../../logger';
 import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
-import {
-  localPathExists,
-  localPathIsFile,
-  readLocalFile,
-  writeLocalFile,
-} from '../../util/fs';
+import { localPathIsFile, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import type { FileChange } from '../../util/git/types';
 import { regEx } from '../../util/regex';
@@ -45,9 +40,7 @@ export async function postUpgradeCommandsExecutor(
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles.concat(updatedArtifacts)) {
-        const canWriteFile =
-          !(await localPathExists(file.path)) ||
-          (await localPathIsFile(file.path));
+        const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && canWriteFile) {
           let contents;
           if (typeof file.contents === 'string') {
