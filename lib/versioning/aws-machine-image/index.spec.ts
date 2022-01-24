@@ -43,9 +43,12 @@ describe('versioning/aws-machine-image/index', () => {
     });
   });
   describe('isGreaterThan(version1, version2)', () => {
-    it('should return false', () => {
-      expect(aws.isGreaterThan('ami-00', 'ami-99')).toBeFalse();
-      expect(aws.isGreaterThan('ami-99', 'ami-00')).toBeFalse();
+    it('should return true', () => {
+      // Since we can't compare AMI IDs directly, we consider any version
+      // greater than any other version so that updates will be generated.
+      // https://github.com/renovatebot/renovate/discussions/13739
+      expect(aws.isGreaterThan('ami-00', 'ami-99')).toBeTrue();
+      expect(aws.isGreaterThan('ami-99', 'ami-00')).toBeTrue();
     });
   });
 });

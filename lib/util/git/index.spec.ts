@@ -4,7 +4,7 @@ import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import type { File } from './types';
+import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
@@ -262,7 +262,7 @@ describe('util/git/index', () => {
   });
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
-      const file: File = {
+      const file: FileChange = {
         type: 'addition',
         path: 'some-new-file',
         contents: 'some new-contents',
@@ -325,7 +325,7 @@ describe('util/git/index', () => {
   });
   describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
-      const file: File = {
+      const file: FileChange = {
         type: 'addition',
         path: 'some-new-file',
         contents: 'some new-contents',
@@ -338,7 +338,7 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('deletes file', async () => {
-      const file: File = {
+      const file: FileChange = {
         type: 'deletion',
         path: 'file_to_delete',
       };
@@ -350,7 +350,7 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('updates multiple files', async () => {
-      const files: File[] = [
+      const files: FileChange[] = [
         {
           type: 'addition',
           path: 'some-existing-file',
@@ -370,7 +370,7 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('updates git submodules', async () => {
-      const files: File[] = [
+      const files: FileChange[] = [
         {
           type: 'addition',
           path: '.',
@@ -385,7 +385,7 @@ describe('util/git/index', () => {
       expect(commit).toBeNull();
     });
     it('does not push when no diff', async () => {
-      const files: File[] = [
+      const files: FileChange[] = [
         {
           type: 'addition',
           path: 'future_file',
@@ -404,7 +404,7 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files: File[] = [
+      const files: FileChange[] = [
         {
           type: 'addition',
           path: 'some-new-file',
@@ -434,7 +434,7 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files: File[] = [
+      const files: FileChange[] = [
         {
           type: 'addition',
           path: 'some-new-file',
@@ -465,7 +465,7 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files: File[] = [
+      const files: FileChange[] = [
         {
           type: 'addition',
           path: 'some-new-file',
@@ -493,7 +493,7 @@ describe('util/git/index', () => {
     });
 
     it('creates file with the executable bit', async () => {
-      const file: File = {
+      const file: FileChange = {
         type: 'addition',
         path: 'some-executable',
         contents: 'some new-contents',
