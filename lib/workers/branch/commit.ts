@@ -57,6 +57,7 @@ export function commitFilesToBranch(
     force: !!config.forceCommit,
   };
 
+  // istanbul ignore next
   const pushCallback =
     config.platformCommit && platform.pushFiles ? platform.pushFiles : null;
   return commitFiles(commitConfig, pushCallback);

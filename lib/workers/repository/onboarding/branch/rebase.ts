@@ -62,6 +62,7 @@ export async function rebaseOnboardingBranch(
     message: commitMessage.toString(),
   };
 
+  // istanbul ignore next
   const pushCallback =
     config.platformCommit && platform.pushFiles ? platform.pushFiles : null;
   return commitFiles(commitConfig, pushCallback);
