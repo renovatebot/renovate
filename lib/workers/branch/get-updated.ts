@@ -4,15 +4,15 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import type { ArtifactError, PackageDependency } from '../../manager/types';
 import { getFile } from '../../util/git';
-import type { File, FileAddition } from '../../util/git/types';
+import type { FileAddition, FileChange } from '../../util/git/types';
 import type { BranchConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];
   reuseExistingBranch?: boolean;
-  updatedPackageFiles: File[];
-  updatedArtifacts: File[];
+  updatedPackageFiles: FileChange[];
+  updatedArtifacts: FileChange[];
 }
 
 export async function getUpdatedPackageFiles(
@@ -220,7 +220,7 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: updatedFileContents[name],
   }));
-  const updatedArtifacts: File[] = [];
+  const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   for (const packageFile of updatedPackageFiles) {
     const manager = packageFileManagers[packageFile.path];

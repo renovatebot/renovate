@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { smartTruncate } from './pr-body';
 
-const prBody = loadFixture('pr-body.txt');
+const prBody = Fixtures.get('pr-body.txt');
 
 describe('platform/utils/pr-body', () => {
   describe('.smartTruncate', () => {
