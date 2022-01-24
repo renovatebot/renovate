@@ -77,6 +77,21 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
     });
 
+    it('creates PR with footer and header with trailing and leading newlines', async () => {
+      await ensureOnboardingPr(
+        {
+          ...config,
+          prHeader: '\r\r\nThis should not be the first line of the PR',
+          prFooter:
+            'There should be several empty lines at the end of the PR\r\n\n\n',
+        },
+        packageFiles,
+        branches
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+    });
+
     it('creates PR with footer and header using templating', async () => {
       config.baseBranch = 'some-branch';
       config.repository = 'test';
