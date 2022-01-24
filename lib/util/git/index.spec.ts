@@ -123,9 +123,12 @@ describe('util/git/index', () => {
         .mockImplementationOnce(() => {
           throw new Error('The remote end hung up unexpectedly');
         })
+        .mockImplementationOnce(() => {
+          throw new Error('The remote end hung up unexpectedly');
+        })
         .mockImplementationOnce(() => 'some result');
       expect(await git.gitRetry(() => gitFunc())).toBe('some result');
-      expect(gitFunc).toHaveBeenCalledTimes(2);
+      expect(gitFunc).toHaveBeenCalledTimes(3);
     });
 
     it('retries the func call up to retry count if ExternalHostError thrown', async () => {
