@@ -25,8 +25,8 @@ describe('workers/branch/execute-post-upgrade-commands', () => {
       const config: BranchConfig = {
         updatedPackageFiles: [],
         updatedArtifacts: [
-          { name: 'some-existing-dir', contents: '' },
-          { name: 'artifact', contents: '' },
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
         ],
         artifactErrors: [],
         upgrades: [],
