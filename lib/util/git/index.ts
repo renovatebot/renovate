@@ -266,7 +266,12 @@ export function setGitAuthor(gitAuthor: string): void {
 }
 
 export async function writeGitAuthor(): Promise<void> {
-  const { gitAuthorName, gitAuthorEmail } = config;
+  const { gitAuthorName, gitAuthorEmail, writeGitDone } = config;
+  // istanbul ignore if
+  if (writeGitDone) {
+    return;
+  }
+  config.writeGitDone = true;
   try {
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
@@ -584,6 +589,7 @@ export async function isBranchConflicted(
 ): Promise<boolean> {
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
   await syncGit();
+  await writeGitAuthor();
 
   const baseBranchSha = getBranchCommit(baseBranch)?.slice(0, 7);
   const branchSha = getBranchCommit(branch)?.slice(0, 7);
