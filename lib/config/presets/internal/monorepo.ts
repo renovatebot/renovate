@@ -184,7 +184,7 @@ const repoGroups = {
   treat: 'https://github.com/seek-oss/treat',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   uppy: 'https://github.com/transloadit/uppy',
-  vue: 'https://github.com/vuejs/vue',
+  vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',

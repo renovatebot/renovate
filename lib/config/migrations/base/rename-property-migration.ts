@@ -3,7 +3,7 @@ import { AbstractMigration } from './abstract-migration';
 
 export class RenamePropertyMigration extends AbstractMigration {
   override readonly deprecated = true;
-  readonly propertyName: string;
+  override readonly propertyName: string;
 
   private readonly newPropertyName: string;
 
@@ -18,7 +18,7 @@ export class RenamePropertyMigration extends AbstractMigration {
     this.newPropertyName = newPropertyName;
   }
 
-  override run(value): void {
+  override run(value: unknown): void {
     this.setSafely(this.newPropertyName, value);
   }
 }

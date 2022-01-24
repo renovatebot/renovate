@@ -2,7 +2,12 @@ import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import type { RangeStrategy } from '../../types';
-import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
+import {
+  branchExists,
+  isBranchConflicted,
+  isBranchModified,
+  isBranchStale,
+} from '../../util/git';
 import type { BranchConfig } from '../types';
 
 type ParentBranch = {
@@ -14,7 +19,7 @@ type ParentBranch = {
 export async function shouldReuseExistingBranch(
   config: BranchConfig
 ): Promise<ParentBranch> {
-  const { branchName } = config;
+  const { baseBranch, branchName } = config;
   const result: ParentBranch = { reuseExistingBranch: false };
   // Check if branch exists
   if (!branchExists(branchName)) {
@@ -74,9 +79,9 @@ export async function shouldReuseExistingBranch(
   }
 
   // Now check if PR is unmergeable. If so then we also rebase
-  result.isConflicted = !!pr?.isConflicted;
+  result.isConflicted = await isBranchConflicted(baseBranch, branchName);
   if (result.isConflicted) {
-    logger.debug('PR is conflicted');
+    logger.debug('Branch is conflicted');
 
     if ((await isBranchModified(branchName)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);

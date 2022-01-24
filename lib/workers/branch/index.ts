@@ -25,6 +25,7 @@ import {
   deleteBranch,
   getBranchCommit,
   branchExists as gitBranchExists,
+  isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
 import {
@@ -439,7 +440,11 @@ export async function processBranch(
       }
     }
     const forcedManually = userRebaseRequested || !branchExists;
-    config.forceCommit = forcedManually || branchPr?.isConflicted;
+
+    config.isConflicted ??=
+      branchExists &&
+      (await isBranchConflicted(config.baseBranch, config.branchName));
+    config.forceCommit = forcedManually || config.isConflicted;
 
     config.stopUpdating = branchPr?.labels?.includes(config.stopUpdatingLabel);
 
