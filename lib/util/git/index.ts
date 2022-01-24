@@ -585,7 +585,9 @@ export async function isBranchConflicted(
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
   await syncGit();
 
-  if (!branchExists(baseBranch) || !branchExists(branch)) {
+  const baseBranchSha = getBranchCommit(baseBranch)?.slice(0, 7);
+  const branchSha = getBranchCommit(branch)?.slice(0, 7);
+  if (!baseBranchSha || !branchExists(branchSha)) {
     logger.warn(
       { baseBranch, branch },
       'isBranchConflicted: branch does not exist'
@@ -593,8 +595,6 @@ export async function isBranchConflicted(
     return true;
   }
 
-  const baseBranchSha = getBranchCommit(baseBranch);
-  const branchSha = getBranchCommit(branch);
   const cachedResult = getCachedConflictResult(
     baseBranch,
     baseBranchSha,
