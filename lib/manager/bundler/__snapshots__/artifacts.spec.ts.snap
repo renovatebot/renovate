@@ -75,7 +75,7 @@ Array [
 exports[`manager/bundler/artifacts Docker injects bundler host configuration as command with bundler < 2 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/ruby:latest",
+    "cmd": "docker pull renovate/ruby:1.2.0",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -87,7 +87,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"install-tool bundler 1.2 && bundler config --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"install-tool bundler 1.2 && bundler config --local gems-private.com some-user:some-password && bundler lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
