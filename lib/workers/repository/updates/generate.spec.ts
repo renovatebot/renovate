@@ -681,13 +681,11 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.upgrades.map((u) => u.displayPending)).toMatchInlineSnapshot(`
-        Array [
-          "",
-          "\`1.1.0\`",
-          "\`1.1.1\` (+1)",
-        ]
-      `);
+      expect(res.upgrades.map((u) => u.displayPending)).toStrictEqual([
+        '',
+        '`1.1.0`',
+        '`1.1.1` (+1)',
+      ]);
     });
   });
 });
