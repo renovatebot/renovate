@@ -120,4 +120,5 @@ export interface BranchConfig
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
   stopUpdating?: boolean;
+  isConflicted?: boolean;
 }

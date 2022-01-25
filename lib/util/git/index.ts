@@ -261,7 +261,12 @@ export function setGitAuthor(gitAuthor: string): void {
 }
 
 export async function writeGitAuthor(): Promise<void> {
-  const { gitAuthorName, gitAuthorEmail } = config;
+  const { gitAuthorName, gitAuthorEmail, writeGitDone } = config;
+  // istanbul ignore if
+  if (writeGitDone) {
+    return;
+  }
+  config.writeGitDone = true;
   try {
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
@@ -571,6 +576,56 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   );
   config.branchIsModified[branchName] = true;
   return true;
+}
+
+export async function isBranchConflicted(
+  baseBranch: string,
+  branch: string
+): Promise<boolean> {
+  logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
+  await syncGit();
+  await writeGitAuthor();
+  if (!branchExists(baseBranch) || !branchExists(branch)) {
+    logger.warn(
+      { baseBranch, branch },
+      'isBranchConflicted: branch does not exist'
+    );
+    return true;
+  }
+
+  let result = false;
+
+  const origBranch = config.currentBranch;
+  try {
+    await git.reset(ResetMode.HARD);
+    if (origBranch !== baseBranch) {
+      await git.checkout(baseBranch);
+    }
+    await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
+  } catch (err) {
+    result = true;
+    // istanbul ignore if: not easily testable
+    if (!err?.git?.conflicts?.length) {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: unknown error'
+      );
+    }
+  } finally {
+    try {
+      await git.merge(['--abort']);
+      if (origBranch !== baseBranch) {
+        await git.checkout(origBranch);
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: cleanup error'
+      );
+    }
+  }
+
+  return result;
 }
 
 export async function deleteBranch(branchName: string): Promise<void> {

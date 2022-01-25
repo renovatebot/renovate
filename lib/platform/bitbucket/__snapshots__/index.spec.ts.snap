@@ -27,16 +27,6 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
   },
   Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
-  },
-  Object {
     "body": Object {
       "reviewers": Array [
         Object {
@@ -469,11 +459,9 @@ Array [
 exports[`platform/bitbucket/index getBranchPr() bitbucket finds PR for branch 1`] = `
 Object {
   "body": "summary",
-  "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
   "hasReviewers": false,
-  "isConflicted": false,
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -516,16 +504,6 @@ Array [
     },
     "method": "GET",
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
   },
 ]
 `;
@@ -1108,11 +1086,9 @@ Array [
 exports[`platform/bitbucket/index getPr() canRebase 1`] = `
 Object {
   "body": "summary",
-  "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #3",
   "hasReviewers": false,
-  "isConflicted": false,
   "number": 3,
   "sourceBranch": "branch",
   "state": "open",
@@ -1124,11 +1100,9 @@ Object {
 exports[`platform/bitbucket/index getPr() canRebase 2`] = `
 Object {
   "body": "summary",
-  "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
   "hasReviewers": false,
-  "isConflicted": false,
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -1140,11 +1114,9 @@ Object {
 exports[`platform/bitbucket/index getPr() canRebase 3`] = `
 Object {
   "body": "summary",
-  "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
   "hasReviewers": false,
-  "isConflicted": false,
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -1179,16 +1151,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3/diff",
-  },
-  Object {
-    "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
@@ -1200,16 +1162,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
-  },
-  Object {
-    "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "Basic YWJjOjEyMw==",
@@ -1218,16 +1170,6 @@ Array [
     },
     "method": "GET",
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
   },
 ]
 `;
@@ -1235,11 +1177,9 @@ Array [
 exports[`platform/bitbucket/index getPr() exists 1`] = `
 Object {
   "body": "summary",
-  "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
   "hasReviewers": false,
-  "isConflicted": false,
   "number": 5,
   "sourceBranch": "branch",
   "state": "open",
@@ -1271,16 +1211,6 @@ Array [
     },
     "method": "GET",
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
-  },
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/diff",
   },
 ]
 `;
