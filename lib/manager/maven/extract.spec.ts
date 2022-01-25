@@ -1,12 +1,12 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackage, extractRegistries } from './extract';
 
-const minimumContent = loadFixture(`minimum.pom.xml`);
-const simpleContent = loadFixture(`simple.pom.xml`);
+const minimumContent = Fixtures.get(`minimum.pom.xml`);
+const simpleContent = Fixtures.get(`simple.pom.xml`);
 
-const mirrorSettingsContent = loadFixture(`mirror.settings.xml`);
-const profileSettingsContent = loadFixture(`profile.settings.xml`);
-const complexSettingsContent = loadFixture(`complex.settings.xml`);
+const mirrorSettingsContent = Fixtures.get(`mirror.settings.xml`);
+const profileSettingsContent = Fixtures.get(`profile.settings.xml`);
+const complexSettingsContent = Fixtures.get(`complex.settings.xml`);
 
 describe('manager/maven/extract', () => {
   describe('extractDependencies', () => {

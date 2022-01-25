@@ -422,33 +422,11 @@ export async function initRepo({
         { repository_fork: config.repository },
         'Found existing fork'
       );
-      // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
-      // with the base commit from the parent repository
-      const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
-      const sha = repo.defaultBranchRef.target.oid;
-      try {
-        logger.debug(
-          `Updating forked repository default sha ${sha} to match upstream`
-        );
-        await githubApi.patchJson(url, {
-          body: {
-            sha,
-            force: true,
-          },
-          token: forkToken || opts.token,
-        });
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn(
-          { url, sha, err: err.err || err },
-          'Error updating fork from upstream - cannot continue'
-        );
-        if (err instanceof ExternalHostError) {
-          throw err;
-        }
-        throw new ExternalHostError(err);
-      }
     } else {
-      logger.debug({ repository_fork: config.repository }, 'Created fork');
+      logger.debug(
+        { repository_fork: config.repository },
+        'Created fork, waiting 30s'
+      );
       existingRepos.push(config.repository);
       // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
       await delay(30000);
@@ -473,9 +451,15 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
+  let upstreamUrl: string;
+  if (forkMode) {
+    parsedEndpoint.pathname = config.parentRepo + '.git';
+    upstreamUrl = URL.format(parsedEndpoint);
+  }
   await git.initRepo({
     ...config,
     url,
+    upstreamUrl,
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
@@ -624,12 +608,6 @@ async function getOpenPrs(): Promise<PrList> {
           pr.canMerge = false;
           pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
         }
-        // https://developer.github.com/v4/enum/mergestatestatus
-        if (pr.mergeStateStatus === 'DIRTY') {
-          pr.isConflicted = true;
-        } else {
-          pr.isConflicted = false;
-        }
         if (pr.labels) {
           pr.labels = pr.labels.nodes.map((label) => label.name);
         }
@@ -691,10 +669,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     } else {
       pr.canMerge = false;
       pr.canMergeReason = `mergeable = ${pr.mergeable}`;
-    }
-    if (pr.mergeable_state === 'dirty') {
-      logger.debug({ prNo }, 'PR state is dirty so unmergeable');
-      pr.isConflicted = true;
     }
   }
   return pr;
@@ -1716,6 +1690,12 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       if (alerts.length) {
         logger.trace({ alerts }, 'GitHub vulnerability details');
         for (const alert of alerts) {
+          if (alert.securityVulnerability === null) {
+            // As described in the documentation, there are cases in which
+            // GitHub API responds with `"securityVulnerability": null`.
+            // But it's may be faulty, so skip processing it here.
+            continue;
+          }
           const {
             package: { name, ecosystem },
             vulnerableVersionRange,

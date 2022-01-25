@@ -4120,23 +4120,6 @@ Array [
     "url": "https://api.github.com/repos/some/repo/forks",
   },
   Object {
-    "body": Object {
-      "force": true,
-      "sha": "1234",
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "content-length": "27",
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "PATCH",
-    "url": "https://api.github.com/repos/forked/repo/git/refs/heads/master",
-  },
-  Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -5571,7 +5554,6 @@ Object {
   "displayNumber": "Pull Request #2500",
   "hasAssignees": false,
   "hasReviewers": false,
-  "isConflicted": true,
   "number": 2500,
   "sourceBranch": "renovate/jest-monorepo",
   "state": "open",
@@ -6005,7 +5987,6 @@ Object {
   "canMergeReason": "mergeable = undefined",
   "commits": 1,
   "displayNumber": "Pull Request #1",
-  "isConflicted": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -7403,23 +7384,6 @@ Array [
     "method": "PATCH",
     "url": "https://api.github.com/repos/forked/repo",
   },
-  Object {
-    "body": Object {
-      "force": true,
-      "sha": "1234",
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "content-length": "27",
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "PATCH",
-    "url": "https://api.github.com/repos/forked/repo/git/refs/heads/master",
-  },
 ]
 `;
 
@@ -7905,23 +7869,6 @@ Array [
     },
     "method": "POST",
     "url": "https://api.github.com/repos/some/repo/forks",
-  },
-  Object {
-    "body": Object {
-      "force": true,
-      "sha": "1234",
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate, br",
-      "authorization": "token 123test",
-      "content-length": "27",
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-    },
-    "method": "PATCH",
-    "url": "https://api.github.com/repos/forked/repo/git/refs/heads/master",
   },
 ]
 `;

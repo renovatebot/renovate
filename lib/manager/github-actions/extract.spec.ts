@@ -1,8 +1,5 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
-
-const workflow1 = loadFixture('workflow_1.yml');
-const workflow2 = loadFixture('workflow_2.yml');
 
 describe('manager/github-actions/extract', () => {
   describe('extractPackageFile()', () => {
@@ -10,12 +7,12 @@ describe('manager/github-actions/extract', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts multiple docker image lines from yaml configuration file', () => {
-      const res = extractPackageFile(workflow1);
+      const res = extractPackageFile(Fixtures.get('workflow_1.yml'));
       expect(res.deps).toMatchSnapshot();
       expect(res.deps.filter((d) => d.datasource === 'docker')).toHaveLength(2);
     });
     it('extracts multiple action tag lines from yaml configuration file', () => {
-      const res = extractPackageFile(workflow2);
+      const res = extractPackageFile(Fixtures.get('workflow_2.yml'));
       expect(res.deps).toMatchSnapshot();
       expect(
         res.deps.filter((d) => d.datasource === 'github-tags')

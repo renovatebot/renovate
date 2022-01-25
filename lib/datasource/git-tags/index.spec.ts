@@ -1,6 +1,6 @@
 import _simpleGit from 'simple-git';
 import { getPkgReleases } from '..';
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { GitTagsDatasource } from '.';
 
 jest.mock('simple-git');
@@ -8,7 +8,7 @@ const simpleGit: any = _simpleGit;
 
 const depName = 'https://github.com/example/example.git';
 
-const lsRemote1 = loadFixture('ls-remote-1.txt', '../git-refs');
+const lsRemote1 = Fixtures.get('ls-remote-1.txt', '../git-refs');
 
 const datasource = GitTagsDatasource.id;
 const datasourceInstance = new GitTagsDatasource();
