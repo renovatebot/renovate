@@ -50,12 +50,21 @@ class LooseVersioningApi extends GenericVersioningApi {
         return part1 - part2;
       }
     }
-    // istanbul ignore if
-    if (!(parsed1.suffix && parsed2.suffix)) {
+
+    if (parsed1.suffix && parsed2.suffix) {
+      return parsed1.suffix.localeCompare(parsed2.suffix);
+    }
+
+    if (parsed1.suffix) {
+      return -1;
+    }
+
+    if (parsed2.suffix) {
       return 1;
     }
-    // equals
-    return parsed1.suffix.localeCompare(parsed2.suffix);
+
+    // istanbul ignore next
+    return 0;
   }
 }
 

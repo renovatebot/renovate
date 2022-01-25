@@ -425,13 +425,6 @@ export function migrateConfig(
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
         }
-      } else if (key === 'raiseDeprecationWarnings') {
-        delete migratedConfig.raiseDeprecationWarnings;
-        if (val === false) {
-          migratedConfig.suppressNotifications =
-            migratedConfig.suppressNotifications || [];
-          migratedConfig.suppressNotifications.push('deprecationWarningIssues');
-        }
       } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
         if (migratedConfig[key] !== undefined) {
           migratedConfig.platformAutomerge = migratedConfig[key];
