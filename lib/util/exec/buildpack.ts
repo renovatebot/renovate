@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import * as allVersioning from '../../versioning';
 import { id as composerVersioningId } from '../../versioning/composer';
 import { id as npmVersioningId } from '../../versioning/npm';
+import { id as pep440VersioningId } from '../../versioning/pep440';
 import { id as semverVersioningId } from '../../versioning/semver';
 import type { ToolConfig, ToolConstraint } from './types';
 
@@ -34,6 +35,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'npm',
     depName: 'pnpm',
     versioning: npmVersioningId,
+  },
+  poetry: {
+    datasource: 'pypi',
+    depName: 'poetry',
+    versioning: pep440VersioningId,
   },
 };
 
