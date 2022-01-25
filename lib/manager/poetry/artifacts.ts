@@ -58,7 +58,10 @@ function getPoetryRequirement(pyProjectContent: string): string | null {
           const pkgValMatch = pkgValRegex.exec(requirement);
           if (pkgValMatch) {
             const [, depName, , currVal] = pkgValMatch;
-            if (depName === 'poetry' && currVal) {
+            if (
+              (depName === 'poetry' || depName === 'poetry-core') &&
+              currVal
+            ) {
               return currVal.trim();
             }
           }
