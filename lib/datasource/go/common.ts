@@ -8,6 +8,7 @@ import type { DataSource } from './types';
 
 export const bitbucket = new BitBucketTagsDatasource();
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum GoproxyFallback {
   WhenNotFoundOrGone = ',',
   Always = '|',

@@ -27,7 +27,8 @@ async function addIfUpdated(
   if (status.modified.includes(fileProjectPath)) {
     return {
       file: {
-        name: fileProjectPath,
+        type: 'addition',
+        path: fileProjectPath,
         contents: await readLocalFile(fileProjectPath),
       },
     };
@@ -130,7 +131,7 @@ export async function updateArtifacts({
       )
     ).filter(Boolean);
     logger.debug(
-      { files: updateArtifactsResult.map((r) => r.file.name) },
+      { files: updateArtifactsResult.map((r) => r.file.path) },
       `Returning updated gradle-wrapper files`
     );
     return updateArtifactsResult;

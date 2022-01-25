@@ -124,6 +124,15 @@ export function generateBranchConfig(
     }
     upgrade.displayFrom ??= '';
     upgrade.displayTo ??= '';
+    const pendingVersionsLength = upgrade.pendingVersions?.length;
+    if (pendingVersionsLength) {
+      upgrade.displayPending = `\`${upgrade.pendingVersions.slice(-1).pop()}\``;
+      if (pendingVersionsLength > 1) {
+        upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
+      }
+    } else {
+      upgrade.displayPending = '';
+    }
     upgrade.prettyDepType =
       upgrade.prettyDepType || upgrade.depType || 'dependency';
     if (useGroupSettings) {

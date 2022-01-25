@@ -49,7 +49,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(git.commitFiles.mock.calls[0][0].message).toContain(
         '.github/renovate.json'
       );
-      expect(git.commitFiles.mock.calls[0][0].files[0].name).toBe(
+      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
         '.github/renovate.json'
       );
     });
@@ -63,7 +63,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(git.commitFiles.mock.calls[0][0].message).toContain(
         'renovate.json'
       );
-      expect(git.commitFiles.mock.calls[0][0].files[0].name).toBe(
+      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
         'renovate.json'
       );
     });
