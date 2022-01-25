@@ -4,7 +4,11 @@ import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { extractPackageFile } from '.';
 
-const tf1 = loadFixture('1.tf');
+const modules = loadFixture('modules.tf');
+const bitbucketModules = loadFixture('bitbucketModules.tf');
+const providers = loadFixture('providers.tf');
+const docker = loadFixture('docker.tf');
+
 const tf2 = `module "relative" {
   source = "../../modules/fe"
 }
@@ -32,11 +36,32 @@ describe('manager/terraform/extract', () => {
       expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
     });
 
-    it('extracts', async () => {
-      const res = await extractPackageFile(tf1, '1.tf', {});
+    it('extracts  modules', async () => {
+      const res = await extractPackageFile(modules, 'modules.tf', {});
+      expect(res.deps).toHaveLength(18);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(51);
-      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(9);
+    });
+
+    it('extracts bitbucket modules', async () => {
+      const res = await extractPackageFile(bitbucketModules, 'modules.tf', {});
+      expect(res.deps).toHaveLength(11);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+      expect(res).toMatchSnapshot();
+    });
+
+    it('extracts providers', async () => {
+      const res = await extractPackageFile(providers, 'providers.tf', {});
+      expect(res.deps).toHaveLength(14);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
+      expect(res).toMatchSnapshot();
+    });
+
+    it('extracts docker resources', async () => {
+      const res = await extractPackageFile(docker, 'docker.tf', {});
+      expect(res.deps).toHaveLength(8);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
+      expect(res).toMatchSnapshot();
     });
 
     it('returns null if only local deps', async () => {
