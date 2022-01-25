@@ -46,7 +46,6 @@ function getPythonConstraint(
 const pkgValRegex = regEx(`^${dependencyPattern}$`);
 
 function getPoetryRequirement(pyProjectContent: string): string | null {
-  debugger;
   try {
     const pyproject: PoetryFile = parse(pyProjectContent);
     // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
