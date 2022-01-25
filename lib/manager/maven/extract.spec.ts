@@ -1,8 +1,12 @@
-import { loadFixture } from '../../../test/util';
-import { extractPackage } from './extract';
+import { Fixtures } from '../../../test/fixtures';
+import { extractPackage, extractRegistries } from './extract';
 
-const minimumContent = loadFixture(`minimum.pom.xml`);
-const simpleContent = loadFixture(`simple.pom.xml`);
+const minimumContent = Fixtures.get(`minimum.pom.xml`);
+const simpleContent = Fixtures.get(`simple.pom.xml`);
+
+const mirrorSettingsContent = Fixtures.get(`mirror.settings.xml`);
+const profileSettingsContent = Fixtures.get(`profile.settings.xml`);
+const complexSettingsContent = Fixtures.get(`complex.settings.xml`);
 
 describe('manager/maven/extract', () => {
   describe('extractDependencies', () => {
@@ -79,6 +83,39 @@ describe('manager/maven/extract', () => {
         mavenProps: {},
         packageFile: null,
       });
+    });
+  });
+  describe('extractRegistries', () => {
+    it('returns null for invalid XML', () => {
+      expect(extractRegistries(undefined)).toBeEmptyArray();
+      expect(extractRegistries('invalid xml content')).toBeEmptyArray();
+      expect(extractRegistries('<foobar></foobar>')).toBeEmptyArray();
+      expect(extractRegistries('<settings></settings>')).toBeEmptyArray();
+    });
+
+    it('extract registries from a simple mirror settings file', () => {
+      const res = extractRegistries(mirrorSettingsContent);
+      expect(res).toStrictEqual([
+        'https://artifactory.company.com/artifactory/my-maven-repo',
+      ]);
+    });
+
+    it('extract registries from a simple profile settings file', () => {
+      const res = extractRegistries(profileSettingsContent);
+      expect(res).toStrictEqual([
+        'https://repo.adobe.com/nexus/content/groups/public',
+      ]);
+    });
+
+    it('extract registries from a complex profile settings file', () => {
+      const res = extractRegistries(complexSettingsContent);
+      expect(res).toStrictEqual([
+        'https://artifactory.company.com/artifactory/my-maven-repo',
+        'https://repo.adobe.com/nexus/content/groups/public',
+        'https://repo.adobe.com/v2/nexus/content/groups/public',
+        'https://repo.adobe.com/v3/nexus/content/groups/public',
+        'https://repo.adobe.com/v4/nexus/content/groups/public',
+      ]);
     });
   });
 });

@@ -80,6 +80,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
   try {
     await resolveConfigPresets(config);
   } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, CONFIG_PRESETS_INVALID);
     throw new Error(CONFIG_PRESETS_INVALID);
   }
 }
@@ -137,7 +138,7 @@ export async function start(): Promise<number> {
       return 2;
     }
   } finally {
-    globalFinalize(config);
+    await globalFinalize(config);
     logger.debug(`Renovate exiting`);
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);

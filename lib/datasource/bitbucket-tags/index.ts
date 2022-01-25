@@ -7,7 +7,7 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BitbucketCommit, BitbucketTag } from './types';
 
 export class BitBucketTagsDatasource extends Datasource {
-  bitbucketHttp = new BitbucketHttp();
+  bitbucketHttp = new BitbucketHttp(BitBucketTagsDatasource.id);
 
   static readonly id = 'bitbucket-tags';
 

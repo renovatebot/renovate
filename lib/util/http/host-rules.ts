@@ -1,4 +1,5 @@
 import {
+  BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
   PlatformId,
@@ -20,6 +21,7 @@ function findMatchingRules(options: GotOptions, url: string): HostRule {
 
   // Fallback to `github` hostType
   if (
+    hostType &&
     GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
     hostType !== PlatformId.Github
   ) {
@@ -34,12 +36,28 @@ function findMatchingRules(options: GotOptions, url: string): HostRule {
 
   // Fallback to `gitlab` hostType
   if (
+    hostType &&
     GITLAB_API_USING_HOST_TYPES.includes(hostType) &&
     hostType !== PlatformId.Gitlab
   ) {
     res = {
       ...hostRules.find({
         hostType: PlatformId.Gitlab,
+        url,
+      }),
+      ...res,
+    };
+  }
+
+  // Fallback to `bitbucket` hostType
+  if (
+    hostType &&
+    BITBUCKET_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== PlatformId.Bitbucket
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: PlatformId.Bitbucket,
         url,
       }),
       ...res,
@@ -74,11 +92,17 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
     options.enabled = false;
   }
   // Apply optional params
-  ['abortOnError', 'abortIgnoreStatusCodes', 'timeout'].forEach((param) => {
-    if (foundRules[param]) {
-      options[param] = foundRules[param];
-    }
-  });
+  if (foundRules.abortOnError) {
+    options.abortOnError = foundRules.abortOnError;
+  }
+
+  if (foundRules.abortIgnoreStatusCodes) {
+    options.abortIgnoreStatusCodes = foundRules.abortIgnoreStatusCodes;
+  }
+
+  if (foundRules.timeout) {
+    options.timeout = foundRules.timeout;
+  }
 
   if (!hasProxy() && foundRules.enableHttp2 === true) {
     options.http2 = true;

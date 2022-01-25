@@ -170,7 +170,7 @@ export async function validateGitVersion(): Promise<boolean> {
   if (
     !(
       version &&
-      (version === GIT_MINIMUM_VERSION ||
+      (semverCoerced.equals(version, GIT_MINIMUM_VERSION) ||
         semverCoerced.isGreaterThan(version, GIT_MINIMUM_VERSION))
     )
   ) {
@@ -184,9 +184,10 @@ export async function validateGitVersion(): Promise<boolean> {
   return true;
 }
 
-async function fetchBranchCommits(): Promise<void> {
+async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   config.branchCommits = {};
-  const opts = ['ls-remote', '--heads', config.url];
+  const url = (preferUpstream && config.upstreamUrl) || config.url;
+  const opts = ['ls-remote', '--heads', url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       opts.unshift(e[0], `${e[1]}`)
@@ -261,7 +262,12 @@ export function setGitAuthor(gitAuthor: string): void {
 }
 
 export async function writeGitAuthor(): Promise<void> {
-  const { gitAuthorName, gitAuthorEmail } = config;
+  const { gitAuthorName, gitAuthorEmail, writeGitDone } = config;
+  // istanbul ignore if
+  if (writeGitDone) {
+    return;
+  }
+  config.writeGitDone = true;
   try {
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
@@ -371,7 +377,6 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
@@ -397,6 +402,23 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  // istanbul ignore if
+  if (config.upstreamUrl) {
+    logger.debug(`Resetting ${config.currentBranch} to upstream`);
+    await git.addRemote('upstream', config.upstreamUrl);
+    await git.fetch(['upstream']);
+    await resetToBranch(config.currentBranch);
+    const resetLog = await git.reset([
+      '--hard',
+      `upstream/${config.currentBranch}`,
+    ]);
+    logger.debug({ resetLog }, 'git reset log');
+    const pushLog = await git.push(['origin', config.currentBranch, '--force']);
+    logger.debug({ pushLog }, 'git push log');
+    await fetchBranchCommits(false);
+  }
+  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+  logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
 }
 
 // istanbul ignore next
@@ -449,7 +471,10 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     await git.checkout(['-f', branchName, '--']);
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
-      logger.debug({ branchName, latestCommitDate }, 'latest commit');
+      logger.debug(
+        { branchName, latestCommitDate, sha: config.currentBranchSha },
+        'latest commit'
+      );
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
@@ -573,6 +598,56 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   return true;
 }
 
+export async function isBranchConflicted(
+  baseBranch: string,
+  branch: string
+): Promise<boolean> {
+  logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
+  await syncGit();
+  await writeGitAuthor();
+  if (!branchExists(baseBranch) || !branchExists(branch)) {
+    logger.warn(
+      { baseBranch, branch },
+      'isBranchConflicted: branch does not exist'
+    );
+    return true;
+  }
+
+  let result = false;
+
+  const origBranch = config.currentBranch;
+  try {
+    await git.reset(ResetMode.HARD);
+    if (origBranch !== baseBranch) {
+      await git.checkout(baseBranch);
+    }
+    await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
+  } catch (err) {
+    result = true;
+    // istanbul ignore if: not easily testable
+    if (!err?.git?.conflicts?.length) {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: unknown error'
+      );
+    }
+  } finally {
+    try {
+      await git.merge(['--abort']);
+      if (origBranch !== baseBranch) {
+        await git.checkout(origBranch);
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: cleanup error'
+      );
+    }
+  }
+
+  return result;
+}
+
 export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
   try {
@@ -598,7 +673,6 @@ export async function mergeBranch(branchName: string): Promise<void> {
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
-    await git.checkout(['-B', branchName, 'origin/' + branchName]);
     await git.checkout([
       '-B',
       config.currentBranch,
@@ -700,10 +774,8 @@ export async function commitFiles({
     const addedModifiedFiles: string[] = [];
     const ignoredFiles: string[] = [];
     for (const file of files) {
-      let fileName = file.name;
-      // istanbul ignore if
-      if (fileName === '|delete|') {
-        fileName = file.contents as string;
+      const fileName = file.path;
+      if (file.type === 'deletion') {
         try {
           await git.rm([fileName]);
           deletedFiles.push(fileName);
@@ -716,6 +788,9 @@ export async function commitFiles({
         if (await isDirectory(upath.join(localDir, fileName))) {
           // This is usually a git submodule update
           logger.trace({ fileName }, 'Adding directory commit');
+        } else if (file.contents === null) {
+          // istanbul ignore next
+          continue;
         } else {
           let contents: Buffer;
           // istanbul ignore else
@@ -727,7 +802,7 @@ export async function commitFiles({
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
           await fs.outputFile(upath.join(localDir, fileName), contents, {
-            mode: file.executable ? 0o777 : 0o666,
+            mode: file.isExecutable ? 0o777 : 0o666,
           });
         }
         try {
@@ -735,7 +810,7 @@ export async function commitFiles({
           const addParams =
             fileName === configFileNames[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
-          if (file.executable) {
+          if (file.isExecutable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
           addedModifiedFiles.push(fileName);
@@ -748,7 +823,7 @@ export async function commitFiles({
             throw err;
           }
           logger.debug({ fileName }, 'Cannot commit ignored file');
-          ignoredFiles.push(file.name);
+          ignoredFiles.push(file.path);
         }
       }
     }
@@ -827,7 +902,7 @@ export async function commitFiles({
     if (
       (err.message.includes('remote rejected') ||
         err.message.includes('403')) &&
-      files?.some((file) => file.name?.startsWith('.github/workflows/'))
+      files?.some((file) => file.path?.startsWith('.github/workflows/'))
     ) {
       logger.debug({ err }, 'commitFiles error');
       logger.info('Workflows update rejection - aborting branch.');

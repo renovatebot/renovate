@@ -45,6 +45,24 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       createPrBody = platform.createPr.mock.calls[0][0].prBody;
     });
+
+    it('creates PR with labels', async () => {
+      await ensureOnboardingPr(
+        {
+          ...config,
+          labels: ['label'],
+          addLabels: ['label', 'additional-label'],
+        },
+        packageFiles,
+        branches
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].labels).toEqual([
+        'label',
+        'additional-label',
+      ]);
+    });
+
     it('returns if PR does not need updating', async () => {
       platform.getBranchPr.mockResolvedValue(
         partial<Pr>({
@@ -62,9 +80,9 @@ describe('workers/repository/onboarding/pr/index', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           body: createPrBody,
-          isConflicted: true,
         })
       );
+      git.isBranchConflicted.mockResolvedValueOnce(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -95,9 +113,9 @@ describe('workers/repository/onboarding/pr/index', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           body: createPrBody,
-          isConflicted: true,
         })
       );
+      git.isBranchConflicted.mockResolvedValueOnce(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(logger.info).toHaveBeenCalledWith(

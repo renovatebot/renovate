@@ -35,7 +35,7 @@ export function migrateConfig(
         optionTypes[option.name] = option.type;
       });
     }
-    const newConfig = MigrationsService.run(config).migratedConfig;
+    const newConfig = MigrationsService.run(config);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',
@@ -68,19 +68,6 @@ export function migrateConfig(
           migratedConfig[newKey] = true;
         }
         delete migratedConfig[key];
-      } else if (key === 'semanticCommits') {
-        if (val === true) {
-          migratedConfig.semanticCommits = 'enabled';
-        } else if (val === false) {
-          migratedConfig.semanticCommits = 'disabled';
-        } else if (val !== 'enabled' && val !== 'disabled') {
-          migratedConfig.semanticCommits = 'auto';
-        }
-      } else if (key === 'enabledManagers' && is.array(val)) {
-        // Replace yarn with npm, since yarn actually uses npm as package manager
-        migratedConfig.enabledManagers = migratedConfig.enabledManagers.map(
-          (element) => (element === 'yarn' ? 'npm' : element)
-        );
       } else if (parentKey === 'hostRules' && key === 'platform') {
         migratedConfig.hostType = val;
         delete migratedConfig.platform;
@@ -150,13 +137,6 @@ export function migrateConfig(
         delete depTypePackageRule.packageRules;
         migratedConfig.packageRules.push(depTypePackageRule);
         delete migratedConfig[key];
-      } else if (key === 'pinVersions') {
-        delete migratedConfig.pinVersions;
-        if (val === true) {
-          migratedConfig.rangeStrategy = 'pin';
-        } else if (val === false) {
-          migratedConfig.rangeStrategy = 'replace';
-        }
       } else if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
@@ -169,24 +149,6 @@ export function migrateConfig(
         );
       } else if (key === 'gitFs') {
         delete migratedConfig.gitFs;
-      } else if (key === 'rebaseStalePrs') {
-        delete migratedConfig.rebaseStalePrs;
-        if (!migratedConfig.rebaseWhen) {
-          if (val === null) {
-            migratedConfig.rebaseWhen = 'auto';
-          }
-          if (val === true) {
-            migratedConfig.rebaseWhen = 'behind-base-branch';
-          }
-          if (val === false) {
-            migratedConfig.rebaseWhen = 'conflicted';
-          }
-        }
-      } else if (key === 'rebaseConflictedPrs') {
-        delete migratedConfig.rebaseConflictedPrs;
-        if (val === false) {
-          migratedConfig.rebaseWhen = 'never';
-        }
       } else if (key === 'ignoreNpmrcFile') {
         delete migratedConfig.ignoreNpmrcFile;
         if (!is.string(migratedConfig.npmrc)) {
@@ -201,9 +163,6 @@ export function migrateConfig(
           '{{managerBranchPrefix}}',
           '{{additionalBranchPrefix}}'
         );
-      } else if (key === 'managerBranchPrefix') {
-        delete migratedConfig.managerBranchPrefix;
-        migratedConfig.additionalBranchPrefix = val;
       } else if (
         key === 'branchPrefix' &&
         is.string(val) &&
@@ -212,16 +171,6 @@ export function migrateConfig(
         const templateIndex = val.indexOf(`{{`);
         migratedConfig.branchPrefix = val.substring(0, templateIndex);
         migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
-      } else if (key === 'upgradeInRange') {
-        delete migratedConfig.upgradeInRange;
-        if (val === true) {
-          migratedConfig.rangeStrategy = 'bump';
-        }
-      } else if (key === 'versionStrategy') {
-        delete migratedConfig.versionStrategy;
-        if (val === 'widen') {
-          migratedConfig.rangeStrategy = 'widen';
-        }
       } else if (key === 'semanticPrefix' && is.string(val)) {
         delete migratedConfig.semanticPrefix;
         let [text] = val.split(':') as any; // TODO: fixme
@@ -475,19 +424,6 @@ export function migrateConfig(
         );
         if (subMigrate.isMigrated) {
           migratedConfig[key] = subMigrate.migratedConfig;
-        }
-      } else if (key === 'raiseDeprecationWarnings') {
-        delete migratedConfig.raiseDeprecationWarnings;
-        if (val === false) {
-          migratedConfig.suppressNotifications =
-            migratedConfig.suppressNotifications || [];
-          migratedConfig.suppressNotifications.push('deprecationWarningIssues');
-        }
-      } else if (key === 'composerIgnorePlatformReqs') {
-        if (val === true) {
-          migratedConfig.composerIgnorePlatformReqs = [];
-        } else if (val === false) {
-          migratedConfig.composerIgnorePlatformReqs = null;
         }
       } else if (key === 'azureAutoComplete' || key === 'gitLabAutomerge') {
         if (migratedConfig[key] !== undefined) {

@@ -1,12 +1,11 @@
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class GoModTidyMigration extends AbstractMigration {
-  readonly propertyName = 'gomodTidy';
+  override readonly deprecated = true;
+  override readonly propertyName = 'gomodTidy';
 
-  override run(value): void {
+  override run(value: unknown): void {
     const postUpdateOptions = this.get('postUpdateOptions');
-
-    this.delete(this.propertyName);
 
     if (value) {
       const newPostUpdateOptions = Array.isArray(postUpdateOptions)

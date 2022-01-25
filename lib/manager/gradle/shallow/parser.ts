@@ -1,7 +1,6 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
@@ -190,7 +189,7 @@ function processDepInterpolation({
           fileReplacePosition = lastToken.offset + 1;
           delete dep.groupName;
         } else {
-          dep.skipReason = SkipReason.ContainsVariable;
+          dep.skipReason = 'contains-variable';
         }
         dep.managerData = { fileReplacePosition, packageFile };
       }
@@ -203,6 +202,7 @@ function processDepInterpolation({
 function processPlugin({
   tokenMap,
   packageFile,
+  variables,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const { pluginName, pluginVersion, methodName } = tokenMap;
   const plugin = pluginName.value;
@@ -212,20 +212,59 @@ function processPlugin({
     methodName.value === 'kotlin'
       ? `org.jetbrains.kotlin.${plugin}:org.jetbrains.kotlin.${plugin}.gradle.plugin`
       : `${plugin}:${plugin}.gradle.plugin`;
-  const currentValue = pluginVersion.value;
-  const fileReplacePosition = pluginVersion.offset;
-  const dep = {
+
+  const dep: PackageDependency<GradleManagerData> = {
     depType: 'plugin',
     depName,
     lookupName,
     registryUrls: ['https://plugins.gradle.org/m2/'],
-    currentValue,
     commitMessageTopic: `plugin ${depName}`,
-    managerData: {
-      fileReplacePosition,
-      packageFile,
-    },
   };
+
+  if (pluginVersion.type === TokenType.Word) {
+    const varData = variables[pluginVersion.value];
+    if (varData) {
+      const currentValue = varData.value;
+      const fileReplacePosition = varData.fileReplacePosition;
+      dep.currentValue = currentValue;
+      dep.managerData = { fileReplacePosition, packageFile };
+    } else {
+      const currentValue = pluginVersion.value;
+      const fileReplacePosition = pluginVersion.offset;
+      dep.currentValue = currentValue;
+      dep.managerData = { fileReplacePosition, packageFile };
+      dep.skipReason = 'unknown-version';
+    }
+  } else if (pluginVersion.type === TokenType.StringInterpolation) {
+    const versionTpl = pluginVersion as StringInterpolation;
+    const children = versionTpl.children;
+    const [child] = children;
+    if (child?.type === TokenType.Variable && children.length === 1) {
+      const varData = variables[child.value];
+      if (varData) {
+        const currentValue = varData.value;
+        const fileReplacePosition = varData.fileReplacePosition;
+        dep.currentValue = currentValue;
+        dep.managerData = { fileReplacePosition, packageFile };
+      } else {
+        const currentValue = child.value;
+        const fileReplacePosition = child.offset;
+        dep.currentValue = currentValue;
+        dep.managerData = { fileReplacePosition, packageFile };
+        dep.skipReason = 'unknown-version';
+      }
+    } else {
+      const fileReplacePosition = versionTpl.offset;
+      dep.managerData = { fileReplacePosition, packageFile };
+      dep.skipReason = 'unknown-version';
+    }
+  } else {
+    const currentValue = pluginVersion.value;
+    const fileReplacePosition = pluginVersion.offset;
+    dep.currentValue = currentValue;
+    dep.managerData = { fileReplacePosition, packageFile };
+  }
+
   return { deps: [dep] };
 }
 
@@ -287,7 +326,7 @@ function processLongFormDep({
     }
     const methodName = tokenMap.methodName?.value;
     if (annoyingMethods.has(methodName)) {
-      dep.skipReason = SkipReason.Ignored;
+      dep.skipReason = 'ignored';
     }
 
     return { deps: [dep] };
@@ -355,6 +394,8 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // id 'foo.bar' version '1.2.3'
+    // id 'foo.bar' version fooBarVersion
+    // id 'foo.bar' version "$fooBarVersion"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -363,13 +404,22 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       },
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      {
+        matchType: [
+          TokenType.String,
+          TokenType.Word,
+          TokenType.StringInterpolation,
+        ],
+        tokenMapKey: 'pluginVersion',
+      },
       endOfInstruction,
     ],
     handler: processPlugin,
   },
   {
     // id('foo.bar') version '1.2.3'
+    // id('foo.bar') version fooBarVersion
+    // id('foo.bar') version "$fooBarVersion"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -380,7 +430,14 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.RightParen },
       { matchType: TokenType.Word, matchValue: 'version' },
-      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      {
+        matchType: [
+          TokenType.String,
+          TokenType.Word,
+          TokenType.StringInterpolation,
+        ],
+        tokenMapKey: 'pluginVersion',
+      },
       endOfInstruction,
     ],
     handler: processPlugin,

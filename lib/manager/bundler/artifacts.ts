@@ -101,30 +101,13 @@ export async function updateArtifacts(
     let cmd;
 
     if (config.isLockFileMaintenance) {
-      cmd = 'bundle lock';
+      cmd = 'bundler lock';
     } else {
-      cmd = `bundle lock --update ${updatedDeps
+      cmd = `bundler lock --update ${updatedDeps
         .map((dep) => dep.depName)
         .map(quote)
         .join(' ')}`;
     }
-
-    let bundlerVersion = '';
-    const { bundler } = constraints;
-    if (bundler) {
-      if (isValid(bundler)) {
-        logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
-        bundlerVersion = ` -v ${quote(bundler)}`;
-      } else {
-        logger.warn({ bundlerVersion: bundler }, 'Invalid bundler version');
-      }
-    } else {
-      logger.debug('No bundler version constraint found - will use latest');
-    }
-    const preCommands = [
-      'ruby --version',
-      `gem install bundler${bundlerVersion}`,
-    ];
 
     const bundlerHostRules = findAllAuthenticatable({
       hostType: 'rubygems',
@@ -153,6 +136,9 @@ export async function updateArtifacts(
       },
       []
     );
+
+    const { bundler } = constraints || {};
+    const preCommands = ['ruby --version'];
 
     // Bundler < 2 has a different config option syntax than >= 2
     if (
@@ -185,6 +171,12 @@ export async function updateArtifacts(
         tagScheme: 'ruby',
         tagConstraint: await getRubyConstraint(updateArtifact),
       },
+      toolConstraints: [
+        {
+          toolName: 'bundler',
+          constraint: bundler,
+        },
+      ],
       preCommands,
     };
     await exec(cmd, execOptions);
@@ -198,7 +190,8 @@ export async function updateArtifacts(
     return [
       {
         file: {
-          name: lockFileName,
+          type: 'addition',
+          path: lockFileName,
           contents: lockFileContent,
         },
       },

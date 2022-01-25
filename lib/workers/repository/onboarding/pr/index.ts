@@ -4,8 +4,16 @@ import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../manager/types';
 import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
-import { deleteBranch, isBranchModified } from '../../../../util/git';
-import { addAssigneesReviewers, getPlatformPrOptions } from '../../../pr';
+import {
+  deleteBranch,
+  isBranchConflicted,
+  isBranchModified,
+} from '../../../../util/git';
+import {
+  addAssigneesReviewers,
+  getPlatformPrOptions,
+  prepareLabels,
+} from '../../../pr';
 import type { BranchConfig } from '../../../types';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
@@ -72,7 +80,11 @@ If you need any further assistance then you can also [request help here](${confi
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
-    if (existingPr?.isConflicted) {
+    const isConflicted = await isBranchConflicted(
+      config.baseBranch,
+      config.onboardingBranch
+    );
+    if (isConflicted) {
       configDesc += emojify(
         `:warning: This PR has a merge conflict, however Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
       );
@@ -127,7 +139,7 @@ If you need any further assistance then you can also [request help here](${confi
     return;
   }
   logger.debug('Creating onboarding PR');
-  const labels: string[] = config.addLabels ?? [];
+  const labels: string[] = prepareLabels(config);
   try {
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create onboarding PR');
