@@ -93,7 +93,9 @@ export async function resolveConstraint(
   const releases = pkgReleases?.releases ?? [];
   const versions = releases.map((r) => r.version);
   const resolvedVersion = versions
-    .filter((v) => !constraint || versioning.matches(v, constraint))
+    .filter((v) =>
+      constraint ? versioning.matches(v, constraint) : versioning.isStable(v)
+    )
     .pop();
 
   if (resolvedVersion) {
