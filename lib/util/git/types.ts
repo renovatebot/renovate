@@ -73,7 +73,7 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string;
   force?: boolean;
-};
+}
 
 /**
  * Represents a git authentication rule in the form of e.g.:
