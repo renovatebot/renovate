@@ -653,7 +653,6 @@ export async function mergeBranch(branchName: string): Promise<void> {
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
-    await git.checkout(['-B', branchName, 'origin/' + branchName]);
     await git.checkout([
       '-B',
       config.currentBranch,
