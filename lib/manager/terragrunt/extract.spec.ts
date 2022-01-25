@@ -1,11 +1,5 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
-
-const tg1 = loadFixture('2.hcl');
-const tg2 = `terragrunt {
-  source = "../../modules/fe"
-}
-`;
 
 describe('manager/terragrunt/extract', () => {
   describe('extractPackageFile()', () => {
@@ -13,13 +7,18 @@ describe('manager/terragrunt/extract', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts terragrunt sources', () => {
-      const res = extractPackageFile(tg1);
+      const res = extractPackageFile(Fixtures.get('2.hcl'));
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(30);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
     });
     it('returns null if only local terragrunt deps', () => {
-      expect(extractPackageFile(tg2)).toBeNull();
+      expect(
+        extractPackageFile(`terragrunt {
+        source = "../../modules/fe"
+      }
+      `)
+      ).toBeNull();
     });
   });
 });

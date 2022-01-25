@@ -1,7 +1,6 @@
 import semver from 'semver';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
@@ -25,7 +24,7 @@ function getDep(
   if (isVersion(currentValue)) {
     dep.datasource = datasourceGo.id;
   } else {
-    dep.skipReason = SkipReason.UnsupportedVersion;
+    dep.skipReason = 'unsupported-version';
   }
   const digestMatch = regEx(/v0\.0.0-\d{14}-([a-f0-9]{12})/).exec(currentValue);
   if (digestMatch) {

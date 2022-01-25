@@ -1,8 +1,5 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from '.';
-
-const brokenYaml = loadFixture('update.yaml');
-const packageFile = loadFixture('extract.yaml');
 
 describe('manager/pub/extract', () => {
   describe('extractPackageFile', () => {
@@ -11,11 +8,17 @@ describe('manager/pub/extract', () => {
       expect(res).toBeNull();
     });
     it('should return null if package is invalid', () => {
-      const res = extractPackageFile(brokenYaml, 'pubspec.yaml');
+      const res = extractPackageFile(
+        Fixtures.get('update.yaml'),
+        'pubspec.yaml'
+      );
       expect(res).toBeNull();
     });
     it('should return valid dependencies', () => {
-      const res = extractPackageFile(packageFile, 'pubspec.yaml');
+      const res = extractPackageFile(
+        Fixtures.get('extract.yaml'),
+        'pubspec.yaml'
+      );
       expect(res).toEqual({
         datasource: 'dart',
         deps: [

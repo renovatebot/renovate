@@ -51,7 +51,8 @@ export async function rebaseOnboardingBranch(
     branchName: config.onboardingBranch,
     files: [
       {
-        name: configFile,
+        type: 'addition',
+        path: configFile,
         contents,
       },
     ],

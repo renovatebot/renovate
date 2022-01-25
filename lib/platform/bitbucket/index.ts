@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import parseDiff from 'parse-diff';
 import { PlatformId } from '../../constants';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -270,16 +269,6 @@ export async function findPr({
   return pr;
 }
 
-async function isPrConflicted(prNo: number): Promise<boolean> {
-  const diff = (
-    await bitbucketHttp.get(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`
-    )
-  ).body;
-
-  return utils.isConflicted(parseDiff(diff));
-}
-
 // Gets details for a PR
 export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
@@ -298,12 +287,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     ...utils.prInfo(pr),
   };
 
-  if (utils.prStates.open.includes(pr.state)) {
-    res.isConflicted = await isPrConflicted(prNo);
-
-    // TODO: Is that correct? Should we check getBranchStatus like gitlab? (#9618)
-    res.canMerge = !res.isConflicted;
-  }
   res.hasReviewers = is.nonEmptyArray(pr.reviewers);
 
   return res;

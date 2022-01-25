@@ -4,6 +4,7 @@ import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
@@ -205,8 +206,9 @@ describe('util/git/index', () => {
   });
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
-      const file = {
-        name: 'some-new-file',
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
         contents: 'some new-contents',
       };
       await git.commitFiles({
@@ -273,8 +275,9 @@ describe('util/git/index', () => {
   });
   describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
-      const file = {
-        name: 'some-new-file',
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
         contents: 'some new-contents',
       };
       const commit = await git.commitFiles({
@@ -285,9 +288,9 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('deletes file', async () => {
-      const file = {
-        name: '|delete|',
-        contents: 'file_to_delete',
+      const file: FileChange = {
+        type: 'deletion',
+        path: 'file_to_delete',
       };
       const commit = await git.commitFiles({
         branchName: 'renovate/something',
@@ -297,13 +300,15 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('updates multiple files', async () => {
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'some-existing-file',
+          type: 'addition',
+          path: 'some-existing-file',
           contents: 'updated content',
         },
         {
-          name: 'some-other-existing-file',
+          type: 'addition',
+          path: 'some-other-existing-file',
           contents: 'other updated content',
         },
       ];
@@ -315,9 +320,10 @@ describe('util/git/index', () => {
       expect(commit).not.toBeNull();
     });
     it('updates git submodules', async () => {
-      const files = [
+      const files: FileChange[] = [
         {
-          name: '.',
+          type: 'addition',
+          path: '.',
           contents: 'some content',
         },
       ];
@@ -329,9 +335,10 @@ describe('util/git/index', () => {
       expect(commit).toBeNull();
     });
     it('does not push when no diff', async () => {
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'future_file',
+          type: 'addition',
+          path: 'future_file',
           contents: 'future',
         },
       ];
@@ -347,9 +354,10 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
@@ -376,9 +384,10 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
@@ -406,9 +415,10 @@ describe('util/git/index', () => {
       const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
-      const files = [
+      const files: FileChange[] = [
         {
-          name: 'some-new-file',
+          type: 'addition',
+          path: 'some-new-file',
           contents: 'some new-contents',
         },
       ];
@@ -433,10 +443,11 @@ describe('util/git/index', () => {
     });
 
     it('creates file with the executable bit', async () => {
-      const file = {
-        name: 'some-executable',
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-executable',
         contents: 'some new-contents',
-        executable: true,
+        isExecutable: true,
       };
       const commit = await git.commitFiles({
         branchName: 'renovate/past_branch',
@@ -593,6 +604,85 @@ describe('util/git/index', () => {
   describe('setGitAuthor()', () => {
     it('throws for invalid', () => {
       expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
+    });
+  });
+
+  describe('isBranchConflicted', () => {
+    beforeAll(async () => {
+      const repo = Git(base.path);
+      await repo.init();
+
+      await repo.checkout(['-b', 'renovate/conflicted_branch', defaultBranch]);
+      await repo.checkout([
+        '-b',
+        'renovate/non_conflicted_branch',
+        defaultBranch,
+      ]);
+
+      await repo.checkout(defaultBranch);
+      await fs.writeFile(base.path + '/one_file', 'past (updated)');
+      await repo.add(['one_file']);
+      await repo.commit('past (updated) message');
+
+      await repo.checkout('renovate/conflicted_branch');
+      await fs.writeFile(base.path + '/one_file', 'past (updated branch)');
+      await repo.add(['one_file']);
+      await repo.commit('past (updated branch) message');
+
+      await repo.checkout('renovate/non_conflicted_branch');
+      await fs.writeFile(base.path + '/another_file', 'other');
+      await repo.add(['another_file']);
+      await repo.commit('other (updated branch) message');
+
+      await repo.checkout(defaultBranch);
+    });
+
+    it('returns true for non-existing source branch', async () => {
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/non_existing_branch'
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('returns true for non-existing target branch', async () => {
+      const res = await git.isBranchConflicted(
+        'renovate/non_existing_branch',
+        'renovate/non_conflicted_branch'
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('detects conflicted branch', async () => {
+      const branchBefore = 'renovate/non_conflicted_branch';
+      await git.checkoutBranch(branchBefore);
+
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/conflicted_branch'
+      );
+
+      expect(res).toBeTrue();
+
+      const status = await git.getRepoStatus();
+      expect(status.current).toEqual(branchBefore);
+      expect(status.isClean()).toBeTrue();
+    });
+
+    it('detects non-conflicted branch', async () => {
+      const branchBefore = 'renovate/conflicted_branch';
+      await git.checkoutBranch(branchBefore);
+
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/non_conflicted_branch'
+      );
+
+      expect(res).toBeFalse();
+
+      const status = await git.getRepoStatus();
+      expect(status.current).toEqual(branchBefore);
+      expect(status.isClean()).toBeTrue();
     });
   });
 });

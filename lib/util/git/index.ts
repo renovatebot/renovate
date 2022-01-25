@@ -170,7 +170,7 @@ export async function validateGitVersion(): Promise<boolean> {
   if (
     !(
       version &&
-      (version === GIT_MINIMUM_VERSION ||
+      (semverCoerced.equals(version, GIT_MINIMUM_VERSION) ||
         semverCoerced.isGreaterThan(version, GIT_MINIMUM_VERSION))
     )
   ) {
@@ -261,7 +261,12 @@ export function setGitAuthor(gitAuthor: string): void {
 }
 
 export async function writeGitAuthor(): Promise<void> {
-  const { gitAuthorName, gitAuthorEmail } = config;
+  const { gitAuthorName, gitAuthorEmail, writeGitDone } = config;
+  // istanbul ignore if
+  if (writeGitDone) {
+    return;
+  }
+  config.writeGitDone = true;
   try {
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
@@ -573,6 +578,56 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   return true;
 }
 
+export async function isBranchConflicted(
+  baseBranch: string,
+  branch: string
+): Promise<boolean> {
+  logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
+  await syncGit();
+  await writeGitAuthor();
+  if (!branchExists(baseBranch) || !branchExists(branch)) {
+    logger.warn(
+      { baseBranch, branch },
+      'isBranchConflicted: branch does not exist'
+    );
+    return true;
+  }
+
+  let result = false;
+
+  const origBranch = config.currentBranch;
+  try {
+    await git.reset(ResetMode.HARD);
+    if (origBranch !== baseBranch) {
+      await git.checkout(baseBranch);
+    }
+    await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
+  } catch (err) {
+    result = true;
+    // istanbul ignore if: not easily testable
+    if (!err?.git?.conflicts?.length) {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: unknown error'
+      );
+    }
+  } finally {
+    try {
+      await git.merge(['--abort']);
+      if (origBranch !== baseBranch) {
+        await git.checkout(origBranch);
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: cleanup error'
+      );
+    }
+  }
+
+  return result;
+}
+
 export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
   try {
@@ -699,10 +754,8 @@ export async function commitFiles({
     const addedModifiedFiles: string[] = [];
     const ignoredFiles: string[] = [];
     for (const file of files) {
-      let fileName = file.name;
-      // istanbul ignore if
-      if (fileName === '|delete|') {
-        fileName = file.contents as string;
+      const fileName = file.path;
+      if (file.type === 'deletion') {
         try {
           await git.rm([fileName]);
           deletedFiles.push(fileName);
@@ -729,7 +782,7 @@ export async function commitFiles({
           // some file systems including Windows don't support the mode
           // so the index should be manually updated after adding the file
           await fs.outputFile(upath.join(localDir, fileName), contents, {
-            mode: file.executable ? 0o777 : 0o666,
+            mode: file.isExecutable ? 0o777 : 0o666,
           });
         }
         try {
@@ -737,7 +790,7 @@ export async function commitFiles({
           const addParams =
             fileName === configFileNames[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
-          if (file.executable) {
+          if (file.isExecutable) {
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
           addedModifiedFiles.push(fileName);
@@ -750,7 +803,7 @@ export async function commitFiles({
             throw err;
           }
           logger.debug({ fileName }, 'Cannot commit ignored file');
-          ignoredFiles.push(file.name);
+          ignoredFiles.push(file.path);
         }
       }
     }
@@ -829,7 +882,7 @@ export async function commitFiles({
     if (
       (err.message.includes('remote rejected') ||
         err.message.includes('403')) &&
-      files?.some((file) => file.name?.startsWith('.github/workflows/'))
+      files?.some((file) => file.path?.startsWith('.github/workflows/'))
     ) {
       logger.debug({ err }, 'commitFiles error');
       logger.info('Workflows update rejection - aborting branch.');
