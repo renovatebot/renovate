@@ -300,7 +300,6 @@ describe('platform/github/index', () => {
     it('should update fork when forkMode', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
-      scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
@@ -313,7 +312,6 @@ describe('platform/github/index', () => {
       forkInitRepoMock(scope, 'some/repo', true, 'not_master');
       scope.post('/repos/forked/repo/git/refs').reply(200);
       scope.patch('/repos/forked/repo').reply(200);
-      scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
@@ -732,9 +730,7 @@ describe('platform/github/index', () => {
           },
           head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
           state: PrState.Open,
-        })
-        .patch('/repos/forked/repo/git/refs/heads/master')
-        .reply(200);
+        });
       await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
