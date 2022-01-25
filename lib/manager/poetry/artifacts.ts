@@ -46,11 +46,14 @@ function getPythonConstraint(
 const pkgValRegex = regEx(`^${dependencyPattern}$`);
 
 function getPoetryRequirement(pyProjectContent: string): string | null {
+  debugger;
   try {
     const pyproject: PoetryFile = parse(pyProjectContent);
     // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+    const buildBackend = pyproject['build-system']?.['build-backend'];
     if (
-      pyproject['build-system']?.['build-backend'] === 'poetry.masonry.api' &&
+      (buildBackend === 'poetry.masonry.api' ||
+        buildBackend === 'poetry.core.masonry.api') &&
       is.nonEmptyArray(pyproject['build-system']?.requires)
     ) {
       for (const requirement of pyproject['build-system'].requires) {
@@ -59,7 +62,7 @@ function getPoetryRequirement(pyProjectContent: string): string | null {
           if (pkgValMatch) {
             const [, depName, , currVal] = pkgValMatch;
             if (
-              (depName === 'poetry' || depName === 'poetry-core') &&
+              (depName === 'poetry' || depName === 'poetry_core') &&
               currVal
             ) {
               return currVal.trim();
