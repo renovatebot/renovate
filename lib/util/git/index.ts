@@ -402,6 +402,7 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  // istanbul ignore if
   if (config.upstreamUrl) {
     logger.debug(`Resetting ${config.currentBranch} to upstream`);
     await git.addRemote('upstream', config.upstreamUrl);
