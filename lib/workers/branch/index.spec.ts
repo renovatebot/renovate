@@ -1,11 +1,4 @@
-import * as _fs from 'fs-extra';
-import {
-  defaultConfig,
-  fs as fsUtil,
-  git,
-  mocked,
-  platform,
-} from '../../../test/util';
+import { defaultConfig, fs, git, mocked, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import {
@@ -49,7 +42,6 @@ jest.mock('../../util/merge-confidence');
 jest.mock('../../util/sanitize');
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
-jest.mock('fs-extra');
 jest.mock('../global/limits');
 
 const getUpdated = mocked(_getUpdated);
@@ -64,7 +56,6 @@ const prAutomerge = mocked(_prAutomerge);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
-const fs = mocked(_fs);
 const limits = mocked(_limits);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
@@ -1048,13 +1039,11 @@ describe('workers/branch/index', () => {
         not_added: [],
         deleted: ['deleted_file'],
       } as StatusResult);
-
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
-      fsUtil.localPathExists
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
-      fsUtil.localPathIsFile
+      fs.localPathIsFile
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
 
@@ -1137,12 +1126,11 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
-      fsUtil.localPathExists
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
-      fsUtil.localPathIsFile
+      fs.localPathIsFile
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
 
@@ -1215,12 +1203,11 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
-      fsUtil.localPathExists
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
-      fsUtil.localPathIsFile
+      fs.localPathIsFile
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
 
@@ -1302,22 +1289,13 @@ describe('workers/branch/index', () => {
           deleted: ['deleted_file', 'modified_then_deleted_file'],
         } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fsUtil.readLocalFile
-        .mockResolvedValueOnce(Buffer.from('modified file content') as never)
-        .mockResolvedValueOnce(
-          Buffer.from('this file will not exists') as never
-        )
-        .mockResolvedValueOnce(
-          Buffer.from('modified file content again') as never
-        )
-        .mockResolvedValueOnce(
-          Buffer.from('this file was once deleted') as never
-        );
-      fsUtil.localPathExists
-        .mockResolvedValue(true)
-        .mockResolvedValueOnce(true);
-      fsUtil.localPathIsFile
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content' as never)
+        .mockResolvedValueOnce('this file will not exists' as never)
+        .mockResolvedValueOnce('modified file content again' as never)
+        .mockResolvedValueOnce('this file was once deleted' as never);
+      fs.localPathExists.mockResolvedValue(true).mockResolvedValueOnce(true);
+      fs.localPathIsFile
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
 
@@ -1450,16 +1428,13 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file', 'deleted_then_created_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fsUtil.readLocalFile
-        .mockResolvedValueOnce(Buffer.from('modified file content') as never)
-        .mockResolvedValueOnce(
-          Buffer.from('this file will not exists') as never
-        );
-      fsUtil.localPathExists
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists');
+      fs.localPathExists
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
-      fsUtil.localPathIsFile
+      fs.localPathIsFile
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
 
