@@ -1706,6 +1706,12 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       if (alerts.length) {
         logger.trace({ alerts }, 'GitHub vulnerability details');
         for (const alert of alerts) {
+          if (alert.securityVulnerability === null) {
+            // As described in the documentation, there are cases in which
+            // GitHub API responds with `"securityVulnerability": null`.
+            // But it's may be faulty, so skip processing it here.
+            continue;
+          }
           const {
             package: { name, ecosystem },
             vulnerableVersionRange,

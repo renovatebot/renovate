@@ -5,6 +5,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
+import * as _logger from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as _git from '../../util/git';
 import type { CreatePRConfig, Platform } from '../types';
@@ -15,6 +16,7 @@ describe('platform/github/index', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
   let git: jest.Mocked<typeof _git>;
+  let logger: jest.Mocked<typeof _logger>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -25,6 +27,7 @@ describe('platform/github/index', () => {
     hostRules = mocked(await import('../../util/host-rules'));
     jest.mock('../../util/git');
     git = mocked(await import('../../util/git'));
+    logger = mocked(await import('../../logger'));
     git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
@@ -2443,6 +2446,50 @@ describe('platform/github/index', () => {
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('calls logger.debug with only items that include securityVulnerability', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              vulnerabilityAlerts: {
+                edges: [
+                  {
+                    node: {
+                      securityAdvisory: { severity: 'HIGH', references: [] },
+                      securityVulnerability: {
+                        package: {
+                          ecosystem: 'NPM',
+                          name: 'left-pad',
+                        },
+                        vulnerableVersionRange: '0.0.2',
+                        firstPatchedVersion: { identifier: '0.0.3' },
+                      },
+                      vulnerableManifestFilename: 'foo',
+                      vulnerableManifestPath: 'bar',
+                    },
+                  },
+                  {
+                    node: {
+                      securityAdvisory: { severity: 'HIGH', references: [] },
+                      securityVulnerability: null,
+                      vulnerableManifestFilename: 'foo',
+                      vulnerableManifestPath: 'bar',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+      await github.getVulnerabilityAlerts();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { alerts: { 'npm/left-pad': { '0.0.2': '0.0.3' } } },
+        'GitHub vulnerability details'
+      );
+      expect(logger.logger.error).not.toHaveBeenCalled();
     });
   });
 
