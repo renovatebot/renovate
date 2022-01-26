@@ -67,6 +67,7 @@ export interface RenovateSharedConfig {
   timezone?: string;
   unicodeEmoji?: boolean;
   gitIgnoredAuthors?: string[];
+  platformCommit?: boolean;
 }
 
 // Config options used only within the global worker

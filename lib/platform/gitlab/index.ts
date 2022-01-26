@@ -20,7 +20,6 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { setBaseUrl } from '../../util/http/gitlab';
@@ -1180,11 +1179,4 @@ export async function filterUnavailableUsers(
     }
   }
   return filteredUsers;
-}
-
-// istanbul ignore next
-export function commitFiles(
-  config: CommitFilesConfig
-): Promise<CommitSha | null> {
-  return git.commitFiles(config);
 }

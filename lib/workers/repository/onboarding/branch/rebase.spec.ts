@@ -28,7 +28,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('does not rebase modified branch', async () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('does nothing if branch is up to date', async () => {
       const contents =
@@ -37,9 +37,15 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         .mockResolvedValueOnce(contents) // package.json
         .mockResolvedValueOnce(contents); // renovate.json
       await rebaseOnboardingBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('rebases onboarding branch', async () => {
+      git.isBranchStale.mockResolvedValueOnce(true);
+      await rebaseOnboardingBranch(config);
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+    });
+    it('rebases via platform', async () => {
+      config.platformCommit = true;
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
@@ -50,11 +56,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         ...config,
         onboardingConfigFileName: '.github/renovate.json',
       });
-      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles.mock.calls[0][0].message).toContain(
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles.mock.calls[0][0].message).toContain(
         '.github/renovate.json'
       );
-      expect(platform.commitFiles.mock.calls[0][0].files[0].path).toBe(
+      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
         '.github/renovate.json'
       );
     });
@@ -64,11 +70,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         ...config,
         onboardingConfigFileName: undefined,
       });
-      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles.mock.calls[0][0].message).toContain(
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles.mock.calls[0][0].message).toContain(
         'renovate.json'
       );
-      expect(platform.commitFiles.mock.calls[0][0].files[0].path).toBe(
+      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
         'renovate.json'
       );
     });

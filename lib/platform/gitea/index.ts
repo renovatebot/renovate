@@ -14,7 +14,6 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
@@ -861,11 +860,6 @@ const platform: Platform = {
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     return Promise.resolve([]);
   },
-
-  // istanbul ignore next
-  commitFiles(config: CommitFilesConfig): Promise<CommitSha | null> {
-    return git.commitFiles(config);
-  },
 };
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -898,5 +892,4 @@ export const {
   mergePr,
   setBranchStatus,
   updatePr,
-  commitFiles,
 } = platform;

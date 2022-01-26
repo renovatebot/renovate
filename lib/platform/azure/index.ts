@@ -18,7 +18,6 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
@@ -840,11 +839,4 @@ export async function deleteLabel(
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  config: CommitFilesConfig
-): Promise<CommitSha | null> {
-  return git.commitFiles(config);
 }
