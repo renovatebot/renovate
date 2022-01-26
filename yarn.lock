@@ -2412,10 +2412,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.10.tgz#616f16e9d3a2a3d618136b1be244315d95bd7cab"
   integrity sha512-S/3xB4KzyFxYGCppyDt68yzBU9ysL88lSdIah4D6cptdcltc4NCPCAMc0+PCpg/lLIyC7IPvj2Z52OJWeIUkog==
 
-"@types/node@16.11.20":
-  version "16.11.20"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.20.tgz#334b116c6d41143c92599965e14b5a3dd68c5d1f"
-  integrity sha512-lAKaZ0Lc1Umwd0AqLr6iy5U8u/1DpK7/JzNgQn9cMMUk2mFR8bbhEP8BQrI9Cm5CU0bOVCaWbkGBvgqKMOJHsw==
+"@types/node@16.11.21":
+  version "16.11.21"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.21.tgz#474d7589a30afcf5291f59bd49cca9ad171ffde4"
+  integrity sha512-Pf8M1XD9i1ksZEcCP8vuSNwooJ/bZapNmIzpmsMaL+jMI+8mEYU3PKvs+xDNuQcJWF/x24WzY4qxLtB0zNow9A==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -7939,10 +7939,10 @@ rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.17.2:
-  version "1.17.2"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.17.2.tgz#d85c41ff9d64877862bbcb6936305d73ecc6f288"
-  integrity sha512-z+OkvKWvm6+pDW4gwMHFuHDL8ZE/lg4cYH0/p8DBh3EEfQgBDbG56n7TJkFFKKWmFOaKPjZE4pLNQoBfqEMZ+g==
+re2@1.17.3:
+  version "1.17.3"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.17.3.tgz#8cceb48f52c45b860b1f67cee8a44726f7d05e9a"
+  integrity sha512-Dp5iWVR8W3C7Nm9DziMY4BleMPRb/pe6kvfbzLv80dVYaXRc9jRnwwNqU0oE/taRm0qYR1+Qrtzk9rPjS9ecaQ==
   dependencies:
     install-artifact-from-github "^1.3.0"
     nan "^2.15.0"
