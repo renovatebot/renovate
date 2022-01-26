@@ -26,11 +26,14 @@ export function sanitize(input: string): string {
   return output;
 }
 
-export function add(secret: string): void {
+export function addSecretForSanitizing(secret: string): void {
+  if (secret === '**redacted**') {
+    return;
+  }
   secrets.add(secret);
   secrets.add(secret?.replace('x-access-token:', '')); // GitHub App tokens
 }
 
-export function clear(): void {
+export function clearSanitizedSecretsList(): void {
   secrets.clear();
 }
