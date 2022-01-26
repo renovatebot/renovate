@@ -862,11 +862,6 @@ export async function fetchCommit({
 export async function commitFiles(
   config: CommitFilesConfig
 ): Promise<CommitSha | null> {
-  const { branchName } = config;
-  const { localDir } = GlobalConfig.get();
-  await syncGit();
-  logger.debug(`Committing files to branch ${branchName}`);
-  await handleCommitAuth(localDir);
   const commitResult = await prepareCommit(config);
   if (!commitResult) {
     return null;
