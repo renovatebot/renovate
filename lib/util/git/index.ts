@@ -835,6 +835,7 @@ export async function pushCommit({
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
+    incLimitedValue(Limit.Commits);
   } catch (err) /* istanbul ignore next */ {
     handleCommitError(files, branchName, err);
   }
@@ -849,11 +850,10 @@ export async function fetchCommit({
   try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--force']);
-    const sha = (await git.revparse([branchName])).trim();
-    config.branchCommits[branchName] = sha;
+    const commit = (await git.revparse([branchName])).trim();
+    config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
-    incLimitedValue(Limit.Commits);
-    return sha.slice(0, 7);
+    return commit;
   } catch (err) /* istanbul ignore next */ {
     return handleCommitError(files, branchName, err);
   }
