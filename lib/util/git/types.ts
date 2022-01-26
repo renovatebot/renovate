@@ -14,6 +14,8 @@ export type CommitSha = string;
 export interface StorageConfig {
   currentBranch?: string;
   url: string;
+
+  upstreamUrl?: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
   fullClone?: boolean;
@@ -73,4 +75,9 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string;
   force?: boolean;
+}
+
+export interface CommitResult {
+  sha: string;
+  files: FileChange[];
 }
