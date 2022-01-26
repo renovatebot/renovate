@@ -73,7 +73,7 @@ export function generateBranchConfig(
   const depNames: string[] = [];
   const newValue: string[] = [];
   const toVersions: string[] = [];
-  const toValues: Set<string> = new Set();
+  const toValues = new Set<string>();
   branchUpgrades.forEach((upg) => {
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);
