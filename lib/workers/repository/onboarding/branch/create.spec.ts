@@ -40,6 +40,7 @@ describe('workers/repository/onboarding/branch/create', () => {
       );
     });
     it('commits via platform', async () => {
+      platform.commitFiles = jest.fn();
       config.platformCommit = true;
       await createOnboardingBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledWith(

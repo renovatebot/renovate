@@ -45,6 +45,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });
     it('rebases via platform', async () => {
+      platform.commitFiles = jest.fn();
       config.platformCommit = true;
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
