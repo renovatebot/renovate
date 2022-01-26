@@ -751,21 +751,25 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
+async function handleCommitAuth(localDir: string): Promise<void> {
+  if (!privateKeySet) {
+    await writePrivateKey();
+    privateKeySet = true;
+  }
+  await configSigningKey(localDir);
+  await writeGitAuthor();
+}
+
 export async function commitFiles({
   branchName,
   files,
   message,
   force = false,
 }: CommitFilesConfig): Promise<CommitSha | null> {
+  const { localDir } = GlobalConfig.get();
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
-  if (!privateKeySet) {
-    await writePrivateKey();
-    privateKeySet = true;
-  }
-  const { localDir } = GlobalConfig.get();
-  await configSigningKey(localDir);
-  await writeGitAuthor();
+  await handleCommitAuth(localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
