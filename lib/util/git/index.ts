@@ -816,7 +816,7 @@ export async function commitFiles({
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
     return commit;
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     return handleCommitError(files, branchName, err);
   }
 }
