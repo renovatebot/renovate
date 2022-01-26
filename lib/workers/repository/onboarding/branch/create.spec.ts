@@ -1,5 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
-import { commitFiles } from '../../../../util/git';
+import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
 import { CommitMessage } from '../../model/commit-message';
 import { createOnboardingBranch } from './create';
 
@@ -35,7 +34,7 @@ describe('workers/repository/onboarding/branch/create', () => {
   describe('createOnboardingBranch', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
-      expect(commitFiles).toHaveBeenCalledWith(
+      expect(platform.commitFiles).toHaveBeenCalledWith(
         buildExpectedCommitFilesArgument('Add renovate.json')
       );
     });
@@ -44,7 +43,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         'We can Renovate if we want to, we can leave PRs in decline';
       config.onboardingCommitMessage = message;
       await createOnboardingBranch(config);
-      expect(commitFiles).toHaveBeenCalledWith(
+      expect(platform.commitFiles).toHaveBeenCalledWith(
         buildExpectedCommitFilesArgument(`${message}`)
       );
     });
@@ -53,7 +52,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const prefix = 'RENOV-123';
         config.commitMessagePrefix = prefix;
         await createOnboardingBranch(config);
-        expect(commitFiles).toHaveBeenCalledWith(
+        expect(platform.commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           )
@@ -66,7 +65,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         config.commitMessagePrefix = prefix;
         config.onboardingCommitMessage = message;
         await createOnboardingBranch(config);
-        expect(commitFiles).toHaveBeenCalledWith(
+        expect(platform.commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} ${message}`
           )
@@ -78,7 +77,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const prefix = 'chore(deps)';
         config.semanticCommits = 'enabled';
         await createOnboardingBranch(config);
-        expect(commitFiles).toHaveBeenCalledWith(
+        expect(platform.commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           )
@@ -91,7 +90,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         config.semanticCommits = 'enabled';
         config.onboardingCommitMessage = message;
         await createOnboardingBranch(config);
-        expect(commitFiles).toHaveBeenCalledWith(
+        expect(platform.commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} ${message}`
           )
@@ -104,7 +103,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         config.semanticCommits = 'enabled';
         config.onboardingConfigFileName = undefined;
         await createOnboardingBranch(config);
-        expect(commitFiles).toHaveBeenCalledWith(
+        expect(platform.commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           )
@@ -115,7 +114,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         config.semanticCommits = 'enabled';
         config.onboardingConfigFileName = 'superConfigFile.yaml';
         await createOnboardingBranch(config);
-        expect(commitFiles).toHaveBeenCalledWith(
+        expect(platform.commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add renovate.json`
           )
@@ -126,7 +125,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         config.semanticCommits = 'enabled';
         config.onboardingConfigFileName = '.gitlab/renovate.json';
         await createOnboardingBranch(config);
-        expect(commitFiles).toHaveBeenCalledWith(
+        expect(platform.commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add ${config.onboardingConfigFileName}`,
             config.onboardingConfigFileName
@@ -138,7 +137,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         config.semanticCommits = 'enabled';
         config.onboardingConfigFileName = `.renovaterc`;
         await createOnboardingBranch(config);
-        expect(commitFiles).toHaveBeenCalledWith(
+        expect(platform.commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${CommitMessage.SEPARATOR} add ${config.onboardingConfigFileName}`,
             config.onboardingConfigFileName

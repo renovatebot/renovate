@@ -2,12 +2,8 @@ import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import {
-  commitFiles,
-  getFile,
-  isBranchModified,
-  isBranchStale,
-} from '../../../../util/git';
+import { platform } from '../../../../platform';
+import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -47,7 +43,7 @@ export async function rebaseOnboardingBranch(
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }
-  return commitFiles({
+  return platform.commitFiles({
     branchName: config.onboardingBranch,
     files: [
       {

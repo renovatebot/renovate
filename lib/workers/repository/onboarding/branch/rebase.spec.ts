@@ -1,4 +1,9 @@
-import { RenovateConfig, defaultConfig, git } from '../../../../../test/util';
+import {
+  RenovateConfig,
+  defaultConfig,
+  git,
+  platform,
+} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { rebaseOnboardingBranch } from './rebase';
 
@@ -23,7 +28,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('does not rebase modified branch', async () => {
       git.isBranchModified.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('does nothing if branch is up to date', async () => {
       const contents =
@@ -32,12 +37,12 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         .mockResolvedValueOnce(contents) // package.json
         .mockResolvedValueOnce(contents); // renovate.json
       await rebaseOnboardingBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('rebases onboarding branch', async () => {
       git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
     });
     it('uses the onboardingConfigFileName if set', async () => {
       git.isBranchStale.mockResolvedValueOnce(true);
@@ -45,11 +50,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         ...config,
         onboardingConfigFileName: '.github/renovate.json',
       });
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles.mock.calls[0][0].message).toContain(
+      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+      expect(platform.commitFiles.mock.calls[0][0].message).toContain(
         '.github/renovate.json'
       );
-      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
+      expect(platform.commitFiles.mock.calls[0][0].files[0].path).toBe(
         '.github/renovate.json'
       );
     });
@@ -59,11 +64,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         ...config,
         onboardingConfigFileName: undefined,
       });
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles.mock.calls[0][0].message).toContain(
+      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+      expect(platform.commitFiles.mock.calls[0][0].message).toContain(
         'renovate.json'
       );
-      expect(git.commitFiles.mock.calls[0][0].files[0].path).toBe(
+      expect(platform.commitFiles.mock.calls[0][0].files[0].path).toBe(
         'renovate.json'
       );
     });

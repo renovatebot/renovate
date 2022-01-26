@@ -2,7 +2,7 @@ import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitFiles } from '../../../../util/git';
+import { platform } from '../../../../platform';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -30,7 +30,7 @@ export async function createOnboardingBranch(
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }
-  return commitFiles({
+  return platform.commitFiles({
     branchName: config.onboardingBranch,
     files: [
       {
