@@ -148,7 +148,8 @@ export function generateBranchConfig(
     delete upgrade.group;
 
     // istanbul ignore else
-    if (toValues.size > 1 && !typesGroup) {
+    if (toVersions.length > 1 && toValues.size > 1 && !typesGroup) {
+      logger.trace({ toVersions });
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
