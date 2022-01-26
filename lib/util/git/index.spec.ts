@@ -230,6 +230,12 @@ describe('util/git/index', () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
+      const repo = Git(GlobalConfig.get('localDir'));
+      await repo.checkout([
+        '-B',
+        'renovate/future_branch',
+        'origin/renovate/future_branch',
+      ]);
       await git.mergeBranch('renovate/future_branch');
       const merged = await Git(origin.path).branch([
         '--verbose',
