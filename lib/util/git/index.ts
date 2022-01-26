@@ -31,6 +31,7 @@ import { checkForPlatformFailure, handleCommitError } from './error';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
+  CommitResult,
   CommitSha,
   LocalConfig,
   StatusResult,
@@ -696,15 +697,15 @@ async function handleCommitAuth(localDir: string): Promise<void> {
   await writeGitAuthor();
 }
 
-export async function commitFiles({
+export async function prepareCommit({
   branchName,
   files,
   message,
   force = false,
-}: CommitFilesConfig): Promise<CommitSha | null> {
+}: CommitFilesConfig): Promise<CommitResult | null> {
   const { localDir } = GlobalConfig.get();
   await syncGit();
-  logger.debug(`Committing files to branch ${branchName}`);
+  logger.debug(`Preparing files for branch ${branchName}`);
   await handleCommitAuth(localDir);
   try {
     await git.reset(ResetMode.HARD);
@@ -787,7 +788,7 @@ export async function commitFiles({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    const commit = commitRes?.commit || 'unknown';
+    const endSha = commitRes.commit;
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
@@ -796,6 +797,29 @@ export async function commitFiles({
       return null;
     }
 
+    const result: CommitResult = {
+      sha: endSha,
+      files: files.filter((fileChange) => {
+        if (fileChange.type === 'deletion') {
+          return deletedFiles.includes(fileChange.path);
+        }
+        return addedModifiedFiles.includes(fileChange.path);
+      }),
+    };
+
+    return result;
+  } catch (err) /* istanbul ignore next */ {
+    return handleCommitError(files, branchName, err);
+  }
+}
+
+export async function pushCommit({
+  branchName,
+  files,
+}: CommitFilesConfig): Promise<void> {
+  await syncGit();
+  logger.debug(`Pushing branch ${branchName}`);
+  try {
     const pushOptions: TaskOptions = {
       '--force-with-lease': null,
       '-u': null,
@@ -811,18 +835,44 @@ export async function commitFiles({
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
-    // Fetch it after create
+  } catch (err) /* istanbul ignore next */ {
+    handleCommitError(files, branchName, err);
+  }
+}
+
+export async function fetchCommit({
+  branchName,
+  files,
+}: CommitFilesConfig): Promise<CommitSha | null> {
+  await syncGit();
+  logger.debug(`Fetching branch ${branchName}`);
+  try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--force']);
-    config.branchCommits[branchName] = (
-      await git.revparse([branchName])
-    ).trim();
+    const sha = (await git.revparse([branchName])).trim();
+    config.branchCommits[branchName] = sha;
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
-    return commit;
+    return sha.slice(0, 7);
   } catch (err) /* istanbul ignore next */ {
     return handleCommitError(files, branchName, err);
   }
+}
+
+export async function commitFiles(
+  config: CommitFilesConfig
+): Promise<CommitSha | null> {
+  const { branchName } = config;
+  const { localDir } = GlobalConfig.get();
+  await syncGit();
+  logger.debug(`Committing files to branch ${branchName}`);
+  await handleCommitAuth(localDir);
+  const commitResult = await prepareCommit(config);
+  if (!commitResult) {
+    return null;
+  }
+  await pushCommit(config);
+  return fetchCommit(config);
 }
 
 export function getUrl({
