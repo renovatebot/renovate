@@ -1,4 +1,4 @@
-import { defaultConfig, partial, platform } from '../../../test/util';
+import { defaultConfig, git, partial, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { BranchConfig } from '../types';
 import { commitFilesToBranch } from './commit';
@@ -20,12 +20,13 @@ describe('workers/branch/commit', () => {
         updatedArtifacts: [],
       });
       jest.resetAllMocks();
+      git.commitFiles.mockResolvedValueOnce('123test');
       platform.commitFiles.mockResolvedValueOnce('123test');
       GlobalConfig.reset();
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('commits files', async () => {
       config.updatedPackageFiles.push({
@@ -33,6 +34,17 @@ describe('workers/branch/commit', () => {
         path: 'package.json',
         contents: 'some contents',
       });
+      await commitFilesToBranch(config);
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles.mock.calls).toMatchSnapshot();
+    });
+    it('commits via platform', async () => {
+      config.updatedPackageFiles.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      config.platformCommit = true;
       await commitFilesToBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
       expect(platform.commitFiles.mock.calls).toMatchSnapshot();
@@ -45,7 +57,7 @@ describe('workers/branch/commit', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
   });
 });

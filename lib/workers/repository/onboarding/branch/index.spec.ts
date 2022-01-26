@@ -72,8 +72,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
-      const file = platform.commitFiles.mock.calls[0][0]
-        .files[0] as FileAddition;
+      const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents.toString();
       expect(contents).toBeJsonString();
       expect(JSON.parse(contents)).toEqual({
@@ -102,8 +101,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         },
         configFileNames[0]
       );
-      const file = platform.commitFiles.mock.calls[0][0]
-        .files[0] as FileAddition;
+      const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents.toString();
       expect(contents).toBeJsonString();
       expect(JSON.parse(contents)).toEqual({
@@ -193,7 +191,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
   });
 });

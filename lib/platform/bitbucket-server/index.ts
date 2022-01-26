@@ -15,7 +15,6 @@ import { GitProtocol } from '../../types/git';
 import type { FileData } from '../../types/platform/bitbucket-server';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import {
@@ -1011,11 +1010,4 @@ export function massageMarkdown(input: string): string {
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   logger.debug(`getVulnerabilityAlerts()`);
   return Promise.resolve([]);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  config: CommitFilesConfig
-): Promise<CommitSha | null> {
-  return git.commitFiles(config);
 }

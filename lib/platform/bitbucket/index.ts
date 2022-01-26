@@ -6,7 +6,6 @@ import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import * as git from '../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { regEx } from '../../util/regex';
@@ -845,11 +844,4 @@ export async function mergePr({
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  config: CommitFilesConfig
-): Promise<CommitSha | null> {
-  return git.commitFiles(config);
 }

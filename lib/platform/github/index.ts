@@ -22,7 +22,6 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { regEx } from '../../util/regex';
@@ -1719,11 +1718,4 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
   return alerts;
-}
-
-// istanbul ignore next
-export function commitFiles(
-  config: CommitFilesConfig
-): Promise<CommitSha | null> {
-  return git.commitFiles(config);
 }
