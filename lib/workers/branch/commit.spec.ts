@@ -1,4 +1,4 @@
-import { defaultConfig, git, partial, platform } from '../../../test/util';
+import { defaultConfig, partial, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { BranchConfig } from '../types';
 import { commitFilesToBranch } from './commit';
