@@ -73,7 +73,7 @@ export function generateBranchConfig(
   const depNames: string[] = [];
   const newValue: string[] = [];
   const toVersions: string[] = [];
-  const toValues: string[] = [];
+  const toValues: Set<string> = new Set();
   branchUpgrades.forEach((upg) => {
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);
@@ -81,8 +81,8 @@ export function generateBranchConfig(
     if (!toVersions.includes(upg.newVersion)) {
       toVersions.push(upg.newVersion);
     }
-    if (!toValues.includes(upg.newValue)) {
-      toValues.push(upg.newValue);
+    if (!toValues.has(upg.newValue)) {
+      toValues.add(upg.newValue);
     }
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
@@ -150,7 +150,7 @@ export function generateBranchConfig(
     delete upgrade.group;
 
     // istanbul ignore else
-    if (toValues.length > 1 && !typesGroup) {
+    if (toValues.size > 1 && !typesGroup) {
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
