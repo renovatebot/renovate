@@ -134,7 +134,14 @@ describe('datasource/conan/index', () => {
           depName: 'bad',
           lookupName: 'bad/1.2@_/_',
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        registryUrl: 'https://center.conan.io',
+        releases: [
+          {
+            version: '1.9.3',
+          },
+        ],
+      });
     });
 
     it('handles non 404 errors', async () => {

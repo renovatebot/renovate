@@ -1,16 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/conan/index getReleases handles malformed packages 1`] = `
-Object {
-  "registryUrl": "https://center.conan.io",
-  "releases": Array [
-    Object {
-      "version": "1.9.3",
-    },
-  ],
-}
-`;
-
 exports[`datasource/conan/index getReleases processes real versioned data 1`] = `
 Object {
   "registryUrl": "https://center.conan.io",
