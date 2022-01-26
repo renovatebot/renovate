@@ -8,7 +8,7 @@ import { logger } from '../../logger';
 import type { OutgoingHttpHeaders } from '../../util/http/types';
 import { maskToken } from '../../util/mask';
 import { regEx } from '../../util/regex';
-import { add } from '../../util/sanitize';
+import { addSecretForSanitizing } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import type { Npmrc, PackageResolution } from './types';
 
@@ -43,13 +43,15 @@ function sanitize(key: string, val: string): void {
     return;
   }
   if (key.endsWith('_authToken') || key.endsWith('_auth')) {
-    add(val);
+    addSecretForSanitizing(val);
   } else if (key.endsWith(':_password')) {
-    add(val);
+    addSecretForSanitizing(val);
     const password = Buffer.from(val, 'base64').toString();
-    add(password);
+    addSecretForSanitizing(password);
     const username: string = npmrc[key.replace(':_password', ':username')];
-    add(Buffer.from(`${username}:${password}`).toString('base64'));
+    addSecretForSanitizing(
+      Buffer.from(`${username}:${password}`).toString('base64')
+    );
   }
 }
 
