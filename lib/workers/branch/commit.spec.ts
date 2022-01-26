@@ -21,7 +21,7 @@ describe('workers/branch/commit', () => {
       });
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('123test');
-      platform.commitFiles.mockResolvedValueOnce('123test');
+      platform.commitFiles = jest.fn();
       GlobalConfig.reset();
     });
     it('handles empty files', async () => {
