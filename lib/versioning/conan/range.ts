@@ -46,7 +46,7 @@ export function getPatch(version: string): null | number {
       semver.coerce(cleanedVersion, options),
       options
     );
-    return Number(newVersion.split('.')[2]);
+    return Number(newVersion?.split('.')[2]);
   }
   return null;
 }
@@ -125,7 +125,7 @@ export function replaceRange({
   const toVersionMinor = getMinor(newVersion);
   const toVersionPatch = getPatch(newVersion);
   const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)[0])
+    ? '-' + String(semver.prerelease(newVersion)?.[0])
     : '';
 
   if (element.operator === '~>') {
@@ -154,14 +154,14 @@ export function replaceRange({
     }
     return res;
   }
-  if (element.operator === '<') {
+  if (element.operator === '<' && toVersionMajor) {
     let res;
     if (currentValue.endsWith('.0.0')) {
       const newMajor = toVersionMajor + 1;
       res = `<${newMajor}.0.0`;
     } else if (element.patch) {
       res = `<${semver.inc(newVersion, 'patch')}`;
-    } else if (element.minor) {
+    } else if (element.minor && toVersionMinor) {
       res = `<${toVersionMajor}.${toVersionMinor + 1}`;
     } else {
       res = `<${toVersionMajor + 1}`;
@@ -173,7 +173,7 @@ export function replaceRange({
   }
   if (element.operator === '>') {
     let res;
-    if (currentValue.endsWith('.0.0')) {
+    if (currentValue.endsWith('.0.0') && toVersionMajor) {
       const newMajor = toVersionMajor + 1;
       res = `>${newMajor}.0.0`;
     } else if (element.patch) {
@@ -212,7 +212,7 @@ export function replaceRange({
 export function widenRange(
   { currentValue, currentVersion, newVersion }: NewValueConfig,
   options: semver.Options
-): string {
+): string | null {
   const parsedRange = parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
 
@@ -248,7 +248,7 @@ export function widenRange(
 export function bumpRange(
   { currentValue, currentVersion, newVersion }: NewValueConfig,
   options: semver.Options
-): string {
+): string | null {
   if (!containsOperators(currentValue) && currentValue.includes('||')) {
     return widenRange(
       {
@@ -266,7 +266,7 @@ export function bumpRange(
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)[0])
+    ? '-' + String(semver.prerelease(newVersion)?.[0])
     : '';
 
   if (parsedRange.length === 1) {
@@ -306,7 +306,7 @@ export function bumpRange(
     }
   } else {
     const newRange = fixParsedRange(currentValue);
-    const versions = newRange.map((x) => {
+    const versions = newRange.map((x: any) => {
       // don't bump or'd single version values
       if (x.operator === '||') {
         return x.semver;
@@ -321,7 +321,10 @@ export function bumpRange(
           },
           options
         );
-        if (matchesWithOptions(newVersion, bumpedSubRange, options)) {
+        if (
+          bumpedSubRange &&
+          matchesWithOptions(newVersion, bumpedSubRange, options)
+        ) {
           return bumpedSubRange;
         }
       }
@@ -333,7 +336,7 @@ export function bumpRange(
         newVersion,
       });
     });
-    return versions.filter((x) => x !== null && x !== '').join(' ');
+    return versions.filter((x: any) => x !== null && x !== '').join(' ');
   }
   logger.debug(
     'Unsupported range type for rangeStrategy=bump: ' + currentValue

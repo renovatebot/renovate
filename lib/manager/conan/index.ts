@@ -8,3 +8,5 @@ export const defaultConfig = {
   versioning: conan.id,
   rangeStrategy: 'bump',
 };
+
+export const supportedDatasources = [ConanDatasource.id];

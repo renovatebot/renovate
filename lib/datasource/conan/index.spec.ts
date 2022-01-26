@@ -32,7 +32,24 @@ describe('datasource/conan/index', () => {
           depName: 'fakepackage',
           lookupName: 'fakepackage/1.2@_/_',
         })
-      ).toMatchSnapshot();
+      ).toBeNull();
+    });
+
+    it('handles empty return', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get('/v2/conans/search?q=fakepackage')
+        .reply(200, {});
+      config.registryUrls = [defaultRegistryUrl];
+      expect(
+        await getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          depName: 'fakepackage',
+          lookupName: 'fakepackage/1.2@_/_',
+        })
+      ).toBeNull();
     });
 
     it('handles bad registries', async () => {
@@ -49,7 +66,7 @@ describe('datasource/conan/index', () => {
           depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
-      ).toMatchSnapshot();
+      ).toBeNull();
     });
 
     it('handles missing packages', async () => {
@@ -100,7 +117,7 @@ describe('datasource/conan/index', () => {
           depName: 'poco',
           lookupName: 'poco/1.2@un/matched',
         })
-      ).toMatchSnapshot();
+      ).toBeNull();
     });
 
     it('handles malformed packages', async () => {
@@ -135,7 +152,7 @@ describe('datasource/conan/index', () => {
           depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
-      ).toMatchSnapshot();
+      ).toBeNull();
     });
 
     it('handles missing slash on registries', async () => {
@@ -152,7 +169,7 @@ describe('datasource/conan/index', () => {
           depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
-      ).toMatchSnapshot();
+      ).toBeNull();
     });
   });
 });

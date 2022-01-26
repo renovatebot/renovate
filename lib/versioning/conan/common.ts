@@ -4,7 +4,7 @@ import { regEx } from '../../util/regex';
 export function makeVersion(
   version: string,
   options: semver.Options
-): string | boolean {
+): string | boolean | null {
   const splitVersion = version.split('.');
   const prerelease = semver.prerelease(version, options);
 
@@ -23,7 +23,6 @@ export function makeVersion(
   ) {
     return semver.valid(semver.coerce(version, options), options);
   }
-
   return semver.valid(version, options);
 }
 
@@ -61,8 +60,13 @@ export function matchesWithOptions(
   options: semver.Options
 ): boolean {
   let cleanedVersion = version;
-  if (semver.prerelease(cleanedVersion) && options.includePrerelease) {
-    cleanedVersion = semver.coerce(cleanedVersion).raw;
+  if (
+    cleanedVersion &&
+    semver.prerelease(cleanedVersion) &&
+    options.includePrerelease
+  ) {
+    const coercedVersion = semver.coerce(cleanedVersion)?.raw;
+    cleanedVersion = coercedVersion ? coercedVersion : '';
   }
   return semver.satisfies(cleanedVersion, cleanRange, options);
 }
@@ -73,8 +77,8 @@ export function findSatisfyingVersion(
   compareRt: number
 ): string | null {
   const options = getOptions(range);
-  let cur = null;
-  let curSV = null;
+  let cur: any = null;
+  let curSV: any = null;
   let index = 0;
   let curIndex = -1;
 

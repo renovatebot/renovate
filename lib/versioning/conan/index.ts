@@ -31,27 +31,28 @@ export const supportedRangeStrategies = ['auto', 'bump', 'widen', 'replace'];
 const MIN = 1;
 const MAX = -1;
 
-function isVersion(input: string): string | boolean {
+function isVersion(input: string): boolean {
   if (input && !input.includes('[')) {
     const qualifiers = getOptions(input);
     const version = cleanVersion(input);
-    let looseResult = null;
     if (qualifiers.loose) {
-      looseResult = looseAPI.isVersion(version);
+      if (looseAPI.isVersion(version)) {
+        return true;
+      }
     }
-    return makeVersion(version, qualifiers) || looseResult;
+    return makeVersion(version, qualifiers) !== null;
   }
   return false;
 }
 
-function isValid(input: string): string | boolean {
+function isValid(input: string): boolean {
   const version = cleanVersion(input);
   const qualifiers = getOptions(input);
   if (makeVersion(version, qualifiers)) {
-    return version;
+    return version !== null;
   }
 
-  return semver.validRange(version, qualifiers);
+  return semver.validRange(version, qualifiers) !== null;
 }
 
 function equals(version: string, other: string): boolean {
@@ -82,7 +83,10 @@ function isLessThanRange(version: string, range: string): boolean {
   const cleanedVersion = cleanVersion(version);
   const cleanRange = cleanVersion(range);
   const options = getOptions(range);
-  const looseResult = looseAPI.isLessThanRange(cleanedVersion, cleanRange);
+  const looseResult: any = looseAPI.isLessThanRange?.(
+    cleanedVersion,
+    cleanRange
+  );
   try {
     return semver.ltr(cleanedVersion, cleanRange, options) || looseResult;
   } catch {
@@ -146,13 +150,13 @@ function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   const cleanRange = cleanVersion(currentValue);
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return newVersion;
   }
   const options = getOptions(currentValue);
-  let newValue = '';
+  let newValue: any = '';
 
   if (rangeStrategy === 'widen') {
     newValue = widenRange(

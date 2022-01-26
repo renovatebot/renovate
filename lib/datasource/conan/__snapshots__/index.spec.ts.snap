@@ -1,9 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/conan/index getReleases handles bad registries 1`] = `null`;
-
-exports[`datasource/conan/index getReleases handles bad return 1`] = `null`;
-
 exports[`datasource/conan/index getReleases handles malformed packages 1`] = `
 Object {
   "registryUrl": "https://center.conan.io",
@@ -14,12 +10,6 @@ Object {
   ],
 }
 `;
-
-exports[`datasource/conan/index getReleases handles missing slash on registries 1`] = `null`;
-
-exports[`datasource/conan/index getReleases handles non 404 errors 1`] = `null`;
-
-exports[`datasource/conan/index getReleases it handles mismatched userAndChannel versioned data 1`] = `null`;
 
 exports[`datasource/conan/index getReleases processes real versioned data 1`] = `
 Object {

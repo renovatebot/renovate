@@ -1,165 +1,165 @@
 import { api as conan } from '.';
 
 describe('versioning/conan/index', () => {
-  // isValid(version: string): string | boolean | null;
+  // isValid(version: string): boolean;
   test.each`
     version                                                      | result
-    ${'[1.2.3.4, loose=False]'}                                  | ${null}
-    ${'[NOT VALID, loose=False]'}                                | ${null}
-    ${'[1.2, loose=False]'}                                      | ${'>=1.2.0 <1.3.0-0'}
-    ${'[1.a.2, loose=False]'}                                    | ${null}
-    ${'[Infinity.NaN.Infinity, loose=False]'}                    | ${null}
-    ${'1.2.3.4'}                                                 | ${'1.2.3.4'}
-    ${'NOT VALID'}                                               | ${null}
-    ${'1.2'}                                                     | ${'1.2'}
-    ${'1.a.2'}                                                   | ${null}
-    ${''}                                                        | ${'*'}
-    ${'Infinity.NaN.Infinity'}                                   | ${null}
-    ${'17.04.0'}                                                 | ${'17.04.0'}
-    ${'1.2.3'}                                                   | ${'1.2.3'}
-    ${'1.2.3-foo'}                                               | ${'1.2.3-foo'}
-    ${'[>1.1 <2.0]'}                                             | ${'>=1.2.0 <2.0.0-0'}
-    ${'1.2.3foo'}                                                | ${'1.2.3-foo'}
-    ${'[~1.2.3]'}                                                | ${'>=1.2.3 <1.3.0-0'}
-    ${'[^1.2.3]'}                                                | ${'>=1.2.3 <2.0.0-0'}
-    ${'1.x'}                                                     | ${'1.x'}
-    ${'[>1.2.3]'}                                                | ${'>1.2.3'}
-    ${'[>1.1 <2.1]'}                                             | ${'>=1.2.0 <2.1.0-0'}
-    ${'[~=3.0]'}                                                 | ${'~=3.0'}
-    ${'[>1.1 || 0.8]'}                                           | ${'>=1.2.0||>=0.8.0 <0.9.0-0'}
-    ${'[1.2.7 || >=1.2.9 <2.0.0]'}                               | ${'1.2.7 || >=1.2.9 <2.0.0'}
-    ${'[>1.1 <2.1, include_prerelease=True]'}                    | ${'>=1.2.0-0 <2.1.0-0'}
-    ${'[~1.2.3, loose=False]'}                                   | ${'>=1.2.3 <1.3.0-0'}
-    ${'[~1.2.3, loose=False, include_prerelease=True]'}          | ${'>=1.2.3 <1.3.0-0'}
-    ${'renovatebot/renovate'}                                    | ${null}
-    ${'renovatebot/renovate#main'}                               | ${null}
-    ${'https://github.com/renovatebot/renovate.git'}             | ${null}
-    ${'[>=01.02.03]'}                                            | ${'>=1.2.3'}
-    ${'[~1.02.03beta]'}                                          | ${'>=1.2.3-beta <1.3.0-0'}
-    ${'[">1.0.0 <1.0.2", loose=False, include_prerelease=True]'} | ${'>1.0.0 <1.0.2'}
-    ${'[1.0.0 - 2.0.0, loose=False]'}                            | ${'>=1.0.0 <=2.0.0'}
-    ${'[1.0.0, loose=False]'}                                    | ${'1.0.0'}
-    ${'[>=*, loose=False]'}                                      | ${'*'}
-    ${'[, loose=False]'}                                         | ${'*'}
-    ${'[*, loose=False]'}                                        | ${'*'}
-    ${'[>=1.0.0, loose=False]'}                                  | ${'>=1.0.0'}
-    ${'[>1.0.0, loose=False]'}                                   | ${'>1.0.0'}
-    ${'[<=2.0.0, loose=False]'}                                  | ${'<=2.0.0'}
-    ${'[1, loose=False]'}                                        | ${'>=1.0.0 <2.0.0-0'}
-    ${'[<=2.0.0, loose=False]'}                                  | ${'<=2.0.0'}
-    ${'[<=2.0.0, loose=False]'}                                  | ${'<=2.0.0'}
-    ${'[<2.0.0, loose=False]'}                                   | ${'<2.0.0'}
-    ${'[<2.0.0, loose=False]'}                                   | ${'<2.0.0'}
-    ${'[>= 1.0.0, loose=False]'}                                 | ${'>=1.0.0'}
-    ${'[>=  1.0.0, loose=False]'}                                | ${'>=1.0.0'}
-    ${'[>=   1.0.0, loose=False]'}                               | ${'>=1.0.0'}
-    ${'[> 1.0.0, loose=False]'}                                  | ${'>1.0.0'}
-    ${'[>  1.0.0, loose=False]'}                                 | ${'>1.0.0'}
-    ${'[<=   2.0.0, loose=False]'}                               | ${'<=2.0.0'}
-    ${'[<= 2.0.0, loose=False]'}                                 | ${'<=2.0.0'}
-    ${'[<=  2.0.0, loose=False]'}                                | ${'<=2.0.0'}
-    ${'[<    2.0.0, loose=False]'}                               | ${'<2.0.0'}
-    ${'[<	2.0.0, loose=False]'}                                   | ${'<2.0.0'}
-    ${'[>=0.1.97, loose=False]'}                                 | ${'>=0.1.97'}
-    ${'[>=0.1.97, loose=False]'}                                 | ${'>=0.1.97'}
-    ${'[0.1.20 || 1.2.4, loose=False]'}                          | ${'0.1.20||1.2.4'}
-    ${'[>=0.2.3 || <0.0.1, loose=False]'}                        | ${'>=0.2.3||<0.0.1'}
-    ${'[>=0.2.3 || <0.0.1, loose=False]'}                        | ${'>=0.2.3||<0.0.1'}
-    ${'[>=0.2.3 || <0.0.1, loose=False]'}                        | ${'>=0.2.3||<0.0.1'}
-    ${'[||, loose=False]'}                                       | ${'*'}
-    ${'[2.x.x, loose=False]'}                                    | ${'>=2.0.0 <3.0.0-0'}
-    ${'[1.2.x, loose=False]'}                                    | ${'>=1.2.0 <1.3.0-0'}
-    ${'[1.2.x || 2.x, loose=False]'}                             | ${'>=1.2.0 <1.3.0-0||>=2.0.0 <3.0.0-0'}
-    ${'[1.2.x || 2.x, loose=False]'}                             | ${'>=1.2.0 <1.3.0-0||>=2.0.0 <3.0.0-0'}
-    ${'[x, loose=False]'}                                        | ${'*'}
-    ${'[2.*.*, loose=False]'}                                    | ${'>=2.0.0 <3.0.0-0'}
-    ${'[1.2.*, loose=False]'}                                    | ${'>=1.2.0 <1.3.0-0'}
-    ${'[1.2.* || 2.*, loose=False]'}                             | ${'>=1.2.0 <1.3.0-0||>=2.0.0 <3.0.0-0'}
-    ${'[*, loose=False]'}                                        | ${'*'}
-    ${'[2, loose=False]'}                                        | ${'>=2.0.0 <3.0.0-0'}
-    ${'[2.3, loose=False]'}                                      | ${'>=2.3.0 <2.4.0-0'}
-    ${'[~2.4, loose=False]'}                                     | ${'>=2.4.0 <2.5.0-0'}
-    ${'[~>3.2.1, loose=False]'}                                  | ${'>=3.2.1 <3.3.0-0'}
-    ${'[~1, loose=False]'}                                       | ${'>=1.0.0 <2.0.0-0'}
-    ${'[~>1, loose=False]'}                                      | ${'>=1.0.0 <2.0.0-0'}
-    ${'[~> 1, loose=False]'}                                     | ${'>=1.0.0 <2.0.0-0'}
-    ${'[~1.0, loose=False]'}                                     | ${'>=1.0.0 <1.1.0-0'}
-    ${'[~ 1.0, loose=False]'}                                    | ${'>=1.0.0 <1.1.0-0'}
-    ${'[^0, loose=False]'}                                       | ${'<1.0.0-0'}
-    ${'[^ 1, loose=False]'}                                      | ${'>=1.0.0 <2.0.0-0'}
-    ${'[^0.1, loose=False]'}                                     | ${'>=0.1.0 <0.2.0-0'}
-    ${'[^1.0, loose=False]'}                                     | ${'>=1.0.0 <2.0.0-0'}
-    ${'[^1.2, loose=False]'}                                     | ${'>=1.2.0 <2.0.0-0'}
-    ${'[^0.0.1, loose=False]'}                                   | ${'>=0.0.1 <0.0.2-0'}
-    ${'[^0.0.1-beta, loose=False]'}                              | ${'>=0.0.1-beta <0.0.2-0'}
-    ${'[^0.1.2, loose=False]'}                                   | ${'>=0.1.2 <0.2.0-0'}
-    ${'[^1.2.3, loose=False]'}                                   | ${'>=1.2.3 <2.0.0-0'}
-    ${'[^1.2.3-beta.4, loose=False]'}                            | ${'>=1.2.3-beta.4 <2.0.0-0'}
-    ${'[<1, loose=False]'}                                       | ${'<1.0.0-0'}
-    ${'[< 1, loose=False]'}                                      | ${'<1.0.0-0'}
-    ${'[>=1, loose=False]'}                                      | ${'>=1.0.0'}
-    ${'[>= 1, loose=False]'}                                     | ${'>=1.0.0'}
-    ${'[<1.2, loose=False]'}                                     | ${'<1.2.0-0'}
-    ${'[< 1.2, loose=False]'}                                    | ${'<1.2.0-0'}
-    ${'[1, loose=False]'}                                        | ${'>=1.0.0 <2.0.0-0'}
-    ${'[>01.02.03, loose=True]'}                                 | ${'>1.2.3'}
-    ${'[>01.02.03, loose=False]'}                                | ${null}
-    ${'[~1.2.3beta, loose=True]'}                                | ${'>=1.2.3-beta <1.3.0-0'}
-    ${'[~1.2.3beta, loose=False]'}                               | ${null}
-    ${'[^ 1.2 ^ 1, loose=False]'}                                | ${'>=1.2.0 <2.0.0-0 >=1.0.0'}
+    ${'[1.2.3.4, loose=False]'}                                  | ${false}
+    ${'[NOT VALID, loose=False]'}                                | ${false}
+    ${'[1.2, loose=False]'}                                      | ${true}
+    ${'[1.a.2, loose=False]'}                                    | ${false}
+    ${'[Infinity.NaN.Infinity, loose=False]'}                    | ${false}
+    ${'1.2.3.4'}                                                 | ${true}
+    ${'NOT VALID'}                                               | ${false}
+    ${'1.2'}                                                     | ${true}
+    ${'1.a.2'}                                                   | ${false}
+    ${''}                                                        | ${true}
+    ${'Infinity.NaN.Infinity'}                                   | ${false}
+    ${'17.04.0'}                                                 | ${true}
+    ${'1.2.3'}                                                   | ${true}
+    ${'1.2.3-foo'}                                               | ${true}
+    ${'[>1.1 <2.0]'}                                             | ${true}
+    ${'1.2.3foo'}                                                | ${true}
+    ${'[~1.2.3]'}                                                | ${true}
+    ${'[^1.2.3]'}                                                | ${true}
+    ${'1.x'}                                                     | ${true}
+    ${'[>1.2.3]'}                                                | ${true}
+    ${'[>1.1 <2.1]'}                                             | ${true}
+    ${'[~=3.0]'}                                                 | ${true}
+    ${'[>1.1 || 0.8]'}                                           | ${true}
+    ${'[1.2.7 || >=1.2.9 <2.0.0]'}                               | ${true}
+    ${'[>1.1 <2.1, include_prerelease=True]'}                    | ${true}
+    ${'[~1.2.3, loose=False]'}                                   | ${true}
+    ${'[~1.2.3, loose=False, include_prerelease=True]'}          | ${true}
+    ${'renovatebot/renovate'}                                    | ${false}
+    ${'renovatebot/renovate#main'}                               | ${false}
+    ${'https://github.com/renovatebot/renovate.git'}             | ${false}
+    ${'[>=01.02.03]'}                                            | ${true}
+    ${'[~1.02.03beta]'}                                          | ${true}
+    ${'[">1.0.0 <1.0.2", loose=False, include_prerelease=True]'} | ${true}
+    ${'[1.0.0 - 2.0.0, loose=False]'}                            | ${true}
+    ${'[1.0.0, loose=False]'}                                    | ${true}
+    ${'[>=*, loose=False]'}                                      | ${true}
+    ${'[, loose=False]'}                                         | ${true}
+    ${'[*, loose=False]'}                                        | ${true}
+    ${'[>=1.0.0, loose=False]'}                                  | ${true}
+    ${'[>1.0.0, loose=False]'}                                   | ${true}
+    ${'[<=2.0.0, loose=False]'}                                  | ${true}
+    ${'[1, loose=False]'}                                        | ${true}
+    ${'[<=2.0.0, loose=False]'}                                  | ${true}
+    ${'[<=2.0.0, loose=False]'}                                  | ${true}
+    ${'[<2.0.0, loose=False]'}                                   | ${true}
+    ${'[<2.0.0, loose=False]'}                                   | ${true}
+    ${'[>= 1.0.0, loose=False]'}                                 | ${true}
+    ${'[>=  1.0.0, loose=False]'}                                | ${true}
+    ${'[>=   1.0.0, loose=False]'}                               | ${true}
+    ${'[> 1.0.0, loose=False]'}                                  | ${true}
+    ${'[>  1.0.0, loose=False]'}                                 | ${true}
+    ${'[<=   2.0.0, loose=False]'}                               | ${true}
+    ${'[<= 2.0.0, loose=False]'}                                 | ${true}
+    ${'[<=  2.0.0, loose=False]'}                                | ${true}
+    ${'[<    2.0.0, loose=False]'}                               | ${true}
+    ${'[<	2.0.0, loose=False]'}                                   | ${true}
+    ${'[>=0.1.97, loose=False]'}                                 | ${true}
+    ${'[>=0.1.97, loose=False]'}                                 | ${true}
+    ${'[0.1.20 || 1.2.4, loose=False]'}                          | ${true}
+    ${'[>=0.2.3 || <0.0.1, loose=False]'}                        | ${true}
+    ${'[>=0.2.3 || <0.0.1, loose=False]'}                        | ${true}
+    ${'[>=0.2.3 || <0.0.1, loose=False]'}                        | ${true}
+    ${'[||, loose=False]'}                                       | ${true}
+    ${'[2.x.x, loose=False]'}                                    | ${true}
+    ${'[1.2.x, loose=False]'}                                    | ${true}
+    ${'[1.2.x || 2.x, loose=False]'}                             | ${true}
+    ${'[1.2.x || 2.x, loose=False]'}                             | ${true}
+    ${'[x, loose=False]'}                                        | ${true}
+    ${'[2.*.*, loose=False]'}                                    | ${true}
+    ${'[1.2.*, loose=False]'}                                    | ${true}
+    ${'[1.2.* || 2.*, loose=False]'}                             | ${true}
+    ${'[*, loose=False]'}                                        | ${true}
+    ${'[2, loose=False]'}                                        | ${true}
+    ${'[2.3, loose=False]'}                                      | ${true}
+    ${'[~2.4, loose=False]'}                                     | ${true}
+    ${'[~>3.2.1, loose=False]'}                                  | ${true}
+    ${'[~1, loose=False]'}                                       | ${true}
+    ${'[~>1, loose=False]'}                                      | ${true}
+    ${'[~> 1, loose=False]'}                                     | ${true}
+    ${'[~1.0, loose=False]'}                                     | ${true}
+    ${'[~ 1.0, loose=False]'}                                    | ${true}
+    ${'[^0, loose=False]'}                                       | ${true}
+    ${'[^ 1, loose=False]'}                                      | ${true}
+    ${'[^0.1, loose=False]'}                                     | ${true}
+    ${'[^1.0, loose=False]'}                                     | ${true}
+    ${'[^1.2, loose=False]'}                                     | ${true}
+    ${'[^0.0.1, loose=False]'}                                   | ${true}
+    ${'[^0.0.1-beta, loose=False]'}                              | ${true}
+    ${'[^0.1.2, loose=False]'}                                   | ${true}
+    ${'[^1.2.3, loose=False]'}                                   | ${true}
+    ${'[^1.2.3-beta.4, loose=False]'}                            | ${true}
+    ${'[<1, loose=False]'}                                       | ${true}
+    ${'[< 1, loose=False]'}                                      | ${true}
+    ${'[>=1, loose=False]'}                                      | ${true}
+    ${'[>= 1, loose=False]'}                                     | ${true}
+    ${'[<1.2, loose=False]'}                                     | ${true}
+    ${'[< 1.2, loose=False]'}                                    | ${true}
+    ${'[1, loose=False]'}                                        | ${true}
+    ${'[>01.02.03, loose=True]'}                                 | ${true}
+    ${'[>01.02.03, loose=False]'}                                | ${false}
+    ${'[~1.2.3beta, loose=True]'}                                | ${true}
+    ${'[~1.2.3beta, loose=False]'}                               | ${false}
+    ${'[^ 1.2 ^ 1, loose=False]'}                                | ${true}
   `('isValid("$version") === $result', ({ version, result }) => {
     const res = conan.isValid(version);
     expect(res).toBe(result);
   });
 
-  // isVersion(version: string): string | boolean | null;
-  // isSingleVersion(version: string): string | boolean | null;
+  // isVersion(version: string): boolean;
+  // isSingleVersion(version: string): boolean;
   test.each`
     version                                            | result
-    ${'1.0.7-prerelease.1'}                            | ${'1.0.7-prerelease.1'}
-    ${'1.0.7-prerelease.1, include_prerelease=True'}   | ${'1.0.7-prerelease.1'}
-    ${'NOT VALID, loose=False'}                        | ${null}
-    ${'NOT VALID'}                                     | ${null}
-    ${'1.a.2, loose=False'}                            | ${null}
-    ${'1.a.2'}                                         | ${'1.a.2'}
+    ${'1.0.7-prerelease.1'}                            | ${true}
+    ${'1.0.7-prerelease.1, include_prerelease=True'}   | ${true}
+    ${'NOT VALID, loose=False'}                        | ${false}
+    ${'NOT VALID'}                                     | ${false}
+    ${'1.a.2, loose=False'}                            | ${false}
+    ${'1.a.2'}                                         | ${true}
     ${null}                                            | ${false}
-    ${'1.2, loose=False'}                              | ${null}
-    ${'1.2'}                                           | ${'1.2.0'}
-    ${'1.2.3.4, loose=False'}                          | ${null}
-    ${'1.2.3.4'}                                       | ${'1.2.3'}
-    ${'1.2.23.4'}                                      | ${'1.2.23'}
-    ${'4.1.3-pre, include_prerelease=True'}            | ${'4.1.3-pre'}
-    ${'X.2, loose=False'}                              | ${null}
-    ${'X.2'}                                           | ${'2.0.0'}
-    ${'Infinity.NaN.Infinity, loose=False'}            | ${null}
-    ${'Infinity.NaN.Infinity'}                         | ${null}
-    ${'1.2.3'}                                         | ${'1.2.3'}
-    ${'"1.2.3", loose=False'}                          | ${'1.2.3'}
-    ${'"1.2.3", loose=False, include_prerelease=True'} | ${'1.2.3'}
-    ${'"1.2.3", include_prerelease=True'}              | ${'1.2.3'}
-    ${'1.2.3-alpha.1'}                                 | ${'1.2.3-alpha.1'}
-    ${'"1.2.3-alpha.1", include_prerelease=True'}      | ${'1.2.3-alpha.1'}
-    ${'"1.2.6-pre.1", include_prerelease=True'}        | ${'1.2.6-pre.1'}
-    ${'"1.2.3-dev.1+abc", include_prerelease=True'}    | ${'1.2.3-dev.1'}
-    ${'1.2.3-dev.1+abc'}                               | ${'1.2.3-dev.1+abc'}
-    ${'1.2.6-pre.1'}                                   | ${'1.2.6-pre.1'}
-    ${'=1.2.3'}                                        | ${'1.2.3'}
-    ${'= 1.2.3'}                                       | ${'1.2.3'}
-    ${'1.x'}                                           | ${'1.0.0'}
-    ${'"1.x", loose=False'}                            | ${null}
-    ${'01.02.03'}                                      | ${'1.2.3'}
-    ${'1.2.3-beta.01, include_prerelease=True'}        | ${'1.2.3-beta.1'}
-    ${'   =1.2.3'}                                     | ${'1.2.3'}
-    ${'1.2.3foo, include_prerelease=True'}             | ${'1.2.3-foo'}
-    ${'5.0.20210712-T1759Z+b563c1478'}                 | ${'5.0.20210712-T1759Z+b563c1478'}
-    ${'0.2'}                                           | ${'0.2.0'}
-    ${'16.00'}                                         | ${'16.0.0'}
+    ${'1.2, loose=False'}                              | ${false}
+    ${'1.2'}                                           | ${true}
+    ${'1.2.3.4, loose=False'}                          | ${false}
+    ${'1.2.3.4'}                                       | ${true}
+    ${'1.2.23.4'}                                      | ${true}
+    ${'4.1.3-pre, include_prerelease=True'}            | ${true}
+    ${'X.2, loose=False'}                              | ${false}
+    ${'X.2'}                                           | ${true}
+    ${'Infinity.NaN.Infinity, loose=False'}            | ${false}
+    ${'Infinity.NaN.Infinity'}                         | ${false}
+    ${'1.2.3'}                                         | ${true}
+    ${'"1.2.3", loose=False'}                          | ${true}
+    ${'"1.2.3", loose=False, include_prerelease=True'} | ${true}
+    ${'"1.2.3", include_prerelease=True'}              | ${true}
+    ${'1.2.3-alpha.1'}                                 | ${true}
+    ${'"1.2.3-alpha.1", include_prerelease=True'}      | ${true}
+    ${'"1.2.6-pre.1", include_prerelease=True'}        | ${true}
+    ${'"1.2.3-dev.1+abc", include_prerelease=True'}    | ${true}
+    ${'1.2.3-dev.1+abc'}                               | ${true}
+    ${'1.2.6-pre.1'}                                   | ${true}
+    ${'=1.2.3'}                                        | ${true}
+    ${'= 1.2.3'}                                       | ${true}
+    ${'1.x'}                                           | ${true}
+    ${'"1.x", loose=False'}                            | ${false}
+    ${'01.02.03'}                                      | ${true}
+    ${'1.2.3-beta.01, include_prerelease=True'}        | ${true}
+    ${'   =1.2.3'}                                     | ${true}
+    ${'1.2.3foo, include_prerelease=True'}             | ${true}
+    ${'5.0.20210712-T1759Z+b563c1478'}                 | ${true}
+    ${'0.2'}                                           | ${true}
+    ${'16.00'}                                         | ${true}
   `('isVersion("$version") === $result', ({ version, result }) => {
     const res = conan.isVersion(version);
     expect(res).toBe(result);
   });
 
-  // isCompatible(version: string, range?: string): string | boolean | null;
+  // isCompatible(version: string, range?: string): boolean;
   test.each`
     range                                                                           | version              | result
     ${'[>1.1 <2.0]'}                                                                | ${'1.2.3'}           | ${true}
@@ -167,13 +167,13 @@ describe('versioning/conan/index', () => {
     ${'["1.0.0 - 2.0.0", loose=False, include_prerelease=False]'}                   | ${'1.2.3'}           | ${true}
     ${'["^1.2.3+build", loose=False, include_prerelease=False]'}                    | ${'1.2.3'}           | ${true}
     ${'["^1.2.3+build", loose=False, include_prerelease=False]'}                    | ${'1.3.0'}           | ${true}
-    ${'["1.2.3-pre+asdf - 2.4.3-pre+asdf", loose=False, include_prerelease=False]'} | ${'1.2.3'}           | ${false}
-    ${'["1.2.3pre+asdf - 2.4.3-pre+asdf", loose=True, include_prerelease=False]'}   | ${'1.2.3'}           | ${false}
-    ${'["1.2.3-pre+asdf - 2.4.3pre+asdf", loose=True, include_prerelease=False]'}   | ${'1.2.3'}           | ${false}
-    ${'["1.2.3pre+asdf - 2.4.3pre+asdf", loose=True, include_prerelease=False]'}    | ${'1.2.3'}           | ${false}
+    ${'["1.2.3-pre+asdf - 2.4.3-pre+asdf", loose=False, include_prerelease=False]'} | ${'1.2.3'}           | ${true}
+    ${'["1.2.3pre+asdf - 2.4.3-pre+asdf", loose=True, include_prerelease=False]'}   | ${'1.2.3'}           | ${true}
+    ${'["1.2.3-pre+asdf - 2.4.3pre+asdf", loose=True, include_prerelease=False]'}   | ${'1.2.3'}           | ${true}
+    ${'["1.2.3pre+asdf - 2.4.3pre+asdf", loose=True, include_prerelease=False]'}    | ${'1.2.3'}           | ${true}
     ${'["1.2.3-pre+asdf - 2.4.3-pre+asdf", loose=False, include_prerelease=False]'} | ${'1.2.3-pre.2'}     | ${false}
     ${'["1.2.3-pre+asdf - 2.4.3-pre+asdf", loose=False, include_prerelease=False]'} | ${'2.4.3-alpha'}     | ${false}
-    ${'["1.2.3+asdf - 2.4.3+asdf", loose=False, include_prerelease=False]'}         | ${'1.2.3'}           | ${false}
+    ${'["1.2.3+asdf - 2.4.3+asdf", loose=False, include_prerelease=False]'}         | ${'1.2.3'}           | ${true}
     ${'["1.0.0", loose=False, include_prerelease=False]'}                           | ${'1.0.0'}           | ${true}
     ${'[">=*", loose=False, include_prerelease=False]'}                             | ${'0.2.4'}           | ${true}
     ${'["", loose=False, include_prerelease=False]'}                                | ${'1.0.0'}           | ${true}
@@ -248,7 +248,7 @@ describe('versioning/conan/index', () => {
     ${'[">1.1.0 <2.0.0", include_prerelease=True]'}                                 | ${'1.2.3-dev.1+abc'} | ${true}
     ${'["~ 1.0.3", loose=False, include_prerelease=False]'}                         | ${'1.0.12'}          | ${true}
     ${'[">=1.2.1 1.2.3", loose=False, include_prerelease=False]'}                   | ${'1.2.3'}           | ${true}
-    ${'["1.2.3 >=1.2.1", loose=False, include_prerelease=False]'}                   | ${'1.2.3'}           | ${false}
+    ${'["1.2.3 >=1.2.1", loose=False, include_prerelease=False]'}                   | ${'1.2.3'}           | ${true}
     ${'[">=1.2.3 >=1.2.1", loose=False, include_prerelease=False]'}                 | ${'1.2.3'}           | ${true}
     ${'[">=1.2.1 >=1.2.3", loose=False, include_prerelease=False]'}                 | ${'1.2.3'}           | ${true}
     ${'[">=1.2", loose=False, include_prerelease=False]'}                           | ${'1.2.8'}           | ${true}
@@ -900,7 +900,7 @@ describe('versioning/conan/index', () => {
   `(
     'isLessThanRange("$version", "$range") === "$result"',
     ({ version, range, result }) => {
-      const res = conan.isLessThanRange(version, range);
+      const res = conan.isLessThanRange?.(version, range);
       expect(res).toEqual(result);
     }
   );
