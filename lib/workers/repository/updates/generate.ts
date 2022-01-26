@@ -81,9 +81,7 @@ export function generateBranchConfig(
     if (!toVersions.includes(upg.newVersion)) {
       toVersions.push(upg.newVersion);
     }
-    if (!toValues.has(upg.newValue)) {
-      toValues.add(upg.newValue);
-    }
+    toValues.add(upg.newValue);
     if (upg.commitMessageExtra) {
       const extra = template.compile(upg.commitMessageExtra, upg);
       if (!newValue.includes(extra)) {
