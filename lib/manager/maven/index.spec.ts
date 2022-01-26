@@ -74,6 +74,10 @@ describe('manager/maven/index', () => {
               currentValue: '1.8.1',
             },
             {
+              depName: 'org.example:extension-artefact',
+              currentValue: '1.0',
+            },
+            {
               depName: 'org.example:${artifact-id-placeholder}',
               skipReason: 'name-placeholder',
             },
@@ -94,7 +98,6 @@ describe('manager/maven/index', () => {
             {
               depName: 'org.example:quuz',
               currentValue: '1.2.3',
-              depType: 'test',
             },
             {
               depName: 'org.example:quuuz',
@@ -102,9 +105,17 @@ describe('manager/maven/index', () => {
             },
             { depName: 'org.example:hard-range', currentValue: '[1.0.0]' },
             {
+              depName: 'org.example:relocation-artifact',
+              currentValue: '1.0',
+            },
+            {
               depName: 'org.example:profile-artifact',
               currentValue: '${profile-placeholder}',
               skipReason: 'version-placeholder',
+            },
+            {
+              depName: 'org.example:profile-build-artefact',
+              currentValue: '2.17',
             },
             {
               depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
