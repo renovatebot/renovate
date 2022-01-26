@@ -76,3 +76,8 @@ export interface CommitFilesConfig {
   message: string;
   force?: boolean;
 }
+
+export interface CommitResult {
+  sha: string;
+  files: FileChange[];
+}
