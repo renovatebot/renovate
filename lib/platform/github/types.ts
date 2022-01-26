@@ -64,6 +64,7 @@ export interface PlatformConfig {
 
 export interface LocalRepoConfig {
   repositoryName: string;
+  repositoryId: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
@@ -76,6 +77,7 @@ export interface LocalRepoConfig {
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
+  defaultBranchOid: string;
   repositoryOwner: string;
   repository: string | null;
   renovateUsername: string;
@@ -90,6 +92,7 @@ export type BranchProtection = any;
 export type PrList = Record<number, GhPr>;
 
 export interface GhRepo {
+  repositoryId: string;
   isFork: boolean;
   isArchived: boolean;
   nameWithOwner: string;

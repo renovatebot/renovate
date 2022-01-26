@@ -22,7 +22,12 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
+import type {
+  CommitFilesConfig,
+  CommitSha,
+  FileAddition,
+  FileDeletion,
+} from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { regEx } from '../../util/regex';
@@ -50,6 +55,7 @@ import type {
 import { smartTruncate } from '../utils/pr-body';
 import {
   closedPrsQuery,
+  commitFilesMutation,
   enableAutoMergeMutation,
   getIssuesQuery,
   openPrsQuery,
@@ -263,6 +269,7 @@ export async function initRepo({
       },
     });
     repo = res?.data?.repository;
+    config.repositoryId = repo.repositoryId;
     // istanbul ignore if
     if (!repo) {
       throw new Error(REPOSITORY_NOT_FOUND);
@@ -286,6 +293,7 @@ export async function initRepo({
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
+    config.defaultBranchOid = repo.defaultBranchRef?.target?.oid;
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
@@ -1721,9 +1729,78 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return alerts;
 }
 
-// istanbul ignore next
-export function commitFiles(
+async function pushFiles({
+  branchName,
+  files,
+  message,
+}: CommitFilesConfig): Promise<CommitSha | null> {
+  const additions: FileAddition[] = [];
+  const deletions: FileDeletion[] = [];
+
+  for (const file of files) {
+    if (file.type === 'addition') {
+      additions.push(file);
+    } else {
+      deletions.push(file);
+    }
+  }
+
+  const executableFiles = additions.filter(({ isExecutable }) => isExecutable);
+  if (executableFiles.length) {
+    logger.warn(
+      { branchName, executableFiles: executableFiles.map(({ path }) => path) },
+      'Platform-native commit: found executable files'
+    );
+    return null;
+  }
+
+  const fileChanges = {
+    additions: additions.map(({ path, contents }) => ({
+      path,
+      contents: Buffer.from(contents).toString('base64'),
+    })),
+    deletions: deletions.map(({ path }) => ({ path })),
+  };
+
+  const variables = {
+    repo: config.repository,
+    repositoryId: config.repositoryId,
+    branchName: `refs/heads/${branchName}`,
+    oid: config.defaultBranchOid,
+    fileChanges,
+    message,
+  };
+
+  try {
+    const { data, errors } = await githubApi.requestGraphql<{
+      createCommitOnBranch: { commit: { oid: string } };
+    }>(commitFilesMutation, { variables });
+
+    if (errors) {
+      logger.warn(
+        { branchName, errors },
+        'Platform-native commit: GraphQL errors'
+      );
+      return null;
+    }
+
+    return data?.createCommitOnBranch?.commit?.oid;
+  } catch (err) {
+    logger.debug({ branchName, err }, 'Platform-native commit: unknown error');
+    return null;
+  }
+}
+
+export async function commitFiles(
   config: CommitFilesConfig
 ): Promise<CommitSha | null> {
-  return git.commitFiles(config);
+  const commitResult = await git.prepareCommit(config);
+  if (!commitResult) {
+    return null;
+  }
+  const pushResult = await pushFiles(config);
+  if (!pushResult) {
+    return null;
+  }
+  return git.fetchCommit(config);
 }
