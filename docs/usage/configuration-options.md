@@ -2366,7 +2366,7 @@ Renovate's "rollback" feature exists to propose a downgrade to the next-highest 
 
 Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
 
-You can configure the `rollbackPrs` property globally, per-lanuage, or per-package to override the default behavior.
+You can configure the `rollbackPrs` property globally, per-language, or per-package to override the default behavior.
 
 ## ruby
 
