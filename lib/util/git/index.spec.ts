@@ -8,7 +8,7 @@ import * as git from '.';
 import { setNoVerify } from '.';
 
 // Class is no longer exported
-const SimpleGit = Object.getPrototypeOf(Git());
+const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
   jest.setTimeout(15000);
