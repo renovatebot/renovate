@@ -1,12 +1,14 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
-import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
+
+// Class is no longer exported
+const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
   jest.setTimeout(15000);
@@ -225,12 +227,6 @@ describe('util/git/index', () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
-      const repo = Git(GlobalConfig.get('localDir'));
-      await repo.checkout([
-        '-B',
-        'renovate/future_branch',
-        'origin/renovate/future_branch',
-      ]);
       await git.mergeBranch('renovate/future_branch');
       const merged = await Git(origin.path).branch([
         '--verbose',
