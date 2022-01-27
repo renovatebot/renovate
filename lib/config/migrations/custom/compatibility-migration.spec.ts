@@ -15,4 +15,13 @@ describe('config/migrations/custom/compatibility-migration', () => {
       }
     );
   });
+
+  it('should just remove property when compatibility is not an object', () => {
+    expect(CompatibilityMigration).toMigrate(
+      {
+        compatibility: 'test',
+      },
+      {}
+    );
+  });
 });
