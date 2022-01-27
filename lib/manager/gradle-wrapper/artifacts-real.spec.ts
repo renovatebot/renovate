@@ -70,18 +70,20 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
       });
 
       expect(res).toEqual(
-        [
-          'gradle/wrapper/gradle-wrapper.properties',
-          'gradle/wrapper/gradle-wrapper.jar',
-          'gradlew',
-          'gradlew.bat',
-        ].map((fileProjectPath) => ({
-          file: {
-            contents: readBin(`./testFiles/${fileProjectPath}`),
-            path: fileProjectPath,
-            type: 'addition',
-          },
-        }))
+        await Promise.all(
+          [
+            'gradle/wrapper/gradle-wrapper.properties',
+            'gradle/wrapper/gradle-wrapper.jar',
+            'gradlew',
+            'gradlew.bat',
+          ].map(async (fileProjectPath) => ({
+            file: {
+              contents: await readBin(`./testFiles/${fileProjectPath}`),
+              path: fileProjectPath,
+              type: 'addition',
+            },
+          }))
+        )
       );
 
       for (const file of [
