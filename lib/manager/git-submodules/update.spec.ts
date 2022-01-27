@@ -1,4 +1,4 @@
-import _simpleGit from 'simple-git';
+import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { GlobalConfig } from '../../config/global';
@@ -7,7 +7,7 @@ import type { Upgrade } from '../types';
 import updateDependency from './update';
 
 jest.mock('simple-git');
-const simpleGit: any = _simpleGit;
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
 describe('manager/git-submodules/update', () => {
   describe('updateDependency', () => {
@@ -40,10 +40,10 @@ describe('manager/git-submodules/update', () => {
     it('returns content on update', async () => {
       simpleGit.mockReturnValue({
         submoduleUpdate() {
-          return Promise.resolve();
+          return Promise.resolve(null) as Response<string>;
         },
         checkout() {
-          return Promise.resolve();
+          return Promise.resolve(null) as Response<string>;
         },
       });
       const update = await updateDependency({
