@@ -193,6 +193,7 @@ describe('platform/bitbucket-server/index', () => {
         await bitbucket.initRepo({
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
+          gitUrl: 'default',
           ...config,
         });
         return scope;
@@ -286,6 +287,7 @@ describe('platform/bitbucket-server/index', () => {
             await bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
+              gitUrl: 'default',
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -309,6 +311,7 @@ describe('platform/bitbucket-server/index', () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
+            gitUrl: 'ssh',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({ url: sshLink('SOME', 'repo') })
@@ -335,6 +338,7 @@ describe('platform/bitbucket-server/index', () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
+            gitUrl: 'default',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -368,6 +372,7 @@ describe('platform/bitbucket-server/index', () => {
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
+            gitUrl: 'endpoint',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -392,6 +397,7 @@ describe('platform/bitbucket-server/index', () => {
             bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
+              gitUrl: 'default',
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);
           expect(httpMock.getTrace()).toMatchSnapshot();
