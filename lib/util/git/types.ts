@@ -28,6 +28,8 @@ export interface LocalConfig extends StorageConfig {
   ignoredAuthors: string[];
   gitAuthorName?: string;
   gitAuthorEmail?: string;
+
+  writeGitDone?: boolean;
 }
 
 export interface FileAddition {
@@ -71,4 +73,9 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string;
   force?: boolean;
+}
+
+export interface CommitResult {
+  sha: string;
+  files: FileChange[];
 }

@@ -1973,6 +1973,7 @@ const options: RenovateOptions[] = [
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
       Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
     },
@@ -1982,7 +1983,7 @@ const options: RenovateOptions[] = [
     description: 'List of columns to use in PR bodies.',
     type: 'array',
     subType: 'string',
-    default: ['Package', 'Type', 'Update', 'Change'],
+    default: ['Package', 'Type', 'Update', 'Change', 'Pending'],
   },
   {
     name: 'prBodyNotes',
