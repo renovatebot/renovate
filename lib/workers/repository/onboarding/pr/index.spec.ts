@@ -63,6 +63,58 @@ describe('workers/repository/onboarding/pr/index', () => {
       ]);
     });
 
+    it('creates PR with empty footer and header', async () => {
+      await ensureOnboardingPr(
+        {
+          ...config,
+          prHeader: '',
+          prFooter: '',
+        },
+        packageFiles,
+        branches
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+    });
+
+    it('creates PR with footer and header with trailing and leading newlines', async () => {
+      await ensureOnboardingPr(
+        {
+          ...config,
+          prHeader: '\r\r\nThis should not be the first line of the PR',
+          prFooter:
+            'There should be several empty lines at the end of the PR\r\n\n\n',
+        },
+        packageFiles,
+        branches
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+    });
+
+    it('creates PR with footer and header using templating', async () => {
+      config.baseBranch = 'some-branch';
+      config.repository = 'test';
+      await ensureOnboardingPr(
+        {
+          ...config,
+          prHeader: 'This is a header for platform:{{platform}}',
+          prFooter:
+            'And this is a footer for repository:{{repository}} baseBranch:{{baseBranch}}',
+        },
+        packageFiles,
+        branches
+      );
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
+        /platform:github/
+      );
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
+        /repository:test/
+      );
+      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+    });
+
     it('returns if PR does not need updating', async () => {
       platform.getBranchPr.mockResolvedValue(
         partial<Pr>({

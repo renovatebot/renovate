@@ -83,3 +83,8 @@ export interface AuthenticationRule {
   url: string;
   insteadOf: string;
 }
+
+export interface CommitResult {
+  sha: string;
+  files: FileChange[];
+}
