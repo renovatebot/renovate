@@ -1,6 +1,7 @@
 import { join } from 'upath';
-import { envMock, git, exec, mockExecAll } from '../../../test/exec-util';
-import { env, fs, loadFixture, mocked } from '../../../test/util';
+import { envMock, exec, mockExecAll } from '../../../test/exec-util';
+import { Fixtures } from '../../../test/fixtures';
+import { env, fs } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as docker from '../../util/exec/docker';
@@ -19,9 +20,9 @@ const adminConfig: RepoGlobalConfig = {
 };
 
 const config: UpdateArtifactsConfig = {};
-const ociLockFile1 = loadFixture('oci_1.lock');
-const ociLockFile2 = loadFixture('oci_2.lock');
-const chartFile = loadFixture('Chart.yaml');
+const ociLockFile1 = Fixtures.get('oci_1.lock');
+const ociLockFile2 = Fixtures.get('oci_2.lock');
+const chartFile = Fixtures.get('Chart.yaml');
 
 describe('manager/helmv3/artifacts', () => {
   beforeEach(() => {
@@ -347,6 +348,7 @@ describe('manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
+    fs.getSubDirectory.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',

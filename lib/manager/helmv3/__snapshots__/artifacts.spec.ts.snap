@@ -43,7 +43,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined",
+    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
