@@ -137,7 +137,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined",
+    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -239,7 +239,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined",
+    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -263,7 +263,7 @@ Array [
 exports[`manager/helmv3/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined",
+    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -308,7 +308,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 exports[`manager/helmv3/artifacts returns updated Chart.lock 2`] = `
 Array [
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined",
+    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -353,7 +353,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 exports[`manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 2`] = `
 Array [
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined",
+    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -410,7 +410,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined\\"",
+    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -493,7 +493,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined",
+    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -550,7 +550,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm repo add stable --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories the_stable_url && helm repo add repo1 --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories the_repo1_url && helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories undefined\\"",
+    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -e HELM_EXPERIMENTAL_OCI -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm repo add stable --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories the_stable_url && helm repo add repo1 --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories the_repo1_url && helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

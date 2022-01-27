@@ -67,6 +67,7 @@ describe('manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
     fs.privateCacheDir.mockReturnValue('');
+    fs.getSubDirectory.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -85,6 +86,7 @@ describe('manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
+    fs.getSubDirectory.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -112,6 +114,7 @@ describe('manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
+    fs.getSubDirectory.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -139,6 +142,7 @@ describe('manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
+    fs.getSubDirectory.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -191,6 +195,7 @@ describe('manager/helmv3/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
+    fs.getSubDirectory.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -222,6 +227,7 @@ describe('manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
+    fs.getSubDirectory.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -264,6 +270,7 @@ describe('manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
+    fs.getSubDirectory.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -311,6 +318,7 @@ describe('manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
+    fs.getSubDirectory.mockReturnValue('');
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
