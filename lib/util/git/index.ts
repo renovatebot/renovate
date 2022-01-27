@@ -1,12 +1,11 @@
 import URL from 'url';
 import fs from 'fs-extra';
-import type {
+import simpleGit, {
   Options,
+  ResetMode,
   SimpleGit,
   TaskOptions,
-  ResetMode as _ResetMode,
 } from 'simple-git';
-import * as simpleGit from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -27,9 +26,11 @@ import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
+import { checkForPlatformFailure, handleCommitError } from './error';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
+  CommitResult,
   CommitSha,
   LocalConfig,
   StatusResult,
@@ -38,74 +39,6 @@ import type {
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
-
-// TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
-const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
-
-// istanbul ignore next
-function checkForPlatformFailure(err: Error): void {
-  if (process.env.NODE_ENV === 'test') {
-    return;
-  }
-  const externalHostFailureStrings = [
-    'remote: Invalid username or password',
-    'gnutls_handshake() failed',
-    'The requested URL returned error: 5',
-    'The remote end hung up unexpectedly',
-    'access denied or repository not exported',
-    'Could not write new index file',
-    'Failed to connect to',
-    'Connection timed out',
-    'malformed object name',
-    'Could not resolve host',
-    'early EOF',
-    'fatal: bad config', // .gitmodules problem
-    'expected flush after ref listing',
-  ];
-  for (const errorStr of externalHostFailureStrings) {
-    if (err.message.includes(errorStr)) {
-      logger.debug({ err }, 'Converting git error to ExternalHostError');
-      throw new ExternalHostError(err, 'git');
-    }
-  }
-
-  const configErrorStrings = [
-    {
-      error: 'GitLab: Branch name does not follow the pattern',
-      message:
-        "Cannot push because branch name does not follow project's push rules",
-    },
-    {
-      error: 'GitLab: Commit message does not follow the pattern',
-      message:
-        "Cannot push because commit message does not follow project's push rules",
-    },
-    {
-      error: ' is not a member of team',
-      message:
-        'The `Restrict commits to existing GitLab users` rule is blocking Renovate push. Check the Renovate `gitAuthor` setting',
-    },
-    {
-      error: 'TF401027:',
-      message:
-        'You need the Git `GenericContribute` permission to perform this action',
-    },
-    {
-      error: 'matches more than one',
-      message:
-        "Renovate cannot push branches if there are tags with names the same as Renovate's branches. Please remove conflicting tag names or change Renovate's branchPrefix to avoid conflicts.",
-    },
-  ];
-  for (const { error, message } of configErrorStrings) {
-    if (err.message.includes(error)) {
-      logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
-      const res = new Error(CONFIG_VALIDATION);
-      res.validationError = message;
-      res.validationMessage = err.message;
-      throw res;
-    }
-  }
-}
 
 function localName(branchName: string): string {
   return branchName.replace(regEx(/^origin\//), '');
@@ -153,7 +86,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
-  const globalGit = simpleGit.default();
+  const globalGit = simpleGit();
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(/\s+/)) {
@@ -184,10 +117,9 @@ export async function validateGitVersion(): Promise<boolean> {
   return true;
 }
 
-async function fetchBranchCommits(preferUpstream = true): Promise<void> {
+async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
-  const url = (preferUpstream && config.upstreamUrl) || config.url;
-  const opts = ['ls-remote', '--heads', url];
+  const opts = ['ls-remote', '--heads', config.url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       opts.unshift(e[0], `${e[1]}`)
@@ -217,7 +149,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = simpleGit.default(localDir, simpleGitConfig());
+  git = simpleGit(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -377,6 +309,7 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
+  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
@@ -402,23 +335,6 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
-  // istanbul ignore if
-  if (config.upstreamUrl) {
-    logger.debug(`Resetting ${config.currentBranch} to upstream`);
-    await git.addRemote('upstream', config.upstreamUrl);
-    await git.fetch(['upstream']);
-    await resetToBranch(config.currentBranch);
-    const resetLog = await git.reset([
-      '--hard',
-      `upstream/${config.currentBranch}`,
-    ]);
-    logger.debug({ resetLog }, 'git reset log');
-    const pushLog = await git.push(['origin', config.currentBranch, '--force']);
-    logger.debug({ pushLog }, 'git push log');
-    await fetchBranchCommits(false);
-  }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
-  logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
 }
 
 // istanbul ignore next
@@ -471,10 +387,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     await git.checkout(['-f', branchName, '--']);
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
-      logger.debug(
-        { branchName, latestCommitDate, sha: config.currentBranchSha },
-        'latest commit'
-      );
+      logger.debug({ branchName, latestCommitDate }, 'latest commit');
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
@@ -673,6 +586,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
+    await git.checkout(['-B', branchName, 'origin/' + branchName]);
     await git.checkout([
       '-B',
       config.currentBranch,
@@ -751,21 +665,25 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
-export async function commitFiles({
-  branchName,
-  files,
-  message,
-  force = false,
-}: CommitFilesConfig): Promise<CommitSha | null> {
-  await syncGit();
-  logger.debug(`Committing files to branch ${branchName}`);
+async function handleCommitAuth(localDir: string): Promise<void> {
   if (!privateKeySet) {
     await writePrivateKey();
     privateKeySet = true;
   }
-  const { localDir } = GlobalConfig.get();
   await configSigningKey(localDir);
   await writeGitAuthor();
+}
+
+export async function prepareCommit({
+  branchName,
+  files,
+  message,
+  force = false,
+}: CommitFilesConfig): Promise<CommitResult | null> {
+  const { localDir } = GlobalConfig.get();
+  await syncGit();
+  logger.debug(`Preparing files for commiting to branch ${branchName}`);
+  await handleCommitAuth(localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
@@ -856,6 +774,29 @@ export async function commitFiles({
       return null;
     }
 
+    const result: CommitResult = {
+      sha: commit,
+      files: files.filter((fileChange) => {
+        if (fileChange.type === 'deletion') {
+          return deletedFiles.includes(fileChange.path);
+        }
+        return addedModifiedFiles.includes(fileChange.path);
+      }),
+    };
+
+    return result;
+  } catch (err) /* istanbul ignore next */ {
+    return handleCommitError(files, branchName, err);
+  }
+}
+
+export async function pushCommit({
+  branchName,
+  files,
+}: CommitFilesConfig): Promise<void> {
+  await syncGit();
+  logger.debug(`Pushing branch ${branchName}`);
+  try {
     const pushOptions: TaskOptions = {
       '--force-with-lease': null,
       '-u': null,
@@ -871,84 +812,39 @@ export async function commitFiles({
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
-    // Fetch it after create
+    incLimitedValue(Limit.Commits);
+  } catch (err) /* istanbul ignore next */ {
+    handleCommitError(files, branchName, err);
+  }
+}
+
+export async function fetchCommit({
+  branchName,
+  files,
+}: CommitFilesConfig): Promise<CommitSha | null> {
+  await syncGit();
+  logger.debug(`Fetching branch ${branchName}`);
+  try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--force']);
-    config.branchCommits[branchName] = (
-      await git.revparse([branchName])
-    ).trim();
+    const commit = (await git.revparse([branchName])).trim();
+    config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
-    incLimitedValue(Limit.Commits);
     return commit;
   } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
-    if (err.message.includes(`'refs/heads/renovate' exists`)) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = 'None';
-      error.validationError = 'An existing branch is blocking Renovate';
-      error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
-      throw error;
-    }
-    if (
-      err.message.includes(
-        'refusing to allow a GitHub App to create or update workflow'
-      )
-    ) {
-      logger.warn(
-        'App has not been granted permissions to update Workflows - aborting branch.'
-      );
-      return null;
-    }
-    if (
-      (err.message.includes('remote rejected') ||
-        err.message.includes('403')) &&
-      files?.some((file) => file.path?.startsWith('.github/workflows/'))
-    ) {
-      logger.debug({ err }, 'commitFiles error');
-      logger.info('Workflows update rejection - aborting branch.');
-      return null;
-    }
-    if (err.message.includes('protected branch hook declined')) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = branchName;
-      error.validationError = 'Renovate branch is protected';
-      error.validationMessage = `Renovate cannot push to its branch because branch protection has been enabled.`;
-      throw error;
-    }
-    if (err.message.includes('can only push your own commits')) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = branchName;
-      error.validationError = 'Bitbucket committer error';
-      error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: "${String(
-        err.message
-      )}"`;
-      throw error;
-    }
-    if (err.message.includes('remote: error: cannot lock ref')) {
-      logger.error({ err }, 'Error committing files.');
-      return null;
-    }
-    if (err.message.includes('[rejected] (stale info)')) {
-      logger.info(
-        'Branch update was rejected because local copy is not up-to-date.'
-      );
-      return null;
-    }
-    if (
-      err.message.includes('denying non-fast-forward') ||
-      err.message.includes('GH003: Sorry, force-pushing')
-    ) {
-      logger.debug({ err }, 'Permission denied to update branch');
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = branchName;
-      error.validationError = 'Force push denied';
-      error.validationMessage = `Renovate is unable to update branch(es) due to force pushes being disallowed.`;
-      throw error;
-    }
-    logger.debug({ err }, 'Unknown error committing files');
-    // We don't know why this happened, so this will cause bubble up to a branch error
-    throw err;
+    return handleCommitError(files, branchName, err);
   }
+}
+
+export async function commitFiles(
+  config: CommitFilesConfig
+): Promise<CommitSha | null> {
+  const commitResult = await prepareCommit(config);
+  if (!commitResult) {
+    return null;
+  }
+  await pushCommit(config);
+  return fetchCommit(config);
 }
 
 export function getUrl({

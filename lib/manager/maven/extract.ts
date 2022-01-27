@@ -36,13 +36,17 @@ function containsPlaceholder(str: string): boolean {
   return regEx(/\${.*?}/g).test(str);
 }
 
-function depFromNode(node: XmlElement): PackageDependency | null {
+function depFromNode(
+  node: XmlElement,
+  underBuildSettingsElement = false
+): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
   }
   let groupId = node.valueWithPath('groupId')?.trim();
   const artifactId = node.valueWithPath('artifactId')?.trim();
   const currentValue = node.valueWithPath('version')?.trim();
+  let depType: string;
 
   if (!groupId && node.name === 'plugin') {
     groupId = 'org.apache.maven.plugins';
@@ -62,7 +66,23 @@ function depFromNode(node: XmlElement): PackageDependency | null {
       registryUrls,
     };
 
-    const depType = node.valueWithPath('scope')?.trim();
+    switch (node.name) {
+      case 'plugin':
+      case 'extension':
+        depType = 'build';
+        break;
+      case 'parent':
+        depType = 'parent';
+        break;
+      case 'dependency':
+        if (underBuildSettingsElement) {
+          depType = 'build';
+        } else {
+          depType = node.valueWithPath('scope')?.trim() ?? 'compile'; // maven default scope is compile
+        }
+        break;
+    }
+
     if (depType) {
       result.depType = depType;
     }
@@ -75,15 +95,23 @@ function depFromNode(node: XmlElement): PackageDependency | null {
 function deepExtract(
   node: XmlElement,
   result: PackageDependency[] = [],
-  isRoot = true
+  isRoot = true,
+  underBuildSettingsElement = false
 ): PackageDependency[] {
-  const dep = depFromNode(node);
+  const dep = depFromNode(node, underBuildSettingsElement);
   if (dep && !isRoot) {
     result.push(dep);
   }
   if (node.children) {
     for (const child of node.children) {
-      deepExtract(child as XmlElement, result, false);
+      deepExtract(
+        child as XmlElement,
+        result,
+        false,
+        node.name === 'build' ||
+          node.name === 'reporting' ||
+          underBuildSettingsElement
+      );
     }
   }
   return result;

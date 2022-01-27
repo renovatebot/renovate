@@ -4120,6 +4120,23 @@ Array [
     "url": "https://api.github.com/repos/some/repo/forks",
   },
   Object {
+    "body": Object {
+      "force": true,
+      "sha": "1234",
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "27",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://api.github.com/repos/forked/repo/git/refs/heads/master",
+  },
+  Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
@@ -7384,6 +7401,23 @@ Array [
     "method": "PATCH",
     "url": "https://api.github.com/repos/forked/repo",
   },
+  Object {
+    "body": Object {
+      "force": true,
+      "sha": "1234",
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "27",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://api.github.com/repos/forked/repo/git/refs/heads/master",
+  },
 ]
 `;
 
@@ -7869,6 +7903,23 @@ Array [
     },
     "method": "POST",
     "url": "https://api.github.com/repos/some/repo/forks",
+  },
+  Object {
+    "body": Object {
+      "force": true,
+      "sha": "1234",
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate, br",
+      "authorization": "token 123test",
+      "content-length": "27",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+    },
+    "method": "PATCH",
+    "url": "https://api.github.com/repos/forked/repo/git/refs/heads/master",
   },
 ]
 `;
