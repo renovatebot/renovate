@@ -6,7 +6,6 @@ export interface ChartDefinition {
 
 export interface Repository {
   name: string;
-  isAlias: boolean;
   repository: string;
 }
 
