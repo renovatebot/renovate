@@ -7,7 +7,7 @@ Follow the rules below to increase the chance that your pull request gets merged
 
 ## General rules
 
-1. Only create/edit presets for problems which can not be fixed upstream
+1. Avoid creating presets for problems which can be fixed upstream
 1. The internal preset should be helpful for a significant number of Renovate users
 
 ### Specific rules
