@@ -2,13 +2,12 @@ import {
   GitPullRequest,
   GitRepository,
   GitStatusContext,
-  PullRequestAsyncStatus,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../logger';
 import { HostRule, PrState } from '../../types';
 import { GitOptions } from '../../types/git';
-import { add } from '../../util/sanitize';
+import { addSecretForSanitizing } from '../../util/sanitize';
 import { AzurePr } from './types';
 
 export function getNewBranchName(branchName?: string): string {
@@ -103,8 +102,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
 
   const sourceRefName = azurePr.sourceRefName;
 
-  const isConflicted = azurePr.mergeStatus === PullRequestAsyncStatus.Conflicts;
-
   return {
     ...azurePr,
     sourceBranch,
@@ -115,7 +112,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     sourceRefName,
     targetBranch,
     createdAt,
-    ...(isConflicted && { isConflicted }),
   } as AzurePr;
 }
 
@@ -149,7 +145,7 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
     authType = 'bearer';
     authValue = config.token;
   }
-  add(authValue);
+  addSecretForSanitizing(authValue);
   return {
     '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}`,
   };

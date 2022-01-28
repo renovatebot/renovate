@@ -83,7 +83,8 @@ export async function updateArtifacts({
     return [
       {
         file: {
-          name: outputFileName,
+          type: 'addition',
+          path: outputFileName,
           contents: await readLocalFile(outputFileName, 'utf8'),
         },
       },

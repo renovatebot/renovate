@@ -1,5 +1,8 @@
 import is from '@sindresorhus/is';
+import findPkgs from 'find-packages';
 import { load } from 'js-yaml';
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import {
   findLocalSiblingOrParent,
@@ -9,7 +12,6 @@ import {
 } from '../../../util/fs';
 import type { PackageFile } from '../../types';
 import type { PnpmWorkspaceFile } from './types';
-import { matchesAnyPattern } from './utils';
 
 export async function extractPnpmFilters(
   fileName: string
@@ -74,7 +76,7 @@ export async function detectPnpmWorkspaces(
   packageFiles: Partial<PackageFile>[]
 ): Promise<void> {
   logger.debug(`Detecting pnpm Workspaces`);
-  const packageFilterCache = new Map<string, string[] | null>();
+  const packagePathCache = new Map<string, string[] | null>();
 
   for (const p of packageFiles) {
     const { packageFile, pnpmShrinkwrap } = p;
@@ -96,17 +98,24 @@ export async function detectPnpmWorkspaces(
     const { workspaceYamlPath, lockFilePath } = pnpmWorkspace;
 
     // check if package matches workspace filter
-    if (!packageFilterCache.has(workspaceYamlPath)) {
+    if (!packagePathCache.has(workspaceYamlPath)) {
       const filters = await extractPnpmFilters(workspaceYamlPath);
-      packageFilterCache.set(workspaceYamlPath, filters);
-    }
-    const packageFilters = packageFilterCache.get(workspaceYamlPath);
-    const isPackageInWorkspace =
-      packageFilters !== null &&
-      matchesAnyPattern(
-        packageFile,
-        packageFilters.map((filter) => filter.replace(/\/?$/, '/package.json')) // TODO #12875
+      const { localDir } = GlobalConfig.get();
+      const packages = await findPkgs(
+        upath.dirname(upath.join(localDir, workspaceYamlPath)),
+        { patterns: filters }
       );
+      const packagePaths = packages.map((pkg) =>
+        upath.join(pkg.dir, 'package.json')
+      );
+      packagePathCache.set(workspaceYamlPath, packagePaths);
+    }
+    const packagePaths = packagePathCache.get(workspaceYamlPath);
+
+    const isPackageInWorkspace = packagePaths?.some((p) =>
+      p.endsWith(packageFile)
+    );
+
     if (isPackageInWorkspace) {
       p.pnpmShrinkwrap = lockFilePath;
     } else {

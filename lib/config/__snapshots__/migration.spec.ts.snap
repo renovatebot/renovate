@@ -113,7 +113,12 @@ Object {
     ":dependencyDashboard",
   ],
   "hostRules": Array [
-    Object {},
+    Object {
+      "hostType": "docker",
+      "matchHost": "https://docker.io",
+      "password": "some-password",
+      "username": "some-username",
+    },
   ],
   "ignorePaths": Array [
     "node_modules/",

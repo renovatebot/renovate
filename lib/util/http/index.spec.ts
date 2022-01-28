@@ -192,22 +192,44 @@ describe('util/http/index', () => {
     let bar = false;
     let baz = false;
 
-    const mockRequestResponse = () => {
-      let resolveRequest;
+    const dummyResolve = (_: unknown): void => {
+      return;
+    };
+
+    interface MockedRequestResponse<T = unknown> {
+      request: Promise<T>;
+      resolveRequest: (_?: T) => void;
+      response: Promise<T>;
+      resolveResponse: (_?: T) => void;
+    }
+
+    const mockRequestResponse = (): MockedRequestResponse => {
+      let resolveRequest = dummyResolve;
       const request = new Promise((resolve) => {
         resolveRequest = resolve;
       });
 
-      let resolveResponse;
+      let resolveResponse = dummyResolve;
       const response = new Promise((resolve) => {
         resolveResponse = resolve;
       });
 
-      return [request, resolveRequest, response, resolveResponse];
+      return { request, resolveRequest, response, resolveResponse };
     };
 
-    const [fooReq, fooStart, fooResp, fooFinish] = mockRequestResponse();
-    const [barReq, barStart, barResp, barFinish] = mockRequestResponse();
+    const {
+      request: fooReq,
+      resolveRequest: fooStart,
+      response: fooResp,
+      resolveResponse: fooFinish,
+    } = mockRequestResponse();
+
+    const {
+      request: barReq,
+      resolveRequest: barStart,
+      response: barResp,
+      resolveResponse: barFinish,
+    } = mockRequestResponse();
 
     httpMock
       .scope(baseUrl)
@@ -256,7 +278,7 @@ describe('util/http/index', () => {
   it('getBuffer', async () => {
     httpMock.scope(baseUrl).get('/').reply(200, Buffer.from('test'));
     const res = await http.getBuffer('http://renovate.com');
-    expect(res.body).toBeInstanceOf(Buffer);
-    expect(res.body.toString('utf-8')).toBe('test');
+    expect(res?.body).toBeInstanceOf(Buffer);
+    expect(res?.body.toString('utf-8')).toBe('test');
   });
 });
