@@ -40,7 +40,6 @@ describe('manager/poetry/extract', () => {
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(9);
       expect(res.constraints).toEqual({
-        poetry: 'poetry>=1.0 wheel',
         python: '~2.7 || ^3.4',
       });
     });

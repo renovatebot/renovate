@@ -11,6 +11,8 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
+export const supportedDatasources = ['*'];
+
 export function extractPackageFile(
   content: string,
   packageFile: string,

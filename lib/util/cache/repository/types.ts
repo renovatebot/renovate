@@ -1,5 +1,6 @@
 import type { PackageFile } from '../../../manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
+import type { GitConflictsCache } from '../../git/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -31,6 +32,11 @@ export interface BranchCache {
   upgrades: BranchUpgradeCache[];
 }
 
+export interface GithubGraphqlPageCache {
+  pageLastResizedAt: string;
+  pageSize: number;
+}
+
 export interface Cache {
   configFileName?: string;
   semanticCommits?: 'enabled' | 'disabled';
@@ -40,4 +46,10 @@ export interface Cache {
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
+  platform?: {
+    github?: {
+      graphqlPageCache?: Record<string, GithubGraphqlPageCache>;
+    };
+  };
+  gitConflicts?: GitConflictsCache;
 }

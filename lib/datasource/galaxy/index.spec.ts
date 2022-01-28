@@ -1,10 +1,7 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { loadFixture } from '../../../test/util';
 import { GalaxyDatasource } from '.';
-
-const res1 = loadFixture('timezone');
-const empty = loadFixture('empty');
 
 const baseUrl = 'https://galaxy.ansible.com/';
 
@@ -79,7 +76,7 @@ describe('datasource/galaxy/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
-        .reply(200, res1);
+        .reply(200, Fixtures.get('timezone'));
       const res = await getPkgReleases({
         datasource: GalaxyDatasource.id,
         depName: 'yatesr.timezone',
@@ -93,7 +90,7 @@ describe('datasource/galaxy/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=foo&name=bar')
-        .reply(200, empty);
+        .reply(200, Fixtures.get('empty'));
       const res = await getPkgReleases({
         datasource: GalaxyDatasource.id,
         depName: 'foo.bar',

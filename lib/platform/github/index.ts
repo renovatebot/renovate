@@ -109,6 +109,8 @@ export async function initPlatform({
     throw new Error('Init: You must configure a GitHub personal access token');
   }
 
+  platformConfig.isGHApp = token.startsWith('x-access-token:');
+
   if (endpoint) {
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(platformConfig.endpoint);
@@ -148,11 +150,21 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   try {
-    const res = await githubApi.getJson<{ full_name: string }[]>(
-      'user/repos?per_page=100',
-      { paginate: 'all' }
-    );
-    return res.body.map((repo) => repo.full_name);
+    if (platformConfig.isGHApp) {
+      const res = await githubApi.getJson<{
+        repositories: { full_name: string }[];
+      }>(`installation/repositories?per_page=100`, {
+        paginationField: 'repositories',
+        paginate: 'all',
+      });
+      return res.body.repositories.map((repo) => repo.full_name);
+    } else {
+      const res = await githubApi.getJson<{ full_name: string }[]>(
+        `user/repos?per_page=100`,
+        { paginate: 'all' }
+      );
+      return res.body.map((repo) => repo.full_name);
+    }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
@@ -612,12 +624,6 @@ async function getOpenPrs(): Promise<PrList> {
           pr.canMerge = false;
           pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
         }
-        // https://developer.github.com/v4/enum/mergestatestatus
-        if (pr.mergeStateStatus === 'DIRTY') {
-          pr.isConflicted = true;
-        } else {
-          pr.isConflicted = false;
-        }
         if (pr.labels) {
           pr.labels = pr.labels.nodes.map((label) => label.name);
         }
@@ -679,10 +685,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     } else {
       pr.canMerge = false;
       pr.canMergeReason = `mergeable = ${pr.mergeable}`;
-    }
-    if (pr.mergeable_state === 'dirty') {
-      logger.debug({ prNo }, 'PR state is dirty so unmergeable');
-      pr.isConflicted = true;
     }
   }
   return pr;
@@ -1704,6 +1706,12 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       if (alerts.length) {
         logger.trace({ alerts }, 'GitHub vulnerability details');
         for (const alert of alerts) {
+          if (alert.securityVulnerability === null) {
+            // As described in the documentation, there are cases in which
+            // GitHub API responds with `"securityVulnerability": null`.
+            // But it's may be faulty, so skip processing it here.
+            continue;
+          }
           const {
             package: { name, ecosystem },
             vulnerableVersionRange,
