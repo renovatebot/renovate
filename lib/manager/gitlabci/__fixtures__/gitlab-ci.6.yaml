@@ -7,5 +7,5 @@ services:
   - name: other/image1:1.0.0
     alias: imagealias1
   # another comment
-  - name: other/image2:1.0.0
-    alias: imagealias2
+  - alias: imagealias2
+    name: other/image2:1.0.0

@@ -9,14 +9,14 @@ import type { GitlabPipeline } from './types';
 import { replaceReferenceTags } from './utils';
 
 const commentsRe = regEx(/^\s*#/);
-const aliasesRe = regEx(/^\s*alias/);
+const aliasesRe = regEx(`^\\s*-*\\s*alias:`);
 const whitespaceRe = regEx(`^(?<whitespace>\\s*)`);
 const imageRe = regEx(
   `^(?<whitespace>\\s*)image:(?:\\s+['"]?(?<image>[^\\s'"]+)['"]?)?\\s*$`
 );
 const nameRe = regEx(`^\\s*name:\\s+['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`);
 const serviceRe = regEx(
-  `^\\s*-\\s*(?:name:\\s+)?['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`
+  `^\\s*-*\\s*(?:name:\\s+)?['"]?(?<depName>[^\\s'"]+)['"]?\\s*$`
 );
 function skipCommentAndAliasLines(
   lines: string[],
