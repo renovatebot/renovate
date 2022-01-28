@@ -70,7 +70,7 @@ We don't want you spending an hour trying to work out something that would take 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
 Please email rhys@arkins.net and simply mention that you need an invitation to the channel and you'll be added ASAP.
 
-Important: this Slack group is restricted to development questions only in order to keep the volume of message lower - all technical support questions should still be posted to this repository's Discussions instead.
+Important: this Slack group is restricted to development questions only in order to keep the volume of messages lower - all technical support questions should still be posted to this repository's Discussions instead.
 
 ## Legal
 
