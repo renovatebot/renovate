@@ -77,7 +77,6 @@ export interface LocalRepoConfig {
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
-  defaultBranchOid: string;
   repositoryOwner: string;
   repository: string | null;
   renovateUsername: string;

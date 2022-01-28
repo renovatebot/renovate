@@ -2581,7 +2581,8 @@ describe('platform/github/index', () => {
     beforeEach(() => {
       git.prepareCommit.mockImplementation(({ files }) =>
         Promise.resolve({
-          sha: '1234567',
+          oldSha: '1234567',
+          newSha: '7654321',
           files,
         })
       );

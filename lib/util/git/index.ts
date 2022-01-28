@@ -704,12 +704,13 @@ export async function prepareCommit({
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const { localDir } = GlobalConfig.get();
   await syncGit();
-  logger.debug(`Preparing files for commiting to branch ${branchName}`);
+  logger.debug(`Preparing files for committing to branch ${branchName}`);
   await handleCommitAuth(localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
+    const oldSha = (await git.revparse([branchName])).trim();
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];
     const ignoredFiles: string[] = [];
@@ -787,7 +788,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    const commit = commitRes?.commit || 'unknown';
+    const newSha = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
@@ -797,7 +798,8 @@ export async function prepareCommit({
     }
 
     const result: CommitResult = {
-      sha: commit,
+      oldSha,
+      newSha,
       files: files.filter((fileChange) => {
         if (fileChange.type === 'deletion') {
           return deletedFiles.includes(fileChange.path);

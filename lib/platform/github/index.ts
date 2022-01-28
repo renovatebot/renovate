@@ -24,6 +24,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
 import type {
   CommitFilesConfig,
+  CommitResult,
   CommitSha,
   FileAddition,
   FileDeletion,
@@ -293,7 +294,6 @@ export async function initRepo({
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
-    config.defaultBranchOid = repo.defaultBranchRef?.target?.oid;
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
@@ -1745,11 +1745,10 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return alerts;
 }
 
-async function pushFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<CommitSha | null> {
+async function pushFiles(
+  { branchName, files, message }: CommitFilesConfig,
+  { oldSha }: CommitResult
+): Promise<CommitSha | null> {
   const additions: FileAddition[] = [];
   const deletions: FileDeletion[] = [];
 
@@ -1778,16 +1777,18 @@ async function pushFiles({
     deletions: deletions.map(({ path }) => ({ path })),
   };
 
-  const variables = {
-    repo: config.repository,
-    repositoryId: config.repositoryId,
-    branchName: `refs/heads/${branchName}`,
-    oid: config.defaultBranchOid,
-    fileChanges,
-    message,
-  };
-
   try {
+    const refName = `refs/heads/${branchName}`;
+
+    const variables = {
+      repo: config.repository,
+      repositoryId: config.repositoryId,
+      branchName: refName,
+      oid: oldSha,
+      fileChanges,
+      message,
+    };
+
     const { data, errors } = await githubApi.requestGraphql<{
       createCommitOnBranch: { commit: { oid: string } };
     }>(commitFilesMutation, { variables });
@@ -1814,7 +1815,7 @@ export async function commitFiles(
   if (!commitResult) {
     return null;
   }
-  const pushResult = await pushFiles(config);
+  const pushResult = await pushFiles(config, commitResult);
   if (!pushResult) {
     return null;
   }
