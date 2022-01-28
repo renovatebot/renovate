@@ -100,7 +100,14 @@ function matchesRule(
     positiveMatch = true;
   }
   if (matchBaseBranches.length) {
-    const isMatch = matchBaseBranches.includes(baseBranch);
+    const isMatch = matchBaseBranches.some((matchBaseBranch): boolean => {
+      const isAllowedPred = configRegexPredicate(matchBaseBranch);
+      if (isAllowedPred) {
+        return isAllowedPred(baseBranch);
+      }
+      return matchBaseBranch === baseBranch;
+    });
+
     if (!isMatch) {
       return false;
     }

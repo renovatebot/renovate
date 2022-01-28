@@ -1,11 +1,11 @@
 import URL from 'url';
-import parseLinkHeader from 'parse-link-header';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
+import { HttpError } from '../../util/http/types';
 import { hasKey } from '../../util/object';
 import { regEx } from '../../util/regex';
-import { ensurePathPrefix } from '../../util/url';
+import { ensurePathPrefix, parseLinkHeader } from '../../util/url';
 import {
   api as dockerVersioning,
   id as dockerVersioningId,
@@ -21,6 +21,7 @@ import {
   getRegistryRepository,
   http,
   id,
+  isECRMaxResultsError,
 } from './common';
 import { getTagsQuayRegistry } from './quay';
 
@@ -75,13 +76,30 @@ async function getDockerApiTags(
     return null;
   }
   let page = 1;
+  let foundMaxResultsError = false;
   do {
-    const res = await http.getJson<{ tags: string[] }>(url, {
-      headers,
-      noAuth: true,
-    });
+    let res;
+    try {
+      res = await http.getJson<{ tags: string[] }>(url, {
+        headers,
+        noAuth: true,
+      });
+    } catch (err) {
+      if (
+        !foundMaxResultsError &&
+        err instanceof HttpError &&
+        isECRMaxResultsError(err)
+      ) {
+        const maxResults = 1000;
+        url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
+        url = ensurePathPrefix(url, '/v2');
+        foundMaxResultsError = true;
+        continue;
+      }
+      throw err;
+    }
     tags = tags.concat(res.body.tags);
-    const linkHeader = parseLinkHeader(res.headers.link as string);
+    const linkHeader = parseLinkHeader(res.headers.link);
     url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
     page += 1;
   } while (url && page < 20);
@@ -200,7 +218,8 @@ export async function getDigest(
     );
     if (manifestResponse) {
       if (hasKey('docker-content-digest', manifestResponse.headers)) {
-        digest = manifestResponse.headers['docker-content-digest'] || null;
+        digest =
+          (manifestResponse.headers['docker-content-digest'] as string) || null;
       } else {
         logger.debug(
           { registryHost },

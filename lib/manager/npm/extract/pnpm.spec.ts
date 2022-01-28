@@ -112,6 +112,16 @@ describe('manager/npm/extract/pnpm', () => {
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
+          packageFile: 'solo-package-leading-dot-slash/package.json',
+          packageJsonName: '@demo/solo-leading-dot-slash',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
+          packageFile: 'solo-package-leading-double-dot-slash/package.json',
+          packageJsonName: '@demo/solo-leading-double-dot-slash',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
           packageFile: 'solo-package-trailing-slash/package.json',
           packageJsonName: '@demo/solo-trailing-slash',
           pnpmShrinkwrap: undefined as undefined | string,

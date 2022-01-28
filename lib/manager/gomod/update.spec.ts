@@ -1,9 +1,9 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import type { UpdateType } from '../../config/types';
 import { updateDependency } from './update';
 
-const gomod1 = loadFixture('1/go.mod');
-const gomod2 = loadFixture('2/go.mod');
+const gomod1 = Fixtures.get('1/go.mod');
+const gomod2 = Fixtures.get('2/go.mod');
 
 describe('manager/gomod/update', () => {
   describe('updateDependency', () => {
@@ -278,6 +278,13 @@ describe('manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
+    });
+    it('should return null for replacement', () => {
+      const res = updateDependency({
+        fileContent: undefined,
+        upgrade: { updateType: 'replacement' },
+      });
+      expect(res).toBeNull();
     });
   });
 });

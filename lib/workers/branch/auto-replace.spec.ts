@@ -1,24 +1,33 @@
-import { defaultConfig, loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
+import { defaultConfig } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
 import type { BranchUpgradeConfig } from '../types';
 import { doAutoReplace } from './auto-replace';
 
-const sampleHtml = loadFixture('sample.html', `../../manager/html`);
+const sampleHtml = Fixtures.get('sample.html', `../../manager/html`);
 
-jest.mock('../../util/fs');
+jest.mock('fs-extra', () => Fixtures.fsExtra());
 
 describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
     let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;
+    beforeAll(() => {
+      GlobalConfig.set({
+        localDir: '/temp',
+      });
+    });
     beforeEach(() => {
       upgrade = {
         ...JSON.parse(JSON.stringify(defaultConfig)),
         manager: 'html',
+        packageFile: 'test',
       };
       reuseExistingBranch = false;
     });
+
     it('rebases if the deps list has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
       reuseExistingBranch = true;
@@ -61,9 +70,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newValue = '7.1.1';
       upgrade.depIndex = 1;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
-      expect(res).toEqual(
-        `     ${script}  ${script.replace('7.1.0', '7.1.1')} `
-      );
+      expect(res).toBe(`     ${script}  ${script.replace('7.1.0', '7.1.1')} `);
     });
     it('handles already updated', async () => {
       const script =
@@ -117,7 +124,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
       const res = await doAutoReplace(upgrade, script, reuseExistingBranch);
-      expect(res).toEqual(
+      expect(res).toBe(
         `<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js" integrity="sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" crossorigin="anonymous">`
       );
     });
@@ -138,7 +145,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.autoReplaceStringTemplate =
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
-      expect(res).toEqual(
+      expect(res).toBe(
         `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
       );
     });

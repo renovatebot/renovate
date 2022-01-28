@@ -37,6 +37,25 @@ Force pushing a PR is OK when:
 - you need to make large changes on a PR which require a full review anyway
 - you need to bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
 
+## Apply maintainer provided review suggestions
+
+Maintainers can suggest changes while reviewing your pull request, please follow these steps to apply them:
+
+1. Batch the suggestions into a logical group by clicking on the **Add suggestion to batch** button
+2. Click on the **Commit suggestions** button
+
+Read the [GitHub docs, Applying suggested changes](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request#applying-suggested-changes) to learn more.
+
+## Resolve review comments instead of commenting
+
+A maintainer/contributor can ask you to make changes, without providing a suggestion that you can apply.
+In this case you need to do some work yourself to address the feedback.
+
+Once you've done the work, resolve the conversation by clicking on the **Resolve conversation** button in the PR overview.
+Avoid posting comments like "I've done the work", or "Done".
+
+Read the [GitHub Docs, resolving conversations](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request#resolving-conversations) to learn more.
+
 ## Re-requesting a review
 
 Please do not ping your reviewer(s) by mentioning them in a new comment.
@@ -50,6 +69,8 @@ We don't want you spending an hour trying to work out something that would take 
 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
 Please email rhys@arkins.net and simply mention that you need an invitation to the channel and you'll be added ASAP.
+
+Important: this Slack group is restricted to development questions only in order to keep the volume of messages lower - all technical support questions should still be posted to this repository's Discussions instead.
 
 ## Legal
 

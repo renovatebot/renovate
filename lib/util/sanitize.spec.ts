@@ -1,21 +1,26 @@
-import { add, clear, sanitize } from './sanitize';
+import {
+  addSecretForSanitizing,
+  clearSanitizedSecretsList,
+  sanitize,
+} from './sanitize';
 
 describe('util/sanitize', () => {
   beforeEach(() => {
-    clear();
+    clearSanitizedSecretsList();
   });
 
   it('sanitizes empty string', () => {
-    expect(sanitize(null)).toBeNull();
+    expect(sanitize(null as never)).toBeNull();
+    expect(sanitize('')).toBe('');
   });
   it('sanitizes secrets from strings', () => {
     const token = '123testtoken';
     const username = 'userabc';
     const password = 'password123';
-    add(token);
+    addSecretForSanitizing(token);
     const hashed = Buffer.from(`${username}:${password}`).toString('base64');
-    add(hashed);
-    add(password);
+    addSecretForSanitizing(hashed);
+    addSecretForSanitizing(password);
 
     const input = `My token is ${token}, username is "${username}" and password is "${password}" (hashed: ${hashed})`;
     const output =

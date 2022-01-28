@@ -1,7 +1,5 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
-
-const content = loadFixture('setup-cfg-1.txt');
 
 describe('manager/setup-cfg/extract', () => {
   describe('extractPackageFile()', () => {
@@ -9,7 +7,7 @@ describe('manager/setup-cfg/extract', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts dependencies', () => {
-      const res = extractPackageFile(content);
+      const res = extractPackageFile(Fixtures.get('setup-cfg-1.txt'));
       expect(res).toMatchSnapshot({
         deps: [
           { depName: 'qux', currentValue: '>=4.4.4' },
