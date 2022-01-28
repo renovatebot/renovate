@@ -353,8 +353,10 @@ Another example would be if you want to configure a DCO signoff to each commit.
 
 ## commitMessage
 
-Editing of `commitMessage` directly is now deprecated and not recommended.
-Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
+<!-- prettier-ignore -->
+!!! warning
+    Editing of `commitMessage` directly is now deprecated and not recommended.
+    Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
 
 ## commitMessageAction
 
