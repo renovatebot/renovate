@@ -22,6 +22,7 @@ const cacheMinutes = 30;
 const githubHttp = new GithubHttp(id);
 const http = new Http(id);
 
+// eslint-disable-next-line typescript-enum/no-enum, typescript-enum/no-const-enum
 const enum URLFormatOptions {
   WithShardWithSpec,
   WithShardWithoutSpec,
@@ -183,7 +184,6 @@ async function getReleasesFromCDN(
       const line = lines[idx];
       const [name, ...versions] = line.split('/');
       if (name === lookupName.replace(regEx(/\/.*$/), '')) {
-        // TODO #12071
         const releases = versions.map((version) => ({ version }));
         return { releases };
       }

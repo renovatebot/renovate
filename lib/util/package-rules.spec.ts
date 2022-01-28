@@ -65,8 +65,10 @@ describe('util/package-rules', () => {
         },
       ],
     };
-    // FIXME: explicit assert condition
-    expect(applyPackageRules(config)).toMatchSnapshot();
+    expect(applyPackageRules(config)).toEqual({
+      ...config,
+      matchUpdateTypes: ['bump'],
+    });
   });
   it('applies both rules for a', () => {
     const dep = {
@@ -375,6 +377,41 @@ describe('util/package-rules', () => {
     const dep = {
       depType: 'dependencies',
       baseBranch: 'staging',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+  it('filters branches with matching branch regex', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchBaseBranches: ['/^release\\/.*/'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      datasource: OrbDatasource.id,
+      baseBranch: 'release/5.8',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+
+  it('filters branches with non-matching branch regex', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchBaseBranches: ['/^release\\/.*/'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      datasource: OrbDatasource.id,
+      baseBranch: 'master',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -709,10 +746,10 @@ describe('util/package-rules', () => {
     expect(res3.x).toBeDefined();
   });
   it('empty rules', () => {
-    // FIXME: explicit assert condition
-    expect(
-      applyPackageRules({ ...config1, packageRules: null })
-    ).toMatchSnapshot();
+    expect(applyPackageRules({ ...config1, packageRules: null })).toEqual({
+      foo: 'bar',
+      packageRules: null,
+    });
   });
 
   it('creates groupSlug if necessary', () => {

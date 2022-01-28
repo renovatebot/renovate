@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import type { PackageDependency } from '../types';
 import { TerraformDependencyTypes } from './common';
@@ -42,8 +41,8 @@ export function extractTerraformProvider(
     // istanbul ignore else
     if (is.string(line)) {
       // `{` will be counted wit +1 and `}` with -1. Therefore if we reach braceCounter == 0. We have found the end of the terraform block
-      const openBrackets = (line.match(regEx(/\{/g)) || []).length; // TODO #12071
-      const closedBrackets = (line.match(regEx(/\}/g)) || []).length; // TODO #12071
+      const openBrackets = (line.match(regEx(/\{/g)) || []).length;
+      const closedBrackets = (line.match(regEx(/\}/g)) || []).length;
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       // only update fields inside the root block
@@ -82,7 +81,7 @@ export function analyzeTerraformProvider(
   if (is.nonEmptyString(dep.managerData.source)) {
     const source = sourceExtractionRegex.exec(dep.managerData.source);
     if (!source) {
-      dep.skipReason = SkipReason.UnsupportedUrl;
+      dep.skipReason = 'unsupported-url';
       return;
     }
 
@@ -101,6 +100,6 @@ export function analyzeTerraformProvider(
   dep.lockedVersion = getLockedVersion(dep, locks);
 
   if (!dep.currentValue) {
-    dep.skipReason = SkipReason.NoVersion;
+    dep.skipReason = 'no-version';
   }
 }

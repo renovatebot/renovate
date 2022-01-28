@@ -22,7 +22,7 @@ export function getSliceEndNumber(
   return nearestEnd;
 }
 
-export default function extractPackageFile(
+export function extractPackageFile(
   content: string,
   fileName: string
 ): PackageFile | null {
@@ -46,11 +46,9 @@ export default function extractPackageFile(
       // find role and collection block
       lines.forEach((line, index) => {
         if (regEx(/^collections:/).exec(line)) {
-          // TODO #12071
           positions.collections = index;
         }
         if (regEx(/^roles:/).exec(line)) {
-          // TODO #12071
           positions.roles = index;
         }
       });

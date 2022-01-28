@@ -88,6 +88,7 @@ describe('datasource/go/get-datasource', () => {
         expect(res).toEqual({
           datasource: githubDatasource,
           lookupName: 'golang/text',
+          registryUrl: 'https://github.com',
         });
       });
 
@@ -117,6 +118,23 @@ describe('datasource/go/get-datasource', () => {
         expect(res).toEqual({
           datasource: gitlabDatasource,
           lookupName: 'group/subgroup',
+          registryUrl: 'https://gitlab.com',
+        });
+      });
+
+      it('supports GitLab deps on private subgroups', async () => {
+        httpMock
+          .scope('https://gitlab.com')
+          .get('/group/subgroup/private.git/v3?go-get=1')
+          .reply(200, loadFixture('go-get-gitlab.html'));
+
+        const res = await getDatasource(
+          'gitlab.com/group/subgroup/private.git/v3'
+        );
+
+        expect(res).toEqual({
+          datasource: gitlabDatasource,
+          lookupName: 'group/subgroup/private',
           registryUrl: 'https://gitlab.com',
         });
       });

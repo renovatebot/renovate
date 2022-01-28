@@ -15,7 +15,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   for (const line of content.split('\n')) {
-    const match = regEx(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line); // TODO #12071
+    const match = regEx(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom);

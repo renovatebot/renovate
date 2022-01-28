@@ -79,13 +79,31 @@ If you want Renovate to run on only a subset of those, use the `autodiscoverFilt
 ## autodiscoverFilter
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
-It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern.
+It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
-e.g.
+**Minimatch**:
 
 ```json
 {
   "autodiscoverFilter": "project/*"
+}
+```
+
+**Regex**:
+
+All text inside the start and end `/` will be treated as a regular expression.
+
+```json
+{
+  "autodiscoverFilter": "/project/.*/"
+}
+```
+
+You can negate the regex by putting a `!` in front:
+
+```json
+{
+  "autodiscoverFilter": "!/project/.*/"
 }
 ```
 

@@ -160,7 +160,7 @@ describe('workers/pr/index', () => {
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      pr.isConflicted = true;
+      git.isBranchConflicted.mockResolvedValueOnce(true);
       await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
@@ -237,8 +237,12 @@ describe('workers/pr/index', () => {
       config.schedule = ['before 5am'];
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      // FIXME: explicit assert condition
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot([
+        {
+          prTitle: 'Update dependency dummy to v1.1.0',
+          sourceBranch: 'renovate/gitlabdummy-1.x',
+        },
+      ]);
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
       config.branchName = 'renovate/dummy-1.x';
       config.depName = 'dummy';
@@ -253,8 +257,12 @@ describe('workers/pr/index', () => {
       config.schedule = ['before 5am'];
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      // FIXME: explicit assert condition
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot([
+        {
+          prTitle: 'Update dependency dummy to v1.1.0',
+          sourceBranch: 'renovate/dummy-1.x',
+        },
+      ]);
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
     it('should not create PR if limit is reached', async () => {
@@ -347,8 +355,12 @@ describe('workers/pr/index', () => {
       }
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      // FIXME: explicit assert condition
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot([
+        {
+          prTitle: 'Update dependency dummy to v1.1.0',
+          sourceBranch: 'renovate/dummy-1.x',
+        },
+      ]);
     });
     it('should add note about Pin', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
@@ -361,8 +373,12 @@ describe('workers/pr/index', () => {
       config.logJSON = await changelogHelper.getChangeLogJSON(config);
       const { pr } = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      // FIXME: explicit assert condition
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot([
+        {
+          prTitle: 'Update dependency dummy to v1.1.0',
+          sourceBranch: 'renovate/dummy-1.x',
+        },
+      ]);
       expect(platform.createPr.mock.calls[0][0].prBody).toContain(
         'this Pin PR'
       );
@@ -577,8 +593,10 @@ describe('workers/pr/index', () => {
       config.logJSON = await changelogHelper.getChangeLogJSON(config);
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       const { pr } = await prWorker.ensurePr(config);
-      // FIXME: explicit assert condition
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchSnapshot({
+        displayNumber: 'Existing PR',
+        title: 'Update dependency dummy to v1.1.0',
+      });
     });
     it('should return modified existing PR title', async () => {
       config.newValue = '1.2.0';
@@ -587,8 +605,10 @@ describe('workers/pr/index', () => {
         title: 'wrong',
       });
       const { pr } = await prWorker.ensurePr(config);
-      // FIXME: explicit assert condition
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchSnapshot({
+        displayNumber: 'Existing PR',
+        title: 'wrong',
+      });
     });
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
@@ -679,6 +699,54 @@ describe('workers/pr/index', () => {
       expect(platform.createPr.mock.calls[0][0]).toMatchObject({
         labels: ['deps', 'renovate', 'js'],
       });
+    });
+  });
+
+  describe('prepareLabels(config)', () => {
+    it('returns empty array if no labels are configured', () => {
+      const result = prWorker.prepareLabels({});
+      expect(result).toBeArrayOfSize(0);
+    });
+
+    it('only labels', () => {
+      const result = prWorker.prepareLabels({ labels: ['labelA', 'labelB'] });
+      expect(result).toBeArrayOfSize(2);
+      expect(result).toEqual(['labelA', 'labelB']);
+    });
+
+    it('only addLabels', () => {
+      const result = prWorker.prepareLabels({
+        addLabels: ['labelA', 'labelB'],
+      });
+      expect(result).toBeArrayOfSize(2);
+      expect(result).toEqual(['labelA', 'labelB']);
+    });
+
+    it('merge labels and addLabels', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['labelA', 'labelB'],
+        addLabels: ['labelC'],
+      });
+      expect(result).toBeArrayOfSize(3);
+      expect(result).toEqual(['labelA', 'labelB', 'labelC']);
+    });
+
+    it('deduplicate merged labels and addLabels', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['labelA', 'labelB'],
+        addLabels: ['labelB', 'labelC'],
+      });
+      expect(result).toBeArrayOfSize(3);
+      expect(result).toEqual(['labelA', 'labelB', 'labelC']);
+    });
+
+    it('template labels', () => {
+      const result = prWorker.prepareLabels({
+        labels: ['datasource-{{{datasource}}}'],
+        datasource: 'npm',
+      });
+      expect(result).toBeArrayOfSize(1);
+      expect(result).toEqual(['datasource-npm']);
     });
   });
 });

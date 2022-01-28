@@ -1,7 +1,6 @@
 import semver from 'semver';
 import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
@@ -25,7 +24,7 @@ function getDep(
   if (isVersion(currentValue)) {
     dep.datasource = datasourceGo.id;
   } else {
-    dep.skipReason = SkipReason.UnsupportedVersion;
+    dep.skipReason = 'unsupported-version';
   }
   const digestMatch = regEx(/v0\.0.0-\d{14}-([a-f0-9]{12})/).exec(currentValue);
   if (digestMatch) {
@@ -51,12 +50,12 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
       const replaceMatch = regEx(
         /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
-      ).exec(line); // TODO #12071
+      ).exec(line);
       if (replaceMatch) {
         const dep = getDep(lineNumber, replaceMatch, 'replace');
         deps.push(dep);
       }
-      const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line); // TODO #12071
+      const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line);
       if (requireMatch && !line.endsWith('// indirect')) {
         logger.trace({ lineNumber }, `require line: "${line}"`);
         const dep = getDep(lineNumber, requireMatch, 'require');
@@ -67,7 +66,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         do {
           lineNumber += 1;
           line = lines[lineNumber];
-          const multiMatch = regEx(/^\s+([^\s]+)\s+([^\s]+)/).exec(line); // TODO #12071
+          const multiMatch = regEx(/^\s+([^\s]+)\s+([^\s]+)/).exec(line);
           logger.trace(`reqLine: "${line}"`);
           if (multiMatch && !line.endsWith('// indirect')) {
             logger.trace({ lineNumber }, `require line: "${line}"`);

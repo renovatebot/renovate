@@ -4,7 +4,7 @@ import * as openpgp from 'openpgp';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
-import { add } from '../util/sanitize';
+import { addSecretForSanitizing } from '../util/sanitize';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 
@@ -174,8 +174,8 @@ export async function decryptConfig(
           }
           logger.debug(`Decrypted ${eKey}`);
           if (eKey === 'npmToken') {
-            const token = decryptedStr.replace(regEx(/\n$/), ''); // TODO #12071
-            add(token);
+            const token = decryptedStr.replace(regEx(/\n$/), '');
+            addSecretForSanitizing(token);
             logger.debug(
               { decryptedToken: maskToken(token) },
               'Migrating npmToken to npmrc'
@@ -191,7 +191,7 @@ export async function decryptConfig(
               } else {
                 logger.debug('Appending _authToken= to end of existing npmrc');
                 decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\n?$/), // TODO #12071
+                  regEx(/\n?$/),
                   `\n_authToken=${token}\n`
                 );
               }
@@ -202,7 +202,7 @@ export async function decryptConfig(
             }
           } else {
             decryptedConfig[eKey] = decryptedStr;
-            add(decryptedStr);
+            addSecretForSanitizing(decryptedStr);
           }
         }
       } else {

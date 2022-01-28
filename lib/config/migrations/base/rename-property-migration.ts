@@ -2,7 +2,8 @@ import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from './abstract-migration';
 
 export class RenamePropertyMigration extends AbstractMigration {
-  readonly propertyName: string;
+  override readonly deprecated = true;
+  override readonly propertyName: string;
 
   private readonly newPropertyName: string;
 
@@ -17,9 +18,7 @@ export class RenamePropertyMigration extends AbstractMigration {
     this.newPropertyName = newPropertyName;
   }
 
-  override run(value): void {
-    this.delete(this.propertyName);
-
+  override run(value: unknown): void {
     this.setSafely(this.newPropertyName, value);
   }
 }

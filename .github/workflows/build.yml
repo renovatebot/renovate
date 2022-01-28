@@ -27,7 +27,7 @@ env:
 
 jobs:
   test:
-    name: ${{ format('test ({0})', matrix.os) }}
+    name: ${{ matrix.node-version == 14 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
@@ -36,7 +36,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [14]
+        node-version: [14, 16]
         java-version: [11]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
@@ -51,7 +51,7 @@ jobs:
           }]' || '[]') }}
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 14 || matrix.node-version == 16) }}
       NODE_VERSION: ${{ matrix.node-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
       # skip Java tests on pull requests without 'ci:fulltest' label
@@ -63,7 +63,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -118,7 +118,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -168,7 +168,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@04c56d2f954f1e4c69436aa54cfef261a018f458 # renovate: tag=v2.5.0
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn

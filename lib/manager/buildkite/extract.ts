@@ -16,7 +16,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const line = lines[lineIdx];
       const pluginsSection = regEx(
         /^(?<pluginsIndent>\s*)(-?\s*)plugins:/
-      ).exec(line); // TODO #12071
+      ).exec(line);
       if (pluginsSection) {
         logger.trace(`Matched plugins on line ${lineNumber}`);
         isPluginsSection = true;
@@ -25,10 +25,10 @@ export function extractPackageFile(content: string): PackageFile | null {
         logger.debug(`serviceImageLine: "${line}"`);
         const { currentIndent } = regEx(/^(?<currentIndent>\s*)/).exec(
           line
-        ).groups; // TODO #12071
+        ).groups;
         const depLineMatch = regEx(
           /^\s+(?:-\s+)?(?<depName>[^#]+)#(?<currentValue>[^:]+)/
-        ).exec(line); // TODO #12071
+        ).exec(line);
         if (currentIndent.length <= pluginsIndent.length) {
           isPluginsSection = false;
           pluginsIndent = '';
@@ -62,14 +62,14 @@ export function extractPackageFile(content: string): PackageFile | null {
                 { dependency: depName },
                 'Something is wrong with buildkite plugin name'
               );
-              skipReason = SkipReason.InvalidDependencySpecification;
+              skipReason = 'invalid-dependency-specification';
             }
           } else {
             logger.debug(
               { currentValue },
               'Skipping non-pinned current version'
             );
-            skipReason = SkipReason.InvalidVersion;
+            skipReason = 'invalid-version';
           }
           const dep: PackageDependency = {
             depName,

@@ -41,16 +41,16 @@ Array [
   Object {
     "body": undefined,
     "name": undefined,
-    "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases",
+    "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases",
     "tag": "v1.0.0",
-    "url": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0",
+    "url": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.0",
   },
   Object {
     "body": undefined,
     "name": undefined,
-    "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases",
+    "notesSourceUrl": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases",
     "tag": "v1.0.1",
-    "url": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1",
+    "url": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1",
   },
 ]
 `;
@@ -65,7 +65,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2fyet-other-repository/releases?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100",
   },
 ]
 `;
@@ -75,16 +75,16 @@ Array [
   Object {
     "body": undefined,
     "name": undefined,
-    "notesSourceUrl": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases",
+    "notesSourceUrl": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases",
     "tag": "v1.0.0",
-    "url": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.0",
+    "url": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.0",
   },
   Object {
     "body": undefined,
     "name": undefined,
-    "notesSourceUrl": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases",
+    "notesSourceUrl": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases",
     "tag": "v1.0.1",
-    "url": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases/v1.0.1",
+    "url": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1",
   },
 ]
 `;
@@ -100,24 +100,12 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://my.custom.domain/api/v4/projects/some%2fyet-other-repository/releases?per_page=100",
+    "url": "https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100",
   },
 ]
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "" 1`] = `
-Object {
-  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
-",
-  "id": undefined,
-  "name": undefined,
-  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
-  "tag": "1.0.1",
-  "url": "https://github.com/some/other-repository/releases/1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -133,18 +121,6 @@ Array [
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other@" 1`] = `
-Object {
-  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
-",
-  "id": undefined,
-  "name": undefined,
-  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
-  "tag": "other@1.0.1",
-  "url": "https://github.com/some/other-repository/releases/other@1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other@" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -160,18 +136,6 @@ Array [
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other_v" 1`] = `
-Object {
-  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
-",
-  "id": undefined,
-  "name": undefined,
-  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
-  "tag": "other_v1.0.1",
-  "url": "https://github.com/some/other-repository/releases/other_v1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other_v" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -187,18 +151,6 @@ Array [
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other-" 1`] = `
-Object {
-  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
-",
-  "id": undefined,
-  "name": undefined,
-  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
-  "tag": "other-1.0.1",
-  "url": "https://github.com/some/other-repository/releases/other-1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "other-" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -214,18 +166,6 @@ Array [
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "v" 1`] = `
-Object {
-  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
-",
-  "id": undefined,
-  "name": undefined,
-  "notesSourceUrl": "https://api.github.com/repos/some/other-repository/releases",
-  "tag": "v1.0.1",
-  "url": "https://github.com/some/other-repository/releases/v1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body "v" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -241,16 +181,6 @@ Array [
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "" 1`] = `
-Object {
-  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
-  "name": undefined,
-  "notesSourceUrl": "https://api.gitlab.com/projects/some%2fother-repository/releases",
-  "tag": "1.0.1",
-  "url": "https://gitlab.com/some/other-repository/tags/1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -260,22 +190,12 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2fother-repository/releases?per_page=100",
+    "url": "https://api.gitlab.com/projects/some%2Fother-repository/releases?per_page=100",
   },
 ]
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "other-" 1`] = `
-Object {
-  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
-  "name": undefined,
-  "notesSourceUrl": "https://api.gitlab.com/projects/some%2fother-repository/releases",
-  "tag": "other-1.0.1",
-  "url": "https://gitlab.com/some/other-repository/tags/other-1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "other-" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -285,22 +205,12 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2fother-repository/releases?per_page=100",
+    "url": "https://api.gitlab.com/projects/some%2Fother-repository/releases?per_page=100",
   },
 ]
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "v" 1`] = `
-Object {
-  "body": "some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)",
-  "name": undefined,
-  "notesSourceUrl": "https://api.gitlab.com/projects/some%2fother-repository/releases",
-  "tag": "v1.0.1",
-  "url": "https://gitlab.com/some/other-repository/tags/v1.0.1",
-}
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo "v" 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -310,7 +220,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/some%2fother-repository/releases?per_page=100",
+    "url": "https://api.gitlab.com/projects/some%2Fother-repository/releases?per_page=100",
   },
 ]
 `;
@@ -340,7 +250,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100&path=packages/foo",
+    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100&path=packages/foo",
   },
   Object {
     "headers": Object {
@@ -349,7 +259,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/blobs/abcd/raw",
+    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw",
   },
 ]
 `;
@@ -379,7 +289,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100",
+    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -388,7 +298,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/blobs/abcd/raw",
+    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw",
   },
 ]
 `;
@@ -741,7 +651,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100",
+    "url": "https://api.gitlab.com/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -750,7 +660,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw",
+    "url": "https://api.gitlab.com/projects/gitlab-org%2Fgitter%2Fwebapp/repository/blobs/abcd/raw",
   },
 ]
 `;
@@ -1056,7 +966,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://my.custom.domain/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100",
+    "url": "https://my.custom.domain/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100",
   },
   Object {
     "headers": Object {
@@ -1066,7 +976,7 @@ Array [
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "method": "GET",
-    "url": "https://my.custom.domain/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw",
+    "url": "https://my.custom.domain/projects/gitlab-org%2Fgitter%2Fwebapp/repository/blobs/abcd/raw",
   },
 ]
 `;

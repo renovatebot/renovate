@@ -61,7 +61,7 @@ Object {
 }
 `;
 
-exports[`manager/terraform/extract extractPackageFile() extracts 1`] = `
+exports[`manager/terraform/extract extractPackageFile() extracts  modules 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -106,42 +106,11 @@ Object {
       "depType": "module",
     },
     Object {
-      "currentValue": "v0.1.0",
-      "datasource": "github-tags",
-      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
-      "depType": "module",
-      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
-    },
-    Object {
-      "currentValue": "v0.1.0",
-      "datasource": "github-tags",
-      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
-      "depType": "module",
-      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
-    },
-    Object {
       "currentValue": "v2.0.0",
       "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
       "depType": "module",
       "lookupName": "hashicorp/example",
-    },
-    Object {
-      "datasource": "terraform-module",
-      "depName": "terraform-aws-modules/security-group/aws",
-      "depType": "module",
-    },
-    Object {
-      "currentValue": "<= 2.4.0",
-      "datasource": "terraform-module",
-      "depName": "terraform-aws-modules/security-group/aws",
-      "depType": "module",
-    },
-    Object {
-      "currentValue": "1.28.3",
-      "datasource": "terraform-module",
-      "depName": "particuleio/addons/kubernetes",
-      "depType": "module",
     },
     Object {
       "currentValue": "~> 1.1.0",
@@ -177,51 +146,49 @@ Object {
       "depType": "module",
     },
     Object {
+      "currentValue": "v0.1.0",
+      "datasource": "github-tags",
+      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "depType": "module",
+      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
+    },
+    Object {
+      "currentValue": "v0.1.0",
+      "datasource": "github-tags",
+      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "depType": "module",
+      "lookupName": "tieto-cem/terraform-aws-ecs-task-definition",
+    },
+    Object {
+      "datasource": "terraform-module",
+      "depName": "terraform-aws-modules/security-group/aws",
+      "depType": "module",
+    },
+    Object {
+      "currentValue": "<= 2.4.0",
+      "datasource": "terraform-module",
+      "depName": "terraform-aws-modules/security-group/aws",
+      "depType": "module",
+    },
+    Object {
+      "currentValue": "1.28.3",
+      "datasource": "terraform-module",
+      "depName": "particuleio/addons/kubernetes",
+      "depType": "module",
+    },
+    Object {
       "skipReason": "local",
     },
     Object {
       "skipReason": "no-source",
     },
-    Object {
-      "currentValue": "1.36.1",
-      "datasource": "terraform-provider",
-      "depName": "azurerm",
-      "depType": "provider",
-      "lockedVersion": undefined,
-      "lookupName": "hashicorp/azurerm",
-    },
-    Object {
-      "currentValue": "=2.4",
-      "datasource": "terraform-provider",
-      "depName": "gitlab",
-      "depType": "provider",
-      "lockedVersion": undefined,
-      "lookupName": "hashicorp/gitlab",
-    },
-    Object {
-      "currentValue": "=1.3",
-      "datasource": "terraform-provider",
-      "depName": "gitlab",
-      "depType": "provider",
-      "lockedVersion": undefined,
-      "lookupName": "hashicorp/gitlab",
-    },
-    Object {
-      "datasource": "terraform-provider",
-      "depName": "helm",
-      "depType": "provider",
-      "lockedVersion": undefined,
-      "lookupName": "hashicorp/helm",
-      "skipReason": "no-version",
-    },
-    Object {
-      "currentValue": "V1.9",
-      "datasource": "terraform-provider",
-      "depName": "newrelic",
-      "depType": "provider",
-      "lockedVersion": undefined,
-      "lookupName": "hashicorp/newrelic",
-    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() extracts bitbucket modules 1`] = `
+Object {
+  "deps": Array [
     Object {
       "currentValue": "v1.0.0",
       "datasource": "git-tags",
@@ -299,6 +266,106 @@ Object {
       "depType": "module",
       "lookupName": "hashicorp/example",
     },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() extracts docker resources 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.7.8",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "docker_image",
+      "replaceString": "nginx:1.7.8",
+    },
+    Object {
+      "skipReason": "invalid-dependency-specification",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker",
+      "depType": "docker_image",
+      "replaceString": "\${data.docker_registry_image.ubuntu.name}",
+      "skipReason": "contains-variable",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.7.8",
+      "datasource": "docker",
+      "depName": "nginx",
+      "depType": "docker_container",
+      "replaceString": "nginx:1.7.8",
+    },
+    Object {
+      "skipReason": "invalid-dependency-specification",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v1",
+      "datasource": "docker",
+      "depName": "repo.mycompany.com:8080/foo-service",
+      "depType": "docker_service",
+      "replaceString": "repo.mycompany.com:8080/foo-service:v1",
+    },
+    Object {
+      "skipReason": "invalid-dependency-specification",
+    },
+    Object {
+      "skipReason": "invalid-value",
+    },
+  ],
+}
+`;
+
+exports[`manager/terraform/extract extractPackageFile() extracts providers 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.36.1",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/azurerm",
+    },
+    Object {
+      "currentValue": "=2.4",
+      "datasource": "terraform-provider",
+      "depName": "gitlab",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/gitlab",
+    },
+    Object {
+      "currentValue": "=1.3",
+      "datasource": "terraform-provider",
+      "depName": "gitlab1",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/gitlab1",
+    },
+    Object {
+      "datasource": "terraform-provider",
+      "depName": "helm",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/helm",
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "V1.9",
+      "datasource": "terraform-provider",
+      "depName": "newrelic",
+      "depType": "provider",
+      "lockedVersion": undefined,
+      "lookupName": "hashicorp/newrelic",
+    },
     Object {
       "currentValue": ">= 2.7.0",
       "datasource": "terraform-provider",
@@ -321,7 +388,7 @@ Object {
       "depName": "hashicorp/terraform",
       "depType": "required_version",
       "extractVersion": "v(?<version>.*)$",
-      "lineNumber": 250,
+      "lineNumber": 72,
     },
     Object {
       "currentValue": "2.7.2",
@@ -375,52 +442,6 @@ Object {
       "registryUrls": Array [
         "https://terraform.example.com",
       ],
-    },
-    Object {
-      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-      "currentDigest": undefined,
-      "currentValue": "1.7.8",
-      "datasource": "docker",
-      "depName": "nginx",
-      "depType": "docker_image",
-      "replaceString": "nginx:1.7.8",
-    },
-    Object {
-      "skipReason": "invalid-dependency-specification",
-    },
-    Object {
-      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-      "datasource": "docker",
-      "depType": "docker_image",
-      "replaceString": "\${data.docker_registry_image.ubuntu.name}",
-      "skipReason": "contains-variable",
-    },
-    Object {
-      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-      "currentDigest": undefined,
-      "currentValue": "1.7.8",
-      "datasource": "docker",
-      "depName": "nginx",
-      "depType": "docker_container",
-      "replaceString": "nginx:1.7.8",
-    },
-    Object {
-      "skipReason": "invalid-dependency-specification",
-    },
-    Object {
-      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-      "currentDigest": undefined,
-      "currentValue": "v1",
-      "datasource": "docker",
-      "depName": "repo.mycompany.com:8080/foo-service",
-      "depType": "docker_service",
-      "replaceString": "repo.mycompany.com:8080/foo-service:v1",
-    },
-    Object {
-      "skipReason": "invalid-dependency-specification",
-    },
-    Object {
-      "skipReason": "invalid-value",
     },
   ],
 }

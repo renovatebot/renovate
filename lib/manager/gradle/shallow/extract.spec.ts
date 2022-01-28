@@ -1,6 +1,5 @@
 import { extractAllPackageFiles } from '..';
 import { fs, loadFixture } from '../../../../test/util';
-import { SkipReason } from '../../../types';
 import type { ExtractConfig } from '../../types';
 
 jest.mock('../../../util/fs');
@@ -71,7 +70,7 @@ describe('manager/gradle/shallow/extract', () => {
             depName: 'foo:bar',
             currentValue: '1.2.3',
             registryUrls: ['https://repo.maven.apache.org/maven2'],
-            skipReason: SkipReason.ContainsVariable,
+            skipReason: 'contains-variable',
             managerData: {
               packageFile: 'build.gradle',
             },
