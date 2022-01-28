@@ -8,6 +8,7 @@ const golangReleasesContent = loadFixture('releases.go');
 const golangReleasesInvalidContent = loadFixture('releases-invalid.go');
 const golangReleasesInvalidContent2 = loadFixture('releases-invalid2.go');
 const golangReleasesInvalidContent3 = loadFixture('releases-invalid3.go');
+const golangReleasesInvalidContent4 = loadFixture('releases-invalid4.go');
 
 const datasource = GolangVersionDatasource.id;
 
@@ -66,6 +67,16 @@ describe('datasource/golang-version/index', () => {
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/master/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent3);
+      await expect(
+        getPkgReleases({ datasource, depName: 'golang' })
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws ExternalHostError for invalid release semver', async () => {
+      httpMock
+        .scope('https://raw.githubusercontent.com')
+        .get('/golang/website/master/internal/history/release.go')
+        .reply(200, golangReleasesInvalidContent4);
       await expect(
         getPkgReleases({ datasource, depName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
