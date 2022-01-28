@@ -92,13 +92,9 @@ async function helmCommands(
       parameters.push(`--password ${quote(password)}`);
     }
 
-    if (value.isAlias || isPrivateRepo) {
-      cmd.push(
-        `helm repo add ${value.name} ${parameters.join(' ')} ${
-          value.repository
-        }`
-      );
-    }
+    cmd.push(
+      `helm repo add ${value.name} ${parameters.join(' ')} ${value.repository}`
+    );
   });
 
   cmd.push(
