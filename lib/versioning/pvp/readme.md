@@ -9,7 +9,7 @@ Quotes from the [Haskell PVP Specification](https://pvp.haskell.org/):
 > A.B is known as the _major_ version number, and C the _minor_ version number.
 
 The one unusual difference between PVP and SemVer is that there are two major versions, and that there can be an optional number of additional version numbers past _minor_.
-For example `1.2.3` (note there's no patch version here), `1.2.3.4` (`4` is the patch version), or `1.2.3.4.5.6.7` are all valid version numbers.
+For example `1.2.3` (note there's no _patch_ version here), `1.2.3.4` (`4` is the _patch_ version), or `1.2.3.4.5.6.7` are all valid version numbers.
 
 **Are ranges supported?**
 
