@@ -422,11 +422,33 @@ export async function initRepo({
         { repository_fork: config.repository },
         'Found existing fork'
       );
+      // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
+      // with the base commit from the parent repository
+      const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
+      const sha = repo.defaultBranchRef.target.oid;
+      try {
+        logger.debug(
+          `Updating forked repository default sha ${sha} to match upstream`
+        );
+        await githubApi.patchJson(url, {
+          body: {
+            sha,
+            force: true,
+          },
+          token: forkToken || opts.token,
+        });
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn(
+          { url, sha, err: err.err || err },
+          'Error updating fork from upstream - cannot continue'
+        );
+        if (err instanceof ExternalHostError) {
+          throw err;
+        }
+        throw new ExternalHostError(err);
+      }
     } else {
-      logger.debug(
-        { repository_fork: config.repository },
-        'Created fork, waiting 30s'
-      );
+      logger.debug({ repository_fork: config.repository }, 'Created fork');
       existingRepos.push(config.repository);
       // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
       await delay(30000);
@@ -451,15 +473,9 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  let upstreamUrl: string;
-  if (forkMode) {
-    parsedEndpoint.pathname = config.parentRepo + '.git';
-    upstreamUrl = URL.format(parsedEndpoint);
-  }
   await git.initRepo({
     ...config,
     url,
-    upstreamUrl,
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,

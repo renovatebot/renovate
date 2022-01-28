@@ -14,8 +14,6 @@ export type CommitSha = string;
 export interface StorageConfig {
   currentBranch?: string;
   url: string;
-
-  upstreamUrl?: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
   fullClone?: boolean;
@@ -75,6 +73,22 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string;
   force?: boolean;
+}
+
+export type BranchName = string;
+export type TargetBranchName = BranchName;
+export type SourceBranchName = BranchName;
+
+export type GitConflictsCache = Record<TargetBranchName, TargetBranchConflicts>;
+
+export interface TargetBranchConflicts {
+  targetBranchSha: CommitSha;
+  sourceBranches: Record<SourceBranchName, SourceBranchConflict>;
+}
+
+export interface SourceBranchConflict {
+  sourceBranchSha: CommitSha;
+  isConflicted: boolean;
 }
 
 export interface CommitResult {

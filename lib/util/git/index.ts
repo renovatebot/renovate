@@ -1,12 +1,12 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-import type {
+import simpleGit, {
   Options,
+  ResetMode,
   SimpleGit,
   TaskOptions,
-  ResetMode as _ResetMode,
 } from 'simple-git';
-import * as simpleGit from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -27,6 +27,10 @@ import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
+import {
+  getCachedConflictResult,
+  setCachedConflictResult,
+} from './conflicts-cache';
 import { checkForPlatformFailure, handleCommitError } from './error';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
@@ -40,9 +44,6 @@ import type {
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
-
-// TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
-const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
 function localName(branchName: string): string {
   return branchName.replace(regEx(/^origin\//), '');
@@ -90,7 +91,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
-  const globalGit = simpleGit.default();
+  const globalGit = simpleGit();
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(/\s+/)) {
@@ -121,10 +122,9 @@ export async function validateGitVersion(): Promise<boolean> {
   return true;
 }
 
-async function fetchBranchCommits(preferUpstream = true): Promise<void> {
+async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
-  const url = (preferUpstream && config.upstreamUrl) || config.url;
-  const opts = ['ls-remote', '--heads', url];
+  const opts = ['ls-remote', '--heads', config.url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       opts.unshift(e[0], `${e[1]}`)
@@ -154,7 +154,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = simpleGit.default(localDir, simpleGitConfig());
+  git = simpleGit(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -314,6 +314,7 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
+  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
   if (config.cloneSubmodules) {
     const submodules = await getSubmodules();
     for (const submodule of submodules) {
@@ -339,23 +340,6 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
-  // istanbul ignore if
-  if (config.upstreamUrl) {
-    logger.debug(`Resetting ${config.currentBranch} to upstream`);
-    await git.addRemote('upstream', config.upstreamUrl);
-    await git.fetch(['upstream']);
-    await resetToBranch(config.currentBranch);
-    const resetLog = await git.reset([
-      '--hard',
-      `upstream/${config.currentBranch}`,
-    ]);
-    logger.debug({ resetLog }, 'git reset log');
-    const pushLog = await git.push(['origin', config.currentBranch, '--force']);
-    logger.debug({ pushLog }, 'git push log');
-    await fetchBranchCommits(false);
-  }
-  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
-  logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
 }
 
 // istanbul ignore next
@@ -408,10 +392,7 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     await git.checkout(['-f', branchName, '--']);
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
-      logger.debug(
-        { branchName, latestCommitDate, sha: config.currentBranchSha },
-        'latest commit'
-      );
+      logger.debug({ branchName, latestCommitDate }, 'latest commit');
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
@@ -542,12 +523,28 @@ export async function isBranchConflicted(
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
   await syncGit();
   await writeGitAuthor();
-  if (!branchExists(baseBranch) || !branchExists(branch)) {
+
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branch);
+  if (!baseBranchSha || !branchSha) {
     logger.warn(
       { baseBranch, branch },
       'isBranchConflicted: branch does not exist'
     );
     return true;
+  }
+
+  const cachedResult = getCachedConflictResult(
+    baseBranch,
+    baseBranchSha,
+    branch,
+    branchSha
+  );
+  if (is.boolean(cachedResult)) {
+    logger.debug(
+      `Using cached result ${cachedResult} for isBranchConflicted(${baseBranch}, ${branch})`
+    );
+    return cachedResult;
   }
 
   let result = false;
@@ -582,6 +579,7 @@ export async function isBranchConflicted(
     }
   }
 
+  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
   return result;
 }
 
@@ -610,6 +608,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
   try {
     await syncGit();
     await git.reset(ResetMode.HARD);
+    await git.checkout(['-B', branchName, 'origin/' + branchName]);
     await git.checkout([
       '-B',
       config.currentBranch,
