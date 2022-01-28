@@ -55,7 +55,7 @@ function npm2cargo(input: string): string {
 }
 
 const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange(version, cargo2npm(range));
+  !!npm.isLessThanRange?.(version, cargo2npm(range));
 
 export const isValid = (input: string): boolean =>
   npm.isValid(cargo2npm(input));
@@ -63,11 +63,19 @@ export const isValid = (input: string): boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, cargo2npm(range));
 
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.getSatisfyingVersion(versions, cargo2npm(range));
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.getSatisfyingVersion(versions, cargo2npm(range));
+}
 
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.minSatisfyingVersion(versions, cargo2npm(range));
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return npm.minSatisfyingVersion(versions, cargo2npm(range));
+}
 
 const isSingleVersion = (constraint: string): boolean =>
   constraint.trim().startsWith('=') &&
@@ -96,7 +104,7 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
-  let newCargo = npm2cargo(newSemver);
+  let newCargo = newSemver ? npm2cargo(newSemver) : null;
   // istanbul ignore if
   if (!newCargo) {
     logger.info(

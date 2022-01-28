@@ -32,6 +32,16 @@ Array [
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
   Object {
+    "packageFile": "solo-package-leading-dot-slash/package.json",
+    "packageJsonName": "@demo/solo-leading-dot-slash",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
+    "packageFile": "solo-package-leading-double-dot-slash/package.json",
+    "packageJsonName": "@demo/solo-leading-double-dot-slash",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  Object {
     "packageFile": "solo-package-trailing-slash/package.json",
     "packageJsonName": "@demo/solo-trailing-slash",
     "pnpmShrinkwrap": "pnpm-lock.yaml",

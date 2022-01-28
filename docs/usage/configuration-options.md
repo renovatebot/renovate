@@ -2340,7 +2340,7 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 
 ```json
 {
-  "reviewers": "team:foo"
+  "reviewers": ["team:foo"]
 }
 ```
 
@@ -2366,7 +2366,7 @@ Renovate's "rollback" feature exists to propose a downgrade to the next-highest 
 
 Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
 
-You can configure the `rollbackPrs` property globally, per-lanuage, or per-package to override the default behavior.
+You can configure the `rollbackPrs` property globally, per-language, or per-package to override the default behavior.
 
 ## ruby
 
@@ -2529,6 +2529,11 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 <!-- markdownlint-enable MD001 -->
 
+## stopUpdatingLabel
+
+On supported platforms it is possible to add a label to a PR to request Renovate stop updating the PR.
+By default this label is `"stop-updating"` however you can configure it to anything you want by changing this `stopUpdatingLabel` field.
+
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
@@ -2579,6 +2584,14 @@ If you wish to disable all updates outside of scheduled hours then configure thi
 
 By default, Renovate will attempt to update all detected dependencies, regardless of whether they are defined using pinned single versions (e.g. `1.2.3`) or constraints/ranges (e.g. (`^1.2.3`).
 You can set this option to `false` if you wish to disable updating for pinned (single version) dependencies specifically.
+
+## useBaseBranchConfig
+
+By default, Renovate will read config file from the default branch only and will ignore any config files in base branches.
+You can configure `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
+
+The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
+This scenario may be useful for testing the config changes in base branches instantly.
 
 ## userStrings
 

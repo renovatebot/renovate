@@ -1,3 +1,4 @@
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import * as gitVersioning from '../../versioning/git';
 
 export { default as extractPackageFile } from './extract';
@@ -9,3 +10,5 @@ export const defaultConfig = {
   versioning: gitVersioning.id,
   fileMatch: ['(^|/).gitmodules$'],
 };
+
+export const supportedDatasources = [GitRefsDatasource.id];

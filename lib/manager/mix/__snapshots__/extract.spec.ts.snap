@@ -28,7 +28,7 @@ Object {
       "managerData": Object {
         "lineNumber": 20,
       },
-      "skipReason": "non-hex depTypes",
+      "skipReason": "non-hex-dep-types",
     },
     Object {
       "currentValue": "~> 1.0",

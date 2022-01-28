@@ -107,11 +107,6 @@ describe('platform/azure/util', () => {
       const res = getRenovatePRFormat({ status: 1 } as any);
       expect(res).toMatchSnapshot();
     });
-
-    it('should be formated (isConflicted)', () => {
-      const res = getRenovatePRFormat({ mergeStatus: 2 } as any);
-      expect(res).toMatchSnapshot();
-    });
   });
 
   describe('streamToString', () => {

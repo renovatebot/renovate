@@ -1,4 +1,6 @@
 import { ProgrammingLanguage } from '../../constants';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import * as datasourcePackagist from '../../datasource/packagist';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { getRangeStrategy } from './range';
@@ -20,3 +22,8 @@ export const defaultConfig = {
   fileMatch: ['(^|/)([\\w-]*)composer.json$'],
   versioning: composerVersioningId,
 };
+
+export const supportedDatasources = [
+  GitTagsDatasource.id,
+  datasourcePackagist.id,
+];
