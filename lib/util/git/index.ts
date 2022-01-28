@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import simpleGit, {
   Options,
@@ -26,6 +27,10 @@ import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
+import {
+  getCachedConflictResult,
+  setCachedConflictResult,
+} from './conflicts-cache';
 import { checkForPlatformFailure, handleCommitError } from './error';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
@@ -518,12 +523,28 @@ export async function isBranchConflicted(
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
   await syncGit();
   await writeGitAuthor();
-  if (!branchExists(baseBranch) || !branchExists(branch)) {
+
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branch);
+  if (!baseBranchSha || !branchSha) {
     logger.warn(
       { baseBranch, branch },
       'isBranchConflicted: branch does not exist'
     );
     return true;
+  }
+
+  const cachedResult = getCachedConflictResult(
+    baseBranch,
+    baseBranchSha,
+    branch,
+    branchSha
+  );
+  if (is.boolean(cachedResult)) {
+    logger.debug(
+      `Using cached result ${cachedResult} for isBranchConflicted(${baseBranch}, ${branch})`
+    );
+    return cachedResult;
   }
 
   let result = false;
@@ -558,6 +579,7 @@ export async function isBranchConflicted(
     }
   }
 
+  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
   return result;
 }
 
