@@ -547,8 +547,8 @@ export async function isBranchConflicted(
   await syncGit();
   await writeGitAuthor();
 
-  const baseBranchSha = getBranchCommit(baseBranch)?.slice(0, 7);
-  const branchSha = getBranchCommit(branch)?.slice(0, 7);
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branch);
   if (!baseBranchSha || !branchSha) {
     logger.warn(
       { baseBranch, branch },
