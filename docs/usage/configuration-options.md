@@ -488,7 +488,7 @@ Examples of what having a Dependency Dashboard will allow you to do:
 - Recreate an unmerged PR (e.g. for a major update that you postponed by closing the original PR)
 
 <!-- prettier-ignore -->
-!!! note
+!!! tip
     Enabling the Dependency Dashboard does not itself change any of the "control flow" of Renovate, e.g. it will otherwise still create and manage PRs exactly as it always has, including scheduling and rate limiting.
     The Dependency Dashboard therefore provides visibility as well as additional control.
 
