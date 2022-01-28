@@ -541,6 +541,9 @@ export async function isBranchConflicted(
     branchSha
   );
   if (is.boolean(cachedResult)) {
+    logger.debug(
+      `Using cached result ${cachedResult} for isBranchConflicted(${baseBranch}, ${branch})`
+    );
     return cachedResult;
   }
 
