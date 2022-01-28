@@ -78,6 +78,26 @@ It is integrated with WhiteSource's vulnerability detection capabilities and add
 
 WhiteSource Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
 
+#### Forking Renovate app
+
+"Forking Renovate" is the sister app to the WhiteSource Renovate App on GitHub.com.
+The difference is that Forking Renovate does not require `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
+Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
+
+[Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
+
+##### Benefits
+
+Forking Renovate needs only `read` level access to any repository it runs on.
+
+##### Drawbacks
+
+If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
+
+- Automerge is not supported
+- The `baseBranches` config option is not supported
+- The app dashboard (`app.renovatebot.com`) is currently not supported
+
 ### Hosting Renovate
 
 Once you have decided on a Renovate distribution, you need to decide where and how to run it.
@@ -92,7 +112,9 @@ WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-live
 
 ### Global config
 
-Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js`, `config.json`, `config.json5`, `config.yaml` or `config.yml`), environment variables, or CLI parameters.
+Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file, environment variables, or CLI parameters.
+By default Renovate checks if a file named `config.js` is present.
+Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (e.g. `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -119,7 +141,7 @@ module.exports = {
 };
 ```
 
-`config.js` may also export a `Promise` of such an object, or a function that will return either a plain Javascript object or a `Promise` of such an object.
+`config.js` may also export a `Promise` of such an object, or a function that will return either a plain JavaScript object or a `Promise` of such an object.
 This allows one to include the results of asynchronous operations in the exported value.
 An example of a `config.js` that exports an async function (which is a function that returns a `Promise`) can be seen in a comment for [#10011: Allow autodiscover filtering for repo topic](https://github.com/renovatebot/renovate/issues/10011#issuecomment-992568583) and more examples can be seen in [`file.spec.ts`](https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts).
 
@@ -131,7 +153,7 @@ It is also recommended that you configure `config.gitAuthor` with the same ident
 
 #### GitHub (Enterprise Server)
 
-First, [create a Personal Access Token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" scope).
+First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account (select "repo" scope).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 For GitHub Enterprise Server set the `endpoint` in your `config.js` to `https://github.enterprise.com/api/v3/`.
@@ -174,7 +196,6 @@ Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
 List of repositories to run on.
-Auto discovery does not work with a GitHub App.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
 
@@ -186,7 +207,7 @@ Don't forget to configure `platform=gitlab` somewhere in config.
 
 #### Bitbucket Cloud
 
-First, [create an AppPassword](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html) for the bot account.
+First, [create an AppPassword](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) for the bot account.
 Give the bot App password the following permission scopes:
 
 - [`account`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#account) (Account: Read)
@@ -207,9 +228,9 @@ Don't forget to configure `platform=bitbucket-server` somewhere in config.
 
 If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
-### Azure DevOps
+#### Azure DevOps
 
-First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats) for the bot account.
+First, [create a Personal Access Token](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=preview-page) for the bot account.
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=azure` somewhere in config.
 

@@ -1,6 +1,5 @@
 import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
@@ -56,7 +55,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       } else {
         dep.currentValue = currentValue;
         if (!dockerVersioning.api.isValid(currentValue)) {
-          dep.skipReason = SkipReason.InvalidVersion;
+          dep.skipReason = 'invalid-version';
         }
       }
       deps.push(dep);

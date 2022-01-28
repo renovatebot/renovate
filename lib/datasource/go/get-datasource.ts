@@ -35,6 +35,7 @@ async function goGetDatasource(goModule: string): Promise<DataSource | null> {
         lookupName: goSourceUrl
           .replace('https://github.com/', '')
           .replace(regEx(/\/$/), ''),
+        registryUrl: 'https://github.com',
       };
     }
     const gitlabUrl =
@@ -45,6 +46,16 @@ async function goGetDatasource(goModule: string): Promise<DataSource | null> {
 
     if (gitlabUrl && gitlabUrlName) {
       if (gitlabModuleName?.startsWith(gitlabUrlName)) {
+        if (gitlabModuleName.includes('.git')) {
+          return {
+            datasource: gitlab.id,
+            registryUrl: gitlabUrl,
+            lookupName: gitlabModuleName.substring(
+              0,
+              gitlabModuleName.indexOf('.git')
+            ),
+          };
+        }
         return {
           datasource: gitlab.id,
           registryUrl: gitlabUrl,
@@ -119,7 +130,11 @@ export async function getDatasource(
   if (goModule.startsWith('gopkg.in/')) {
     const [pkg] = goModule.replace('gopkg.in/', '').split('.');
     const lookupName = pkg.includes('/') ? pkg : `go-${pkg}/${pkg}`;
-    return { datasource: github.id, lookupName };
+    return {
+      datasource: github.id,
+      lookupName,
+      registryUrl: 'https://github.com',
+    };
   }
 
   if (goModule.startsWith('github.com/')) {
@@ -128,6 +143,7 @@ export async function getDatasource(
     return {
       datasource: github.id,
       lookupName,
+      registryUrl: 'https://github.com',
     };
   }
 
@@ -137,6 +153,7 @@ export async function getDatasource(
     return {
       datasource: bitbucket.id,
       lookupName,
+      registryUrl: 'https://bitbucket.org',
     };
   }
 

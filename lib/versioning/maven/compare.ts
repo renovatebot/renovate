@@ -140,7 +140,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
 }
 
 function nullFor(token: Token): Token {
-  return token.prefix === PREFIX_DOT
+  return token.type === TYPE_NUMBER
     ? {
         prefix: token.prefix,
         type: TYPE_NUMBER,
@@ -166,6 +166,7 @@ function commonOrder(token: Token): number {
   return 3;
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum QualifierTypes {
   Alpha = 1,
   Beta,

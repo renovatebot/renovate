@@ -34,6 +34,7 @@ const config: InitialOptionsTsJest = {
     'jest-extended/all',
     'expect-more-jest',
     '<rootDir>/test/setup.ts',
+    '<rootDir>/test/to-migrate.ts',
   ],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
   testEnvironment: 'node',

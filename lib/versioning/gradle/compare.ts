@@ -1,5 +1,7 @@
+import is from '@sindresorhus/is';
 import { regEx } from '../../util/regex';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum TokenType {
   Number = 1,
   String,
@@ -10,7 +12,10 @@ type Token = {
   val: string | number;
 };
 
-function iterateChars(str: string, cb: (p: string, n: string) => void): void {
+function iterateChars(
+  str: string,
+  cb: (p: string | null, n: string | null) => void
+): void {
   let prev = null;
   let next = null;
   for (let i = 0; i < str.length; i += 1) {
@@ -41,7 +46,7 @@ function isTransition(prevChar: string, nextChar: string): boolean {
 }
 
 export function tokenize(versionStr: string): Token[] | null {
-  let result = [];
+  let result: Token[] | null = [];
   let currentVal = '';
 
   function yieldToken(): void {
@@ -81,6 +86,7 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum QualifierRank {
   Dev = -1,
   Default = 0,
@@ -142,7 +148,7 @@ function stringTokenCmp(left: string, right: string): number {
 
 function tokenCmp(left: Token | null, right: Token | null): number {
   if (left === null) {
-    if (right.type === TokenType.String) {
+    if (right?.type === TokenType.String) {
       return 1;
     }
     return -1;
@@ -174,8 +180,8 @@ function tokenCmp(left: Token | null, right: Token | null): number {
 }
 
 export function compare(left: string, right: string): number {
-  const leftTokens = tokenize(left);
-  const rightTokens = tokenize(right);
+  const leftTokens = tokenize(left) ?? [];
+  const rightTokens = tokenize(right) ?? [];
   const length = Math.max(leftTokens.length, rightTokens.length);
   for (let idx = 0; idx < length; idx += 1) {
     const leftToken = leftTokens[idx] || null;
@@ -188,27 +194,36 @@ export function compare(left: string, right: string): number {
   return 0;
 }
 
-export function isVersion(input: string): boolean {
+export function parse(input: string): Token[] | null {
   if (!input) {
-    return false;
+    return null;
   }
 
   if (!regEx(/^[-._+a-zA-Z0-9]+$/i).test(input)) {
-    return false;
+    return null;
   }
 
   if (regEx(/^latest\.?/i).test(input)) {
-    return false;
+    return null;
   }
 
   const tokens = tokenize(input);
-  return !!tokens && !!tokens.length;
+  // istanbul ignore if: should not happen
+  if (!tokens?.length) {
+    return null;
+  }
+  return tokens;
+}
+
+export function isVersion(input: string): boolean {
+  return !!parse(input);
 }
 
 interface PrefixRange {
   tokens: Token[];
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum RangeBound {
   Inclusive = 1,
   Exclusive,
@@ -252,23 +267,30 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
     return null;
   }
 
-  const match = mavenBasedRangeRegex.exec(input);
-  if (match) {
-    const { leftBoundStr, separator, rightBoundStr } = match.groups;
-    let { leftVal, rightVal } = match.groups;
+  const matchGroups = mavenBasedRangeRegex.exec(input)?.groups;
+  if (matchGroups) {
+    const { leftBoundStr, separator, rightBoundStr } = matchGroups;
+    let leftVal: string | null = matchGroups.leftVal;
+    let rightVal: string | null = matchGroups.rightVal;
     if (!leftVal) {
       leftVal = null;
     }
     if (!rightVal) {
       rightVal = null;
     }
-    const isVersionLeft = isVersion(leftVal);
-    const isVersionRight = isVersion(rightVal);
+    const isVersionLeft = is.string(leftVal) && isVersion(leftVal);
+    const isVersionRight = is.string(rightVal) && isVersion(rightVal);
     if (
       (leftVal === null || isVersionLeft) &&
       (rightVal === null || isVersionRight)
     ) {
-      if (isVersionLeft && isVersionRight && compare(leftVal, rightVal) === 1) {
+      if (
+        isVersionLeft &&
+        isVersionRight &&
+        leftVal &&
+        rightVal &&
+        compare(leftVal, rightVal) === 1
+      ) {
         return null;
       }
       const leftBound =
