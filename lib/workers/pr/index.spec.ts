@@ -160,7 +160,7 @@ describe('workers/pr/index', () => {
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      pr.isConflicted = true;
+      git.isBranchConflicted.mockResolvedValueOnce(true);
       await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });

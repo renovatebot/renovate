@@ -48,7 +48,7 @@ function determineDatasource(
       { repository, hostUrl },
       'Provided hostname does not match any hostRules. Ignoring'
     );
-    return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostname] };
+    return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
     [PlatformId.Gitea, gitlabTagsId],
@@ -67,7 +67,7 @@ function determineDatasource(
     { repository, registry: hostUrl },
     'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
   );
-  return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostname] };
+  return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
 
 function extractDependency(
@@ -115,7 +115,7 @@ function extractDependency(
     depType: 'repository',
     datasource: undefined,
     lookupName: undefined,
-    skipReason: SkipReason.InvalidUrl,
+    skipReason: 'invalid-url',
     currentValue: tag,
   };
 }

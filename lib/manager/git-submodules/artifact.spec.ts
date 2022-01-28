@@ -10,7 +10,9 @@ describe('manager/git-submodules/artifact', () => {
           newPackageFileContent: '',
           config: {},
         })
-      ).toMatchSnapshot([{ file: { contents: '', name: '' } }]);
+      ).toMatchSnapshot([
+        { file: { type: 'addition', path: '', contents: '' } },
+      ]);
     });
     it('returns two modules', () => {
       expect(
@@ -21,8 +23,8 @@ describe('manager/git-submodules/artifact', () => {
           config: {},
         })
       ).toMatchSnapshot([
-        { file: { name: 'renovate' } },
-        { file: { name: 'renovate-pro' } },
+        { file: { type: 'addition', path: 'renovate', contents: '' } },
+        { file: { type: 'addition', path: 'renovate-pro', contents: '' } },
       ]);
     });
   });

@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import type { PackageFile } from '../../../manager/types';
 import { platform } from '../../../platform';
 import { getCache } from '../../../util/cache/repository';
+import { clone } from '../../../util/clone';
 import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import type { BranchConfig } from '../../types';
@@ -18,7 +19,7 @@ async function getBaseBranchConfig(
 ): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
-  let baseBranchConfig: RenovateConfig = config;
+  let baseBranchConfig: RenovateConfig = clone(config);
 
   if (
     config.useBaseBranchConfig === 'merge' &&
@@ -55,6 +56,11 @@ async function getBaseBranchConfig(
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranches = config.baseBranches;
+  }
+
+  if (config.baseBranches.length > 1) {
+    baseBranchConfig.branchPrefix += `${baseBranch}-`;
+    baseBranchConfig.hasBaseBranches = true;
   }
 
   baseBranchConfig = mergeChildConfig(baseBranchConfig, { baseBranch });

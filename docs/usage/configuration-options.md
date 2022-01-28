@@ -2366,7 +2366,7 @@ Renovate's "rollback" feature exists to propose a downgrade to the next-highest 
 
 Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
 
-You can configure the `rollbackPrs` property globally, per-lanuage, or per-package to override the default behavior.
+You can configure the `rollbackPrs` property globally, per-language, or per-package to override the default behavior.
 
 ## ruby
 
@@ -2528,6 +2528,11 @@ If you have both `automerge` as well as `stabilityDays` enabled, it means that P
 This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
 
 <!-- markdownlint-enable MD001 -->
+
+## stopUpdatingLabel
+
+On supported platforms it is possible to add a label to a PR to request Renovate stop updating the PR.
+By default this label is `"stop-updating"` however you can configure it to anything you want by changing this `stopUpdatingLabel` field.
 
 ## suppressNotifications
 

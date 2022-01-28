@@ -1,6 +1,6 @@
 import { GenericVersion, GenericVersioningApi } from './generic';
 
-describe('versioning/loose/utils', () => {
+describe('versioning/generic', () => {
   const optionalFunctions = [
     'isLessThanRange',
     'valueToVersion',
