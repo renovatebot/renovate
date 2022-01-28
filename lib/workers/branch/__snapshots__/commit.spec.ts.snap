@@ -8,7 +8,8 @@ Array [
       "files": Array [
         Object {
           "contents": "some contents",
-          "name": "package.json",
+          "path": "package.json",
+          "type": "addition",
         },
       ],
       "force": false,

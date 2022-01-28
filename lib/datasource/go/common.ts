@@ -13,6 +13,7 @@ export const http = new Http(id);
 
 export const bitbucket = new BitBucketTagsDatasource();
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum GoproxyFallback {
   WhenNotFoundOrGone = ',',
   Always = '|',

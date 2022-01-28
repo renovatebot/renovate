@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { SkipReason } from '../../../types';
 import { getSiblingFileName, getSubDirectory } from '../../../util/fs';
 import type { PackageFile } from '../../types';
 import { detectPnpmWorkspaces } from './pnpm';
@@ -42,7 +41,7 @@ export async function detectMonorepos(
       if (!updateInternalDeps) {
         p.deps?.forEach((dep) => {
           if (internalPackageNames.includes(dep.depName)) {
-            dep.skipReason = SkipReason.InternalPackage;
+            dep.skipReason = 'internal-package';
           }
         });
       }
@@ -61,7 +60,7 @@ export async function detectMonorepos(
         if (!updateInternalDeps) {
           subPackage.deps?.forEach((dep) => {
             if (internalPackageNames.includes(dep.depName)) {
-              dep.skipReason = SkipReason.InternalPackage;
+              dep.skipReason = 'internal-package';
             }
           });
         }
