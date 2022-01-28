@@ -8,6 +8,7 @@ import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
@@ -36,6 +37,7 @@ export class MigrationsService {
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
+    ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],
     ['managerBranchPrefix', 'additionalBranchPrefix'],
@@ -51,6 +53,7 @@ export class MigrationsService {
     GoModTidyMigration,
     IgnoreNodeModulesMigration,
     PinVersionsMigration,
+    RaiseDeprecationWarningsMigration,
     RebaseConflictedPrs,
     RebaseStalePrsMigration,
     RequiredStatusChecksMigration,
