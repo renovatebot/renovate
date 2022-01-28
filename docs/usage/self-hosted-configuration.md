@@ -246,7 +246,7 @@ If this is set to `myprefix_` the final container created from `renovate/node` i
 
 <!-- prettier-ignore -->
 !!! note
-    Dangling containers will not be removed until Renovate is run with the same prefix again.
+    Dangling containers will only be removed when Renovate runs again with the same prefix.
 
 ## dockerImagePrefix
 
