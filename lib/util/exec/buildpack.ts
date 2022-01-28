@@ -20,6 +20,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'composer/composer',
     versioning: composerVersioningId,
   },
+  helm: {
+    datasource: 'github-releases',
+    depName: 'helm/helm',
+    versioning: semverVersioningId,
+  },
   jb: {
     datasource: 'github-releases',
     depName: 'jsonnet-bundler/jsonnet-bundler',
