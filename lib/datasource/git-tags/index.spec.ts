@@ -1,10 +1,10 @@
-import _simpleGit from 'simple-git';
+import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../test/fixtures';
 import { GitTagsDatasource } from '.';
 
 jest.mock('simple-git');
-const simpleGit: any = _simpleGit;
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
 const depName = 'https://github.com/example/example.git';
 
@@ -18,7 +18,7 @@ describe('datasource/git-tags/index', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(null);
+          return Promise.resolve(null) as Response<string>;
         },
       });
       const versions = await getPkgReleases({ datasource, depName });
@@ -36,7 +36,7 @@ describe('datasource/git-tags/index', () => {
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
 
@@ -51,7 +51,7 @@ describe('datasource/git-tags/index', () => {
     it('returns null if not found', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await datasourceInstance.getDigest(
@@ -63,7 +63,7 @@ describe('datasource/git-tags/index', () => {
     it('returns digest for tag', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await datasourceInstance.getDigest(
@@ -75,7 +75,7 @@ describe('datasource/git-tags/index', () => {
     it('returns digest for HEAD', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await datasourceInstance.getDigest(

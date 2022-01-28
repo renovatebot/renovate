@@ -2,14 +2,8 @@ import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { platform } from '../../../../platform';
-import {
-  commitFiles,
-  getFile,
-  isBranchModified,
-  isBranchStale,
-} from '../../../../util/git';
-import type { CommitFilesConfig } from '../../../../util/git/types';
+import { commitAndPush } from '../../../../platform/commit';
+import { getFile, isBranchModified, isBranchStale } from '../../../../util/git';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -50,7 +44,7 @@ export async function rebaseOnboardingBranch(
     return null;
   }
 
-  const commitConfig: CommitFilesConfig = {
+  return commitAndPush({
     branchName: config.onboardingBranch,
     files: [
       {
@@ -60,9 +54,6 @@ export async function rebaseOnboardingBranch(
       },
     ],
     message: commitMessage.toString(),
-  };
-
-  return config.platformCommit && platform.commitFiles
-    ? platform.commitFiles(commitConfig)
-    : commitFiles(commitConfig);
+    platformCommit: !!config.platformCommit,
+  });
 }
