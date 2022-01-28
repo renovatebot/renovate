@@ -49,7 +49,7 @@ In this example we defined 3 NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the 3 feeds.
 All feeds are checked for dependency updates, and duplicate updates are merged/joined together into a single dependency update.
 
-If your project uses lockfiles (a `package.lock.json` exists), alternate feed settings are ignored and _only_ `NuGet.config` and `https://api.nuget.org/v3/index.json` are considered for lookups.
+If your project uses lockfiles (a `package.lock.json` exists), alternate feed settings must be defined in a `NuGet.config` as `registryUrls` are not passed through to the NuGet commands used.
 
 ### Protocol versions
 
