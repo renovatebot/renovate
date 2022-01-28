@@ -5,7 +5,6 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { splitImageParts } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
@@ -57,7 +56,7 @@ export function extractImage(image: Image): PackageDependency | null {
       depName,
       currentValue: newTag,
       currentDigest: digest,
-      skipReason: SkipReason.InvalidDependencySpecification,
+      skipReason: 'invalid-dependency-specification',
     };
   }
 
@@ -66,7 +65,7 @@ export function extractImage(image: Image): PackageDependency | null {
       return {
         depName,
         currentValue: digest,
-        skipReason: SkipReason.InvalidValue,
+        skipReason: 'invalid-value',
       };
     }
 
@@ -84,7 +83,7 @@ export function extractImage(image: Image): PackageDependency | null {
       return {
         depName,
         currentValue: newTag,
-        skipReason: SkipReason.InvalidValue,
+        skipReason: 'invalid-value',
       };
     }
 

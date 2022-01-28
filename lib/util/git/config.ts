@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { SimpleGitOptions } from 'simple-git';
+import type { SimpleGitOptions } from 'simple-git';
 import type { GitNoVerifyOption } from './types';
 
 let noVerify: GitNoVerifyOption[] = ['push', 'commit'];

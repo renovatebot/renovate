@@ -39,9 +39,9 @@ export async function set(
   await cacheProxy.set(namespace, key, value, minutes);
 }
 
-export function init(config: AllConfig): void {
+export async function init(config: AllConfig): Promise<void> {
   if (config.redisUrl) {
-    redisCache.init(config.redisUrl);
+    await redisCache.init(config.redisUrl);
     cacheProxy = {
       get: redisCache.get,
       set: redisCache.set,
@@ -55,8 +55,8 @@ export function init(config: AllConfig): void {
   }
 }
 
-export function cleanup(config: AllConfig): void {
+export async function cleanup(config: AllConfig): Promise<void> {
   if (config?.redisUrl) {
-    redisCache.end();
+    await redisCache.end();
   }
 }

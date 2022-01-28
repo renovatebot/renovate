@@ -9,6 +9,7 @@ const pomContent = loadFixture('simple.pom.xml');
 const pomParent = loadFixture('parent.pom.xml');
 const pomChild = loadFixture('child.pom.xml');
 const origContent = loadFixture('grouping.pom.xml');
+const settingsContent = loadFixture('mirror.settings.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
@@ -26,6 +27,27 @@ describe('manager/maven/index', () => {
       fs.readLocalFile.mockResolvedValueOnce('invalid content');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
       expect(res).toBeEmptyArray();
+    });
+
+    it('should return packages with urls from a settings file', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(settingsContent)
+        .mockResolvedValueOnce(pomContent);
+      const packages = await extractAllPackageFiles({}, [
+        'settings.xml',
+        'simple.pom.xml',
+      ]);
+      const urls = [
+        'https://repo.maven.apache.org/maven2',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://artifactory.company.com/artifactory/my-maven-repo',
+      ];
+      for (const pkg of packages) {
+        for (const dep of pkg.deps) {
+          const depUrls = [...dep.registryUrls];
+          expect(depUrls).toEqual(urls);
+        }
+      }
     });
 
     it('should return package files info', async () => {
@@ -52,6 +74,10 @@ describe('manager/maven/index', () => {
               currentValue: '1.8.1',
             },
             {
+              depName: 'org.example:extension-artefact',
+              currentValue: '1.0',
+            },
+            {
               depName: 'org.example:${artifact-id-placeholder}',
               skipReason: 'name-placeholder',
             },
@@ -72,7 +98,6 @@ describe('manager/maven/index', () => {
             {
               depName: 'org.example:quuz',
               currentValue: '1.2.3',
-              depType: 'test',
             },
             {
               depName: 'org.example:quuuz',
@@ -80,9 +105,17 @@ describe('manager/maven/index', () => {
             },
             { depName: 'org.example:hard-range', currentValue: '[1.0.0]' },
             {
+              depName: 'org.example:relocation-artifact',
+              currentValue: '1.0',
+            },
+            {
               depName: 'org.example:profile-artifact',
               currentValue: '${profile-placeholder}',
               skipReason: 'version-placeholder',
+            },
+            {
+              depName: 'org.example:profile-build-artefact',
+              currentValue: '2.17',
             },
             {
               depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',

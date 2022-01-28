@@ -104,7 +104,6 @@ function toRenovatePR(data: helper.PR): Pr | null {
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
     canMerge: data.mergeable,
-    isConflicted: !data.mergeable,
     hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
