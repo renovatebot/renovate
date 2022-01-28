@@ -104,7 +104,7 @@ describe('manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(1);
+    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -131,7 +131,7 @@ describe('manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(1);
+    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -216,7 +216,7 @@ describe('manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(3);
+    expect(execSnapshots).toBeArrayOfSize(4);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -295,7 +295,7 @@ describe('manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(4);
+    expect(execSnapshots).toBeArrayOfSize(5);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -384,6 +384,13 @@ describe('manager/helmv3/artifacts', () => {
     expect(
       execSnapshots.filter((value) =>
         value.cmd.startsWith('helm repo add repo1')
+      )
+    ).toBeArrayOfSize(1);
+    expect(
+      execSnapshots.filter((value) =>
+        value.cmd.includes(
+          'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable'
+        )
       )
     ).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchSnapshot();

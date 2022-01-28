@@ -60,7 +60,6 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
       // remove additional keys to prevent interference at deduplication
       return {
         name: dependency.name,
-        isAlias: dependency.isAlias,
         repository: dependency.repository,
       };
     });
@@ -82,7 +81,6 @@ export function aliasRecordToRepositories(
   return Object.entries(aliases).map(([alias, url]) => {
     return {
       name: alias,
-      isAlias: true,
       repository: url,
     };
   });
