@@ -75,18 +75,18 @@ export interface CommitFilesConfig {
   force?: boolean;
 }
 
-type BranchName = string;
-type TargetBranchName = BranchName;
-type SourceBranchName = BranchName;
+export type BranchName = string;
+export type TargetBranchName = BranchName;
+export type SourceBranchName = BranchName;
 
 export type GitConflictsCache = Record<TargetBranchName, TargetBranchConflicts>;
 
-interface TargetBranchConflicts {
+export interface TargetBranchConflicts {
   targetBranchSha: CommitSha;
   sourceBranches: Record<SourceBranchName, SourceBranchConflict>;
 }
 
-interface SourceBranchConflict {
+export interface SourceBranchConflict {
   sourceBranchSha: CommitSha;
   isConflicted: boolean;
 }
