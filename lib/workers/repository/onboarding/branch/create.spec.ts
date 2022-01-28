@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
+import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
 import { commitFiles } from '../../../../util/git';
 import { CommitMessage } from '../../model/commit-message';
 import { createOnboardingBranch } from './create';
@@ -20,7 +20,6 @@ describe('workers/repository/onboarding/branch/create', () => {
   describe('createOnboardingBranch', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
-
       expect(commitFiles).toHaveBeenCalledWith({
         branchName: 'renovate/configure',
         files: [
@@ -31,6 +30,27 @@ describe('workers/repository/onboarding/branch/create', () => {
           },
         ],
         message: 'Add renovate.json',
+        platformCommit: false,
+      });
+    });
+    it('commits via platform', async () => {
+      platform.commitFiles = jest.fn();
+
+      config.platformCommit = true;
+
+      await createOnboardingBranch(config);
+
+      expect(platform.commitFiles).toHaveBeenCalledWith({
+        branchName: 'renovate/configure',
+        files: [
+          {
+            type: 'addition',
+            path: 'renovate.json',
+            contents: '{"foo":"bar"}',
+          },
+        ],
+        message: 'Add renovate.json',
+        platformCommit: true,
       });
     });
     it('applies supplied commit message', async () => {
@@ -51,6 +71,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           },
         ],
         message,
+        platformCommit: false,
       });
     });
     describe('applies the commitMessagePrefix value', () => {
@@ -72,6 +93,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           message,
+          platformCommit: false,
         });
       });
       it('to the supplied commit message', async () => {
@@ -95,6 +117,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           message,
+          platformCommit: false,
         });
       });
     });
@@ -117,6 +140,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           message,
+          platformCommit: false,
         });
       });
       it('to the supplied commit message', async () => {
@@ -140,6 +164,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           message,
+          platformCommit: false,
         });
       });
     });
@@ -163,6 +188,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           message,
+          platformCommit: false,
         });
       });
       it('falls back to the default option if in list of allowed names', async () => {
@@ -184,6 +210,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           message,
+          platformCommit: false,
         });
       });
       it('uses the given name if valid', async () => {
@@ -206,6 +233,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           message,
+          platformCommit: false,
         });
       });
       it('applies to the default commit message', async () => {
@@ -222,6 +250,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           branchName: 'renovate/configure',
           files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           message,
+          platformCommit: false,
         });
       });
     });
