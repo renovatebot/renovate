@@ -155,7 +155,7 @@ function handleGotError(
 }
 
 interface GraphqlOptions {
-  variables?: Record<string, string | number | null | Record<string, unknown>>;
+  variables?: { [k: string]: unknown };
   paginate?: boolean;
   count?: number;
   limit?: number;

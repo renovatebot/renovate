@@ -113,3 +113,13 @@ export interface GhAutomergeResponse {
     pullRequest: { number: number };
   };
 }
+
+export interface GithubGraphqlFileChanges {
+  additions: {
+    path: string;
+    contents: string;
+  }[];
+  deletions: {
+    path: string;
+  }[];
+}

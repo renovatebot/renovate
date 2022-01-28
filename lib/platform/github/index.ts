@@ -73,6 +73,7 @@ import {
   GhGraphQlPr,
   GhRepo,
   GhRestPr,
+  GithubGraphqlFileChanges,
   LocalRepoConfig,
   PlatformConfig,
   PrList,
@@ -1769,7 +1770,7 @@ async function pushFiles(
     return null;
   }
 
-  const fileChanges = {
+  const fileChanges: GithubGraphqlFileChanges = {
     additions: additions.map(({ path, contents }) => ({
       path,
       contents: Buffer.from(contents).toString('base64'),
