@@ -80,7 +80,7 @@ export interface GlobalOnlyConfig {
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
-  globalPresets?: string[];
+  globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
   prCommitsPerRunLimit?: number;

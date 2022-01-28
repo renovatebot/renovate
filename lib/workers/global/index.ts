@@ -85,12 +85,12 @@ export async function validatePresets(config: AllConfig): Promise<void> {
   }
 }
 
-export async function resolveGlobalPresets(
-  globalPresets: string[]
+export async function resolveGlobalExtends(
+  globalExtends: string[]
 ): Promise<AllConfig> {
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
-    const config = { extends: globalPresets };
+    const config = { extends: globalExtends };
     const resolvedConfig = await resolveConfigPresets(config);
     return resolvedConfig;
   } catch (err) /* istanbul ignore next */ {
@@ -103,9 +103,9 @@ export async function start(): Promise<number> {
   try {
     // read global config from file, env and cli args
     config = await getGlobalConfig();
-    if (config?.globalPresets) {
+    if (config?.globalExtends) {
       // resolve global presets immediately
-      config = await resolveGlobalPresets(config.globalPresets);
+      config = await resolveGlobalExtends(config.globalExtends);
     }
     // initialize all submodules
     config = await globalInitialize(config);

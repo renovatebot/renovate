@@ -41,7 +41,7 @@ describe('workers/global/index', () => {
   it('resolves global presets immediately', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       repositories: [],
-      globalPresets: [':pinVersions'],
+      globalExtends: [':pinVersions'],
     });
     presets.resolveConfigPresets.mockResolvedValueOnce({});
     await expect(globalWorker.start()).resolves.toBe(0);
