@@ -49,6 +49,8 @@ In this example we defined 3 NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the 3 feeds.
 All feeds are checked for dependency updates, and duplicate updates are merged/joined together into a single dependency update.
 
+If your project uses lockfiles (a `package.lock.json` exists), configuration settings are ignored and _only_ `NuGet.config` and `https://api.nuget.org/v3/index.json` are considered for lookups.
+
 ### Protocol versions
 
 NuGet supports two protocol versions, `v2` and `v3`, the NuGet client and server must use the same protocol version.
