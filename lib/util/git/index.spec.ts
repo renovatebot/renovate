@@ -1,12 +1,19 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
-import SimpleGit from 'simple-git/src/git';
 import tmp from 'tmp-promise';
+import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
+
+jest.mock('./conflicts-cache');
+const conflictsCache = mocked(_conflictsCache);
+
+// Class is no longer exported
+const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
   jest.setTimeout(15000);
@@ -598,6 +605,152 @@ describe('util/git/index', () => {
   describe('setGitAuthor()', () => {
     it('throws for invalid', () => {
       expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
+    });
+  });
+
+  describe('isBranchConflicted', () => {
+    beforeAll(async () => {
+      const repo = Git(base.path);
+      await repo.init();
+
+      await repo.checkout(['-b', 'renovate/conflicted_branch', defaultBranch]);
+      await repo.checkout([
+        '-b',
+        'renovate/non_conflicted_branch',
+        defaultBranch,
+      ]);
+
+      await repo.checkout(defaultBranch);
+      await fs.writeFile(base.path + '/one_file', 'past (updated)');
+      await repo.add(['one_file']);
+      await repo.commit('past (updated) message');
+
+      await repo.checkout('renovate/conflicted_branch');
+      await fs.writeFile(base.path + '/one_file', 'past (updated branch)');
+      await repo.add(['one_file']);
+      await repo.commit('past (updated branch) message');
+
+      await repo.checkout('renovate/non_conflicted_branch');
+      await fs.writeFile(base.path + '/another_file', 'other');
+      await repo.add(['another_file']);
+      await repo.commit('other (updated branch) message');
+
+      await repo.checkout(defaultBranch);
+
+      conflictsCache.getCachedConflictResult.mockReturnValue(null);
+    });
+
+    it('returns true for non-existing source branch', async () => {
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/non_existing_branch'
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('returns true for non-existing target branch', async () => {
+      const res = await git.isBranchConflicted(
+        'renovate/non_existing_branch',
+        'renovate/non_conflicted_branch'
+      );
+      expect(res).toBeTrue();
+    });
+
+    it('detects conflicted branch', async () => {
+      const branchBefore = 'renovate/non_conflicted_branch';
+      await git.checkoutBranch(branchBefore);
+
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/conflicted_branch'
+      );
+
+      expect(res).toBeTrue();
+
+      const status = await git.getRepoStatus();
+      expect(status.current).toEqual(branchBefore);
+      expect(status.isClean()).toBeTrue();
+    });
+
+    it('detects non-conflicted branch', async () => {
+      const branchBefore = 'renovate/conflicted_branch';
+      await git.checkoutBranch(branchBefore);
+
+      const res = await git.isBranchConflicted(
+        defaultBranch,
+        'renovate/non_conflicted_branch'
+      );
+
+      expect(res).toBeFalse();
+
+      const status = await git.getRepoStatus();
+      expect(status.current).toEqual(branchBefore);
+      expect(status.isClean()).toBeTrue();
+    });
+
+    describe('cache', () => {
+      beforeEach(() => {
+        jest.resetAllMocks();
+      });
+      it('returns cached values', async () => {
+        conflictsCache.getCachedConflictResult.mockReturnValue(true);
+
+        const res = await git.isBranchConflicted(
+          defaultBranch,
+          'renovate/conflicted_branch'
+        );
+
+        expect(res).toBeTrue();
+        expect(conflictsCache.getCachedConflictResult.mock.calls).toEqual([
+          [
+            defaultBranch,
+            expect.any(String),
+            'renovate/conflicted_branch',
+            expect.any(String),
+          ],
+        ]);
+        expect(conflictsCache.setCachedConflictResult).not.toHaveBeenCalled();
+      });
+
+      it('caches truthy return value', async () => {
+        conflictsCache.getCachedConflictResult.mockReturnValue(null);
+
+        const res = await git.isBranchConflicted(
+          defaultBranch,
+          'renovate/conflicted_branch'
+        );
+
+        expect(res).toBeTrue();
+        expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
+          [
+            defaultBranch,
+            expect.any(String),
+            'renovate/conflicted_branch',
+            expect.any(String),
+            true,
+          ],
+        ]);
+      });
+
+      it('caches falsy return value', async () => {
+        conflictsCache.getCachedConflictResult.mockReturnValue(null);
+
+        const res = await git.isBranchConflicted(
+          defaultBranch,
+          'renovate/non_conflicted_branch'
+        );
+
+        expect(res).toBeFalse();
+        expect(conflictsCache.setCachedConflictResult.mock.calls).toEqual([
+          [
+            defaultBranch,
+            expect.any(String),
+            'renovate/non_conflicted_branch',
+            expect.any(String),
+            false,
+          ],
+        ]);
+      });
     });
   });
 });

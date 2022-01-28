@@ -66,6 +66,20 @@ Object {
       "semanticCommitType": "fix",
     },
     Object {
+      "matchDatasources": Array [
+        "maven",
+      ],
+      "matchDepTypes": Array [
+        "compile",
+        "provided",
+        "runtime",
+        "system",
+        "import",
+        "parent",
+      ],
+      "semanticCommitType": "fix",
+    },
+    Object {
       "matchPackagePatterns": Array [
         "*",
       ],

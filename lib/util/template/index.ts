@@ -77,6 +77,7 @@ export const allowedFields = {
     'The depName field sanitized for use in branches after removing spaces and special characters',
   depType: 'The dependency type (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
+  displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
   isLockfileUpdate: 'true if the branch is a lock file update',

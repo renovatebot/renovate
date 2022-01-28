@@ -533,9 +533,7 @@ Array [
 
 exports[`manager/poetry/extract extractPackageFile() handles multiple constraint dependencies 1`] = `
 Object {
-  "constraints": Object {
-    "poetry": "poetry>=1.1.2 setuptools poetry-dynamic-versioning",
-  },
+  "constraints": Object {},
   "deps": Array [
     Object {
       "currentValue": "",
