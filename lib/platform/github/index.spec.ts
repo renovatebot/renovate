@@ -2608,6 +2608,25 @@ describe('platform/github/index', () => {
       expect(res).toBe('0abcdef');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns null if pre-commit phase has failed', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      git.prepareCommit.mockResolvedValueOnce(null);
+
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [
+          { type: 'addition', path: 'foo.bar', contents: 'foobar' },
+          { type: 'deletion', path: 'baz' },
+          { type: 'deletion', path: 'qux' },
+        ],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
     it('returns null if executable files are found', async () => {
       const res = await github.commitFiles({
         branchName: 'foo/bar',
