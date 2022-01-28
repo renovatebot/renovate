@@ -14,6 +14,7 @@ import { addMetaData } from './metadata';
 import type {
   DatasourceApi,
   DigestConfig,
+  GetDigestInputConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
   ReleaseResult,
@@ -372,23 +373,26 @@ export async function getPkgReleases(
   return res;
 }
 
-export function supportsDigests(config: DigestConfig): boolean {
-  return 'getDigest' in getDatasourceFor(config.datasource);
+export function supportsDigests(datasource: string | undefined): boolean {
+  return !!datasource && 'getDigest' in getDatasourceFor(datasource);
+}
+
+function getDigestConfig(
+  datasource: DatasourceApi,
+  config: GetDigestInputConfig
+): DigestConfig {
+  const { currentValue, currentDigest } = config;
+  const lookupName = config.lookupName ?? config.depName;
+  const [registryUrl] = resolveRegistryUrls(datasource, config.registryUrls);
+  return { lookupName, registryUrl, currentValue, currentDigest };
 }
 
 export function getDigest(
-  config: DigestConfig,
+  config: GetDigestInputConfig,
   value?: string
 ): Promise<string | null> {
   const datasource = getDatasourceFor(config.datasource);
-  const lookupName = config.lookupName || config.depName;
-  const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  const digestConfig: DigestConfig = {
-    registryUrl: registryUrls[0],
-    currentValue: config.currentValue,
-    currentDigest: config.currentDigest,
-    lookupName,
-  };
+  const digestConfig = getDigestConfig(datasource, config);
   return datasource.getDigest(digestConfig, value);
 }
 
