@@ -54,6 +54,7 @@ export interface RenovateSharedConfig {
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
+  stopUpdatingLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   repository?: string;
@@ -158,6 +159,8 @@ export interface CustomManager {
   autoReplaceStringTemplate?: string;
 }
 
+export type UseBaseBranchConfigType = 'merge' | 'none';
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
@@ -167,6 +170,7 @@ export interface RenovateConfig
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
+  useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
   branchList?: string[];

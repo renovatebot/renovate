@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
-const input01Content = loadFixture('package-1.js');
+const input01Content = Fixtures.get('package-1.js');
 
 describe('manager/meteor/extract', () => {
   describe('extractPackageFile()', () => {

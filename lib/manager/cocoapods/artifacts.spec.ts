@@ -169,10 +169,10 @@ describe('manager/cocoapods/artifacts', () => {
         config,
       })
     ).toMatchSnapshot([
-      { file: { name: 'Podfile.lock' } },
-      { file: { name: 'Pods/Manifest.lock' } },
-      { file: { name: 'Pods/New' } },
-      { file: { name: '|delete|' } },
+      { file: { type: 'addition', path: 'Podfile.lock' } },
+      { file: { type: 'addition', path: 'Pods/Manifest.lock' } },
+      { file: { type: 'addition', path: 'Pods/New' } },
+      { file: { type: 'deletion', path: 'Pods/Deleted' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
