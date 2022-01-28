@@ -1,6 +1,6 @@
 import delay from 'delay';
 import fs from 'fs-extra';
-import _simpleGit from 'simple-git';
+import _simpleGit, { SimpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
@@ -13,7 +13,7 @@ import { RegistryFlavor, RegistryInfo } from './types';
 import { CrateDatasource } from '.';
 
 jest.mock('simple-git');
-const simpleGit: any = _simpleGit;
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
