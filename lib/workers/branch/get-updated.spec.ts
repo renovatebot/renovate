@@ -356,7 +356,8 @@ describe('workers/branch/get-updated', () => {
       poetry.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
-            name: 'poetry.lock',
+            type: 'addition',
+            path: 'poetry.lock',
             contents: 'some contents',
           },
         },
