@@ -2,7 +2,7 @@ import type { RenovateConfig } from '../../types';
 import { AbstractMigration } from './abstract-migration';
 
 export class RemovePropertyMigration extends AbstractMigration {
-  readonly propertyName: string;
+  override readonly propertyName: string;
 
   constructor(
     propertyName: string,

@@ -45,7 +45,7 @@ export const isVersion = (version: string): boolean => !!valid(vtrim(version));
 const isGreaterThan = (left: string, right: string): boolean =>
   gt(vtrim(left), vtrim(right));
 const isLessThanRange = (version: string, range: string): boolean =>
-  ltr(vtrim(version), vtrim(range));
+  !!ltr(vtrim(version), vtrim(range));
 
 const isSingleVersion = (range: string): boolean => {
   const { version, operator } = parseRange(vtrim(range));
@@ -74,17 +74,25 @@ export const isValid = (input: string): boolean =>
 
 export const matches = (version: string, range: string): boolean =>
   satisfies(vtrim(version), vtrim(range));
-const getSatisfyingVersion = (versions: string[], range: string): string =>
-  maxSatisfying(versions.map(vtrim), vtrim(range));
-const minSatisfyingVersion = (versions: string[], range: string): string =>
-  minSatisfying(versions.map(vtrim), vtrim(range));
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return maxSatisfying(versions.map(vtrim), vtrim(range));
+}
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  return minSatisfying(versions.map(vtrim), vtrim(range));
+}
 
 const getNewValue = ({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string => {
+}: NewValueConfig): string | null => {
   let newValue = null;
   if (isVersion(currentValue)) {
     newValue = currentValue.startsWith('v') ? 'v' + newVersion : newVersion;
@@ -123,7 +131,7 @@ const getNewValue = ({
         logger.warn(`Unsupported strategy ${rangeStrategy}`);
     }
   }
-  if (regEx(/^('|")/).exec(currentValue)) {
+  if (newValue && regEx(/^('|")/).exec(currentValue)) {
     const delimiter = currentValue[0];
     return newValue
       .split(',')

@@ -11,6 +11,7 @@ export const presets: Record<string, Preset> = {
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
+      'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
     ],
   },
@@ -81,6 +82,30 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['@hapi/joi'],
         replacementName: 'joi',
         replacementVersion: '17.1.1',
+      },
+    ],
+  },
+  'redux-devtools-extension-to-scope': {
+    description:
+      'the redux-devtools-extension package was renamed to @redux-devtools/extension',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['redux-devtools-extension'],
+        replacementName: '@redux-devtools/extension',
+        replacementVersion: '3.0.0',
+      },
+    ],
+  },
+  'renovate-pep440-to-renovatebot-pep440': {
+    description:
+      'the @renovate/pep440 package was renamed to @renovatebot/pep440',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@renovate/pep440'],
+        replacementName: '@renovatebot/pep440',
+        replacementVersion: '1.0.0',
       },
     ],
   },

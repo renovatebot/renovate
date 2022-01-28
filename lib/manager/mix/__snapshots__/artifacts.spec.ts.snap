@@ -5,7 +5,8 @@ Array [
   Object {
     "file": Object {
       "contents": "New mix.lock",
-      "name": "mix.lock",
+      "path": "mix.lock",
+      "type": "addition",
     },
   },
 ]
