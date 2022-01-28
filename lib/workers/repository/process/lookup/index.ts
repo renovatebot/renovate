@@ -319,7 +319,7 @@ export async function lookupUpdates(
       res.fixedVersion = currentValue.replace(regEx(/^=+/), '');
     }
     // Add digests if necessary
-    if (supportsDigests(config)) {
+    if (supportsDigests(config.datasource)) {
       if (currentDigest) {
         if (!digestOneAndOnly || !res.updates.length) {
           // digest update
