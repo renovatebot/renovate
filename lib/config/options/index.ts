@@ -2226,7 +2226,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'platformCommit',
-    description: `Perform commits by taking advantage of the platform-native API.`,
+    description: `Use platform API to perform commits instead of using git directly.`,
     type: 'boolean',
     default: false,
     supportedPlatforms: ['github'],
