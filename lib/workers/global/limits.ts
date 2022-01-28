@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum Limit {
   Commits = 'Commits',
   PullRequests = 'PullRequests',

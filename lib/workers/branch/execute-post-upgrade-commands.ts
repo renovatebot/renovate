@@ -4,16 +4,16 @@ import { GlobalConfig } from '../../config/global';
 import { addMeta, logger } from '../../logger';
 import type { ArtifactError } from '../../manager/types';
 import { exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { localPathIsFile, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
-import type { File } from '../../util/git/types';
+import type { FileChange } from '../../util/git/types';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { compile } from '../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 export type PostUpgradeCommandsExecutionResult = {
-  updatedArtifacts: File[];
+  updatedArtifacts: FileChange[];
   artifactErrors: ArtifactError[];
 };
 
@@ -37,11 +37,11 @@ export async function postUpgradeCommandsExecutor(
     );
     const commands = upgrade.postUpgradeTasks?.commands || [];
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters || [];
-
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles.concat(updatedArtifacts)) {
-        if (file.type === 'addition') {
+        const canWriteFile = await localPathIsFile(file.path);
+        if (file.type === 'addition' && canWriteFile) {
           let contents;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);

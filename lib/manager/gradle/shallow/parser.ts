@@ -245,7 +245,10 @@ function processPlugin({
         const currentValue = varData.value;
         const fileReplacePosition = varData.fileReplacePosition;
         dep.currentValue = currentValue;
-        dep.managerData = { fileReplacePosition, packageFile };
+        dep.managerData = {
+          fileReplacePosition,
+          packageFile: varData.packageFile,
+        };
       } else {
         const currentValue = child.value;
         const fileReplacePosition = child.offset;

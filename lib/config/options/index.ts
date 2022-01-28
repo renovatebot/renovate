@@ -1393,7 +1393,7 @@ const options: RenovateOptions[] = [
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['bitbucket'],
+    supportedPlatforms: ['bitbucket', 'bitbucket-server'],
   },
   // Automatic merging
   {
@@ -1973,6 +1973,7 @@ const options: RenovateOptions[] = [
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
       Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
     },
@@ -1982,7 +1983,7 @@ const options: RenovateOptions[] = [
     description: 'List of columns to use in PR bodies.',
     type: 'array',
     subType: 'string',
-    default: ['Package', 'Type', 'Update', 'Change'],
+    default: ['Package', 'Type', 'Update', 'Change', 'Pending'],
   },
   {
     name: 'prBodyNotes',
@@ -2212,6 +2213,7 @@ const options: RenovateOptions[] = [
     description:
       'User-facing strings pertaining to the PR comment that gets posted when a PR is closed.',
     type: 'object',
+    freeChoice: true,
     default: {
       ignoreTopic: 'Renovate Ignore Notification',
       ignoreMajor:

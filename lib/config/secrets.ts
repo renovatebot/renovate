@@ -5,7 +5,7 @@ import {
 } from '../constants/error-messages';
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
-import { add } from '../util/sanitize';
+import { addSecretForSanitizing } from '../util/sanitize';
 import { AllConfig, RenovateConfig } from './types';
 
 const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
@@ -120,7 +120,7 @@ export function applySecretsToConfig(
   // Add all secrets to be sanitized
   if (is.plainObject(secrets)) {
     for (const secret of Object.values(secrets)) {
-      add(String(secret));
+      addSecretForSanitizing(String(secret));
     }
   }
   return replaceSecretsinObject(config, secrets);

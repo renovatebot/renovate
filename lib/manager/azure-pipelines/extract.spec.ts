@@ -1,4 +1,4 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import {
   extractContainer,
   extractPackageFile,
@@ -6,11 +6,11 @@ import {
   parseAzurePipelines,
 } from './extract';
 
-const azurePipelines = loadFixture('azure-pipelines.yaml');
+const azurePipelines = Fixtures.get('azure-pipelines.yaml');
 
-const azurePipelinesInvalid = loadFixture('azure-pipelines-invalid.yaml');
+const azurePipelinesInvalid = Fixtures.get('azure-pipelines-invalid.yaml');
 
-const azurePipelinesNoDependency = loadFixture(
+const azurePipelinesNoDependency = Fixtures.get(
   'azure-pipelines-no-dependency.yaml'
 );
 

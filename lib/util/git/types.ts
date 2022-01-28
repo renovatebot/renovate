@@ -28,6 +28,8 @@ export interface LocalConfig extends StorageConfig {
   ignoredAuthors: string[];
   gitAuthorName?: string;
   gitAuthorEmail?: string;
+
+  writeGitDone?: boolean;
 }
 
 export interface FileAddition {
@@ -64,11 +66,32 @@ export interface FileDeletion {
   path: string;
 }
 
-export type File = FileAddition | FileDeletion;
+export type FileChange = FileAddition | FileDeletion;
 
-export type CommitFilesConfig = {
+export interface CommitFilesConfig {
   branchName: string;
-  files: File[];
+  files: FileChange[];
   message: string;
   force?: boolean;
-};
+}
+
+export type BranchName = string;
+export type TargetBranchName = BranchName;
+export type SourceBranchName = BranchName;
+
+export type GitConflictsCache = Record<TargetBranchName, TargetBranchConflicts>;
+
+export interface TargetBranchConflicts {
+  targetBranchSha: CommitSha;
+  sourceBranches: Record<SourceBranchName, SourceBranchConflict>;
+}
+
+export interface SourceBranchConflict {
+  sourceBranchSha: CommitSha;
+  isConflicted: boolean;
+}
+
+export interface CommitResult {
+  sha: string;
+  files: FileChange[];
+}

@@ -43,6 +43,16 @@ body:
     validations:
       required: false
 
+  - type: dropdown
+    id: regression-error
+    attributes:
+      label: Was this something which used to work for you, and then stopped?
+      options:
+        - 'It used to work, and then stopped'
+        - 'I never saw this working'
+    validations:
+      required: true
+
   - type: textarea
     id: describe-bug
     attributes:

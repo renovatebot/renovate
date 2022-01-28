@@ -1,4 +1,4 @@
-import type { File } from '../../../util/git/types';
+import type { FileChange } from '../../../util/git/types';
 import type { PackageFile } from '../../types';
 
 export interface DetermineLockFileDirsResult {
@@ -19,7 +19,7 @@ export interface ArtifactError {
 
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
-  updatedArtifacts: File[];
+  updatedArtifacts: FileChange[];
 }
 
 export interface GenerateLockFileResult {

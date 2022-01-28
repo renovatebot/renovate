@@ -55,7 +55,6 @@ export interface Pr {
   displayNumber?: string;
   hasAssignees?: boolean;
   hasReviewers?: boolean;
-  isConflicted?: boolean;
   labels?: string[];
   number?: number;
   reviewers?: string[];

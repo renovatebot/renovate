@@ -1,5 +1,4 @@
-import * as _fs from 'fs-extra';
-import { defaultConfig, git, mocked, platform } from '../../../test/util';
+import { defaultConfig, fs, git, mocked, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import {
@@ -10,7 +9,7 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../manager/npm/post-update/types';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
-import type { File, StatusResult } from '../../util/git/types';
+import type { FileChange, StatusResult } from '../../util/git/types';
 import * as _mergeConfidence from '../../util/merge-confidence';
 import * as _sanitize from '../../util/sanitize';
 import * as _limits from '../global/limits';
@@ -41,8 +40,8 @@ jest.mock('../pr/automerge');
 jest.mock('../../util/exec');
 jest.mock('../../util/merge-confidence');
 jest.mock('../../util/sanitize');
+jest.mock('../../util/fs');
 jest.mock('../../util/git');
-jest.mock('fs-extra');
 jest.mock('../global/limits');
 
 const getUpdated = mocked(_getUpdated);
@@ -57,12 +56,11 @@ const prAutomerge = mocked(_prAutomerge);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const sanitize = mocked(_sanitize);
-const fs = mocked(_fs);
 const limits = mocked(_limits);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
-function findFileContent(files: File[], path: string): string | null {
+function findFileContent(files: FileChange[], path: string): string | null {
   const f = files.find((file) => file.path === path);
   if (f.type === 'addition') {
     return f.contents.toString();
@@ -1010,7 +1008,7 @@ describe('workers/branch/index', () => {
     });
 
     it('executes post-upgrade tasks if trust is high', async () => {
-      const updatedPackageFile: File = {
+      const updatedPackageFile: FileChange = {
         type: 'addition',
         path: 'pom.xml',
         contents: 'pom.xml file contents',
@@ -1041,9 +1039,13 @@ describe('workers/branch/index', () => {
         not_added: [],
         deleted: ['deleted_file'],
       } as StatusResult);
-
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1093,7 +1095,7 @@ describe('workers/branch/index', () => {
     });
 
     it('handles post-upgrade task exec errors', async () => {
-      const updatedPackageFile: File = {
+      const updatedPackageFile: FileChange = {
         type: 'addition',
         path: 'pom.xml',
         contents: 'pom.xml file contents',
@@ -1124,8 +1126,13 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1164,7 +1171,7 @@ describe('workers/branch/index', () => {
     });
 
     it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {
-      const updatedPackageFile: File = {
+      const updatedPackageFile: FileChange = {
         type: 'addition',
         path: 'pom.xml',
         contents: 'pom.xml file contents',
@@ -1196,8 +1203,13 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+      fs.readLocalFile.mockResolvedValueOnce('modified file content');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1239,7 +1251,7 @@ describe('workers/branch/index', () => {
     });
 
     it('executes post-upgrade tasks with multiple dependecy in one branch', async () => {
-      const updatedPackageFile: File = {
+      const updatedPackageFile: FileChange = {
         type: 'addition',
         path: 'pom.xml',
         contents: 'pom.xml file contents',
@@ -1277,12 +1289,15 @@ describe('workers/branch/index', () => {
           deleted: ['deleted_file', 'modified_then_deleted_file'],
         } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile
-        .mockResolvedValueOnce(Buffer.from('modified file content'))
-        .mockResolvedValueOnce(Buffer.from('this file will not exists'))
-        .mockResolvedValueOnce(Buffer.from('modified file content again'))
-        .mockResolvedValueOnce(Buffer.from('this file was once deleted'));
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content' as never)
+        .mockResolvedValueOnce('this file will not exists' as never)
+        .mockResolvedValueOnce('modified file content again' as never)
+        .mockResolvedValueOnce('this file was once deleted' as never);
+      fs.localPathExists.mockResolvedValue(true).mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1381,7 +1396,7 @@ describe('workers/branch/index', () => {
     });
 
     it('executes post-upgrade tasks once when set to branch mode', async () => {
-      const updatedPackageFile: File = {
+      const updatedPackageFile: FileChange = {
         type: 'addition',
         path: 'pom.xml',
         contents: 'pom.xml file contents',
@@ -1413,10 +1428,15 @@ describe('workers/branch/index', () => {
         deleted: ['deleted_file', 'deleted_then_created_file'],
       } as StatusResult);
 
-      fs.outputFile.mockReturnValue();
-      fs.readFile
-        .mockResolvedValueOnce(Buffer.from('modified file content'))
-        .mockResolvedValueOnce(Buffer.from('this file will not exists'));
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1490,6 +1510,7 @@ describe('workers/branch/index', () => {
         )
       ).toBe('modified file content');
     });
+
     it('returns when rebaseWhen=never', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,

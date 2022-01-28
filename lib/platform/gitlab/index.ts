@@ -614,7 +614,6 @@ export async function getPr(iid: number): Promise<Pr> {
   if (mr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
-    pr.isConflicted = true;
   } else if (pr.state === PrState.Open) {
     const branchStatus = await getBranchStatus(pr.sourceBranch);
     if (branchStatus === BranchStatus.green) {
