@@ -87,7 +87,6 @@ export class GolangVersionDatasource extends Datasource {
         const releaseVersionMatch = releaseVersionRegex.exec(line);
         if (releaseVersionMatch) {
           release.version = `${releaseVersionMatch.groups.versionMajor}.${releaseVersionMatch.groups.versionMinor}.${releaseVersionMatch.groups.patch}`;
-          // istanbul ignore if
           if (!isVersion(release.version)) {
             throw new ExternalHostError(
               new Error(`Version ${release.version} is not a valid semver`)
