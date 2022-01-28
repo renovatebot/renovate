@@ -47,7 +47,7 @@ The following is an example manifest of running Renovate against a GitHub Enterp
 First the Kubernetes manifest:
 
 ```yaml
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: renovate
@@ -97,7 +97,7 @@ A `config.js` file can be added to the manifest using a `ConfigMap` as shown in 
 
 ```yaml
 ---
- apiVersion: v1
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: renovate-config
@@ -109,7 +109,7 @@ data:
     }
 
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: renovate-bot

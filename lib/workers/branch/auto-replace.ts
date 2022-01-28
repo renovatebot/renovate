@@ -187,6 +187,7 @@ export async function doAutoReplace(
           newString
         );
         await writeLocalFile(upgrade.packageFile, testContent);
+
         if (await confirmIfDepUpdated(upgrade, testContent)) {
           return testContent;
         }

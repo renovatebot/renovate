@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -18,7 +17,7 @@ function extractDepFromIncludeFile(includeObj: {
     depType: 'repository',
   };
   if (!includeObj.ref) {
-    dep.skipReason = SkipReason.UnknownVersion;
+    dep.skipReason = 'unknown-version';
     return dep;
   }
   dep.currentValue = includeObj.ref;

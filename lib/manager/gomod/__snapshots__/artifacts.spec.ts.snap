@@ -7,13 +7,15 @@ Array [
   Object {
     "file": Object {
       "contents": "New go.sum",
-      "name": "go.sum",
+      "path": "go.sum",
+      "type": "addition",
     },
   },
   Object {
     "file": Object {
       "contents": "New main.go",
-      "name": "go.mod",
+      "path": "go.mod",
+      "type": "addition",
     },
   },
 ]
@@ -113,13 +115,15 @@ Array [
   Object {
     "file": Object {
       "contents": "New go.sum",
-      "name": "go.sum",
+      "path": "go.sum",
+      "type": "addition",
     },
   },
   Object {
     "file": Object {
       "contents": "New main.go",
-      "name": "go.mod",
+      "path": "go.mod",
+      "type": "addition",
     },
   },
 ]

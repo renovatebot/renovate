@@ -58,13 +58,15 @@ describe('manager/batect-wrapper/artifacts', () => {
       expect(result).toEqual([
         {
           file: {
-            name: 'batect',
+            type: 'addition',
+            path: 'batect',
             contents: newUnixWrapperContent,
           },
         },
         {
           file: {
-            name: 'batect.cmd',
+            type: 'addition',
+            path: 'batect.cmd',
             contents: newWindowsWrapperContent,
           },
         },
@@ -78,13 +80,15 @@ describe('manager/batect-wrapper/artifacts', () => {
       expect(result).toEqual([
         {
           file: {
-            name: 'some/sub/dir/batect',
+            type: 'addition',
+            path: 'some/sub/dir/batect',
             contents: newUnixWrapperContent,
           },
         },
         {
           file: {
-            name: 'some/sub/dir/batect.cmd',
+            type: 'addition',
+            path: 'some/sub/dir/batect.cmd',
             contents: newWindowsWrapperContent,
           },
         },

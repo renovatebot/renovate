@@ -97,32 +97,36 @@ describe('manager/jsonnet-bundler/artifacts', () => {
     ).toMatchSnapshot([
       {
         file: {
-          name: 'jsonnetfile.json',
+          type: 'addition',
+          path: 'jsonnetfile.json',
           contents: 'Updated jsonnetfile.json',
         },
       },
       {
         file: {
-          name: 'jsonnetfile.lock.json',
+          type: 'addition',
+          path: 'jsonnetfile.lock.json',
           contents: 'Updated jsonnetfile.lock.json',
         },
       },
       {
         file: {
-          name: 'vendor/foo/main.jsonnet',
+          type: 'addition',
+          path: 'vendor/foo/main.jsonnet',
           contents: 'New foo/main.jsonnet',
         },
       },
       {
         file: {
-          name: 'vendor/bar/main.jsonnet',
+          type: 'addition',
+          path: 'vendor/bar/main.jsonnet',
           contents: 'New bar/main.jsonnet',
         },
       },
       {
         file: {
-          name: '|delete|',
-          contents: 'vendor/baz/deleted.jsonnet',
+          type: 'deletion',
+          path: 'vendor/baz/deleted.jsonnet',
         },
       },
     ]);
@@ -152,7 +156,8 @@ describe('manager/jsonnet-bundler/artifacts', () => {
     ).toMatchSnapshot([
       {
         file: {
-          name: 'jsonnetfile.lock.json',
+          type: 'addition',
+          path: 'jsonnetfile.lock.json',
           contents: 'Updated jsonnetfile.lock.json',
         },
       },

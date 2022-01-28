@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { commitFiles } from '../../util/git';
+import { commitAndPush } from '../../platform/commit';
 import { sanitize } from '../../util/sanitize';
 import type { BranchConfig } from '../types';
 
@@ -13,13 +13,12 @@ export function commitFilesToBranch(
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
-    updatedFiles = updatedFiles.filter((f) => {
-      const filename = f.name === '|delete|' ? f.contents.toString() : f.name;
-      const matchesExcludePaths = config.excludeCommitPaths.some((path) =>
-        minimatch(filename, path, { dot: true })
+    updatedFiles = updatedFiles.filter(({ path: filePath }) => {
+      const matchesExcludePaths = config.excludeCommitPaths.some(
+        (excludedPath) => minimatch(filePath, excludedPath, { dot: true })
       );
       if (matchesExcludePaths) {
-        logger.debug(`Excluding ${filename} from commit`);
+        logger.debug(`Excluding ${filePath} from commit`);
         return false;
       }
       return true;
@@ -29,7 +28,7 @@ export function commitFilesToBranch(
     logger.debug(`No files to commit`);
     return null;
   }
-  const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
+  const fileLength = [...new Set(updatedFiles.map((file) => file.path))].length;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
@@ -47,11 +46,13 @@ export function commitFilesToBranch(
     );
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
+
   // API will know whether to create new branch or not
-  return commitFiles({
+  return commitAndPush({
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage,
     force: !!config.forceCommit,
+    platformCommit: !!config.platformCommit,
   });
 }

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { NewValueConfig, VersioningApi } from './types';
 
 export interface GenericVersion {
   release: number[];
