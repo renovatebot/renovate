@@ -12,17 +12,19 @@ Array [
     "contents": "yarnPath: .yarn/releases/yarn-3.0.2.cjs
 a: b
 ",
-    "name": "path/to/lockfile/.yarnrc.yml",
+    "path": "path/to/lockfile/.yarnrc.yml",
+    "type": "addition",
   },
   Object {
-    "contents": "path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs",
-    "name": "|delete|",
+    "path": "path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs",
+    "type": "deletion",
   },
   Object {
     "contents": "new yarn
 ",
-    "executable": true,
-    "name": "path/to/lockfile/.yarn/releases/yarn-3.0.2.cjs",
+    "isExecutable": true,
+    "path": "path/to/lockfile/.yarn/releases/yarn-3.0.2.cjs",
+    "type": "addition",
   },
 ]
 `;
@@ -33,17 +35,19 @@ Array [
     "contents": "yarnPath: .yarn/releases/yarn-3.0.2.cjs
 a: b
 ",
-    "name": "path/to/lockfile/.yarnrc.yml",
+    "path": "path/to/lockfile/.yarnrc.yml",
+    "type": "addition",
   },
   Object {
-    "contents": "path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs",
-    "name": "|delete|",
+    "path": "path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs",
+    "type": "deletion",
   },
   Object {
     "contents": "new yarn
 ",
-    "executable": true,
-    "name": "path/to/lockfile/.yarn/releases/yarn-3.0.2.cjs",
+    "isExecutable": true,
+    "path": "path/to/lockfile/.yarn/releases/yarn-3.0.2.cjs",
+    "type": "addition",
   },
 ]
 `;

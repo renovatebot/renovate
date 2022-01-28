@@ -1597,7 +1597,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2322,7 +2321,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2343,7 +2341,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2364,7 +2361,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2486,7 +2482,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -6095,7 +6090,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -6820,7 +6814,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -6841,7 +6834,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -6862,7 +6854,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -6984,7 +6975,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
-  "isConflicted": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
