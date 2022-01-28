@@ -16,6 +16,7 @@ import { range } from '../range';
 import { regEx } from '../regex';
 import { parseLinkHeader } from '../url';
 import { GotLegacyError } from './legacy';
+import type { GraphqlOptions } from './types';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
 const githubBaseUrl = 'https://api.github.com/';
@@ -152,15 +153,6 @@ function handleGotError(
     logger.debug({ err }, 'Unknown GitHub error');
   }
   return err;
-}
-
-interface GraphqlOptions {
-  variables?: { [k: string]: unknown };
-  paginate?: boolean;
-  count?: number;
-  limit?: number;
-  cursor?: string | null;
-  acceptHeader?: string;
 }
 
 interface GraphqlPaginatedContent<T = unknown> {

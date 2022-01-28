@@ -31,6 +31,7 @@ import type {
 } from '../../util/git/types';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
+import type { GraphqlVariables } from '../../util/http/types';
 import { regEx } from '../../util/regex';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
@@ -1781,7 +1782,7 @@ async function pushFiles(
   try {
     const refName = `refs/heads/${branchName}`;
 
-    const variables = {
+    const variables: GraphqlVariables = {
       repo: config.repository,
       repositoryId: config.repositoryId,
       branchName: refName,

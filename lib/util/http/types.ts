@@ -34,3 +34,16 @@ export interface RequestStats {
 }
 
 export type OutgoingHttpHeaders = Record<string, string | string[] | undefined>;
+
+export interface GraphqlVariables {
+  [k: string]: unknown;
+}
+
+export interface GraphqlOptions {
+  variables?: GraphqlVariables;
+  paginate?: boolean;
+  count?: number;
+  limit?: number;
+  cursor?: string | null;
+  acceptHeader?: string;
+}
