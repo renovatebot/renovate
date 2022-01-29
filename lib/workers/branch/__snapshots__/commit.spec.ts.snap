@@ -14,6 +14,27 @@ Array [
       ],
       "force": false,
       "message": "some commit message",
+      "platformCommit": false,
+    },
+  ],
+]
+`;
+
+exports[`workers/branch/commit commitFilesToBranch commits via platform 1`] = `
+Array [
+  Array [
+    Object {
+      "branchName": "renovate/some-branch",
+      "files": Array [
+        Object {
+          "contents": "some contents",
+          "path": "package.json",
+          "type": "addition",
+        },
+      ],
+      "force": false,
+      "message": "some commit message",
+      "platformCommit": true,
     },
   ],
 ]
