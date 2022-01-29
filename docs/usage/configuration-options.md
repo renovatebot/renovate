@@ -1769,7 +1769,6 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 ## platformCommit
 
-Commits will be performed by the platform API rather than using `git` directly.
 Supports GitHub-only.
 
 The primary reason to use this option is because commits will then be signed automatically, including if authenticating as an app.
