@@ -1768,7 +1768,6 @@ async function pushFiles(
       { branchName, executableFiles: executableFiles.map(({ path }) => path) },
       'Platform-native commit: found executable files'
     );
-    return null;
   }
 
   const fileChanges: GithubGraphqlFileChanges = {
