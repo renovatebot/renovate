@@ -1749,7 +1749,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 
 async function pushFiles(
   { branchName, files, message }: CommitFilesConfig,
-  { oldSha }: CommitResult
+  { prevCommitSha }: CommitResult
 ): Promise<CommitSha | null> {
   const additions: FileAddition[] = [];
   const deletions: FileDeletion[] = [];
@@ -1786,7 +1786,7 @@ async function pushFiles(
       repo: config.repository,
       repositoryId: config.repositoryId,
       branchName: refName,
-      oid: oldSha,
+      oid: prevCommitSha,
       fileChanges,
       message,
     };
