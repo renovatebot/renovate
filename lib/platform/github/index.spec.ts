@@ -2612,7 +2612,6 @@ describe('platform/github/index', () => {
       });
 
       expect(res).toBe('0abcdef');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null if pre-commit phase has failed', async () => {
       const scope = httpMock.scope(githubApiHost);
@@ -2646,7 +2645,6 @@ describe('platform/github/index', () => {
       });
 
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null on GraphQL errors', async () => {
       const scope = httpMock.scope(githubApiHost);
@@ -2663,7 +2661,6 @@ describe('platform/github/index', () => {
       });
 
       expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
