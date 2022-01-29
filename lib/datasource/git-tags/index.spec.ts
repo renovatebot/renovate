@@ -55,7 +55,7 @@ describe('datasource/git-tags/index', () => {
         },
       });
       const digest = await datasourceInstance.getDigest(
-        { datasource, depName: 'a tag to look up' },
+        { lookupName: 'a tag to look up' },
         'notfound'
       );
       expect(digest).toBeNull();
@@ -67,7 +67,7 @@ describe('datasource/git-tags/index', () => {
         },
       });
       const digest = await datasourceInstance.getDigest(
-        { datasource, depName: 'a tag to look up' },
+        { lookupName: 'a tag to look up' },
         'v1.0.2'
       );
       expect(digest).toMatchSnapshot();
@@ -79,7 +79,7 @@ describe('datasource/git-tags/index', () => {
         },
       });
       const digest = await datasourceInstance.getDigest(
-        { datasource, depName: 'another tag to look up' },
+        { lookupName: 'another tag to look up' },
         undefined
       );
       expect(digest).toMatchSnapshot();

@@ -527,6 +527,7 @@ describe('workers/repository/dependency-dashboard', () => {
         ## Awaiting Schedule
 
         These updates are awaiting their schedule. Click on a checkbox to get an update now.
+
          - [x] <!-- unschedule-branch=branchName3 -->pr3
 
          - [x] <!-- rebase-all-open-prs -->'
