@@ -253,7 +253,9 @@ For example the result may be:
 
 ## npm-hosted presets
 
-Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
+<!-- prettier-ignore -->
+!!! warning
+    Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
 
 If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
 That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
