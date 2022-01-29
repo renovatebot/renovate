@@ -53,8 +53,13 @@ export class AwsMachineImageDataSource extends Datasource {
     const matchingImages = await this.ec2.getValue().send(cmd);
     matchingImages.Images = matchingImages.Images ?? [];
     return matchingImages.Images.sort((image1, image2) => {
-      const ts1 = image1.CreationDate ? Date.parse(image1.CreationDate) : 0;
-      const ts2 = image2.CreationDate ? Date.parse(image2.CreationDate) : 0;
+      const ts1 = image1.CreationDate
+        ? Date.parse(image1.CreationDate)
+        : /* istanbul ignore next */ 0;
+
+      const ts2 = image2.CreationDate
+        ? Date.parse(image2.CreationDate)
+        : /* istanbul ignore next */ 0;
       return ts1 - ts2;
     });
   }
@@ -78,13 +83,16 @@ export class AwsMachineImageDataSource extends Datasource {
         (image) => image.ImageId === newValue
       );
       if (newValueMatchingImages.length === 1) {
-        return newValueMatchingImages[0].Name ?? null;
+        return (
+          newValueMatchingImages[0].Name ?? /* istanbul ignore next */ null
+        );
       }
       return null;
     }
 
     const res = await this.getReleases({ lookupName: serializedAmiFilter });
-    return res?.releases?.[0]?.newDigest ?? null;
+    // istanbul ignore next
+    return res?.releases?.[0]?.newDigest ?? /* istanbul ignore next */ null;
   }
 
   @cache({
