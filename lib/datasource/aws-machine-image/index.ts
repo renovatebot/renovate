@@ -91,7 +91,6 @@ export class AwsMachineImageDataSource extends Datasource {
     }
 
     const res = await this.getReleases({ lookupName: serializedAmiFilter });
-    // istanbul ignore next
     return res?.releases?.[0]?.newDigest ?? /* istanbul ignore next */ null;
   }
 
