@@ -200,7 +200,7 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored'
       );
     }
-    return datasource.defaultRegistryUrls || [];
+    return datasource.defaultRegistryUrls ?? [];
   }
   const customUrls = registryUrls?.filter(Boolean);
   let resolvedUrls: string[] = [];
