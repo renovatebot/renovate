@@ -2223,10 +2223,10 @@
   resolved "https://registry.yarnpkg.com/@types/emscripten/-/emscripten-1.39.6.tgz#698b90fe60d44acf93c31064218fbea93fbfd85a"
   integrity sha512-H90aoynNhhkQP6DRweEjJp5vfUVdIj7tdPLsu7pq89vODD/lcugKfZOsfgwpvM6XUewEp2N5dCg1Uf3Qe55Dcg==
 
-"@types/eslint@8.4.0":
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-8.4.0.tgz#95712d5b32fd99a0d9493c31c6197ea7471c3ba6"
-  integrity sha512-JUYa/5JwoqikCy7O7jKtuNe9Z4ZZt615G+1EKfaDGSNEpzaA2OwbV/G1v08Oa7fd1XzlFoSCvt9ePl9/6FyAug==
+"@types/eslint@8.4.1":
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-8.4.1.tgz#c48251553e8759db9e656de3efc846954ac32304"
+  integrity sha512-GE44+DNEyxxh2Kc6ro/VkIj+9ma0pO0bwv9+uHSyBrikYOHr8zYcdPvnBOp1aw8s+CjRvuSx7CyWqRrNFQ59mA==
   dependencies:
     "@types/estree" "*"
     "@types/json-schema" "*"
