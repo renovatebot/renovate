@@ -181,28 +181,31 @@ async function mergeRegistries(
   return null;
 }
 
+function massageRegistryUrls(registryUrls: string[]): string[] {
+  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+}
+
 function resolveRegistryUrls(
   datasource: DatasourceApi,
-  extractedUrls: string[]
+  registryUrls: string[]
 ): string[] {
-  const { defaultRegistryUrls = [] } = datasource;
   if (!datasource.customRegistrySupport) {
-    if (is.nonEmptyArray(extractedUrls)) {
+    if (is.nonEmptyArray(registryUrls)) {
       logger.warn(
-        { datasource: datasource.id, registryUrls: extractedUrls },
-        'Custom registries are not allowed for this datasource and will be ignored'
+        { datasource: datasource.id, registryUrls },
+        'Custom registryUrls are not allowed for this datasource and will be ignored'
       );
     }
-    return defaultRegistryUrls;
+    return datasource.defaultRegistryUrls;
   }
-  const customUrls = extractedUrls?.filter(Boolean);
-  let registryUrls: string[];
+  const customUrls = registryUrls?.filter(Boolean);
+  let resolvedUrls: string[];
   if (is.nonEmptyArray(customUrls)) {
-    registryUrls = [...customUrls];
+    resolvedUrls = [...customUrls];
   } else {
-    registryUrls = [...defaultRegistryUrls];
+    resolvedUrls = [...datasource.defaultRegistryUrls];
   }
-  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+  return massageRegistryUrls(resolvedUrls);
 }
 
 export function getDefaultVersioning(datasourceName: string): string {
