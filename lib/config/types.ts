@@ -204,6 +204,7 @@ export interface RenovateConfig
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
 
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
 
   repoIsOnboarded?: boolean;

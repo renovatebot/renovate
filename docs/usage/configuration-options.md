@@ -466,6 +466,19 @@ If configured to `true`, then dependency extraction will be done using the relev
 
 This option applies only to the `gradle` manager.
 
+## defaultRegistryUrls
+
+Override a datasource's default registries with this config option.
+The datasources's `customRegistrySupport` value must be `true` for the config option to work.
+
+Default registries are only used when both:
+
+- The manager did not extract any `registryUrls` values, and
+- No `registryUrls` values have been applied via config, such as `packageRules`
+
+Think of `defaultRegistryUrls` as a way to specify the "fallback" registries for a datasource, for use when no `registryUrls` are extracted or configured.
+Compare that to `registryUrls`, which are a way to _override_ registries.
+
 ## dependencyDashboard
 
 Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:base` preset.
