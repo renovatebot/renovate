@@ -468,15 +468,15 @@ This option applies only to the `gradle` manager.
 
 ## defaultRegistryUrls
 
-This configuration option enables overriding of a datasource's default registries.
-Like `registryUrls`, it is only applicable when the datasource's `customRegistrySupport` value is set to `true`.
+Override a datasource's default registries with this config option.
+The datasources's `customRegistrySupport` value must be `true` for the config option to work.
 
 Default registries are only used when both:
 
-- The manager does not extract any `registryUrls` values, and
+- The manager did not extract any `registryUrls` values, and
 - No `registryUrls` values have been applied via config, such as `packageRules`
 
-In other words, you can think of it as a way to specify the "fallback" registries for a datasource, where supported.
+Think of `defaultRegistryUrls` as a way to specify the "fallback" registries for a datasource, where supported.
 
 ## dependencyDashboard
 
