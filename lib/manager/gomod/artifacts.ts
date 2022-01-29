@@ -184,7 +184,7 @@ export async function updateArtifacts({
 
     const execCommands = [];
 
-    let args = 'get -d ./...';
+    let args = 'get -d -t ./...';
     logger.debug({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
