@@ -1,6 +1,9 @@
-Checks YAML manifests for [Flux](https://fluxcd.io/) `HelmRelease` resources and extracts dependencies for the `helm` datasource.
+This manager parses [Flux](https://fluxcd.io/) YAML manifests and:
 
-The `flux` manager will only extract `HelmRelease` resources linked to `HelmRepository` sources.
+1. Extracts `helm` dependencies from `HelmRelease` resources
+2. Extracts `github-releases` dependencies from system manifests (`flux-system/gotk-components.yaml` files) and regenerates them when new versions of Flux are available
+
+The `flux` manager will only extract `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` sources.
 `HelmRelease` resources linked to other kinds of sources like `GitRepository` or `Bucket` will be ignored.
 
 For the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
@@ -10,7 +13,12 @@ For the `flux` manager to properly link `HelmRelease` and `HelmRepository` resou
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
 
-The `flux` manager has no `fileMatch` default patterns, so it won't match any files until you configure it with a pattern.
+Updating system manifests requires that either:
+
+1. The `flux` tool is pre-installed, or
+2. You run a Docker image based on [containerbase/buildpack](https://github.com/containerbase/buildpack), such as the official Renovate images, and have `binarySource=install` configured
+
+By default, the `flux` manager will only match `flux-system/gotk-components.yaml` (i.e. system manifest) files.
 This is because there is no commonly accepted file/directory naming convention for Flux manifests and we don't want to check every single `*.yaml` file in repositories just in case some of them contain Flux definitions.
 
 If most `.yaml` files in your repository are Flux manifests, then you could add this to your config:
