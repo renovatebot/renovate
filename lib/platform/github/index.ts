@@ -1762,10 +1762,12 @@ async function pushFiles(
     }
   }
 
-  const executableFiles = additions.filter(({ isExecutable }) => isExecutable);
+  const executableFiles = additions
+    .filter(({ isExecutable }) => isExecutable)
+    .map(({ path }) => path);
   if (executableFiles.length) {
     logger.warn(
-      { branchName, executableFiles: executableFiles.map(({ path }) => path) },
+      { branchName, executableFiles },
       'Platform-native commit: found executable files'
     );
   }
