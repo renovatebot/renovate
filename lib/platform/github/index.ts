@@ -1778,18 +1778,16 @@ async function pushFiles(
     deletions: deletions.map(({ path }) => ({ path })),
   };
 
+  const variables: GraphqlVariables = {
+    repo: config.repository,
+    repositoryId: config.repositoryId,
+    branchName: `refs/heads/${branchName}`,
+    oid: prevCommitSha,
+    fileChanges,
+    message,
+  };
+
   try {
-    const refName = `refs/heads/${branchName}`;
-
-    const variables: GraphqlVariables = {
-      repo: config.repository,
-      repositoryId: config.repositoryId,
-      branchName: refName,
-      oid: prevCommitSha,
-      fileChanges,
-      message,
-    };
-
     const { data, errors } = await githubApi.requestGraphql<{
       createCommitOnBranch: { commit: { oid: string } };
     }>(commitFilesMutation, { variables });
@@ -1814,6 +1812,11 @@ export async function commitFiles(
 ): Promise<CommitSha | null> {
   const commitResult = await git.prepareCommit(config);
   if (!commitResult) {
+    const { branchName, files } = config;
+    logger.debug(
+      { branchName, files },
+      `Platform-native commit: unable to prepare for commit`
+    );
     return null;
   }
   const pushResult = await pushFiles(config, commitResult);

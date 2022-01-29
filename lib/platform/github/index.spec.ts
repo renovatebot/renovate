@@ -2599,7 +2599,12 @@ describe('platform/github/index', () => {
       const res = await github.commitFiles({
         branchName: 'foo/bar',
         files: [
-          { type: 'addition', path: 'foo.bar', contents: 'foobar' },
+          {
+            type: 'addition',
+            path: 'foo.bar',
+            contents: 'foobar',
+            isExecutable: true,
+          },
           { type: 'deletion', path: 'baz' },
           { type: 'deletion', path: 'qux' },
         ],
@@ -2622,22 +2627,6 @@ describe('platform/github/index', () => {
           { type: 'addition', path: 'foo.bar', contents: 'foobar' },
           { type: 'deletion', path: 'baz' },
           { type: 'deletion', path: 'qux' },
-        ],
-        message: 'Foobar',
-      });
-
-      expect(res).toBeNull();
-    });
-    it('returns null if executable files are found', async () => {
-      const res = await github.commitFiles({
-        branchName: 'foo/bar',
-        files: [
-          {
-            type: 'addition',
-            path: 'foo.bar',
-            contents: 'foobar',
-            isExecutable: true,
-          },
         ],
         message: 'Foobar',
       });
