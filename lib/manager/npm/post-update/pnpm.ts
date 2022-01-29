@@ -1,11 +1,9 @@
-import semver from 'semver';
-import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import { readFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -24,18 +22,14 @@ export async function generateLockFile(
   let stderr: string;
   let cmd = 'pnpm';
   try {
-    let installPnpm = 'npm i -g pnpm';
     const pnpmUpdate = upgrades.find(
       (upgrade) =>
         upgrade.depType === 'packageManager' && upgrade.depName === 'pnpm'
     );
-    const pnpmCompatibility = pnpmUpdate
-      ? pnpmUpdate.newValue
-      : config.constraints?.pnpm;
-    if (semver.validRange(pnpmCompatibility)) {
-      installPnpm += `@${quote(pnpmCompatibility)}`;
-    }
-    const preCommands = [installPnpm];
+    const pnpmToolConstraint: ToolConstraint = {
+      toolName: 'pnpm',
+      constraint: pnpmUpdate ? pnpmUpdate.newValue : config.constraints?.pnpm,
+    };
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
@@ -48,7 +42,7 @@ export async function generateLockFile(
         tagScheme: 'node',
         tagConstraint,
       },
-      preCommands,
+      toolConstraints: [pnpmToolConstraint],
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {

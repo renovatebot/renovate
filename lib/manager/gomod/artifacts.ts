@@ -252,7 +252,8 @@ export async function updateArtifacts({
     const res: UpdateArtifactsResult[] = [
       {
         file: {
-          name: sumFileName,
+          type: 'addition',
+          path: sumFileName,
           contents: await readLocalFile(sumFileName),
         },
       },
@@ -265,7 +266,8 @@ export async function updateArtifacts({
         if (f.endsWith('.go')) {
           res.push({
             file: {
-              name: f,
+              type: 'addition',
+              path: f,
               contents: await readLocalFile(f),
             },
           });
@@ -278,7 +280,8 @@ export async function updateArtifacts({
         if (f.startsWith(vendorDir)) {
           res.push({
             file: {
-              name: f,
+              type: 'addition',
+              path: f,
               contents: await readLocalFile(f),
             },
           });
@@ -287,8 +290,8 @@ export async function updateArtifacts({
       for (const f of status.deleted || []) {
         res.push({
           file: {
-            name: '|delete|',
-            contents: f,
+            type: 'deletion',
+            path: f,
           },
         });
       }
@@ -301,7 +304,8 @@ export async function updateArtifacts({
       logger.debug('Found updated go.mod after go.sum update');
       res.push({
         file: {
-          name: goModFileName,
+          type: 'addition',
+          path: goModFileName,
           contents: finalGoModContent,
         },
       });

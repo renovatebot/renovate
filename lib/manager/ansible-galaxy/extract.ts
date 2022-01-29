@@ -22,7 +22,7 @@ export function getSliceEndNumber(
   return nearestEnd;
 }
 
-export default function extractPackageFile(
+export function extractPackageFile(
   content: string,
   fileName: string
 ): PackageFile | null {

@@ -138,7 +138,7 @@ export async function start(): Promise<number> {
       return 2;
     }
   } finally {
-    globalFinalize(config);
+    await globalFinalize(config);
     logger.debug(`Renovate exiting`);
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);

@@ -1,10 +1,28 @@
+import { getDatasourceList } from '../datasource';
 import { loadModules } from '../util/modules';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
 jest.mock('../util/fs');
 
+const datasources = getDatasourceList();
+
 describe('manager/index', () => {
+  describe('supportedDatasources', () => {
+    for (const m of manager.getManagerList()) {
+      if (m === 'regex') {
+        // regex supports any
+        continue;
+      }
+      const supportedDatasources = manager.get(m, 'supportedDatasources');
+      it(`has valid supportedDatasources for ${m}`, () => {
+        expect(supportedDatasources).toBeNonEmptyArray();
+        supportedDatasources.every((d) => {
+          expect(datasources.includes(d)).toBeTrue();
+        });
+      });
+    }
+  });
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
@@ -55,6 +73,7 @@ describe('manager/index', () => {
     it('returns null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         await manager.extractAllPackageFiles('unknown', {} as any, [])
@@ -66,6 +85,7 @@ describe('manager/index', () => {
     it('returns non-null', async () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
@@ -81,6 +101,7 @@ describe('manager/index', () => {
     it('returns null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(manager.extractPackageFile('unknown', null)).toBeNull();
       expect(manager.extractPackageFile('dummy', null)).toBeNull();
@@ -88,6 +109,7 @@ describe('manager/index', () => {
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
 
@@ -102,6 +124,7 @@ describe('manager/index', () => {
     it('returns null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' })
@@ -110,6 +133,7 @@ describe('manager/index', () => {
     it('returns non-null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
         getRangeStrategy: () => 'replace',
       });
       expect(
@@ -118,6 +142,7 @@ describe('manager/index', () => {
 
       manager.getManagers().set('dummy', {
         defaultConfig: {},
+        supportedDatasources: [],
       });
       expect(
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' })

@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { regEx } from '../../util/regex';
-import { GenericVersion, GenericVersioningApi } from '../loose/generic';
+import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApiConstructor } from '../types';
 
 export const id = 'regex';

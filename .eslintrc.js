@@ -3,7 +3,7 @@ module.exports = {
   env: {
     node: true,
   },
-  plugins: ['@renovate'],
+  plugins: ['@renovate', 'typescript-enum'],
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
@@ -34,6 +34,10 @@ module.exports = {
     'import/named': 2,
     'import/namespace': 2,
     'import/no-named-as-default-member': 0,
+    'import/no-extraneous-dependencies': [
+      'error',
+      { devDependencies: ['test/**/*', '**/*.spec.ts'] },
+    ],
     'import/prefer-default-export': 0, // no benefit
 
     // other rules
@@ -115,10 +119,19 @@ module.exports = {
     '@typescript-eslint/unbound-method': 2,
     '@typescript-eslint/ban-types': 2,
     '@renovate/jest-root-describe': 2,
+
+    'typescript-enum/no-const-enum': 2,
+    'typescript-enum/no-enum': 2,
   },
   settings: {
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts'],
+    },
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+        project: 'tsconfig.lint.json',
+      },
     },
   },
   overrides: [

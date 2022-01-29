@@ -65,9 +65,7 @@ describe('datasource/index', () => {
     }
   });
   it('returns if digests are supported', () => {
-    expect(
-      datasource.supportsDigests({ datasource: datasourceGithubTags.id })
-    ).toBeTrue();
+    expect(datasource.supportsDigests(datasourceGithubTags.id)).toBeTrue();
   });
   it('returns null for no datasource', async () => {
     expect(

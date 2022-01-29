@@ -1,11 +1,10 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import * as datasourceDocker from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { getSiblingFileName, localPathExists } from '../../util/fs';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import { parseRepository, resolveAlias } from './utils';
 
 export async function extractPackageFile(
   content: string,
@@ -57,45 +56,22 @@ export async function extractPackageFile(
       depName: dep.name,
       currentValue: dep.version,
     };
-    if (dep.repository) {
-      res.registryUrls = [dep.repository];
-      if (
-        dep.repository.startsWith('@') ||
-        dep.repository.startsWith('alias:')
-      ) {
-        const repoWithPrefixRemoved = dep.repository.slice(
-          dep.repository[0] === '@' ? 1 : 6
-        );
-        const alias = config.aliases[repoWithPrefixRemoved];
-        if (alias) {
-          res.registryUrls = [alias];
-          return res;
-        }
-
-        res.skipReason = SkipReason.PlaceholderUrl;
-      } else {
-        try {
-          const url = new URL(dep.repository);
-          switch (url.protocol) {
-            case 'oci:':
-              res.datasource = datasourceDocker.id;
-              res.lookupName = dep.repository.replace('oci://', '');
-              res.registryUrls = [];
-              break;
-            case 'file:':
-              res.skipReason = SkipReason.LocalDependency;
-              break;
-            default:
-          }
-        } catch (err) {
-          logger.debug({ err }, 'Error parsing url');
-          res.skipReason = SkipReason.InvalidUrl;
-        }
-      }
-    } else {
-      res.skipReason = SkipReason.NoRepository;
+    if (!dep.repository) {
+      res.skipReason = 'no-repository';
+      return res;
     }
-    return res;
+
+    const repository = resolveAlias(dep.repository, config.aliases);
+    if (!repository) {
+      res.skipReason = 'placeholder-url';
+      return res;
+    }
+
+    const result: PackageDependency = {
+      ...res,
+      ...parseRepository(dep.name, repository),
+    };
+    return result;
   });
   const res: PackageFile = {
     deps,

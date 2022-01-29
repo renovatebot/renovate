@@ -77,10 +77,21 @@ Renovate can update dependency versions found in Maven `pom.xml` files.
 
 Renovate will search repositories for all `pom.xml` files and processes them independently.
 
+Renovate will also parse `settings.xml` files in the following locations:
+
+- `.mvn/settings.xml`
+- `.m2/settings.xml`
+- `settings.xml`
+
+Any repository URLs found within will be added as `registryUrls` to extracted dependencies.
+
 ## Custom registry support, and authentication
 
 Unless using `deepExtract`, Renovate does not make use of authentication credentials available to Gradle.
-Note: the `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
+
+<!-- prettier-ignore -->
+!!! warning
+    The `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
 
 The manager for Gradle makes use of the `maven` datasource.
 Renovate can be configured to access additional repositories and access repositories authenticated.

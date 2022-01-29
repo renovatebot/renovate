@@ -3,7 +3,8 @@ The `regex` manager is designed to allow users to manually configure Renovate fo
 This manager is unique in Renovate in that:
 
 - It is configurable via regex named capture groups
-- Through the use of the `regexManagers` config, multiple "regex managers" can be created for the same repository.
+- Through the use of the `regexManagers` config, multiple "regex managers" can be created for the same repository
+- It can extract any `datasource`
 
 ### Required Fields
 

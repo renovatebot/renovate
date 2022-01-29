@@ -112,7 +112,9 @@ WhiteSource Renovate On-Premises and WhiteSource Remediate both run as long-live
 
 ### Global config
 
-Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file (`config.js`, `config.json`, `config.json5`, `config.yaml` or `config.yml`), environment variables, or CLI parameters.
+Renovate's server-side/admin config is referred to as its "global" config, and can be specified using either a config file, environment variables, or CLI parameters.
+By default Renovate checks if a file named `config.js` is present.
+Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (e.g. `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
@@ -126,7 +128,9 @@ If you are configuring using environment variables, there are two possibilities:
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
-Note: it's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+<!-- prettier-ignore -->
+!!! note
+    It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`. e.g. `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
 #### Using `config.js`
 
@@ -188,8 +192,11 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 **`token:"x-access-token:${github-app-installation}"`**
 
 The token needs to be prefixed with `x-access-token` and be a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
-**Note** The installation tokens expire after 1 hour and need to be regenerated regularly.
-Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+
+<!-- prettier-ignore -->
+!!! note
+    The installation tokens expire after 1 hour and need to be regenerated regularly.
+    Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
@@ -245,7 +252,10 @@ This account can actually be _any_ account on GitHub, and needs only read-only a
 It's used when fetching release notes for repositories in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
-**Note:** If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token as you will exceed the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+<!-- prettier-ignore -->
+!!! note
+    If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub) it is highly recommended to add a token.
+    Otherwise you will exceed the rate limit from the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples
 
