@@ -61,8 +61,8 @@ export class AwsMachineImageDataSource extends Datasource {
 
   @cache({
     namespace: `datasource-${AwsMachineImageDataSource.id}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig, newValue: string) =>
-      `getDigest:${registryUrl}:${lookupName}:${newValue ?? ''}`,
+    key: ({ lookupName }: GetReleasesConfig, newValue: string) =>
+      `getDigest:${lookupName}:${newValue ?? ''}`,
   })
   override async getDigest(
     { lookupName: serializedAmiFilter }: GetReleasesConfig,
@@ -89,8 +89,7 @@ export class AwsMachineImageDataSource extends Datasource {
 
   @cache({
     namespace: `datasource-${AwsMachineImageDataSource.id}`,
-    key: ({ registryUrl, lookupName }: GetReleasesConfig) =>
-      `getReleases:${registryUrl}:${lookupName}`,
+    key: ({ lookupName }: GetReleasesConfig) => `getReleases:${lookupName}`,
   })
   async getReleases({
     lookupName: serializedAmiFilter,
