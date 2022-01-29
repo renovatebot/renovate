@@ -23,7 +23,9 @@ There are four times in Renovate's behavior when it may need credentials:
 - Looking up release notes
 - Passing to package managers when updating lock files or checksums
 
-Note: if you self-host Renovate, and have a self-hosted registry which _doesn't_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
+<!-- prettier-ignore -->
+!!! note
+    If you self-host Renovate, and have a self-hosted registry which _doesn't_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
 
 ## Private Config Presets
 
@@ -188,7 +190,9 @@ module.exports = {
 };
 ```
 
-**NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
+<!-- prettier-ignore -->
+!!! tip
+    Remember to put a trailing slash at the end of your `matchHost` URL.
 
 #### Add npmrc string to Renovate config
 
@@ -389,7 +393,9 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
 
-Note: Encrypted values can't be used in the "Admin/Bot config".
+<!-- prettier-ignore -->
+!!! note
+    Encrypted values can't be used in the "Admin/Bot config".
 
 ### hostRules configuration using environment variables
 

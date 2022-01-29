@@ -18,7 +18,7 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { regEx } from '../../util/regex';
-import { add } from '../../util/sanitize';
+import { addSecretForSanitizing } from '../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
@@ -130,7 +130,7 @@ export async function updateArtifacts(
           const creds = getAuthenticationHeaderValue(hostRule);
           authCommands.push(`${hostRule.resolvedHost} ${creds}`);
           // sanitize the authentication
-          add(creds);
+          addSecretForSanitizing(creds);
         }
         return authCommands;
       },

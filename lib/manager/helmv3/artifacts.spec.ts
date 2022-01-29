@@ -5,6 +5,7 @@ import { envMock, mockExecAll } from '../../../test/exec-util';
 import { loadFixture, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
+import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as hostRules from '../../util/host-rules';
@@ -13,8 +14,11 @@ import * as helmv3 from './artifacts';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('../../datasource');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/http');
+
+const datasource = mocked(_datasource);
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -100,7 +104,7 @@ describe('manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(1);
+    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -124,7 +128,7 @@ describe('manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(1);
+    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -133,6 +137,9 @@ describe('manager/helmv3/artifacts', () => {
     fs.readFile.mockResolvedValueOnce(ociLockFile1 as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce(ociLockFile2 as never);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v3.7.2' }],
+    });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -200,7 +207,7 @@ describe('manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(3);
+    expect(execSnapshots).toBeArrayOfSize(4);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -209,6 +216,9 @@ describe('manager/helmv3/artifacts', () => {
     fs.readFile.mockResolvedValueOnce(ociLockFile1 as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce(ociLockFile2 as never);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v3.7.2' }],
+    });
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
@@ -273,7 +283,7 @@ describe('manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(4);
+    expect(execSnapshots).toBeArrayOfSize(5);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -356,6 +366,13 @@ describe('manager/helmv3/artifacts', () => {
     expect(
       execSnapshots.filter((value) =>
         value.cmd.startsWith('helm repo add repo1')
+      )
+    ).toBeArrayOfSize(1);
+    expect(
+      execSnapshots.filter((value) =>
+        value.cmd.includes(
+          'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable'
+        )
       )
     ).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchSnapshot();

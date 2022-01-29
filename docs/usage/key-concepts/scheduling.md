@@ -76,8 +76,10 @@ before 5:00am
 on friday and saturday
 ```
 
-**Warning:** Renovate does not support scheduled minutes or "at an exact time" granularity.
-Granularity must be at least one hour.
+<!-- prettier-ignore -->
+!!! warning
+    Renovate does not support scheduled minutes or "at an exact time" granularity.
+    Granularity must be at least one hour.
 
 Renovate uses the [@breejs/later](https://github.com/breejs/later) library to parse the text, so Renovate is limited to that library's syntax support.
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text) for more details.

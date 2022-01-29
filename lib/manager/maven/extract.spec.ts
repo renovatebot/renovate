@@ -21,41 +21,89 @@ describe('manager/maven/extract', () => {
       const res = extractPackage(simpleContent);
       expect(res).toMatchSnapshot({
         deps: [
-          { depName: 'org.example:parent', currentValue: '42' },
-          { depName: 'org.example:foo', currentValue: '0.0.1' },
-          { depName: 'org.example:bar', currentValue: '1.0.0' },
+          {
+            depName: 'org.example:parent',
+            currentValue: '42',
+            depType: 'parent',
+          },
+          {
+            depName: 'org.example:foo',
+            currentValue: '0.0.1',
+            depType: 'compile',
+          },
+          {
+            depName: 'org.example:bar',
+            currentValue: '1.0.0',
+            depType: 'compile',
+          },
           {
             depName: 'org.apache.maven.plugins:maven-release-plugin',
             currentValue: '2.4.2',
+            depType: 'build',
           },
           {
             depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
             currentValue: '1.8.1',
+            depType: 'build',
+          },
+          {
+            depName: 'org.example:extension-artefact',
+            currentValue: '1.0',
+            depType: 'build',
           },
           {
             depName: 'org.example:${artifact-id-placeholder}',
             currentValue: '0.0.1',
+            depType: 'compile',
           },
-          { depName: '${group-id-placeholder}:baz', currentValue: '0.0.1' },
-          { depName: '${quuxGroup}:${quuxId}', currentValue: '${quuxVersion}' },
+          {
+            depName: '${group-id-placeholder}:baz',
+            currentValue: '0.0.1',
+            depType: 'compile',
+          },
+          {
+            depName: '${quuxGroup}:${quuxId}',
+            currentValue: '${quuxVersion}',
+            depType: 'compile',
+          },
           {
             depName: '${quuxGroup}:${quuxId}-test',
             currentValue: '${quuxVersion}',
+            depType: 'compile',
           },
           {
             depName: 'org.example:quuz',
             currentValue: '1.2.3',
             depType: 'test',
           },
-          { depName: 'org.example:quuuz', currentValue: "it's not a version" },
-          { depName: 'org.example:hard-range', currentValue: '[1.0.0]' },
+          {
+            depName: 'org.example:quuuz',
+            currentValue: "it's not a version",
+            depType: 'compile',
+          },
+          {
+            depName: 'org.example:hard-range',
+            currentValue: '[1.0.0]',
+            depType: 'compile',
+          },
+          {
+            depName: 'org.example:relocation-artifact',
+            currentValue: '1.0',
+          },
           {
             depName: 'org.example:profile-artifact',
             currentValue: '${profile-placeholder}',
+            depType: 'compile',
+          },
+          {
+            depName: 'org.example:profile-build-artefact',
+            currentValue: '2.17',
+            depType: 'build',
           },
           {
             depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
             currentValue: '2.17',
+            depType: 'build',
           },
         ],
         mavenProps: {

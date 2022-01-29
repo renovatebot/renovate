@@ -1,10 +1,10 @@
-import _simpleGit from 'simple-git';
+import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../test/fixtures';
 import { GitRefsDatasource } from '.';
 
 jest.mock('simple-git');
-const simpleGit: any = _simpleGit;
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
 const depName = 'https://github.com/example/example.git';
 
@@ -17,7 +17,7 @@ describe('datasource/git-refs/index', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(null);
+          return Promise.resolve(null) as Response<string>;
         },
       });
       const versions = await getPkgReleases({
@@ -29,7 +29,7 @@ describe('datasource/git-refs/index', () => {
     it('returns nil if response is malformed', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve('aabbccddeeff');
+          return Promise.resolve('aabbccddeeff') as Response<string>;
         },
       });
       const { releases } = await getPkgReleases({
@@ -53,7 +53,7 @@ describe('datasource/git-refs/index', () => {
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
 
@@ -70,7 +70,7 @@ describe('datasource/git-refs/index', () => {
     it('returns null if not found', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await new GitRefsDatasource().getDigest(
@@ -82,7 +82,7 @@ describe('datasource/git-refs/index', () => {
     it('returns digest for tag', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await new GitRefsDatasource().getDigest(
@@ -94,7 +94,7 @@ describe('datasource/git-refs/index', () => {
     it('ignores refs/for/', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await new GitRefsDatasource().getDigest(
@@ -106,7 +106,7 @@ describe('datasource/git-refs/index', () => {
     it('returns digest for HEAD', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await new GitRefsDatasource().getDigest(
