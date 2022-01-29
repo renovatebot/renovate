@@ -222,6 +222,31 @@ describe('datasource/index', () => {
       })
     ).toBeNull();
   });
+  it('merges custom defaultRegistryUrls and returns success', async () => {
+    mavenDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+    });
+    mavenDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceMaven.id,
+      depName: 'something',
+      defaultRegistryUrls: ['https://reg1.com', 'https://reg2.io'],
+    });
+    expect(res).toEqual({
+      releases: [
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.0.0',
+        },
+        {
+          registryUrl: 'https://reg1.com',
+          version: '1.1.0',
+        },
+      ],
+    });
+  });
   it('merges registries and returns success', async () => {
     mavenDatasource.getReleases.mockResolvedValueOnce({
       releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
