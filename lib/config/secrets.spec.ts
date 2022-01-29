@@ -159,7 +159,7 @@ describe('config/secrets', () => {
         secrets: { SECRET_MANAGER: 'npm' },
         allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
-      expect(() => applySecretsToConfig(config, {}, false)).toThrow(
+      expect(() => applySecretsToConfig(config, null, false)).toThrow(
         CONFIG_VALIDATION
       );
     });
