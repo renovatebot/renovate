@@ -775,6 +775,17 @@ const options: RenovateOptions[] = [
     supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
   },
   {
+    name: 'defaultRegistryUrls',
+    description:
+      'List of registry URLs to use as the default for a datasource.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'registryUrls',
     description:
       'List of URLs to try for dependency lookup. Package manager specific.',
