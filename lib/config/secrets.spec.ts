@@ -154,5 +154,14 @@ describe('config/secrets', () => {
       });
       expect(Object.keys(res)).toContain('secrets');
     });
+    it('null as secrets will result in an error', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+      };
+      expect(() => applySecretsToConfig(config, {}, false)).toThrow(
+        CONFIG_VALIDATION
+      );
+    });
   });
 });
