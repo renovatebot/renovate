@@ -115,10 +115,6 @@ export class BitBucketTagsDatasource extends Datasource {
     { lookupName: repo }: DigestConfig,
     newValue?: string
   ): Promise<string | null> {
-    if (!repo) {
-      return null;
-    }
-
     if (newValue?.length) {
       return this.getTagCommit(repo, newValue);
     }
