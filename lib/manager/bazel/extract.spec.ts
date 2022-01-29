@@ -1,10 +1,5 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from './../../../test/fixtures';
 import { extractPackageFile } from './extract';
-
-const workspaceFile = loadFixture('WORKSPACE1');
-const workspace2File = loadFixture('WORKSPACE2');
-const workspace3File = loadFixture('WORKSPACE3');
-const fileWithBzlExtension = loadFixture('repositories.bzl');
 
 describe('manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {
@@ -17,12 +12,12 @@ describe('manager/bazel/extract', () => {
       expect(res).toBeNull();
     });
     it('extracts multiple types of dependencies', () => {
-      const res = extractPackageFile(workspaceFile);
+      const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
       expect(res.deps).toHaveLength(14);
       expect(res.deps).toMatchSnapshot();
     });
     it('extracts github tags', () => {
-      const res = extractPackageFile(workspace2File);
+      const res = extractPackageFile(Fixtures.get('WORKSPACE2'));
       expect(res.deps).toMatchSnapshot([
         { lookupName: 'lmirosevic/GBDeviceInfo' },
         { lookupName: 'nelhage/rules_boost' },
@@ -31,11 +26,11 @@ describe('manager/bazel/extract', () => {
       ]);
     });
     it('handle comments and strings', () => {
-      const res = extractPackageFile(workspace3File);
+      const res = extractPackageFile(Fixtures.get('WORKSPACE3'));
       expect(res.deps).toMatchSnapshot([{ lookupName: 'nelhage/rules_boost' }]);
     });
     it('extracts dependencies from *.bzl files', () => {
-      const res = extractPackageFile(fileWithBzlExtension);
+      const res = extractPackageFile(Fixtures.get('repositories.bzl'));
       expect(res.deps).toMatchSnapshot([
         {
           currentDigest: '0356bef3fbbabec5f0e196ecfacdeb6db62d48c0',

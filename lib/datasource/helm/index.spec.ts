@@ -1,10 +1,10 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { loadFixture } from '../../../test/util';
 import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
-const indexYaml = loadFixture('index.yaml');
+const indexYaml = Fixtures.get('index.yaml');
 
 describe('datasource/helm/index', () => {
   describe('getReleases', () => {

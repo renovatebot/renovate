@@ -1,4 +1,4 @@
-import { readFile, readFileSync } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import Git from 'simple-git';
 import { resolve } from 'upath';
 import * as httpMock from '../../../test/http-mock';
@@ -26,13 +26,13 @@ function readString(...paths: string[]): Promise<string> {
   return readFile(resolve(fixtures, ...paths), 'utf8');
 }
 
-function readBinSync(...paths: string[]): Buffer {
-  return readFileSync(resolve(fixtures, ...paths));
+async function readBin(...paths: string[]): Promise<Buffer> {
+  return await readFile(resolve(fixtures, ...paths));
 }
 
-function compareFile(file: string, path: string) {
-  expect(readBinSync(`./testFiles/${file}`)).toEqual(
-    readBinSync(`./${path}/${file}`)
+async function compareFile(file: string, path: string): Promise<void> {
+  expect(await readBin(`./testFiles/${file}`)).toEqual(
+    await readBin(`./${path}/${file}`)
   );
 }
 
@@ -70,27 +70,30 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
       });
 
       expect(res).toEqual(
-        [
-          'gradle/wrapper/gradle-wrapper.properties',
-          'gradle/wrapper/gradle-wrapper.jar',
-          'gradlew',
-          'gradlew.bat',
-        ].map((fileProjectPath) => ({
-          file: {
-            name: fileProjectPath,
-            contents: readBinSync(`./testFiles/${fileProjectPath}`),
-          },
-        }))
+        await Promise.all(
+          [
+            'gradle/wrapper/gradle-wrapper.properties',
+            'gradle/wrapper/gradle-wrapper.jar',
+            'gradlew',
+            'gradlew.bat',
+          ].map(async (fileProjectPath) => ({
+            file: {
+              contents: await readBin(`./testFiles/${fileProjectPath}`),
+              path: fileProjectPath,
+              type: 'addition',
+            },
+          }))
+        )
       );
 
-      [
+      for (const file of [
         'gradle/wrapper/gradle-wrapper.properties',
         'gradle/wrapper/gradle-wrapper.jar',
         'gradlew',
         'gradlew.bat',
-      ].forEach((file) => {
-        compareFile(file, 'expectedFiles');
-      });
+      ]) {
+        await compareFile(file, 'expectedFiles');
+      }
     });
 
     it('updates from version', async () => {
@@ -110,7 +113,10 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
       expect(result).toHaveLength(1);
       expect(result[0].artifactError).toBeUndefined();
 
-      compareFile('gradle/wrapper/gradle-wrapper.properties', 'expectedFiles');
+      await compareFile(
+        'gradle/wrapper/gradle-wrapper.properties',
+        'expectedFiles'
+      );
     });
 
     it('up to date', async () => {
@@ -132,9 +138,9 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
       // 5.6.4 => 5.6.4 (updates execs)
       // 6.3 => (5.6.4) (downgrades execs)
       // looks like a bug in Gradle
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-        compareFile(file, 'testFiles-copy');
-      });
+      for (const file of ['gradle/wrapper/gradle-wrapper.properties']) {
+        await compareFile(file, 'testFiles-copy');
+      }
     });
 
     it('getRepoStatus fails', async () => {
@@ -157,9 +163,9 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
       expect(res[0].artifactError.stderr).toBe('failed');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-        compareFile(file, 'testFiles-copy');
-      });
+      for (const file of ['gradle/wrapper/gradle-wrapper.properties']) {
+        await compareFile(file, 'testFiles-copy');
+      }
     });
 
     it('gradlew failed', async () => {
@@ -185,9 +191,9 @@ describe('manager/gradle-wrapper/artifacts-real', () => {
       expect(res[0].artifactError.stderr).not.toBe('');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-        compareFile(file, 'testFiles-copy');
-      });
+      for (const file of ['gradle/wrapper/gradle-wrapper.properties']) {
+        await compareFile(file, 'testFiles-copy');
+      }
     });
 
     it('gradlew not found', async () => {

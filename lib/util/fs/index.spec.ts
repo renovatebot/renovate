@@ -11,6 +11,7 @@ import {
   findLocalSiblingOrParent,
   getSubDirectory,
   localPathExists,
+  localPathIsFile,
   readLocalDirectory,
   readLocalFile,
   writeLocalFile,
@@ -187,6 +188,26 @@ describe('util/fs/index', () => {
         },
         { unsafeCleanup: true }
       );
+    });
+  });
+
+  describe('localPathIsFile', () => {
+    beforeEach(() => {
+      GlobalConfig.set({ localDir: '' });
+    });
+
+    it('returns true for file', async () => {
+      expect(await localPathIsFile(__filename)).toBeTrue();
+    });
+
+    it('returns false for directory', async () => {
+      expect(await localPathIsFile(__dirname)).toBeFalse();
+    });
+
+    it('returns false for non-existing path', async () => {
+      expect(
+        await localPathIsFile(__filename.replace('.ts', '.txt'))
+      ).toBeFalse();
     });
   });
 });

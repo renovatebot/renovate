@@ -8,7 +8,7 @@
   "include": [
     "lib/config/app-strings.ts",
     "lib/config/global.ts",
-    "lib/config/migrations/types.ts",
+    "lib/config/migrations/*",
     "lib/config/presets/common.ts",
     "lib/constants/**/*.ts",
     "lib/data-files.generated.ts",
@@ -44,7 +44,8 @@
     "lib/proxy.ts",
     "lib/types/**/*.ts",
     "lib/util/**/*.ts",
-    "lib/versioning/gradle/compare.ts",
+    "lib/versioning/gradle/**/*.ts",
+    "lib/versioning/cargo/**/*.ts",
     "lib/versioning/hex/**/*.ts",
     "lib/versioning/loose/**/*.ts",
     "lib/versioning/maven/**/*.ts",

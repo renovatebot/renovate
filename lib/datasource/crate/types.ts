@@ -1,3 +1,4 @@
+// eslint-disable-next-line typescript-enum/no-enum
 export enum RegistryFlavor {
   /** https://crates.io, supports rawgit access */
   CratesIo,

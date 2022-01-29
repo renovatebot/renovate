@@ -129,7 +129,8 @@ Array [
   Object {
     "file": Object {
       "contents": "New Podfile",
-      "name": "Podfile.lock",
+      "path": "Podfile.lock",
+      "type": "addition",
     },
   },
 ]
@@ -175,25 +176,28 @@ Array [
   Object {
     "file": Object {
       "contents": "New Podfile",
-      "name": "Podfile.lock",
+      "path": "Podfile.lock",
+      "type": "addition",
     },
   },
   Object {
     "file": Object {
       "contents": undefined,
-      "name": "Pods/Manifest.lock",
+      "path": "Pods/Manifest.lock",
+      "type": "addition",
     },
   },
   Object {
     "file": Object {
       "contents": undefined,
-      "name": "Pods/New",
+      "path": "Pods/New",
+      "type": "addition",
     },
   },
   Object {
     "file": Object {
-      "contents": "Pods/Deleted",
-      "name": "|delete|",
+      "path": "Pods/Deleted",
+      "type": "deletion",
     },
   },
 ]
