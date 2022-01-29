@@ -24,7 +24,9 @@ export async function renovateRepository(
   canRetry = true
 ): Promise<ProcessResult> {
   splitInit();
-  let config = GlobalConfig.set(applySecretsToConfig(repoConfig, {}, false));
+  let config = GlobalConfig.set(
+    applySecretsToConfig(repoConfig, undefined, false)
+  );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion: pkg.version }, 'Repository started');

@@ -133,5 +133,26 @@ describe('config/secrets', () => {
       });
       expect(Object.keys(res)).toContain('secrets');
     });
+    it('{} as secrets will result in an error', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+      };
+      expect(() => applySecretsToConfig(config, {}, false)).toThrow(
+        CONFIG_VALIDATION
+      );
+    });
+    it('undefined as secrets will result replace the secret', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+      };
+      const res = applySecretsToConfig(config, undefined, false);
+      expect(res).toStrictEqual({
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['npm'],
+      });
+      expect(Object.keys(res)).toContain('secrets');
+    });
   });
 });
