@@ -13,7 +13,12 @@ For the `flux` manager to properly link `HelmRelease` and `HelmRepository` resou
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
 
-By default, the `flux` manager will only match `flux-system/gotk-components.yaml` files.
+Updating system manifests requires that either:
+
+1. The `flux` tool is pre-installed, or
+2. You run a Docker image based on [containerbase/buildpack](https://github.com/containerbase/buildpack), such as the official Renovate images, and have `binarySource=install` configured
+
+By default, the `flux` manager will only match `flux-system/gotk-components.yaml` (i.e. system manifest) files.
 This is because there is no commonly accepted file/directory naming convention for Flux manifests and we don't want to check every single `*.yaml` file in repositories just in case some of them contain Flux definitions.
 
 If most `.yaml` files in your repository are Flux manifests, then you could add this to your config:
