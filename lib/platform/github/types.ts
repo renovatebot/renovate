@@ -22,7 +22,6 @@ export interface Comment {
 
 export interface GhPr extends Pr {
   comments: Comment[];
-  mergeable: boolean;
 }
 
 export interface GhRestPr extends GhPr {
@@ -31,6 +30,7 @@ export interface GhRestPr extends GhPr {
     sha: string;
     repo: { full_name: string };
   };
+  mergeable: boolean;
   mergeable_state: string;
   number: number;
   title: string;
