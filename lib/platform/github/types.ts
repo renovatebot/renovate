@@ -43,7 +43,6 @@ export interface GhRestPr extends GhPr {
 }
 
 export interface GhGraphQlPr extends GhPr {
-  commits: any;
   reviewRequests: any;
   assignees: any;
   mergeStateStatus: string;

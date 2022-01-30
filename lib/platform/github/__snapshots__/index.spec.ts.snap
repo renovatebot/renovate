@@ -3527,32 +3527,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -3599,7 +3573,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -3864,32 +3838,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -3936,7 +3884,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -4179,32 +4127,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -4251,7 +4173,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5413,32 +5335,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -5485,7 +5381,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5571,7 +5467,6 @@ Object {
   "displayNumber": "Pull Request #2500",
   "hasAssignees": false,
   "hasReviewers": false,
-  "isConflicted": true,
   "number": 2500,
   "sourceBranch": "renovate/jest-monorepo",
   "state": "open",
@@ -5659,32 +5554,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -5731,7 +5600,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -5834,32 +5703,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -5906,7 +5749,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6005,7 +5848,6 @@ Object {
   "canMergeReason": "mergeable = undefined",
   "commits": 1,
   "displayNumber": "Pull Request #1",
-  "isConflicted": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -6093,32 +5935,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -6165,7 +5981,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6350,32 +6166,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -6422,7 +6212,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
@@ -6591,32 +6381,6 @@ Array [
               },
               "baseRefName": null,
               "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
               "headRefName": null,
               "labels": Object {
                 "__args": Object {
@@ -6663,7 +6427,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate, br",
       "authorization": "token 123test",
-      "content-length": "1377",
+      "content-length": "934",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",

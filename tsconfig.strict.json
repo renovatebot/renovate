@@ -8,7 +8,7 @@
   "include": [
     "lib/config/app-strings.ts",
     "lib/config/global.ts",
-    "lib/config/migrations/types.ts",
+    "lib/config/migrations/*",
     "lib/config/presets/common.ts",
     "lib/constants/**/*.ts",
     "lib/data-files.generated.ts",

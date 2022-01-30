@@ -32,6 +32,7 @@ export interface ChangeLogProject {
   sourceDirectory?: string;
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum ChangeLogError {
   MissingGithubToken = 1,
   MissingGitlabToken = 2,

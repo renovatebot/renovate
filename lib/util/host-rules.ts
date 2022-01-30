@@ -54,14 +54,14 @@ export function add(params: HostRule): void {
   confidentialFields.forEach((field) => {
     const secret = rule[field];
     if (is.string(secret) && secret.length > 3) {
-      sanitize.add(secret);
+      sanitize.addSecretForSanitizing(secret);
     }
   });
   if (rule.username && rule.password) {
     const secret = Buffer.from(`${rule.username}:${rule.password}`).toString(
       'base64'
     );
-    sanitize.add(secret);
+    sanitize.addSecretForSanitizing(secret);
   }
   hostRules.push(rule);
 }
@@ -174,5 +174,5 @@ export function getAll(): HostRule[] {
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
-  sanitize.clear();
+  sanitize.clearSanitizedSecretsList();
 }

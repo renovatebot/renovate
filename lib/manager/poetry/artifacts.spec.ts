@@ -12,6 +12,7 @@ import * as _hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
+const pyproject1toml = loadFixture('pyproject.1.toml');
 const pyproject10toml = loadFixture('pyproject.10.toml');
 
 jest.mock('fs-extra');
@@ -131,9 +132,19 @@ describe('manager/poetry/artifacts', () => {
   });
   it('returns updated poetry.lock using docker', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    // poetry.lock
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    // poetry
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.2.0' },
+      ],
+    });
+    // python
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.4.2' }],
     });
@@ -142,12 +153,11 @@ describe('manager/poetry/artifacts', () => {
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
         updatedDeps,
-        newPackageFileContent: '{}',
+        newPackageFileContent: pyproject1toml,
         config: {
           ...config,
           constraints: {
             python: '~2.7 || ^3.4',
-            poetry: 'poetry>=1.1.2 setuptools poetry-dynamic-versioning>1',
           },
         },
       })
@@ -156,11 +166,21 @@ describe('manager/poetry/artifacts', () => {
   });
   it('returns updated poetry.lock using docker (constraints)', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    // poetry.lock
     fs.readFile.mockResolvedValueOnce(
       '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
     );
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    // poetry
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.0.0' },
+        { version: '1.1.0' },
+        { version: '1.2.0' },
+      ],
+    });
+    // python
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
     });
@@ -169,10 +189,10 @@ describe('manager/poetry/artifacts', () => {
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
         updatedDeps,
-        newPackageFileContent: '{}',
+        newPackageFileContent: pyproject1toml,
         config: {
           ...config,
-          constraints: { poetry: 'poetry>=1.0' },
+          constraints: {},
         },
       })
     ).not.toBeNull();

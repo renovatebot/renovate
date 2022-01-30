@@ -5,6 +5,7 @@ import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import { platform } from '../../platform';
 import { regEx } from '../../util/regex';
+import * as template from '../../util/template';
 import { BranchConfig, BranchResult } from '../types';
 
 interface DependencyDashboard {
@@ -145,7 +146,8 @@ export async function ensureDependencyDashboard(
   }
   let issueBody = '';
   if (config.dependencyDashboardHeader?.length) {
-    issueBody += `${config.dependencyDashboardHeader}\n\n`;
+    issueBody +=
+      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
   }
 
   issueBody = appendRepoProblems(config, issueBody);
@@ -167,7 +169,7 @@ export async function ensureDependencyDashboard(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n';
+      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -312,7 +314,10 @@ export async function ensureDependencyDashboard(
   }
 
   if (config.dependencyDashboardFooter?.length) {
-    issueBody += `---\n${config.dependencyDashboardFooter}\n`;
+    issueBody +=
+      '---\n' +
+      template.compile(config.dependencyDashboardFooter, config) +
+      '\n';
   }
 
   if (config.dependencyDashboardIssue) {

@@ -1,18 +1,32 @@
 import { loadAll } from 'js-yaml';
+import { id as GithubReleasesId } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type {
-  FluxManifest,
-  FluxResource,
-  HelmRelease,
-  HelmRepository,
-} from './types';
+import { isSystemManifest } from './common';
+import type { FluxManifest, FluxResource, ResourceFluxManifest } from './types';
 
-function readManifest(content: string): FluxManifest | null {
-  const manifest: FluxManifest = { releases: [], repositories: [] };
+function readManifest(content: string, file: string): FluxManifest | null {
+  if (isSystemManifest(file)) {
+    const versionMatch = regEx(/#\s*Flux\s+Version:\s*(\S+)/).exec(content);
+    if (!versionMatch) {
+      return null;
+    }
+    return {
+      kind: 'system',
+      file: file,
+      version: versionMatch[1],
+    };
+  }
+
+  const manifest: FluxManifest = {
+    kind: 'resource',
+    file: file,
+    releases: [],
+    repositories: [],
+  };
   let resources: FluxResource[];
   try {
     resources = loadAll(content, null, { json: true }) as FluxResource[];
@@ -48,67 +62,87 @@ function readManifest(content: string): FluxManifest | null {
   return manifest;
 }
 
-function resolveReleases(
-  releases: HelmRelease[],
-  repositories: HelmRepository[]
+function resolveManifest(
+  manifest: FluxManifest,
+  context: FluxManifest[]
 ): PackageDependency[] {
-  return releases.map((release) => {
-    const res: PackageDependency = {
-      depName: release.spec.chart.spec.chart,
-      currentValue: release.spec.chart.spec.version,
-    };
+  const resourceManifests = context.filter(
+    (manifest) => manifest.kind === 'resource'
+  ) as ResourceFluxManifest[];
+  const repositories = resourceManifests.flatMap(
+    (manifest) => manifest.repositories
+  );
+  switch (manifest.kind) {
+    case 'system':
+      return [
+        {
+          depName: 'fluxcd/flux2',
+          datasource: GithubReleasesId,
+          currentValue: manifest.version,
+        },
+      ];
+    case 'resource':
+      return manifest.releases.map((release) => {
+        const res: PackageDependency = {
+          depName: release.spec.chart.spec.chart,
+          currentValue: release.spec.chart.spec.version,
+          datasource: HelmDatasource.id,
+        };
 
-    const matchingRepositories = repositories.filter(
-      (rep) =>
-        rep.kind === release.spec.chart.spec.sourceRef?.kind &&
-        rep.metadata.name === release.spec.chart.spec.sourceRef.name &&
-        rep.metadata.namespace ===
-          (release.spec.chart.spec.sourceRef.namespace ||
-            release.metadata?.namespace)
-    );
-    if (matchingRepositories.length) {
-      res.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
-    } else {
-      res.skipReason = SkipReason.UnknownRegistry;
-    }
+        const matchingRepositories = repositories.filter(
+          (rep) =>
+            rep.kind === release.spec.chart.spec.sourceRef?.kind &&
+            rep.metadata.name === release.spec.chart.spec.sourceRef.name &&
+            rep.metadata.namespace ===
+              (release.spec.chart.spec.sourceRef.namespace ||
+                release.metadata?.namespace)
+        );
+        if (matchingRepositories.length) {
+          res.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
+        } else {
+          res.skipReason = 'unknown-registry';
+        }
 
-    return res;
-  });
+        return res;
+      });
+  }
+  // istanbul ignore next: unreachable code
+  return null;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
-  const manifest = readManifest(content);
+export function extractPackageFile(
+  content: string,
+  packageFile: string
+): PackageFile | null {
+  const manifest = readManifest(content, packageFile);
   if (!manifest) {
     return null;
   }
-  const deps = resolveReleases(manifest.releases, manifest.repositories);
-  return deps.length ? { deps: deps, datasource: HelmDatasource.id } : null;
+  const deps = resolveManifest(manifest, [manifest]);
+  return deps.length ? { deps: deps } : null;
 }
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  const releases = new Map<string, HelmRelease[]>();
-  const repositories: HelmRepository[] = [];
+  const manifests: FluxManifest[] = [];
   const results: PackageFile[] = [];
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    const manifest = readManifest(content);
+    const manifest = readManifest(content, file);
     if (manifest) {
-      releases.set(file, manifest.releases);
-      repositories.push(...manifest.repositories);
+      manifests.push(manifest);
     }
   }
 
-  for (const file of releases) {
-    const deps = resolveReleases(file[1], repositories);
+  for (const manifest of manifests) {
+    const deps = resolveManifest(manifest, manifests);
     if (deps.length) {
       results.push({
-        packageFile: file[0],
+        packageFile: manifest.file,
         deps: deps,
-        datasource: HelmDatasource.id,
       });
     }
   }

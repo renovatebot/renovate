@@ -1,14 +1,14 @@
-import _simpleGit from 'simple-git';
+import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { getPkgReleases } from '..';
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { GitTagsDatasource } from '.';
 
 jest.mock('simple-git');
-const simpleGit: any = _simpleGit;
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
 const depName = 'https://github.com/example/example.git';
 
-const lsRemote1 = loadFixture('ls-remote-1.txt', '../git-refs');
+const lsRemote1 = Fixtures.get('ls-remote-1.txt', '../git-refs');
 
 const datasource = GitTagsDatasource.id;
 const datasourceInstance = new GitTagsDatasource();
@@ -18,7 +18,7 @@ describe('datasource/git-tags/index', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(null);
+          return Promise.resolve(null) as Response<string>;
         },
       });
       const versions = await getPkgReleases({ datasource, depName });
@@ -36,7 +36,7 @@ describe('datasource/git-tags/index', () => {
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
 
@@ -51,11 +51,11 @@ describe('datasource/git-tags/index', () => {
     it('returns null if not found', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await datasourceInstance.getDigest(
-        { datasource, depName: 'a tag to look up' },
+        { lookupName: 'a tag to look up' },
         'notfound'
       );
       expect(digest).toBeNull();
@@ -63,11 +63,11 @@ describe('datasource/git-tags/index', () => {
     it('returns digest for tag', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await datasourceInstance.getDigest(
-        { datasource, depName: 'a tag to look up' },
+        { lookupName: 'a tag to look up' },
         'v1.0.2'
       );
       expect(digest).toMatchSnapshot();
@@ -75,11 +75,11 @@ describe('datasource/git-tags/index', () => {
     it('returns digest for HEAD', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(lsRemote1);
+          return Promise.resolve(lsRemote1) as Response<string>;
         },
       });
       const digest = await datasourceInstance.getDigest(
-        { datasource, depName: 'another tag to look up' },
+        { lookupName: 'another tag to look up' },
         undefined
       );
       expect(digest).toMatchSnapshot();

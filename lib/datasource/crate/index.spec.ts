@@ -1,11 +1,11 @@
 import delay from 'delay';
 import fs from 'fs-extra';
-import _simpleGit from 'simple-git';
+import _simpleGit, { SimpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { loadFixture } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import * as memCache from '../../util/cache/memory';
@@ -13,11 +13,7 @@ import { RegistryFlavor, RegistryInfo } from './types';
 import { CrateDatasource } from '.';
 
 jest.mock('simple-git');
-const simpleGit: any = _simpleGit;
-
-const res1 = loadFixture('libc');
-const res2 = loadFixture('amethyst');
-const res3 = loadFixture('mypkg');
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
@@ -36,7 +32,7 @@ function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
 
         const path = `${clonePath}/my/pk/mypkg`;
         fs.mkdirSync(dirname(path), { recursive: true });
-        fs.writeFileSync(path, res3, { encoding: 'utf8' });
+        fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
       }
     );
 
@@ -209,7 +205,10 @@ describe('datasource/crate/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data: libc', async () => {
-      httpMock.scope(baseUrl).get('/li/bc/libc').reply(200, res1);
+      httpMock
+        .scope(baseUrl)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
       const res = await getPkgReleases({
         datasource,
         depName: 'libc',
@@ -221,7 +220,10 @@ describe('datasource/crate/index', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data: amethyst', async () => {
-      httpMock.scope(baseUrl).get('/am/et/amethyst').reply(200, res2);
+      httpMock
+        .scope(baseUrl)
+        .get('/am/et/amethyst')
+        .reply(200, Fixtures.get('amethyst'));
       const res = await getPkgReleases({
         datasource,
         depName: 'amethyst',

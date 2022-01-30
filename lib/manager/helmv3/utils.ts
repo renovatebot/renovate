@@ -1,7 +1,7 @@
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import type { PackageDependency } from '../types';
+import type { ChartDefinition, Repository } from './types';
 
 export function parseRepository(
   depName: string,
@@ -17,14 +17,14 @@ export function parseRepository(
         res.lookupName = `${repositoryURL.replace('oci://', '')}/${depName}`;
         break;
       case 'file:':
-        res.skipReason = SkipReason.LocalDependency;
+        res.skipReason = 'local-dependency';
         break;
       default:
         res.registryUrls = [repositoryURL];
     }
   } catch (err) {
     logger.debug({ err }, 'Error parsing url');
-    res.skipReason = SkipReason.InvalidUrl;
+    res.skipReason = 'invalid-url';
   }
   return res;
 }
@@ -51,4 +51,37 @@ export function resolveAlias(
     return alias;
   }
   return null;
+}
+
+export function getRepositories(definitions: ChartDefinition[]): Repository[] {
+  const repositoryList = definitions
+    .flatMap((value) => value.dependencies)
+    .map((dependency) => {
+      // remove additional keys to prevent interference at deduplication
+      return {
+        name: dependency.name,
+        repository: dependency.repository,
+      };
+    });
+  const dedup = new Set();
+  return repositoryList.filter((el) => {
+    const duplicate = dedup.has(el.repository);
+    dedup.add(el.repository);
+    return !duplicate;
+  });
+}
+
+export function isOCIRegistry(repository: Repository): boolean {
+  return repository.repository.startsWith('oci://');
+}
+
+export function aliasRecordToRepositories(
+  aliases: Record<string, string>
+): Repository[] {
+  return Object.entries(aliases).map(([alias, url]) => {
+    return {
+      name: alias,
+      repository: url,
+    };
+  });
 }

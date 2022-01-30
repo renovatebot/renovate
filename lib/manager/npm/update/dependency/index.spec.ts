@@ -1,7 +1,7 @@
-import { loadFixture } from '../../../../../test/util';
+import { Fixtures } from '../../../../../test/fixtures';
 import * as npmUpdater from '.';
 
-const readFixture = (x: string): string => loadFixture(x, '../..');
+const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
 const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');

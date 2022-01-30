@@ -16,10 +16,14 @@ In short:
 
 Shareable config presets can only be used with the JSON format, other formats are not supported.
 
-**Warning:** `default.json` is intended for use with presets only!
-**Warning:** Do not use a `renovate.json` file as a preset.
+<!-- prettier-ignore -->
+!!! warning
+    `default.json` is intended for use with presets only!
+    Also, do not use a `renovate.json` file as a preset.
 
-**Info:** We've deprecated the use of a `renovate.json` file for presets as this can cause issues if the repository configuration uses a `renovate.json` file as well.
+<!-- prettier-ignore -->
+!!! info
+    We've deprecated the use of a `renovate.json` file for presets as this can cause issues if the repository configuration uses a `renovate.json` file as well.
 
 ## Goals of Preset Configs
 
@@ -87,9 +91,11 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | Local with preset name and path with a tag | `local>abc/foo//path/xyz#1.5.4` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.5.4`        |
 | Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.5.4`   | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.5.4`        |
 
-Note that you can't combine the path and sub-preset syntaxes.
-This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
-One workaround is to use distinct files instead of sub-presets.
+<!-- prettier-ignore -->
+!!! tip
+    You can't combine the path and sub-preset syntaxes.
+    This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
+    One workaround is to use distinct files instead of sub-presets.
 
 ## Example configs
 
@@ -99,8 +105,10 @@ It simply sets the configuration option `rangeStrategy` to `replace`.
 An example of a full config is `config:base`, which is Renovate's default configuration.
 It mostly uses Renovate config defaults but adds a few smart customisations such as grouping monorepo packages together.
 
-Special note: the `:xyz` naming convention (with `:` prefix) is a special shorthand for the `default:` presets.
-e.g. `:xyz` is equivalent to `default:xyz`.
+<!-- prettier-ignore -->
+!!! note
+    The `:xyz` naming convention (with `:` prefix) is a special shorthand for the `default:` presets.
+    e.g. `:xyz` is equivalent to `default:xyz`.
 
 ## How to Use Preset Configs
 
@@ -245,7 +253,9 @@ For example the result may be:
 
 ## npm-hosted presets
 
-Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
+<!-- prettier-ignore -->
+!!! warning
+    Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
 
 If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
 That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
@@ -279,7 +289,7 @@ Then in each of your repositories you can add your Renovate config like:
 
 Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
 
-Note: if you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
+If you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
 
 ```json
 {

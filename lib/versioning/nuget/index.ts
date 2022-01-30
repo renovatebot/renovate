@@ -1,6 +1,6 @@
 import semver from 'semver';
 import { regEx } from '../../util/regex';
-import { GenericVersion, GenericVersioningApi } from '../loose/generic';
+import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'nuget';

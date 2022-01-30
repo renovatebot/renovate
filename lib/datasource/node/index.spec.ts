@@ -1,10 +1,8 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { datasource, defaultRegistryUrl } from './common';
-
-const res1 = loadFixture('index.json');
 
 describe('datasource/node/index', () => {
   describe('getReleases', () => {
@@ -42,7 +40,10 @@ describe('datasource/node/index', () => {
     });
 
     it('processes real data', async () => {
-      httpMock.scope(defaultRegistryUrl).get('/index.json').reply(200, res1);
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get('/index.json')
+        .reply(200, Fixtures.get('index.json'));
       const res = await getPkgReleases({
         datasource,
         depName: 'node',
