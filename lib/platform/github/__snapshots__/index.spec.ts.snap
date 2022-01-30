@@ -3386,7 +3386,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "cannotMergeReason": "pr.mergeable = \\"undefined\\"",
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Pull Request #91",
@@ -3728,7 +3727,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "cannotMergeReason": "pr.mergeable = \\"undefined\\"",
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Pull Request #91",
@@ -3976,7 +3974,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "cannotMergeReason": "pr.mergeable = \\"undefined\\"",
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Pull Request #90",
@@ -5835,7 +5832,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "cannotMergeReason": "pr.mergeable = \\"undefined\\"",
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "mergeable_state": "dirty",

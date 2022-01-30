@@ -670,7 +670,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (pr.state === PrState.Open) {
     pr.sourceBranch = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
-    if (pr.mergeable !== true) {
+    if (pr.mergeable === false) {
       pr.cannotMergeReason = `pr.mergeable = "${pr.mergeable}"`;
     }
   }
