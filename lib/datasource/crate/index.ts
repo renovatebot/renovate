@@ -129,7 +129,7 @@ export class CrateDatasource extends Datasource {
         return `https://crates.io/crates/${lookupName}`;
       case RegistryFlavor.Cloudsmith: {
         // input: https://dl.cloudsmith.io/basic/$org/$repo/cargo/index.git
-        const tokens = info.url.pathname.split('/');
+        const tokens = info.url?.pathname.split('/');
         const org = tokens[2];
         const repo = tokens[3];
         return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${lookupName}`;
@@ -163,6 +163,10 @@ export class CrateDatasource extends Datasource {
     lookupName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
+    if (!registryUrl) {
+      return null;
+    }
+
     let url: URL;
     try {
       url = new URL(registryUrl);
@@ -256,7 +260,9 @@ export class CrateDatasource extends Datasource {
     return registry;
   }
 
-  private static areReleasesCacheable(registryUrl: string): boolean {
+  private static areReleasesCacheable(
+    registryUrl: string | undefined
+  ): boolean {
     // We only cache public releases, we don't want to cache private
     // cloned data between runs.
     return registryUrl === 'https://crates.io';
