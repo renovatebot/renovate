@@ -37,7 +37,7 @@ Object {
 exports[`platform/gitea/index getPr should fallback to direct fetching if cache fails 1`] = `
 Object {
   "body": "some random pull request",
-  "cannotMergeReason": undefined,
+  "cannotMergeReason": "pr.mergeable=\\"false\\"",
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
   "hasAssignees": false,
