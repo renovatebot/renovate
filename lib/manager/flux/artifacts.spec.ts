@@ -1,15 +1,26 @@
 import { exec, mockExecAll } from '../../../test/exec-util';
+import { fs } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import { updateArtifacts } from '.';
 
 jest.mock('child_process');
+jest.mock('../../util/fs');
 
 describe('manager/flux/artifacts', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
+  beforeAll(() => {
+    GlobalConfig.set({
+      localDir: '',
+    });
   });
 
+  // beforeEach(() => {
+  //   jest.resetAllMocks();
+  // });
+
   it('replaces existing value', async () => {
-    mockExecAll(exec, { stdout: 'test', stderr: '' });
+    mockExecAll(exec, { stdout: '', stderr: '' });
+    fs.readLocalFile.mockResolvedValueOnce('old');
+    fs.readLocalFile.mockResolvedValueOnce('test');
 
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
