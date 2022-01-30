@@ -8,6 +8,7 @@ import { cache } from '../../util/cache/package/decorator';
 import { privateCacheDir, readFile } from '../../util/fs';
 import { simpleGitConfig } from '../../util/git/config';
 import { regEx } from '../../util/regex';
+import { parseUrl } from '../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -161,16 +162,10 @@ export class CrateDatasource extends Datasource {
    */
   private static async fetchRegistryInfo({
     lookupName,
-    registryUrl,
+    registryUrl = '',
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
-    if (!registryUrl) {
-      return null;
-    }
-
-    let url: URL;
-    try {
-      url = new URL(registryUrl);
-    } catch (err) {
+    const url = parseUrl(registryUrl);
+    if (!url) {
       logger.debug({ registryUrl }, 'could not parse registry URL');
       return null;
     }
