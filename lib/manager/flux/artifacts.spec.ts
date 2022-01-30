@@ -13,10 +13,6 @@ describe('manager/flux/artifacts', () => {
     });
   });
 
-  // beforeEach(() => {
-  //   jest.resetAllMocks();
-  // });
-
   it('replaces existing value', async () => {
     mockExecAll(exec, { stdout: '', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
@@ -51,6 +47,19 @@ describe('manager/flux/artifacts', () => {
     expect(res).toBeNull();
   });
 
+  it('ignores unchanged system manifests', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('old');
+    fs.readLocalFile.mockResolvedValueOnce('old');
+    const res = await updateArtifacts({
+      packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+      updatedDeps: [{ newVersion: '1.0.1' }],
+      newPackageFileContent: undefined,
+      config: {},
+    });
+
+    expect(res).toBeNull();
+  });
+
   it('ignores system manifests without a new version', async () => {
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
@@ -62,7 +71,7 @@ describe('manager/flux/artifacts', () => {
     expect(res).toBeNull();
   });
 
-  it('failed to generate manifests', async () => {
+  it('failed to generate system manifest', async () => {
     mockExecAll(exec, new Error('failed'));
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
@@ -71,8 +80,34 @@ describe('manager/flux/artifacts', () => {
       config: {},
     });
 
-    expect(res[0].artifactError.lockFile).toBe(
-      'clusters/my-cluster/flux-system/gotk-components.yaml'
-    );
+    expect(res).toStrictEqual([
+      {
+        artifactError: {
+          lockFile: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          stderr: 'failed',
+        },
+      },
+    ]);
+  });
+
+  it('failed to read system manifest', async () => {
+    mockExecAll(exec, { stdout: '', stderr: 'Error' });
+    fs.readLocalFile.mockResolvedValueOnce('old');
+    fs.readLocalFile.mockResolvedValueOnce('');
+    const res = await updateArtifacts({
+      packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+      updatedDeps: [{ newVersion: '1.0.1' }],
+      newPackageFileContent: undefined,
+      config: {},
+    });
+
+    expect(res).toStrictEqual([
+      {
+        artifactError: {
+          lockFile: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          stderr: 'Error',
+        },
+      },
+    ]);
   });
 });
