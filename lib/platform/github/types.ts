@@ -30,7 +30,6 @@ export interface GhRestPr extends GhPr {
     sha: string;
     repo: { full_name: string };
   };
-  mergeable: boolean;
   mergeable_state: string;
   number: number;
   title: string;
