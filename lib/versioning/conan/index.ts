@@ -127,7 +127,16 @@ function isCompatible(version: string, range: string): boolean {
   return false;
 }
 
-function isStable(_: string): boolean {
+function isStable(version: string): boolean {
+  const cleanedVersion = cleanVersion(version);
+  const options = getOptions(version);
+  if (
+    !options.includePrerelease &&
+    semver.prerelease(cleanedVersion, options)
+  ) {
+    return false;
+  }
+
   return true;
 }
 

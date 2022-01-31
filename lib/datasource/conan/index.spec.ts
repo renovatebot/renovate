@@ -1,8 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { loadJsonFixture } from '../../../test/util';
-import * as loose from '../../versioning/loose';
-import { id as versioning } from '../../versioning/loose';
+import * as conan from '../../versioning/conan';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
@@ -12,7 +11,7 @@ const fakeJson: any = loadJsonFixture('fake.json');
 const datasource = ConanDatasource.id;
 
 const config = {
-  versioning: loose.id,
+  versioning: conan.id,
   registryUrls: [defaultRegistryUrl],
 };
 
@@ -28,7 +27,6 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'fakepackage',
           lookupName: 'fakepackage/1.2@_/_',
         })
@@ -45,7 +43,6 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'fakepackage',
           lookupName: 'fakepackage/1.2@_/_',
         })
@@ -62,7 +59,6 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
@@ -79,7 +75,6 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'fakepackage',
           lookupName: 'fakepackage/1.2@_/_',
         })
@@ -96,11 +91,29 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        registryUrl: 'https://center.conan.io',
+        releases: [
+          {
+            version: '1.8.1',
+          },
+          {
+            version: '1.9.3',
+          },
+          {
+            version: '1.9.4',
+          },
+          {
+            version: '1.10.0',
+          },
+          {
+            version: '1.10.1',
+          },
+        ],
+      });
     });
 
     it('it handles mismatched userAndChannel versioned data', async () => {
@@ -113,7 +126,6 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'poco',
           lookupName: 'poco/1.2@un/matched',
         })
@@ -130,7 +142,6 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'bad',
           lookupName: 'bad/1.2@_/_',
         })
@@ -155,7 +166,6 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })
@@ -172,7 +182,6 @@ describe('datasource/conan/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          versioning,
           depName: 'poco',
           lookupName: 'poco/1.2@_/_',
         })

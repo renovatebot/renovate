@@ -82,7 +82,7 @@ export function findSatisfyingVersion(
   let index = 0;
   let curIndex = -1;
 
-  versions.forEach((v) => {
+  for (const v of versions) {
     const versionFromList = makeVersion(v, options);
     if (typeof versionFromList === 'string') {
       const cleanedVersion = cleanVersion(versionFromList);
@@ -100,7 +100,7 @@ export function findSatisfyingVersion(
       }
     }
     index += 1;
-  });
+  }
   if (curIndex >= 0) {
     return versions[curIndex];
   }

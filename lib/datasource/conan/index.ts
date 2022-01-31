@@ -1,7 +1,6 @@
 import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
-import { ensureTrailingSlash } from '../../util/url';
-import * as conan from '../../versioning/conan';
+import { ensureTrailingSlash, joinUrlParts } from '../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { conanDatasourceRegex, datasource, defaultRegistryUrl } from './common';
@@ -16,8 +15,6 @@ export class ConanDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
-  override readonly defaultVersioning = conan.id;
-
   constructor() {
     super(ConanDatasource.id);
   }
@@ -31,7 +28,7 @@ export class ConanDatasource extends Datasource {
 
     try {
       const url = ensureTrailingSlash(hostUrl);
-      const lookupUrl = `${url}v2/conans/search?q=${packageName}`;
+      const lookupUrl = joinUrlParts(url, `v2/conans/search?q=${packageName}`);
 
       logger.trace({ lookupUrl }, 'conan api got lookup');
       const rep = await this.http.getJson<ConanJSON>(lookupUrl);

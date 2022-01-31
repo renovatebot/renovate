@@ -554,7 +554,7 @@ describe('versioning/conan/index', () => {
     version                                          | result
     ${'5.0.1'}                                       | ${true}
     ${'19.00'}                                       | ${true}
-    ${'1.0.7-prerelease.1'}                          | ${true}
+    ${'1.0.7-prerelease.1'}                          | ${false}
     ${'1.0.7-prerelease.1, include_prerelease=True'} | ${true}
   `('isStable("$version") === $result', ({ version, result }) => {
     const res = conan.isStable(version);
