@@ -93,7 +93,7 @@ export async function resolveGlobalExtends(
     const config = { extends: globalExtends };
     const resolvedConfig = await resolveConfigPresets(config);
     return resolvedConfig;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     throw new Error(CONFIG_PRESETS_INVALID);
   }
 }
