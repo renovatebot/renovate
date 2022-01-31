@@ -135,6 +135,7 @@ This mode means that Renovate will dynamically install the version of tools avai
 Supported tools for dynamic install are:
 
 - `composer`
+- `flux`
 - `jb`
 - `npm`
 
