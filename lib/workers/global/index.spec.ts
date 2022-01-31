@@ -3,6 +3,7 @@ import { ERROR, WARN } from 'bunyan';
 import { fs, logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
 import { PlatformId } from '../../constants';
+import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import * as datasourceDocker from '../../datasource/docker';
 import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';
@@ -48,6 +49,20 @@ describe('workers/global/index', () => {
     expect(presets.resolveConfigPresets).toHaveBeenCalledWith({
       extends: [':pinVersions'],
     });
+  });
+
+  it('throws if global presets could not be resolved', async () => {
+    configParser.parseConfigs.mockResolvedValueOnce({
+      repositories: [],
+      globalExtends: [':pinVersions'],
+    });
+    presets.resolveConfigPresets.mockImplementation(() => {
+      throw new Error('some-error');
+    });
+    await expect(
+      globalWorker.resolveGlobalExtends(['some-preset'])
+    ).rejects.toThrow(CONFIG_PRESETS_INVALID);
+    expect(presets.resolveConfigPresets).toHaveBeenCalled();
   });
 
   it('handles zero repos', async () => {

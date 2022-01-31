@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
 import * as configParser from '../../config';
+import { mergeChildConfig } from '../../config';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
 import type {
@@ -105,7 +106,10 @@ export async function start(): Promise<number> {
     config = await getGlobalConfig();
     if (config?.globalExtends) {
       // resolve global presets immediately
-      config = mergeChildConfig(config, await resolveGlobalExtends(config.globalExtends));
+      config = mergeChildConfig(
+        config,
+        await resolveGlobalExtends(config.globalExtends)
+      );
     }
     // initialize all submodules
     config = await globalInitialize(config);
