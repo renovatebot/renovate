@@ -1,3 +1,4 @@
+import bunyan from 'bunyan';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
@@ -715,6 +716,33 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    it('checks for valid log level', () => {
+      expect(
+        configValidation.isValidLogLevel('warning' as bunyan.LogLevel)
+      ).toBeFalsy();
+      expect(
+        configValidation.isValidLogLevel('warn' as bunyan.LogLevel)
+      ).toBeTruthy();
+      expect(
+        configValidation.isValidLogLevel('trace' as bunyan.LogLevel)
+      ).toBeTruthy();
+      expect(
+        configValidation.isValidLogLevel(' ' as bunyan.LogLevel)
+      ).toBeTruthy();
+      expect(
+        configValidation.isValidLogLevel('' as bunyan.LogLevel)
+      ).toBeTruthy();
+      expect(
+        configValidation.isValidLogLevel(20 as bunyan.LogLevel)
+      ).toBeTruthy();
+      expect(
+        configValidation.isValidLogLevel(10 as bunyan.LogLevel)
+      ).toBeTruthy();
+      expect(
+        configValidation.isValidLogLevel(100 as bunyan.LogLevel)
+      ).toBeFalsy();
     });
   });
 });

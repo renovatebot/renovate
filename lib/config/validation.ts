@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import bunyan from 'bunyan';
 import { getLanguageList, getManagerList } from '../manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
@@ -569,4 +570,42 @@ export async function validateConfig(
   errors.sort(sortAll);
   warnings.sort(sortAll);
   return { errors, warnings };
+}
+
+export function isValidLogLevel(
+  logLevelToCheck: bunyan.LogLevel
+): logLevelToCheck is bunyan.LogLevel {
+  const allowedValues: bunyan.LogLevel[] = [
+    'trace',
+    'debug',
+    'info',
+    'warn',
+    'error',
+    'fatal',
+    bunyan.TRACE,
+    bunyan.DEBUG,
+    bunyan.INFO,
+    bunyan.WARN,
+    bunyan.ERROR,
+    bunyan.FATAL,
+  ];
+  const result: boolean =
+    allowedValues.indexOf(logLevelToCheck) !== -1 ||
+    (typeof logLevelToCheck === 'string' &&
+      logLevelToCheck.trim().length === 0);
+
+  if (!result) {
+    const Logger = bunyan.createLogger({
+      name: 'log level error log',
+      streams: [
+        {
+          level: 'fatal',
+          stream: process.stdout, // log INFO and above to stdout
+        },
+      ],
+    });
+    Logger.fatal(`${logLevelToCheck} is not a valid log level terminating`);
+  }
+
+  return result;
 }
