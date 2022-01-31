@@ -7400,10 +7400,10 @@ opener@*:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
-openpgp@5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.0.1.tgz#fe355dcdc2074e505d5c22ee51e880a8296bd0ab"
-  integrity sha512-J9HGIcXumwczJwX3JvgshWYtkhsOJHm5ZPd1ipJ1BqrZL06NgqV/EfJyF3ThOlNV2rY0MGWdS8L8/kKyeo3sXg==
+openpgp@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.1.0.tgz#4da3880ad04d9d75b3f0470451f6862d43252568"
+  integrity sha512-keCno6QPMXWwfjrOOtT8fwZ5XgCcB7vZH80xb44SbJ49qQ11Efl2fFfqHpaie7jTQFjRKxgT8hSFPXJUjogNPw==
   dependencies:
     asn1.js "^5.0.0"
 
