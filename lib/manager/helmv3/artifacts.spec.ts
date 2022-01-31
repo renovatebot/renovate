@@ -1,18 +1,26 @@
 import { join } from 'upath';
 import { envMock, exec, mockExecAll } from '../../../test/exec-util';
 import { Fixtures } from '../../../test/fixtures';
-import { env, fs } from '../../../test/util';
+import { env, fs, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
+import * as _datasource from '../../datasource';
 import * as docker from '../../util/exec/docker';
 import * as hostRules from '../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from './artifacts';
 
 jest.mock('child_process');
+jest.mock('../../datasource');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/http');
 jest.mock('../../util/fs');
+
+const datasource = mocked(_datasource);
+
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+const exec: jest.Mock<typeof _exec> = _exec as any;
+const env = mocked(_env);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
@@ -143,6 +151,9 @@ describe('manager/helmv3/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
     fs.getSubDirectory.mockReturnValue('');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v3.7.2' }],
+    });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -228,6 +239,9 @@ describe('manager/helmv3/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue('');
     fs.getSubDirectory.mockReturnValue('');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v3.7.2' }],
+    });
     expect(
       await helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
