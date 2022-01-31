@@ -24,7 +24,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 exports[`manager/helmv3/artifacts alias name is picked, when repository is as alias and dependency defined 2`] = `
 Array [
   Object {
-    "cmd": "helm repo add repo1 --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories --username basicUser --password secret https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo1 --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username basicUser --password secret https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -43,7 +43,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -99,7 +99,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 exports[`manager/helmv3/artifacts log into private registries and repositories NOT defined in aliases 2`] = `
 Array [
   Object {
-    "cmd": "helm registry login --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories --username registryUser --password password registry.gitlab.com/user/oci-helm-test",
+    "cmd": "helm registry login --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username registryUser --password password registry.gitlab.com/user/oci-helm-test",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -118,7 +118,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm repo add repo-test --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories --username basicUser --password secret https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username basicUser --password secret https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -137,7 +137,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -182,7 +182,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 exports[`manager/helmv3/artifacts log into private registries and repositories already defined in aliases 2`] = `
 Array [
   Object {
-    "cmd": "helm registry login --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories --username test --password aPassword registry.example.com/organization",
+    "cmd": "helm registry login --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username test --password aPassword registry.example.com/organization",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -201,7 +201,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm repo add stable --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories the_stable_url",
+    "cmd": "helm repo add stable --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_stable_url",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -220,7 +220,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm repo add repo1 --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories --username basicUser --password secret https://the_repo1_url",
+    "cmd": "helm repo add repo1 --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username basicUser --password secret https://the_repo1_url",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -239,7 +239,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm repo add repo-test --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -258,7 +258,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -282,7 +282,7 @@ Array [
 exports[`manager/helmv3/artifacts returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "helm repo add repo-test --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -301,7 +301,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -346,7 +346,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 exports[`manager/helmv3/artifacts returns updated Chart.lock 2`] = `
 Array [
   Object {
-    "cmd": "helm repo add repo-test --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -365,7 +365,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -410,7 +410,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 exports[`manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 2`] = `
 Array [
   Object {
-    "cmd": "helm repo add repo-test --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -429,7 +429,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -531,7 +531,7 @@ generated: \\"2022-01-20T17:48:47.610371241+01:00\\"
 exports[`manager/helmv3/artifacts sets repositories from aliases 2`] = `
 Array [
   Object {
-    "cmd": "helm repo add stable --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories the_stable_url",
+    "cmd": "helm repo add stable --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_stable_url",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -550,7 +550,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm repo add repo1 --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories the_repo1_url",
+    "cmd": "helm repo add repo1 --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories the_repo1_url",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -569,7 +569,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm repo add repo-test --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -588,7 +588,7 @@ Array [
     },
   },
   Object {
-    "cmd": "helm dependency update --registry-config registry.json --repository-config repositories.yaml --repository-cache repositories ''",
+    "cmd": "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
