@@ -28,6 +28,10 @@ const ociLockFile1 = Fixtures.get('oci_1.lock');
 const ociLockFile2 = Fixtures.get('oci_2.lock');
 const chartFile = Fixtures.get('Chart.yaml');
 
+const ociLockFile1Alias = Fixtures.get('oci_1_alias.lock');
+const ociLockFile2Alias = Fixtures.get('oci_2_alias.lock');
+const chartFileAlias = Fixtures.get('ChartAlias.yaml');
+
 describe('manager/helmv3/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -421,6 +425,55 @@ describe('manager/helmv3/artifacts', () => {
         value.cmd.includes(
           'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable'
         )
+      )
+    ).toBeArrayOfSize(1);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('do not add aliases to repository list', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1Alias as never);
+    const execSnapshots = mockExecAll(exec);
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2Alias as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getSubDirectory.mockReturnValue('');
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps: [],
+        newPackageFileContent: chartFileAlias,
+        config: {
+          ...config,
+          updateType: 'lockFileMaintenance',
+          aliases: {
+            jetstack: 'https://charts.jetstack.io',
+          },
+        },
+      })
+    ).toMatchSnapshot([
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: ociLockFile2Alias,
+        },
+      },
+    ]);
+    expect(execSnapshots).toBeArrayOfSize(3);
+    expect(
+      execSnapshots.filter(
+        (value) =>
+          value.cmd.startsWith('helm repo add jetstack') && // alias
+          value.cmd.includes('https://charts.jetstack.io')
+      )
+    ).toBeArrayOfSize(1);
+    expect(
+      execSnapshots.filter(
+        (value) =>
+          value.cmd.startsWith('helm repo add nginx') && // falling back to name
+          value.cmd.includes('https://kubernetes.github.io/ingress-nginx')
       )
     ).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchSnapshot();
