@@ -51,6 +51,15 @@ describe('manager/gitlabci/extract', () => {
       expect(res[0].deps).toHaveLength(3);
     });
 
+    it('extracts multiple named services', async () => {
+      const res = await extractAllPackageFiles(config, [
+        'lib/manager/gitlabci/__fixtures__/gitlab-ci.6.yaml',
+      ]);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].deps).toHaveLength(3);
+    });
+
     it('extracts multiple image lines', async () => {
       const res = await extractAllPackageFiles(config, [
         'lib/manager/gitlabci/__fixtures__/gitlab-ci.yaml',

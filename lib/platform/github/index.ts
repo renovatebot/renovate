@@ -633,7 +633,6 @@ async function getOpenPrs(): Promise<PrList> {
         delete pr.reviewRequests;
         delete pr.mergeable;
         delete pr.mergeStateStatus;
-        delete pr.commits;
         config.openPrList[pr.number] = pr;
         prNumbers.push(pr.number);
       }

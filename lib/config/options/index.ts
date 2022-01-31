@@ -782,6 +782,17 @@ const options: RenovateOptions[] = [
     supportedManagers: ['helm-requirements', 'helmv3', 'helmfile'],
   },
   {
+    name: 'defaultRegistryUrls',
+    description:
+      'List of registry URLs to use as the default for a datasource.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'registryUrls',
     description:
       'List of URLs to try for dependency lookup. Package manager specific.',
@@ -1165,6 +1176,7 @@ const options: RenovateOptions[] = [
       'replace',
       'widen',
       'update-lockfile',
+      'in-range-only',
     ],
     cli: false,
     env: false,
@@ -2220,6 +2232,7 @@ const options: RenovateOptions[] = [
     description:
       'User-facing strings pertaining to the PR comment that gets posted when a PR is closed.',
     type: 'object',
+    freeChoice: true,
     default: {
       ignoreTopic: 'Renovate Ignore Notification',
       ignoreMajor:
