@@ -29,6 +29,7 @@ jobs:
         uses: github/codeql-action/init@8b37404d562d866ad6a65d0ecb4fa5131e047ca4 # renovate: tag=v1.0.30
         with:
           config-file: ./.github/codeql/codeql-config.yml
+          languages: javascript
 
         # Override language selection by uncommenting this and choosing your languages
         # with:

@@ -135,6 +135,7 @@ This mode means that Renovate will dynamically install the version of tools avai
 Supported tools for dynamic install are:
 
 - `composer`
+- `flux`
 - `jb`
 - `npm`
 
@@ -183,7 +184,9 @@ The format of the environment variables must follow:
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
-Note: the following prefixes cannot be supported for this functionality: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+<!-- prettier-ignore -->
+!!! note
+    The following prefixes cannot be supported for this functionality: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
 
 ### npmjs registry token example
 
@@ -242,7 +245,9 @@ Adds a custom prefix to the default Renovate sidecar Docker containers name and 
 
 If this is set to `myprefix_` the final container created from `renovate/node` image would be named `myprefix_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
 
-Note that dangling containers will not be removed until Renovate is run with the same prefix again.
+<!-- prettier-ignore -->
+!!! note
+    Dangling containers will only be removed when Renovate runs again with the same prefix.
 
 ## dockerImagePrefix
 
@@ -385,13 +390,16 @@ Set this to `false` only if all three statements are true:
 
 ## onboardingBranch
 
-Note that this setting is independent of `branchPrefix`.
+<!-- prettier-ignore -->
+!!! note
+    This setting is independent of `branchPrefix`.
+
 For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
 If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
 ## onboardingCommitMessage
 
-Note that if `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
+If `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
 
 ## onboardingConfig
 
@@ -505,7 +513,9 @@ Any encrypted secrets using GPG must have a mandatory organization/group scope, 
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
 Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
 
-Note: simple public key encryption was previously used to encrypt secrets, but this approach has now been deprecated and no longer documented.
+<!-- prettier-ignore -->
+!!! note
+    Simple public key encryption was previously used to encrypt secrets, but this approach has been deprecated and is no longer documented.
 
 ## privateKeyOld
 
@@ -543,7 +553,9 @@ Set this to `"enabled"` to have Renovate maintain a JSON file cache per-reposito
 Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
-Warning: this is an experimental feature and may be modified or removed in a future non-major release.
+<!-- prettier-ignore -->
+!!! warning
+    This is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
 

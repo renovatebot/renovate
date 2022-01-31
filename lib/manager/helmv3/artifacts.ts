@@ -5,7 +5,7 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
-import type { ExecOptions } from '../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
 import {
   getSiblingFileName,
   getSubDirectory,
@@ -23,17 +23,10 @@ import {
 } from './utils';
 
 async function helmCommands(
+  execOptions: ExecOptions,
   manifestPath: string,
   repositories: Repository[]
 ): Promise<void> {
-  const execOptions: ExecOptions = {
-    docker: {
-      image: 'helm',
-    },
-    extraEnv: {
-      HELM_EXPERIMENTAL_OCI: '1',
-    },
-  };
   const cmd = [];
   // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
   const helmConfigParameters = [
@@ -148,7 +141,21 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    await helmCommands(packageFileName, repositories);
+    const helmToolConstraint: ToolConstraint = {
+      toolName: 'helm',
+      constraint: config.constraints?.helm,
+    };
+
+    const execOptions: ExecOptions = {
+      docker: {
+        image: 'sidecar',
+      },
+      extraEnv: {
+        HELM_EXPERIMENTAL_OCI: '1',
+      },
+      toolConstraints: [helmToolConstraint],
+    };
+    await helmCommands(execOptions, packageFileName, repositories);
     logger.debug('Returning updated Chart.lock');
     const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newHelmLockContent) {

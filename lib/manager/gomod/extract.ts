@@ -1,5 +1,5 @@
 import semver from 'semver';
-import * as datasourceGo from '../../datasource/go';
+import { GoDatasource } from '../../datasource/go';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { isVersion } from '../../versioning/semver';
@@ -22,7 +22,7 @@ function getDep(
     currentValue,
   };
   if (isVersion(currentValue)) {
-    dep.datasource = datasourceGo.id;
+    dep.datasource = GoDatasource.id;
   } else {
     dep.skipReason = 'unsupported-version';
   }

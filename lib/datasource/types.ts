@@ -4,6 +4,7 @@ export interface GetDigestInputConfig {
   datasource?: string;
   lookupName?: string;
   depName: string;
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
@@ -18,6 +19,7 @@ export interface DigestConfig {
 
 export interface ReleasesConfigBase {
   npmrc?: string;
+  defaultRegistryUrls?: string[];
   registryUrls?: string[];
 }
 

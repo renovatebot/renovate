@@ -73,6 +73,7 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string;
   force?: boolean;
+  platformCommit?: boolean;
 }
 
 export type BranchName = string;
