@@ -36,8 +36,7 @@ export class GolangVersionDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
       homepage: 'https://go.dev/',
-      sourceUrl:
-        'https://github.com/golang/website/blob/master/internal/history/release.go',
+      sourceUrl: 'https://github.com/golang/go',
       releases: [],
     };
     const golangVersionsUrl = `${registryUrl}master/internal/history/release.go`;

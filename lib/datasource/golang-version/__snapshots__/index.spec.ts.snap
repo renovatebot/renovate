@@ -506,6 +506,6 @@ Object {
       "version": "1.17.5",
     },
   ],
-  "sourceUrl": "https://github.com/golang/website",
+  "sourceUrl": "https://github.com/golang/go",
 }
 `;

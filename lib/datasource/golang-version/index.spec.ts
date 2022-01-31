@@ -23,6 +23,11 @@ describe('datasource/golang-version/index', () => {
         datasource,
         depName: 'golang',
       });
+      expect(res.releases).toHaveLength(125);
+      expect(res.releases[0]).toEqual({
+        releaseTimestamp: '2012-03-28T00:00:00.000Z',
+        version: '1.0.0',
+      });
       expect(res).toMatchSnapshot();
     });
 
