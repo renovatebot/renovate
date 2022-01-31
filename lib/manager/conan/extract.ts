@@ -41,7 +41,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         const lines = sanitizedLine.split(/["'],/);
         for (const line of lines) {
           const matches = regex.exec(line.trim());
-          if (matches) {
+          if (matches?.groups) {
             let dep: PackageDependency = {};
             const depName = matches.groups?.name;
             const currentValue = matches.groups?.version.trim();
