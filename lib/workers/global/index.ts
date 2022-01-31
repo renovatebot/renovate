@@ -95,6 +95,7 @@ export async function resolveGlobalExtends(
     const resolvedConfig = await resolveConfigPresets(config);
     return resolvedConfig;
   } catch (err) {
+    logger.error({ err }, 'Error resolving config preset');
     throw new Error(CONFIG_PRESETS_INVALID);
   }
 }
