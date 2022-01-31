@@ -42,7 +42,7 @@ export const presets: Record<string, Preset> = {
       {
         matchDatasources: ['maven'],
         matchPackageNames: ['org.web3j:core'],
-        allowedVersions: '/^(?!5\\.0\\.0)/',
+        allowedVersions: '!/^5\\.0\\.0/',
       },
     ],
   },
