@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
-import { fs, logger } from '../../../test/util';
+import { fs, logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
 import { PlatformId } from '../../constants';
 import * as datasourceDocker from '../../datasource/docker';
@@ -18,7 +18,7 @@ jest.mock('../../config/presets');
 const repositoryWorker = _repositoryWorker;
 const configParser: jest.Mocked<typeof _configParser> = _configParser as never;
 const platform: jest.Mocked<typeof _platform> = _platform as never;
-const presets: jest.Mocked<typeof _presets> = _presets as never;
+const presets = mocked(_presets);
 const limits = _limits;
 
 describe('workers/global/index', () => {

@@ -105,7 +105,7 @@ export async function start(): Promise<number> {
     config = await getGlobalConfig();
     if (config?.globalExtends) {
       // resolve global presets immediately
-      config = await resolveGlobalExtends(config.globalExtends);
+      config = mergeChildConfig(config, await resolveGlobalExtends(config.globalExtends));
     }
     // initialize all submodules
     config = await globalInitialize(config);

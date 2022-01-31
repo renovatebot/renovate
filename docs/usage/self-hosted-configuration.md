@@ -351,8 +351,8 @@ Possible values:
 ## globalExtends
 
 The list of presets to use/extend in the self-hosted global config file.
-Unlike the usual presets, `globalExtends` are resolved immediately, and merged with any other global config.
-You can use this option, for example, if you want to publish the list of repositories to renovate in a preset and re-use it somewhere else.
+Unlike the `extends` field, which is passed through unresolved to be part of repository config, any presets in `globalExtends` are resolved immediately as part of global config.
+Therefore you need to use this field if your preset contains any global-only configuration options, such as the list of repositories to run against.
 
 ## logContext
 
