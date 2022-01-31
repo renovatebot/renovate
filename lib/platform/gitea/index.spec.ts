@@ -576,7 +576,7 @@ describe('platform/gitea/index', () => {
     it('should fallback to direct fetching if cache fails', async () => {
       const mockPR = mockPRs[0];
       helper.searchPRs.mockResolvedValueOnce([]);
-      helper.getPR.mockResolvedValueOnce(mockPR);
+      helper.getPR.mockResolvedValueOnce({ ...mockPR, mergeable: false });
       await initFakeRepo();
 
       const res = await gitea.getPr(mockPR.number);
