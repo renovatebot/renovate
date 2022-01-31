@@ -66,7 +66,7 @@ describe('manager/helmv3/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
-    fs.privateCacheDir.mockReturnValue('');
+    fs.privateCacheDir.mockReturnValue('/tmp/renovate/cache/__renovate-private-cache');
     fs.getSubDirectory.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
