@@ -1,7 +1,8 @@
-import _fs from 'fs-extra';
 import bunyan from 'bunyan';
+import _fs from 'fs-extra';
 import { add } from '../util/host-rules';
 import { add as addSecret } from '../util/sanitize';
+import { isValidLogLevel } from './utils';
 import {
   addMeta,
   addStream,
@@ -185,29 +186,13 @@ describe('logger/index', () => {
   });
 
   it('checks for valid log level', () => {
-    expect(
-      configValidation.isValidLogLevel('warning' as bunyan.LogLevel)
-    ).toBeFalsy();
-    expect(
-      configValidation.isValidLogLevel('warn' as bunyan.LogLevel)
-    ).toBeTruthy();
-    expect(
-      configValidation.isValidLogLevel('trace' as bunyan.LogLevel)
-    ).toBeTruthy();
-    expect(
-      configValidation.isValidLogLevel(' ' as bunyan.LogLevel)
-    ).toBeTruthy();
-    expect(
-      configValidation.isValidLogLevel('' as bunyan.LogLevel)
-    ).toBeTruthy();
-    expect(
-      configValidation.isValidLogLevel(20 as bunyan.LogLevel)
-    ).toBeTruthy();
-    expect(
-      configValidation.isValidLogLevel(10 as bunyan.LogLevel)
-    ).toBeTruthy();
-    expect(
-      configValidation.isValidLogLevel(100 as bunyan.LogLevel)
-    ).toBeFalsy();
+    expect(isValidLogLevel('warning' as bunyan.LogLevel)).toBeFalsy();
+    expect(isValidLogLevel('warn' as bunyan.LogLevel)).toBeTruthy();
+    expect(isValidLogLevel('trace' as bunyan.LogLevel)).toBeTruthy();
+    expect(isValidLogLevel(' ' as bunyan.LogLevel)).toBeTruthy();
+    expect(isValidLogLevel('' as bunyan.LogLevel)).toBeTruthy();
+    expect(isValidLogLevel(20 as bunyan.LogLevel)).toBeTruthy();
+    expect(isValidLogLevel(10 as bunyan.LogLevel)).toBeTruthy();
+    expect(isValidLogLevel(100 as bunyan.LogLevel)).toBeFalsy();
   });
 });
