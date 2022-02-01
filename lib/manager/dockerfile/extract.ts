@@ -56,14 +56,14 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     depName = depTagSplit.join(':');
   }
 
-  if (depName && depName.indexOf(variableMarker) !== -1) {
+  if (depName?.includes(variableMarker)) {
     // If depName contains a variable, after cleaning, e.g. "$REGISTRY/alpine", we currently not support this.
     return {
       skipReason: 'contains-variable',
     };
   }
 
-  if (currentValue && currentValue.indexOf(variableMarker) !== -1) {
+  if (currentValue?.includes(variableMarker)) {
     // If tag contains a variable, e.g. "5.0${VERSION_SUFFIX}", we do not support this.
     return {
       skipReason: 'contains-variable',
