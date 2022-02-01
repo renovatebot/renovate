@@ -1,3 +1,4 @@
+import fs from 'fs-extra';
 import * as httpMock from '../../test/http-mock';
 import { logger, mocked } from '../../test/util';
 import {
@@ -26,13 +27,19 @@ const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
+const managerList = fs
+  .readdirSync(__dirname, { withFileTypes: true })
+  .filter((dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'))
+  .map((dirent) => dirent.name)
+  .sort();
+
 describe('datasource/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
   it('returns datasources', () => {
     expect(datasource.getDatasources()).toBeDefined();
-    expect(datasource.getDatasourceList()).toBeDefined();
+    expect(datasource.getDatasourceList()).toEqual(managerList);
   });
   it('validates datasource', () => {
     function validateDatasource(module: DatasourceApi, name: string): boolean {
