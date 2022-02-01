@@ -224,11 +224,15 @@ export function isValidLogLevel(
     bunyan.ERROR,
     bunyan.FATAL,
   ];
-  const result: boolean =
-    allowedValues.indexOf(logLevelToCheck) !== -1 ||
-    (typeof logLevelToCheck === 'string' &&
-      logLevelToCheck.trim().length === 0);
+  if (
+    typeof logLevelToCheck === 'string' &&
+    logLevelToCheck.trim().length === 0
+  ) {
+    // if the log level is empty string then return true
+    return true;
+  }
 
+  const result: boolean = allowedValues.indexOf(logLevelToCheck) !== -1;
   if (!result) {
     const Logger = bunyan.createLogger({
       name: 'log level error log',
