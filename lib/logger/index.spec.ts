@@ -1,4 +1,5 @@
 import _fs from 'fs-extra';
+import bunyan from 'bunyan';
 import { add } from '../util/host-rules';
 import { add as addSecret } from '../util/sanitize';
 import {
@@ -181,5 +182,32 @@ describe('logger/index', () => {
     expect(logged.secrets.foo).toBe('***********');
     expect(logged.someFn).toBe('[function]');
     expect(logged.someObject.field).toBe('**redacted**');
+  });
+
+  it('checks for valid log level', () => {
+    expect(
+      configValidation.isValidLogLevel('warning' as bunyan.LogLevel)
+    ).toBeFalsy();
+    expect(
+      configValidation.isValidLogLevel('warn' as bunyan.LogLevel)
+    ).toBeTruthy();
+    expect(
+      configValidation.isValidLogLevel('trace' as bunyan.LogLevel)
+    ).toBeTruthy();
+    expect(
+      configValidation.isValidLogLevel(' ' as bunyan.LogLevel)
+    ).toBeTruthy();
+    expect(
+      configValidation.isValidLogLevel('' as bunyan.LogLevel)
+    ).toBeTruthy();
+    expect(
+      configValidation.isValidLogLevel(20 as bunyan.LogLevel)
+    ).toBeTruthy();
+    expect(
+      configValidation.isValidLogLevel(10 as bunyan.LogLevel)
+    ).toBeTruthy();
+    expect(
+      configValidation.isValidLogLevel(100 as bunyan.LogLevel)
+    ).toBeFalsy();
   });
 });

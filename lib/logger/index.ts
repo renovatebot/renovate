@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import { nanoid } from 'nanoid';
-import { isValidLogLevel } from '../config/validation';
+import { isValidLogLevel } from './utils';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';

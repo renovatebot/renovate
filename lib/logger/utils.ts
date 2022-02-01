@@ -206,3 +206,41 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
 
   throw new Error("Missing 'stream' or 'path' for bunyan stream");
 }
+
+export function isValidLogLevel(
+  logLevelToCheck: bunyan.LogLevel
+): logLevelToCheck is bunyan.LogLevel {
+  const allowedValues: bunyan.LogLevel[] = [
+    'trace',
+    'debug',
+    'info',
+    'warn',
+    'error',
+    'fatal',
+    bunyan.TRACE,
+    bunyan.DEBUG,
+    bunyan.INFO,
+    bunyan.WARN,
+    bunyan.ERROR,
+    bunyan.FATAL,
+  ];
+  const result: boolean =
+    allowedValues.indexOf(logLevelToCheck) !== -1 ||
+    (typeof logLevelToCheck === 'string' &&
+      logLevelToCheck.trim().length === 0);
+
+  if (!result) {
+    const Logger = bunyan.createLogger({
+      name: 'log level error log',
+      streams: [
+        {
+          level: 'fatal',
+          stream: process.stdout,
+        },
+      ],
+    });
+    Logger.fatal(`${logLevelToCheck} is not a valid log level. terminating...`);
+  }
+
+  return result;
+}
