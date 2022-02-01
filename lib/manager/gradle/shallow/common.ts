@@ -5,6 +5,7 @@ export const GOOGLE_REPO = 'https://dl.google.com/android/maven2/';
 export const GRADLE_PLUGIN_PORTAL_REPO = 'https://plugins.gradle.org/m2/';
 
 // TODO: convert to types
+// eslint-disable-next-line typescript-enum/no-enum
 export enum TokenType {
   Space = 'space',
   LineComment = 'lineComment',

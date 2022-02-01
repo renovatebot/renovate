@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 
 export function extractPackageFile(
@@ -30,17 +29,17 @@ export function extractPackageFile(
     };
 
     if (!res.depName) {
-      res.skipReason = SkipReason.InvalidName;
+      res.skipReason = 'invalid-name';
       return res;
     }
 
     if (!res.currentValue) {
-      res.skipReason = SkipReason.InvalidVersion;
+      res.skipReason = 'invalid-version';
       return res;
     }
 
     if (!dep.repository) {
-      res.skipReason = SkipReason.NoRepository;
+      res.skipReason = 'no-repository';
       return res;
     }
 
@@ -55,16 +54,16 @@ export function extractPackageFile(
         return res;
       }
 
-      res.skipReason = SkipReason.PlaceholderUrl;
+      res.skipReason = 'placeholder-url';
     } else {
       try {
         const url = new URL(dep.repository);
         if (url.protocol === 'file:') {
-          res.skipReason = SkipReason.LocalDependency;
+          res.skipReason = 'local-dependency';
         }
       } catch (err) {
         logger.debug({ err }, 'Error parsing url');
-        res.skipReason = SkipReason.InvalidUrl;
+        res.skipReason = 'invalid-url';
       }
     }
     return res;

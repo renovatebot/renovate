@@ -152,6 +152,34 @@ describe('manager/index', () => {
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'bump' })
       ).not.toBeNull();
     });
+
+    it('returns update-lockfile for in-range-only', () => {
+      manager.getManagers().set('dummy', {
+        defaultConfig: {},
+        supportedDatasources: [],
+      });
+      expect(
+        manager.getRangeStrategy({
+          manager: 'dummy',
+          rangeStrategy: 'in-range-only',
+        })
+      ).toBe('update-lockfile');
+    });
+
+    it('returns update-lockfile for in-range-only if it is proposed my manager', () => {
+      manager.getManagers().set('dummy', {
+        defaultConfig: {},
+        supportedDatasources: [],
+        getRangeStrategy: () => 'in-range-only',
+      });
+      expect(
+        manager.getRangeStrategy({
+          manager: 'dummy',
+          rangeStrategy: 'in-range-only',
+        })
+      ).toBe('update-lockfile');
+    });
+
     afterEach(() => {
       manager.getManagers().delete('dummy');
     });

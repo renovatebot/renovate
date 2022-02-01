@@ -1,6 +1,5 @@
 import { HexDatasource } from '../../datasource/hex';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { findLocalSiblingOrParent, localPathExists } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
@@ -53,7 +52,7 @@ export async function extractPackageFile(
           }
 
           if (dep.datasource !== HexDatasource.id) {
-            dep.skipReason = SkipReason.NonHexDeptypes;
+            dep.skipReason = 'non-hex-dep-types';
           }
 
           // Find dep's line number

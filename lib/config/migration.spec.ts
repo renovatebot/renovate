@@ -692,32 +692,6 @@ describe('config/migration', () => {
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
   });
 
-  it('it migrates composerIgnorePlatformReqs values', () => {
-    let config: TestRenovateConfig;
-    let res: MigratedConfig;
-
-    config = {
-      composerIgnorePlatformReqs: true,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
-
-    config = {
-      composerIgnorePlatformReqs: false,
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeTrue();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toBeNull();
-
-    config = {
-      composerIgnorePlatformReqs: [],
-    } as never;
-    res = configMigration.migrateConfig(config);
-    expect(res.isMigrated).toBeFalse();
-    expect(res.migratedConfig.composerIgnorePlatformReqs).toStrictEqual([]);
-  });
-
   it('it migrates gradle-lite', () => {
     const config: RenovateConfig = {
       gradle: {

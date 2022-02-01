@@ -1,8 +1,5 @@
-import { loadFixture } from '../../../test/util';
+import { Fixtures } from '../../../test/fixtures';
 import { extractPackageFile } from './extract';
-
-const yamlFile1 = loadFixture('main1.yaml');
-const yamlFile2 = loadFixture('main2.yaml');
 
 describe('manager/ansible/extract', () => {
   describe('extractPackageFile()', () => {
@@ -10,12 +7,12 @@ describe('manager/ansible/extract', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts multiple image lines from docker_container', () => {
-      const res = extractPackageFile(yamlFile1);
+      const res = extractPackageFile(Fixtures.get('main1.yaml'));
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(9);
     });
     it('extracts multiple image lines from docker_service', () => {
-      const res = extractPackageFile(yamlFile2);
+      const res = extractPackageFile(Fixtures.get('main2.yaml'));
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(4);
     });

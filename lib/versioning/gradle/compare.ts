@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../util/regex';
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum TokenType {
   Number = 1,
   String,
@@ -85,6 +86,7 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum QualifierRank {
   Dev = -1,
   Default = 0,
@@ -192,27 +194,36 @@ export function compare(left: string, right: string): number {
   return 0;
 }
 
-export function isVersion(input: string): boolean {
+export function parse(input: string): Token[] | null {
   if (!input) {
-    return false;
+    return null;
   }
 
   if (!regEx(/^[-._+a-zA-Z0-9]+$/i).test(input)) {
-    return false;
+    return null;
   }
 
   if (regEx(/^latest\.?/i).test(input)) {
-    return false;
+    return null;
   }
 
   const tokens = tokenize(input);
-  return !!tokens && !!tokens.length;
+  // istanbul ignore if: should not happen
+  if (!tokens?.length) {
+    return null;
+  }
+  return tokens;
+}
+
+export function isVersion(input: string): boolean {
+  return !!parse(input);
 }
 
 interface PrefixRange {
   tokens: Token[];
 }
 
+// eslint-disable-next-line typescript-enum/no-enum
 export enum RangeBound {
   Inclusive = 1,
   Exclusive,

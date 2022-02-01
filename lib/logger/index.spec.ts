@@ -1,7 +1,7 @@
 import bunyan from 'bunyan';
 import _fs from 'fs-extra';
 import { add } from '../util/host-rules';
-import { add as addSecret } from '../util/sanitize';
+import { addSecretForSanitizing as addSecret } from '../util/sanitize';
 import { isValidLogLevel } from './utils';
 import {
   addMeta,

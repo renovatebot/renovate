@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../test/fixtures';
 import * as httpMock from '../../../test/http-mock';
-import { loadFixture } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { joinUrlParts } from '../../util/url';
@@ -14,8 +14,8 @@ const testConfig = {
   registryUrls: [testRegistryUrl],
   depName: testLookupName,
 };
-const fixtureReleasesAsFolders = loadFixture('releases-as-folders.html');
-const fixtureReleasesAsFiles = loadFixture('releases-as-files.html');
+const fixtureReleasesAsFolders = Fixtures.get('releases-as-folders.html');
+const fixtureReleasesAsFiles = Fixtures.get('releases-as-files.html');
 
 function getPath(folder: string): string {
   return `/${folder}`;

@@ -3,11 +3,10 @@
 exports[`platform/gitea/index createPr should use base branch by default 1`] = `
 Object {
   "body": "pr-body",
-  "canMerge": true,
+  "cannotMergeReason": undefined,
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
   "hasAssignees": false,
-  "isConflicted": false,
   "number": 42,
   "sha": "0d9c7726c3d628b7e28af234595cfd20febdbf8e",
   "sourceBranch": "pr-branch",
@@ -21,11 +20,10 @@ Object {
 exports[`platform/gitea/index createPr should use default branch if requested 1`] = `
 Object {
   "body": "pr-body",
-  "canMerge": true,
+  "cannotMergeReason": undefined,
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
   "hasAssignees": false,
-  "isConflicted": false,
   "number": 42,
   "sha": "0d9c7726c3d628b7e28af234595cfd20febdbf8e",
   "sourceBranch": "pr-branch",
@@ -39,11 +37,10 @@ Object {
 exports[`platform/gitea/index getPr should fallback to direct fetching if cache fails 1`] = `
 Object {
   "body": "some random pull request",
-  "canMerge": true,
+  "cannotMergeReason": "pr.mergeable=\\"false\\"",
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
   "hasAssignees": false,
-  "isConflicted": false,
   "number": 1,
   "sha": "some-head-sha",
   "sourceBranch": "some-head-branch",
@@ -57,11 +54,10 @@ Object {
 exports[`platform/gitea/index getPr should return enriched pull request which exists if open 1`] = `
 Object {
   "body": "some random pull request",
-  "canMerge": true,
+  "cannotMergeReason": undefined,
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
   "hasAssignees": false,
-  "isConflicted": false,
   "number": 1,
   "sha": "some-head-sha",
   "sourceBranch": "some-head-branch",
@@ -83,11 +79,10 @@ exports[`platform/gitea/index getPrList should filter list by creator 2`] = `
 Array [
   Object {
     "body": "some random pull request",
-    "canMerge": true,
+    "cannotMergeReason": undefined,
     "createdAt": "2015-03-22T20:36:16Z",
     "displayNumber": "Pull Request #1",
     "hasAssignees": false,
-    "isConflicted": false,
     "number": 1,
     "sha": "some-head-sha",
     "sourceBranch": "some-head-branch",
@@ -98,11 +93,10 @@ Array [
   },
   Object {
     "body": "other random pull request",
-    "canMerge": true,
+    "cannotMergeReason": undefined,
     "createdAt": "2011-08-18T22:30:38Z",
     "displayNumber": "Pull Request #2",
     "hasAssignees": false,
-    "isConflicted": false,
     "number": 2,
     "sha": "other-head-sha",
     "sourceBranch": "other-head-branch",
@@ -118,11 +112,10 @@ exports[`platform/gitea/index getPrList should return list of pull requests 1`] 
 Array [
   Object {
     "body": "some random pull request",
-    "canMerge": true,
+    "cannotMergeReason": undefined,
     "createdAt": "2015-03-22T20:36:16Z",
     "displayNumber": "Pull Request #1",
     "hasAssignees": false,
-    "isConflicted": false,
     "number": 1,
     "sha": "some-head-sha",
     "sourceBranch": "some-head-branch",
@@ -133,11 +126,10 @@ Array [
   },
   Object {
     "body": "other random pull request",
-    "canMerge": true,
+    "cannotMergeReason": undefined,
     "createdAt": "2011-08-18T22:30:38Z",
     "displayNumber": "Pull Request #2",
     "hasAssignees": false,
-    "isConflicted": false,
     "number": 2,
     "sha": "other-head-sha",
     "sourceBranch": "other-head-branch",

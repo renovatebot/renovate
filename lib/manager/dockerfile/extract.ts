@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
 import type { PackageDependency, PackageFile } from '../types';
@@ -29,7 +28,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
       currentFrom.indexOf(variableDefaultValueSplit) === -1
     ) {
       return {
-        skipReason: SkipReason.ContainsVariable,
+        skipReason: 'contains-variable',
       };
     }
 
@@ -60,7 +59,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentValue && currentValue.indexOf(variableMarker) !== -1) {
     // If tag contains a variable, e.g. "5.0${VERSION_SUFFIX}", we do not support this.
     return {
-      skipReason: SkipReason.ContainsVariable,
+      skipReason: 'contains-variable',
     };
   }
 
@@ -102,7 +101,7 @@ export function getDep(
 ): PackageDependency {
   if (!is.string(currentFrom)) {
     return {
-      skipReason: SkipReason.InvalidValue,
+      skipReason: 'invalid-value',
     };
   }
   const dep = splitImageParts(currentFrom);

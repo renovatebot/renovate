@@ -5,9 +5,8 @@ import moo from 'moo';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGithubReleases from '../../datasource/github-releases';
 import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceGo from '../../datasource/go';
+import { GoDatasource } from '../../datasource/go';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import type { PackageDependency, PackageFile } from '../types';
@@ -254,7 +253,7 @@ export function extractPackageFile(
     ) {
       dep.depName = depName;
       dep.currentValue = currentValue || commit.substr(0, 7);
-      dep.datasource = datasourceGo.id;
+      dep.datasource = GoDatasource.id;
       dep.lookupName = importpath;
       if (remote) {
         const remoteMatch = regEx(
@@ -263,7 +262,7 @@ export function extractPackageFile(
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.lookupName = remote.replace('https://', '');
         } else {
-          dep.skipReason = SkipReason.UnsupportedRemote;
+          dep.skipReason = 'unsupported-remote';
         }
       }
       if (commit) {

@@ -45,24 +45,24 @@ function extractFromSection(
           if (registryUrl) {
             registryUrls = [registryUrl];
           } else {
-            skipReason = SkipReason.UnknownRegistry;
+            skipReason = 'unknown-registry';
           }
         }
         if (path) {
-          skipReason = SkipReason.PathDependency;
+          skipReason = 'path-dependency';
         }
         if (git) {
-          skipReason = SkipReason.GitDependency;
+          skipReason = 'git-dependency';
         }
       } else if (path) {
         currentValue = '';
-        skipReason = SkipReason.PathDependency;
+        skipReason = 'path-dependency';
       } else if (git) {
         currentValue = '';
-        skipReason = SkipReason.GitDependency;
+        skipReason = 'git-dependency';
       } else {
         currentValue = '';
-        skipReason = SkipReason.InvalidDependencySpecification;
+        skipReason = 'invalid-dependency-specification';
       }
     }
     const dep: PackageDependency = {

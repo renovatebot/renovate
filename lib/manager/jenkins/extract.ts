@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { isSkipComment } from '../../util/ignore';
 import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
@@ -21,14 +20,14 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
   if (plugin.source?.version) {
     dep.currentValue = plugin.source.version.toString();
     if (typeof plugin.source.version !== 'string') {
-      dep.skipReason = SkipReason.InvalidVersion;
+      dep.skipReason = 'invalid-version';
       logger.warn(
         { dep },
         'Jenkins plugin dependency version is not a string and will be ignored'
       );
     }
   } else {
-    dep.skipReason = SkipReason.NoVersion;
+    dep.skipReason = 'no-version';
   }
 
   if (
@@ -36,15 +35,15 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
     plugin.source?.version === 'experimental' ||
     plugin.groupId
   ) {
-    dep.skipReason = SkipReason.UnsupportedVersion;
+    dep.skipReason = 'unsupported-version';
   }
 
   if (plugin.source?.url) {
-    dep.skipReason = SkipReason.InternalPackage;
+    dep.skipReason = 'internal-package';
   }
 
   if (!dep.skipReason && plugin.renovate?.ignore) {
-    dep.skipReason = SkipReason.Ignored;
+    dep.skipReason = 'ignored';
   }
 
   logger.debug({ dep }, 'Jenkins plugin dependency');
