@@ -50,10 +50,9 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: PrAutomergeBlockReason.Conflicted,
     };
   }
-  if (!ignoreTests && pr.canMerge !== true) {
+  if (!ignoreTests && pr.cannotMergeReason) {
     logger.debug(
-      { canMergeReason: pr.canMergeReason },
-      'PR is not ready for merge'
+      `Platform reported that PR is not ready for merge. Reason: [${pr.cannotMergeReason}]`
     );
     return {
       automerged: false,
