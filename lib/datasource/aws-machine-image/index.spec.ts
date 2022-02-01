@@ -133,7 +133,7 @@ const mockEmpty: DescribeImagesResult = {};
 
 function mockDescribeImagesCommand(result: DescribeImagesResult): void {
   ec2Mock.reset();
-  ec2Mock.on(DescribeImagesCommand as never).resolves(result as never);
+  ec2Mock.on(DescribeImagesCommand).resolves(result);
 }
 
 describe('datasource/aws-machine-image/index', () => {
