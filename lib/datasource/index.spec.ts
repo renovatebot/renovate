@@ -27,18 +27,18 @@ const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
 const packagistDatasource = mocked(datasourcePackagist);
 
-const managerList = fs
-  .readdirSync(__dirname, { withFileTypes: true })
-  .filter((dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'))
-  .map((dirent) => dirent.name)
-  .sort();
-
 describe('datasource/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
   it('returns datasources', () => {
     expect(datasource.getDatasources()).toBeDefined();
+
+    const managerList = fs
+      .readdirSync(__dirname, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'))
+      .map((dirent) => dirent.name)
+      .sort();
     expect(datasource.getDatasourceList()).toEqual(managerList);
   });
   it('validates datasource', () => {
