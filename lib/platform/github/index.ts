@@ -80,6 +80,7 @@ import {
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
+import { getCommitTree, listCommitTree, pushCommitAsRef } from '../../util/git';
 
 const githubApi = new githubHttp.GithubHttp();
 
@@ -1747,9 +1748,32 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return alerts;
 }
 
+async function forcePushFiles(
+  branchName: string,
+  parentCommitSha: string,
+  localCommitSha: string,
+  message: string
+): Promise<void> {
+  const tmpRefName = `refs/renovate/${branchName}`;
+
+  await pushCommitAsRef(localCommitSha, tmpRefName);
+  const treeSha = await getCommitTree(localCommitSha);
+
+  const commitRes = await githubApi.postJson<{ sha: string }>(
+    `/repos/${config.repository}/git/commits`,
+    { body: { message, tree: treeSha, parents: [parentCommitSha] } }
+  );
+  const remoteCommitSha = commitRes.body.sha;
+
+  await githubApi.patchJson(
+    `/repos/${config.repository}/git/refs/heads/${branchName}`,
+    { body: { sha: remoteCommitSha, force: true } }
+  );
+}
+
 async function pushFiles(
   { branchName, files, message }: CommitFilesConfig,
-  { prevCommitSha }: CommitResult
+  { prevCommitSha, commitSha }: CommitResult
 ): Promise<CommitSha | null> {
   const additions: FileAddition[] = [];
   const deletions: FileDeletion[] = [];
@@ -1795,11 +1819,15 @@ async function pushFiles(
     }>(commitFilesMutation, { variables });
 
     if (errors) {
-      logger.warn(
-        { branchName, errors },
-        'Platform-native commit: GraphQL errors'
-      );
-      return null;
+      if (errors.some(({ type }) => type === 'STALE_DATA')) {
+        await forcePushFiles(branchName, prevCommitSha, commitSha, message);
+      } else {
+        logger.warn(
+          { branchName, errors },
+          'Platform-native commit: GraphQL errors'
+        );
+        return null;
+      }
     }
 
     return data?.createCommitOnBranch?.commit?.oid;

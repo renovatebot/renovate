@@ -895,3 +895,39 @@ export function getUrl({
     pathname: repository + '.git',
   });
 }
+
+export async function pushCommitAsRef(
+  commitSha: string,
+  refName: string
+): Promise<void> {
+  await git.raw(['update-ref', refName, commitSha]);
+  await git.raw(['push', '--force', 'origin', refName]);
+}
+
+const newlineRegex = regEx(/\r?\n/);
+
+interface TreeItem {
+  path: string;
+  mode: string;
+  type: string;
+  sha: string;
+}
+
+const treeItemRegex = regEx(
+  /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
+);
+
+export async function getCommitTree(commitSha: string): Promise<string> {
+  return (await git.raw(['cat-file', '-p', commitSha])).slice(5, 45);
+}
+
+export async function listCommitTree(treeSha: string): Promise<TreeItem[]> {
+  const contents = await git.raw(['cat-file', '-p', treeSha]);
+  const lines = contents.split(newlineRegex);
+  const result: TreeItem[] = [];
+  for (const line of lines) {
+    const { path, mode, type, sha } = line.match(treeItemRegex)?.groups ?? {};
+    result.push({ path, mode, type, sha });
+  }
+  return result;
+}
