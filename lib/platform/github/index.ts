@@ -1763,7 +1763,7 @@ async function forcePushFiles(
 
 async function pushFiles(
   { branchName, files, message }: CommitFilesConfig,
-  { prevCommitSha, commitSha }: CommitResult
+  { parentCommitSha, commitSha }: CommitResult
 ): Promise<CommitSha | null> {
   const additions: FileAddition[] = [];
   const deletions: FileDeletion[] = [];
@@ -1798,7 +1798,7 @@ async function pushFiles(
     repo: config.repository,
     repositoryId: config.repositoryId,
     branchName: `refs/heads/${branchName}`,
-    oid: prevCommitSha,
+    oid: parentCommitSha,
     fileChanges,
     message,
   };
@@ -1810,7 +1810,7 @@ async function pushFiles(
 
     if (errors) {
       if (errors.some(({ type }) => type === 'STALE_DATA')) {
-        await forcePushFiles(branchName, prevCommitSha, commitSha, message);
+        await forcePushFiles(branchName, parentCommitSha, commitSha, message);
       } else {
         logger.warn(
           { branchName, errors },
