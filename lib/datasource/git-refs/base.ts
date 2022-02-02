@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { cache } from '../../util/cache/package/decorator';
 import { simpleGitConfig } from '../../util/git/config';
 import { getRemoteUrlWithToken } from '../../util/git/url';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { GetReleasesConfig } from '../types';
 import type { RawRefs } from './types';
 
@@ -34,7 +34,7 @@ export class GitDatasource {
 
     const refs = lsRemote
       .trim()
-      .split('\n')
+      .split(newlineRegex)
       .map((line) => line.trim())
       .map((line) => {
         let match = refMatch.exec(line);
