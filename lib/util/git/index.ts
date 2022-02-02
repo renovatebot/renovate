@@ -712,7 +712,7 @@ export async function prepareCommit({
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
-    const prevCommitSha = config.currentBranchSha;
+    const parentCommitSha = config.currentBranchSha;
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];
@@ -801,7 +801,7 @@ export async function prepareCommit({
     }
 
     const result: CommitResult = {
-      prevCommitSha,
+      parentCommitSha,
       commitSha,
       files: files.filter((fileChange) => {
         if (fileChange.type === 'deletion') {
