@@ -2579,7 +2579,7 @@ describe('platform/github/index', () => {
     beforeEach(() => {
       git.prepareCommit.mockImplementation(({ files }) =>
         Promise.resolve({
-          prevCommitSha: '1234567',
+          parentCommitSha: '1234567',
           commitSha: '7654321',
           files,
         })
