@@ -7,8 +7,6 @@ describe('logger/utils', () => {
   });
 
   it('checks for valid log levels', () => {
-    const lel = validateLogLevel(undefined);
-    console.log(lel);
     expect(validateLogLevel(undefined)).toBeUndefined();
     expect(validateLogLevel('')).toBeUndefined();
     expect(validateLogLevel(' ')).toBeUndefined();
