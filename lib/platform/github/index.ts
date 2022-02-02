@@ -1737,7 +1737,7 @@ async function forcePushFiles(
   parentCommitSha: string,
   localCommitSha: string,
   message: string
-): Promise<void> {
+): Promise<string> {
   const tmpRefName = `refs/renovate/${branchName}`;
 
   await pushCommitAsRef(localCommitSha, tmpRefName);
@@ -1759,6 +1759,8 @@ async function forcePushFiles(
     `/repos/${config.repository}/git/refs/heads/${branchName}`,
     { body: { sha: remoteCommitSha, force: true } }
   );
+
+  return remoteCommitSha;
 }
 
 async function pushFiles(
@@ -1810,7 +1812,7 @@ async function pushFiles(
 
     if (errors) {
       if (errors.some(({ type }) => type === 'STALE_DATA')) {
-        await forcePushFiles(branchName, parentCommitSha, commitSha, message);
+        return forcePushFiles(branchName, parentCommitSha, commitSha, message);
       } else {
         logger.warn(
           { branchName, errors },
