@@ -1,7 +1,7 @@
 import bunyan from 'bunyan';
 import { validateLogLevel } from './utils';
 
-describe('validate log level', () => {
+describe('logger/utils', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
