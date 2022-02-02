@@ -40,6 +40,7 @@ import type {
   LocalConfig,
   StatusResult,
   StorageConfig,
+  TreeItem,
 } from './types';
 
 export { setNoVerify } from './config';
@@ -89,6 +90,8 @@ let privateKeySet = false;
 
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
+const newlineRegex = regEx(/\r?\n/);
+
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
   const globalGit = simpleGit();
@@ -132,7 +135,7 @@ async function fetchBranchCommits(): Promise<void> {
   }
   try {
     (await git.raw(opts))
-      .split('\n')
+      .split(newlineRegex)
       .filter(Boolean)
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
@@ -173,7 +176,7 @@ async function deleteLocalBranch(branchName: string): Promise<void> {
 
 async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
-    .split('\n')
+    .split(newlineRegex)
     .map((branch) => branch.trim())
     .filter((branch) => branch.length)
     .filter((branch) => !branch.startsWith('* '));
@@ -428,7 +431,7 @@ export async function getFileList(): Promise<string[]> {
     return [];
   }
   return files
-    .split('\n')
+    .split(newlineRegex)
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
     .map((line) => line.split(regEx(/\t/)).pop())
@@ -704,11 +707,12 @@ export async function prepareCommit({
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const { localDir } = GlobalConfig.get();
   await syncGit();
-  logger.debug(`Preparing files for commiting to branch ${branchName}`);
+  logger.debug(`Preparing files for committing to branch ${branchName}`);
   await handleCommitAuth(localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
+    const prevCommitSha = config.currentBranchSha;
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];
@@ -787,7 +791,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    const commit = commitRes?.commit || 'unknown';
+    const commitSha = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
@@ -797,7 +801,8 @@ export async function prepareCommit({
     }
 
     const result: CommitResult = {
-      sha: commit,
+      prevCommitSha,
+      commitSha,
       files: files.filter((fileChange) => {
         if (fileChange.type === 'deletion') {
           return deletedFiles.includes(fileChange.path);
@@ -892,4 +897,31 @@ export function getUrl({
     host,
     pathname: repository + '.git',
   });
+}
+
+export async function pushCommitAsRef(
+  commitSha: string,
+  refName: string
+): Promise<void> {
+  await git.raw(['update-ref', refName, commitSha]);
+  await git.raw(['push', '--force', 'origin', refName]);
+}
+
+const treeItemRegex = regEx(
+  /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
+);
+
+export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
+  const treeSha = (await git.raw(['cat-file', '-p', commitSha])).slice(5, 45);
+  const contents = await git.raw(['cat-file', '-p', treeSha]);
+  const lines = contents.split(newlineRegex);
+  const result: TreeItem[] = [];
+  for (const line of lines) {
+    const matchGroups = line.match(treeItemRegex)?.groups;
+    if (matchGroups) {
+      const { path, mode, type, sha } = matchGroups;
+      result.push({ path, mode, type, sha });
+    }
+  }
+  return result;
 }
