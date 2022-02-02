@@ -9,14 +9,14 @@ describe('validate log level', () => {
   it('checks for valid log levels', () => {
     const lel = validateLogLevel(undefined);
     console.log(lel);
-    expect(validateLogLevel(undefined)).toBe(undefined);
-    expect(validateLogLevel('')).toBe(undefined);
-    expect(validateLogLevel(' ')).toBe(undefined);
-    expect(validateLogLevel('warn')).toBe(undefined);
-    expect(validateLogLevel('debug')).toBe(undefined);
-    expect(validateLogLevel('trace')).toBe(undefined);
-    expect(validateLogLevel('info' as bunyan.LogLevel)).toBe(undefined);
-    expect(validateLogLevel(10)).toBe(undefined);
+    expect(validateLogLevel(undefined)).toBeUndefined();
+    expect(validateLogLevel('')).toBeUndefined();
+    expect(validateLogLevel(' ')).toBeUndefined();
+    expect(validateLogLevel('warn')).toBeUndefined();
+    expect(validateLogLevel('debug')).toBeUndefined();
+    expect(validateLogLevel('trace')).toBeUndefined();
+    expect(validateLogLevel('info' as bunyan.LogLevel)).toBeUndefined();
+    expect(validateLogLevel(10)).toBeUndefined();
   });
 
   it('checks for invalid log levels', () => {

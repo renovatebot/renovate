@@ -211,7 +211,7 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
  * A function that terminates exeution if the log level that was entered is
  *  not a valid value for the bunyan logger.
  * @param logLevelToCheck
- * @returns returns when the logLevelToCheck is valid. Else it stops execution.
+ * @returns returns undefined when the logLevelToCheck is valid. Else it stops execution.
  */
 export function validateLogLevel(
   logLevelToCheck: string | undefined | bunyan.LogLevel
