@@ -1,7 +1,7 @@
 import { HexDatasource } from '../../datasource/hex';
 import { logger } from '../../logger';
 import { findLocalSiblingOrParent, localPathExists } from '../../util/fs';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
@@ -15,7 +15,7 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace('mix.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  const contentArr = content.split('\n');
+  const contentArr = content.split(newlineRegex);
 
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
