@@ -1,4 +1,4 @@
-import { BranchConfig, BranchUpgradeConfig } from '../../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { getPrUpdatesTable } from './updates-table';
 
 describe('workers/pr/body/updates-table', () => {
