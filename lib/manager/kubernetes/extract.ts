@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -14,7 +14,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     return null;
   }
 
-  for (const line of content.split('\n')) {
+  for (const line of content.split(newlineRegex)) {
     const match = regEx(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
     if (match) {
       const currentFrom = match[1];

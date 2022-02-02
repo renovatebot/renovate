@@ -4,7 +4,7 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
@@ -198,7 +198,7 @@ export function generateBranchConfig(
     );
     if (upgrade.toLowerCase) {
       // We only need to lowercase the first line
-      const splitMessage = upgrade.commitMessage.split('\n');
+      const splitMessage = upgrade.commitMessage.split(newlineRegex);
       splitMessage[0] = splitMessage[0].toLowerCase();
       upgrade.commitMessage = splitMessage.join('\n');
     }
@@ -228,7 +228,7 @@ export function generateBranchConfig(
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {
-      [upgrade.prTitle] = upgrade.commitMessage.split('\n');
+      [upgrade.prTitle] = upgrade.commitMessage.split(newlineRegex);
     }
     upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
     if (upgrade.isGroup) {
