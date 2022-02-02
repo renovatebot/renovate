@@ -90,8 +90,6 @@ let privateKeySet = false;
 
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
-const newlineRegex = regEx(/\r?\n/);
-
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
   const globalGit = simpleGit();
