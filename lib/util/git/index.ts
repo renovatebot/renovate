@@ -40,6 +40,7 @@ import type {
   LocalConfig,
   StatusResult,
   StorageConfig,
+  TreeItem,
 } from './types';
 
 export { setNoVerify } from './config';
@@ -89,6 +90,8 @@ let privateKeySet = false;
 
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
+const newlineRegex = regEx(/\r?\n/);
+
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
   const globalGit = simpleGit();
@@ -132,7 +135,7 @@ async function fetchBranchCommits(): Promise<void> {
   }
   try {
     (await git.raw(opts))
-      .split('\n')
+      .split(newlineRegex)
       .filter(Boolean)
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
@@ -173,7 +176,7 @@ async function deleteLocalBranch(branchName: string): Promise<void> {
 
 async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
-    .split('\n')
+    .split(newlineRegex)
     .map((branch) => branch.trim())
     .filter((branch) => branch.length)
     .filter((branch) => !branch.startsWith('* '));
@@ -428,7 +431,7 @@ export async function getFileList(): Promise<string[]> {
     return [];
   }
   return files
-    .split('\n')
+    .split(newlineRegex)
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
     .map((line) => line.split(regEx(/\t/)).pop())
@@ -902,15 +905,6 @@ export async function pushCommitAsRef(
 ): Promise<void> {
   await git.raw(['update-ref', refName, commitSha]);
   await git.raw(['push', '--force', 'origin', refName]);
-}
-
-const newlineRegex = regEx(/\r?\n/);
-
-interface TreeItem {
-  path: string;
-  mode: string;
-  type: string;
-  sha: string;
 }
 
 const treeItemRegex = regEx(

@@ -8,6 +8,7 @@ import * as _conflictsCache from './conflicts-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
+import { GitlabPackagesDatasource } from '../../datasource/gitlab-packages';
 
 jest.mock('./conflicts-cache');
 const conflictsCache = mocked(_conflictsCache);
@@ -751,6 +752,45 @@ describe('util/git/index', () => {
           ],
         ]);
       });
+    });
+  });
+
+  describe('pushCommitAsRef', () => {
+    it('creates non-branch ref', async () => {
+      const commit = git.getBranchCommit(defaultBranch);
+      await git.pushCommitAsRef(commit, 'refs/foo/bar');
+      const repo = Git(tmpDir.path);
+      const res = (await repo.raw(['ls-remote'])).split(/\s+/);
+      expect(res).toContain('refs/foo/bar');
+    });
+  });
+
+  describe('listCommitTree', () => {
+    it('creates non-branch ref', async () => {
+      const commit = git.getBranchCommit(defaultBranch);
+      const res = await git.listCommitTree(commit);
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "mode": "100644",
+            "path": "file_to_delete",
+            "sha": "0abaeaa9932cc3322604c196b22c4db5c33aa548",
+            "type": "blob",
+          },
+          Object {
+            "mode": "100644",
+            "path": "master_file",
+            "sha": "88d050b1908057b53d38b42702ebc659e3d7f696",
+            "type": "blob",
+          },
+          Object {
+            "mode": "100644",
+            "path": "past_file",
+            "sha": "913705ab2ca79368053a476efa48aa6912d052c5",
+            "type": "blob",
+          },
+        ]
+      `);
     });
   });
 });

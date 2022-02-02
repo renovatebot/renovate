@@ -97,3 +97,10 @@ export interface CommitResult {
   commitSha: string;
   files: FileChange[];
 }
+
+export interface TreeItem {
+  path: string;
+  mode: string;
+  type: string;
+  sha: string;
+}
