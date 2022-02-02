@@ -1,7 +1,7 @@
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 
@@ -17,7 +17,7 @@ export async function extractPackageFile(
     registryUrls: [],
     deps: [],
   };
-  const lines = content.split('\n');
+  const lines = content.split(newlineRegex);
   const delimiters = ['"', "'"];
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
