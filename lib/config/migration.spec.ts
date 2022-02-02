@@ -1,4 +1,3 @@
-import { expect } from '@jest/globals';
 import { PlatformId } from '../constants';
 import { getConfig } from './defaults';
 import { GlobalConfig } from './global';

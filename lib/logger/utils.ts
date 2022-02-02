@@ -207,9 +207,15 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
   throw new Error("Missing 'stream' or 'path' for bunyan stream");
 }
 
-export function isValidLogLevel(
-  logLevelToCheck: bunyan.LogLevel
-): logLevelToCheck is bunyan.LogLevel {
+/**
+ * A function that terminates exeution if the log level that was entered is
+ *  not a valid value for the bunyan logger.
+ * @param logLevelToCheck
+ * @returns true when the logLevelToCheck is valid. Else it stops execution
+ */
+export function validateLogLevel(
+  logLevelToCheck: string | undefined | bunyan.LogLevel
+) {
   const allowedValues: bunyan.LogLevel[] = [
     'trace',
     'debug',
@@ -225,26 +231,24 @@ export function isValidLogLevel(
     bunyan.FATAL,
   ];
   if (
-    typeof logLevelToCheck === 'string' &&
-    logLevelToCheck.trim().length === 0
+    !logLevelToCheck ||
+    (typeof logLevelToCheck === 'string' &&
+      logLevelToCheck.trim().length === 0) ||
+    allowedValues.indexOf(logLevelToCheck as bunyan.LogLevel) !== -1
   ) {
-    // if the log level is empty string then return true
+    // if the log level is empty string then return true.
     return true;
   }
 
-  const result: boolean = allowedValues.indexOf(logLevelToCheck) !== -1;
-  if (!result) {
-    const Logger = bunyan.createLogger({
-      name: 'log level error log',
-      streams: [
-        {
-          level: 'fatal',
-          stream: process.stdout,
-        },
-      ],
-    });
-    Logger.fatal(`${logLevelToCheck} is not a valid log level. terminating...`);
-  }
-
-  return result;
+  const logger = bunyan.createLogger({
+    name: 'renovate',
+    streams: [
+      {
+        level: 'fatal',
+        stream: process.stdout,
+      },
+    ],
+  });
+  logger.fatal(`${logLevelToCheck} is not a valid log level. terminating...`);
+  process.exit(1);
 }

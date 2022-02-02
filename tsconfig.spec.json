@@ -1,8 +1,7 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "types": ["node", "jest", "jest-extended", "expect-more-jest"]
+    "allowJs": false,
+    "checkJs": false
   }
 }

@@ -6,17 +6,14 @@ import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import { RenovateStream } from './pretty-stdout';
 import type { BunyanRecord, Logger } from './types';
-import { ProblemStream, isValidLogLevel, withSanitizer } from './utils';
+import { ProblemStream, validateLogLevel, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT ?? nanoid();
 let curMeta: Record<string, unknown> = {};
 
 const problems = new ProblemStream();
 
-process.env.LOG_LEVEL.toLocaleLowerCase();
-if (!isValidLogLevel(process.env.LOG_LEVEL as bunyan.LogLevel)) {
-  process.exit(1);
-}
+validateLogLevel(process.env.LOG_LEVEL);
 const stdout: bunyan.Stream = {
   name: 'stdout',
   level:

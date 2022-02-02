@@ -22,6 +22,7 @@
     "checkJs": true
   },
   "exclude": [
+    "node_modules",
     "./.cache",
     "./dist",
     "**/__mocks__/*",
