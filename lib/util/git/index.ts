@@ -915,7 +915,7 @@ export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];
   for (const line of lines) {
-    const matchGroups = line.match(treeItemRegex)?.groups;
+    const matchGroups = treeItemRegex.exec(line)?.groups;
     if (matchGroups) {
       const { path, mode, type, sha } = matchGroups;
       result.push({ path, mode, type, sha });
