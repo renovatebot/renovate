@@ -148,27 +148,6 @@ export async function accumulateValues<T = any>(
   return accumulator;
 }
 
-interface Files {
-  chunks: {
-    changes: {
-      content: string;
-    }[];
-  }[];
-}
-
-export function isConflicted(files: Files[]): boolean {
-  for (const file of files) {
-    for (const chunk of file.chunks) {
-      for (const change of chunk.changes) {
-        if (change.content === '+=======') {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
-
 export interface PrResponse {
   id: number;
   title: string;

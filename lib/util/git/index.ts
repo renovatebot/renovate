@@ -1,13 +1,13 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import delay from 'delay';
 import fs from 'fs-extra';
-import type {
+import simpleGit, {
   Options,
+  ResetMode,
   SimpleGit,
   TaskOptions,
-  ResetMode as _ResetMode,
 } from 'simple-git';
-import * as simpleGit from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -28,9 +28,15 @@ import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
+import {
+  getCachedConflictResult,
+  setCachedConflictResult,
+} from './conflicts-cache';
+import { checkForPlatformFailure, handleCommitError } from './error';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
+  CommitResult,
   CommitSha,
   LocalConfig,
   StatusResult,
@@ -39,9 +45,6 @@ import type {
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
-
-// TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
-const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
 // Retry parameters
 const retryCount = 5;
@@ -88,73 +91,6 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   }
 
   throw lastError;
-}
-
-// istanbul ignore next
-function checkForPlatformFailure(err: Error): Error | null {
-  if (process.env.NODE_ENV === 'test') {
-    return null;
-  }
-  const externalHostFailureStrings = [
-    'remote: Invalid username or password',
-    'gnutls_handshake() failed',
-    'The requested URL returned error: 5',
-    'The remote end hung up unexpectedly',
-    'access denied or repository not exported',
-    'Could not write new index file',
-    'Failed to connect to',
-    'Connection timed out',
-    'malformed object name',
-    'Could not resolve host',
-    'early EOF',
-    'fatal: bad config', // .gitmodules problem
-    'expected flush after ref listing',
-  ];
-  for (const errorStr of externalHostFailureStrings) {
-    if (err.message.includes(errorStr)) {
-      logger.debug({ err }, 'Converting git error to ExternalHostError');
-      return new ExternalHostError(err, 'git');
-    }
-  }
-
-  const configErrorStrings = [
-    {
-      error: 'GitLab: Branch name does not follow the pattern',
-      message:
-        "Cannot push because branch name does not follow project's push rules",
-    },
-    {
-      error: 'GitLab: Commit message does not follow the pattern',
-      message:
-        "Cannot push because commit message does not follow project's push rules",
-    },
-    {
-      error: ' is not a member of team',
-      message:
-        'The `Restrict commits to existing GitLab users` rule is blocking Renovate push. Check the Renovate `gitAuthor` setting',
-    },
-    {
-      error: 'TF401027:',
-      message:
-        'You need the Git `GenericContribute` permission to perform this action',
-    },
-    {
-      error: 'matches more than one',
-      message:
-        "Renovate cannot push branches if there are tags with names the same as Renovate's branches. Please remove conflicting tag names or change Renovate's branchPrefix to avoid conflicts.",
-    },
-  ];
-  for (const { error, message } of configErrorStrings) {
-    if (err.message.includes(error)) {
-      logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
-      const res = new Error(CONFIG_VALIDATION);
-      res.validationError = message;
-      res.validationMessage = err.message;
-      return res;
-    }
-  }
-
-  return null;
 }
 
 function localName(branchName: string): string {
@@ -206,7 +142,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
-  const globalGit = simpleGit.default();
+  const globalGit = simpleGit();
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(/\s+/)) {
@@ -223,7 +159,7 @@ export async function validateGitVersion(): Promise<boolean> {
   if (
     !(
       version &&
-      (version === GIT_MINIMUM_VERSION ||
+      (semverCoerced.equals(version, GIT_MINIMUM_VERSION) ||
         semverCoerced.isGreaterThan(version, GIT_MINIMUM_VERSION))
     )
   ) {
@@ -272,7 +208,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = simpleGit.default(localDir, simpleGitConfig());
+  git = simpleGit(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -317,7 +253,12 @@ export function setGitAuthor(gitAuthor: string): void {
 }
 
 export async function writeGitAuthor(): Promise<void> {
-  const { gitAuthorName, gitAuthorEmail } = config;
+  const { gitAuthorName, gitAuthorEmail, writeGitDone } = config;
+  // istanbul ignore if
+  if (writeGitDone) {
+    return;
+  }
+  config.writeGitDone = true;
   try {
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
@@ -644,6 +585,73 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   return true;
 }
 
+export async function isBranchConflicted(
+  baseBranch: string,
+  branch: string
+): Promise<boolean> {
+  logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
+  await syncGit();
+  await writeGitAuthor();
+
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branch);
+  if (!baseBranchSha || !branchSha) {
+    logger.warn(
+      { baseBranch, branch },
+      'isBranchConflicted: branch does not exist'
+    );
+    return true;
+  }
+
+  const cachedResult = getCachedConflictResult(
+    baseBranch,
+    baseBranchSha,
+    branch,
+    branchSha
+  );
+  if (is.boolean(cachedResult)) {
+    logger.debug(
+      `Using cached result ${cachedResult} for isBranchConflicted(${baseBranch}, ${branch})`
+    );
+    return cachedResult;
+  }
+
+  let result = false;
+
+  const origBranch = config.currentBranch;
+  try {
+    await git.reset(ResetMode.HARD);
+    if (origBranch !== baseBranch) {
+      await git.checkout(baseBranch);
+    }
+    await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
+  } catch (err) {
+    result = true;
+    // istanbul ignore if: not easily testable
+    if (!err?.git?.conflicts?.length) {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: unknown error'
+      );
+    }
+  } finally {
+    try {
+      await git.merge(['--abort']);
+      if (origBranch !== baseBranch) {
+        await git.checkout(origBranch);
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug(
+        { baseBranch, branch, err },
+        'isBranchConflicted: cleanup error'
+      );
+    }
+  }
+
+  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
+  return result;
+}
+
 export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
   try {
@@ -769,21 +777,25 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
-export async function commitFiles({
-  branchName,
-  files,
-  message,
-  force = false,
-}: CommitFilesConfig): Promise<CommitSha | null> {
-  await syncGit();
-  logger.debug(`Committing files to branch ${branchName}`);
+async function handleCommitAuth(localDir: string): Promise<void> {
   if (!privateKeySet) {
     await writePrivateKey();
     privateKeySet = true;
   }
-  const { localDir } = GlobalConfig.get();
   await configSigningKey(localDir);
   await writeGitAuthor();
+}
+
+export async function prepareCommit({
+  branchName,
+  files,
+  message,
+  force = false,
+}: CommitFilesConfig): Promise<CommitResult | null> {
+  const { localDir } = GlobalConfig.get();
+  await syncGit();
+  logger.debug(`Preparing files for commiting to branch ${branchName}`);
+  await handleCommitAuth(localDir);
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
@@ -879,6 +891,29 @@ export async function commitFiles({
       return null;
     }
 
+    const result: CommitResult = {
+      sha: commit,
+      files: files.filter((fileChange) => {
+        if (fileChange.type === 'deletion') {
+          return deletedFiles.includes(fileChange.path);
+        }
+        return addedModifiedFiles.includes(fileChange.path);
+      }),
+    };
+
+    return result;
+  } catch (err) /* istanbul ignore next */ {
+    return handleCommitError(files, branchName, err);
+  }
+}
+
+export async function pushCommit({
+  branchName,
+  files,
+}: CommitFilesConfig): Promise<void> {
+  await syncGit();
+  logger.debug(`Pushing branch ${branchName}`);
+  try {
     const pushOptions: TaskOptions = {
       '--force-with-lease': null,
       '-u': null,
@@ -892,14 +927,24 @@ export async function commitFiles({
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
-    // Fetch it after create
+    incLimitedValue(Limit.Commits);
+  } catch (err) /* istanbul ignore next */ {
+    handleCommitError(files, branchName, err);
+  }
+}
+
+export async function fetchCommit({
+  branchName,
+  files,
+}: CommitFilesConfig): Promise<CommitSha | null> {
+  await syncGit();
+  logger.debug(`Fetching branch ${branchName}`);
+  try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await gitRetry(() => git.fetch(['origin', ref, '--force']));
-    config.branchCommits[branchName] = (
-      await git.revparse([branchName])
-    ).trim();
+    const commit = (await git.revparse([branchName])).trim();
+    config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
-    incLimitedValue(Limit.Commits);
     return commit;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
@@ -973,6 +1018,17 @@ export async function commitFiles({
     // We don't know why this happened, so this will cause bubble up to a branch error
     throw err;
   }
+}
+
+export async function commitFiles(
+  config: CommitFilesConfig
+): Promise<CommitSha | null> {
+  const commitResult = await prepareCommit(config);
+  if (!commitResult) {
+    return null;
+  }
+  await pushCommit(config);
+  return fetchCommit(config);
 }
 
 export function getUrl({

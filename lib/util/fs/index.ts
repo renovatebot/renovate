@@ -154,3 +154,11 @@ export async function readLocalDirectory(path: string): Promise<string[]> {
 export function createWriteStream(path: string): fs.WriteStream {
   return fs.createWriteStream(path);
 }
+
+export function localPathIsFile(pathName: string): Promise<boolean> {
+  const { localDir } = GlobalConfig.get();
+  return fs
+    .stat(upath.join(localDir, pathName))
+    .then((s) => s.isFile())
+    .catch(() => false);
+}

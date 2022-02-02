@@ -289,18 +289,6 @@ export async function getPr(
   pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   pr.version = updatePrVersion(pr.number, pr.version);
 
-  if (pr.state === PrState.Open) {
-    const mergeRes = await bitbucketServerHttp.getJson<{
-      conflicted: string;
-      canMerge: string;
-    }>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
-      { useCache: !refreshCache }
-    );
-    pr.isConflicted = !!mergeRes.body.conflicted;
-    pr.canMerge = !!mergeRes.body.canMerge;
-  }
-
   return pr;
 }
 
