@@ -909,8 +909,11 @@ const treeItemRegex = regEx(
   /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
 );
 
+const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
+
 export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
-  const treeSha = (await git.raw(['cat-file', '-p', commitSha])).slice(5, 45);
+  const commitOutput = await git.raw(['cat-file', '-p', commitSha]);
+  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
   const contents = await git.raw(['cat-file', '-p', treeSha]);
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];
