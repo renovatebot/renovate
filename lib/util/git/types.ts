@@ -93,7 +93,7 @@ export interface SourceBranchConflict {
 }
 
 export interface CommitResult {
-  prevCommitSha: string;
+  parentCommitSha: string;
   commitSha: string;
   files: FileChange[];
 }

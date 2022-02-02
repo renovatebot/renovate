@@ -624,17 +624,9 @@ async function getOpenPrs(): Promise<PrList> {
         const hasNegativeReview = pr.reviews?.nodes?.length > 0;
         // istanbul ignore if
         if (hasNegativeReview) {
-          pr.canMerge = false;
-          pr.canMergeReason = `hasNegativeReview`;
-        } else if (canMergeStates.includes(pr.mergeStateStatus)) {
-          pr.canMerge = true;
-        } else if (config.forkToken && pr.mergeStateStatus === 'BLOCKED') {
-          // The main token can't merge but maybe the forking token can
-          // istanbul ignore next
-          pr.canMerge = true;
-        } else {
-          pr.canMerge = false;
-          pr.canMergeReason = `mergeStateStatus = ${pr.mergeStateStatus}`;
+          pr.cannotMergeReason = `PR has a negative review`;
+        } else if (!canMergeStates.includes(pr.mergeStateStatus)) {
+          pr.cannotMergeReason = `pr.mergeStateStatus = ${pr.mergeStateStatus}`;
         }
         if (pr.labels) {
           pr.labels = pr.labels.nodes.map((label) => label.name);
@@ -643,9 +635,7 @@ async function getOpenPrs(): Promise<PrList> {
         delete pr.assignees;
         pr.hasReviewers = !!(pr.reviewRequests?.totalCount > 0);
         delete pr.reviewRequests;
-        delete pr.mergeable;
         delete pr.mergeStateStatus;
-        delete pr.commits;
         config.openPrList[pr.number] = pr;
         prNumbers.push(pr.number);
       }
@@ -692,12 +682,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (pr.state === PrState.Open) {
     pr.sourceBranch = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
-    if (pr.mergeable === true) {
-      pr.canMerge = true;
-    } else {
-      pr.canMerge = false;
-      pr.canMergeReason = `mergeable = ${pr.mergeable}`;
-    }
   }
   return pr;
 }

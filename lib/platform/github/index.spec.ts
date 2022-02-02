@@ -2136,7 +2136,6 @@ describe('platform/github/index', () => {
           number: 1,
           state: PrState.Closed,
           base: { sha: '1234' },
-          mergeable: true,
           merged_at: 'sometime',
         })
         .post('/graphql')
@@ -2183,7 +2182,6 @@ describe('platform/github/index', () => {
           state: PrState.Open,
           base: { sha: '5678' },
           commits: 1,
-          mergeable: true,
         })
         .post('/graphql')
         .twice()

@@ -103,6 +103,7 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioning.isVersion(release.version)
       );
+
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -364,6 +365,12 @@ export async function lookupUpdates(
           update.isLockfileUpdate ||
           (update.newDigest && !update.newDigest.startsWith(currentDigest))
       );
+    // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
+    if (config.rangeStrategy === 'in-range-only') {
+      res.updates = res.updates.filter(
+        (update) => update.newValue === currentValue
+      );
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError || err.message === CONFIG_VALIDATION) {
       throw err;

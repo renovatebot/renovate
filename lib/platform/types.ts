@@ -49,8 +49,7 @@ export interface RepoParams {
 export interface Pr {
   body?: string;
   sourceBranch: string;
-  canMerge?: boolean;
-  canMergeReason?: string;
+  cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
   createdAt?: string;
   closedAt?: string;
   displayNumber?: string;

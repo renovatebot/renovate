@@ -24,7 +24,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { regEx } from '../regex';
+import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
@@ -712,7 +712,7 @@ export async function prepareCommit({
   try {
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
-    const prevCommitSha = config.currentBranchSha;
+    const parentCommitSha = config.currentBranchSha;
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];
@@ -801,7 +801,7 @@ export async function prepareCommit({
     }
 
     const result: CommitResult = {
-      prevCommitSha,
+      parentCommitSha,
       commitSha,
       files: files.filter((fileChange) => {
         if (fileChange.type === 'deletion') {
@@ -911,13 +911,31 @@ const treeItemRegex = regEx(
   /^(?<mode>\d{6})\s+(?<type>blob|tree)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/
 );
 
+const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
+
+/**
+ *
+ * $ git cat-file -p <commit-sha>
+ *
+ * > tree <tree-sha>
+ * > parent 59b8b0e79319b7dc38f7a29d618628f3b44c2fd7
+ * > ...
+ *
+ * $ git cat-file -p <tree-sha>
+ *
+ * > 040000 tree 389400684d1f004960addc752be13097fe85d776    .devcontainer
+ * > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    .editorconfig
+ * > ...
+ *
+ */
 export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
-  const treeSha = (await git.raw(['cat-file', '-p', commitSha])).slice(5, 45);
+  const commitOutput = await git.raw(['cat-file', '-p', commitSha]);
+  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
   const contents = await git.raw(['cat-file', '-p', treeSha]);
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];
   for (const line of lines) {
-    const matchGroups = line.match(treeItemRegex)?.groups;
+    const matchGroups = treeItemRegex.exec(line)?.groups;
     if (matchGroups) {
       const { path, mode, type, sha } = matchGroups;
       result.push({ path, mode, type, sha });
