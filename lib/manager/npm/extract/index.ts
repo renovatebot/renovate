@@ -6,7 +6,7 @@ import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -124,7 +124,7 @@ export async function extractPackageFile(
           'Stripping .npmrc file of lines with variables'
         );
         repoNpmrc = repoNpmrc
-          .split('\n')
+          .split(newlineRegex)
           .filter((line) => !line.includes('=${'))
           .join('\n');
       }

@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getElapsedMinutes } from '../../util/date';
+import { newlineRegex } from '../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -71,7 +72,7 @@ export class RubyGemsOrgDatasource extends Datasource {
       return;
     }
 
-    for (const line of newLines.split('\n')) {
+    for (const line of newLines.split(newlineRegex)) {
       RubyGemsOrgDatasource.processLine(line);
     }
     lastSync = new Date();

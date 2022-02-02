@@ -1,0 +1,17 @@
+image:
+  # comment
+  name: $VARIABLE/renovate/renovate:31.65.1-slim
+
+services:
+  # comment
+  - name: $VARIABLE/other/image1:1.0.0
+    alias: imagealias1
+  # comment
+  - name: ${VARIABLE}/other/image1:2.0.0
+    alias: imagealias2
+  # comment
+  - name: docker.io/$VARIABLE/image1:3.0.0
+    alias: imagealias1
+  # comment
+  - name: docker.io/${VARIABLE}/image1:4.0.0
+    alias: imagealias2
