@@ -1,8 +1,6 @@
-import bunyan from 'bunyan';
 import _fs from 'fs-extra';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
-import { validateLogLevel } from './utils';
 import {
   addMeta,
   addStream,
@@ -183,38 +181,5 @@ describe('logger/index', () => {
     expect(logged.secrets.foo).toBe('***********');
     expect(logged.someFn).toBe('[function]');
     expect(logged.someObject.field).toBe('**redacted**');
-  });
-
-  it('checks for valid log level', () => {
-    expect(validateLogLevel(undefined)).toBeTruthy();
-    expect(validateLogLevel('')).toBeTruthy();
-    expect(validateLogLevel(' ')).toBeTruthy();
-    expect(validateLogLevel('warn')).toBeTruthy();
-    expect(validateLogLevel('debug')).toBeTruthy();
-    expect(validateLogLevel('trace')).toBeTruthy();
-    expect(validateLogLevel('info' as bunyan.LogLevel)).toBeTruthy();
-    expect(validateLogLevel(10)).toBeTruthy();
-    // Mock when the function exits
-    const mockExit = jest
-      .spyOn(process, 'exit')
-      .mockImplementation((number) => {
-        throw new Error('process.exit: ' + number);
-      });
-    expect(() => {
-      validateLogLevel('warning');
-    }).toThrow();
-    expect(mockExit).toHaveBeenCalledWith(1);
-    mockExit.mockRestore();
-
-    const mockExit2 = jest
-      .spyOn(process, 'exit')
-      .mockImplementation((number) => {
-        throw new Error('process.exit: ' + number);
-      });
-    expect(() => {
-      validateLogLevel('100');
-    }).toThrow();
-    expect(mockExit2).toHaveBeenCalledWith(1);
-    mockExit2.mockRestore();
   });
 });

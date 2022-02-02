@@ -211,11 +211,11 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
  * A function that terminates exeution if the log level that was entered is
  *  not a valid value for the bunyan logger.
  * @param logLevelToCheck
- * @returns true when the logLevelToCheck is valid. Else it stops execution
+ * @returns returns when the logLevelToCheck is valid. Else it stops execution.
  */
 export function validateLogLevel(
   logLevelToCheck: string | undefined | bunyan.LogLevel
-) {
+): void {
   const allowedValues: bunyan.LogLevel[] = [
     'trace',
     'debug',
@@ -236,8 +236,8 @@ export function validateLogLevel(
       logLevelToCheck.trim().length === 0) ||
     allowedValues.indexOf(logLevelToCheck as bunyan.LogLevel) !== -1
   ) {
-    // if the log level is empty string then return true.
-    return true;
+    // if the log level is empty string then return.
+    return;
   }
 
   const logger = bunyan.createLogger({
