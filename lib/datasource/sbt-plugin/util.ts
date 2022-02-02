@@ -1,4 +1,3 @@
-import url from 'url';
 import { regEx } from '../../util/regex';
 
 const linkRegExp = /(?<=href=['"])[^'"]*(?=\/['"])/g;
@@ -16,9 +15,9 @@ export function parseIndexDir(
 
 export function normalizeRootRelativeUrls(
   content: string,
-  rootUrl: string | url.URL
+  rootUrl: string | URL
 ): string {
-  const rootRelativePath = new url.URL(rootUrl.toString()).pathname;
+  const rootRelativePath = new URL(rootUrl.toString()).pathname;
   return content.replaceAll(linkRegExp, (href) =>
     href.replace(rootRelativePath, '')
   );
