@@ -22,6 +22,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
+import { listCommitTree, pushCommitAsRef } from '../../util/git';
 import type {
   CommitFilesConfig,
   CommitResult,
@@ -80,7 +81,6 @@ import {
   PrList,
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
-import { getCommitTree, listCommitTree, pushCommitAsRef } from '../../util/git';
 
 const githubApi = new githubHttp.GithubHttp();
 
@@ -1757,7 +1757,13 @@ async function forcePushFiles(
   const tmpRefName = `refs/renovate/${branchName}`;
 
   await pushCommitAsRef(localCommitSha, tmpRefName);
-  const treeSha = await getCommitTree(localCommitSha);
+  const treeItems = await listCommitTree(localCommitSha);
+
+  const treeRes = await githubApi.postJson<{ sha: string }>(
+    `/repos/${config.repository}/git/trees`,
+    { body: { tree: treeItems } }
+  );
+  const treeSha = treeRes.body.sha;
 
   const commitRes = await githubApi.postJson<{ sha: string }>(
     `/repos/${config.repository}/git/commits`,
