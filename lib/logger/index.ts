@@ -13,6 +13,10 @@ let curMeta: Record<string, unknown> = {};
 
 const problems = new ProblemStream();
 
+if (is.string(process.env.LOG_LEVEL)) {
+  process.env.LOG_LEVEL = process.env.LOG_LEVEL.toLowerCase();
+  process.env.LOG_LEVEL = process.env.LOG_LEVEL.trim();
+}
 validateLogLevel(process.env.LOG_LEVEL);
 const stdout: bunyan.Stream = {
   name: 'stdout',

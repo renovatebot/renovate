@@ -11,7 +11,6 @@ describe('logger/utils', () => {
     expect(validateLogLevel('warn')).toBeUndefined();
     expect(validateLogLevel('debug')).toBeUndefined();
     expect(validateLogLevel('trace')).toBeUndefined();
-    expect(validateLogLevel('TRACE')).toBeUndefined();
     expect(validateLogLevel('info' as bunyan.LogLevel)).toBeUndefined();
   });
 
