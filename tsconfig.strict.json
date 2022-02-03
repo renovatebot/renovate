@@ -7,7 +7,7 @@
   },
   "include": ["lib/", "test/"],
   "exclude": [
-    "lib/**/*.spec.ts",
+    "**/*.spec.ts",
     "lib/config-validator.ts",
     "lib/config/decrypt.ts",
     "lib/config/defaults.ts",
