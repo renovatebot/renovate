@@ -14,4 +14,8 @@ export interface HostRule {
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
   resolvedHost?: string;
+  keyStore?: {
+    filename: string;
+    passphrase?: string;
+  };
 }
