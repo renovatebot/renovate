@@ -16,10 +16,11 @@ const shaRe = regEx(/^[a-z0-9]{40}|[a-z0-9]{64}$/);
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  for (const line of content.split(newlineRegex)) {
+  for (let line of content.split(newlineRegex)) {
     if (line.trim().startsWith('#')) {
       continue;
     }
+    line = line.replaceAll('"', '');
 
     const dockerMatch = dockerRe.exec(line);
     if (dockerMatch) {

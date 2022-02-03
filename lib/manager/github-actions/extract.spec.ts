@@ -18,5 +18,12 @@ describe('manager/github-actions/extract', () => {
         res.deps.filter((d) => d.datasource === 'github-tags')
       ).toHaveLength(5);
     });
+    it('extracts tag line with double quotes', () => {
+      const res = extractPackageFile(Fixtures.get('workflow_3.yml'));
+      expect(res.deps).toMatchSnapshot();
+      expect(
+        res.deps.filter((d) => d.datasource === 'github-tags')
+      ).toHaveLength(1);
+    });
   });
 });
