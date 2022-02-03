@@ -225,14 +225,14 @@ export function validateLogLevel(
     'fatal',
   ];
   if (!logLevelToCheck) {
+    // when logLevel is undefined
     return;
   }
   if (typeof logLevelToCheck === 'string') {
+    logLevelToCheck = logLevelToCheck.trim();
     logLevelToCheck = logLevelToCheck.toLocaleLowerCase();
-    if (
-      allowedValues.includes(logLevelToCheck as bunyan.LogLevel) ||
-      logLevelToCheck.trim().length === 0
-    ) {
+    if (allowedValues.includes(logLevelToCheck as bunyan.LogLevel)) {
+      // log level is in the allowed values
       return;
     }
   }

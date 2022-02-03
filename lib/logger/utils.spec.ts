@@ -8,8 +8,6 @@ describe('logger/utils', () => {
 
   it('checks for valid log levels', () => {
     expect(validateLogLevel(undefined)).toBeUndefined();
-    expect(validateLogLevel('')).toBeUndefined();
-    expect(validateLogLevel(' ')).toBeUndefined();
     expect(validateLogLevel('warn')).toBeUndefined();
     expect(validateLogLevel('debug')).toBeUndefined();
     expect(validateLogLevel('trace')).toBeUndefined();
@@ -21,6 +19,8 @@ describe('logger/utils', () => {
     input
     ${'warning'}
     ${'100'}
+    ${''}
+    ${' '}
   `('checks for invalid log level: $input', (input) => {
     // Mock when the function exits
     const mockExit = jest.spyOn(process, 'exit');
