@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { TerragruntDependencyTypes } from './common';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
@@ -19,7 +19,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
   let deps: PackageDependency<TerraformManagerData>[] = [];
   try {
-    const lines = content.split('\n');
+    const lines = content.split(newlineRegex);
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
       const terragruntDependency = dependencyBlockExtractionRegex.exec(line);

@@ -101,5 +101,58 @@ describe('manager/gitlabci/extract', () => {
       expect(res).toBeNull();
       expect(logger.logger.warn).toHaveBeenCalled();
     });
+
+    it('skips images with variables', async () => {
+      const res = await extractAllPackageFiles(config, [
+        'lib/manager/gitlabci/__fixtures__/gitlab-ci.7.yaml',
+      ]);
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              datasource: 'docker',
+              depType: 'image-name',
+              replaceString: '$VARIABLE/renovate/renovate:31.65.1-slim',
+              skipReason: 'contains-variable',
+            },
+            {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              datasource: 'docker',
+              depType: 'service-image',
+              replaceString: '$VARIABLE/other/image1:1.0.0',
+              skipReason: 'contains-variable',
+            },
+            {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              datasource: 'docker',
+              depType: 'service-image',
+              replaceString: '${VARIABLE}/other/image1:2.0.0',
+              skipReason: 'contains-variable',
+            },
+            {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              datasource: 'docker',
+              depType: 'service-image',
+              replaceString: 'docker.io/$VARIABLE/image1:3.0.0',
+              skipReason: 'contains-variable',
+            },
+            {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              datasource: 'docker',
+              depType: 'service-image',
+              replaceString: 'docker.io/${VARIABLE}/image1:4.0.0',
+              skipReason: 'contains-variable',
+            },
+          ],
+          packageFile: 'lib/manager/gitlabci/__fixtures__/gitlab-ci.7.yaml',
+        },
+      ]);
+    });
   });
 });
