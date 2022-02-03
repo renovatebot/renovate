@@ -25,7 +25,7 @@ export function extractPackageFile(
   deps = doc.dependencies.map((dep) => {
     const res: PackageDependency = {
       depName: dep.name,
-      currentValue: dep.version,
+      currentValue: dep.version ? String(dep.version) : dep.version, // keep returning undefined and not "undefined"
     };
 
     if (!res.depName) {
