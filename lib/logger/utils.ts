@@ -234,7 +234,7 @@ export function validateLogLevel(
     !logLevelToCheck ||
     (typeof logLevelToCheck === 'string' &&
       logLevelToCheck.trim().length === 0) ||
-    allowedValues.indexOf(logLevelToCheck as bunyan.LogLevel) !== -1
+    !allowedValues.includes(logLevelToCheck as bunyan.LogLevel)
   ) {
     // if the log level is empty string then return.
     return;
