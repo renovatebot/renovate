@@ -25,7 +25,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { regEx } from '../regex';
+import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
@@ -183,7 +183,7 @@ async function fetchBranchCommits(): Promise<void> {
   }
   try {
     (await gitRetry(() => git.raw(opts)))
-      .split('\n')
+      .split(newlineRegex)
       .filter(Boolean)
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
@@ -227,7 +227,7 @@ async function deleteLocalBranch(branchName: string): Promise<void> {
 
 async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
-    .split('\n')
+    .split(newlineRegex)
     .map((branch) => branch.trim())
     .filter((branch) => branch.length)
     .filter((branch) => !branch.startsWith('* '));
@@ -494,7 +494,7 @@ export async function getFileList(): Promise<string[]> {
     return [];
   }
   return files
-    .split('\n')
+    .split(newlineRegex)
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
     .map((line) => line.split(regEx(/\t/)).pop())

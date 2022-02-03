@@ -4,7 +4,7 @@ import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
@@ -110,7 +110,7 @@ async function addReleasesFromIndexPage(
         const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
         const res = await downloadHttpProtocol(indexUrl);
         const { body = '' } = res;
-        for (const line of body.split('\n')) {
+        for (const line of body.split(newlineRegex)) {
           const match = line.trim().match(mavenCentralHtmlVersionRegex);
           if (match) {
             const { version, releaseTimestamp: timestamp } =
