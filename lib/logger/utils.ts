@@ -223,21 +223,18 @@ export function validateLogLevel(
     'warn',
     'error',
     'fatal',
-    bunyan.TRACE,
-    bunyan.DEBUG,
-    bunyan.INFO,
-    bunyan.WARN,
-    bunyan.ERROR,
-    bunyan.FATAL,
   ];
-  if (
-    !logLevelToCheck ||
-    (typeof logLevelToCheck === 'string' &&
-      logLevelToCheck.trim().length === 0) ||
-    !allowedValues.includes(logLevelToCheck as bunyan.LogLevel)
-  ) {
-    // if the log level is empty string then return.
+  if (!logLevelToCheck) {
     return;
+  }
+  if (typeof logLevelToCheck === 'string') {
+    logLevelToCheck = logLevelToCheck.toLocaleLowerCase();
+    if (
+      allowedValues.includes(logLevelToCheck as bunyan.LogLevel) ||
+      logLevelToCheck.trim().length === 0
+    ) {
+      return;
+    }
   }
 
   const logger = bunyan.createLogger({
