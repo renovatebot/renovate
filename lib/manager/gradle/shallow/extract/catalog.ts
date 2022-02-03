@@ -1,6 +1,5 @@
 import { parse } from '@iarna/toml';
 import deepmerge from 'deepmerge';
-import { SkipReason } from '../../../../types';
 import { hasKey } from '../../../../util/object';
 import type { PackageDependency } from '../../../types';
 import type { GradleManagerData } from '../../types';
@@ -87,7 +86,7 @@ function extractDependency({
     if (!currentValue) {
       return {
         depName,
-        skipReason: SkipReason.NoVersion,
+        skipReason: 'no-version',
       };
     }
     return {
@@ -114,7 +113,7 @@ function extractDependency({
   if (!currentValue) {
     return {
       depName,
-      skipReason: SkipReason.NoVersion,
+      skipReason: 'no-version',
     };
   }
 

@@ -1,4 +1,12 @@
-import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  git,
+  mocked,
+  platform,
+} from '../../../../test/util';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { extractDependencies, updateRepo } from '.';
 
@@ -33,6 +41,62 @@ describe('workers/repository/process/index', () => {
         branches: [undefined],
         packageFiles: undefined,
       });
+    });
+
+    it('reads config from default branch if useBaseBranchConfig not specified', async () => {
+      git.branchExists.mockReturnValue(true);
+      platform.getJsonFile.mockResolvedValueOnce({});
+      config.baseBranches = ['master', 'dev'];
+      config.useBaseBranchConfig = 'none';
+      getCache().configFileName = 'renovate.json';
+      const res = await extractDependencies(config);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
+      expect(platform.getJsonFile).not.toHaveBeenCalledWith(
+        'renovate.json',
+        undefined,
+        'dev'
+      );
+    });
+
+    it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
+      git.branchExists.mockReturnValue(true);
+      platform.getJsonFile = jest.fn().mockResolvedValue({});
+      config.baseBranches = ['master', 'dev'];
+      config.useBaseBranchConfig = 'merge';
+      getCache().configFileName = 'renovate.json';
+      const res = await extractDependencies(config);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
+      expect(platform.getJsonFile).toHaveBeenCalledWith(
+        'renovate.json',
+        undefined,
+        'dev'
+      );
+    });
+
+    it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
+      git.branchExists.mockReturnValue(true);
+      platform.getJsonFile = jest
+        .fn()
+        .mockImplementation((fileName, repoName, branchName) => {
+          if (branchName === 'dev') {
+            throw new Error();
+          }
+          return {};
+        });
+      getCache().configFileName = 'renovate.json';
+      config.baseBranches = ['master', 'dev'];
+      config.useBaseBranchConfig = 'merge';
+      await expect(extractDependencies(config)).rejects.toThrow(
+        CONFIG_VALIDATION
+      );
     });
   });
 });

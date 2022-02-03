@@ -65,7 +65,9 @@ describe('config/secrets', () => {
         npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',
       };
       const res = applySecretsToConfig(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        npmToken: '123test==',
+      });
       expect(Object.keys(res)).not.toContain('secrets');
     });
     it('replaces secrets in a subobject', () => {
@@ -74,7 +76,11 @@ describe('config/secrets', () => {
         npm: { npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}' },
       };
       const res = applySecretsToConfig(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        npm: {
+          npmToken: '123test==',
+        },
+      });
       expect(Object.keys(res)).not.toContain('secrets');
     });
     it('replaces secrets in a array of objects', () => {
@@ -85,7 +91,9 @@ describe('config/secrets', () => {
         ],
       };
       const res = applySecretsToConfig(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        hostRules: [{ hostType: 'npm', token: '123test==' }],
+      });
       expect(Object.keys(res)).not.toContain('secrets');
     });
     it('replaces secrets in a array of strings', () => {
@@ -94,8 +102,66 @@ describe('config/secrets', () => {
         allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
       const res = applySecretsToConfig(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toStrictEqual({
+        allowedManagers: ['npm'],
+      });
       expect(Object.keys(res)).not.toContain('secrets');
+    });
+    it('replaces secrets in a array of objects without deleting them', () => {
+      const config = {
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
+        hostRules: [
+          { hostType: 'npm', token: '{{ secrets.ARTIFACTORY_TOKEN }}' },
+        ],
+      };
+      const res = applySecretsToConfig(config, config.secrets, false);
+      expect(res).toStrictEqual({
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
+        hostRules: [{ hostType: 'npm', token: '123test==' }],
+      });
+      expect(Object.keys(res)).toContain('secrets');
+    });
+    it('replaces secrets in a array of strings without deleting them', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+      };
+      const res = applySecretsToConfig(config, config.secrets, false);
+      expect(res).toStrictEqual({
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['npm'],
+      });
+      expect(Object.keys(res)).toContain('secrets');
+    });
+    it('{} as secrets will result in an error', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+      };
+      expect(() => applySecretsToConfig(config, {}, false)).toThrow(
+        CONFIG_VALIDATION
+      );
+    });
+    it('undefined as secrets will result replace the secret', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+      };
+      const res = applySecretsToConfig(config, undefined, false);
+      expect(res).toStrictEqual({
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['npm'],
+      });
+      expect(Object.keys(res)).toContain('secrets');
+    });
+    it('null as secrets will result in an error', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
+      };
+      expect(() => applySecretsToConfig(config, null, false)).toThrow(
+        CONFIG_VALIDATION
+      );
     });
   });
 });

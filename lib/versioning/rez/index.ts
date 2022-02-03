@@ -33,7 +33,7 @@ function equals(a: string, b: string): boolean {
   }
 }
 
-function getMajor(version: string): number {
+function getMajor(version: string): number | null {
   try {
     return npm.getMajor(padZeroes(version));
   } catch (err) /* istanbul ignore next */ {
@@ -41,7 +41,7 @@ function getMajor(version: string): number {
   }
 }
 
-function getMinor(version: string): number {
+function getMinor(version: string): number | null {
   try {
     return npm.getMinor(padZeroes(version));
   } catch (err) /* istanbul ignore next */ {
@@ -49,7 +49,7 @@ function getMinor(version: string): number {
   }
 }
 
-function getPatch(version: string): number {
+function getPatch(version: string): number | null {
   try {
     return npm.getPatch(padZeroes(version));
   } catch (err) /* istanbul ignore next */ {
@@ -68,11 +68,11 @@ function isGreaterThan(a: string, b: string): boolean {
 function isLessThanRange(version: string, range: string): boolean {
   return (
     npm.isVersion(padZeroes(version)) &&
-    npm.isLessThanRange(padZeroes(version), rez2npm(range))
+    !!npm.isLessThanRange?.(padZeroes(version), rez2npm(range))
   );
 }
 
-export function isValid(input: string): string | boolean {
+export function isValid(input: string): boolean {
   return npm.isValid(rez2npm(input));
 }
 
@@ -80,7 +80,7 @@ function isStable(version: string): boolean {
   return npm.isStable(padZeroes(version));
 }
 
-function isVersion(input: string): string | boolean {
+function isVersion(input: string): boolean {
   return npm.isVersion(padZeroes(rez2npm(input)));
 }
 
@@ -91,15 +91,21 @@ function matches(version: string, range: string): boolean {
   );
 }
 
-function getSatisfyingVersion(versions: string[], range: string): string {
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
   return npm.getSatisfyingVersion(versions, rez2npm(range));
 }
 
-function minSatisfyingVersion(versions: string[], range: string): string {
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
   return npm.minSatisfyingVersion(versions, rez2npm(range));
 }
 
-function isSingleVersion(constraint: string): string | boolean {
+function isSingleVersion(constraint: string): boolean {
   return (
     (constraint.trim().startsWith('==') &&
       isVersion(constraint.trim().substring(2).trim())) ||
@@ -116,7 +122,7 @@ function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string {
+}: NewValueConfig): string | null {
   const pep440Value = pep440.getNewValue({
     currentValue: rez2pep440(currentValue),
     rangeStrategy,
@@ -126,29 +132,31 @@ function getNewValue({
   if (exactVersion.test(currentValue)) {
     return pep440Value;
   }
-  if (inclusiveBound.test(currentValue)) {
+  if (pep440Value && inclusiveBound.test(currentValue)) {
     return pep4402rezInclusiveBound(pep440Value);
   }
-  if (lowerBound.test(currentValue)) {
+  if (pep440Value && lowerBound.test(currentValue)) {
     if (currentValue.includes('+')) {
       return npm2rezplus(pep440Value);
     }
     return pep440Value;
   }
-  if (upperBound.test(currentValue)) {
+  if (pep440Value && upperBound.test(currentValue)) {
     return pep440Value;
   }
-  if (ascendingRange.test(currentValue)) {
+  const matchAscRange = ascendingRange.exec(currentValue);
+  if (pep440Value && matchAscRange?.groups) {
     // Replace version numbers but keep rez format, otherwise we just end up trying
     // to convert every single case separately.
-    const match = ascendingRange.exec(currentValue);
-    const lowerBoundAscCurrent = match.groups.range_lower_asc;
-    const upperBoundAscCurrent = match.groups.range_upper_asc;
-    const lowerAscVersionCurrent = match.groups.range_lower_asc_version;
-    const upperAscVersionCurrent = match.groups.range_upper_asc_version;
+    const lowerBoundAscCurrent = matchAscRange.groups.range_lower_asc;
+    const upperBoundAscCurrent = matchAscRange.groups.range_upper_asc;
+    const lowerAscVersionCurrent = matchAscRange.groups.range_lower_asc_version;
+    const upperAscVersionCurrent = matchAscRange.groups.range_upper_asc_version;
     const [lowerBoundAscPep440, upperBoundAscPep440] = pep440Value.split(', ');
-    const lowerAscVersionNew = regEx(versionGroup).exec(lowerBoundAscPep440)[0];
-    const upperAscVersionNew = regEx(versionGroup).exec(upperBoundAscPep440)[0];
+    const lowerAscVersionNew =
+      regEx(versionGroup).exec(lowerBoundAscPep440)?.[0] ?? '';
+    const upperAscVersionNew =
+      regEx(versionGroup).exec(upperBoundAscPep440)?.[0] ?? '';
     const lowerBoundAscNew = lowerBoundAscCurrent.replace(
       lowerAscVersionCurrent,
       lowerAscVersionNew
@@ -161,21 +169,23 @@ function getNewValue({
 
     return lowerBoundAscNew + separator + upperBoundAscNew;
   }
-  if (descendingRange.test(currentValue)) {
+  const matchDscRange = descendingRange.exec(currentValue);
+  if (pep440Value && matchDscRange?.groups) {
     // Replace version numbers but keep rez format, otherwise we just end up trying
     // to convert every single case separately.
-    const match = descendingRange.exec(currentValue);
-    const upperBoundDescCurrent = match.groups.range_upper_desc;
-    const lowerBoundDescCurrent = match.groups.range_lower_desc;
-    const upperDescVersionCurrent = match.groups.range_upper_desc_version;
-    const lowerDescVersionCurrent = match.groups.range_lower_desc_version;
+    const upperBoundDescCurrent = matchDscRange.groups.range_upper_desc;
+    const lowerBoundDescCurrent = matchDscRange.groups.range_lower_desc;
+    const upperDescVersionCurrent =
+      matchDscRange.groups.range_upper_desc_version;
+    const lowerDescVersionCurrent =
+      matchDscRange.groups.range_lower_desc_version;
     const [lowerBoundDescPep440, upperBoundDescPep440] =
       pep440Value.split(', ');
 
     const upperDescVersionNew =
-      regEx(versionGroup).exec(upperBoundDescPep440)[0];
+      regEx(versionGroup).exec(upperBoundDescPep440)?.[0] ?? '';
     const lowerDescVersionNew =
-      regEx(versionGroup).exec(lowerBoundDescPep440)[0];
+      regEx(versionGroup).exec(lowerBoundDescPep440)?.[0] ?? '';
     const upperBoundDescNew = upperBoundDescCurrent.replace(
       upperDescVersionCurrent,
       upperDescVersionNew
@@ -192,6 +202,10 @@ function getNewValue({
   return null;
 }
 
+function isCompatible(version: string): boolean {
+  return isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -199,7 +213,7 @@ export const api: VersioningApi = {
   getPatch,
   getNewValue,
   getSatisfyingVersion,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,

@@ -1,7 +1,6 @@
 import moo from 'moo';
 import { ProgrammingLanguage } from '../../constants';
 import { id as datasource } from '../../datasource/nuget';
-import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../types';
 
@@ -43,7 +42,7 @@ function parseDependencyLine(line: string): PackageDependency | null {
       if (protocol.startsWith('http')) {
         result.registryUrls = [registryUrl];
       } else {
-        result.skipReason = SkipReason.UnsupportedUrl;
+        result.skipReason = 'unsupported-url';
       }
     }
 
@@ -69,3 +68,5 @@ export function extractPackageFile(content: string): PackageFile {
   }
   return { deps };
 }
+
+export const supportedDatasources = [datasource];

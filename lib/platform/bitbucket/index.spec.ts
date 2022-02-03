@@ -17,22 +17,6 @@ const pr = {
   created_on: '2018-07-02T07:02:25.275030+00:00',
 };
 
-const diff = `
-diff --git a/requirements.txt b/requirements.txt
-index 7e08d70..f5283ca 100644
---- a/requirements.txt
-+++ b/requirements.txt
-@@ -7,7 +7,7 @@ docutils==0.12
-enum34==1.1.6
-futures==3.2.0
-isort==4.3.4
--jedi==0.11.1
-+jedi==0.12.1
-lazy-object-proxy==1.3.1
-lxml==3.6.0
-mccabe==0.6.1
-`;
-
 describe('platform/bitbucket/index', () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
@@ -164,9 +148,7 @@ describe('platform/bitbucket/index', () => {
         )
         .reply(200, { values: [pr] })
         .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, pr)
-        .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .reply(200, diff);
+        .reply(200, pr);
 
       expect(await bitbucket.getBranchPr('branch')).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -584,8 +566,6 @@ describe('platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr)
-        .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .reply(200, diff)
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await bitbucket.addReviewers(5, ['someuser', 'someotheruser']);
@@ -699,11 +679,7 @@ describe('platform/bitbucket/index', () => {
   describe('getPr()', () => {
     it('exists', async () => {
       const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, pr)
-        .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .reply(200, diff);
+      scope.get('/2.0/repositories/some/repo/pullrequests/5').reply(200, pr);
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -722,14 +698,9 @@ describe('platform/bitbucket/index', () => {
           state: 'OPEN',
           created_on: '2018-07-02T07:02:25.275030+00:00',
         })
-        .get('/2.0/repositories/some/repo/pullrequests/3/diff')
-        .reply(200, ' ')
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .twice()
-        .reply(200, pr)
-        .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .twice()
-        .reply(200, diff);
+        .reply(200, pr);
       expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
@@ -802,6 +773,77 @@ describe('platform/bitbucket/index', () => {
         .reply(200);
       await bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('removes reviewers no longer member of the workspace when updating pr', async () => {
+      const notMemberReviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const memberReviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { reviewers: [memberReviewer, notMemberReviewer] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
+              ],
+            },
+            message:
+              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
+          },
+        })
+        .head('/2.0/workspaces/some/members/123')
+        .reply(404)
+        .head('/2.0/workspaces/some/members/456')
+        .reply(200)
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200);
+      expect(
+        await bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+        })
+      ).toBeUndefined();
+    });
+    it('throws exception when unable to check reviewers workspace membership', async () => {
+      const reviewer = {
+        display_name: 'Bob Smith',
+        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+        account_id: '123',
+      };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { reviewers: [reviewer] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Bob Smith is not a member of this workspace and cannot be added to this pull request',
+              ],
+            },
+            message:
+              'reviewers: Bob Smith is not a member of this workspace and cannot be added to this pull request',
+          },
+        })
+        .head('/2.0/workspaces/some/members/123')
+        .reply(401);
+      await expect(() =>
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
     it('rethrows exception when PR update error not due to inactive reviewers', async () => {
       const reviewer = {
@@ -941,9 +983,9 @@ describe('platform/bitbucket/index', () => {
 
     it('returns file content in json5 format', async () => {
       const json5Data = `
-        { 
+        {
           // json5 comment
-          foo: 'bar' 
+          foo: 'bar'
         }
       `;
       const scope = await initRepoMock();

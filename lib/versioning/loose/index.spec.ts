@@ -38,13 +38,43 @@ describe('versioning/loose/index', () => {
   });
 
   test.each`
+    a          | b          | expected
+    ${'2.4'}   | ${'2.4'}   | ${true}
+    ${'2.4.0'} | ${'2.4.0'} | ${true}
+    ${'2.4.0'} | ${'2.4'}   | ${false}
+    ${'2.4.1'} | ${'2.4'}   | ${false}
+    ${'2.4.2'} | ${'2.4.1'} | ${false}
+  `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
+    expect(loose.equals(a, b)).toBe(expected);
+  });
+
+  test.each`
     a             | b              | expected
     ${'2.4.0'}    | ${'2.4'}       | ${true}
     ${'2.4.2'}    | ${'2.4.1'}     | ${true}
     ${'2.4.beta'} | ${'2.4.alpha'} | ${true}
     ${'1.9'}      | ${'2'}         | ${false}
     ${'1.9'}      | ${'1.9.1'}     | ${false}
+    ${'2.4'}      | ${'2.4.beta'}  | ${true}
+    ${'2.4.0'}    | ${'2.4.beta'}  | ${true}
+    ${'2.4.beta'} | ${'2.4'}       | ${false}
+    ${'2.4.beta'} | ${'2.4.0'}     | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(loose.isGreaterThan(a, b)).toBe(expected);
+  });
+
+  test.each`
+    version    | expected
+    ${'1.2.0'} | ${true}
+  `('isCompatible("$version") === $expected', ({ version, expected }) => {
+    expect(loose.isCompatible(version)).toBe(expected);
+  });
+
+  test.each`
+    version     | expected
+    ${'1.2.0'}  | ${true}
+    ${'^1.2.0'} | ${false}
+  `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+    expect(loose.isSingleVersion(version)).toBe(expected);
   });
 });

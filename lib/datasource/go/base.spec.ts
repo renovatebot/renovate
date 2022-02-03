@@ -3,13 +3,13 @@ import { loadFixture, mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import { id as githubDatasource } from '../github-tags';
 import { id as gitlabDatasource } from '../gitlab-tags';
-import { getDatasource } from './get-datasource';
+import { BaseGoDatasource } from './base';
 
 jest.mock('../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
-describe('datasource/go/get-datasource', () => {
+describe('datasource/go/base', () => {
   describe('simple cases', () => {
     test.each`
       module                     | datasource          | lookupName
@@ -20,7 +20,7 @@ describe('datasource/go/get-datasource', () => {
     `(
       '$module -> $datasource: $lookupName',
       async ({ module, datasource, lookupName }) => {
-        const res = await getDatasource(module);
+        const res = await BaseGoDatasource.getDatasource(module);
         expect(res).toMatchObject({ datasource, lookupName });
       }
     );
@@ -46,7 +46,7 @@ describe('datasource/go/get-datasource', () => {
           .get('/x/text?go-get=1')
           .reply(200, meta);
 
-        const res = await getDatasource('example.com/x/text');
+        const res = await BaseGoDatasource.getDatasource('example.com/x/text');
 
         expect(res).toBeNull();
       });
@@ -57,7 +57,9 @@ describe('datasource/go/get-datasource', () => {
           .get('/example/module?go-get=1')
           .reply(200);
 
-        const res = await getDatasource('example.com/example/module');
+        const res = await BaseGoDatasource.getDatasource(
+          'example.com/example/module'
+        );
 
         expect(res).toBeNull();
       });
@@ -72,7 +74,9 @@ describe('datasource/go/get-datasource', () => {
           .get('/example/module?go-get=1')
           .reply(200, mismatchResponse);
 
-        const res = await getDatasource('example.com/example/module');
+        const res = await BaseGoDatasource.getDatasource(
+          'example.com/example/module'
+        );
 
         expect(res).toBeNull();
       });
@@ -83,11 +87,12 @@ describe('datasource/go/get-datasource', () => {
           .get('/x/text?go-get=1')
           .reply(200, loadFixture('go-get-github.html'));
 
-        const res = await getDatasource('golang.org/x/text');
+        const res = await BaseGoDatasource.getDatasource('golang.org/x/text');
 
         expect(res).toEqual({
           datasource: githubDatasource,
           lookupName: 'golang/text',
+          registryUrl: 'https://github.com',
         });
       });
 
@@ -97,7 +102,9 @@ describe('datasource/go/get-datasource', () => {
           .get('/example/module?go-get=1')
           .reply(200, loadFixture('go-get-github-ee.html'));
 
-        const res = await getDatasource('git.enterprise.com/example/module');
+        const res = await BaseGoDatasource.getDatasource(
+          'git.enterprise.com/example/module'
+        );
 
         expect(res).toEqual({
           datasource: githubDatasource,
@@ -112,7 +119,9 @@ describe('datasource/go/get-datasource', () => {
           .get('/group/subgroup?go-get=1')
           .reply(200, loadFixture('go-get-gitlab.html'));
 
-        const res = await getDatasource('gitlab.com/group/subgroup');
+        const res = await BaseGoDatasource.getDatasource(
+          'gitlab.com/group/subgroup'
+        );
 
         expect(res).toEqual({
           datasource: gitlabDatasource,
@@ -127,7 +136,7 @@ describe('datasource/go/get-datasource', () => {
           .get('/group/subgroup/private.git/v3?go-get=1')
           .reply(200, loadFixture('go-get-gitlab.html'));
 
-        const res = await getDatasource(
+        const res = await BaseGoDatasource.getDatasource(
           'gitlab.com/group/subgroup/private.git/v3'
         );
 
@@ -148,7 +157,7 @@ describe('datasource/go/get-datasource', () => {
           .get('/x/text?go-get=1')
           .reply(200, mismatchingResponse);
 
-        const res = await getDatasource('golang.org/x/text');
+        const res = await BaseGoDatasource.getDatasource('golang.org/x/text');
 
         expect(res).toEqual({
           datasource: gitlabDatasource,
@@ -164,7 +173,9 @@ describe('datasource/go/get-datasource', () => {
           .get('/golang/myrepo?go-get=1')
           .reply(200, loadFixture('go-get-gitlab-ee.html'));
 
-        const res = await getDatasource('my.custom.domain/golang/myrepo');
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/golang/myrepo'
+        );
 
         expect(res).toEqual({
           datasource: gitlabDatasource,
@@ -181,7 +192,7 @@ describe('datasource/go/get-datasource', () => {
           .get('/fyne?go-get=1')
           .reply(200, meta);
 
-        const res = await getDatasource('fyne.io/fyne');
+        const res = await BaseGoDatasource.getDatasource('fyne.io/fyne');
 
         expect(res).toEqual({
           datasource: 'github-tags',

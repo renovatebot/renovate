@@ -27,7 +27,7 @@ env:
 
 jobs:
   test:
-    name: ${{ format('test ({0})', matrix.os) }}
+    name: ${{ matrix.node-version == 14 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
@@ -36,7 +36,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [14]
+        node-version: [14, 16]
         java-version: [11]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
@@ -51,7 +51,7 @@ jobs:
           }]' || '[]') }}
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 14 || matrix.node-version == 16) }}
       NODE_VERSION: ${{ matrix.node-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
       # skip Java tests on pull requests without 'ci:fulltest' label

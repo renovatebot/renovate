@@ -699,5 +699,22 @@ describe('config/validation', () => {
         },
       ]);
     });
+
+    it('errors if schedule is cron and has no * minutes', async () => {
+      const config = {
+        schedule: ['30 5 * * *'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid schedule: `Invalid schedule: "30 5 * * *" has cron syntax, but doesn\'t have * as minutes`',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
   });
 });

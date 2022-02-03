@@ -1,5 +1,5 @@
 import { loadFixture } from '../../../test/util';
-import extractPackageFile, { getSliceEndNumber } from './extract';
+import { extractPackageFile, getSliceEndNumber } from './extract';
 
 const yamlFile1 = loadFixture('requirements01.yml');
 const yamlFile2 = loadFixture('requirements02.yml');

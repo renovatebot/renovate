@@ -1,4 +1,5 @@
 import { ProgrammingLanguage } from '../../constants';
+import * as datasourceMaven from '../../datasource/maven';
 import * as gradleVersioning from '../../versioning/gradle';
 import type {
   ExtractConfig,
@@ -38,3 +39,5 @@ export const defaultConfig = {
   timeout: 600,
   versioning: gradleVersioning.id,
 };
+
+export const supportedDatasources = [datasourceMaven.id];

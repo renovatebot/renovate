@@ -1,5 +1,4 @@
 import { loadFixture } from '../../../../test/util';
-import { SkipReason } from '../../../types';
 import {
   GOOGLE_REPO,
   GRADLE_PLUGIN_PORTAL_REPO,
@@ -36,7 +35,7 @@ describe('manager/gradle/shallow/parser', () => {
         ${'group: "foo", name: "bar", version: depVersion'}                       | ${null}
         ${'("foo", "bar", "1.2.3")'}                                              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'(group = "foo", name = "bar", version = "1.2.3")'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'createXmlValueRemover("defaults", "integer", "integer")'}              | ${{ depName: 'defaults:integer', currentValue: 'integer', skipReason: SkipReason.Ignored }}
+        ${'createXmlValueRemover("defaults", "integer", "integer")'}              | ${{ depName: 'defaults:integer', currentValue: 'integer', skipReason: 'ignored' }}
         ${'"foo:bar:1.2.3@zip"'}                                                  | ${{ currentValue: '1.2.3', dataType: 'zip', depName: 'foo:bar' }}
       `('$input', ({ input, output }) => {
         const { deps } = parseGradle(input);
@@ -67,10 +66,16 @@ describe('manager/gradle/shallow/parser', () => {
         ${''}               | ${'id "foo.bar" version "1.2.3"'}   | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id("foo.bar") version "1.2.3"'}  | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'kotlin("jvm") version "1.3.71"'} | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
-        ${''}               | ${'id "foo.bar" version something'} | ${{ depName: 'foo.bar', currentValue: 'something', skipReason: SkipReason.UnknownVersion }}
+        ${''}               | ${'id "foo.bar" version something'} | ${{ depName: 'foo.bar', currentValue: 'something', skipReason: 'unknown-version' }}
         ${'baz = "1.2.3"'}  | ${'id "foo.bar" version baz'}       | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar") version baz'}      | ${{ depName: 'foo.bar', lookupName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${'baz = "1.3.71"'} | ${'kotlin("jvm") version baz'}      | ${{ depName: 'org.jetbrains.kotlin.jvm', lookupName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
+        ${'z = "1.2.3"'}    | ${'id "x.y" version "$z"'}          | ${{ depName: 'x.y', lookupName: 'x.y:x.y.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'id "x.y" version "$z"'}          | ${{ depName: 'x.y', skipReason: 'unknown-version', currentValue: 'z' }}
+        ${''}               | ${'id "x.y" version "x${y}z"'}      | ${{ depName: 'x.y', skipReason: 'unknown-version' }}
+        ${'z = "1.2.3"'}    | ${'id("x.y") version "$z"'}         | ${{ depName: 'x.y', lookupName: 'x.y:x.y.gradle.plugin', currentValue: '1.2.3' }}
+        ${''}               | ${'id("x.y") version "$z"'}         | ${{ depName: 'x.y', skipReason: 'unknown-version', currentValue: 'z' }}
+        ${''}               | ${'id("x.y") version "x${y}z"'}     | ${{ depName: 'x.y', skipReason: 'unknown-version' }}
       `('$input', ({ def, input, output }) => {
         const { deps } = parseGradle([def, input].join('\n'));
         expect(deps).toMatchObject([output].filter(Boolean));

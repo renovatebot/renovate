@@ -4,7 +4,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
-import type { ExecOptions } from '../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../util/exec/types';
 import {
   deleteLocalFile,
   getSiblingFileName,
@@ -12,6 +12,8 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { find } from '../../util/host-rules';
+import { regEx } from '../../util/regex';
+import { dependencyPattern } from '../pip_requirements/extract';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -39,6 +41,39 @@ function getPythonConstraint(
     // Do nothing
   }
   return undefined;
+}
+
+const pkgValRegex = regEx(`^${dependencyPattern}$`);
+
+function getPoetryRequirement(pyProjectContent: string): string | null {
+  try {
+    const pyproject: PoetryFile = parse(pyProjectContent);
+    // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+    const buildBackend = pyproject['build-system']?.['build-backend'];
+    if (
+      (buildBackend === 'poetry.masonry.api' ||
+        buildBackend === 'poetry.core.masonry.api') &&
+      is.nonEmptyArray(pyproject['build-system']?.requires)
+    ) {
+      for (const requirement of pyproject['build-system'].requires) {
+        if (is.nonEmptyString(requirement)) {
+          const pkgValMatch = pkgValRegex.exec(requirement);
+          if (pkgValMatch) {
+            const [, depName, , currVal] = pkgValMatch;
+            if (
+              (depName === 'poetry' || depName === 'poetry_core') &&
+              currVal
+            ) {
+              return currVal.trim();
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    logger.debug({ err }, 'Error parsing pyproject.toml file');
+  }
+  return null;
 }
 
 function getPoetrySources(content: string, fileName: string): PoetrySource[] {
@@ -125,13 +160,16 @@ export async function updateArtifacts({
       );
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
-    const poetryRequirement = config.constraints?.poetry || 'poetry';
-    const poetryInstall =
-      'pip install ' + poetryRequirement.split(' ').map(quote).join(' ');
+    const constraint =
+      config.constraints?.poetry || getPoetryRequirement(newPackageFileContent);
     const extraEnv = getSourceCredentialVars(
       newPackageFileContent,
       packageFileName
     );
+    const toolConstraint: ToolConstraint = {
+      toolName: 'poetry',
+      constraint,
+    };
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -141,7 +179,7 @@ export async function updateArtifacts({
         tagConstraint,
         tagScheme: 'poetry',
       },
-      preCommands: [poetryInstall],
+      toolConstraints: [toolConstraint],
     };
     await exec(cmd, execOptions);
     const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');
@@ -153,7 +191,8 @@ export async function updateArtifacts({
     return [
       {
         file: {
-          name: lockFileName,
+          type: 'addition',
+          path: lockFileName,
           contents: newPoetryLockContent,
         },
       },

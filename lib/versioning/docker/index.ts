@@ -1,5 +1,5 @@
 import { regEx } from '../../util/regex';
-import { GenericVersion, GenericVersioningApi } from '../loose/generic';
+import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'docker';
@@ -71,9 +71,9 @@ class DockerVersioningApi extends GenericVersioningApi {
     return parsed2.suffix.localeCompare(parsed1.suffix);
   }
 
-  override isCompatible(version: string, range: string): boolean {
+  override isCompatible(version: string, current: string): boolean {
     const parsed1 = this._parse(version);
-    const parsed2 = this._parse(range);
+    const parsed2 = this._parse(current);
     return (
       parsed1.suffix === parsed2.suffix &&
       parsed1.release.length === parsed2.release.length

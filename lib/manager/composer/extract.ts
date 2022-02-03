@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import { api as semverComposer } from '../../versioning/composer';
@@ -148,7 +147,7 @@ export async function extractPackageFile(
             dep.lookupName = lookupName;
           }
           if (!depName.includes('/')) {
-            dep.skipReason = SkipReason.Unsupported;
+            dep.skipReason = 'unsupported';
           }
           if (lockParsed) {
             const lockField =

@@ -6,7 +6,7 @@ import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import type { HttpError } from '../../util/http/types';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import { massageGithubUrl } from '../metadata';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -22,6 +22,7 @@ const cacheMinutes = 30;
 const githubHttp = new GithubHttp(id);
 const http = new Http(id);
 
+// eslint-disable-next-line typescript-enum/no-enum, typescript-enum/no-const-enum
 const enum URLFormatOptions {
   WithShardWithSpec,
   WithShardWithoutSpec,
@@ -178,7 +179,7 @@ async function getReleasesFromCDN(
   const url = releasesCDNUrl(lookupName, registryUrl);
   const resp = await requestCDN(url, lookupName);
   if (resp) {
-    const lines = resp.split('\n');
+    const lines = resp.split(newlineRegex);
     for (let idx = 0; idx < lines.length; idx += 1) {
       const line = lines[idx];
       const [name, ...versions] = line.split('/');

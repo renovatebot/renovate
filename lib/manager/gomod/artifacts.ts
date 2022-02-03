@@ -184,7 +184,7 @@ export async function updateArtifacts({
 
     const execCommands = [];
 
-    let args = 'get -d ./...';
+    let args = 'get -d -t ./...';
     logger.debug({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
@@ -209,12 +209,16 @@ export async function updateArtifacts({
       logger.debug({ cmd, args }, 'go mod tidy command skipped');
     }
 
+    const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
+      ? ' -compat=1.17'
+      : '';
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') ||
+        config.postUpdateOptions?.includes('gomodTidy1.17') ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
-      args = 'mod tidy';
+      args = 'mod tidy' + tidyOpts;
       logger.debug({ cmd, args }, 'go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -224,7 +228,7 @@ export async function updateArtifacts({
       logger.debug({ cmd, args }, 'go mod vendor command included');
       execCommands.push(`${cmd} ${args}`);
       if (isGoModTidyRequired) {
-        args = 'mod tidy';
+        args = 'mod tidy' + tidyOpts;
         logger.debug({ cmd, args }, 'go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -232,7 +236,7 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy';
+      args = 'mod tidy' + tidyOpts;
       logger.debug({ cmd, args }, 'additional go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -248,7 +252,8 @@ export async function updateArtifacts({
     const res: UpdateArtifactsResult[] = [
       {
         file: {
-          name: sumFileName,
+          type: 'addition',
+          path: sumFileName,
           contents: await readLocalFile(sumFileName),
         },
       },
@@ -261,7 +266,8 @@ export async function updateArtifacts({
         if (f.endsWith('.go')) {
           res.push({
             file: {
-              name: f,
+              type: 'addition',
+              path: f,
               contents: await readLocalFile(f),
             },
           });
@@ -274,7 +280,8 @@ export async function updateArtifacts({
         if (f.startsWith(vendorDir)) {
           res.push({
             file: {
-              name: f,
+              type: 'addition',
+              path: f,
               contents: await readLocalFile(f),
             },
           });
@@ -283,8 +290,8 @@ export async function updateArtifacts({
       for (const f of status.deleted || []) {
         res.push({
           file: {
-            name: '|delete|',
-            contents: f,
+            type: 'deletion',
+            path: f,
           },
         });
       }
@@ -297,7 +304,8 @@ export async function updateArtifacts({
       logger.debug('Found updated go.mod after go.sum update');
       res.push({
         file: {
-          name: goModFileName,
+          type: 'addition',
+          path: goModFileName,
           contents: finalGoModContent,
         },
       });

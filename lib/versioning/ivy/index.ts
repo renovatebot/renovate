@@ -31,14 +31,14 @@ const {
   sortVersions,
 } = maven;
 
-function isValid(str: string): string | boolean {
+function isValid(str: string): boolean {
   if (!str) {
     return false;
   }
   return maven.isVersion(str) || !!parseDynamicRevision(str);
 }
 
-function isVersion(str: string): string | boolean {
+function isVersion(str: string): boolean {
   if (!str || LATEST_REGEX.test(str)) {
     return false;
   }
@@ -101,14 +101,22 @@ function getNewValue({
   return autoExtendMavenRange(currentValue, newVersion);
 }
 
+function isCompatible(version: string): boolean {
+  return isVersion(version);
+}
+
+function isSingleVersion(version: string): boolean {
+  return isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
   getPatch,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
-  isSingleVersion: isVersion,
+  isSingleVersion,
   isStable,
   isValid,
   isVersion,

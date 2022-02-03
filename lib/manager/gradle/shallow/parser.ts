@@ -1,8 +1,7 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { SkipReason } from '../../../types';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
 import {
@@ -190,7 +189,7 @@ function processDepInterpolation({
           fileReplacePosition = lastToken.offset + 1;
           delete dep.groupName;
         } else {
-          dep.skipReason = SkipReason.ContainsVariable;
+          dep.skipReason = 'contains-variable';
         }
         dep.managerData = { fileReplacePosition, packageFile };
       }
@@ -234,7 +233,33 @@ function processPlugin({
       const fileReplacePosition = pluginVersion.offset;
       dep.currentValue = currentValue;
       dep.managerData = { fileReplacePosition, packageFile };
-      dep.skipReason = SkipReason.UnknownVersion;
+      dep.skipReason = 'unknown-version';
+    }
+  } else if (pluginVersion.type === TokenType.StringInterpolation) {
+    const versionTpl = pluginVersion as StringInterpolation;
+    const children = versionTpl.children;
+    const [child] = children;
+    if (child?.type === TokenType.Variable && children.length === 1) {
+      const varData = variables[child.value];
+      if (varData) {
+        const currentValue = varData.value;
+        const fileReplacePosition = varData.fileReplacePosition;
+        dep.currentValue = currentValue;
+        dep.managerData = {
+          fileReplacePosition,
+          packageFile: varData.packageFile,
+        };
+      } else {
+        const currentValue = child.value;
+        const fileReplacePosition = child.offset;
+        dep.currentValue = currentValue;
+        dep.managerData = { fileReplacePosition, packageFile };
+        dep.skipReason = 'unknown-version';
+      }
+    } else {
+      const fileReplacePosition = versionTpl.offset;
+      dep.managerData = { fileReplacePosition, packageFile };
+      dep.skipReason = 'unknown-version';
     }
   } else {
     const currentValue = pluginVersion.value;
@@ -304,7 +329,7 @@ function processLongFormDep({
     }
     const methodName = tokenMap.methodName?.value;
     if (annoyingMethods.has(methodName)) {
-      dep.skipReason = SkipReason.Ignored;
+      dep.skipReason = 'ignored';
     }
 
     return { deps: [dep] };
@@ -372,6 +397,8 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // id 'foo.bar' version '1.2.3'
+    // id 'foo.bar' version fooBarVersion
+    // id 'foo.bar' version "$fooBarVersion"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -381,7 +408,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.Word, matchValue: 'version' },
       {
-        matchType: [TokenType.String, TokenType.Word],
+        matchType: [
+          TokenType.String,
+          TokenType.Word,
+          TokenType.StringInterpolation,
+        ],
         tokenMapKey: 'pluginVersion',
       },
       endOfInstruction,
@@ -390,6 +421,8 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   },
   {
     // id('foo.bar') version '1.2.3'
+    // id('foo.bar') version fooBarVersion
+    // id('foo.bar') version "$fooBarVersion"
     matchers: [
       {
         matchType: TokenType.Word,
@@ -401,7 +434,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.RightParen },
       { matchType: TokenType.Word, matchValue: 'version' },
       {
-        matchType: [TokenType.String, TokenType.Word],
+        matchType: [
+          TokenType.String,
+          TokenType.Word,
+          TokenType.StringInterpolation,
+        ],
         tokenMapKey: 'pluginVersion',
       },
       endOfInstruction,
@@ -657,7 +694,7 @@ export function parseProps(
   let offset = 0;
   const vars = {};
   const deps = [];
-  for (const line of input.split('\n')) {
+  for (const line of input.split(newlineRegex)) {
     const lineMatch = propRegex.exec(line);
     if (lineMatch) {
       const { key, value, leftPart } = lineMatch.groups;

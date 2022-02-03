@@ -49,12 +49,12 @@ export async function globalInitialize(
   await checkVersions();
   config = await initPlatform(config);
   config = await setDirectories(config);
-  packageCache.init(config);
+  await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
   return config;
 }
 
-export function globalFinalize(config: RenovateConfig): void {
-  packageCache.cleanup(config);
+export async function globalFinalize(config: RenovateConfig): Promise<void> {
+  await packageCache.cleanup(config);
 }

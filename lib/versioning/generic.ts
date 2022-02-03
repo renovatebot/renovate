@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import type { NewValueConfig, VersioningApi } from '../types';
+import type { NewValueConfig, VersioningApi } from './types';
 
 export interface GenericVersion {
   release: number[];
@@ -19,7 +19,7 @@ export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion
 > implements VersioningApi
 {
-  private _getSection(version: string, index: number): number {
+  private _getSection(version: string, index: number): number | null {
     const parsed = this._parse(version);
     return parsed && parsed.release.length > index
       ? parsed.release[index]
@@ -78,20 +78,20 @@ export abstract class GenericVersioningApi<
     return this._parse(version) !== null;
   }
 
-  isCompatible(version: string, _range: string): boolean {
+  isCompatible(version: string, _current: string): boolean {
     return this.isValid(version);
   }
 
   isStable(version: string): boolean {
     const parsed = this._parse(version);
-    return parsed && !parsed.prerelease;
+    return !!(parsed && !parsed.prerelease);
   }
 
-  isSingleVersion(version: string): string | boolean {
+  isSingleVersion(version: string): boolean {
     return this.isValid(version);
   }
 
-  isVersion(version: string): string | boolean {
+  isVersion(version: string): boolean {
     return this.isValid(version);
   }
 
@@ -120,11 +120,13 @@ export abstract class GenericVersioningApi<
   }
 
   getSatisfyingVersion(versions: string[], range: string): string | null {
-    return versions.find((v) => this.equals(v, range)) || null;
+    const result = versions.find((v) => this.equals(v, range));
+    return result ?? null;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
-    return versions.find((v) => this.equals(v, range)) || null;
+    const result = versions.find((v) => this.equals(v, range));
+    return result ?? null;
   }
 
   getNewValue(newValueConfig: NewValueConfig): string {

@@ -47,7 +47,7 @@ function isLessThanRange(version: string, range: string): boolean {
   );
 }
 
-export function isValid(input: string): string | boolean {
+export function isValid(input: string): boolean {
   return npm.isValid(poetry2npm(input));
 }
 
@@ -79,7 +79,7 @@ function minSatisfyingVersion(versions: string[], range: string): string {
   );
 }
 
-function isSingleVersion(constraint: string): string | boolean {
+function isSingleVersion(constraint: string): boolean {
   return (
     (constraint.trim().startsWith('=') &&
       isVersion(constraint.trim().substring(1).trim())) ||

@@ -23,7 +23,9 @@ There are four times in Renovate's behavior when it may need credentials:
 - Looking up release notes
 - Passing to package managers when updating lock files or checksums
 
-Note: if you self-host Renovate, and have a self-hosted registry which _doesn't_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
+<!-- prettier-ignore -->
+!!! note
+    If you self-host Renovate, and have a self-hosted registry which _doesn't_ require authentication to access, then such modules/packages are not considered "private" to Renovate.
 
 ## Private Config Presets
 
@@ -123,7 +125,8 @@ Any `hostRules` with `hostType=packagist` are also included.
 
 ### gomod
 
-If a `github.com` token is found in `hostRules`, then it is written out to local [GIT*CONFIG*](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT) variables prior to running `go` commands.
+<!-- prettier-ignore -->
+If a `github.com` token is found in `hostRules`, then it is written out to local [GIT_CONFIG_](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT) variables prior to running `go` commands.
 The environment variables used are: `GIT_CONFIG_KEY_0=url.https://${token}@github.com/.insteadOf GIT_CONFIG_VALUE_0=https://github.com/ GIT_CONFIG_COUNT=1`.
 
 ### helm
@@ -187,7 +190,9 @@ module.exports = {
 };
 ```
 
-**NOTE:** Remember to put a trailing slash at the end of your `matchHost` URL.
+<!-- prettier-ignore -->
+!!! tip
+    Remember to put a trailing slash at the end of your `matchHost` URL.
 
 #### Add npmrc string to Renovate config
 
@@ -388,7 +393,9 @@ For instructions on this, see the above section on encrypting secrets for the Wh
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
 
-Note: Encrypted values can't be used in the "Admin/Bot config".
+<!-- prettier-ignore -->
+!!! note
+    Encrypted values can't be used in the "Admin/Bot config".
 
 ### hostRules configuration using environment variables
 

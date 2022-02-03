@@ -1,6 +1,7 @@
-import { extractPackageFile } from './extract';
+import * as githubTagsDatasource from '../../datasource/github-tags';
+import * as dockerVersioning from '../../versioning/docker';
 
-export { extractPackageFile };
+export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: [
@@ -8,3 +9,8 @@ export const defaultConfig = {
     '(^|\\/)action\\.ya?ml$',
   ],
 };
+
+export const supportedDatasources = [
+  githubTagsDatasource.id,
+  dockerVersioning.id,
+];

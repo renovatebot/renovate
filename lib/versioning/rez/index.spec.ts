@@ -151,7 +151,7 @@ describe('versioning/rez/index', () => {
   `(
     'isLessThanRange($version, "$range") === $expected',
     ({ version, range, expected }) => {
-      expect(versioning.isLessThanRange(version, range)).toBe(expected);
+      expect(versioning.isLessThanRange?.(version, range)).toBe(expected);
     }
   );
 
@@ -439,4 +439,11 @@ describe('versioning/rez/index', () => {
       expect(res).toBe(expected);
     }
   );
+
+  test.each`
+    version    | expected
+    ${'1.2.0'} | ${true}
+  `('isCompatible("$version") === $expected', ({ version, expected }) => {
+    expect(versioning.isCompatible(version)).toBe(expected);
+  });
 });

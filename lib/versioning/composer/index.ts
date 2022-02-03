@@ -102,17 +102,17 @@ const isGreaterThan = (a: string, b: string): boolean =>
 const isLessThanRange = (version: string, range: string): boolean =>
   npm.isLessThanRange(composer2npm(version), composer2npm(range));
 
-const isSingleVersion = (input: string): string | boolean =>
-  input && npm.isSingleVersion(composer2npm(input));
+const isSingleVersion = (input: string): boolean =>
+  !!input && npm.isSingleVersion(composer2npm(input));
 
 const isStable = (version: string): boolean =>
   version && npm.isStable(composer2npm(version));
 
-export const isValid = (input: string): string | boolean =>
-  input && npm.isValid(composer2npm(input));
+export const isValid = (input: string): boolean =>
+  !!input && npm.isValid(composer2npm(input));
 
-export const isVersion = (input: string): string | boolean =>
-  input && npm.isVersion(composer2npm(input));
+export const isVersion = (input: string): boolean =>
+  !!input && npm.isVersion(composer2npm(input));
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(composer2npm(version), composer2npm(range));
@@ -234,12 +234,16 @@ function sortVersions(a: string, b: string): number {
   return npm.sortVersions(composer2npm(a), composer2npm(b));
 }
 
+function isCompatible(version: string): boolean {
+  return isVersion(version);
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
   getPatch,
-  isCompatible: isVersion,
+  isCompatible,
   isGreaterThan,
   isLessThanRange,
   isSingleVersion,

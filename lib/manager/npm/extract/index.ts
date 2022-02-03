@@ -5,9 +5,8 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { SkipReason } from '../../../types';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -125,7 +124,7 @@ export async function extractPackageFile(
           'Stripping .npmrc file of lines with variables'
         );
         repoNpmrc = repoNpmrc
-          .split('\n')
+          .split(newlineRegex)
           .filter((line) => !line.includes('=${'))
           .join('\n');
       }
@@ -179,11 +178,11 @@ export async function extractPackageFile(
   ): PackageDependency {
     const dep: PackageDependency = {};
     if (!validateNpmPackageName(depName).validForOldPackages) {
-      dep.skipReason = SkipReason.InvalidName;
+      dep.skipReason = 'invalid-name';
       return dep;
     }
     if (typeof input !== 'string') {
-      dep.skipReason = SkipReason.InvalidValue;
+      dep.skipReason = 'invalid-value';
       return dep;
     }
     dep.currentValue = input.trim();
@@ -216,10 +215,10 @@ export async function extractPackageFile(
         dep.lookupName = 'microsoft/vscode';
         constraints.vscode = dep.currentValue;
       } else {
-        dep.skipReason = SkipReason.UnknownEngines;
+        dep.skipReason = 'unknown-engines';
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = SkipReason.UnknownVersion;
+        dep.skipReason = 'unknown-version';
       }
       return dep;
     }
@@ -236,10 +235,10 @@ export async function extractPackageFile(
       } else if (depName === 'npm') {
         dep.datasource = npmId;
       } else {
-        dep.skipReason = SkipReason.UnknownVolta;
+        dep.skipReason = 'unknown-volta';
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = SkipReason.UnknownVersion;
+        dep.skipReason = 'unknown-version';
       }
       return dep;
     }
@@ -259,23 +258,23 @@ export async function extractPackageFile(
       }
     }
     if (dep.currentValue.startsWith('file:')) {
-      dep.skipReason = SkipReason.File;
+      dep.skipReason = 'file';
       hasFancyRefs = true;
       return dep;
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = npmId;
       if (dep.currentValue === '*') {
-        dep.skipReason = SkipReason.AnyVersion;
+        dep.skipReason = 'any-version';
       }
       if (dep.currentValue === '') {
-        dep.skipReason = SkipReason.Empty;
+        dep.skipReason = 'empty';
       }
       return dep;
     }
     const hashSplit = dep.currentValue.split('#');
     if (hashSplit.length !== 2) {
-      dep.skipReason = SkipReason.UnknownVersion;
+      dep.skipReason = 'unknown-version';
       return dep;
     }
     const [depNamePart, depRefPart] = hashSplit;
@@ -292,7 +291,7 @@ export async function extractPackageFile(
         .replace(regEx(/\.git$/), '');
       const githubRepoSplit = githubOwnerRepo.split('/');
       if (githubRepoSplit.length !== 2) {
-        dep.skipReason = SkipReason.UnknownVersion;
+        dep.skipReason = 'unknown-version';
         return dep;
       }
       [githubOwner, githubRepo] = githubRepoSplit;
@@ -306,7 +305,7 @@ export async function extractPackageFile(
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
     ) {
-      dep.skipReason = SkipReason.UnknownVersion;
+      dep.skipReason = 'unknown-version';
       return dep;
     }
     if (isVersion(depRefPart)) {
@@ -325,7 +324,7 @@ export async function extractPackageFile(
       dep.datasource = datasourceGithubTags.id;
       dep.lookupName = githubOwnerRepo;
     } else {
-      dep.skipReason = SkipReason.UnversionedReference;
+      dep.skipReason = 'unversioned-reference';
       return dep;
     }
     dep.githubRepo = githubOwnerRepo;

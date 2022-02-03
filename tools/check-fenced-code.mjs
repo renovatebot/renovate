@@ -39,7 +39,6 @@ function checkValidJson(file, token) {
 async function processFile(file) {
   const text = await fs.readFile(file, 'utf8');
   const tokens = markdown.parse(text, undefined);
-  shell.echo(`Linting ${file}...`);
 
   tokens.forEach((token) => {
     if (token.type === 'fence' && token.info === 'json') {

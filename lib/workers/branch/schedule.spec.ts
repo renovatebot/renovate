@@ -81,6 +81,11 @@ describe('workers/branch/schedule', () => {
         ])[0]
       ).toBeTrue();
     });
+
+    it('returns true if schedule uses cron syntax', () => {
+      expect(schedule.hasValidSchedule(['* 5 * * *'])[0]).toBeTrue();
+    });
+
     it('massages schedules', () => {
       expect(
         schedule.hasValidSchedule([
@@ -150,11 +155,53 @@ describe('workers/branch/schedule', () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
+
     it('supports outside hours', () => {
       config.schedule = ['after 4:00pm'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
+
+    it('supports cron syntax with hours', () => {
+      config.schedule = ['* 10 * * *'];
+      let res = schedule.isScheduledNow(config);
+      expect(res).toBeTrue();
+
+      config.schedule = ['* 11 * * *'];
+      res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
+    });
+
+    it('supports cron syntax with days', () => {
+      config.schedule = ['* * 30 * *'];
+      let res = schedule.isScheduledNow(config);
+      expect(res).toBeTrue();
+
+      config.schedule = ['* * 1 * *'];
+      res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
+    });
+
+    it('supports cron syntax with months', () => {
+      config.schedule = ['* * * 6 *'];
+      let res = schedule.isScheduledNow(config);
+      expect(res).toBeTrue();
+
+      config.schedule = ['* * * 7 *'];
+      res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
+    });
+
+    it('supports cron syntax with weekdays', () => {
+      config.schedule = ['* * * * 5'];
+      let res = schedule.isScheduledNow(config);
+      expect(res).toBeTrue();
+
+      config.schedule = ['* * * * 6'];
+      res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
+    });
+
     describe('supports timezone', () => {
       const cases: [string, string, string, boolean][] = [
         ['after 4pm', 'Asia/Singapore', '2017-06-30T15:59:00.000+0800', false],
