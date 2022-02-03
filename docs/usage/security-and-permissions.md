@@ -2,9 +2,7 @@
 
 ## Comparison table
 
-Refer to this table for a overview of the permissions needed for the different ways to run Renovate:
-
-| Permission name   | Renovate hosted app |  Forking Renovate  |
+| Permission        | Renovate hosted app |  Forking Renovate  |
 | ----------------- | :-----------------: | :----------------: |
 | Dependabot alerts |       `read`        |       `read`       |
 | Administration    |       `read`        |       `read`       |
