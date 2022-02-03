@@ -447,19 +447,6 @@ export async function ensurePr(
         incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr.number, prTitle }, 'PR created');
         RepositoryStatisticsReporter.setPrState(pr.number, 'created');
-
-        /*let repositoryStats = StatsReporter.getRepositoryStats(
-          config.repository
-        );
-        repositoryStats.dependencyUpdates.push({
-          branch: config.branchName,
-          prNumber: pr.number,
-          createdAt: pr.createdAt,
-          dependencyName: config.depName,
-          dependencyVersion: config.newValue,
-          datasource: config.datasource,
-        } as DependencyStats);
-        StatsReporter.saveRepositoryStats(config.repository, repositoryStats);*/
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Pull request creation error');

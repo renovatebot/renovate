@@ -124,7 +124,6 @@ export async function checkAutoMerge(
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ branchName, err }, 'Branch auto-remove failed');
     }
-
     return { automerged: true, branchRemoved };
   }
   return {

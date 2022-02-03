@@ -92,6 +92,7 @@ export async function start(): Promise<number> {
     config = await getGlobalConfig();
     // initialize all submodules
     config = await globalInitialize(config);
+
     await validatePresets(config);
 
     checkEnv();
