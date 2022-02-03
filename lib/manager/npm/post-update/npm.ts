@@ -7,7 +7,7 @@ import {
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
-import { move, pathExists, readFile, remove } from '../../../util/fs';
+import { localPathExists, move, readLocalFile, remove } from '../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -113,7 +113,7 @@ export async function generateLockFile(
     // massage to shrinkwrap if necessary
     if (
       filename === 'npm-shrinkwrap.json' &&
-      (await pathExists(upath.join(cwd, 'package-lock.json')))
+      (await localPathExists('package-lock.json'))
     ) {
       await move(
         upath.join(cwd, 'package-lock.json'),
@@ -122,7 +122,7 @@ export async function generateLockFile(
     }
 
     // Read the result
-    lockFile = await readFile(upath.join(cwd, filename), 'utf8');
+    lockFile = await readLocalFile(filename, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

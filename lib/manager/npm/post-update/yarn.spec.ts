@@ -1,24 +1,19 @@
 import { exec as _exec } from 'child_process';
-import fs from 'fs-extra';
 import {
   ExecSnapshots,
   envMock,
   mockExecAll,
 } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import { mocked } from '../../../../test/util';
-import * as _env from '../../../util/exec/env';
+import { env, fs } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import * as yarnHelper from './yarn';
 
-jest.mock('fs-extra', () =>
-  require('../../../../test/fixtures').Fixtures.fsExtra()
-);
 jest.mock('child_process');
+jest.mock('../../../util/fs');
 jest.mock('../../../util/exec/env');
 jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -31,10 +26,10 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 
 describe('manager/npm/post-update/yarn', () => {
   beforeEach(() => {
-    Fixtures.reset();
     jest.clearAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    GlobalConfig.set({ localDir: '' });
   });
 
   it.each([
@@ -45,13 +40,14 @@ describe('manager/npm/post-update/yarn', () => {
   ])(
     'generates lock files using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
-      Fixtures.mock(
-        {
-          '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
-          'yarn.lock': 'package-lock-contents',
-        },
-        '/some-dir'
-      );
+      fs.readLocalFile.mockImplementation((file) => {
+        if (file === '.yarnrc') {
+          return Promise.resolve('yarn-path ./.yarn/cli.js\n');
+        } else if (file === 'yarn.lock') {
+          return Promise.resolve('package-lock-contents');
+        }
+        return Promise.resolve('');
+      });
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -70,7 +66,7 @@ describe('manager/npm/post-update/yarn', () => {
         },
         config
       );
-      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -78,12 +74,7 @@ describe('manager/npm/post-update/yarn', () => {
   );
 
   it('only skips build if skipInstalls is false', async () => {
-    Fixtures.mock(
-      {
-        'yarn.lock': 'package-lock-contents',
-      },
-      'some-dir'
-    );
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const execSnapshots = mockExecAll(exec, {
       stdout: '3.0.0',
       stderr: '',
@@ -101,12 +92,7 @@ describe('manager/npm/post-update/yarn', () => {
   });
 
   it('does not use global cache if zero install is detected', async () => {
-    Fixtures.mock(
-      {
-        'yarn.lock': 'package-lock-contents',
-      },
-      'some-dir'
-    );
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const execSnapshots = mockExecAll(exec, {
       stdout: '2.1.0',
       stderr: '',
@@ -130,12 +116,7 @@ describe('manager/npm/post-update/yarn', () => {
   ])(
     'performs lock file updates using yarn v%s',
     async (yarnVersion, yarnCompatibility) => {
-      Fixtures.mock(
-        {
-          'yarn.lock': 'package-lock-contents',
-        },
-        'some-dir'
-      );
+      fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -160,12 +141,7 @@ describe('manager/npm/post-update/yarn', () => {
   it.each([['1.22.0']])(
     'performs lock file updates and full install using yarn v%s',
     async (yarnVersion) => {
-      Fixtures.mock(
-        {
-          'yarn.lock': 'package-lock-contents',
-        },
-        'some-dir'
-      );
+      fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -188,13 +164,7 @@ describe('manager/npm/post-update/yarn', () => {
   ])(
     'performs lock file maintenance using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
-      Fixtures.mock(
-        {
-          '.yarnrc': null,
-          'yarn.lock': 'package-lock-contents',
-        },
-        'some-dir'
-      );
+      fs.readLocalFile.mockResolvedValue(undefined);
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -208,7 +178,7 @@ describe('manager/npm/post-update/yarn', () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         { isLockFileMaintenance: true },
       ]);
-      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toBeUndefined();
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -221,12 +191,7 @@ describe('manager/npm/post-update/yarn', () => {
   ])(
     'performs yarn binary update using yarn v%s',
     async (yarnVersion, yarnCompatibility) => {
-      Fixtures.mock(
-        {
-          'yarn.lock': 'package-lock-contents',
-        },
-        'some-dir'
-      );
+      fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -249,13 +214,15 @@ describe('manager/npm/post-update/yarn', () => {
   );
 
   it('catches errors', async () => {
-    Fixtures.mock({});
+    fs.readLocalFile.mockResolvedValueOnce('').mockImplementationOnce(() => {
+      return Promise.reject(new Error('error'));
+    });
     const execSnapshots = mockExecAll(exec, {
       stdout: '1.9.4',
       stderr: 'some-error',
     });
     const res = await yarnHelper.generateLockFile('some-dir', {});
-    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -263,14 +230,17 @@ describe('manager/npm/post-update/yarn', () => {
 
   describe('checkYarnrc()', () => {
     it('returns offline mirror and yarn path', async () => {
-      Fixtures.mock(
-        {
-          '.yarn/cli.js': '',
-          '/tmp/renovate/.yarnrc':
-            'yarn-offline-mirror "./packages-cache"\nyarn-path "/.yarn/cli.js"\n',
-        },
-        '/'
-      );
+      fs.readLocalFile.mockImplementation((file) => {
+        if (file === '.yarn/cli.js') {
+          return Promise.resolve('');
+        } else if (file === '.yarnrc') {
+          return Promise.resolve(
+            'yarn-offline-mirror "./packages-cache"\nyarn-path "/.yarn/cli.js"\n'
+          );
+        }
+        return undefined;
+      });
+      fs.exists.mockResolvedValueOnce(true);
       expect(await yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
         offlineMirror: true,
         yarnPath: '/.yarn/cli.js',
@@ -278,13 +248,15 @@ describe('manager/npm/post-update/yarn', () => {
     });
 
     it('returns no offline mirror and unquoted yarn path', async () => {
-      Fixtures.mock(
-        {
-          '.yarn/cli.js': '',
-          '/tmp/renovate/.yarnrc': 'yarn-path /.yarn/cli.js\n',
-        },
-        '/'
-      );
+      fs.readLocalFile.mockImplementation((file) => {
+        if (file === '.yarn/cli.js') {
+          return Promise.resolve('');
+        } else if (file === '.yarnrc') {
+          return Promise.resolve('yarn-path /.yarn/cli.js\n');
+        }
+        return undefined;
+      });
+      fs.exists.mockResolvedValueOnce(true);
       expect(await yarnHelper.checkYarnrc('/tmp/renovate')).toEqual({
         offlineMirror: false,
         yarnPath: '/.yarn/cli.js',
@@ -292,18 +264,18 @@ describe('manager/npm/post-update/yarn', () => {
     });
 
     it('returns offline mirror and no yarn path for non-existant yarn-path binary', async () => {
-      Fixtures.mock(
-        {
-          '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
-        },
-        '/tmp/renovate'
-      );
+      fs.readLocalFile.mockImplementation((file) => {
+        if (file === '.yarnrc') {
+          return Promise.resolve('yarn-path ./.yarn/cli.js\n');
+        }
+        return undefined;
+      });
       const { offlineMirror, yarnPath } = await yarnHelper.checkYarnrc(
         '/tmp/renovate'
       );
       expect(offlineMirror).toBeFalse();
       expect(yarnPath).toBeNull();
-      expect(Fixtures.toJSON()['/tmp/renovate/.yarnrc']).toBe('\n');
+      expect(fs.writeLocalFile).toHaveBeenCalledWith('.yarnrc', '\n');
     });
   });
 });

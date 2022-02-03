@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
 import { quote } from 'shlex';
-import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -12,7 +11,12 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { exists, readFile, remove, writeFile } from '../../../util/fs';
+import {
+  exists,
+  readLocalFile,
+  remove,
+  writeLocalFile,
+} from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
@@ -24,7 +28,7 @@ export async function checkYarnrc(
   let offlineMirror = false;
   let yarnPath: string = null;
   try {
-    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await readLocalFile(`.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
@@ -42,7 +46,7 @@ export async function checkYarnrc(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
           ''
         );
-        await writeFile(`${cwd}/.yarnrc`, scrubbedYarnrc);
+        await writeLocalFile(`.yarnrc`, scrubbedYarnrc);
         yarnPath = null;
       }
     }
@@ -68,7 +72,7 @@ export async function generateLockFile(
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const lockFileName = upath.join(cwd, 'yarn.lock');
+  const lockFileName = 'yarn.lock';
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
@@ -228,7 +232,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
