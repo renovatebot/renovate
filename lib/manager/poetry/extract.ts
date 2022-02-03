@@ -149,13 +149,6 @@ export async function extractPackageFile(
 
   const constraints: Record<string, any> = {};
 
-  // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
-  if (
-    pyprojectfile['build-system']?.['build-backend'] === 'poetry.masonry.api'
-  ) {
-    constraints.poetry = pyprojectfile['build-system']?.requires.join(' ');
-  }
-
   if (is.nonEmptyString(pyprojectfile.tool?.poetry?.dependencies?.python)) {
     constraints.python = pyprojectfile.tool?.poetry?.dependencies?.python;
   }

@@ -1,7 +1,7 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
 import {
@@ -245,7 +245,10 @@ function processPlugin({
         const currentValue = varData.value;
         const fileReplacePosition = varData.fileReplacePosition;
         dep.currentValue = currentValue;
-        dep.managerData = { fileReplacePosition, packageFile };
+        dep.managerData = {
+          fileReplacePosition,
+          packageFile: varData.packageFile,
+        };
       } else {
         const currentValue = child.value;
         const fileReplacePosition = child.offset;
@@ -691,7 +694,7 @@ export function parseProps(
   let offset = 0;
   const vars = {};
   const deps = [];
-  for (const line of input.split('\n')) {
+  for (const line of input.split(newlineRegex)) {
     const lineMatch = propRegex.exec(line);
     if (lineMatch) {
       const { key, value, leftPart } = lineMatch.groups;

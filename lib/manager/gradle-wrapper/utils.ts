@@ -4,7 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { chmod } from '../../util/fs';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import gradleVersioning from '../../versioning/gradle';
 import { id as npmVersioning } from '../../versioning/npm';
 import { GradleVersionExtract } from './types';
@@ -81,7 +81,7 @@ const DISTRIBUTION_URL_REGEX = regEx(
 export function extractGradleVersion(
   fileContent: string
 ): GradleVersionExtract | null {
-  const lines = fileContent?.split('\n') ?? [];
+  const lines = fileContent?.split(newlineRegex) ?? [];
 
   for (const line of lines) {
     const distributionUrlMatch = DISTRIBUTION_URL_REGEX.exec(line);
