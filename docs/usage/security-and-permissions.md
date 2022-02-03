@@ -6,7 +6,7 @@ Refer to this table for a overview of the permissions needed for the different w
 
 | Permission name   | Renovate hosted app |  Forking Renovate  |
 | ----------------- | :-----------------: | :----------------: |
-| Dependabot alerts |       `read`        |   not applicable   |
+| Dependabot alerts |       `read`        |       `read`       |
 | Administration    |       `read`        |       `read`       |
 | Metadata          |       `read`        |       `read`       |
 | Checks            | `read` and `write`  |   not applicable   |
@@ -44,6 +44,7 @@ The `forking-renovate` app needs the following permissions.
 
 `read` access to:
 
+- Dependabot alerts
 - administration
 - code
 - deployments
