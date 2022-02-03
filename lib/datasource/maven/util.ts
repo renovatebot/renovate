@@ -146,28 +146,29 @@ export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
   path: string
-): url.URL | null {
+): url.URL {
   return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export async function downloadMavenXml(
   pkgUrl: url.URL | null
-): Promise<MavenXml | null> {
+): Promise<MavenXml> {
   /* istanbul ignore if */
   if (!pkgUrl) {
     return {};
   }
-  let rawContent: string;
-  let authorization: boolean;
-  let statusCode: number;
+  let rawContent: string | undefined;
+  let authorization: boolean | undefined;
+  let statusCode: number | undefined;
   switch (pkgUrl.protocol) {
     case 'http:':
     case 'https:':
-      ({
-        authorization,
-        body: rawContent,
-        statusCode,
-      } = await downloadHttpProtocol(pkgUrl));
+      {
+        const res = await downloadHttpProtocol(pkgUrl);
+        authorization = res.authorization;
+        statusCode = res.statusCode;
+        rawContent = res.body;
+      }
       break;
     case 's3:':
       logger.debug('Skipping s3 dependency');
