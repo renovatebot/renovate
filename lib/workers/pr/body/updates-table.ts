@@ -21,11 +21,11 @@ function getRowDefinition(
 }
 
 function getNonEmptyColumns(
-  definitions: string[],
+  headers: string[],
   rows: Record<string, string>[]
 ): string[] {
   const res: string[] = [];
-  for (const header of definitions) {
+  for (const header of headers) {
     for (const row of rows) {
       if (row[header]?.length) {
         if (!res.includes(header)) {
@@ -38,9 +38,10 @@ function getNonEmptyColumns(
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
+  const headers = Object.keys(config.prBodyDefinitions);
   const tableValues = config.upgrades.map((upgrade) => {
     const res: Record<string, string> = {};
-    const rowDefinition = getRowDefinition(config.prBodyColumns, upgrade);
+    const rowDefinition = getRowDefinition(headers, upgrade);
     for (const column of rowDefinition) {
       const { header, value } = column;
       try {
@@ -58,7 +59,8 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     }
     return res;
   });
-  const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
+
+  const tableColumns = getNonEmptyColumns(headers, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
   res += '| ' + tableColumns.join(' | ') + ' |\n';
   res += '|' + tableColumns.map(() => '---|').join('') + '\n';

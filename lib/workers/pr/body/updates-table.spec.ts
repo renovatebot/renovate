@@ -75,6 +75,17 @@ describe('workers/pr/body/updates-table', () => {
       branchName: 'some-branch',
       upgrades: [upgrade0, upgrade1, upgrade2],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
+      prBodyDefinitions: {
+        Package: '{{{depNameLinked}}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change: 'All locks refreshed',
+        Pending: '{{{displayPending}}}',
+        References: '{{{references}}}',
+        'Package file': '{{{packageFile}}}',
+      },
     };
     const result = getPrUpdatesTable(configObj);
     expect(result).toContain('6.2.3');
