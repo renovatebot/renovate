@@ -17,7 +17,7 @@ import {
   remove,
   writeLocalFile,
 } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeConstraint } from './node-version';
 import { GenerateLockFileResult } from './types';
@@ -31,11 +31,11 @@ export async function checkYarnrc(
     const yarnrc = await readLocalFile(`.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
-        .split('\n')
+        .split(newlineRegex)
         .find((line) => line.startsWith('yarn-offline-mirror '));
       offlineMirror = !!mirrorLine;
       const pathLine = yarnrc
-        .split('\n')
+        .split(newlineRegex)
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
         yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');

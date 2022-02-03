@@ -4,7 +4,7 @@ import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
-import { regEx } from '../../regex';
+import { newlineRegex, regEx } from '../../regex';
 import { ensureTrailingSlash } from '../../url';
 import { rawExec } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
@@ -173,7 +173,7 @@ export async function removeDanglingContainers(): Promise<void> {
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
         .trim()
-        .split('\n')
+        .split(newlineRegex)
         .map((container) => container.trim())
         .filter(Boolean);
       logger.debug({ containerIds }, 'Removing dangling child containers');

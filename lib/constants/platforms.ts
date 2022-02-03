@@ -13,6 +13,7 @@ export const GITHUB_API_USING_HOST_TYPES = [
   'github-releases',
   'github-tags',
   'pod',
+  'github-changelog',
 ];
 
 export const GITLAB_API_USING_HOST_TYPES = [
@@ -20,6 +21,7 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-releases',
   'gitlab-tags',
   'gitlab-packages',
+  'gitlab-changelog',
 ];
 
 export const BITBUCKET_API_USING_HOST_TYPES = [

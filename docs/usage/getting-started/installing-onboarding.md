@@ -29,8 +29,10 @@ Unfortunately GitHub doesn't offer a "select all except X,Y,Z" option, so you mu
 
 Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
-Note: if you are using the WhiteSource Renovate App then it has a custom behavior for forked repositories.
-If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
+<!-- prettier-ignore -->
+!!! note
+    If you are using the WhiteSource Renovate App then it has a custom behavior for forked repositories.
+    If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
 
 ### Hosted GitLab.com App
 
@@ -71,7 +73,9 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 
 #### package.json
 
-Note: this approach has been deprecated and will be removed in a future release.
+<!-- prettier-ignore -->
+!!! warning
+    This approach has been deprecated and will be removed in a future release.
 
 You can add the same settings to a `"renovate"` section in your `package.json` file instead.
 The `package.json` file must be located at the root of your repository.

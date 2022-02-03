@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { regEx } from '../../util/regex';
+import { newlineRegex, regEx } from '../../util/regex';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractCollections } from './collections';
 import { extractCollectionsMetaDataFile } from './collections-metadata';
@@ -29,7 +29,7 @@ export function extractPackageFile(
   logger.trace('ansible-galaxy.extractPackageFile()');
   const galaxyFileNameRegEx = regEx(/galaxy\.ya?ml$/);
   const deps: PackageDependency[] = [];
-  const lines = content.split('\n');
+  const lines = content.split(newlineRegex);
 
   try {
     // if this is a galaxy.yml file we have to interpret the dependencies differently

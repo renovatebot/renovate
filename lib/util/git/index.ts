@@ -1,12 +1,12 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-import type {
+import simpleGit, {
   Options,
+  ResetMode,
   SimpleGit,
   TaskOptions,
-  ResetMode as _ResetMode,
 } from 'simple-git';
-import * as simpleGit from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -24,9 +24,13 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { api as semverCoerced } from '../../versioning/semver-coerced';
 import { Limit, incLimitedValue } from '../../workers/global/limits';
-import { regEx } from '../regex';
+import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getNoVerify, simpleGitConfig } from './config';
+import {
+  getCachedConflictResult,
+  setCachedConflictResult,
+} from './conflicts-cache';
 import { checkForPlatformFailure, handleCommitError } from './error';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
@@ -40,9 +44,6 @@ import type {
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
-
-// TODO: fix upstream types https://github.com/steveukx/git-js/issues/704
-const ResetMode = (simpleGit.default as any).ResetMode as typeof _ResetMode;
 
 function localName(branchName: string): string {
   return branchName.replace(regEx(/^origin\//), '');
@@ -90,7 +91,7 @@ export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
   let version: string;
-  const globalGit = simpleGit.default();
+  const globalGit = simpleGit();
   try {
     const raw = await globalGit.raw(['--version']);
     for (const section of raw.split(/\s+/)) {
@@ -131,7 +132,7 @@ async function fetchBranchCommits(): Promise<void> {
   }
   try {
     (await git.raw(opts))
-      .split('\n')
+      .split(newlineRegex)
       .filter(Boolean)
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
@@ -153,7 +154,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   const { localDir } = GlobalConfig.get();
-  git = simpleGit.default(localDir, simpleGitConfig());
+  git = simpleGit(localDir, simpleGitConfig());
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -172,7 +173,7 @@ async function deleteLocalBranch(branchName: string): Promise<void> {
 
 async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
-    .split('\n')
+    .split(newlineRegex)
     .map((branch) => branch.trim())
     .filter((branch) => branch.length)
     .filter((branch) => !branch.startsWith('* '));
@@ -427,7 +428,7 @@ export async function getFileList(): Promise<string[]> {
     return [];
   }
   return files
-    .split('\n')
+    .split(newlineRegex)
     .filter(Boolean)
     .filter((line) => line.startsWith('100'))
     .map((line) => line.split(regEx(/\t/)).pop())
@@ -522,12 +523,28 @@ export async function isBranchConflicted(
   logger.debug(`isBranchConflicted(${baseBranch}, ${branch})`);
   await syncGit();
   await writeGitAuthor();
-  if (!branchExists(baseBranch) || !branchExists(branch)) {
+
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branch);
+  if (!baseBranchSha || !branchSha) {
     logger.warn(
       { baseBranch, branch },
       'isBranchConflicted: branch does not exist'
     );
     return true;
+  }
+
+  const cachedResult = getCachedConflictResult(
+    baseBranch,
+    baseBranchSha,
+    branch,
+    branchSha
+  );
+  if (is.boolean(cachedResult)) {
+    logger.debug(
+      `Using cached result ${cachedResult} for isBranchConflicted(${baseBranch}, ${branch})`
+    );
+    return cachedResult;
   }
 
   let result = false;
@@ -562,6 +579,7 @@ export async function isBranchConflicted(
     }
   }
 
+  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
   return result;
 }
 
